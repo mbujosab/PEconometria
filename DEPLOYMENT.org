@@ -1,0 +1,190 @@
+#    -*- mode: org -*-
+
+# LEEME: Este fichero es el que documenta, con criterio propio y separado del =PlanDeEscritura.org= (que queda fuera del repo), /cómo funciona/ la infraestructura del repositorio.
+
+#+TITLE: Despliegue y publicación de "Principios de Econometría"
+#+AUTHOR: Marcos Bujosa
+#+LANGUAGE: es
+
+* Filosofía general
+
+Este repositorio separa estrictamente /fuentes/ (rama =main=) de
+/artefactos generados/ (rama =gh-pages=):
+
+- =main= contiene únicamente ficheros =.org=, figuras =.png=, datos y
+  ficheros de configuración (=makefile=, =css/=, =mycfg-GitHubPages.py=,
+  =requirements.txt=). Nada generado (pdf, html, ipynb, slides, guiones
+  =.inp= de Gretl) se versiona aquí.
+- =gh-pages= contiene únicamente lo generado: HTML, PDF, cuadernos
+  Jupyter, diapositivas reveal.js y los guiones =.inp= tangled. Se
+  reconstruye por completo cada vez que se despliega; no tiene historia
+  "significativa" propia, es un espejo del estado actual de =main=.
+
+Esta separación evita mezclar en el historial de =main= cambios de
+contenido con cambios puramente mecánicos de regeneración, y mantiene el
+repositorio ligero.
+
+* Estructura de directorios (resumen)
+
+| Ruta                        | Contenido                                    | ¿Se versiona en =main=? |
+|------------------------------+-----------------------------------------------+---------------------------|
+| =org-lessons/*.org=          | Sesiones teóricas                             | Sí                        |
+| =org-lessons/img/=           | Figuras                                       | Sí                        |
+| =org-pract/*.org=            | Guiones de laboratorio (fuente)               | Sí                        |
+| =org-pract/guiones/*.inp=    | Script Gretl tangled                          | No (generado)             |
+| =CuadernosElectronicos/*.org=| Cuadernos complementarios (fuente, si los hay) | Sí                        |
+| =data/=                      | Datasets                                      | Sí                        |
+| =css/=                       | Temas de exportación HTML                     | Sí                        |
+| =index.org=                  | Fuente de la portada de =gh-pages=            | Sí                        |
+| =*.pdf=, =*.html=, =*.ipynb=, =*.slides.html= | Artefactos              | No (solo en =gh-pages=)   |
+
+* Estrategia B (actual): build local + despliegue manual
+
+** Requisitos en la máquina local
+
+Emacs + scimax, Gretl (=gretlcli=), una distribución LaTeX con soporte
+=minted= (=--shell-escape= + =pygments=), y Jupyter con =nbconvert=. Todo
+ello ya está operativo en la máquina de trabajo habitual del autor: no
+se reinstala nada en cada publicación, a diferencia de lo que ocurriría
+con integración continua (ver Estrategia A).
+
+** Compilar todo
+
+#+begin_src sh
+make all index
+#+end_src
+
+Esto genera, dentro de =org-lessons/=, =org-pract/= y
+=CuadernosElectronicos/=, todos los PDF, HTML, =.ipynb= y diapositivas, y
+tangla + ejecuta los guiones de Gretl de las prácticas. También genera
+=index.html= a partir de =index.org=.
+
+* Preparar la rama =gh-pages= (una sola vez, ya hecho)
+
+#+begin_src sh
+git checkout --orphan gh-pages
+git rm -rf --cached .
+git commit --allow-empty -m "Rama gh-pages: sitio publicado (contenidos generados)"
+git push origin gh-pages
+git checkout main
+git worktree add _ghpages gh-pages
+#+end_src
+
+El directorio =_ghpages/= es un /worktree/ de git: la misma repositorio,
+pero con la rama =gh-pages= pagada en esa carpeta. Permite tener =main= y
+=gh-pages= abiertos simultáneamente sin cambiar de rama. Esta carpeta está
+en =.gitignore= de =main= (no debe versionarse ahí).
+
+* Desplegar
+
+#+begin_src sh
+./deploy-gh-pages.sh
+#+end_src
+
+El script (véase su código en el repositorio) copia cada artefacto
+generado a la subcarpeta correspondiente de =_ghpages/= y hace commit +
+push directamente sobre =gh-pages=.
+
+* Publicar en GitHub Pages
+
+/Settings → Pages → Source: Deploy from a branch → =gh-pages= / =(root)=/.
+
+- Estrategia A (futura, si se desea automatizar con CI)
+
+Si en el futuro se prefiere que la publicación ocurra automáticamente en
+cada =push= a =main= (sin depender de ejecutar el script a mano), la vía
+es GitHub Actions. Se documenta aquí para no tener que rediseñarlo desde
+cero, pero /no está activada/ por defecto.
+
+* Coste y riesgos a tener en cuenta
+
+- Instalar Emacs + scimax + Gretl + una distribución LaTeX completa en
+  cada ejecución del workflow es lento (varios minutos) y fràgil: scimax
+  puede intentar compilar paquetes de MELPA la primera vez.
+- No hay reconstrucción incremental real entre ejecuciones de CI (el
+  =checkout= siempre parte limpio), aunque el =Makefile= use timestamps.
+- Mejora natural: empaquetar toda la cadena de herramientas (Emacs,
+  scimax, Gretl, TeXLive, Jupyter) en una /imagen Docker/ propia,
+  publicada en un registro (Docker Hub o GitHub Container Registry), y
+  hacer que el =job= de Actions use esa imagen como =container:=. Esto
+  evita reinstalar dependencias en cada ejecución y hace reproducible el
+  entorno de compilación.
+
+* Pasos para migrar a Estrategia A cuando se decida
+
+1. Crear un =Dockerfile= con Emacs, scimax preinstalado y cacheado,
+   Gretl, TeXLive (subconjunto: =texlive-xetex texlive-latex-extra
+   texlive-fonts-extra latexmk=), =pygments= y Jupyter/nbconvert.
+2. Publicar la imagen (p. ej. =ghcr.io/mbujosab/peconometria-build:latest=).
+3. Activar el fichero =.github/workflows/build.yml= (ya escrito más abajo,
+   /listo para usar/ una vez exista la imagen) cambiando el paso de
+   instalación de dependencias por =container: ghcr.io/mbujosab/peconometria-build:latest=.
+4. Verificar en un =workflow_dispatch= manual antes de dejarlo disparado
+   por =push= a =main=.
+
+* =.github/workflows/build.yml= (preparado, no activo por defecto)
+
+#+begin_src yaml :tangle .github/workflows/build.yml.disabled
+name: Build y despliegue a gh-pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'org-lessons/**'
+      - 'org-pract/**'
+      - 'CuadernosElectronicos/**'
+      - 'index.org'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Cuando exista la imagen Docker propia, sustituir el paso de
+    # "Instalar dependencias" por:
+    #   container: ghcr.io/mbujosab/peconometria-build:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar dependencias
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y emacs-nox gretl \
+            texlive-xetex texlive-latex-extra texlive-fonts-extra latexmk
+          pip install jupyter nbconvert pygments
+
+      - name: Clonar scimax
+        run: git clone --depth 1 https://github.com/jkitchin/scimax.git $HOME/Software/scimax
+
+      - name: make all
+        run: make all index
+
+      - name: Preparar sitio
+        run: |
+          mkdir -p _site/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos}
+          find org-lessons -maxdepth 1 -name '*.slides.html' -exec cp {} _site/Transparencias/ \;
+          find org-lessons -maxdepth 1 -name '*.html' ! -name '*.slides.html' -exec cp {} _site/Lecciones-html/ \;
+          find org-lessons -maxdepth 1 -name '*.pdf'  -exec cp {} _site/Lecciones-pdf/ \;
+          find org-lessons -maxdepth 1 -name '*.ipynb' -exec cp {} _site/CuadernosElectronicos/ \;
+          find org-pract -maxdepth 1 -name '*.html' -exec cp {} _site/Practicas-html/ \;
+          find org-pract -maxdepth 1 -name '*.pdf'  -exec cp {} _site/Practicas-pdf/ \;
+          find org-pract/guiones -maxdepth 1 -name '*.inp' -exec cp {} _site/Practicas-html/guiones/ \;
+          find CuadernosElectronicos -maxdepth 1 -name '*.ipynb' -exec cp {} _site/CuadernosElectronicos/ \;
+          cp requirements.txt _site/
+          cp index.html _site/
+
+      - name: Desplegar a gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          publish_branch: gh-pages
+#+end_src
+
+/Nota/: este fichero puede guardarse ya en el repositorio bajo
+=.github/workflows/build.yml.disabled= (o simplemente fuera de
+=.github/workflows/=, p. ej. en este mismo =DEPLOYMENT.org=) para que no
+se ejecute hasta que se decida activarlo conscientemente.
