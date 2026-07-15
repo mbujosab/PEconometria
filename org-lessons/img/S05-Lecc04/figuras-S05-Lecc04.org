@@ -1,0 +1,787 @@
+#+title: Código de las figuras del libro
+#+author: Marcos Bujosa Brun
+
+#+latex_header: \usepackage{nacal}
+
+\maketitle
+
+\newpage
+
+#+call: makePNGs()
+
+
+* Figuras con fuente tikz
+
+** Media aritmética 1
+
+#+NAME: MediaAritmetica1
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/MediaAritmetica1.tex :results discard :exports code
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+\begin{document}
+  <<Colores>>
+
+  \begin{tikzpicture}[scale=1.1]
+    % vértices del triángulo
+    \coordinate (v1) at (0,0);
+    \coordinate (v2) at (3,0); % punta eje horizontal
+    \coordinate (v3) at (1.5,2);
+    \coordinate (v4) at (1.5,0);  
+    
+    \coordinate (v6) at (0,2); % vector e
+    \coordinate (v7) at (0,2.7); % punta eje vertical
+
+    \coordinate (v8) at (-0.9, 1.5);
+    \coordinate (v9) at (-0.9, 0);
+    \coordinate (v10) at (  0, 1.5);
+    \coordinate (v11) at (-2, 0);
+
+    % Ángulo recto usando tkz-euclide sin fallos
+    \tkzMarkRightAngle[size=.28,gray,very thin](v1,v4,v3) 
+    
+    % division del triangulo
+    \draw[-,gray,dashed,very thin]  (v3) -- (v4);
+        
+    % lineas y vectores
+    \draw[color=blue!95!black,very thin]  (v11) -- (v2) node [right]  {$\Span{\Vect{1}}$};
+    \draw[very thin]  (v1) -- (v7) node [above]  {$\Span{\Vect{1}}^\perp$};
+    
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!black] (v1) -- (v3) node [above]  {$\Vect{y}$};
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,blue!50!black] (v1) -- (v4) node [anchor=north west,yshift=-1mm,xshift=-3mm]  {$\Vect{\Media{y}}=(\media{\Vect{y}})\Vect{1}$};
+    \draw[decorate, decoration={brace,mirror},gray!85!black] (0.02,-0.1) -- (1.5,-0.1) node [midway, anchor=north, yshift=-1mm, outer sep=1pt,font=\footnotesize]{$\modulus{\media{\Vect{y}}}$};
+
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!gray] (v1) -- (v8) node [above]  {$\Vect{z}$};
+    \draw[-,gray,dashed,very thin]  (v8) -- (v9);
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,blue!50!gray] (v1) -- (v9) node [anchor=north east,yshift=-1mm,xshift=-3mm]  {$\Vect{\Media{z}}=(\media{\Vect{z}})\Vect{1}$};
+    \draw[decorate, decoration={brace,mirror},gray!85!black] (-.9,-0.1) -- (-0.02,-0.1) node [midway, anchor=north, yshift=-1mm, outer sep=1pt,font=\footnotesize]{$\modulus{\media{\Vect{z}}}$};
+  \end{tikzpicture} 
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la media de un vector de \R[n]}
+[[file:./png/MediaAritmetica1.png]]
+
+#+call: makePNGs()
+
+** Media aritmética 2
+
+#+NAME: MediaAritmetica2
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/MediaAritmetica2.tex :results discard :exports code
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+% 1. DEFINIMOS LA VISTA 3D (Ángulos de rotación para los ejes)
+\tdplotsetmaincoords{55}{65}
+
+\begin{document}
+  <<Colores>>
+
+  \begin{tikzpicture} [scale=3,
+    tdplot_main_coords,
+    axis/.style={-,black, thin},
+    vector/.style={-stealth},
+    vector guide/.style={dashed,gray,very thin}]
+    
+    % standard tikz coordinate definition using x, y, z coords
+    \tdplotsetcoord{P}{1.2}{50}{70}
+    \tdplotsetcoord{Q}{1}{-70}{-140}
+    \tdplotsetcoord{C}{1.9}{45}{40}
+    \tdplotsetcoord{O}{0}{0}{0}
+    
+    \tdplotsetrotatedcoords{0}{0}{-45}
+    
+    \tdplotsetcoord{X}{.5}{90}{0}   
+    \tdplotsetcoord{XX}{.3}{-90}{0}   
+    \tdplotsetcoord{Y}{1.2}{90}{90}    % vectores constantes
+    \tdplotsetcoord{YY}{.3}{90}{-90}
+    \tdplotsetcoord{Z}{1.0}{0}{0}
+    \tdplotsetcoord{ZZ}{-.3}{0}{0}     % vertical
+    \tdplotsetcoord{H}{1}{-90}{-60}
+    
+    % draw axes
+    \draw[axis]  (XX) -- (X); 
+    \draw[axis,color=blue!95!black,thin]  (YY) -- (Y) node[color=blue!90!black, anchor=west,font=\footnotesize]{$\Span{\Vect{1}}$};
+    \draw[axis]  (ZZ) -- (Z); 
+  
+    \coordinate (Ymedia) at (0,0.865,0);
+    \coordinate (Yhat)   at (Pxy);
+    
+    \coordinate (Xmedia) at (0,0.605,0);
+    
+    % 2. CORRECCIÓN: tikz-3dplot guarda el punto final real en (P) de forma global si el compilador lo mapea bien, 
+    % pero requiere una proyección válida si falla. Si da problemas, puedes usar directamente las coordenadas manuales cartesianas.
+    \tkzMarkRightAngle[size=.08](O,Ymedia,P) 
+    \tkzMarkRightAngle[size=.08](O,Xmedia,Q) 
+    
+    \draw[vector guide]         (Ymedia) -- (P);
+    \draw[vector guide]         (Xmedia) -- (Q);
+
+    % draw a vector from O to P
+    \draw[vector, red!30!gray] (O) -- (P) node[anchor=south]{$\Vect{v}$};
+    \draw[vector, color=blue!50!gray,thick]  (O) -- (Ymedia) node[anchor=west, xshift=-0.4mm, yshift=-1.4mm]{${\Vect{\Media{v}}}$};
+    
+    \draw[vector, green!30!gray] (O) -- (Q) node[anchor=north west, yshift=0.8mm]{$\Vect{x}$};
+    \draw[vector, color=blue!50!black,thick]  (O) -- (Xmedia) node[anchor=south, xshift=-0.4mm]{${\Vect{\Media{x}}}$};
+
+    \draw[decorate, decoration={brace,raise=3pt},gray!85!black] (O) -- (Xmedia) node [midway, anchor=south, yshift=2.7mm, xshift=-0.8mm, outer sep=0pt, inner sep=0.1pt, font=\tiny, fill=white, opacity=.9, text opacity=1]{$\modulus{\media{\Vect{x}}}$};
+
+   
+  \end{tikzpicture}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la media de un vector de \R[n]}
+[[file:./png/MediaAritmetica2.png]]
+
+#+call: makePNGs()
+
+** Desviación Típica 0
+
+#+NAME: DesviacionTipica0
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/DesviacionTipica0.tex :results discard :exports code
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+% Añadida explícitamente arrows.meta para asegurar que Stealth funcione siempre
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+\begin{document}
+  <<Colores>>
+
+  \begin{tikzpicture}[scale=1.1]
+    % vértices del triángulo
+    \coordinate (v1) at (0,0);
+    \coordinate (v2) at (3,0); % punta eje horizontal
+    \coordinate (v3) at (1.5,2);
+    
+    \coordinate (v4) at (1.5,0);  
+    
+    \coordinate (v6) at (0,2); % vector e
+    \coordinate (v7) at (0,2.7); % punta eje vertical
+
+    \tkzMarkRightAngle[size=.28,gray,very thin](v1,v6,v3) 
+    
+    % division del triangulo
+    \draw[-,gray!45,dashed,very thin]  (v3) -- (v4);
+    \draw[-,gray!50!black,dashed,very thin]  (v3) -- (v6);
+
+    % triangulo
+    \draw[color=blue!90!black,very thin]  (v1) -- (v2) node [right]  {$\Span{\Vect{1}}$};
+    \draw[very thin]  (v1) -- (v7) node [above]  {$\Span{\Vect{1}}^\perp$};
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!35!blue!50!black] (v1) -- (v3) node [above]  {$\Vect{y}$};
+    
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,blue!65!gray] (v1) -- (v4) node [below,yshift=-1mm]  {$\Vect{\Media{y}}$};
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!35!black] (v1) -- (v6) node [left,xshift=-1mm]   {$\Vect{y}-\Vect{\Media{y}}$};
+
+    % CORRECCIÓN: Trazamos de arriba a abajo usando mirror. Evita el conflicto con tkz-euclide.
+    \draw[decorate, decoration={brace,mirror},green!45!orange!85!black] (-0.1,2) -- (-0.1,0) node [midway, anchor=east, xshift=-1mm, outer sep=1pt, font=\footnotesize]{${\norma[s]{\Vect{y}-\Vect{\Media{y}}}}=\dt{\Vect{y}}$};
+    % gray!85!black
+  \end{tikzpicture} 
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la desviación típìca de un vector de \R[n]}
+[[file:./png/DesviacionTipica0.png]]
+
+#+call: makePNGs()
+
+** Desviación Típica 1
+
+#+NAME: DesviacionTipica1
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/DesviacionTipica1.tex :results discard :exports code
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\pgfplotsset{compat=newest}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+% Añadimos arrows.meta para dar soporte a los estilos de vectores con flechas stealth
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+% 1. DEFINIMOS LA VISTA 3D (Ángulos de rotación para los ejes)
+\tdplotsetmaincoords{55}{65}
+
+\begin{document}
+  <<Colores>>
+
+  \begin{tikzpicture} [scale=3,
+    tdplot_main_coords,
+    axis/.style={-,black, thin},
+    vector/.style={-stealth},
+    vector guide/.style={dashed,gray,very thin}]
+    
+    % standard tikz coordinate definition using x, y, z coords
+    \tdplotsetcoord{P}{1.2}{50}{70}
+    \tdplotsetcoord{Q}{1}{-70}{-140}
+    \tdplotsetcoord{C}{1.9}{45}{40}
+    \tdplotsetcoord{O}{0}{0}{0}
+    
+    \tdplotsetrotatedcoords{0}{0}{-45}
+    
+    \tdplotsetcoord{X}{.7}{90}{0}   
+    \tdplotsetcoord{XX}{.8}{-90}{0}   
+    \tdplotsetcoord{Y}{1.2}{90}{90}    % vectores constantes
+    \tdplotsetcoord{YY}{.3}{90}{-90}
+    \tdplotsetcoord{Z}{1.0}{0}{0}
+    \tdplotsetcoord{ZZ}{-.45}{0}{0}     % vertical
+    \tdplotsetcoord{H}{1}{-90}{-60}
+  
+    % draw axes
+    \draw[axis]  (XX) -- (X); 
+    \draw[axis,color=blue!95!black,thin]  (YY) -- (Y) node[color=blue!90!black, anchor=west,font=\footnotesize]{$\Span{\Vect{1}}$};
+    \draw[axis]  (ZZ) -- (Z); 
+  
+    \coordinate (Ymedia) at (0,0.865,0);
+    \coordinate (Yhat)   at (Pxy);
+
+    \coordinate (Xmedia) at (0,0.605,0);
+
+    \tkzMarkRightAngle[size=.08,gray](O,Pxz,P) 
+    \tkzMarkRightAngle[size=.08,gray](O,Qxz,Q) 
+
+    % REEMPLAZO 3D SEGURO: Dibujamos los indicadores de ángulo recto manualmente
+    % usando proyecciones relativas cortas para que sigan la perspectiva 3D real
+    %\draw[gray, very thin] ($(Pxz)!0.06!(O)$) -- ($(Pxz)!0.06!(O)+(P)-(Pxz)$) -- ($(Pxz)!0.06!(P)$);
+    %\draw[gray, very thin] ($(Qxz)!0.06!(O)$) -- ($(Qxz)!0.06!(O)+(Q)-(Qxz)$) -- ($(Qxz)!0.06!(Q)$);
+  
+    \draw[vector guide,gray!50!black]         (Pxz) -- (P);
+    \draw[vector guide]         (Ymedia) -- (P);
+  
+    \draw[vector guide,gray!50!black]         (Qxz) -- (Q);
+    \draw[vector guide]         (Xmedia) -- (Q);
+
+    \draw[decorate, decoration={brace,mirror,raise=2pt},green!45!orange!85!black] (O) -- (Qxz) node [midway, anchor=north east, yshift=-1.7mm, xshift=0.35mm, outer sep=0pt, inner sep=0.3pt, font=\scriptsize, fill=white, opacity=.9, text opacity=1]{$\norma[s]{\Vect{X}-\Vect{\Media{x}}}=\dt{\Vect{x}}$};
+
+    \draw[decorate, decoration={brace,raise=2pt},red!85!orange!75!black] (O) -- (Pxz) node [midway, anchor=east, yshift=0.9mm, xshift=-1.8mm, outer sep=0.0pt, inner sep=0.3pt, font=\scriptsize, fill=white, opacity=.9, text opacity=1]{$\norma[s]{\Vect{v}-\Vect{\Media{v}}}=\dt{\Vect{v}}$};
+    % gray!85!black
+    
+    % draw a vector from O to P
+    \draw[vector, red!30!gray] (O) -- (P) node[anchor=south west]{$\Vect{v}$};
+    \draw[vector, color=blue!20!gray,thick]  (O) -- (Ymedia) node[anchor=south west]{${\Vect{\Media{v}}}$};
+    \draw[vector, red!50!black,thick]  (O) --  (Pxz)node[anchor=south, xshift=0.55mm]{$\Vect{v}-\Vect{\Media{v}}$};
+
+    \draw[vector, green!30!gray] (O) -- (Q) node[anchor=west]{$\Vect{x}$};
+    \draw[vector, color=blue!30!gray,thick]  (O) -- (Xmedia) node[anchor=south]{${\Vect{\Media{x}}}$};
+    \draw[vector, green!40!black,thick]  (O) --  (Qxz)node[anchor=north west]{$\Vect{X}-\Vect{\Media{x}}$};
+    
+  \end{tikzpicture}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la desviación típìca de un vector de \R[n]}
+[[file:./png/DesviacionTipica1.png]]
+
+#+call: makePNGs()
+
+** Desviación Típica de dos datos
+
+*** Ejemplo 1
+ 
+#+NAME: DesviacionT1
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/DesviacionT1.tex :results discard :exports
+\documentclass[border=10pt]{standalone} 
+\usepackage{tikz}
+\usetikzlibrary{calc, decorations.pathreplacing}
+\usepackage{amsmath}
+\usepackage{tkz-euclide}
+
+\begin{document}
+\begin{tikzpicture}
+    % Establecer los límites del gráfico y agregar un grid
+    \draw[step=1cm,lightgray,very thin] (-1,-1) grid (4.3,5.3);
+    \draw[-, thin] (-1,0) -- (4,0) node[right]{};
+    \draw[-, thin] (0,-1) -- (0,5) node[above]{};
+    
+    % Definir los vectores
+    \coordinate (O) at (0,0);
+    \coordinate (U) at (1,1);
+    \coordinate (M) at (3,3);
+    \coordinate (X) at (2,4);
+
+    % Marca de ángulo recto
+    \tkzMarkRightAngle[fill=blue!10,size=.4](O,M,X)
+
+    % Dibujar la recta generada por el vector (1,1)
+    \draw[-,thick,gray] (-1,-1) -- (4.1,4.1) node[right]{};
+    
+    % Dibujar el vector X
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick, blue] (O) -- (X) node[above,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{x}=(2,4,)$};
+    
+    % Dibujar el vector (-2,-2)
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!black] (O) -- (M) node[below right, sloped,fill=white,opacity=.9,text opacity=1]{$\mu\boldsymbol{1}$};
+    
+    % Dibujar la línea punteada entre (-2,-2) y (2,-6)
+    \draw[dashed] (M) -- (X);
+    
+    % Dibujar el vector Uno
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick, purple] (O) -- (U) node[below right,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{1}=(1,1,)$};
+    
+    % Añadir una llave con la etiqueta sigma
+    \draw[decorate,decoration={brace,amplitude=5pt,mirror},xshift=0pt,yshift=0pt] (M) -- (X) node[midway, above,  yshift=5pt, sloped,fill=white,opacity=.9,text opacity=1] {$\sigma$};
+
+    % Añadir una llave con longitud del vector uno
+    \draw[decorate,decoration={brace,amplitude=5pt,mirror},xshift=0pt,yshift=0pt] (O) -- (U) node[midway, below,  yshift=-5pt, sloped,fill=white,opacity=.9,text opacity=1] {$1$};
+
+\end{tikzpicture}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la desviación típìca de un vector de \R[2]}
+[[file:./png/DesviacionT1.png]]
+
+#+call: makePNGs()
+
+
+\newpage
+
+*** Ejemplo 2
+ 
+#+NAME: DesviacionT2
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/DesviacionT2.tex :results discard :exports
+\documentclass[border=10pt]{standalone} 
+\usepackage{tikz}
+\usetikzlibrary{calc, decorations.pathreplacing, arrows.meta} % Añadido arrows.meta
+\usepackage{amsmath}
+\usepackage{tkz-euclide}
+
+\begin{document}
+\begin{tikzpicture}
+    % Establecer los límites del gráfico y agregar un grid
+    \draw[step=1cm,lightgray,very thin] (-1,-1) grid (4.3,6.3);
+    \draw[-, thin] (-1,0) -- (4,0) node[right]{};
+    \draw[-, thin] (0,-1) -- (0,6) node[above]{};
+
+    % Dibujar la recta generada por el vector (1,1)
+    \coordinate (C1) at ( -1, -1);
+    \coordinate (C2) at (4.1,4.1);
+    \draw[-,thick,gray] (C1) -- (C2) node[right]{};
+
+    % Definir los vectores
+    \coordinate (O) at (0,0);
+    \coordinate (U) at (1,1);
+    \coordinate (X) at (2,5);
+    \coordinate (M) at ($(C1)!(X)!(C2)$);
+
+    % Marca de ángulo recto
+    \tkzMarkRightAngle[fill=blue!10,size=.4](O,M,X)
+    
+    % Dibujar el vector X
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick, blue] (O) -- (X) node[above,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{x}=(2,5,)$};
+    
+    % Dibujar el vector (-2,-2)
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!black] (O) -- (M) node[below right, sloped,fill=white,opacity=.9,text opacity=1]{$\mu\boldsymbol{1}$};
+    
+    % Dibujar la línea punteada entre (-2,-2) y (2,-6)
+    \draw[dashed] (M) -- (X);
+    
+    % Dibujar el vector Uno
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick, purple] (O) -- (U) node[below right,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{1}=(1,1,)$};
+    
+    % Añadir una llave con la etiqueta sigma
+    \draw[decorate,decoration={brace,amplitude=5pt,mirror},xshift=0pt,yshift=0pt] (M) -- (X) node[midway, above,  yshift=5pt, sloped,fill=white,opacity=.9,text opacity=1] {$\sigma$};
+
+    % Añadir una llave con longitud del vector uno
+    \draw[decorate,decoration={brace,amplitude=5pt,mirror},xshift=0pt,yshift=0pt] (O) -- (U) node[midway, below,  yshift=-5pt, sloped,fill=white,opacity=.9,text opacity=1] {$1$};
+
+\end{tikzpicture}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la desviación típìca de un vector de \R[2]}
+[[file:./png/DesviacionT2.png]]
+
+#+call: makePNGs()
+
+
+\newpage
+
+*** Ejemplo 3
+ 
+#+NAME: DesviacionT3
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/DesviacionT3.tex :results discard :exports
+\documentclass[border=10pt]{standalone} 
+\usepackage{tikz}
+\usetikzlibrary{calc, decorations.pathreplacing, arrows.meta} % Añadido arrows.meta
+\usepackage{amsmath}
+\usepackage{tkz-euclide}
+
+\begin{document}
+\begin{tikzpicture}
+    % Establecer los límites del gráfico y agregar un grid
+    \draw[step=1cm,lightgray,very thin] (-3,-6.8) grid (3,1.5);
+    \draw[-, thin] (-3,0) -- (3,0) node[right]{};
+    \draw[-, thin] (0,-6.8) -- (0,1.5) node[above]{};
+    
+    % Dibujar la recta generada por el vector (1,1)
+    \coordinate (C1) at (-3,-3);
+    \coordinate (C2) at ( 1.5, 1.5);
+    \draw[-,thick,gray] (C1) -- (C2) node[right]{};
+
+    % Definir los vectores
+    \coordinate (O) at (0,0);
+    \coordinate (U) at (1,1);
+    \coordinate (X) at (2,-6);
+    \coordinate (M) at ($(O)!(X)!(U)$);
+
+    % Marca de ángulo recto
+    \tkzMarkRightAngle[fill=blue!10,size=.4](O,M,X)
+
+    % Dibujar el vector Uno
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick, purple] (O) -- (U) node[below right,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{1}=(1,1)$};
+    
+    % Dibujar el vector X
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick, blue] (O) -- (X) node[below, sloped,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{x}=(2,-6)$};
+    
+    % Dibujar el vector (-2,-2)
+    %\node[green!50!black,align=center,fill=white,opacity=.9,text opacity=1] at (M) {$\mu\boldsymbol{1}=(-2,-2)$};
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!black] (O) -- (M) node[midway, above left, sloped,text opacity=1]{$\mu\boldsymbol{1}=(-2,-2)$};
+    
+    % Dibujar la línea punteada entre (-2,-2) y (2,-6)
+    \draw[dashed] (M) -- (X);
+    
+    % Añadir una llave con la etiqueta sigma
+    \draw[decorate,decoration={brace,amplitude=5pt,mirror},xshift=0pt,yshift=0pt] (M) -- (X) node[midway, below,  yshift=-5pt, sloped,fill=white,opacity=.9,text opacity=1] {$\sigma=4$};
+
+    % Añadir una llave con longitud del vector uno
+    \draw[decorate,decoration={brace,amplitude=5pt,mirror},xshift=0pt,yshift=0pt] (O) -- (U) node[midway, below,  yshift=-5pt, sloped,fill=white,opacity=.9,text opacity=1] {$1$};
+
+\end{tikzpicture}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 250
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la desviación típìca de un vector de \R[2]}
+[[file:./png/DesviacionT3.png]]
+
+#+call: makePNGs()
+
+
+\newpage
+
+** Suma de un vector constante
+
+#+NAME: SumaCte
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/SumaCte.tex :results discard :exports code
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+% Añadida explícitamente arrows.meta para asegurar que Stealth funcione siempre
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+\begin{document}
+  <<Colores>>
+
+  \begin{tikzpicture}[scale=1.1]
+    % vértices del triángulo
+    \coordinate (v1) at (0,0);
+    \coordinate (v2) at (3,0); % punta eje horizontal
+    \coordinate (v3) at (1.5,2);
+    
+    \coordinate (v4) at (1.5,0);  
+    
+    \coordinate (v6) at (0,2); % vector e
+    \coordinate (v7) at (0,2.5); % punta eje vertical
+    
+    \coordinate (v8) at (2.5,2);
+    \coordinate (v9) at (2.5,0);  
+    
+    % division del triangulo
+    \draw[-,gray!40,dashed,very thin]  (v3) -- (v4);
+    \draw[-,gray!50!black,dashed,very thin]  (v8) -- (v6);
+    \draw[-,gray!40,dashed,very thin]  (v8) -- (v9);
+    
+    \draw[color=blue!95!black,very thin]  (v1) -- (v2) node [right]  {$\Span{\Vect{1}}$};
+    \draw[very thin]  (v1) -- (v7) node [above]  {$\Span{\Vect{1}}^\perp$};
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!black] (v1) -- (v3) node [above]  {$\Vect{y}$};
+    
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,gray!70!blue!50] (v1) -- (v9) node [below,yshift=-1mm]  {$\Media{(\Vect{y}+a\Vect{1})}$};
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,gray!70!blue!70] (v1) -- (v4) node [below,yshift=-1mm]  {$\Vect{\Media{y}}$};
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!35!black] (v1) -- (v6); % node [left,xshift=-1mm]   {$\Vect{y}-\Vect{\Media{y}}=\Vect{e}$};
+    
+    \draw[decorate, decoration={brace},gray] (-0.1,0) -- (-0.1,2) node [midway, anchor=east, xshift=-1mm, outer sep=1pt,font=\footnotesize]{$\dt{\Vect{y}}=\dt{(\Vect{y}+a\Vect{1})}$};
+
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick, gray] (v1) -- (v8) node [anchor=south west]  {$\Vect{y}+a\Vect{1}$};
+    
+  \end{tikzpicture} 
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la suma de un vector constante (i.e., con desviación típìca nula)}
+[[file:./png/SumaCte.png]]
+
+#+call: makePNGs()
+
+** Suma de un vector de media nula
+
+#+NAME: SumaMediaNula
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/SumaMediaNula.tex :results discard :exports code
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+% Añadida explícitamente arrows.meta para asegurar que Stealth funcione siempre
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+\begin{document}
+  <<Colores>>
+
+  \begin{tikzpicture}[scale=1.1]
+    % vértices del triángulo
+    \coordinate (v1) at (0,0);
+    \coordinate (v2) at (2,0); % punta eje horizontal
+    \coordinate (v3) at (1.5,1.7);
+    
+    \coordinate (v4) at (1.5,0);  
+    
+    \coordinate (v6) at (0,1.7); % vector e
+    \coordinate (v7) at (0,1.8); % punta eje vertical
+
+    %\coordinate (v8) at (1.5,1.7);
+    \coordinate (v9) at (1.5,2.5);  
+    \coordinate (v10) at (1.5,3);  
+    \coordinate (v11) at (1.5,1);  
+    \coordinate (v12) at (1.5,-1);  
+    \coordinate (v13) at (0,-1);  
+    \coordinate (v14) at (0,1);  
+
+    % division del triangulo
+    \draw[-,gray,dashed,very thin]  (v3) -- (v12);
+    \draw[-,gray!40,dashed,very thin]  (v3) -- (v6);
+    \draw[-,gray!40,dashed,very thin]  (v14) -- (v11);
+    \draw[-,gray!40,dashed,very thin]  (v13) -- (v12);
+    
+    \draw[color=blue!95!black,very thin]  (v1) -- (v2) node [right]  {$\Span{\Vect{1}}$};
+    \draw[very thin]  (v13) -- (v7) node [above]  {$\Span{\Vect{1}}^\perp$};
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick, gray] (v1) -- (v3) node [anchor=west]  {$\Vect{y}+\Vect{x}$};
+    
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!black] (v1) -- (v11) node [anchor= west]  {$\Vect{y}$};
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick, gray!70] (v1) -- (v12) node [anchor=west]  {$\Vect{y}+\Vect{z}$};
+
+    \draw[-{Stealth[length=3mm, width=2mm]},very thick,blue!50!black] (v1) -- (v4); % node [below,yshift=-1mm]  {$\Vect{\media{y}}$}; ,gray!70!blue!80
+
+    \draw[decorate, decoration={brace},gray!85!black] (-0.1,0.02) -- (-0.1,1) node [midway, anchor=east, xshift=-1mm, outer sep=1pt,font=\footnotesize]{$\dt{\Vect{y}}$};
+    \draw[decorate, decoration={brace},gray!85!black] (-0.1,-1) -- (-0.1,-0.02) node [midway, anchor=east, xshift=-1mm, outer sep=1pt,font=\footnotesize]{$\dt{(\Vect{y}+\Vect{z})}$};
+    \draw[decorate, decoration={brace},gray!85!black] (-1.1,0) -- (-1.1,1.7) node [midway, anchor=east, xshift=-1mm, outer sep=1pt,font=\footnotesize]{$\dt{(\Vect{y}+\Vect{x})}$};
+    
+  \end{tikzpicture} 
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la suma de un vector de media nula (i.e., perpendicular al vector de unos)}
+[[file:./png/SumaMediaNula.png]]
+
+#+call: makePNGs()
+
+
+* Trozos de código 
+
+
+Preámbulo para generar un fichero con únicamente una figura, y que use
+la notación de ~nacal~
+#+NAME: Preambulo para figura sola
+#+BEGIN_SRC tex :noweb no-export :results discard :export code
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+#+END_SRC
+
+Contenido del preámbulo para generar figuras en 3d con tikz (con
+proyecciones ortogonales usando la librería [[http://www.bakoma-tex.com/doc/latex/tikz-3dplot/tikz-3dplot_documentation.pdf][tikz-3dplot]].
+#+NAME: Librerías de tikz para figuras 3d
+#+BEGIN_SRC tex :noweb no-export :results discard :export code
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+%\pgfplotsset{compat=newest}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings}
+\usepackage{tkz-euclide}
+#+END_SRC
+
+Contenido del preámbulo para normalizar la proporción alto ancho de la
+figura
+#+NAME: Tamaño de las figuras
+#+BEGIN_SRC tex :noweb no-export :results discard :export code
+%\pgfplotsset{width=10cm,height=6cm,compat=1.8}
+\pgfplotsset{width=10cm,height=6cm}
+#+END_SRC
+
+Código para la normalización de colores en las figuras
+#+NAME: Colores
+#+BEGIN_SRC tex :noweb no-export :results discard :export code
+\def\Rojo{red!50!black}
+\def\RojoOscuro{red!20!black}
+\def\RojoClaro{red!90!black}
+\def\Verde{green!50!black}
+\def\VerdeOscuro{green!30!black}
+\def\VerdeClaro{green!50!gray}
+\def\Azul{blue!50!black}
+\def\AzulOscuro{blue!35!black}
+\def\AzulClaro{blue!60!gray}
+#+END_SRC
+
+#+call: makePNGs()
+
+
+* Compilación
+
+| Para obtener los ficheros en emacs hay que teclear ~C-c C-v t~ |
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((makefile . t)))
+#+END_SRC
+
+La conversión de pdf a png se realiza con ~poppler-utils~
+(especificamente con =pdftoppm=). Así que hay que instalar el programa
+con ~aptitude~ (o programa similar).
+
+#+NAME: makefile
+#+BEGIN_SRC makefile :dir tex :noweb no-export :results silent :exports code :tangle tex/makefile
+%.pdf : %.tex
+	pdflatex $<
+	rm $(basename $<).aux
+	rm $(basename $<).log
+
+%.png : %.pdf
+	pdftoppm -r 500 $< $@ -png
+	mv $@-1.png ../$(basename $@).png
+	#mv $@-1.png ../png/$(basename $@).png
+
+tex_FILES := $(wildcard *.tex)
+png_FILES := $(tex_FILES:.tex=.png)
+
+pngs: $(png_FILES)
+
+pdfs:
+	latexmk -pdf
+	latexmk -c
+#+END_SRC
+
+Para generar los pngs teclear dentro del directorio ~tex~
+#+NAME: makePNGs
+#+BEGIN_SRC bash :dir tex :results silent :exports code
+make pngs
+#+END_SRC
+
+Si además se quiere generar los pdf en la carpeta =tex= (aunque no es
+necesario) se puede teclear ~make pdfs~
+
+#+BEGIN_SRC bash :dir tex :results silent :exports code
+make pdfs
+#+END_SRC
+
+* Ajustes de las figuras
+
+#+BEGIN_SRC bash
+convert MediaAritmetica1.png -gravity center -background white -extent 2300x MediaAritmetica1_ancho.png
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC bash
+convert MediaAritmetica2.png -gravity center -background white -extent 1500x MediaAritmetica2_ancho.png
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC bash
+convert DesviacionTipica0.png -gravity center -background white -extent 3000x DesviacionTipica0_ancho.png
+#+END_SRC
+
+#+RESULTS:
+
+
+#+BEGIN_SRC bash
+convert DesviacionT1.png DesviacionT2.png DesviacionT3.png -gravity center +append -background white -gravity center -extent 3600x${ALTURA} DesviacionT_fila_ancho.png
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC bash
+convert SumaCte.png -gravity center -background white -extent 2100x SumaCte_ancho.png
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC bash
+convert SumaMediaNula.png -gravity center -background white -extent 2100x SumaMediaNula_ancho.png
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC bash
+convert DesviacionTipica1.png -gravity center -background white -extent 1700x DesviacionTipica1_ancho.png
+#+END_SRC
+
+#+RESULTS:
+
+
+* Otras figuras
+
+#+BEGIN_SRC bash
+convert ../S03-Lecc03/ProyeccionOrtogonal1.png -gravity center -background white -extent 4000x ProyeccionOrtogonal1_muy_ancho.png
+#+END_SRC
+
+#+RESULTS:
+

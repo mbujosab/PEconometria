@@ -1,0 +1,231 @@
+
+#+Title: Sesión 4 (B) --- Importar datos desde internet: el Boston Housing original
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+# +OPTIONS: author:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil 
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}          % para fuentes Unicode
+#+LATEX_HEADER: \usepackage{lmodern}           % o mejor, define una fuente explícita
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman} % o cualquier otra que quieras
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+# +LATEX_HEADER: \usepackage[newfloat]{minted}
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{} % opciones específicas si quieres
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+# ###########
+# ESTO DA EL FORMATO FINAL DE LA PÁGINA WEB VÉASE [[https://olmon.gitlab.io/org-themes/]]
+#+SETUPFILE: ../css/bigblow_inline.theme
+# ###########
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+
+;; Mapear el lenguaje "gretl" de tus bloques #+begin_src gretl
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+
+;; minted necesita -shell-escape en la cadena de compilación
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+#      ;'("latexmk -shell-escape -pdf -lualatex -interaction=nonstopmode -output-directory=%o %f"))
+
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L04-B-boston
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S04-Prct-B-boston"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica 
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+# zip $practica $practica.* $practica/*
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S04-Prct-B-boston.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S04-Prct-B-boston.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+#  | Guión: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S04-Prct-B-boston.inp][S04-Prct-B-boston.inp]] |
+
+* Descripción de la práctica
+
+En la práctica anterior usamos =hprice2=, la versión =de manual= del conjunto de datos sobre la vivienda en Boston (Harrison & Rubinfeld, 1978). Esa versión, distribuida con Gretl, /no incluye todas las variables del estudio original/. En particular, le falta una variable /dicotómica/ muy útil para el curso: =chas= (vale 1 si la zona limita con el río Charles, 0 en caso contrario).
+
+En esta práctica aprenderemos a /importar datos desde internet/ —una destreza imprescindible cuando trabajamos con datos propios— y cargaremos el /Boston Housing original/, que sí contiene =chas=. Este conjunto será nuestro /dataset integrador/ cuando estudiemos variables dicotómicas y en el laboratorio final.
+
+/Objetivo/
+
+1. Descargar un fichero de datos (formato CSV) desde internet.
+2. Importarlo en Gretl y reconocer sus variables.
+3. Declarar correctamente el conjunto como datos de sección cruzada.
+4. Examinar la variable dicotómica =chas= y entender qué significa su /media/.
+5. Comparar este dataset con el =hprice2= de la práctica anterior.
+
+* Actividad 1 - Descargar el fichero de datos
+El conjunto original está disponible en varios repositorios públicos. Usaremos una copia en formato =CSV= (valores separados por comas), el formato de intercambio de datos más habitual.
+
+- Descargue el fichero =housing.csv= (o el nombre que corresponda) desde el repositorio indicado en clase, por ejemplo el [[https://www.kaggle.com/datasets/abhijithudayakumar/the-boston-housing-dataset][Boston Housing Dataset en Kaggle]].
+- Guárdelo en una carpeta de trabajo conocida (p. ej. su carpeta de la asignatura).
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Un fichero CSV es simplemente texto: la primera fila suele contener los nombres de las variables y cada fila siguiente, una observación, con los valores separados por comas. Puede abrirlo con cualquier editor de texto para inspeccionarlo antes de importarlo./
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Según la fuente, los nombres de las variables pueden variar (mayúsculas/minúsculas). Las variables del estudio original son:/ =crim=, =zn=, =indus=, =chas=, =nox=, =rm=, =age=, =dis=, =rad=, =tax=, =ptratio=, =b=, =lstat= /y/ =medv= /(valor mediano de la vivienda, en miles de dólares)./
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Si la fuente es [[https://www.kaggle.com/datasets/abhijithudayakumar/the-boston-housing-dataset][Boston Housing Dataset en Kaggle]], los nombres aparecerán en mayúsculas (cámbielos a minúsculas, o use mayúsculas en la sesión de Gretl). Si la fuente es el repositorio del curso, los nombres estarán en minúsculas./
+#+latex: }
+
+
+* Actividad 2 - Importar el CSV en Gretl
+- En la ventana principal de [[https://gretl.sourceforge.net/es.html][Gretl]], seleccione //~Archivo -> Abrir archivo de datos -> Archivo de usuario~// en el menú desplegable en la parte inferior de la pantalla escoja //~texto/CSV~// y elija el fichero descargado.
+- Gretl detectará el separador (coma) y la fila de nombres. Acepte las opciones por defecto y confirme.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en linea de comandos (ajustando la ruta a su sistema)/:
+    #+NAME: Importar CSV
+    #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
+open ../../data/boston.csv --quiet
+    #+end_src
+  #+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Recuerde que según la fuente, los nombres de las variables pueden variar (mayúsculas/minúsculas). Las variables del estudio original son:/ =crim=, =zn=, =indus=, =chas=, =nox=, =rm=, =age=, =dis=, =rad=, =tax=, =ptratio=, =b=, =lstat= /y/ =medv= /(valor mediano de la vivienda, en miles de dólares)./
+#+latex: }
+
+* Actividad 3 - Declarar los datos como sección cruzada
+Al importar un CSV, Gretl trata las observaciones como una serie sin estructura temporal, lo que es correcto: estos son datos de /sección cruzada/ (cada fila es una zona del área de Boston, no un instante de tiempo). Si Gretl preguntara, indique que /no/ se trata de series temporales ni de panel.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /en linea de comandos, para asegurarse/:
+    #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
+setobs 1 1 --cross-section
+    #+end_src
+  #+latex: }
+
+* Actividad 4 - La variable dicotómica =chas=
+La variable =chas= es /dicotómica/ (o /binaria/, o /dummy/): solo toma los valores 0 y 1. Vale 1 si la zona limita con el río Charles y 0 en caso contrario.
+
+*** Mostrar sus valores
+- Marque =chas=, ``pinche'' con el botón derecho y seleccione */~mostrar valores~/*.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en linea de comandos/:
+    #+NAME: Mostrar chas
+    #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
+print -o chas
+    #+end_src
+  #+latex: }
+
+Comprobará que solo contiene ceros y unos.
+
+*** Calcular su media
+- Marque =chas=, ``pinche'' con el botón derecho y seleccione */~Estadísticos descriptivos~/*.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en linea de comandos/:
+    #+NAME: Resumen chas
+    #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
+summary chas
+    #+end_src
+  #+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Observe que la media de una variable 0/1 es justamente la/ proporción /de unos: el porcentaje de zonas que limitan con el río. Esta idea —la media de una dummy es una proporción— reaparecerá al interpretar los coeficientes de variables dicotómicas en la regresión./
+#+latex: }
+
+* Actividad 5 - Comparar con =hprice2=
+Compare el valor mediano de la vivienda en ambos datasets. En el original, la variable es =medv= (en /miles/ de dólares); en =hprice2=, =price= (en dólares).
+
+- Obtenga los estadísticos descriptivos de =medv=.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /en linea de comandos/:
+    #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
+summary medv rm nox
+    #+end_src
+  #+latex: }
+
+¿Coinciden el número de observaciones (506) y los órdenes de magnitud (recordando el cambio de unidades) con los de =hprice2=? Debería tratarse, esencialmente, de los mismos datos.
+
+- Preguntas de interpretación para la clase
+
+- ¿Qué ventaja tiene saber importar datos en formato CSV, frente a depender solo de los datasets de muestra de Gretl?
+- La media de =chas= es un número entre 0 y 1. ¿Qué proporción de zonas limita con el río Charles? ¿Por qué la media de una variable 0/1 es una proporción?
+- ¿Por qué decimos que estos datos son de /sección cruzada/ y no una serie temporal?
+- Las variables =medv= (original) y =price= (=hprice2=) miden lo mismo en /unidades distintas/. ¿Cómo afectaría esto a la interpretación de un coeficiente de regresión, si usáramos una u otra?
+- La variable =chas= es una lista de 506 ceros y unos: un /vector de $\mathbb{R}^{506}$/. ¿Qué =dirección= tiene ese vector en relación con el vector de unos $\boldsymbol{1}$?
+
+- Para profundizar
+
+- Cottrell, A. y Lucchetti, R. (2023). /Gretl User's Guide/. Capítulo sobre importación de datos (=Importing data=). Disponible en [[https://gretl.sourceforge.net/][gretl.sourceforge.net]].
+- Adkins, L. C. (2018). /Using Gretl for Principles of Econometrics/, 4.ª ed. Apéndice sobre lectura de datos externos.
+- Harrison, D. and Rubinfeld, D.L. (1978), [[https://lawcat.berkeley.edu/record/1111234/files/fulltext.pdf]["Hedonic Housing Prices and the Demand for Clean Air"]], Journal of Environmental Economics and Management 5, 81-102.
+
+#+LATEX: \clearpage
+
+*** Código completo de la práctica
+
+ 
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S04-Prct-B-boston.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S04-Prct-B-boston.inp][S04-Prct-B-boston.inp]] |

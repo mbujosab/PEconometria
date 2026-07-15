@@ -1,0 +1,284 @@
+#+Title: Sesión 4 (A) --- Primer contacto con Gretl: el dataset hprice2
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+# +OPTIONS: author:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil 
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}          % para fuentes Unicode
+#+LATEX_HEADER: \usepackage{lmodern}           % o mejor, define una fuente explícita
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman} % o cualquier otra que quieras
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+# +LATEX_HEADER: \usepackage[newfloat]{minted}
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{} % opciones específicas si quieres
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+# ###########
+# ESTO DA EL FORMATO FINAL DE LA PÁGINA WEB VÉASE [[https://olmon.gitlab.io/org-themes/]]
+#+SETUPFILE: ../css/bigblow_inline.theme
+# ###########
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+
+;; Mapear el lenguaje "gretl" de tus bloques #+begin_src gretl
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+
+;; minted necesita -shell-escape en la cadena de compilación
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L04-A-temperaturasDeLaTierra
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S04-Prct-A-hprice2"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica 
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+# zip $practica $practica.* $practica/*
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S04-Prct-A-hprice2.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S04-Prct-A-hprice2.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+
+* Primer contacto con Gretl: el dataset =hprice2=
+
+Esta es nuestra /primera práctica/ con [[https://gretl.sourceforge.net/es.html][Gretl]]. No haremos todavía ninguna regresión: el objetivo de hoy es /tomar contacto con datos reales/ y con la interfaz del programa. Usaremos el conjunto =hprice2=, sobre precios de la vivienda en 506 zonas del área de Boston (Harrison & Rubinfeld, 1978), que será nuestro /dataset recurrente/ durante todo el curso: lo reencontraremos al estudiar formas funcionales con logaritmos (el precio admite transformación logarítmica). En la siguiente práctica trabajaremos con una versión ampliada de estos datos que incluye además una variable dicotómica o dummy (=chas=, proximidad al río Charles).
+
+Trabajamos con datos /reales/ (y no simulados) porque queremos enfrentarnos desde el inicio a la dificultad propia de la realidad económica. Los datos simulados los reservaremos, más adelante, para /verificar/ propiedades teóricas.
+
+/Objetivo/
+
+1. Abrir Gretl y cargar el dataset =hprice2=.
+2. Mostrar los datos y editar los atributos de las variables.
+3. Obtener estadísticos descriptivos.
+4. Generar histogramas y diagramas de caja.
+5. Empezar a leer cada variable como un /vector de $\mathbb{R}^n$/.
+
+Comencemos cargando los datos:
+
+//~Archivo --> Abrir datos --> Archivo de muestra~// y en la pestaña //~Wooldridge~// seleccione =hprice2=.
+
+#+latex: {\vspace{0pt} \footnotesize \color{gray!70!black}
+/o bien teclee en linea de comandos/:
+#+NAME: Lectura del fichero de datos
+#+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no
+open hprice2.gdt
+#+end_src
+
+#+latex: }
+
+Gretl no preguntará por la frecuencia: son datos de /sección cruzada/ (cada observación es una zona, no un instante de tiempo), de modo que /el orden de las observaciones es irrelevante/, tal como vimos en la sesión 1.
+
+** Actividad 1 - Mostrar los datos
+Visualice los valores de los precios de la vivienda:
+- En la ventana principal de [[https://gretl.sourceforge.net/es.html][Gretl]], marque con el ratón la variable: =price=.
+- ``Pinche'' sobre ella con el botón derecho del ratón.
+- Seleccione */~mostrar valores~/* del menú desplegable que se ha abierto al pinchar.
+  
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en linea de comandos/:
+    #+NAME: Mostramos los valores de los datos en columna
+    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no
+print -o price
+    #+end_src
+
+    #+RESULTS: Mostramos los valores de los datos en columna
+
+  #+latex: }
+
+#+latex: \vspace{-3pt}   
+
+La variable =price= es una /lista de 506 números/. Para nosotros, eso es un /vector de $\mathbb{R}^{506}$/. Lo mismo vale para =rooms=, =nox= y cualquier otra variable del fichero.
+  
+*** Para Acceder a la ayuda
+Para consultar la documentación sobre cualquier comando, puede emplear el menú desplegable */~Ayuda~/* que aparece arriba, a la derecha de la ventana principal de [[https://gretl.sourceforge.net/es.html][Gretl]].
+  + */~Ayuda -> Guía de Instrucciones~/* y ``pinche'' sobre //~print~//
+
+#+latex: {\vspace{0pt} \footnotesize \color{gray!70!black}
+/o bien teclee en linea de comandos/: =help print=
+#+latex: }
+
+* Actividad 2 - Editar los atributos de las variables
+Las variables traen ya cierta información, pero podemos enriquecerla con descripciones y etiquetas que aparecerán después en gráficos y salidas.
+
+*** Editar la descripción de =price=
+- Marque la variable =price=, ``pinche'' sobre ella con el botón derecho y seleccione */~Editar atributos~/*.
+- Escriba como descripción =Precio mediano de la vivienda ($)= y como nombre a mostrar en gráficos =Precio ($)=.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en linea de comandos/:
+    #+NAME: Editamos atributos de price
+    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
+setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+    #+end_src
+
+    #+RESULTS: Editamos atributos de price
+
+  #+latex: }
+
+*** Haga lo mismo con =rooms= y con =nox=
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /en linea de comandos/:
+    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
+setinfo rooms -d "Número medio de habitaciones" -n "Habitaciones"
+setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
+    #+end_src
+  #+latex: }
+
+*** Compruebe las etiquetas de todas las variables
+- Las etiquetas se pueden leer en la pantalla principal a la derecha del nombre de cada variable.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en linea de comandos/:
+    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
+labels
+    #+end_src
+  #+latex: }
+
+
+*** Para leer la información registrada del conjunto completo de datos
+Emplee el menú desplegable */~Datos -> Información del conjunto de datos~/*.
+
+
+
+* Actividad 3 - Estadísticos descriptivos
+Queremos resumir numéricamente varias variables a la vez.
+
+- Marque con el ratón las variables =price=, =rooms= y =nox= (manteniendo pulsada la tecla ~Ctrl~).
+- ``pinche'' con el botón derecho y seleccione */~Estadísticos descriptivos~/*.
+- Gretl preguntará si debe mostrar todos los estadísticos o solo los más importantes (explore ambas opciones).
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en linea de comandos/:
+    #+NAME: Estadisticos descriptivos
+    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
+summary price rooms nox
+    #+end_src
+
+    #+RESULTS: Estadisticos descriptivos
+
+  #+latex: }
+
+Obtendrá, para cada variable, la /media/, la /mediana/, el /mínimo/, el /máximo/, la /desviación típica/, etc.
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Semilla geométrica (que germinará en la sesión 7): la/ media /de una variable no es un número cualquiera; veremos que es el resultado de/ proyectar /el vector $\boldsymbol{x}$ sobre la dirección del vector de unos $\boldsymbol{1}$. Y la/ desviación típica /medirá, la distancia de ese vector respecto de su proyección; es decir, la /norma/ del vector de desviaciones $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$. Hoy solo leemos los números; pronto les daremos interpretación geométrica./
+#+latex: }
+
+* Actividad 4 - Histograma
+Para ver la /distribución/ de una variable:
+
+- Marque =price=, ``pinche'' con el botón derecho y seleccione */~Distribución de frecuencias~/*.
+- Gretl preguntará por el número de intervalos; acepte el valor por defecto.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en linea de comandos/:
+    #+NAME: Histograma de price
+    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
+freq price --plot=display
+    #+end_src
+  #+latex: }
+
+Observe la forma de la distribución de =price=: ¿es simétrica?, ¿se extiende la distribución hacia la derecha (cola larga de precios altos)? Repita el histograma para =rooms= y compare.
+
+* Actividad 5 - Diagrama de caja
+El /diagrama de caja/ (boxplot) resume la distribución mediante la mediana, los cuartiles y los valores extremos, y es útil para detectar /observaciones atípicas/.
+
+- Marque =price=, ``pinche'' con el botón derecho y seleccione */~Gráfico de caja~/*.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en linea de comandos/:
+    #+NAME: Boxplot de price
+    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
+boxplot price --output=display
+    #+end_src
+  #+latex: }
+
+Los puntos por encima del ``bigote'' superior son zonas con precios anormalmente altos. /No los eliminamos/: simplemente los observamos. Más adelante (laboratorio integrador) hablaremos de /observaciones influyentes/.
+
+* Preguntas de interpretación para la clase
+
+1. ¿Cuál es el precio medio de la vivienda en la muestra? ¿Y la mediana? ¿Por qué difieren?
+2. El histograma de =price=, ¿sugiere simetría o asimetría? ¿Qué implicaría eso para una eventual transformación logarítmica (que veremos más adelante)?
+3. La variable =price= es una lista de 506 números. ¿En qué espacio $\mathbb{R}^n$ ``vive'' como vector? ¿Y =rooms=?
+4. ¿Por qué hemos usado datos /reales/ y no simulados en esta práctica?
+
+# 4. La media de =chas= resulta ser un número entre 0 y 1. ¿Qué proporción de zonas limita con el río Charles?
+
+* Para profundizar
+
+- Cottrell, A. y Lucchetti, R. (2023). /Gretl User's Guide/. Capítulos introductorios sobre carga de datos y estadística descriptiva. Disponible en [[https://gretl.sourceforge.net/][gretl.sourceforge.net]].
+- Adkins, L. C. (2018). /Using Gretl for Principles of Econometrics/, 4.ª ed. Capítulo 1 (introducción al entorno).
+- Wooldridge, J. M. (2020). /Introductory Econometrics: A Modern Approach/. Apéndice sobre estadística descriptiva; descripción del dataset =hprice2= (Harrison y Rubinfeld, 1978).
+- Harrison, D. and Rubinfeld, D.L. (1978), [[https://lawcat.berkeley.edu/record/1111234/files/fulltext.pdf]["Hedonic Housing Prices and the Demand for Clean Air"]], Journal of Environmental Economics and Management 5, 81-102.  
+
+
+# +LATEX: \clearpage
+
+*** Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S04-Prct-A-hprice2.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S04-Prct-A-hprice2.inp][S04-Prct-A-hprice2.inp]] |
+
+
