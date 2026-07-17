@@ -1,0 +1,25 @@
+LATEXMK  := latexmk
+PDFTOPPM := pdftoppm
+
+TEX := $(wildcard *.tex)
+PDF := $(TEX:.tex=.pdf)
+PNG := $(TEX:.tex=.png)
+
+all: pngs
+
+pngs: $(PNG)
+
+pdfs: $(PDF)
+
+%.pdf: %.tex
+	$(LATEXMK) -pdf $<
+
+%.png: %.pdf
+	$(PDFTOPPM) -r 500 $< $(@:.png=) -png
+	mv $(@:.png=)-1.png ../$@
+
+clean:
+	$(LATEXMK) -c
+
+distclean: clean
+	rm -f *.pdf *.png
