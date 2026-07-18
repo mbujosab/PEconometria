@@ -26,17 +26,25 @@ repositorio ligero.
 
 * Estructura de directorios (resumen)
 
-| Ruta                        | Contenido                                    | ¿Se versiona en =main=? |
-|------------------------------+-----------------------------------------------+---------------------------|
-| =org-lessons/*.org=          | Sesiones teóricas                             | Sí                        |
-| =org-lessons/img/=           | Figuras                                       | Sí                        |
-| =org-pract/*.org=            | Guiones de laboratorio (fuente)               | Sí                        |
-| =org-pract/guiones/*.inp=    | Script Gretl tangled                          | No (generado)             |
-| =CuadernosElectronicos/*.org=| Cuadernos complementarios (fuente, si los hay) | Sí                        |
-| =data/=                      | Datasets                                      | Sí                        |
-| =css/=                       | Temas de exportación HTML                     | Sí                        |
-| =index.org=                  | Fuente de la portada de =gh-pages=            | Sí                        |
-| =*.pdf=, =*.html=, =*.ipynb=, =*.slides.html= | Artefactos              | No (solo en =gh-pages=)   |
+| Ruta                                   | Contenido                                                                    | ¿Se versiona en =main=?                                                        |
+|-----------------------------------------+---------------------------------------------------------------------------+------------------------------------------------------------------------------|
+| =org-lessons/*.org=                     | Sesiones teóricas                                                          | Sí                                                                            |
+| =org-lessons/img/*/*.org=               | Fuente tikz de cada figura individual                                      | Sí                                                                            |
+| =org-lessons/img/Makefile=              | Regenera los =.png= a partir de los =.org= de figuras                      | Sí                                                                            |
+| =org-lessons/img/*/*.png=               | Figuras compiladas                                                         | Sí (artefacto "estable", se versiona para no depender de LaTeX en cada clon)  |
+| =org-pract/*.org=                       | Guiones de laboratorio (fuente)                                            | Sí                                                                            |
+| =org-pract/guiones/*.inp=               | Script Gretl tangled                                                       | No (generado)                                                                 |
+| =org-pract/<nombre>/=                   | Salida de =gretlcli= (gráficos, etc.) al ejecutar el =.inp=                | No (generado)                                                                 |
+| =CuadernosElectronicos/*.org=           | Cuadernos complementarios (fuente, si los hay)                             | Sí                                                                            |
+| =data/=                                 | Datasets                                                                   | Sí                                                                            |
+| =css/=                                  | Temas de exportación HTML                                                  | Sí                                                                            |
+| =index.org=                             | Fuente de la portada de =gh-pages= (tablas de enlaces, mantenidas a mano)  | Sí                                                                            |
+| =*.pdf=, =*.html=, =*.ipynb=, =*.slides.html=, =*.tex=, =*.aux=, =_minted-*/= | Artefactos y residuos de compilación                                       | No (solo en =gh-pages=, o ni eso)                                             |
+
+/Nota/: los =.ipynb= generados a partir de =org-lessons/*.org= son un
+paso *intermedio* hacia las diapositivas reveal.js (=nbconvert --to
+slides=); no se publican como cuaderno descargable. Solo se publican
+como =.ipynb= los de =CuadernosElectronicos/=.
 
 * Estrategia B (actual): build local + despliegue manual
 
@@ -48,18 +56,59 @@ ello ya está operativo en la máquina de trabajo habitual del autor: no
 se reinstala nada en cada publicación, a diferencia de lo que ocurriría
 con integración continua (ver Estrategia A).
 
-** Compilar todo
+El =makefile= invoca siempre Emacs cargando explícitamente el =init.el=
+de scimax (variable =SCIMAX_INIT=, por defecto
+=$(HOME)/Software/scimax/init.el=), nunca el =~/.emacs.d/init.el=
+genérico del sistema. Esto es necesario porque la configuración de
+scimax es la que provee, entre otras cosas, =ox-ipynb= y el resto de
+paquetes usados en la exportación.
+
+** Compilar todo con =Makefile=
 
 #+begin_src sh
 make all index
 #+end_src
 
-Esto genera, dentro de =org-lessons/=, =org-pract/= y
+La generación de las lecciones depende de que las figuras =.png=
+(compiladas a partir del código tikz en =org-lessons/img/*/*.org=)
+estén al día. El =makefile= principal invoca automáticamente, como
+prerrequisito de =lessons=, el =makefile= auxiliar de
+=org-lessons/img/= (que decide por timestamps qué figuras regenerar).
+No es necesario ejecutarlo aparte.
+
+=make clean= limpia también los =.tex=/=.aux=/=.log= residuales de la
+exportación LaTeX, las carpetas =_minted-*= y las carpetas de salida
+que =gretlcli= crea junto a cada práctica ejecutada (mismo nombre que
+el =.org=, sin extensión). Tras =make clean= el árbol de =main= debe
+quedar reducido a fuentes y ficheros de configuración.
+
+=make all index= genera, dentro de =org-lessons/=, =org-pract/= y
 =CuadernosElectronicos/=, todos los PDF, HTML, =.ipynb= y diapositivas, y
 tangla + ejecuta los guiones de Gretl de las prácticas. También genera
 =index.html= a partir de =index.org=.
 
-* Preparar la rama =gh-pages= (una sola vez, ya hecho)
+*** Por qué las reglas de PDF de =org-pract= ejecutan el buffer antes de exportar
+
+Las reglas =%.pdf= y =%.html= de =org-pract/= dependen de un fichero
+/stamp/ =%.executed= (que a su vez depende de =%.tangled=), pero
+además cada una de ellas vuelve a invocar =org-babel-execute-buffer=
+justo antes de exportar, en el mismo proceso Emacs que hace la
+exportación. Esto no es redundante ni un descuido: es imprescindible.
+
+Cada regla de =make= que invoca =$(EMACS_BATCH)= arranca un /proceso
+Emacs independiente/. Ninguna variable Elisp fijada en el preámbulo de
+un =.org= (por ejemplo =org-latex-minted-langs=, =org-latex-listings= o
+=org-latex-pdf-process=, que cada práctica fija en un bloque
+=emacs-lisp= de su preámbulo para que =minted= resalte correctamente el
+código "gretl" mapeándolo al lexer =octave= de Pygments) sobrevive
+entre procesos distintos. Si la exportación a PDF se hiciera en un
+proceso batch nuevo que solo hace =find-file= + =org-latex-export-to-pdf=
+sin re-ejecutar antes ese preámbulo, las variables nunca se fijarían
+en /ese/ proceso y los recuadros de código saldrían vacíos, aunque el
+PDF se genere sin error alguno (véase "Incidentes conocidos", más
+abajo, para la anécdota completa de cómo se detectó esto).
+
+** Preparar la rama =gh-pages= (una sola vez, ya hecho)
 
 #+begin_src sh :eval no
 git checkout --orphan gh-pages
@@ -70,298 +119,116 @@ git checkout main
 git worktree add _ghpages gh-pages
 #+end_src
 
-#+RESULTS:
-| rm        | '.gitignore'                                                    |          |      |           |       |           |             |            |
-| rm        | 'CuadernosElectronicos/S05-Notebook01.org'                      |          |      |           |       |           |             |            |
-| rm        | 'DEPLOYMENT.org'                                                |          |      |           |       |           |             |            |
-| rm        | 'LICENSE'                                                       |          |      |           |       |           |             |            |
-| rm        | 'LICENSE-CODE'                                                  |          |      |           |       |           |             |            |
-| rm        | 'README.org'                                                    |          |      |           |       |           |             |            |
-| rm        | 'css/bigblow_inline.theme'                                      |          |      |           |       |           |             |            |
-| rm        | 'css/readtheorg_inline.theme'                                   |          |      |           |       |           |             |            |
-| rm        | 'css/simple_inlineUCM.theme'                                    |          |      |           |       |           |             |            |
-| rm        | 'data/boston.csv'                                               |          |      |           |       |           |             |            |
-| rm        | 'deploy-gh-pages.sh'                                            |          |      |           |       |           |             |            |
-| rm        | 'index.org'                                                     |          |      |           |       |           |             |            |
-| rm        | 'makefile'                                                      |          |      |           |       |           |             |            |
-| rm        | 'mycfg-GitHubPages.py'                                          |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/00preambulo_lecciones.txt'                         |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/S01-Lecc01.org'                                    |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/S02-Lecc02.org'                                    |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/S03-Lecc03.org'                                    |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/S05-Lecc04.org'                                    |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/S06-Lecc05.org'                                    |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S02-Lecc02/LongitudVectorR2.png'               |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S02-Lecc02/LongitudVectorR3.png'               |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S02-Lecc02/LongitudVector_fila.png'            |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S02-Lecc02/LongitudVector_fila_ancho.png'      |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S02-Lecc02/ProductoPorEscalar.png'             |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S02-Lecc02/SumaVectores.png'                   |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S02-Lecc02/VectorEnR2.png'                     |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S02-Lecc02/resultado_final.png'                |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad1.png'      |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad2.png'      |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad3.png'      |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad4.png'      |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad5.png'      |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad_fila.png'  |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/LongitudVectorR2.png'               |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/LongitudVectorR3.png'               |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/LongitudVector_fila.png'            |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/ProyeccionOrtogonal1.png'           |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/ProyeccionOrtogonal1_ancho.png'     |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/Triangulo1.png'                     |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/Triangulo2.png'                     |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/Triangulo_fila.png'                 |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S03-Lecc03/resultado_fila.png'                 |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/DesviacionT1.png'                   |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/DesviacionT2.png'                   |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/DesviacionT3.png'                   |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/DesviacionT_fila_ancho.png'         |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/DesviacionTipica0.png'              |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/DesviacionTipica0_ancho.png'        |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/DesviacionTipica1.png'              |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/DesviacionTipica1_ancho.png'        |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/MediaAritmetica1.png'               |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/MediaAritmetica1_ancho.png'         |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/MediaAritmetica2.png'               |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/MediaAritmetica2_ancho.png'         |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/ProyeccionOrtogonal1_muy_ancho.png' |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/SumaCte.png'                        |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/SumaCte_ancho.png'                  |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/SumaMediaNula.png'                  |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/SumaMediaNula_ancho.png'            |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S05-Lecc04/figuras-S05-Lecc04.org'             |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S06-Lecc05/Correlacion.png'                    |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S06-Lecc05/Correlacion2.png'                   |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S06-Lecc05/Correlacion_fila_ancho.png'         |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S06-Lecc05/Varianza.png'                       |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S06-Lecc05/Varianza_ancho.png'                 |          |      |           |       |           |             |            |
-| rm        | 'org-lessons/img/S06-Lecc05/figuras-S06-Lecc05.org'             |          |      |           |       |           |             |            |
-| rm        | 'org-pract/00preambulo_practicas.txt'                           |          |      |           |       |           |             |            |
-| rm        | 'org-pract/S04-Prct-A-hprice2.org'                              |          |      |           |       |           |             |            |
-| rm        | 'org-pract/S04-Prct-B-boston.org'                               |          |      |           |       |           |             |            |
-| rm        | 'requirements.txt'                                              |          |      |           |       |           |             |            |
-| [gh-pages | (commit-raíz)                                                   | e9a3999] | Rama | gh-pages: | sitio | publicado | (contenidos | generados) |
-
 El directorio =_ghpages/= es un /worktree/ de git: la misma repositorio,
 pero con la rama =gh-pages= pagada en esa carpeta. Permite tener =main= y
 =gh-pages= abiertos simultáneamente sin cambiar de rama. Esta carpeta está
 en =.gitignore= de =main= (no debe versionarse ahí).
 
-* Desplegar
+** Desplegar la rama =gh_pages= con el script =./deploy-gh-pages.sh=
 
 #+begin_src sh
 ./deploy-gh-pages.sh
 #+end_src
 
-#+RESULTS:
-| make:     | No       |        se | hace                                                          | nada          | para                    | 'all'.              |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| make:     | No       |        se | hace                                                          | nada          | para                    | 'index'.            |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| [gh-pages | 95c507a] | Actualiza | material                                                      | generado      | (2026-07-15)            |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| 185       | files    |  changed, | 35763                                                         | insertions(+) |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | .github/workflows/build.yml                                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | .gitignore                                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | .projectile                                                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | ConfRepo.org                                                  |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/Claude.org                                          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/Curso.org                                           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/Curso.pdf                                           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/Curso.tex                                           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/Descartes.org                                       |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/DocumentoRector.org                                 |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/DocumentoRector.pdf                                 |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/DocumentoRector.tex                                 |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/Enlaces.org                                         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/Lecc01.ipynb                                        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/NotasEmacsLatexMinted.org                           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/PlanDeEscritura.html                                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/PlanDeEscritura.org                                 |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/PlanDeEscritura.pdf                                 |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/PlanDeEscritura.tex                                 |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/PlanDeEscrituraDelCurso.org                         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/PlanDeEscrituraDelCurso.pdf                         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/PlanDeEscrituraDelCurso.tex                         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/ValoracionGTP.org                                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/CosenoCirculoRadioUnidad1.png          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/CosenoCirculoRadioUnidad2.png          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/CosenoCirculoRadioUnidad3.png          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/CosenoCirculoRadioUnidad4.png          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/CosenoCirculoRadioUnidad5.png          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/LongitudVectorR2.png                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/LongitudVectorR3.png                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/ProyeccionOrtogonal1.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/Triangulo1.png                         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/img/sesion03/Triangulo2.png                         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/notasSobreClaudeyGptel.org                          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/pensamientoGemini.org                               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/plan-docente.org                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/proyeccion_ortogonal_econometria.html               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/proyeccion_ortogonal_econometria.org                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/proyeccion_ortogonal_econometria.pdf                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/proyeccion_ortogonal_econometria.tex                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/sesion01.nav                                        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/sesion01.pdf                                        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/sesion01.snm                                        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Consultas/sesion01.tex                                        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | CuadernosElectronicos/PreparacionNotebook.txt-org             |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | CuadernosElectronicos/S05-Notebook01.org                      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | DEPLOYMENT.org                                                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | DEPLOYMENT.pdf                                                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | DEPLOYMENT.tex                                                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | "Ficha/FPE_2_1_Principios                                     | de            | Econometr\303\255a.pdf" |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | LICENSE                                                       |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | LICENSE-CODE                                                  |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Lecturas/Bjerkholt_hist_thou.pdf                              |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | Lecturas/Kennedy-TeachingUndergraduateEconometrics-1998.pdf   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | "Lecturas/Manuales/Joshua                                     | D.            | Angrist,                | J\303\266rn-Steffen | Pischke | -   | Mastering | \342\200\231Metrics_ | The   | Path | from   | Cause | to       | Effect-Princeton | University | Press | (2015).pdf" |
-| create    | mode     |    100644 | Lecturas/Manuales/The                                         | book          | of                      | why_                | the     | new | science   | of                   | cause | and  | effect | (     | PDFDrive | ).pdf            |            |       |             |
-| create    | mode     |    100644 | Lecturas/causal_educ_earnings.pdf                             |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | README.org                                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | README.pdf                                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | README.tex                                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | css/bigblow_inline.theme                                      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | css/readtheorg_inline.theme                                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | css/simple_inlineUCM.theme                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | data/boston.csv                                               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100755 | deploy-gh-pages.sh                                            |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | index.html                                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | index.org                                                     |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | makefile                                                      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | mycfg-GitHubPages.py                                          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/00preambulo_lecciones.txt                         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/PlanDeEscritura.tex                               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/PlanDeEscritura.txt-org                           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/Revisi\303\263n.txt-org                           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S01-Lecc01.org                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S01-Lecc01.tex                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S02-Lecc02.org                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S02-Lecc02.tex                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S03-Lecc03.org                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S03-Lecc03.tex                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S05-Lecc04.org                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S05-Lecc04.tex                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S06-Lecc05.org                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/S06-Lecc05.tex                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/SXX-LeccYY.txt-org                                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/SYY-LeccXX-scratch.txt-org                        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/bibliografia.bib                                  |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/buffer.txt-org                                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/OperacionesConPNGs.org                        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/LongitudVectorR2.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/LongitudVectorR3.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/LongitudVector_fila.png            |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/LongitudVector_fila_ancho.png      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/ProductoPorEscalar.png             |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/ProductoPorEscalar.tex             |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/SumaVectores.png                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/SumaVectores.tex                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/VectorEnR2.png                     |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/VectorEnR2.tex                     |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S02-Lecc02/resultado_final.png                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad1.png      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad2.png      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad3.png      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad4.png      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad5.png      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/CosenoCirculoRadioUnidad_fila.png  |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/LongitudVectorR2.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/LongitudVectorR3.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/LongitudVector_fila.png            |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/ProyeccionOrtogonal1.png           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/ProyeccionOrtogonal1_ancho.png     |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/S03-Lecc03.ipynb                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/Triangulo1.png                     |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/Triangulo2.png                     |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/Triangulo_fila.png                 |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/prueba2.ipynb                      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S03-Lecc03/resultado_fila.png                 |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/DesviacionT1.png                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/DesviacionT2.png                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/DesviacionT3.png                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/DesviacionT_fila_ancho.png         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/DesviacionTipica0.png              |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/DesviacionTipica0_ancho.png        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/DesviacionTipica1.png              |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/DesviacionTipica1_ancho.png        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/MediaAritmetica1.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/MediaAritmetica1_ancho.png         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/MediaAritmetica2.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/MediaAritmetica2_ancho.png         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/ProyeccionOrtogonal1_muy_ancho.png |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/SumaCte.png                        |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/SumaCte_ancho.png                  |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/SumaMediaNula.png                  |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/SumaMediaNula_ancho.png            |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/figuras-S05-Lecc04.org             |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/png/DesviacionT1.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/png/DesviacionT2.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/png/DesviacionT3.png               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/png/DesviacionTipica0.png          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/png/DesviacionTipica1.png          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/png/MediaAritmetica1.png           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/png/MediaAritmetica2.png           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/png/SumaCte.png                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/png/SumaMediaNula.png              |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionT1.pdf               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionT1.tex               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionT2.pdf               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionT2.tex               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionT3.pdf               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionT3.tex               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionTipica0.pdf          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionTipica0.tex          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionTipica1.pdf          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/DesviacionTipica1.tex          |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/MediaAritmetica1.pdf           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/MediaAritmetica1.tex           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/MediaAritmetica2.pdf           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/MediaAritmetica2.tex           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/S05-Lecc04.ipynb               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/SumaCte.pdf                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/SumaCte.tex                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/SumaMediaNula.pdf              |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/SumaMediaNula.tex              |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S05-Lecc04/tex/makefile                       |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/Correlacion.png                    |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/Correlacion2.png                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/Correlacion_fila_ancho.png         |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/S06-Lecc05.ipynb                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/Varianza.png                       |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/Varianza_ancho.png                 |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/figuras-S06-Lecc05.org             |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/figuras-S06-Lecc05.pdf             |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/figuras-S06-Lecc05.tex             |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/tex/Correlacion.tex                |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/tex/Correlacion2.tex               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/tex/Varianza.tex                   |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-lessons/img/S06-Lecc05/tex/makefile                       |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-pract/00preambulo_practicas.txt                           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-pract/S04-Prct-A-hprice2.org                              |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-pract/S04-Prct-A-hprice2.tex                              |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-pract/S04-Prct-B-boston.org                               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-pract/S04-Prct-B-boston.tex                               |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-pract/guiones/S04-Prct-A-hprice2.inp                      |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-pract/guiones/S04-Prct-B-boston.inp                       |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | org-pract/hansl.tex                                           |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
-| create    | mode     |    100644 | requirements.txt                                              |               |                         |                     |         |     |           |                      |       |      |        |       |          |                  |            |       |             |
+El script =deploy-gh-pages.sh= reconstruye =_ghpages/= por completo en
+cada ejecución (nunca acumula sobre el despliegue anterior) y clasifica
+los artefactos generados en subcarpetas: =Lecciones-pdf/=,
+=Lecciones-html/=, =Transparencias/= (slides), =Practicas-pdf/=,
+=Practicas-html/= (+ =guiones/= con los =.inp=) y
+=CuadernosElectronicos/= (solo los de =CuadernosElectronicos/*.org=,
+nunca los =.ipynb= intermedios de =org-lessons=). Copia también
+=index.html= y crea =.nojekyll=.
 
-El script (véase su código en el repositorio) copia cada artefacto
-generado a la subcarpeta correspondiente de =_ghpages/= y hace commit +
-push directamente sobre =gh-pages=.
+Además —y esto es imprescindible para que el material publicado se
+vea completo, no solo se genere sin error— el script copia:
+- =org-lessons/img/= dentro de =Lecciones-html/= y de =Transparencias/=,
+  ya que tanto el HTML de las lecciones como los slides reveal.js
+  referencian las figuras con ruta relativa =img/<subcarpeta>/*.png=.
+- La carpeta de salida de cada práctica (=org-pract/<nombre>/=, con los
+  gráficos y resultados que genera =gretlcli= al ejecutar el =.inp=)
+  dentro de =Practicas-html/=, con el mismo nombre que el =.org=
+  correspondiente (sin extensión), excluyendo =guiones/= (que ya se
+  trata aparte).
 
-* Publicar en GitHub Pages
+*** Salvaguardas del script (importantes: leer antes de tocar el script)
+
+- Determina su propia ubicación con =dirname "${BASH_SOURCE[0]}"=, no
+  con =git rev-parse --show-toplevel= (este último es ambiguo cuando se
+  invoca desde dentro de un /worktree/ secundario como =_ghpages=). Por
+  ello es indiferente ejecutarlo como =./deploy-gh-pages.sh= desde la
+  raíz de =main= o como =../deploy-gh-pages.sh= desde dentro de
+  =_ghpages=.
+- Comprueba, antes de tocar nada, que =main= no está por error en la
+  rama =gh-pages=, que =_ghpages/.git= existe (usa =-e=, no =-d=: en un
+  /worktree/ =.git= es un fichero, no un directorio) y que =_ghpages=
+  está efectivamente en la rama =gh-pages=. Si algo no cuadra, aborta
+  con un mensaje explicativo en vez de continuar.
+- /Nunca/ usa =git clean -fdx= (con =-x=): solo =-fd=. La opción =-x=
+  ignora =.gitignore= y borra también lo ignorado; es la causa de dos
+  incidentes de pérdida de ficheros personales (véase más abajo,
+  "Incidentes y lecciones aprendidas").
+
+*** Limitaciones conocidas
+
+**** El código "gretl" no sale resaltado con color en las exportaciones HTML
+
+En los PDF, el código de los bloques =#+begin_src gretl= sí sale
+coloreado, porque el preámbulo de cada práctica mapea explícitamente
+=gretl= al lexer =octave= de Pygments (=org-latex-minted-langs=), y
+=pygmentize= sí dispone de ese lexer.
+
+En HTML, en cambio, /ningún/ bloque de código sale coloreado
+—incluidos lenguajes con soporte nativo como =python= o =emacs-lisp=,
+no solo =gretl=—, aunque sí conservan atributos como negrita o cursiva.
+Se investigó la causa: Org exporta código a HTML apoyándose en
+=htmlize=, que a su vez consulta =(display-color-p)= para decidir si el
+entorno soporta color. En un proceso Emacs =--batch= (como el que usa
+este =makefile= para toda la generación) esa función devuelve =nil= (no
+hay pantalla), así que =htmlize= omite el color aunque sí aplique otros
+atributos de la cara.
+
+Se probó forzar =(advice-add 'display-color-p :override (lambda (&optional _) t))=
+antes de exportar, sin éxito: el color sigue sin aparecer. No se ha
+seguido investigando más allá porque el beneficio es puramente
+cosmético en un formato secundario (el PDF, que es la versión "seria"
+para imprimir/estudiar, sí muestra el código resaltado correctamente).
+Si en el futuro se quiere retomar, el punto de partida sería revisar
+=org-html-fontify-code= en =ox-html.el= para ver qué otra condición,
+además de =display-color-p=, pueda estar impidiendo la generación de
+=<span style="color:...">=.
+
+**** El lenguaje "gretl" no existe como tal ni en Pygments ni en Emacs
+
+"gretl" no tiene lexer propio en Pygments ni major-mode propio en
+Emacs. Para el PDF se resuelve mapeándolo al más parecido disponible,
+=octave=, mediante =(add-to-list 'org-latex-minted-langs '(gretl "octave"))=
+en el preámbulo de cada práctica. Si algún día aparece un lexer real
+para gretl en Pygments, basta con sustituir esa línea.
+
+** Publicar en GitHub Pages
 
 /Settings → Pages → Source: Deploy from a branch → =gh-pages= / =(root)=/.
 
-- Estrategia A (futura, si se desea automatizar con CI)
+* Estrategia A (futura, si se desea automatizar con CI)
 
 Si en el futuro se prefiere que la publicación ocurra automáticamente en
 cada =push= a =main= (sin depender de ejecutar el script a mano), la vía
 es GitHub Actions. Se documenta aquí para no tener que rediseñarlo desde
 cero, pero /no está activada/ por defecto.
 
-* Coste y riesgos a tener en cuenta
+El fichero =.github/workflows/build.yml.disabled= (más abajo) ya
+incorpora las mismas correcciones que =deploy-gh-pages.sh= (copia de
+=img/= y de las carpetas de salida por práctica). Antes de activarlo
+conviene además:
+- Aclarar la discrepancia observada en compilación local entre el
+  motor LaTeX pedido (=-xelatex= en =org-latex-pdf-process=) y el que
+  =latexmk= termina invocando según el log (=lualatex=); por precaución
+  el workflow instala ambos (=texlive-xetex= y =texlive-luatex=).
+- Confirmar si la limitación de resaltado HTML documentada arriba
+  también se reproduce en el entorno de CI (es esperable que sí, por
+  la misma razón: proceso Emacs =--batch= sin pantalla).
+
+** Coste y riesgos a tener en cuenta
 
 - Instalar Emacs + scimax + Gretl + una distribución LaTeX completa en
   cada ejecución del workflow es lento (varios minutos) y fràgil: scimax
@@ -375,11 +242,12 @@ cero, pero /no está activada/ por defecto.
   evita reinstalar dependencias en cada ejecución y hace reproducible el
   entorno de compilación.
 
-* Pasos para migrar a Estrategia A cuando se decida
+** Pasos para migrar a Estrategia A cuando se decida
 
 1. Crear un =Dockerfile= con Emacs, scimax preinstalado y cacheado,
-   Gretl, TeXLive (subconjunto: =texlive-xetex texlive-latex-extra
-   texlive-fonts-extra latexmk=), =pygments= y Jupyter/nbconvert.
+   Gretl, TeXLive (subconjunto: =texlive-xetex texlive-luatex
+   texlive-latex-extra texlive-fonts-extra latexmk=), =pygments= y
+   Jupyter/nbconvert.
 2. Publicar la imagen (p. ej. =ghcr.io/mbujosab/peconometria-build:latest=).
 3. Activar el fichero =.github/workflows/build.yml= (ya escrito más abajo,
    /listo para usar/ una vez exista la imagen) cambiando el paso de
@@ -387,7 +255,7 @@ cero, pero /no está activada/ por defecto.
 4. Verificar en un =workflow_dispatch= manual antes de dejarlo disparado
    por =push= a =main=.
 
-* =.github/workflows/build.yml= (preparado, no activo por defecto)
+** =.github/workflows/build.yml= (preparado, no activo por defecto)
 
 #+begin_src yaml :tangle .github/workflows/build.yml.disabled
 name: Build y despliegue a gh-pages
@@ -418,7 +286,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y emacs-nox gretl \
-            texlive-xetex texlive-latex-extra texlive-fonts-extra latexmk
+            texlive-xetex texlive-luatex texlive-latex-extra \
+            texlive-fonts-extra latexmk
           pip install jupyter nbconvert pygments
 
       - name: Clonar scimax
@@ -430,16 +299,32 @@ jobs:
       - name: Preparar sitio
         run: |
           mkdir -p _site/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos}
-          find org-lessons -maxdepth 1 -name '*.slides.html' -exec cp {} _site/Transparencias/ \;
+
+          find org-lessons -maxdepth 1 -name '*.slides.html'                  -exec cp {} _site/Transparencias/ \;
           find org-lessons -maxdepth 1 -name '*.html' ! -name '*.slides.html' -exec cp {} _site/Lecciones-html/ \;
-          find org-lessons -maxdepth 1 -name '*.pdf'  -exec cp {} _site/Lecciones-pdf/ \;
-          find org-lessons -maxdepth 1 -name '*.ipynb' -exec cp {} _site/CuadernosElectronicos/ \;
+          find org-lessons -maxdepth 1 -name '*.pdf'                         -exec cp {} _site/Lecciones-pdf/ \;
+          find org-lessons -maxdepth 1 -name '*.ipynb'                       -exec cp {} _site/CuadernosElectronicos/ \;
+
+          # Figuras: imprescindibles para ver algo en Lecciones-html y Transparencias
+          cp -r org-lessons/img _site/Lecciones-html/
+          cp -r org-lessons/img _site/Transparencias/
+
           find org-pract -maxdepth 1 -name '*.html' -exec cp {} _site/Practicas-html/ \;
           find org-pract -maxdepth 1 -name '*.pdf'  -exec cp {} _site/Practicas-pdf/ \;
           find org-pract/guiones -maxdepth 1 -name '*.inp' -exec cp {} _site/Practicas-html/guiones/ \;
+
+          # Salida de gretlcli por práctica (gráficos, estimaciones, etc.)
+          for d in org-pract/*/; do
+            nombre=$(basename "$d")
+            [ "$nombre" = "guiones" ] && continue
+            cp -r "$d" _site/Practicas-html/
+          done
+
           find CuadernosElectronicos -maxdepth 1 -name '*.ipynb' -exec cp {} _site/CuadernosElectronicos/ \;
+
           cp requirements.txt _site/
           cp index.html _site/
+          touch _site/.nojekyll
 
       - name: Desplegar a gh-pages
         uses: peaceiris/actions-gh-pages@v4
@@ -449,3 +334,47 @@ jobs:
           publish_branch: gh-pages
 #+end_src
 
+/Nota/: este fichero puede guardarse ya en el repositorio bajo
+=.github/workflows/build.yml.disabled= (o simplemente fuera de
+=.github/workflows/=, p. ej. en este mismo =DEPLOYMENT.org=) para que no
+se ejecute hasta que se decida activarlo conscientemente.
+
+* Incidentes conocidos y lecciones aprendidas
+
+- =.gitignore= no protege de =git clean -fdx=: la opción =-x= ignora
+  deliberadamente las reglas de =.gitignore= y borra también lo
+  ignorado. Cualquier script de limpieza en este repositorio debe usar
+  =-fd= a secas, nunca =-x=.
+- Los ficheros verdaderamente irremplazables y personales (p. ej. el
+  plan de escritura del curso) no deben vivir /dentro/ del árbol de
+  este repositorio ni siquiera como "ignorados": deben residir en una
+  carpeta hermana, fuera del repo, idealmente con su propio control de
+  versiones. =.gitignore= es una convención, no una barrera física.
+- Si el árbol de trabajo está accesible a través de un enlace
+  simbólico (p. ej. dos clientes de sincronización en la nube apuntando
+  al mismo directorio con nombres distintos), los /worktrees/ de Git
+  pueden quedar con rutas absolutas internas inconsistentes. Si
+  =git worktree list= muestra el worktree pero cualquier operación
+  sobre él falla, probar primero =git worktree repair= antes de asumir
+  pérdida de datos.
+- Cualquier script que borre contenido debe /verificar activamente/
+  (rama actual, existencia y naturaleza del destino) antes de actuar, y
+  abortar con un mensaje claro si algo no es exactamente lo esperado,
+  en vez de confiar en que "se invocará siempre bien".
+- Cada regla de =make= que invoca =$(EMACS_BATCH)= arranca un proceso
+  Emacs independiente; ninguna variable Elisp fijada en un preámbulo
+  =.org= sobrevive entre reglas encadenadas por ficheros stamp. Cualquier
+  exportación que dependa de configuración establecida por bloques del
+  propio documento (como el mapeo =gretl→octave= para minted) debe
+  ejecutar =org-babel-execute-buffer= /en el mismo proceso/ que hace la
+  exportación, no confiar en pasos previos ya cerrados. Este fue el bug
+  que causaba que los PDF de =org-pract= se generasen sin error pero con
+  los recuadros de código de minted completamente vacíos.
+- El resaltado de sintaxis en HTML (vía =htmlize=) depende de
+  =(display-color-p)=, que en un proceso Emacs =--batch= (sin pantalla)
+  devuelve =nil=. Por eso ningún bloque de código sale coloreado en las
+  exportaciones HTML de este repositorio, con independencia del
+  lenguaje. Se documenta como limitación conocida (ver "Limitaciones
+  conocidas") en lugar de como bug pendiente, dado el coste/beneficio
+  de seguir investigando frente al hecho de que el PDF ya muestra el
+  código correctamente resaltado.

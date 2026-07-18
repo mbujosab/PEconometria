@@ -97,11 +97,21 @@ $(PRACT_STAMPS)/%.executed: $(PRACT_STAMPS)/%.tangled $(PRACT_GUIONES)
 	$(EMACS_BATCH) --eval '(progn (find-file "$(PRACT_DIR)/$*.org") (org-babel-execute-buffer))'
 	touch $@
 
+# IMPORTANTE: hay que volver a ejecutar el buffer (no solo find-file)
+# en el MISMO proceso de Emacs que exporta a PDF. El preámbulo de cada
+# .org de prácticas fija variables Elisp (org-latex-minted-langs,
+# org-latex-pdf-process, org-latex-listings) necesarias para que
+# minted resalte correctamente el código "gretl" (mapeado al lexer
+# "octave" de Pygments). Esas variables solo existen mientras vive el
+# proceso Emacs que las fijó: si se exporta en un proceso batch nuevo
+# (como haría "find-file + org-latex-export-to-pdf" a secas), el
+# preámbulo nunca se ejecuta ahí y los recuadros de código salen
+# vacíos, aunque el PDF se genere sin error.
 $(PRACT_DIR)/%.pdf: $(PRACT_STAMPS)/%.executed $(PRACT_GUIONES)
-	$(EMACS_BATCH) --eval '(progn (find-file "$(PRACT_DIR)/$*.org") (org-latex-export-to-pdf))'
+	$(EMACS_BATCH) --eval '(progn (find-file "$(PRACT_DIR)/$*.org") (org-babel-execute-buffer) (org-latex-export-to-pdf))'
 
 $(PRACT_DIR)/%.html: $(PRACT_STAMPS)/%.executed $(PRACT_GUIONES)
-	$(EMACS_BATCH) --eval '(progn (find-file "$(PRACT_DIR)/$*.org") (org-html-export-to-html))'
+	$(EMACS_BATCH) --eval '(progn (find-file "$(PRACT_DIR)/$*.org") (org-babel-execute-buffer) (org-html-export-to-html))'
 
 clean:
 	rm -f $(LESSONS_PDF) $(LESSONS_HTML) $(LESSONS_IPYNB) $(LESSONS_SLIDES)
