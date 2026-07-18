@@ -1,0 +1,78 @@
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+% 1. DEFINIMOS LA VISTA 3D (Ángulos de rotación para los ejes)
+\tdplotsetmaincoords{55}{65}
+
+\begin{document}
+  \def\Rojo{red!50!black}
+  \def\RojoOscuro{red!20!black}
+  \def\RojoClaro{red!90!black}
+  \def\Verde{green!50!black}
+  \def\VerdeOscuro{green!30!black}
+  \def\VerdeClaro{green!50!gray}
+  \def\Azul{blue!50!black}
+  \def\AzulOscuro{blue!35!black}
+  \def\AzulClaro{blue!60!gray}
+
+  \begin{tikzpicture} [scale=3,
+    tdplot_main_coords,
+    axis/.style={-,black, thin},
+    vector/.style={-stealth},
+    vector guide/.style={dashed,gray,very thin}]
+    
+    % standard tikz coordinate definition using x, y, z coords
+    \tdplotsetcoord{P}{1.2}{50}{70}
+    \tdplotsetcoord{Q}{1}{-70}{-140}
+    \tdplotsetcoord{C}{1.9}{45}{40}
+    \tdplotsetcoord{O}{0}{0}{0}
+    
+    \tdplotsetrotatedcoords{0}{0}{-45}
+    
+    \tdplotsetcoord{X}{.5}{90}{0}   
+    \tdplotsetcoord{XX}{.3}{-90}{0}   
+    \tdplotsetcoord{Y}{1.2}{90}{90}    % vectores constantes
+    \tdplotsetcoord{YY}{.3}{90}{-90}
+    \tdplotsetcoord{Z}{1.0}{0}{0}
+    \tdplotsetcoord{ZZ}{-.3}{0}{0}     % vertical
+    \tdplotsetcoord{H}{1}{-90}{-60}
+    
+    % draw axes
+    \draw[axis]  (XX) -- (X); 
+    \draw[axis,color=blue!95!black,thin]  (YY) -- (Y) node[color=blue!90!black, anchor=west,font=\footnotesize]{$\Span{\Vect{1}}$};
+    \draw[axis]  (ZZ) -- (Z); 
+  
+    \coordinate (Ymedia) at (0,0.865,0);
+    \coordinate (Yhat)   at (Pxy);
+    
+    \coordinate (Xmedia) at (0,0.605,0);
+    
+    % 2. CORRECCIÓN: tikz-3dplot guarda el punto final real en (P) de forma global si el compilador lo mapea bien, 
+    % pero requiere una proyección válida si falla. Si da problemas, puedes usar directamente las coordenadas manuales cartesianas.
+    \tkzMarkRightAngle[size=.08](O,Ymedia,P) 
+    \tkzMarkRightAngle[size=.08](O,Xmedia,Q) 
+    
+    \draw[vector guide]         (Ymedia) -- (P);
+    \draw[vector guide]         (Xmedia) -- (Q);
+
+    % draw a vector from O to P
+    \draw[vector, red!30!gray] (O) -- (P) node[anchor=south]{$\Vect{v}$};
+    \draw[vector, color=blue!50!gray,thick]  (O) -- (Ymedia) node[anchor=west, xshift=-0.4mm, yshift=-1.4mm]{${\Vect{\Media{v}}}$};
+    
+    \draw[vector, green!30!gray] (O) -- (Q) node[anchor=north west, yshift=0.8mm]{$\Vect{x}$};
+    \draw[vector, color=blue!50!black,thick]  (O) -- (Xmedia) node[anchor=south, xshift=-0.4mm]{${\Vect{\Media{x}}}$};
+
+    \draw[decorate, decoration={brace,raise=3pt},gray!85!black] (O) -- (Xmedia) node [midway, anchor=south, yshift=2.7mm, xshift=-0.8mm, outer sep=0pt, inner sep=0.1pt, font=\tiny, fill=white, opacity=.9, text opacity=1]{$\modulus{\media{\Vect{x}}}$};
+
+   
+  \end{tikzpicture}
+\end{document}

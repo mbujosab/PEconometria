@@ -1,0 +1,356 @@
+#+TITLE: Generación automática de figuras PNG a partir de documentos Org
+#+AUTHOR: Marcos Bujosa Brun
+#+OPTIONS: toc:3 num:t
+
+#+LATEX_HEADER_EXTRA: \usepackage{fullpage}
+
+#+LATEX_HEADER: \usepackage{fontspec}          % para fuentes Unicode
+#+LATEX_HEADER: \usepackage{lmodern}           % o mejor, define una fuente explícita
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman} % o cualquier otra que quieras
+# +LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{tabularx}
+#+LATEX_HEADER: \usepackage{booktabs}
+#+latex_header: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage[indent]{parskip}
+
+#+LATEX_HEADER: \usepackage{tikz}
+
+#+LATEX_HEADER: \usepackage{amsthm,amsmath}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+LATEX_HEADER: \usepackage{polyglossia}
+#+LATEX_HEADER: \setmainlanguage{spanish}
+
+\maketitle
+
+* Introducción
+
+Este documento describe la infraestructura utilizada para generar automáticamente las figuras de las lecciones a partir de documentos =Org Mode=. El objetivo principal es separar claramente:
+
+- el contenido docente (las figuras),
+- la lógica de compilación,
+- y el procedimiento de construcción.
+
+La filosofía seguida es la habitual en proyectos de software:
+
+- cada componente tiene una única responsabilidad;
+- la infraestructura se comparte entre todas las lecciones;
+- añadir una nueva lección no requiere modificar el sistema de construcción.
+
+El resultado es un sistema escalable en el que cada lección contiene únicamente la descripción de sus figuras.
+
+* Organización del proyecto
+
+La estructura del directorio es la siguiente:
+
+
+#+ATTR_LATEX: :width 0.7\textwidth
+#+begin_src dot :file estructura.pdf
+graph G {
+
+    rankdir=TB;
+
+    // Directorios
+    node [shape=folder];
+    img;
+    "S01-Lecc01";
+    "S01-Lecc02";
+
+    // Ficheros Org
+    node [shape=component];
+    "figuras-S01-Lecc01.org";
+    "figuras-S01-Lecc02.org";
+
+    // Scripts
+    node [shape=component];
+    "build.el";
+    "compila_figuras.sh";
+
+    // Makefile
+    node [shape=component];
+    "Makefile";
+    "Makefile.figuras";
+
+    img -- "build.el";
+    img -- "Makefile";
+    img -- "Makefile.figuras";
+    img -- "compila_figuras.sh";
+
+    img -- "S01-Lecc01";
+    "S01-Lecc01" -- "figuras-S01-Lecc01.org";
+
+    img -- "S01-Lecc02";
+    "S01-Lecc02" -- "figuras-S01-Lecc02.org";
+}
+#+end_src
+
+Cada subdirectorio contiene únicamente el documento =Org= correspondiente a una lección.
+
+** Arquitectura del sistema
+
+El sistema está organizado en cuatro componentes claramente diferenciados, cada uno con una responsabilidad bien definida:
+
+- =Makefile=: coordina la construcción completa del proyecto.
+- =compila_figuras.sh=: procesa una lección concreta.
+- =build.el=: procesa el documento Org mediante Org Babel.
+- =Makefile.figuras=: compila los documentos LaTeX generados y obtiene las imágenes PNG.
+
+Esta separación permite mantener cada componente sencillo e independiente, reduciendo el acoplamiento entre ellos y facilitando su mantenimiento.
+
+* Filosofía
+
+*El principio de diseño consiste en separar claramente la descripción de las figuras (documentos Org) de la infraestructura de construcción (scripts, Makefiles y código Elisp), de modo que cualquier lección pueda incorporarse al proyecto sin duplicar herramientas ni lógica de compilación.*
+
+Cada documento =Org= constituye una descripción declarativa de las figuras de una lección.
+
+Los bloques Babel describen únicamente:
+
+- el código LaTeX/TikZ necesario para producir cada figura;
+- algunos pasos finales de posprocesado (por ejemplo, llamadas a =convert= de ImageMagick).
+
+No contienen ninguna información sobre cómo compilar dichas figuras.
+
+En particular, los documentos =Org= ya no incluyen:
+
+- reglas =make=;
+- llamadas a =latexmk=;
+- llamadas a =make pngs=;
+- infraestructura repetida en todas las lecciones.
+
+Esta separación permite mantener una única copia de la lógica de construcción.
+
+* Flujo general de construcción
+
+El procedimiento completo es
+
+#+begin_src dot :file flujo-construccion.pdf
+#+CAPTION: Flujo general del proceso de construcción.
+#+ATTR_LATEX: :width 0.95\textwidth
+#+begin_src dot :file flujo-general.pdf
+digraph G {
+
+    rankdir=LR;
+
+    graph [
+        nodesep=0.35,
+        ranksep=0.45
+    ];
+
+    node [
+        fontname="Helvetica",
+        fontsize=10
+    ];
+
+    // Programas
+    make   [shape=component,label="make"];
+    script [shape=component,label="compila_figuras.sh"];
+    build  [shape=component,label="build.el"];
+
+    // Artefactos
+    org [shape=note,label=".org"];
+    tex [shape=note,label=".tex"];
+    pdf [shape=note,label=".pdf"];
+    png [shape=note,label=".png"];
+
+    make   -> script;
+    script -> build;
+
+    org -> build;
+
+    build -> tex [label="tangle"];
+
+    tex -> pdf [label="latexmk"];
+
+    pdf -> png [label="pdftoppm"];
+}
+#+end_src
+
+Cada una de estas etapas está controlada por un componente distinto.
+
+* Arquitectura
+** El =Makefile= principal
+
+El Makefile situado en el directorio img constituye el punto de entrada del sistema.
+
+Su misión consiste en
+
+- recorrer todos los subdirectorios;
+- localizar el documento Org correspondiente;
+- decidir si es necesario reconstruir las figuras;
+- invocar compila_figuras.sh únicamente cuando procede;
+- proporcionar objetivos auxiliares como clean y distclean.
+
+** =compila_figuras.sh=
+
+El script =compila_figuras.sh= constituye el trabajador encargado de procesar una única lección.
+
+Recibe como argumento el documento Org correspondiente, invoca Emacs en modo batch utilizando =build.el= y, una vez generados los ficheros =.tex=, delega su compilación en =make= mediante =Makefile.figuras=.
+
+** =build.el=
+
+El fichero =build.el= constituye el puente entre Org Babel y el sistema de construcción.
+
+Su responsabilidad no es generar las imágenes finales, sino transformar el documento Org en los ficheros fuente necesarios para ello y ejecutar aquellas tareas de posprocesado que el autor haya marcado explícitamente mediante la cabecera =:build yes=.
+
+Durante su ejecución realiza las siguientes operaciones:
+
+1. carga Org y Org Babel;
+2. habilita los lenguajes Babel necesarios;
+3. abre el documento Org indicado;
+4. crea el directorio =tex/= si todavía no existe;
+5. ejecuta =org-babel-tangle= para generar los ficheros fuente;
+6. ejecuta únicamente los bloques =bash= marcados con =:build yes=.
+
+La idea es que el documento =Org= permanezca completamente independiente del mecanismo de construcción.
+
+*** Ejecución selectiva de bloques Babel
+
+Uno de los problemas encontrados durante el desarrollo fue que =(org-babel-execute-buffer)= ejecuta absolutamente todos los bloques del documento.
+
+Eso produce diversos inconvenientes:
+
+- intenta ejecutar bloques =latex= o =tex=;
+- intenta interpretar resultados que no interesan;
+- aparecen mensajes de error innecesarios.
+
+Por este motivo se adoptó una estrategia distinta.
+
+Los únicos bloques ejecutados automáticamente son aquellos que cumplen simultáneamente:
+
+- son bloques =bash=;
+- poseen el parámetro =build yes= 
+
+Por ejemplo,
+
+#+begin_src text
+ #+begin_src bash :build yes
+ convert Figura.png -trim Figura.png
+#+end_src
+
+Esta decisión convierte el documento Org en una descripción declarativa del proceso de construcción.
+
+** =Makefile.figuras=
+
+La compilación de las figuras no pertenece a Org Babel.
+
+Corresponde a =make=.
+
+Las reglas principales son
+
+#+begin_src dot :file compilacion-figuras.pdf
+digraph G {
+
+    rankdir=LR;
+
+    node [fontname="Helvetica", fontsize=10];
+
+    tex [shape=note];
+    pdf [shape=note];
+    png [shape=note];
+
+    tex -> pdf [label="latexmk", fontsize=10];
+    pdf -> png [label="pdftoppm", fontsize=10];
+}
+#+end_src
+
+#+ATTR_LATEX: :width 0.65\textwidth
+# [[file:compilacion-figuras.pdf]]
+
+
+Para ello se utilizan dos herramientas especializadas.
+
+*** latexmk
+
+La generación del PDF se delega en =latexmk= en lugar de invocar directamente =pdflatex= porque =latexmk=
+
+- ejecuta tantas compilaciones como sean necesarias;
+- detecta automáticamente bibliografías y referencias;
+- constituye la herramienta estándar para automatizar compilaciones LaTeX.
+
+*** pdftoppm
+
+La conversión de PDF a PNG se realiza mediante =pdftoppm= utilizando una resolución suficientemente elevada para obtener imágenes de buena calidad.
+
+Cada fichero =.tex= genera automáticamente un fichero =.png=.
+
+** Responsabilidades de cada componente
+
+El diseño final reparte las responsabilidades del siguiente modo.
+
+| Componente         | Responsabilidad                           |
+|--------------------+-------------------------------------------|
+| documento Org      | describir las figuras                     |
+| Makefile           | coordinar la construcción completa        |
+| compila_figuras.sh | procesar una lección                      |
+| build.el           | tanglar y ejecutar los bloques :build yes |
+| Makefile.figuras   | compilar .tex en .pdf y .png              |
+
+Cada componente tiene una única responsabilidad.
+
+Esta separación facilita enormemente el mantenimiento.
+
+* Uso del sistema
+** Añadir una nueva lección
+
+Incorporar una nueva lección únicamente requiere crear un nuevo subdirectorio que contenga el correspondiente documento Org.
+
+Por ejemplo,
+
+#+begin_src dot :file añadir-estructura.pdf :exports none :eval yes :results silent
+graph G {
+
+    rankdir=TB;
+
+    // Directorios
+    node [shape=folder];
+    img;
+    "S08-Lecc03";
+
+    // Ficheros Org
+    node [shape=component];
+    "figuras-S08-Lecc03.org";
+ 
+    img -- "S08-Lecc03";
+    "S08-Lecc03" -- "figuras-S08-Lecc03.org";
+}
+#+end_src
+
+#+ATTR_LATEX: :width 0.26\textwidth
+[[file:añadir-estructura.pdf]]
+
+
+No es necesario copiar scripts ni modificar ningún fichero de configuración.
+
+La nueva lección será detectada automáticamente por el Makefile, que localizará el nuevo subdirectorio y delegará su procesamiento en =compila_figuras.sh=.
+
+** Compilación incremental
+
+El Makefile principal compara la fecha de modificación del documento Org de cada lección con las imágenes PNG generadas.
+
+Únicamente cuando el documento Org es más reciente (o cuando las imágenes todavía no existen) se invoca =compila_figuras.sh=. De este modo, una ejecución repetida de =make= reconstruye únicamente aquellas lecciones que realmente han cambiado, reduciendo considerablemente el tiempo de construcción del proyecto.
+
+** Limpieza del proyecto
+
+El Makefile principal proporciona dos objetivos auxiliares:
+
+- =make clean=: elimina los directorios =tex/= generados durante la compilación.
+
+- =make distclean=: además de eliminar los directorios =tex/=, borra todos los ficheros generados automáticamente, conservando únicamente los documentos fuente =.org=.
+
+Estos objetivos permiten recuperar fácilmente un árbol de directorios limpio sin perder ninguno de los documentos originales.
+* Conclusiones
+** Ventajas del diseño
+
+La arquitectura presenta varias ventajas importantes.
+
+- No existe código duplicado.
+- Toda la lógica de construcción está centralizada.
+- Cada documento Org contiene únicamente información docente.
+- El sistema puede ampliarse sin modificar la infraestructura.
+- Resulta sencillo cambiar herramientas de compilación (por ejemplo, sustituir =pdflatex= por =lualatex= o modificar la resolución de las imágenes) editando un único fichero.
+- La infraestructura queda claramente separada del contenido.
+- La compilación puede realizarse de forma incremental: únicamente se reconstruyen las lecciones que lo requieren.
+
+En conjunto, el proyecto adopta una filosofía muy próxima a la programación literaria: los documentos Org describen el conocimiento (las figuras y su significado), mientras que la infraestructura de construcción permanece desacoplada y reutilizable para todas las lecciones.
