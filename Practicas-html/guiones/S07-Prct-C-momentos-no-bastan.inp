@@ -1,0 +1,73 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+nulldata 40
+setobs 1 1 --cross-section
+set seed 20250213
+
+scalar n     = $nobs
+scalar mu0   = 1800  # media común objetivo (euros)
+scalar sigma0 = 250  # desviación típica común objetivo (euros)
+
+series A_bruto = normal(0,1)
+series A_z     = (A_bruto - mean(A_bruto)) / sd(A_bruto)
+series A       = mu0 + sigma0 * A_z
+setinfo A -d "Salario mensual, TechNorte (forma simétrica)" -n "TechNorte"
+
+series u1 = normal(0,1)
+series u2 = normal(0,1)
+series B_bruto = u1^2 + u2^2       # suma de cuadrados de normales: fuertemente asimétrica
+series B_z     = (B_bruto - mean(B_bruto)) / sd(B_bruto)
+series B       = mu0 + sigma0 * B_z
+setinfo B -d "Salario mensual, Comercial Sur (asimetría positiva)" -n "Comercial Sur"
+
+series grupo   = (uniform(0,1) < 0.5)          # dos "categorías" de empleados
+series C_bruto = grupo*normal(-3,1) + (1-grupo)*normal(3,1)
+series C_z     = (C_bruto - mean(C_bruto)) / sd(C_bruto)
+series C       = mu0 + sigma0 * C_z
+setinfo C -d "Salario mensual, Industrias Centro (bimodal: dos categorías)" -n "Industrias Centro"
+
+series D_bruto = normal(0,0.3)   # plantilla muy homogénea...
+D_bruto[1] = 15                  # ...salvo un directivo con un salario disparado
+series D_z = (D_bruto - mean(D_bruto)) / sd(D_bruto)
+series D   = mu0 + sigma0 * D_z
+setinfo D -d "Salario mensual, Consultora Este (con un valor atípico)" -n "Consultora Este"
+
+summary A B C D
+
+freq A --plot=display
+freq B --plot=display
+freq C --plot=display
+freq D --plot=display
+
+boxplot A B C D --output=display
+
+printf "%-15s %10s %10s %10s %10s %10s\n", "Empresa", "Media", "Mediana", "SD", "Asimetria", "Curtosis"
+printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "TechNorte",      mean(A), median(A), sd(A), skewness(A), kurtosis(A)
+printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "Comercial Sur",  mean(B), median(B), sd(B), skewness(B), kurtosis(B)
+printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "Ind. Centro",    mean(C), median(C), sd(C), skewness(C), kurtosis(C)
+printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "Consultora Este",mean(D), median(D), sd(D), skewness(D), kurtosis(D)
+
+printf "\nVerificación: medias y sd deberían coincidir (salvo redondeo)\n"
+printf "Media    -> A: %.6f   B: %.6f   C: %.6f   D: %.6f\n", mean(A), mean(B), mean(C), mean(D)
+printf "SD       -> A: %.6f   B: %.6f   C: %.6f   D: %.6f\n", sd(A),   sd(B),   sd(C),   sd(D)
+printf "(objetivo: mu0 = %.2f ,  sigma0 = %.2f)\n", mu0, sigma0
+
+printf "\nChequeo de la estandarización usada en Gretl\n"
+printf "sd(A_z) = %.6f   sd(B_z) = %.6f   sd(C_z) = %.6f   sd(D_z) = %.6f\n", sd(A_z), sd(B_z), sd(C_z), sd(D_z)
+printf "mean(A_z) = %.6f   mean(B_z) = %.6f   mean(C_z) = %.6f   mean(D_z) = %.6f\n", mean(A_z), mean(B_z), mean(C_z), mean(D_z)

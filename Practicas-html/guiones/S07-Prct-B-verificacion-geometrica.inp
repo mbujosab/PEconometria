@@ -1,0 +1,125 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+nulldata 6 --preserve
+set seed 12345
+
+series y = normal(10, 3)
+print y
+
+printf "Suma de (y - mu_y) = %.10f   (debe ser 0)\n", sum(y - mean(y))
+
+scalar mu_y      = mean(y)
+scalar var_n     = sum((y - mu_y)^2) / $nobs        # divisor 1/n (convención del curso)
+scalar mu_y2     = mean(y^2)
+
+printf "mu_y2                = %.6f\n", mu_y2
+printf "mu_y^2 + sigma_y^2   = %.6f   (divisor n)\n", mu_y^2 + var_n
+
+scalar var_n1 = sum((y - mu_y)^2) / ($nobs - 1)     # divisor 1/(n-1)
+printf "mu_y^2 + var(n-1)    = %.6f   (divisor n-1, ya NO coincide con mu_y2)\n", mu_y^2 + var_n1
+
+nulldata 50 --preserve
+set seed 54321
+
+series y_normal = normal(0, 1)
+series u1 = normal(0,1)
+series u2 = normal(0,1)
+series y_chi2 = u1^2 + u2^2      # marcadamente asimétrica
+
+# --- y_normal ---
+scalar mu_normal    = mean(y_normal)
+scalar var_normal   = sum((y_normal - mu_normal)^2) / $nobs
+scalar ortog_normal = sum(y_normal - mu_normal)
+scalar pitag_normal = mean(y_normal^2) - (mu_normal^2 + var_normal)
+printf "%-10s -> ortogonalidad: %.10f    Pitágoras (desajuste): %.10f\n", "y_normal", ortog_normal, pitag_normal
+
+# --- y_chi2 ---
+scalar mu_chi2    = mean(y_chi2)
+scalar var_chi2   = sum((y_chi2 - mu_chi2)^2) / $nobs
+scalar ortog_chi2 = sum(y_chi2 - mu_chi2)
+scalar pitag_chi2 = mean(y_chi2^2) - (mu_chi2^2 + var_chi2)
+printf "%-10s -> ortogonalidad: %.10f    Pitágoras (desajuste): %.10f\n", "y_chi2", ortog_chi2, pitag_chi2
+
+loop foreach i y_normal y_chi2 --quiet
+    scalar mu    = mean($i)
+    scalar var_n = sum(($i - mu)^2) / $nobs
+    scalar ortog = sum($i - mu)
+    scalar pitag = mean($i^2) - (mu^2 + var_n)
+    printf "%-10s -> ortogonalidad: %.10f    Pitágoras (desajuste): %.10f\n", "$i", ortog, pitag
+endloop
+
+nulldata 100 --preserve
+set seed 11223
+
+series x = uniform(0, 10)
+series u = normal(0, 2)
+series y = 2 + 3*x + u
+
+scalar x_c_dot_y_c = sum((x - mean(x)) * (y - mean(y)))
+scalar cov_manual  = x_c_dot_y_c / $nobs
+
+printf "Covarianza \"a mano\" (divisor n) = %.6f\n", cov_manual
+printf "cov(x,y) de Gretl (divisor n-1)  = %.6f\n", cov(x,y)
+
+scalar norma_x = sqrt(sum((x - mean(x))^2))
+scalar norma_y = sqrt(sum((y - mean(y))^2))
+scalar coseno  = x_c_dot_y_c / (norma_x * norma_y)
+
+printf "cos(theta) \"a mano\" = %.6f\n", coseno
+printf "corr(x,y) de Gretl  = %.6f\n", corr(x,y)
+
+nulldata 30 --preserve
+set seed 987654
+
+scalar R = 500
+scalar max_dev_ortog = 0
+scalar max_dev_pitag = 0
+scalar max_dev_rho   = 0
+
+loop R --quiet
+    series y_loop = normal(0,1) + (uniform(0,1) < 0.1) * normal(5,1)
+    series x_loop = uniform(0,10)
+
+    scalar mu_loop   = mean(y_loop)
+    scalar var_loop  = sum((y_loop - mu_loop)^2) / $nobs
+
+    scalar dev_ortog = abs(sum(y_loop - mu_loop))
+    scalar dev_pitag = abs(mean(y_loop^2) - (mu_loop^2 + var_loop))
+
+    scalar dp_loop    = sum((x_loop-mean(x_loop))*(y_loop-mu_loop))
+    scalar norma_xl   = sqrt(sum((x_loop-mean(x_loop))^2))
+    scalar norma_yl   = sqrt(sum((y_loop-mu_loop)^2))
+    scalar coseno_l   = dp_loop / (norma_xl*norma_yl)
+    scalar dev_rho    = abs(coseno_l - corr(x_loop,y_loop))
+
+    if dev_ortog > max_dev_ortog
+        max_dev_ortog = dev_ortog
+    endif
+    if dev_pitag > max_dev_pitag
+        max_dev_pitag = dev_pitag
+    endif
+    if dev_rho > max_dev_rho
+        max_dev_rho = dev_rho
+    endif
+endloop
+
+printf "\nTras %d repeticiones, cada una con una muestra nueva:\n", R
+printf "  Desviación MÁXIMA ortogonalidad    : %.10f\n", max_dev_ortog
+printf "  Desviación MÁXIMA Pitágoras        : %.10f\n", max_dev_pitag
+printf "  Desviación MÁXIMA rho = cos(theta) : %.10f\n", max_dev_rho

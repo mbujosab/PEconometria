@@ -1,0 +1,83 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+open hprice2.gdt --quiet
+setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+setinfo rooms -d "Número medio de habitaciones" -n "Habitaciones"
+setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
+
+summary price rooms nox
+
+corr price rooms nox
+
+printf "Cov(price,rooms)  = %.4f    Corr(price,rooms) = %.4f\n", cov(price,rooms), corr(price,rooms)
+printf "Cov(price,nox)    = %.4f    Corr(price,nox)   = %.4f\n", cov(price,nox), corr(price,nox)
+printf "Cov(rooms,nox)    = %.4f    Corr(rooms,nox)   = %.4f\n", cov(rooms,nox), corr(rooms,nox)
+
+gnuplot price rooms --output=display
+gnuplot price nox --output=display
+gnuplot rooms nox --output=display
+
+series price_c = price - mean(price)
+series rooms_c = rooms - mean(rooms)
+series nox_c   = nox   - mean(nox)
+
+printf "Suma price_c = %.10f\n", sum(price_c)
+printf "Suma rooms_c = %.10f\n", sum(rooms_c)
+printf "Suma nox_c   = %.10f\n", sum(nox_c)
+
+scalar dp_pr       = sum(price_c * rooms_c)
+scalar norma_price = sqrt(sum(price_c^2))
+scalar norma_rooms = sqrt(sum(rooms_c^2))
+scalar coseno_pr   = dp_pr / (norma_price * norma_rooms)
+
+scalar rad2deg  = 180/3.14159265358979
+scalar theta_pr = acos(coseno_pr) * rad2deg
+
+printf "cos(theta) price-rooms (a mano) = %.6f\n", coseno_pr
+printf "corr(price,rooms) de Gretl      = %.6f\n", corr(price,rooms)
+printf "Ángulo price-rooms = %.2f grados\n", theta_pr
+
+scalar norma_nox = sqrt(sum(nox_c^2))
+
+scalar dp_pn = sum(price_c * nox_c)
+scalar coseno_pn = dp_pn / (norma_price * norma_nox)
+scalar theta_pn = acos(coseno_pn) * rad2deg
+printf "cos(theta) price-nox = %.6f  (ángulo = %.2f grados)\n", coseno_pn, theta_pn
+
+scalar dp_rn = sum(rooms_c * nox_c)
+scalar coseno_rn = dp_rn / (norma_rooms * norma_nox)
+scalar theta_rn = acos(coseno_rn) * rad2deg
+printf "cos(theta) rooms-nox = %.6f  (ángulo = %.2f grados)\n", coseno_rn, theta_rn
+
+scalar n = $nobs
+
+scalar cov_hat_n    = sum(price_c*rooms_c)/n
+scalar var_price_n  = sum(price_c^2)/n
+scalar var_rooms_n  = sum(rooms_c^2)/n
+scalar rho_dividiendo_n = cov_hat_n / sqrt(var_price_n*var_rooms_n)
+
+scalar cov_hat_n1   = sum(price_c*rooms_c)/(n-1)
+scalar var_price_n1 = sum(price_c^2)/(n-1)
+scalar var_rooms_n1 = sum(rooms_c^2)/(n-1)
+scalar rho_dividiendo_n1 = cov_hat_n1 / sqrt(var_price_n1*var_rooms_n1)
+
+printf "rho sin dividir (Actividad 4) = %.6f\n", coseno_pr
+printf "rho dividiendo por n          = %.6f\n", rho_dividiendo_n
+printf "rho dividiendo por (n-1)      = %.6f\n", rho_dividiendo_n1
+printf "rho de Gretl (corr)           = %.6f\n", corr(price,rooms)
