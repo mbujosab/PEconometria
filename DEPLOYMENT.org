@@ -24,6 +24,7 @@ Esta separación evita mezclar en el historial de =main= cambios de
 contenido con cambios puramente mecánicos de regeneración, y mantiene el
 repositorio ligero.
 
+
 * Estructura de directorios (resumen)
 
 | Ruta                                   | Contenido                                                                    | ¿Se versiona en =main=?                                                        |
@@ -45,6 +46,7 @@ repositorio ligero.
 paso *intermedio* hacia las diapositivas reveal.js (=nbconvert --to
 slides=); no se publican como cuaderno descargable. Solo se publican
 como =.ipynb= los de =CuadernosElectronicos/=.
+
 
 * Estrategia B (actual): build local + despliegue manual
 
@@ -87,6 +89,8 @@ quedar reducido a fuentes y ficheros de configuración.
 tangla + ejecuta los guiones de Gretl de las prácticas. También genera
 =index.html= a partir de =index.org=.
 
+# +include: ./makefile src makefile
+
 *** Por qué las reglas de PDF de =org-pract= ejecutan el buffer antes de exportar
 
 Las reglas =%.pdf= y =%.html= de =org-pract/= dependen de un fichero
@@ -107,6 +111,7 @@ sin re-ejecutar antes ese preámbulo, las variables nunca se fijarían
 en /ese/ proceso y los recuadros de código saldrían vacíos, aunque el
 PDF se genere sin error alguno (véase "Incidentes conocidos", más
 abajo, para la anécdota completa de cómo se detectó esto).
+
 
 ** Preparar la rama =gh-pages= (una sola vez, ya hecho)
 
@@ -205,9 +210,11 @@ Emacs. Para el PDF se resuelve mapeándolo al más parecido disponible,
 en el preámbulo de cada práctica. Si algún día aparece un lexer real
 para gretl en Pygments, basta con sustituir esa línea.
 
+
 ** Publicar en GitHub Pages
 
 /Settings → Pages → Source: Deploy from a branch → =gh-pages= / =(root)=/.
+
 
 * Estrategia A (futura, si se desea automatizar con CI)
 
@@ -339,6 +346,7 @@ jobs:
 =.github/workflows/=, p. ej. en este mismo =DEPLOYMENT.org=) para que no
 se ejecute hasta que se decida activarlo conscientemente.
 
+
 * Incidentes conocidos y lecciones aprendidas
 
 - =.gitignore= no protege de =git clean -fdx=: la opción =-x= ignora
@@ -378,3 +386,425 @@ se ejecute hasta que se decida activarlo conscientemente.
   conocidas") en lugar de como bug pendiente, dado el coste/beneficio
   de seguir investigando frente al hecho de que el PDF ya muestra el
   código correctamente resaltado.
+
+
+* Árboles de ficheros en las ramas de GitHub
+** Árbol final en =main=
+
+#+begin_src text
+PEconometria/
+├── README.org
+├── LICENSE                       (CC BY-SA 4.0 — contenido)
+├── LICENSE-CODE                  (GPL v3 — scripts)
+├── DEPLOYMENT.org                (nuevo: diseño del build/despliegue)
+├── .gitignore
+├── makefile
+├── mycfg-GitHubPages.py
+├── requirements.txt
+├── index.org                     (stub; diseño pendiente, a hacer juntos)
+├── css/
+│   ├── readtheorg_inline.theme
+│   └── bigblow_inline.theme
+├── data/
+│   └── boston.csv
+├── org-lessons/
+│   ├── 00preambulo_lecciones.txt
+│   ├── S01-Lecc01.org
+│   ├── S02-Lecc02.org
+│   ├── S03-Lecc03.org
+│   ├── S05-Lecc04.org
+│   ├── S06-Lecc05.org
+│   └── img/
+│       ├── S02-Lecc02/*.png
+│       ├── S03-Lecc03/*.png
+│       ├── S05-Lecc04/*.png
+│       └── S06-Lecc05/*.png
+├── org-pract/
+│   ├── 00preambulo_practicas.txt
+│   ├── S04-Prct-A-hprice2.org
+│   ├── S04-Prct-B-boston.org
+│   └── guiones/                  ← generado por tangle, NO versionado
+└── CuadernosElectronicos/
+    └── S05-Notebook01.org
+#+end_src
+
+** Árbol final en =gh-pages=
+
+#+begin_src text
+gh-pages/
+├── index.html
+├── requirements.txt
+├── Transparencias/
+│   └── SXX-LeccYY.slides.html
+├── Lecciones-html/
+│   └── SXX-LeccYY.html
+├── Lecciones-pdf/
+│   └── SXX-LeccYY.pdf
+├── Practicas-html/
+│   ├── SYY-Prct-X-data.html
+│   └── guiones/
+│       └── SYY-Prct-X-data.inp
+├── Practicas-pdf/
+│   └── SYY-Prct-X-data.pdf
+└── CuadernosElectronicos/
+    └── SXX-NotebookYY.ipynb      ← nativos de CuadernosElectronicos/
+#+end_src
+
+
+* COMMENT Guiones de configuración
+
+** Seguimiento de ficheros (=.gitignore=)
+
+#+begin_src gitignore :tangle .gitignore
+# Emacs
+*~
+\#*\#
+.\#*
+auto/
+
+# LaTeX (residuos de compilación)
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Salidas generadas por el Makefile (solo viven en gh-pages)
+org-lessons/*.pdf
+org-lessons/*.tex
+org-lessons/*.html
+org-lessons/*.ipynb
+org-lessons/*.slides.html
+org-lessons/img/*/*.png
+org-lessons/img/*/tex
+org-pract/*.pdf
+org-pract/*.tex
+org-pract/*.html
+org-pract/.stamps/
+org-pract/guiones
+CuadernosElectronicos/*.ipynb
+index.html
+
+# Jupyter / Python
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+
+# Worktree local para desplegar a gh-pages
+/_ghpages/
+
+# Sistema
+.DS_Store
+
+#
+doc/
+#+end_src
+
+** Despliegue del material y publicación en GitHub
+*** =makefile=
+
+# :tangle makefile
+#+BEGIN_SRC makefile :noweb no-export :results silent :eval no
+# ==================== Configuración general ====================
+EMACS       ?= emacs
+SCIMAX_INIT ?= $(HOME)/Software/scimax/init.el
+EMACS_BATCH := $(EMACS) --batch --load "$(SCIMAX_INIT)"
+
+LESSONS_DIR   := org-lessons
+LESSONS_IMG_DIR := $(LESSONS_DIR)/img
+CUADERNOS_DIR := CuadernosElectronicos
+PRACT_DIR     := org-pract
+
+# ---- org-lessons: pdf, html, ipynb y slides reveal.js ----
+LESSONS_ORG    := $(wildcard $(LESSONS_DIR)/*.org)
+LESSONS_PDF    := $(LESSONS_ORG:.org=.pdf)
+LESSONS_HTML   := $(LESSONS_ORG:.org=.html)
+LESSONS_IPYNB  := $(LESSONS_ORG:.org=.ipynb)
+LESSONS_SLIDES := $(LESSONS_ORG:.org=.slides.html)
+
+# ficheros auxiliares que deja la exportación LaTeX
+LESSONS_TEXAUX := $(LESSONS_ORG:.org=.tex) $(LESSONS_ORG:.org=.aux) \
+                   $(LESSONS_ORG:.org=.log) $(LESSONS_ORG:.org=.out) \
+                   $(LESSONS_ORG:.org=.toc)
+
+# ---- CuadernosElectronicos: solo ipynb ----
+CUADERNOS_ORG   := $(wildcard $(CUADERNOS_DIR)/*.org)
+CUADERNOS_IPYNB := $(CUADERNOS_ORG:.org=.ipynb)
+
+# ---- org-pract: tangle .inp -> ejecutar gretl -> pdf, html ----
+PRACT_ORG    := $(wildcard $(PRACT_DIR)/*.org)
+PRACT_PDF    := $(PRACT_ORG:.org=.pdf)
+PRACT_HTML   := $(PRACT_ORG:.org=.html)
+PRACT_STAMPS := $(PRACT_DIR)/.stamps
+PRACT_GUIONES := $(PRACT_DIR)/guiones
+
+# directorios de salida que gretl crea junto a cada .org de prácticas
+# (mismo nombre que el .org, sin extensión)
+PRACT_OUTDIRS := $(PRACT_ORG:.org=)
+
+PRACT_TEXAUX := $(PRACT_ORG:.org=.tex) $(PRACT_ORG:.org=.aux) \
+                 $(PRACT_ORG:.org=.log) $(PRACT_ORG:.org=.out) \
+                 $(PRACT_ORG:.org=.toc)
+
+.PHONY: all lessons cuadernos pract clean figures
+
+all: lessons cuadernos pract index
+
+lessons:   figures $(LESSONS_PDF) $(LESSONS_HTML) $(LESSONS_IPYNB) $(LESSONS_SLIDES)
+cuadernos: $(CUADERNOS_IPYNB)
+pract:     $(PRACT_PDF) $(PRACT_HTML)
+
+# ==================== figuras ====================
+
+# Recursive make: el makefile de img/ decide él solo (por timestamps
+# .org vs .png) si algo necesita regenerarse. Lo invocamos siempre como
+# prerrequisito de las lecciones para no tener que duplicar esa lógica
+# aquí.
+figures:
+	$(MAKE) -C $(LESSONS_IMG_DIR) all
+
+# ==================== org-lessons ====================
+# Prerrequisito de orden ("| figures") también en las reglas de patrón,
+# por si algún día se invoca "make org-lessons/S01-Lecc01.pdf" a mano
+# sin pasar por el target "lessons".
+$(LESSONS_DIR)/%.pdf: $(LESSONS_DIR)/%.org | figures
+	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-latex-export-to-pdf))'
+
+$(LESSONS_DIR)/%.html: $(LESSONS_DIR)/%.org | figures
+	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-html-export-to-html))'
+
+$(LESSONS_DIR)/%.ipynb: $(LESSONS_DIR)/%.org | figures
+	$(EMACS_BATCH) --eval \
+	  '(progn (require (quote ox-ipynb)) (find-file "$<") (ox-ipynb-export-to-ipynb-file))'
+
+$(LESSONS_DIR)/%.slides.html: $(LESSONS_DIR)/%.ipynb
+	cd $(LESSONS_DIR) && jupyter nbconvert \
+	    --config ../mycfg-GitHubPages.py \
+	    --to slides \
+	    --reveal-prefix "https://unpkg.com/reveal.js@5.2.1" \
+	    --execute $(notdir $<)
+
+# ==================== CuadernosElectronicos ====================
+$(CUADERNOS_DIR)/%.ipynb: $(CUADERNOS_DIR)/%.org
+	$(EMACS_BATCH) --eval \
+	  '(progn (require (quote ox-ipynb)) (find-file "$<") (ox-ipynb-export-to-ipynb-file))'
+
+# ==================== org-pract ====================
+$(PRACT_GUIONES):
+	mkdir -p $@
+
+$(PRACT_STAMPS):
+	mkdir -p $@
+
+$(PRACT_STAMPS)/%.tangled: $(PRACT_DIR)/%.org | $(PRACT_STAMPS) $(PRACT_GUIONES)
+	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-babel-tangle))'
+	touch $@
+
+$(PRACT_STAMPS)/%.executed: $(PRACT_STAMPS)/%.tangled $(PRACT_GUIONES)
+	$(EMACS_BATCH) --eval '(progn (find-file "$(PRACT_DIR)/$*.org") (org-babel-execute-buffer))'
+	touch $@
+
+# IMPORTANTE: hay que volver a ejecutar el buffer (no solo find-file)
+# en el MISMO proceso de Emacs que exporta a PDF. El preámbulo de cada
+# .org de prácticas fija variables Elisp (org-latex-minted-langs,
+# org-latex-pdf-process, org-latex-listings) necesarias para que
+# minted resalte correctamente el código "gretl" (mapeado al lexer
+# "octave" de Pygments). Esas variables solo existen mientras vive el
+# proceso Emacs que las fijó: si se exporta en un proceso batch nuevo
+# (como haría "find-file + org-latex-export-to-pdf" a secas), el
+# preámbulo nunca se ejecuta ahí y los recuadros de código salen
+# vacíos, aunque el PDF se genere sin error.
+$(PRACT_DIR)/%.pdf: $(PRACT_STAMPS)/%.executed $(PRACT_GUIONES)
+	$(EMACS_BATCH) --eval '(progn (find-file "$(PRACT_DIR)/$*.org") (org-babel-execute-buffer) (org-latex-export-to-pdf))'
+
+$(PRACT_DIR)/%.html: $(PRACT_STAMPS)/%.executed $(PRACT_GUIONES)
+	$(EMACS_BATCH) --eval '(progn (find-file "$(PRACT_DIR)/$*.org") (org-babel-execute-buffer) (org-html-export-to-html))'
+
+clean:
+	rm -f $(LESSONS_PDF) $(LESSONS_HTML) $(LESSONS_IPYNB) $(LESSONS_SLIDES)
+	rm -f $(LESSONS_TEXAUX)
+	find $(LESSONS_DIR) -maxdepth 1 -type d -name '_minted-*' -exec rm -rf {} +
+	rm -f $(CUADERNOS_IPYNB)
+	rm -f $(PRACT_PDF) $(PRACT_HTML)
+	rm -f $(PRACT_TEXAUX)
+	find $(PRACT_DIR) -maxdepth 1 -type d -name '_minted-*' -exec rm -rf {} +
+	rm -rf $(PRACT_GUIONES)
+	rm -rf $(PRACT_STAMPS)
+	rm -rf $(PRACT_OUTDIRS)
+	$(MAKE) -C $(LESSONS_IMG_DIR) distclean
+
+# ==================== index.org (portada de gh-pages) ====================
+INDEX_ORG  := index.org
+INDEX_HTML := index.html
+
+.PHONY: index
+index: $(INDEX_HTML)
+
+$(INDEX_HTML): $(INDEX_ORG)
+	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-html-export-to-html))'
+#+END_SRC
+
+*** =deploy-gh-pages.sh=
+
+#+begin_src sh :tangle deploy-gh-pages.sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- Ubicación fija: este script vive siempre en la raíz de "main" ---
+REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+DEST="$REPO_ROOT/_ghpages"
+
+cd "$REPO_ROOT"
+
+# --- Salvaguardas ---
+MAIN_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$MAIN_BRANCH" = "gh-pages" ]; then
+    echo "ERROR: estás en la rama 'gh-pages' en $REPO_ROOT. ¿Seguro que" >&2
+    echo "       este es el checkout de 'main'? Abortando." >&2
+    exit 1
+fi
+
+if [ ! -e "$DEST/.git" ]; then
+    echo "ERROR: $DEST no existe o no es un worktree git válido." >&2
+    echo "       Crea el worktree con:" >&2
+    echo "       git worktree add _ghpages gh-pages" >&2
+    exit 1
+fi
+
+WT_BRANCH=$(git -C "$DEST" rev-parse --abbrev-ref HEAD)
+if [ "$WT_BRANCH" != "gh-pages" ]; then
+    echo "ERROR: $DEST está en la rama '$WT_BRANCH', no 'gh-pages'. Abortando." >&2
+    exit 1
+fi
+
+echo "Repo principal (main): $REPO_ROOT"
+echo "Destino (gh-pages):    $DEST"
+echo "-- OK, desplegando --"
+
+# --- Limpieza confinada al worktree: SIN -x, nunca toca ignorados ---
+git -C "$DEST" rm -rf --ignore-unmatch . >/dev/null
+git -C "$DEST" clean -fd
+
+mkdir -p "$DEST"/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos}
+
+find org-lessons -maxdepth 1 -name '*.slides.html'                  -exec cp {} "$DEST"/Transparencias/ \;
+find org-lessons -maxdepth 1 -name '*.html' ! -name '*.slides.html' -exec cp {} "$DEST"/Lecciones-html/ \;
+find org-lessons -maxdepth 1 -name '*.pdf'                          -exec cp {} "$DEST"/Lecciones-pdf/ \;
+
+# Figuras: tanto el HTML como los slides referencian img/<subcarpeta>/*.png
+# con ruta relativa a org-lessons/. Sin esto no se ve ninguna figura.
+cp -r org-lessons/img "$DEST"/Lecciones-html/
+cp -r org-lessons/img "$DEST"/Transparencias/
+
+find org-pract -maxdepth 1 -name '*.html'        -exec cp {} "$DEST"/Practicas-html/ \;
+find org-pract -maxdepth 1 -name '*.pdf'         -exec cp {} "$DEST"/Practicas-pdf/ \;
+find org-pract/guiones -maxdepth 1 -name '*.inp' -exec cp {} "$DEST"/Practicas-html/guiones/ \;
+
+# Salida de gretlcli por práctica (gráficos, estimaciones, etc.): una
+# carpeta por cada .org de org-pract, mismo nombre sin extensión.
+# "guiones" no es una de ellas (ya se copia aparte, arriba).
+for d in org-pract/*/; do
+    nombre=$(basename "$d")
+    [ "$nombre" = "guiones" ] && continue
+    cp -r "$d" "$DEST"/Practicas-html/
+done
+
+find CuadernosElectronicos -maxdepth 1 -name '*.ipynb' -exec cp {} "$DEST"/CuadernosElectronicos/ \;
+
+cp index.html "$DEST"/
+cp requirements.txt "$DEST"/
+touch "$DEST"/.nojekyll
+
+cd "$DEST"
+git add -A
+git commit -m "Actualiza material generado ($(date +%F))"
+git push origin gh-pages
+#+end_src
+
+(=chmod +x deploy-gh-pages.sh= tras crearlo.)
+
+** Licencia del proyecto (dual, lecciones -- código)
+
+=LICENSE= (raíz, cubre apuntes/transparencias/figuras):
+
+#+begin_src text :tangle LICENSE
+Principios de Econometría — apuntes y materiales docentes
+Copyright (C) Marcos Bujosa
+
+Este contenido (apuntes, transparencias, figuras y texto en general) se
+distribuye bajo la licencia:
+
+    Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+
+Resumen legible:      https://creativecommons.org/licenses/by-sa/4.0/deed.es
+Texto legal completo: https://creativecommons.org/licenses/by-sa/4.0/legalcode.es
+
+Los scripts de código (guiones de Gretl en *.inp y el código incluido en los
+cuadernos Jupyter) se distribuyen bajo una licencia distinta: véase LICENSE-CODE
+(GNU GPL v3).
+#+end_src
+
+=LICENSE-CODE= (raíz, cubre =org-pract/guiones/*.inp= y código Python/Jupyter):
+
+#+begin_src text :tangle LICENSE-CODE
+Los scripts de Gretl (org-pract/guiones/*.inp) y el código fuente incluido en
+los cuadernos Jupyter de este repositorio se distribuyen bajo licencia:
+
+    GNU General Public License v3.0 (GPL-3.0)
+
+Texto legal completo: https://www.gnu.org/licenses/gpl-3.0.txt
+
+    Copyright (C) Marcos Bujosa
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <https://www.gnu.org/licenses/>.
+#+end_src
+
+(GitHub detecta automáticamente el =LICENSE= de la raíz como CC-BY-SA-4.0 para el badge del repo; =LICENSE-CODE= queda como referencia explícita, enlazada desde el README.)
+
+** Configuración de transparencias Reveals.js (=mycfg-GitHubPages.py=)
+
+Esta es la configuración para convertir los Notebooks de Jupyter en slides:
+#+BEGIN_SRC python :tangle mycfg-GitHubPages.py
+c = get_config()
+
+c.SlidesExporter.reveal_theme = 'solarized'
+c.SlidesExporter.reveal_scroll = True
+c.SlidesExporter.language_code = 'es'
+
+c.SlidesExporter.mathjax_url = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"
+
+c.SlidesExporter.jquery_url = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+
+c.SlidesExporter.require_js_url = "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"
+#+END_SRC
+
+- [[https://nbconvert.readthedocs.io/en/latest/config_options.html][Configuración para nbconvert]] (las slides usan ficheros de la web para poder funcionar en GitHubPages)
+- [[https://dbafromthecold.com/2021/02/21/creating-presentations-with-reveal-and-github-pages/][creating-presentations-with-reveal-and-github-pages]]
+- https://github.com/RichardAfolabi/Presentation_js
+- https://emasuriano.com/til/2024-07-01-create-presentations-from-notebook/
+- https://github.com/yjwen/org-reveal
+- https://github.com/hexmode/ox-reveal
+
+** Configuración para MyBinder (=requirements.txt=)
+
+#+BEGIN_SRC text :noweb no-export :results silent :tangle requirements.txt :eval no
+numpy
+plotly>=5.0
+nbformat>=4.2.0
+#+END_SRC
+

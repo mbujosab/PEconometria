@@ -1,0 +1,330 @@
+#+Title: Sesión 7 (A) --- Correlación como coseno: verificación geométrica con hprice2
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil 
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}          % para fuentes Unicode
+#+LATEX_HEADER: \usepackage{lmodern}           % o mejor, define una fuente explícita
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman} % o cualquier otra que quieras
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{} % opciones específicas si quieres
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+# ###########
+# ESTO DA EL FORMATO FINAL DE LA PÁGINA WEB VÉASE [[https://olmon.gitlab.io/org-themes/]]
+#+SETUPFILE: ../css/bigblow_inline.theme
+# ###########
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+
+;; Mapear el lenguaje "gretl" de tus bloques #+begin_src gretl
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+
+;; minted necesita -shell-escape en la cadena de compilación
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L07-A-hprice2
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S07-Prct-A-hprice2"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica 
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S07-Prct-A-hprice2.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S07-Prct-A-hprice2.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+En las lecciones 4 y 5 vimos que la media se obtiene mediante una proyección ortogonal, la desviación típica es una norma, la covarianza es un producto escalar de vectores centrados (es decir, vectores en desviaciones respecto a su media) y —el resultado central de la lección 5— que la correlación $\rho_{\boldsymbol{x}\boldsymbol{y}}$ es el /coseno del ángulo/ entre los vectores en desviaciones. Todo eso se demostró con álgebra. Hoy lo /verificamos con datos reales/: calcularemos $\rho$ con el comando de Gretl y, por otro lado, ``a mano'', construyendo el producto escalar y las normas con instrucciones de Gretl, para comprobar que ambos caminos dan exactamente el mismo número.
+
+Retomamos =hprice2= (práctica de la sesión con Gretl anterior) y las mismas tres variables ya etiquetadas: =price=, =rooms=, =nox=.
+
+/Objetivo/
+
+1. Repasar estadísticos descriptivos de varias variables a la vez.
+2. Calcular covarianzas y correlaciones entre pares de variables.
+3. Visualizar la relación mediante diagramas de dispersión.
+4. Verificar numéricamente que $\rho=\cos\theta$ entre los vectores /centrados/ (es decir, en desviaciones).
+5. Interpretar el signo y la magnitud de $\rho$ en términos del ángulo entre vectores en desviaciones.
+
+* Actividad 1 - Recordatorio: datos y estadísticos descriptivos
+
+Abrimos de nuevo =hprice2= y recuperamos las etiquetas de la práctica anterior.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Reapertura y etiquetas
+#+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+open hprice2.gdt --quiet
+setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+setinfo rooms -d "Número medio de habitaciones" -n "Habitaciones"
+setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
+#+end_src
+#+latex: }
+
+- Recuerde los estadísticos descriptivos:
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Recordatorio summary
+#+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+summary price rooms nox
+#+end_src
+#+latex: }
+
+* Actividad 2 - Covarianzas y correlaciones
+
+- En la ventana principal de Gretl, marque =price=, =rooms= y =nox= (con ~Ctrl~), ``pinche'' con el botón derecho y seleccione */~Matriz de correlación~/*.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en línea de comandos/:
+    #+NAME: Matriz de correlacion
+    #+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+corr price rooms nox
+    #+end_src
+  #+latex: }
+
+- Calculemos también, por separado, la covarianza y la correlación de cada par de variables (funciones =cov()= y =corr()= de Gretl)[fn::Fíjese que =corr(x,y)= de Gretl es la implementación numérica del mismo coeficiente de correlación \(\rho_{\boldsymbol{x}\boldsymbol{y}}\) definido en la lección 5; aunque =cov(x,y)= no es la implementación exacta de la covarianza \(\sigma_{\boldsymbol{x}\boldsymbol{y}}\) pues Gretl divide internamente por $n-1$ (en lugar de por $n$).]:
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /en línea de comandos/:
+    #+NAME: Cov y corr por pares
+    #+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+printf "Cov(price,rooms)  = %.4f    Corr(price,rooms) = %.4f\n", cov(price,rooms), corr(price,rooms)
+printf "Cov(price,nox)    = %.4f    Corr(price,nox)   = %.4f\n", cov(price,nox), corr(price,nox)
+printf "Cov(rooms,nox)    = %.4f    Corr(rooms,nox)   = %.4f\n", cov(rooms,nox), corr(rooms,nox)
+    #+end_src
+  #+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Antes de mirar el resultado: por argumentos económicos, ¿qué signo esperaría en cada uno de los tres pares?/
+#+latex: }
+
+
+* Actividad 3 - Diagramas de dispersión
+
+- Marque dos variables a la vez (p. ej. =price= y =rooms=), ``pinche'' con el botón derecho y seleccione */~Gráfico X-Y~/*.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en línea de comandos/:
+    #+NAME: Diagramas de dispersion
+    #+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+gnuplot price rooms --output=display
+gnuplot price nox --output=display
+gnuplot rooms nox --output=display
+    #+end_src
+  #+latex: }
+
+Compare la ``forma'' de cada nube de puntos (más o menos alargada y ``alineada'' alrededor de la recta mostrada en cada figura[fn::que, como veremos en la próxima lección, se llama ``recta de regresión'']) con el valor numérico de $\rho$ obtenido en la Actividad 2.
+
+* Actividad 4 - Verificación geométrica: la correlación como coseno
+
+Vamos a reconstruir, con instrucciones de Gretl, exactamente lo que hicimos con lápiz y papel en la lección 5: centrar los vectores (i.e., restarles su media), comprobar que son ortogonales a $\boldsymbol{1}$, calcular su producto escalar y sus normas, y formar el coseno del ángulo.
+
+*** Vectores centrados
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Vectores centrados
+#+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+series price_c = price - mean(price)
+series rooms_c = rooms - mean(rooms)
+series nox_c   = nox   - mean(nox)
+#+end_src
+#+latex: }
+
+*** Comprobación de ortogonalidad con $\boldsymbol{1}$
+La media de cada vector centrado debe ser (esencialmente) cero, es decir, sus valores debe sumar cero (salvo por errores de redondeo). Por tanto, ``cada vector centrado debe ser ortogonal a $\boldsymbol{1}$'':
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Comprobacion de ortogonalidad
+#+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+printf "Suma price_c = %.10f\n", sum(price_c)
+printf "Suma rooms_c = %.10f\n", sum(rooms_c)
+printf "Suma nox_c   = %.10f\n", sum(nox_c)
+#+end_src
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Los valores no serán exactamente cero por errores de redondeo en coma flotante, pero deben ser insignificantes (del orden de $10^{-10}$ o menores)./
+#+latex: }
+
+*** El coseno del ángulo entre los datos en desviaciones (par price-rooms)
+Producto escalar y normas ``a mano'' (sin dividir por ningún $n$, es decir, con el producto escalar y la norma /euclídeos/):
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Coseno price-rooms
+#+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+scalar dp_pr       = sum(price_c * rooms_c)
+scalar norma_price = sqrt(sum(price_c^2))
+scalar norma_rooms = sqrt(sum(rooms_c^2))
+scalar coseno_pr   = dp_pr / (norma_price * norma_rooms)
+
+scalar rad2deg  = 180/3.14159265358979
+scalar theta_pr = acos(coseno_pr) * rad2deg
+
+printf "cos(theta) price-rooms (a mano) = %.6f\n", coseno_pr
+printf "corr(price,rooms) de Gretl      = %.6f\n", corr(price,rooms)
+printf "Ángulo price-rooms = %.2f grados\n", theta_pr
+#+end_src
+#+latex: }
+
+(/Usamos =acos()=, la función arcocoseno de Gretl, que devuelve el ángulo en radianes; por eso multiplicamos por \(180/\pi\) para pasarlo a grados./)
+
+Compruebe que =coseno_pr= y =corr(price,rooms)= coinciden.
+
+*** Repetimos para los otros dos pares
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Coseno price-nox y rooms-nox
+#+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+scalar norma_nox = sqrt(sum(nox_c^2))
+
+scalar dp_pn = sum(price_c * nox_c)
+scalar coseno_pn = dp_pn / (norma_price * norma_nox)
+scalar theta_pn = acos(coseno_pn) * rad2deg
+printf "cos(theta) price-nox = %.6f  (ángulo = %.2f grados)\n", coseno_pn, theta_pn
+
+scalar dp_rn = sum(rooms_c * nox_c)
+scalar coseno_rn = dp_rn / (norma_rooms * norma_nox)
+scalar theta_rn = acos(coseno_rn) * rad2deg
+printf "cos(theta) rooms-nox = %.6f  (ángulo = %.2f grados)\n", coseno_rn, theta_rn
+#+end_src
+#+latex: }
+
+* Actividad 5 - Síntesis: signo y magnitud como ángulo
+
+Recordando la lección 5: $\rho\approx1$ corresponde a vectores en desviaciones casi /alineados/ (ángulo pequeño); $\rho\approx-1$, a vectores casi alineados pero en /sentidos opuestos/ (ángulo cercano a $180^o$); $\rho\approx0$, a vectores casi /ortogonales/ (ángulo cercano a $90^o$).
+
+De los tres pares calculados, ¿cuál tiene el ángulo más cercano a $90^o$? ¿Qué le dice eso sobre la relación (lineal) entre esas dos variables?
+
+* Apéndice - ¿Importa dividir entre $n$, entre $n-1$, o no dividir?
+
+En la Actividad 4 no dividimos por ningún $n$: usamos directamente el producto escalar y la norma /euclídeos/ (sin el factor $1/n$ de la lección 4), y aun así el coseno obtenido coincidió con =corr()=. Esto no es casualidad: al ser un /cociente/, cualquier factor común que multiplique por igual al numerador y ambas normas se cancela. Comprobémoslo explícitamente, calculando $\rho$ de tres formas distintas:
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Invarianza del divisor
+#+begin_src gretl :tangle ./guiones/S07-Prct-A-hprice2.inp :eval no
+scalar n = $nobs
+
+scalar cov_hat_n    = sum(price_c*rooms_c)/n
+scalar var_price_n  = sum(price_c^2)/n
+scalar var_rooms_n  = sum(rooms_c^2)/n
+scalar rho_dividiendo_n = cov_hat_n / sqrt(var_price_n*var_rooms_n)
+
+scalar cov_hat_n1   = sum(price_c*rooms_c)/(n-1)
+scalar var_price_n1 = sum(price_c^2)/(n-1)
+scalar var_rooms_n1 = sum(rooms_c^2)/(n-1)
+scalar rho_dividiendo_n1 = cov_hat_n1 / sqrt(var_price_n1*var_rooms_n1)
+
+printf "rho sin dividir (Actividad 4) = %.6f\n", coseno_pr
+printf "rho dividiendo por n          = %.6f\n", rho_dividiendo_n
+printf "rho dividiendo por (n-1)      = %.6f\n", rho_dividiendo_n1
+printf "rho de Gretl (corr)           = %.6f\n", corr(price,rooms)
+#+end_src
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Los cuatro números deben coincidir. Esto no es un capricho de Gretl: es consecuencia de que $\rho$ es un/ coseno, /y el coseno no cambia si escalamos ambos vectores por la misma constante (homogeneidad de la norma, lección 2; invarianza de la correlación ante reescalados, lección 5). Aquí no nos limitamos a creerlo: lo hemos programado y comprobado nosotros mismos con instrucciones que Gretl no ofrece ``de fábrica''./
+#+latex: }
+
+* Preguntas de interpretación para la clase
+
+1. En los tres pares calculados (price-rooms, price-nox, rooms-nox), ¿coincide el signo de la correlación con lo que esperaría por argumentos económicos?
+2. La covarianza y la correlación entre un mismo par de variables tienen siempre el mismo signo, pero sus magnitudes pueden ser muy distintas de un par a otro. ¿Por qué la correlación es preferible para /comparar/ la fuerza de la relación entre distintos pares de variables?
+3. ¿Por qué el valor de $\rho$ no depende de si se divide por $n$, por $n-1$, o no se divide en absoluto?
+4. De los tres pares de variables (en desviaciones), ¿cuál tiene el ángulo más cercano a $90^o$? ¿Qué interpretación geométrica tiene ese resultado?
+5. Observando los tres diagramas de dispersión, ¿la ``forma'' de la nube (más o menos alargada/diagonal) se corresponde con la magnitud de $\rho$ calculada?
+
+*** Para profundizar
+
+- Wooldridge, J. M. (2020). /Introductory Econometrics: A Modern Approach/. Apéndice C.3: covarianza y correlación.
+- Cottrell, A. y Lucchetti, R. (2023). /Gretl User's Guide/. Sección sobre funciones estadísticas (=corr=, =cov=) y sobre gráficos X-Y.
+- Véanse las lecciones 4 y 5 (=S05-Lecc04.org=, =S06-Lecc05.org=) para las demostraciones completas de lo que hoy verificamos numéricamente.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S07-Prct-A-hprice2.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S07-Prct-A-hprice2.inp][S07-Prct-A-hprice2.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+*1. Signos esperados y observados.* Por argumentos económicos cabe esperar $\rho_{\text{price,rooms}}>0$ (más habitaciones, casas más grandes/mejores, mayor precio) y $\rho_{\text{price,nox}}<0$ (más contaminación, zona menos deseable, menor precio). El signo de $\rho_{\text{rooms,nox}}$ es menos evidente a priori; en la práctica suele salir /negativo/ (las zonas con más contaminación —más industriales/urbanas— tienden a tener viviendas algo más pequeñas), aunque de magnitud menor que los otros dos pares. Lo importante pedagógicamente es que el alumno formule su expectativa /antes/ de mirar el número, y después la contraste.
+
+*2. Covarianza vs. correlación para comparar fuerza de relación.* La covarianza depende de las /unidades/ de ambas variables (dólares, número de habitaciones, ppm de NOx), así que su magnitud no es comparable entre pares distintos: una covarianza "grande" puede deberse simplemente a que una variable se mide en una escala con números grandes. La correlación, al ser un coseno, es adimensional y está siempre en $[-1,1]$; por eso sí permite comparar, de forma homogénea, qué par de variables está "más alineado" en sentido geométrico.
+
+*3. Invarianza de $\rho$ al divisor.* Porque $\rho$ es un /cociente/: tanto el numerador (covarianza/producto escalar) como el denominador (producto de las dos "normas"/desviaciones típicas) llevan el mismo factor de escala (ya sea $1/n$, $1/(n-1)$, o ningún factor en absoluto), y ese factor se cancela exactamente en la división. Es la misma propiedad de homogeneidad de la norma y de invarianza de la correlación ante reescalados demostrada en la lección 5, aplicada aquí a un caso extremo: reescalar por /cualquier/ constante positiva común no cambia un coseno.
+
+*4. Ángulo más cercano a $90^o$.* Suele ser el par con menor $|\rho|$ en valor absoluto —previsiblemente =rooms=-=nox=, si su correlación resulta pequeña—. Un ángulo cercano a $90^o$ significa que los vectores en desviaciones son casi /ortogonales/: la variación de una variable, una vez descontada su media, apenas "se parece" (en dirección) a la variación de la otra. Esto no implica que no exista /ninguna/ relación entre ambas variables, sino específicamente que no hay relación /lineal/ apreciable entre sus componentes centradas.
+
+*5. Forma de la nube vs. magnitud de $\rho$.* Sí: cuanto mayor es $|\rho|$, más "alargada" y alineada en torno a una diagonal aparece la nube de puntos (con pendiente positiva si $\rho>0$, negativa si $\rho<0$); cuanto más cercano a 0, más "redonda" o dispersa en todas direcciones se ve la nube, sin una dirección diagonal dominante. Esta es la lectura visual exacta del ángulo entre los vectores centrados.

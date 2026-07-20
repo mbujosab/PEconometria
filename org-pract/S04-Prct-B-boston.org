@@ -135,13 +135,12 @@ El conjunto original está disponible en varios repositorios públicos. Usaremos
 /Si la fuente es [[https://www.kaggle.com/datasets/abhijithudayakumar/the-boston-housing-dataset][Boston Housing Dataset en Kaggle]], los nombres aparecerán en mayúsculas (cámbielos a minúsculas, o use mayúsculas en la sesión de Gretl). Si la fuente es el repositorio del curso, los nombres estarán en minúsculas./
 #+latex: }
 
-
 * Actividad 2 - Importar el CSV en Gretl
 - En la ventana principal de [[https://gretl.sourceforge.net/es.html][Gretl]], seleccione //~Archivo -> Abrir archivo de datos -> Archivo de usuario~// en el menú desplegable en la parte inferior de la pantalla escoja //~texto/CSV~// y elija el fichero descargado.
 - Gretl detectará el separador (coma) y la fila de nombres. Acepte las opciones por defecto y confirme.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-  /o bien teclee en linea de comandos (ajustando la ruta a su sistema)/:
+  /o bien teclee en línea de comandos (ajustando la ruta a su sistema)/:
     #+NAME: Importar CSV
     #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
 open ../../data/boston.csv --quiet
@@ -156,7 +155,7 @@ open ../../data/boston.csv --quiet
 Al importar un CSV, Gretl trata las observaciones como una serie sin estructura temporal, lo que es correcto: estos son datos de /sección cruzada/ (cada fila es una zona del área de Boston, no un instante de tiempo). Si Gretl preguntara, indique que /no/ se trata de series temporales ni de panel.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-  /en linea de comandos, para asegurarse/:
+  /en línea de comandos, para asegurarse/:
     #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
 setobs 1 1 --cross-section
     #+end_src
@@ -169,7 +168,7 @@ La variable =chas= es /dicotómica/ (o /binaria/, o /dummy/): solo toma los valo
 - Marque =chas=, ``pinche'' con el botón derecho y seleccione */~mostrar valores~/*.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-  /o bien teclee en linea de comandos/:
+  /o bien teclee en línea de comandos/:
     #+NAME: Mostrar chas
     #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
 print -o chas
@@ -182,7 +181,7 @@ Comprobará que solo contiene ceros y unos.
 - Marque =chas=, ``pinche'' con el botón derecho y seleccione */~Estadísticos descriptivos~/*.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-  /o bien teclee en linea de comandos/:
+  /o bien teclee en línea de comandos/:
     #+NAME: Resumen chas
     #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
 summary chas
@@ -199,7 +198,7 @@ Compare el valor mediano de la vivienda en ambos datasets. En el original, la va
 - Obtenga los estadísticos descriptivos de =medv=.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-  /en linea de comandos/:
+  /en línea de comandos/:
     #+begin_src gretl :tangle ./guiones/S04-Prct-B-boston.inp :eval no
 summary medv rm nox
     #+end_src
@@ -229,3 +228,17 @@ summary medv rm nox
 #+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S04-Prct-B-boston.inp}
 
 | /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S04-Prct-B-boston.inp][S04-Prct-B-boston.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+*Ventaja de saber importar CSV.* Permite trabajar con /cualquier/ fuente de datos propia (no solo los datasets de muestra empaquetados con Gretl), una destreza imprescindible en cuanto el alumno necesite datos de su propio interés (TFG, trabajos aplicados, datos institucionales, etc.).
+
+*Media de =chas=: ¿qué proporción de zonas limita con el río?* En el Boston Housing original, 35 de las 506 zonas censales limitan con el río Charles, es decir, una proporción de $35/506\approx0{,}069$ (≈ 6,9%). La media de una variable 0/1 es siempre la proporción de unos porque $\mu_{\boldsymbol{x}}=\frac1n\sum x_i$ y, al ser cada $x_i$ o bien 0 o bien 1, la suma $\sum x_i$ es sencillamente el /número/ de unos; dividida por $n$, da la /proporción/.
+
+*¿Por qué sección cruzada y no serie temporal?* Porque cada fila representa una /unidad distinta/ (una zona geográfica), no un instante de tiempo dentro de la evolución de una misma unidad. No existe una relación de "antes/después" entre las filas: podríamos reordenarlas arbitrariamente sin perder ninguna información (a diferencia de una serie temporal, donde el orden es esencial).
+
+*=medv= vs. =price=: mismas unidades distintas.* Si =medv= está en miles de dólares y =price= en dólares, un coeficiente de regresión estimado usando =medv= como variable dependiente sería 1000 veces /menor/ (en valor absoluto) que el estimado usando =price=, para exactamente la misma relación económica subyacente. El cambio de unidades no altera el fenómeno real, solo reescala numéricamente el coeficiente —es la misma idea de "homogeneidad ante escala" que se demuestra formalmente en la lección 5 para la covarianza ($\sigma_{\lambda\boldsymbol{x}\boldsymbol{y}}=\lambda\,\sigma_{\boldsymbol{x}\boldsymbol{y}}$)—. Por eso siempre hay que fijarse en las unidades antes de interpretar la magnitud de un coeficiente.
+
+*=chas= como vector de $\mathbb{R}^{506}$: ¿qué dirección tiene respecto a $\boldsymbol{1}$?* =chas= no es ortogonal a $\boldsymbol{1}$ en general (su media, $\approx0{,}069$, no es cero), así que se descompone en una componente en $\mathcal{L}(\boldsymbol{1})$ —su vector de medias, $0{,}069\cdot\boldsymbol{1}$— y una componente ortogonal a $\boldsymbol{1}$ —su vector en desviaciones—. Al ser una variable 0/1, esa componente en desviaciones tiene una estructura muy particular: solo toma dos valores, $1-0{,}069$ (en las zonas junto al río) y $-0{,}069$ (en el resto), y su norma al cuadrado (la varianza) es $p(1-p)$ con $p$ la proporción de unos. Es un buen ejemplo de que incluso una variable tan simple como una dummy admite la misma descomposición geométrica que cualquier otra.
