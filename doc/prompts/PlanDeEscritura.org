@@ -1,0 +1,1027 @@
+#    -*- mode: org -*-
+
+#+TITLE: Plan de escritura del curso "Principios de Econometría"
+#+SUBTITLE: Manual de continuación para que una IA me asista en la creción de contenido
+
+# +OPTIONS: num:nil
+
+#+SETUPFILE: ../css/readtheorg_inline.theme
+#+startup: shrink
+#+PROPERTY: header-args:emacs-lisp :eval export
+
+#+LATEX_HEADER_EXTRA: \usepackage{fullpage}
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage{tabularx}
+#+LATEX_HEADER: \usepackage{booktabs}
+#+latex_header: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage[indent]{parskip}
+#+LATEX_HEADER: \usepackage{tikz}
+#+LATEX_HEADER: \usepackage{amsthm,amsmath}
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+\maketitle
+
+* 1. INSTRUCCIONES DE EJECUCIÓN PARA LA IA (ALGORITMO)
+
+Este es un /manual operativo/, no un registro histórico. Informa de qué hay, qué falta y cómo escribir lo siguiente. Cada vez que el usuario pida avanzar, ejecuta este bucle:
+
+1. /Identificar el puntero de arranque/: Consulta el cronograma (§7.0) y localiza la *primera fila con Estado =PENDIENTE=*. Esa es la sesión N a escribir. (Este manual no nombra la sesión aquí para evitar desincronizaciones con §7.0).
+   /Excepción/: §7.5-extra (práctica de dispersión + correlación) está fuera del cronograma y no aparece en §7.0. Solo se escribe si el usuario lo solicita explícitamente; no cuenta como sesión PENDIENTE
+   a efectos del puntero de arranque.
+2. /Recopilar requisitos (Arranque rápido)/: Lee EN ESTE ORDEN:
+   - Su ficha (§7.N) para la canónica del contenido.
+   - §10 (Semillas) para comprobar qué promesas previas debe cobrar y cuáles deja plantadas.
+   - §4 (si es teoría) o §5 + §8 (si es lab) y §6 (formato de entrega).
+   - *Plantilla viva*: Carga como ejemplo de formato el último fichero =.org= ya escrito *del mismo tipo* (teoría o lab, según corresponda). 
+     Su nombre exacto está en la última ficha [ESCRITA] del tipo correspondiente en §7. /No uses una práctica de lab como plantilla para una sesión teórica, ni viceversa./
+   - *Salvaguarda de semillas*: Si la sesión a escribir es PENDIENTE, sus semillas pueden no estar aún en §10. 
+     En ese caso, las semillas implícitas de su ficha §7 prevalecen sobre §10. Al actualizar el manual (paso 5), añadir las filas faltantes a §10.
+3. /Esquema previo/: Para sesiones complejas, propón primero un índice/esquema detallado de los apuntes y *espera la aprobación* del usuario antes de redactar el código completo.
+4. /Generación/: Redacta el fichero completo dentro de un bloque =#+begin_src org=.
+5. /Verificación de referencias numéricas/: antes de dar por cerrado el
+   fichero, comprobar CADA aparición de "la lección N", "la sesión N" o
+   "sesión(es) N" (en singular o plural, incluidas construcciones como
+   "las sesiones 17 y 19") contra la tabla de correspondencia
+   sesión↔lección de §4.6. Prestar atención especial a dos errores
+   recurrentes: (i) usar el número de sesión interno del Plan en vez del
+   número de lección en texto visible para el alumno; (ii) citar por su
+   número interno una sesión de laboratorio sin lección propia, en vez de
+   describirla sin número o anclarla a la lección teórica que acompaña
+   (regla de §4.6, "Referencias a sesiones de laboratorio sin lección
+   propia"). Repetir esta comprobación de forma uniforme en TODAS las
+   apariciones de la misma referencia dentro de un mismo fichero: un
+   fichero puede tener el mismo referente citado de formas distintas en
+   puntos distintos (transparencia, apéndice, banco de preguntas), y todas
+   deben coincidir. Un desliz aquí es fácil de cometer incluso en ficheros
+   por lo demás cuidados.
+6. /Actualización del manual/: Al final de tu respuesta, genera un bloque =#+begin_src org= titulado =ACTUALIZACIÓN DEL MANUAL= con el texto exacto para que el usuario lo copie y pegue. Debe contener:
+   - *Actualización de la Ficha §7.N*: Redacta el nuevo bloque rellenando el extracto de memoria (título real, decisiones adoptadas, ejemplos/datasets utilizados y el guiño/semilla a la siguiente sesión).
+   - *Actualización de §10 (Semillas)*: Lista las filas a modificar o añadir, indicando claramente "Cobrada en N" y las nuevas "Sembrada en N". Usa formato de tabla Org-mode (=|...|=).
+   /(Nota: La IA no modificará §7.0 en su output; el usuario pasará el estado a ESCRITA manualmente)./
+
+* 2. REGLAS DE ORO Y JERARQUÍA DEL DOCUMENTO
+
+- /Regla de oro de la información/: Cada hecho vive en /una sola/ sección; las demás lo /referencian/. 
+  - Fuente canónica del avance: §7.0.
+  - Fuente canónica de datos: §8.
+  - Fuente canónica de matemáticas: §4.2.
+  - Fuente canónica de qué se demuestra y qué no: §9.2.
+- /Jerarquía en caso de conflicto/: La ficha §7 es canónica para el /contenido/ de cada sesión; §10 solo para el /cruce/ sembrada↔cobrada; §9 para los /principios/ transversales. Ante cualquier conflicto, *manda la ficha §7*.
+- /Material adicional pendiente/: La "Práctica de dispersión + correlación" (§7.5) está FUERA de la numeración de las 26 sesiones. No bloquea el avance troncal y se insertará cuando el usuario lo indique.
+
+* 3. Contexto del curso (fijo)
+
+- /Asignatura/: Econometría, segundo curso del grado en Filosofía, Política y Economía (PPE), Universidad Complutense de Madrid.
+- /Alumnado/: heterogéneo, formación matemática escasa (un trimestre de estadística introductoria, otro de cálculo de una variable; ningún álgebra lineal). Curioso, con sensibilidad filosófica, quiere entender, no solo aplicar.
+- /Enfoque pedagógico/: fundamentar la regresión lineal con intuición geométrica (vectores, producto escalar, proyección ortogonal), con rigor en $\mathbb{R}^n$ (sin axiomática abstracta de espacio vectorial) y, al final, como analogía explícita (no demostrada) para el salto a esperanza, esperanza condicional y varianza en el espacio de variables aleatorias.
+  - La media es la proyección sobre la recta de los unos.
+  - La varianza muestral sale del teorema de Pitágoras.
+  - La regresión simple se resuelve con dos condiciones de ortogonalidad.
+  - El $R^2$ es un ratio de normas al cuadrado ($=\cos^2\theta$).
+- /Estructura temporal/: 13 semanas aproximadamente, 2 sesiones semanales de 2 horas (25 sesiones). Se alternan teoría y laboratorio (Gretl). En casi todas las sesiones, 15-20 min finales para un ejercicio tipo test.
+- /Principio rector/: ``menos contenido pero mejor entendido''. Preferir profundidad a amplitud.
+
+* 4. Convenciones de escritura (orgmode)
+
+El fichero se exporta a HTML y reveal.js. Estas convenciones se respetan en todo el material.
+
+** 4.1 Estructura y marcado
+- Fichero /orgmode/. Jerarquía con =*=, =**=, =***=.
+- /Énfasis/: =/cursiva/= para términos destacados y first-use de conceptos; =_subrayado_= para definiciones puntuales en texto corrido; nunca abusar de la negrita.
+- /Citas y frases destacadas/: bloques =#+begin_center ... #+end_center=.
+- /Definiciones y teoremas/: en apuntes desarrollados, dentro de =#+begin_quote= encabezados por =/Definición/=, =/Teorema/=, =/Proposición/=.
+- /Comillas estilo LaTeX/: apertura con DOS acentos graves seguidos (backtick, U+0060); cierre con DOS apóstrofos rectos seguidos (U+0027). Nunca usar el signo igual para la apertura. Ejemplo: escribir =``así''= produce ``así''.
+- /Cautela con =#+begin_quote= en transparencias con fragmentos/: en
+  contextos reveal.js/ipynb, combinar =#+begin_quote= con atributos
+  =slide_type . fragment/subslide= puede truncar visualmente la
+  transparencia. Si ocurre, preferir prosa narrativa sin caja antes que
+  forzar el entorno (así se resolvió en S05, sección "La media: dos caras
+  de la misma moneda").
+
+** 4.2 Matemáticas
+Fuente canónica de notación.
+
+*** 4.2.1 Notación (qué se escribe y cómo)
+*/Sintaxis general (LaTeX)/:*
+- Todo en LaTeX. En línea con =\( ... \)= o =$ ... $=; en bloque con =\[ ... \]=.
+  - Puntuación final fuera de =\( ... \)= y =$ ... $=, pero dentro en =\[ ... \]=.
+- /No usar comandos LaTeX personalizados/ del libro de Bujosa (=\Vect=, =\norma=,...). Traducir a LaTeX estándar.
+- Final de demostración: =$\blacksquare$=.
+- Alineaciones con =\begin{aligned} ... \end{aligned}= fuera de =\[ ... \]= y con línea en blanco antes y después.
+- /Decimales con coma/ (convención global): =5{,}48=, no =5.48=.
+
+*/Reglas de objetos/:*
+- /Vectores/: siempre =\boldsymbol{...}= (no =\mathbf{...}=), latinas y griegas: =\boldsymbol{x}=, =\boldsymbol{\beta}=, =\boldsymbol{1}=, =\boldsymbol{0}=.
+- /Los vectores no se transponen/. Un vector es una /lista de números/, sin orientación. Nunca =\boldsymbol{x}^\top=. Producto escalar: =\boldsymbol{x}\cdot\boldsymbol{y}=, no =\boldsymbol{x}^\top\boldsymbol{y}=.
+- /Solo las matrices se transponen/. Una matriz es una /lista de vectores-columna del mismo tamaño/; =\boldsymbol{A}^\top= intercambia filas por columnas. Son objetos distintos un número, un vector de =\mathbb{R}^1= y una matriz =1\times 1=.
+- Las matrices se denotan con =\boldsymbol{\mathsf{...}}= (negrita + fuente
+  sans-serif), para distinguirlas tipográficamente de los vectores (negrita
+  con fuente serif). Ejemplo: =\boldsymbol{\mathsf{X}}=, nunca =\boldsymbol{X}=.
+- Cuando se describe una matriz por sus columnas, se usan corchetes con las
+  columnas separadas por punto y coma: ~\boldsymbol{\mathsf{X}} = [\boldsymbol{1};\;\boldsymbol{x}]~. (Ya usada, como anuncio, en S06/Lección 5.)
+- /Acentos sobre vectores en negrita/ (barra y circunflejo): todo acento
+  tipográfico sobre un vector en negrita se escribe con =\mathop= para forzar
+  el espaciado correcto entre el acento y el símbolo. Vector de medias:
+  =\boldsymbol{\mathop{\overline{y}}}= (nunca =\bar{\boldsymbol{y}}= ni
+  =\boldsymbol{\bar{y}}=). Vector ajustado: =\boldsymbol{\mathop{\widehat{y}}}=
+  y vector de residuos =\boldsymbol{\mathop{\widehat{e}}}= (nunca
+  =\hat{\boldsymbol{y}}= ni =\hat{\boldsymbol{e}}=). Esta regla /no/ afecta a
+  los coeficientes estimados, que son escalares sin negrita ($\hat\beta_0$,
+  $\hat\beta_1$): en ese caso =\hat{\beta}= es tipográficamente correcto sin
+  =\mathop=.
+
+
+*/Productos/:*
+- /Producto matriz–vector =\boldsymbol{A}\boldsymbol{x}= y vector–matriz =\boldsymbol{x}\boldsymbol{A}=, doble lectura/: (i) por productos escalares; (ii) por combinación lineal. Central a partir de la sesión 13  (regresión múltiple); consolidada en el laboratorio de la sesión 14.. Hecho clave: =\boldsymbol{\mathsf{X}}^\top\boldsymbol{e}= y =\boldsymbol{e}\boldsymbol{\mathsf{X}}= son /el mismo vector/.
+- /Producto matriz–matriz/: solo en la sesión 14, al leer =\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}=. No se introduce inversa, rango ni álgebra matricial autónoma.
+- /Notación genérica de producto escalar/: =\langle\boldsymbol{x},\boldsymbol{y}\rangle=.
+  El curso usa dos casos particulares (y anuncia un tercero al cierre):
+  - /Producto escalar euclídeo/: =\boldsymbol{x}\cdot\boldsymbol{y}= (el punto).
+    Es la notación de trabajo en =S02= y =S03=, donde no hay ambigüedad.
+    Equivalente extendida: =\langle\boldsymbol{x},\boldsymbol{y}\rangle_e=, usada
+    solo cuando sea necesario contrastarla con otro producto escalar.
+  - /Producto escalar estadístico/ (anticipado ya en =S02=, con fórmula completa,
+    al motivar por qué $\|\boldsymbol{1}\|_e=\sqrt n$ depende de $n$; adoptado de
+    forma sistemática, con plena justificación y demostración, en =S05=):
+    =\langle\boldsymbol{x},\boldsymbol{y}\rangle_s = \frac{1}{n}(\boldsymbol{x}\cdot\boldsymbol{y})=.
+    En la transición (adopción sistemática en =S05=), explicitar el subíndice =s=.
+    Después, los ángulos sin subíndice son suficientes si el contexto es estadístico.
+  - /Producto escalar probabilístico/ (anunciado en el cierre, ses. 26):
+    =\langle X,Y\rangle_P = E[XY]=. Solo se menciona como analogía.
+  - /Convención de uso/: la notación sin subíndice se reserva para definiciones,
+  propiedades o demostraciones formuladas en abstracto —válidas para
+  cualquier producto escalar con las propiedades de simetría, linealidad y
+  positividad—; en cuanto se trabaja con un caso concreto, se añade el
+  subíndice correspondiente. Esta alternancia aparece ya en =S02=, primero de
+  forma más discreta en la sección "Producto escalar" (genérico
+  $\langle\boldsymbol{x},\boldsymbol{y}\rangle$ en el enunciado, euclídeo
+  $\boldsymbol{x}\cdot\boldsymbol{y}$ en el desarrollo) y, de forma más
+  explícita, en el título "Norma de un vector" (genérico $\|\boldsymbol{x}\|$)
+  frente al cuerpo de esa misma transparencia (euclídeo $\|\boldsymbol{x}\|_e$).
+- /Subíndices siempre en minúscula/: =_s=, =_e=, =_P= (la =P= es mayúscula por
+  ser inicial de "Probabilidad", para distinguirla de =_p= que podría confundirse
+  con un índice).
+- Norma: =\|\boldsymbol{x}\|= (en tablas orgmode, =\Vert=). Norma estadística:
+  =\|\boldsymbol{x}\|_s=, solo cuando sea necesario distinguirla de la euclídea.
+
+*/Estadística/:*
+- /Notación estadística/. Las letras griegas \(\mu\), \(\sigma\), \(\rho\) están
+  asociadas a operaciones del producto escalar estadístico \(\langle\cdot,\cdot\rangle_s\):
+
+  | Letra                                       | Objeto geométrico               | Definición                                                                                                                                                       | Posición en la descomposición                              |
+  |---------------------------------------------+---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------|
+  | \(\mu_{\boldsymbol{x}}\)                    | escalar de la proyección        | \(\langle\boldsymbol{x},\boldsymbol{1}\rangle_s\) (con signo)                                                                                                   | determina la componente en \(\mathcal{L}(\boldsymbol{1})\) |
+  | \(\sigma_{\boldsymbol{x}}\)                 | norma del vector en desviaciones | \(\Vert\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\Vert_s\) (no negativa)                                                                                  | componente en \(\mathcal{L}(\boldsymbol{1})^\perp\)        |
+  | \(\rho_{\boldsymbol{x}\boldsymbol{y}}\)     | coseno del ángulo               | entre \(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\) e \(\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\) en \(\mathcal{L}(\boldsymbol{1})^\perp\)     | ángulo en \(\mathcal{L}(\boldsymbol{1})^\perp\)            |
+
+- La media se denota \(\mu_{\boldsymbol{x}}\) (no \(\bar x\)); la desviación típica
+  como norma del /vector en desviaciones/ \(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\).
+  El término «residuo» se reserva exclusivamente para el contexto de regresión;
+  en el contexto de la media se dice siempre «vector en desviaciones» o
+  «vector en desviaciones respecto a la media».
+- /Vector de medias/: se denota $\boldsymbol{\mathop{\overline{y}}}$ (véase la
+  regla general de acentos sobre vectores en negrita, en "Reglas de objetos").
+  Nunca $\bar{\boldsymbol{y}}$ ni $\boldsymbol{\bar{y}}$.
+- En los libros de estadística, $\rho_{\boldsymbol{x}\boldsymbol{y}}$ aparece
+  a veces como $r_{\boldsymbol{x}\boldsymbol{y}}$ cuando se quiere enfatizar
+  que es un estimador muestral. En este curso usamos siempre $\rho$.
+- /Registro de laboratorio/: en los guiones de prácticas (Gretl) se admite
+  el uso de "vector centrado" / "centrar" como sinónimo informal de "vector
+  en desviaciones", coherente con el propio guiño de la lección 4 ("lo que
+  en la próxima lección llamaremos, con más precisión, /vectores en
+  desviaciones/"). En las lecciones teóricas se usa siempre el término
+  preciso; en las prácticas, ambos registros conviven sin que ello
+  constituya una inconsistencia.
+
+*/Subespacios vectoriales/:*
+- /Subespacio generado/: $\mathcal{L}(\boldsymbol{a})$ denota el conjunto de todos los múltiplos de $\boldsymbol{a}$ (geométricamente, una recta en $\mathbb{R}^n$); $\mathcal{L}(\boldsymbol{v}_1,\dots,\boldsymbol{v}_k)$ denota el conjunto de todas las combinaciones lineales de $k$ vectores. La primera vez que aparezca $\mathcal{L}(\boldsymbol{a})$ en una sesión, recordar al lector su significado con un paréntesis inline.
+- /Complemento ortogonal/: $\mathcal{L}(\boldsymbol{a})^\perp$ denota el conjunto de todos los vectores ortogonales a $\boldsymbol{a}$. La notación $^\perp$ sobre un subespacio es distinta de la ortogonalidad entre dos vectores ($\boldsymbol{x}\perp\boldsymbol{y}$).
+
+*/Precisión terminológica: la proyección es el vector, no la media/*: la
+media $\mu_{\boldsymbol{x}}$ es un /escalar/; lo que ES la proyección
+ortogonal (un vector) es el /vector de medias/ $\mu_{\boldsymbol{x}}\boldsymbol{1}$.
+$\mu_{\boldsymbol{x}}$ es el escalar que multiplica a $\boldsymbol{1}$ para
+obtener esa proyección (equivalentemente, el valor común de las componentes
+del vector proyectado). Evitar en prosa "la media es una proyección
+ortogonal"; usar en su lugar formulaciones como "el vector de medias es la
+proyección ortogonal de $\boldsymbol{y}$ sobre $\mathcal{L}(\boldsymbol{1})$"
+o "la media es el escalar de esa proyección / proviene de esa proyección".
+Esta precisión es igualmente aplicable al vector ajustado
+$\boldsymbol{\mathop{\widehat{y}}}$ en regresión (sesiones 9-10): es
+$\boldsymbol{\mathop{\widehat{y}}}$ quien es la proyección; $\hat\beta_0,\hat\beta_1$
+son sus coeficientes.
+
+*/Regla general sobre primera aparición de notación o conceptos/:*
+Cuando una notación o concepto aparece por primera vez en una sesión, la definición
+o explicación inline es /obligatoria/ en alguno de estos dos lugares, por orden de
+preferencia:
+1. /En la propia transparencia/, si hay espacio suficiente y la definición no la recarga
+   en exceso. Ejemplo: "$\mathcal{L}(\boldsymbol{a})$ (el conjunto de todos los múltiplos
+   de $\boldsymbol{a}$; geométricamente, una recta en $\mathbb{R}^n$)". Pero también debe aparecer en los apuntes desarrollados asociados a dicha transparencia.
+2. /En los apuntes desarrollados asociados a esa transparencia/, si la transparencia
+   ya está densa o la definición requiere más espacio del que cabe cómodamente.
+   En ese caso, la transparencia puede usar la notación sin definirla, confiando en
+   que el docente la explica de viva voz en clase y el alumno la encuentra definida
+   al leer los apuntes.
+
+Lo que /no/ es admisible es que la primera aparición de una notación o concepto
+ocurra en una transparencia sin que la definición aparezca ni en esa transparencia
+ni en sus apuntes desarrollados correspondientes. Es decir, los apuntes desarrollados siempre deben incorporar las definiciones de las nuevas notaciones o conceptos introducidos en las transparencias.
+
+*** 4.2.2 Secuencia y alcance (cuándo se introduce cada cosa)
+Esta subsección coordina la /notación/ de §4.2.1 con el /orden pedagógico/;
+el /cuándo/ concreto (qué sesión cobra cada forma) es canónico en las
+fichas §7, no aquí.
+
+*/Ortogonalidad de la regresión/:*
+- Forma /primaria/ en clase: ~\boldsymbol{e}\boldsymbol{\mathsf{X}}=\boldsymbol{0}~.
+  Forma /equivalente "de manual"/: ~\boldsymbol{\mathsf{X}}^\top\boldsymbol{e}=\boldsymbol{0}~. Ambas coexisten.
+- En regresión simple (ses. 10), la forma primaria se presenta /desglosada/
+  como dos productos escalares ~\boldsymbol{e}\cdot\boldsymbol{1}=0~ y
+  ~\boldsymbol{e}\cdot\boldsymbol{x}=0~ (una ortogonalidad por regresor).
+- La /lectura matricial unificada/ ~\boldsymbol{e}\boldsymbol{\mathsf{X}}=\boldsymbol{0}~
+  llega en la sesión 14, al agrupar los regresores en la matriz ~\boldsymbol{\mathsf{X}}~.
+
+*/Remisión canónica del "cuándo"/:* ses. 10 para las dos ortogonalidades
+desglosadas; ses. 14 para la lectura matricial unificada. §4.2 fija solo
+la notación y el orden de introducción.
+
+/(Convención de referencia: «§7.N» designa siempre la ficha de la sesión N,
+es decir, la subsección §7.x cuya etiqueta incluye el número de sesión.
+La numeración de subsecciones §7.x puede no coincidir con N; ante cualquier
+duda, el número de sesión prevalece sobre el número de subsección.)/
+
+*/Dimensión de un subespacio (uso informal)/:*
+- Primera mención, aislada y con una nota a pie de página breve: sesión 5
+  (S05, lección 4), al comentar que $\mathcal{L}(\boldsymbol{1})^\perp$
+  tiene dimensión $n-1$ en la ilustración geométrica de la proyección; la
+  nota aclara que el término se usa de forma informal y remite el
+  desarrollo a la sesión 6.
+- Primer desarrollo con detalle (y su propia nota a pie de página completa):
+  sesión 6 (S06, lección 5), al justificar por qué en $\mathbb{R}^2$ la
+  correlación es siempre $\pm1$. Se usa de forma completamente informal (una
+  recta "tiene" una dirección, un plano "tiene" dos), sin definición
+  axiomática, coherente con §9.1.
+- No se formaliza en ningún momento del curso. Puede reutilizarse —también
+  de forma informal— cuando aparezcan subespacios generados por varios
+  regresores (sesión 13), pero no debe derivar en maquinaria de álgebra
+  lineal (rango, bases), que el curso excluye explícitamente (§9.2).
+
+*** 4.2.3 Software
+
+*/Gretl/:*
+- En prácticas, los nombres de funciones de Gretl (=corr()=, =cov()=, =sd()=, =var()=) pueden no coincidir exactamente con la convención teórica del curso en el divisor usado. Siempre que ello importe, el guion debe explicitarlo.
+- En las prácticas de software, =vector centrado= se admite como sinónimo operativo de =vector en desviaciones respecto a la media=; en teoría se prefiere siempre la segunda expresión.
+- /Funciones estadísticas de Gretl y convenio del curso/: cuando una práctica use =corr()=, =cov()=, =sd()= o =var()=, y el divisor importe conceptualmente, el guion debe explicitar si coincide o no con la convención teórica del curso (producto escalar estadístico con divisor \(1/n\)). En particular, la correlación puede verificarse con distintos divisores porque estos se cancelan en el cociente; la varianza, en cambio, sí depende del convenio.
+
+** 4.3 Figuras
+- Incrustar con =[[file:./img/SYY-LeccXX/nombre.png]]=. Subcarpetas según el nombre del =.org= (=SYY-LeccXX=).
+- Incluir antes dos líneas: =#+attr_latex: :width 475px= y =#+attr_html: :width 700px=.
+- =#+CAPTION:= cuando proceda.
+- Si se necesita una figura nueva, pedir los ficheros tikz al autor; por defecto =.png=. Las fuentes tikz =.tex= se conservan en la misma carpeta.
+
+** 4.4 Tablas
+- Sintaxis orgmode estándar (=| ... |= con fila de guiones =|---|=).
+- Evitar =\|= dentro de tablas; usar =\Vert=. Celdas complejas con =\mbox{\(...\)}=.
+
+** 4.5 Bibliografía y enlaces
+- Enlaces con =[[url][texto]]=.
+- Referencia recurrente: /Curso de Álgebra Lineal/ de Marcos Bujosa, [[https://mbujosab.github.io/CursoDeAlgebraLineal/][libro online]]. Capítulo 11: ángulo, ortogonalidad, Pitágoras, Cauchy–Schwarz, desigualdad triangular.
+- Otros recursos: Wooldridge (/Introductory Econometrics/, 2020), Strang (/Introduction to Linear Algebra/, 2016), 3Blue1Brown (/Essence of Linear Algebra/), Angrist & Pischke (/Mastering 'Metrics'/), Kennedy (/A Guide to Econometrics/), manual de Gretl, Adkins (/Using Gretl/).
+- "Para profundizar": cada sección sustantiva de los apuntes termina con esta lista (autor, año, título en cursiva, enlace). No es imprescindible repetirla en cada subsección consecutiva que desarrolle una misma idea sin solución de continuidad (p. ej. una definición seguida inmediatamente de su demostración): basta con una lista al cierre del bloque temático.
+
+** 4.6 Nomenclatura de ficheros y carpetas
+- Ficheros =.org= teóricos: =SYY-LeccXX.org= (=YY= = sesión, =XX= = lección). Ej.: =S03-Lecc03.org=.
+- Prácticas Gretl: =SYY-Prct-X-data.org= (=X= = letra =A=, =B=…). Ej.: =S04-Prct-A-hprice2.org=.
+- Toda subcarpeta auxiliar sigue el convenio: =./img/SYY-LeccXX/=, =./data/=, =./guiones/=.
+- /Referencias cruzadas visibles para el alumno/: en el texto que lee el alumno
+  (tanto transparencias como apuntes desarrollados), las referencias a otras
+  sesiones usan la /numeración de lecciones/ (la que aparece en el título del
+  fichero =.org=), no la numeración de sesiones de §7.0. Ejemplo correcto:
+  «como vimos en la lección 2», «esto lo desarrollaremos en la lección 5».
+  La numeración de sesiones (§7.0) es interna al Plan y solo se usa en fichas,
+  semillas (§10) y referencias entre secciones del propio Plan. En particular, el bloque final «Guiño a la sesión siguiente» debe usar siempre la numeración de lecciones («Lección N»), nunca la numeración interna de sesiones del Plan.
+- /Referencias a sesiones de laboratorio sin lección propia/: las sesiones
+  de tipo Lab Gretl no tienen número de lección equivalente (solo lo tienen
+  las sesiones de tipo Teoría; véase el cálculo de §4.6 anterior). Cuando
+  sea necesario anticipar o recordar, en texto visible para el alumno
+  (transparencias, apuntes desarrollados o guiones de práctica), el
+  contenido de una futura sesión de laboratorio, *no debe usarse el número
+  de sesión interno del Plan* (p. ej. "sesión 17"). En su lugar, elegir una
+  de estas dos opciones:
+  1. /Describir el contenido sin número/: "en una futura práctica sobre
+     inferencia", "en el laboratorio de propiedades de MCO".
+  2. /Anclarlo a la lección teórica que esa práctica acompaña/, si conviene
+     ser más preciso: "en la práctica que sigue a la lección 9" en lugar de "en la
+     sesión 17".
+  Esta regla se aplica tanto a los guiones de prácticas como a las
+  lecciones teóricas que anticipen contenido de laboratorio.
+- /Correspondencia sesión↔lección (ayuda de cálculo)/: el número de lección
+  usado en los ficheros =.org= teóricos (=SYY-LeccXX.org=) es el /orden de
+  esa sesión entre las sesiones de tipo Teoría/ del cronograma (§7.0),
+  ignorando las sesiones de laboratorio. Ejemplo: la sesión 9 es la sexta
+  sesión de tipo Teoría del cronograma (tras las sesiones 1, 2, 3, 5, 6, 8),
+  luego le corresponde =Lecc07=, es decir, =S09-Lecc07.org=. Verificar este
+  cálculo contra los ficheros ya escritos antes de fijar el nombre de una
+  ficha pendiente.
+
+* 5. Convenciones específicas de laboratorios (Gretl/Python)
+
+** 5.1 Estructura de entrega de una práctica
+En lugar de "apuntes teóricos", un /guion de laboratorio/ paso a paso:
+- /Objetivos/ de la sesión.
+- /Datos usados y por qué/ (reales, simulados o ambos; justificación pedagógica — ver §8).
+- /Secuencia de acciones/ en el software (menús de Gretl, comandos, capturas si procede).
+- /Resultados esperados/ y cómo leerlos.
+- /Preguntas de interpretación/ para discutir en clase.
+- Bloque "Para profundizar" + cierre de interpretación, en una de estas dos
+  formas (a elegir según la naturaleza de la práctica): (i) banco de
+  preguntas tipo test (8–10, con opciones y respuesta marcada), o (ii)
+  "Preguntas de interpretación para la clase" (abiertas, 5–6) seguidas de
+  una sección "Respuestas" en prosa (formato empleado en S07-Prct-A/B/C).
+- Si una práctica utiliza generadores aleatorios (=normal()=, =uniform()=), se debe incluir siempre =set seed [número]= al inicio del bloque de datos para garantizar la reproducibilidad exacta en clase y en las respuestas de los apuntes".
+- /Conceptos importados de la asignatura de estadística previa/ (p. ej.
+  asimetría, curtosis, mediana, cuartiles): cuando una práctica use por
+  primera vez una función de Gretl que calcule uno de estos estadísticos,
+  debe acompañarla de un recordatorio breve, in situ (una frase o cláusula
+  parentética), de qué mide y con qué convenio (p. ej. "curtosis
+  /excedente/ respecto a la normal, que vale 0"). No es necesario
+  redemostrar ni desarrollar el concepto —se asume visto en el
+  cuatrimestre anterior—, pero tampoco debe usarse sin ese anclaje mínimo.
+  Práctica ya seguida correctamente en =S07-Prct-C-momentos-no-bastan.org=,
+  Actividad 5.
+
+** 5.2 Nombres, cabeceras y enlaces
+- /Convenio de nombres/: =SYY-Prct-X-data= (letra separada por guiones, /no/ =Prct01=). Guion: =./guiones/SYY-Prct-X-data.inp= (carpeta =guiones/=).
+- /Cabecera de ejecución/: bloque =sh= con =#+name: execute-gretl-practice= y =#+PROPERTY:=, variable =practica=, que crea el directorio y lanza =gretlcli -b=. Más /dos bloques iniciales/ =gretl :tangle ... :exports none :eval no=: el primero con la cabecera de copyright (GPL v3); el segundo con =string directory = getenv("DIRECTORIO")= + =set workdir "@directory"= y su comentario explicativo.
+- /Enlaces/: repositorio =https://mbujosab.github.io/PEconometria/...=. Datos en =data/= (p. ej. =data/boston.csv=), referidos desde el guion con ruta relativa =open ../../data/boston.csv=.
+- /Cierre del documento/: línea =#+LATEX: \clearpage= (sin comentar). Le sigue (opcional) el enlace al guion y la inclusión del código completo:
+  =#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/SYY-Prct-X-data.inp}=.
+- /Idioma de la interfaz/: todos los menús y capturas se dan en /español/ (p. ej. //~Archivo -> Abrir datos~//). Fuente canónica de los nombres de  menú para todas las prácticas.
+- /Sección "Respuestas"/: visible (NO en =COMMENT=), situada tras "Código
+  completo de la práctica", precedida inmediatamente por una línea
+  =#+LATEX: \clearpage= (para que comience en página nueva). Encabezado de
+  nivel =*= ("* Respuestas"), igual que "Código completo de la práctica".
+  Esta es la convención ya aplicada de forma uniforme en las tres prácticas
+  de la sesión 7 (=S07-Prct-A/B/C=).
+
+** 5.3 Marcado de actividades y menús
+- /Actividades = subsecciones/: cada actividad es =* Actividad N - ...= (encabezado =*=), NO un ítem de lista. Sub-partes con =*** Editar...= (=***=). Los guiones =-= se reservan para listas reales de pasos.
+- /Menús de Gretl/: =//~Archivo -> Abrir datos~//= (cursiva + verbatim). /Opción destacada/ (la que se selecciona): =*/~Estadísticos descriptivos~/*=.
+- /Carga de dataset de muestra Wooldridge/: pestaña //~Wooldridge~// (no //~Gretl~//).
+- /Bloques =gretl= de comandos en línea/: precedidos de la coletilla en gris =#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black} /o bien teclee en línea de comandos/:= y cerrados con =#+latex: }=.
+
+** 5.4 Notación y comandos gráficos confirmados
+- /Comandos gráficos/: =freq price --plot=display=, =boxplot price --output=display=.
+- =open ../../data/boston.csv= carga como sección cruzada (Gretl pregunta si la primera columna es serie ordinaria; responder /sí/).
+- =setobs 1 1 --cross-section= devuelve =Rango de datos completo: 1 - 506 (n = 506)=.
+- /Bloques de código/: siempre =#+begin_src gretl ... #+end_src= (el lexer real es =octave=, ver §5.5).
+
+** 5.5 Plantilla de fichero de una práctica (replicar)
+
+/Análogo de §6 para prácticas de laboratorio. Para sesiones teóricas, ver §6./
+
+Una práctica = UN solo fichero =.org= (=SYY-Prct-X-data.org=). 
+Secciones en este orden:
+- /Preámbulo/: =#+TITLE=, =#+author: Marcos Bujosa=, =#+LANGUAGE: es=,
+  =#+include: 00preambulo_lecciones.txt= (o el preámbulo de prácticas que
+  corresponda).
+- /Preámbulo minted/ (§A.1): líneas =#+LATEX_HEADER:= de =xcolor=, =\setminted=,
+  =\setminted[octave]{}= y la línea =\usepackage[newfloat]{minted}= (comentada
+  o no según el entorno — ver tabla de §A.1).
+- /Bloque =emacs-lisp== de configuración minted (§A.1, ingrediente 2),
+  cabecera =:exports none :tangle no :results silent :eval yes=.
+- =#+LATEX: \maketitle=, =\blfootnote= con licencia CC BY-SA 4.0.
+- =#+begin_abstract ... #+end_abstract= con objetivos.
+- /Cabecera de ejecución/ (§5.2): bloque =sh= =#+name: execute-gretl-practice=
+  con =#+PROPERTY:= y variable =practica=; más los DOS bloques iniciales
+  =gretl :tangle ... :exports none :eval no= (copyright GPL v3; y
+  =string directory = getenv("DIRECTORIO")= + =set workdir "@directory"=).
+- /Cuerpo/: actividades como secciones =* Actividad N - ...= (§5.3), con
+  objetivos, datos y por qué (§8), secuencia de acciones en Gretl (menús en
+  español, §5.2), resultados esperados y preguntas de interpretación.
+- /Cierre/: línea =#+LATEX: \clearpage=; enlace al guion (opcional) e inclusión
+  del código completo con =\inputminted= (§5.2).
+- /Banco de preguntas/: 8–10 preguntas tipo test, centradas en interpretación
+  de salidas y manejo del software, en secciones =COMMENT=.
+
+* 6. Estructura de entrega de una sesión teórica
+
+#+begin_center
+/Una sesión teórica = UN solo fichero =.org== (=SYY-LeccXX.org=). 
+Dentro de él conviven, en este orden, las transparencias (cada una sección =*=), sus apuntes desarrollados (subsección =**= con =slide_type . skip=) y, al final,
+el banco de preguntas en secciones =COMMENT=. 
+No se reparten en varios ficheros./
+#+end_center
+
+/Análogo de §5.5 para sesiones teóricas. Para prácticas de laboratorio, ver §5.5./
+
+Cada sesión teórica se entrega en /tres bloques/, en este orden:
+
+1. /Transparencias/: entre 8 y 11, numeradas. Concisas, con fórmulas clave, figuras y citas en =#+begin_center ... #+end_center=. La primera es la portada; la última, recapitulación + guiño a la sesión siguiente (ambos bloques pueden fusionarse en una única transparencia, como en las lecciones 2 y 3, o repartirse en dos transparencias consecutivas —recapitulación y guiño, cada una con su propio título—, como en las lecciones 4 y 5; cualquiera de las dos opciones es válida).
+   - Tras cada transparencia, unos /Apuntes desarrollados/: texto extenso, en secciones numeradas, para leer antes o después de clase. Cada sección sustantiva termina con "Para profundizar" (§4.5).
+   - Cada transparencia = sección =*=; sus apuntes = subsección =**= con =#+attr_ipynb: (slideshow . ((slide_type . skip)))= antes de cada bloque. Fragmentos progresivos con =(slide_type . fragment)=.
+2. /Banco de preguntas tipo test/: 12 preguntas, marcadas [B] básica / [M] media / [D] discriminadora. Cada una con 4 opciones, respuesta correcta indicada y línea ``/Evalúa/:''. Al final, sugerencia de selección (8 y 6 preguntas) y comentario sobre las más valiosas pedagógicamente.
+
+/Plantilla de fichero/ (replicar):
+- Preámbulo: =#+TITLE=, =#+author: Marcos Bujosa=, =#+LANGUAGE: es=, =#+include: 00preambulo_lecciones.txt=.
+- Bloque =emacs-lisp :exports none= con =ox-ipynb= y =htmlize=.
+- =#+LATEX: \maketitle=, =\blfootnote= con licencia CC BY-SA 4.0.
+- =#+begin_abstract ... #+end_abstract=.
+- Línea de enlaces: slides / html / pdf / mybinder.
+- Subsecciones =:noexport:= con carga de módulos Python y creación de =./img/SYY-LeccXX=.
+- Cierre: secciones =COMMENT= con banco de preguntas y bloques de exportación.
+
+* 7. Fichas por sesión
+
+#+begin_center
+/Glosario operativo/ (términos de este manual):
+- /Semilla/ (o /promesa/): idea anticipada en una sesión que se desarrollará
+  en otra posterior. Inventario en §10.
+- /Cobrar/ una semilla: desarrollarla/saldarla en la sesión que la recoge.
+- /Anclaje/ (geométrico): la intuición de $\mathbb{R}^n$ sobre la que se
+  apoya una sesión teórica.
+- /Ficha/: bloque §7.x; fuente canónica del /contenido/ de una sesión.
+#+end_center
+
+#+begin_center
+/Sobre la profundidad de las fichas pendientes/: las fichas de /laboratorio/
+pendientes son deliberadamente mínimas. Su contenido se deriva de la sesión
+/teórica/ que verifican, más §5 (convenciones de lab) y §8 (datos). Ampliarlas
+solo al escribirlas; su brevedad NO indica falta de información.
+#+end_center
+
+Corazón operativo del manual. Escribir la sesión N = leer su ficha. Las fichas de sesiones /escritas/ contienen el extracto de memoria; las /pendientes/, su anclaje geométrico, promesas a cumplir y recortes que las afectan.
+
+** 7.0 Cronograma de las 26 sesiones
+
+#+begin_center
+/ATENCIÓN IA/: Esta tabla es de solo lectura para ti. Úsala únicamente para encontrar la primera sesión =PENDIENTE=.
+No incluyas una versión actualizada de esta tabla en tu output; el usuario gestionará el cambio a =ESCRITA= manualmente.
+#+end_center
+
+
+| Sem | Ses | Tipo      | Contenido                                                                                                             | Estado    |
+|-----+-----+-----------+-----------------------------------------------------------------------------------------------------------------------+-----------|
+|   1 |   1 | Teoría    | Introducción: econometría, tipología de datos.                                                                        | ESCRITA   |
+|   1 |   2 | Teoría    | Vectores en $\mathbb{R}^n$, producto escalar, norma.                                                                  | ESCRITA   |
+|   2 |   3 | Teoría    | Ángulo, ortogonalidad, Pitágoras, Cauchy–Schwarz.                                                                     | ESCRITA   |
+|   2 |   4 | Lab Gretl | Introducción a Gretl: dos prácticas (A: hprice2; B: importar Boston).                                                 | ESCRITA   |
+|   3 |   5 | Teoría    | Proyección sobre una recta (minimización). Media como proyección.                                                     | ESCRITA   |
+|   3 |   6 | Teoría    | Varianza vía Pitágoras. Traducción estadística: $1/n$, covarianza, $r=\cos\theta$.                                    | ESCRITA   |
+|   4 |   7 | Lab Gretl | Descriptivos, correlaciones, dispersión (reales); verificar identidades (simulados).                                  | PENDIENTE |
+|   4 |   8 | Teoría    | Regresión simple: planteamiento, supuestos, interpretación.                                                           | PENDIENTE |
+|   5 |   9 | Teoría    | Estimación MCO sin matrices: dos ortogonalidades ⇒ $\hat\beta_1, \hat\beta_0$.                                       | PENDIENTE |
+|   5 |  10 | Teoría    | Bondad de ajuste: SST = SSR + SSE (Pitágoras). $R^2 = \cos^2\theta$.                                                  | PENDIENTE |
+|   6 |  11 | Lab Gretl | Regresión simple (reales); comprobar $\sum e_i = 0$, $\sum x_i e_i = 0$, $R^2$.                                       | PENDIENTE |
+|   6 |  12 | Teoría    | Propiedades MCO: insesgadez y varianza de $\hat\beta_1$ (deducción simple).                                           | PENDIENTE |
+|   7 |  13 | Teoría    | Regresión múltiple: $\mathrm{span}$, notación matricial, ecuaciones normales.                                         | PENDIENTE |
+|   7 |  14 | Lab Gretl | Regresión múltiple (reales): coeficientes parciales, $R^2$ ajustado.                                                  | PENDIENTE |
+|   8 |  15 | Teoría    | Ceteris paribus y Frisch–Waugh (intuición geométrica). [OPCIONAL]                                                     | PENDIENTE |
+|   8 |  16 | Teoría    | Inferencia: distribución de $\hat\beta$ (enunciada), EE, IC, contraste $t$.                                           | PENDIENTE |
+|   9 |  17 | Lab Gretl | Contrastes $t$ e IC (reales); cobertura de IC (simulados).                                                            | PENDIENTE |
+|   9 |  18 | Teoría    | Contraste $F$: significación conjunta, restricciones lineales.                                                        | PENDIENTE |
+|  10 |  19 | Lab Gretl | Aplicar $F$ (reales); distribución de $F$ bajo $H_0$ (simulados).                                                     | PENDIENTE |
+|  10 |  20 | Teoría    | Diagnóstico I: colinealidad (geometría: casi alineados). VIF.                                                         | PENDIENTE |
+|  11 |  21 | Lab Gretl | Colinealidad creciente (simulados): oscilación de $\hat\beta$. Caso real.                                             | PENDIENTE |
+|  11 |  22 | Teoría    | Formas funcionales con logaritmos: log-nivel, nivel-log, log-log. Elasticidades. Cobb–Douglas.                        | PENDIENTE |
+|  12 |  23 | Teoría    | Variables dummy e interacciones; modelos log + dummy. Interpretación de coeficientes.                                 | PENDIENTE |
+|  12 |  24 | Teoría    | Diagnóstico II: heterocedasticidad (BP, White), errores robustos. Especificación (RESET, breve).                      | PENDIENTE |
+|  13 |  25 | Lab Gretl | Caso integrador (reales): logs, dummies, diagnóstico (incl. palanca/Cook). Cierre: diccionario geometría ↔ esperanza. | PENDIENTE |
+
+#+begin_center
+/Nota sobre la doble numeración/: el número de sesión (columna «Ses») es el
+identificador canónico para §10 y para las referencias cruzadas entre fichas.
+El número de lección que aparece en el título de los ficheros =.org=
+(p. ej. «Lección 4» en =S05-Lecc04.org=) puede no coincidir con el número
+de sesión cuando el curso arrancó numerando las lecciones de teoría por
+separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
+#+end_center
+
+** 7.1 Ficha — Sesión 1 (Introducción)
+- /Fichero/: =S01-Lecc01.org=.
+- /Título y entrega/: apuntes + 11 transparencias + 12 preguntas.
+- /Frase de Frisch/ en portada: "la econometría es la medida de lo económico".
+- /Tres usos/: descripción, predicción, inferencia causal. El curso se centra en (1) y (2); (3) solo se siembra.
+- /Mantra/: "correlación no implica causalidad" (policías/criminalidad, luz/miopía).
+- /Regla pedagógica/: "preferimos entender bien pocas cosas que entender mal muchas".
+- /Idea-puente central sembrada/: "los datos como vectores de $\mathbb{R}^n$"; media = proyección, varianza = Pitágoras, regresión = proyección, $R^2 = \cos^2\theta$. Invocable como "ya lo anticipamos en la sesión 1".
+- /Ejemplos motivadores (anclas reutilizables)/: Mincer (salarios/educación), demanda de tabaco, crecimiento (instituciones), evaluación de políticas, precios vivienda (Boston, Harrison–Rubinfeld 1978).
+- /Tipología de datos/: sección cruzada (foco), series temporales ("como si fueran" sección cruzada), panel (NO se trata).
+- /Gretl/: instalación pedida antes de la sesión 4 (gretl.sourceforge.net).
+- /Bibliografía citada/: Strang (cap. 1), 3Blue1Brown, Bujosa, Wooldridge (2020), Angrist & Pischke, Kennedy, Adkins.
+
+** 7.2 Ficha — Sesión 2 (El lenguaje geométrico, I)
+- /Fichero/: =S02-Lecc02.org=.
+- /Título/: "Lección 2. El lenguaje geométrico del curso (parte I)". Abstract: "Vectores en $\mathbb{R}^n$, producto escalar y norma". Entrega: apuntes + 8 transparencias + 12 preguntas.
+- Sesión enteramente matemática; la recompensa estadística llega "a partir de la sesión 5".
+- /Decisiones a respetar/:
+  - Vector = lista ordenada de números. Se rechaza la imagen de bachillerato (segmento orientado); la flecha es convención visual.
+  - Operaciones componente a componente; propiedades enunciadas, no demostradas. Regla del paralelogramo como truco visual.
+  - /Combinación lineal/ = objeto central. Semilla invocable: "la regresión será una combinación lineal de los regresores".
+  - Producto escalar $\boldsymbol{x}\cdot\boldsymbol{y}=\sum x_i y_i$ devuelve un número; su valor aislado no tiene interpretación geométrica (llega en sesión 3).
+  - Norma euclídea $\|\boldsymbol{x}\|=\sqrt{\boldsymbol{x}\cdot\boldsymbol{x}}$, justificada vía Pitágoras en $\mathbb{R}^2$/$\mathbb{R}^3$ (la deducción de la norma vive aquí) y extendida por analogía. Anuncia el Pitágoras general de la sesión 3.
+  - /Doble norma sembrada/: euclídea vs. estadística $\|\boldsymbol{x}\|_{\text{est}}=\sqrt{\tfrac1n\sum x_i^2}$; con la estadística $\|\boldsymbol{1}\|_{\text{est}}=1$. El factor $1/n$ se deriva con detalle en la sesión 5 (justificación completa de por qué $\|\boldsymbol{1}\|_e=\sqrt n$ es un problema) y explica por qué $R^2$ aparece a veces como cociente de sumas y a veces de varianzas. La sesión 7 solo lo verifica numéricamente con datos.
+- /Ejemplos numéricos canónicos (reutilizables)/: $\boldsymbol{x}=(3,2)$; $(2,1)+(1,2)=(3,3)$; $2(2,1)=(4,2)$; en la transparencia, $\boldsymbol{x}=(3,-1,2)$, $\boldsymbol{y}=(1,2,\tfrac12)$ ⇒ $\boldsymbol{x}\cdot\boldsymbol{y}=2$; en las notas skip, $\boldsymbol{x}=(3,-1,2,4)$, $\boldsymbol{y}=(1,2,0,-1)$ ⇒ $\boldsymbol{x}\cdot\boldsymbol{y}=-3$, $\|\boldsymbol{x}\|=\sqrt{30}\approx5{,}48$. PNGs en =img/S02-Lecc02/=.
+- /Formato confirmado/: figuras =.png= con fuentes tikz conservadas; tabla de recapitulación con =\Vert=; decimales con coma.
+
+** 7.3 Ficha — Sesión 3 (El lenguaje geométrico, II)
+- /Fichero/: =S03-Lecc03.org=.
+- /Título/: "Lección 3. El lenguaje geométrico del curso (parte II)". Abstract: "Ángulo, ortogonalidad y teorema de Pitágoras en $\mathbb{R}^n$". Cita: "La ortogonalidad es la piedra angular de la regresión". Entrega: apuntes + 8 transparencias + 12 preguntas.
+- /Contenido demostrado (invocable)/:
+  - Pitágoras en $\mathbb{R}^n$ (la deducción $\mathbb{R}^2$/$\mathbb{R}^3$ está en sesión 2), vía el /cuadrado del binomio vectorial/ $\|\boldsymbol{x}+\boldsymbol{y}\|^2=\|\boldsymbol{x}\|^2+2(\boldsymbol{x}\cdot\boldsymbol{y})+\|\boldsymbol{y}\|^2$, identidad reutilizable (Cauchy–Schwarz, triangular, varianza sesión 7).
+  - Coseno del ángulo $\cos\theta = \frac{\boldsymbol{a}\cdot\boldsymbol{b}}{\|\boldsymbol{a}\|\|\boldsymbol{b}\|}$, demostrado. Mensaje martillo: "la fórmula del coseno es consecuencia de Pitágoras".
+  - Ortogonalidad $\boldsymbol{a}\cdot\boldsymbol{b}=0 \Leftrightarrow \boldsymbol{a}\perp\boldsymbol{b}$; $\boldsymbol{0}$ ortogonal a todos.
+  - /Cauchy–Schwarz/ $|\boldsymbol{a}\cdot\boldsymbol{b}|\leq\|\boldsymbol{a}\|\|\boldsymbol{b}\|$ SÍ se demuestra, con $\boldsymbol{h}=\boldsymbol{b}-\alpha\boldsymbol{a}$, $\alpha=\frac{\boldsymbol{a}\cdot\boldsymbol{b}}{\boldsymbol{a}\cdot\boldsymbol{a}}$; igualdad ⇔ alineados. Semilla: $\alpha\boldsymbol{a}$ es la proyección de $\boldsymbol{b}$ sobre $\boldsymbol{a}$ (se cobra en sesión 5).
+  - Ángulo riguroso, vector unitario, normalización, vectores alineados ($\cos\theta=\pm1$). Avance Tema: colinealidad.
+  - Desigualdad triangular (vía C–S). Distancia $d(\boldsymbol{x},\boldsymbol{y})=\|\boldsymbol{x}-\boldsymbol{y}\|$. Anuncio: "MCO minimiza $\|\boldsymbol{y}-\hat{\boldsymbol{y}}\|$".
+- /Formato confirmado/: figuras en =img/S03-Lecc03/= (versiones en fila =_fila.png=, =_ancho.png= e individuales); demostraciones cerradas con =$\blacksquare$=; tabla con =\Vert=.
+- /Bibliografía/: Bujosa cap. 11; Strang (2016) §1.2; 3Blue1Brown cap. 9.
+- /Guiño a la sesión 5 (a cumplir)/: la distancia como corazón de la regresión; $\boldsymbol{h}=\boldsymbol{b}-\alpha\boldsymbol{a}$ como proyección ortogonal; con $\boldsymbol{a}=\boldsymbol{1}$, $\alpha$ será la media. La sesión 5 debe abrir cobrando esta semilla.
+
+** 7.4 Ficha — Sesión 4 (Laboratorio Gretl I)
+- /Ficheros/: =S04-Prct-A-hprice2.org= y =S04-Prct-B-boston.org=.
+- /Estructura/: dos prácticas encadenadas en clase.
+  - /Práctica A (=S04-Prct-A-hprice2=)/: interfaz de Gretl, carga del dataset de muestra =hprice2= (pestaña //~Wooldridge~//), estadísticos descriptivos, histograma (=freq price --plot=display=) y diagrama de caja (=boxplot price --output=display=). Sin actividad sobre =chas= (=hprice2= no la contiene).
+  - /Práctica B (=S04-Prct-B-boston=)/: importar datos desde internet. Carga del Boston Housing original (=data/boston.csv=), que sí contiene =chas=. Actividades: descargar CSV, importar (//~Archivo -> Abrir datos -> Importar -> texto/CSV~//), declarar sección cruzada, examinar =chas= (media = proporción de unos), comparar con =hprice2=.
+- /Datos/: ver fuente canónica §8.
+- /Nombres de columnas del CSV/ (minúsculas): =crim,zn,indus,chas,nox,rm,age,dis,rad,tax,ptratio,b,lstat,medv=. =medv= = valor mediano en miles de dólares; =chas= = dummy del río Charles.
+- /Semilla geométrica/: la pregunta 5 de la Práctica B presenta =chas= como vector de $\mathbb{R}^{506}$ y pregunta por su relación con $\boldsymbol{1}$. Conecta con la interpretación de dummies y con $\mu_{\boldsymbol{x}}$ como proyección.
+- /Promesa abierta/: queda pendiente la /Práctica de dispersión + correlación/ (ficha §7.5), que sembrará $r=\cos\theta$ con vectores centrados (anticipo de la sesión 7).
+
+** 7.5 Ficha — Práctica dispersión + correlación
+- /Estado/: FUSIONADA dentro de =S07-Prct-A-hprice2.org= (decisión tomada al
+  planificar la sesión 7). No se escribe como fichero independiente. Esta
+  ficha se mantiene solo como registro de la decisión, para que una futura
+  lectura del Plan no la interprete como pendiente de escribir por separado.
+
+** 7.6 Ficha — Sesión 5 (Proyección sobre una recta)
+- /Anclaje e idea rectora/: cobra la semilla de la sesión 3. Proyección sobre
+  una recta minimizando \(\|\boldsymbol{y}-\alpha\boldsymbol{a}\|^2\), con resultado
+  \(\alpha=\frac{\boldsymbol{a}\cdot\boldsymbol{y}}{\boldsymbol{a}\cdot\boldsymbol{a}}\).
+  El caso \(\boldsymbol{a}=\boldsymbol{1}\) da la media, y el residuo es ortogonal
+  (\(\sum e_i = 0\)). Mensaje central, dicho explícitamente: /la media aritmética
+  ES un ajuste MCO cuyo único regresor es la columna de unos/ \(\boldsymbol{1}\);
+  calcular una media es, sin saberlo, resolver una regresión. Esto prepara la
+  sesión 10 (regresión simple = "añadir la dirección \(\boldsymbol{x}\)" al mismo
+  procedimiento).
+- /Promesas a cumplir/: abrir cobrando \(\boldsymbol{h}=\boldsymbol{b}-\alpha\boldsymbol{a}\);
+  conectar con "MCO minimiza \(\|\boldsymbol{y}-\hat{\boldsymbol{y}}\|\)".
+- /Demostración central/: proyección como minimización; comentar de pasada la
+  visión equivalente vía cálculo de una variable.
+- /Notación fijada en esta sesión/: el escalar de la proyección se denota
+  siempre $\alpha$ (coherente con =S03=). El sombrero $\hat{\cdot}$ se reserva
+  para los estimadores MCO de las sesiones 9 y 10.
+- /Definiciones inline a incluir/:
+  - $\mathcal{L}(\boldsymbol{a})$: "el conjunto de todos los múltiplos de
+    $\boldsymbol{a}$ (geométricamente, una recta en $\mathbb{R}^n$)".
+  - $\mathcal{L}(\boldsymbol{1})^\perp$: "el conjunto de todos los vectores
+    ortogonales a $\boldsymbol{1}$, es decir, el conjunto de vectores cuya
+    media es cero".
+- /Notebook asociado/: =S05-Notebook01.org= (fichero independiente).
+  Visualización interactiva en $\mathbb{R}^3$ (3 datos) de $\boldsymbol{1}$,
+  $\boldsymbol{y}$, $\boldsymbol{\mathop{\overline{y}}}=\mu_{\boldsymbol{y}}\boldsymbol{1}$
+  y $\boldsymbol{e}=\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$.
+  Se referencia al final de la sesión 5 como actividad complementaria.
+  No sustituye al Lab Gretl de la sesión 7.
+- /Frase de herencia de propiedades/: al introducir $\langle\cdot,\cdot\rangle_s$,
+  incluir en los apuntes desarrollados un párrafo explícito que diga que las
+  demostraciones de Pitágoras, Cauchy–Schwarz y la desigualdad triangular de
+  la lección 3 solo usaron simetría, linealidad y positividad del producto
+  escalar, propiedades que $\langle\cdot,\cdot\rangle_s$ hereda; por tanto,
+  todos esos resultados siguen siendo válidos con el producto estadístico y
+  su norma asociada $\|\cdot\|_s$, sin modificar ninguna demostración.
+- /Definición inline de $\mathcal{L}(\boldsymbol{a})$/: en los apuntes
+  desarrollados de la primera sección ("De dónde venimos"), en la primera
+  aparición de $\mathcal{L}(\boldsymbol{a})$, añadir entre paréntesis: "el
+  conjunto de todos los múltiplos de $\boldsymbol{a}$; geométricamente, una
+  recta en $\mathbb{R}^n$ que pasa por el origen".
+- /Conexión con lección 2/: en los apuntes desarrollados de "El producto
+  escalar en la estadística", el primer párrafo debe mencionar explícitamente
+  que la motivación del factor $\frac{1}{n}$ fue anticipada al final de la
+  lección 2.
+- /Convención de numeración/: todas las referencias cruzadas visibles para el
+  alumno en este fichero usan numeración de lecciones ("lección 3", "lección
+  2"), no de sesiones.
+
+** 7.7 Ficha — Sesión 6 (Varianza vía Pitágoras)
+- /Fichero/: =S06-Lecc05.org=.
+- /Título y entrega/: "Lección 5. Varianza, covarianza y correlación". Abstract:
+  "La varianza como el cuadrado de una norma, la covarianza como un producto
+  escalar y la correlación como el coseno de un ángulo. El teorema de
+  Pitágoras de la lección 4, ahora con dos vectores." Cita: "Dos vectores,
+  un ángulo: ahí vive toda la correlación." Entrega: apuntes + 11
+  transparencias + 12 preguntas.
+- /Anclaje e idea rectora/: cobra la identidad pitagórica sembrada en la
+  sesión 5 ($\|\boldsymbol{y}\|^2=\|\boldsymbol{\mathop{\overline{y}}}\|^2+\sigma_{\boldsymbol{y}}^2$)
+  y la desarrolla en dos direcciones: (i) la varianza como "fórmula de
+  cálculo" ($\sigma_{\boldsymbol{x}}^2=\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2$),
+  consecuencia directa de Pitágoras y de $\|\boldsymbol{1}\|=1$, no un truco
+  algebraico; (ii) el salto de UN vector a DOS vectores $\boldsymbol{x},\boldsymbol{y}$,
+  con la covarianza como producto escalar de sus vectores en desviaciones y
+  la correlación como el coseno del ángulo entre ellos. Mensaje martillo de
+  la sesión: "covarianza es producto escalar; correlación es coseno; nada de
+  esto es nuevo, es la geometría de las lecciones 2 y 3 aplicada a los
+  vectores en desviaciones". Mensaje central complementario: "la varianza es
+  la covarianza de un vector consigo mismo"; todo lo dicho de la covarianza
+  se aplica a la varianza como caso particular.
+- /Demostración central/: $\sigma_{\boldsymbol{x}}^2=\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2$,
+  vía $\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|^2=\mu_{\boldsymbol{x}}^2$ (homogeneidad
+  de la norma, lección 2, con $\|\boldsymbol{1}\|=1$).
+- /Terminología fijada/: se usa sistemáticamente /vector en desviaciones/
+  (nunca "residuo", término reservado para los modelos de regresión con
+  regresores no constantes). Terminología alineada con la canónica ya fijada en §4.2.1.
+- /Notación heredada sin subíndice/: $\langle\cdot,\cdot\rangle$ y $\|\cdot\|$
+  ya sin subíndice $s$ (la sesión 5 mantiene el subíndice $s$ hasta su
+  propio cierre; es esta sesión 6 quien anuncia explícitamente, en su
+  introducción, la supresión y la asume a partir de ahí); el fichero lo
+  recuerda explícitamente antes de usarlo.
+- La convención $\rho_{\boldsymbol{x}\boldsymbol{y}}$ (nunca $r_{\boldsymbol{x}\boldsymbol{y}}$) ya quedó fijada en el guiño final de la lección 4 (S05); esta sesión simplemente la mantiene, sin necesidad de repetir la aclaración.
+- /Definiciones formales/: las tres definiciones centrales (varianza,
+  covarianza, correlación) se presentan en =#+begin_quote= directamente en
+  transparencias.
+- /Ejemplos numéricos canónicos (reutilizables)/:
+  - En $\mathbb{R}^2$ (retomando la lección 4): $\boldsymbol{x}=(2,4)$,
+    $\boldsymbol{z}=(2,-6)$ ⇒ $\rho_{\boldsymbol{x}\boldsymbol{z}}=-1$ (vectores
+    en desviaciones alineados: $(4,-4)=-4\cdot(-1,1)$).
+  - En $\mathbb{R}^3$ (ejemplo nuevo de esta sesión): $\boldsymbol{x}=(1,2,3)$,
+    $\boldsymbol{y}=(2,2,5)$ ⇒ $\mu_{\boldsymbol{x}}=2$, $\mu_{\boldsymbol{y}}=3$,
+    $\sigma_{\boldsymbol{x}}^2=2/3$, $\sigma_{\boldsymbol{y}}^2=2$,
+    $\sigma_{\boldsymbol{x}\boldsymbol{y}}=1$, $\rho_{\boldsymbol{x}\boldsymbol{y}}=\sqrt3/2$
+    ($\theta=30^o$). Ejemplo de ángulo "intermedio" (ni ortogonal ni alineado),
+    imposible en $\mathbb{R}^2$; reutilizable en las sesiones 9/10 (regresión
+    simple).
+- /Resultado nuevo, no anticipado en fichas anteriores/: en $\mathbb{R}^2$,
+  $\mathcal{L}(\boldsymbol{1})^\perp$ tiene dimensión $1$ (una recta) ⇒ dos
+  vectores en desviaciones cualesquiera están siempre alineados ⇒ $\rho=\pm1$
+  forzosamente; se necesita $n\geq3$ para correlaciones intermedias. /Primer
+  desarrollo completo/ en el curso del argumento "dimensión de un subespacio"
+  y de la cuenta $\dim\mathcal{L}(\boldsymbol{1})^\perp=n-1$ (la sesión 5 ya
+  lo había mencionado brevemente, con una nota a pie de página que remitía
+  aquí); este desarrollo justifica por qué las figuras de esta lección se
+  dibujan en $\mathbb{R}^3$.
+- /Propiedades de traslación y escala/: invarianza de covarianza y
+  correlación ante traslaciones; homogeneidad ante escala
+  ($\sigma_{\boldsymbol{x}'\boldsymbol{y}}=\lambda\sigma_{\boldsymbol{x}\boldsymbol{y}}$,
+  $\rho_{\boldsymbol{x}'\boldsymbol{y}}=\pm\rho_{\boldsymbol{x}\boldsymbol{y}}$
+  según el signo de $\lambda$); y, como caso particular $\boldsymbol{y}=\boldsymbol{x}$,
+  invarianza y homogeneidad /cuadrática/ de la propia varianza:
+  $\sigma_{\boldsymbol{x}+a\boldsymbol{1}}^2=\sigma_{\boldsymbol{x}}^2$ y
+  $\sigma_{\lambda\boldsymbol{x}}^2=\lambda^2\sigma_{\boldsymbol{x}}^2$.
+- /Notación matricial anunciada (no operativa)/: primera aparición en el
+  curso de $\boldsymbol{\mathsf{X}}=[\boldsymbol{1};\;\boldsymbol{x}]$ (matriz
+  con =\mathsf=, columnas separadas por =;=) y de la doble lectura de
+  $\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$ (productos escalares por fila /
+  combinación lineal por columnas), en el "Guiño a la sesión siguiente".
+  Solo se anuncia; no se opera con ella hasta la sesión 13.
+- /Bibliografía citada/: Wooldridge (2020), Apéndice C (repaso clásico sin la
+  lectura geométrica, y también como referencia para el efecto de
+  transformaciones lineales sobre media, varianza y covarianza); Strang
+  (2016), varianza como norma.
+- /Promesas (semillas)/:
+  - Cobra: doble norma euclídea/estadística (sembrada ses. 2, cobro
+    principal en ses. 5; aquí se reutiliza para varianza y covarianza).
+  - Cobra: $\rho=\cos\theta$ con vectores centrados (sembrada ses. 3/5).
+  - Siembra: $R^2=\cos^2\theta$ entre $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$
+    y $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$, y
+    "pendiente = correlación reescalada por $\sigma_y/\sigma_x$", a cobrar en
+    ses. 9 (pendiente) y ses. 10 ($R^2$). Ver fila correspondiente en §10.
+  - Siembra (solo anuncio): notación matricial
+    $\boldsymbol{\mathsf{X}}=[\boldsymbol{1};\;\boldsymbol{x}]$ y doble lectura
+    de $\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$, a desarrollar en la
+    sesión 13.
+- /Convención de numeración/: todas las referencias cruzadas usan "lección N"
+  (nunca "sesión N"), conforme a §4.6.
+- /Guiño a la sesión siguiente/: laboratorio en Gretl (verificación numérica
+  de Pitágoras, covarianza y correlación, con datos reales y simulados); y
+  anuncio explícito de la lección 6 (regresión lineal simple) como
+  proyección sobre $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, con
+  $R^2=\cos^2\theta$ como cierre.
+
+** 7.8 Ficha — Sesión 7 (Lab Gretl: descriptivos)
+- /Fichero A (ESCRITO)/: =S07-Prct-A-hprice2.org= — "Correlación como coseno:
+  verificación geométrica con hprice2".
+- /Decisión de fusión/: absorbe el objetivo de la práctica adicional §7.5
+  (dispersión + correlación, $\rho=\cos\theta$ con vectores centrados). §7.5
+  NO se escribe como fichero independiente; queda marcada como "fusionada
+  en S07-Prct-A" (ver nota en su propia ficha más abajo).
+- /Datos/: =hprice2= (mismas variables `price`, `rooms`, `nox` ya etiquetadas
+  en S04-Prct-A); sin datos nuevos.
+- /Estructura real/: 5 actividades (recordatorio descriptivos; cov/corr por
+  pares; diagramas de dispersión; verificación geométrica "a mano" del
+  coseno —vectores centrados, comprobación de ortogonalidad, producto
+  escalar y normas sin dividir por $n$—; síntesis signo/ángulo) + un
+  /Apéndice/ que demuestra explícitamente, programando en Gretl, que $\rho$
+  no cambia si se divide por $n$, por $n-1$, o no se divide en absoluto
+  (refuerzo de la invarianza de la correlación ante reescalados, lección 5).
+- /Pendiente en esta misma sesión (Lab Gretl, ses. 7)/:
+  - =S07-Prct-B-...=: generación de datos simulados + verificación numérica
+    de las identidades de las lecciones 4-5 (norma de $\boldsymbol{1}$,
+    Pitágoras/fórmula de cálculo de la varianza, covarianza, $\rho=\cos\theta$).
+- /Prácticas adicionales decididas (fuera de numeración de sesiones)/:
+  1. /Univariante/ (a escribir a continuación, en esta misma conversación):
+     conjuntos de datos diseñados a mano con idéntica (o casi idéntica)
+     media y desviación típica pero formas muy distintas (simétrica,
+     asimétrica, bimodal, con atípico), para motivar por qué media/sd no
+     bastan y reforzar histograma/boxplot (ya vistos en S04-Prct-A). No usa
+     correlación ni recta de regresión.
+  2. /Bivariante "tipo Anscombe"/ (RESERVADA para después de la sesión 10):
+     se usará el cuarteto de Anscombe (1973) clásico —no uno diseñado desde
+     cero, por la dificultad de igualar $\rho$ sin herramientas de
+     optimización—, para mostrar que la misma recta/mismo $R^2$ pueden
+     ocultar nubes de puntos radicalmente distintas. Se pospone
+     deliberadamente porque mostrar la recta ajustada antes de la sesión 9
+     (MCO) sería prematuro.
+- /Guiño a la sesión siguiente/: el Apéndice de S07-Prct-A cierra con la
+  idea de que la invarianza de $\rho$ ante el divisor "no es un capricho de
+  Gretl", sino consecuencia de ser un coseno — conecta directamente con la
+  sesión 8 (regresión simple), donde se retoma el mismo par de vectores en
+  desviaciones para obtener la pendiente como correlación reescalada.
+
+- /Fichero B (ESCRITO)/: =S07-Prct-B-verificacion-geometrica.org= —
+  "Verificación geométrica: identidades con datos simulados". Datos
+  generados por el propio guion (sin fichero externo), con control total de
+  su construcción.
+- /Estructura real/: 4 actividades obligatorias (vector pequeño n=6 con
+  verificación manual de ortogonalidad y Pitágoras; comprobación con n=50
+  en distribución simétrica y muy asimétrica; relación lineal conocida
+  y=2+3x+u como puente a la sesión 8; síntesis) + 1 actividad OPCIONAL
+  (repetición masiva mediante un `loop` presentado como "caja negra", sin
+  explicar su mecánica, para responder a la pregunta "¿esto se cumple
+  siempre?" si surge en clase).
+- /Matiz añadido en la Actividad 1/: a diferencia de la correlación
+  (invariante al divisor, Apéndice de S07-Prct-A), la identidad de
+  Pitágoras/varianza SÍ depende de si se divide por $n$ o por $(n-1)$; se
+  verifica explícitamente que solo el divisor $1/n$ (convención
+  estadística del curso, lección 5) hace la identidad exacta.
+- /Estado de la sesión 7 (Lab Gretl) completo/: A (real, correlación como
+  coseno), B (simulado, verificación de identidades + puente a regresión),
+  C (curado algorítmicamente, momentos no bastan). Las tres ESCRITAS.
+- /Pendiente, fuera de la numeración de sesiones/: el cuarteto de Anscombe
+  (bivariante), reservado para después de la sesión 10 (ver ficha §7.5 y
+  actualización previa).
+
+- /Fichero C (ESCRITO)/: =S07-Prct-C-momentos-no-bastan.org= — "Los momentos
+  no bastan: misma media y desviación típica, formas distintas". Material
+  adicional de la propia sesión 7 (no fuera de numeración, a diferencia del
+  cuarteto de Anscombe): cuatro series generadas con formas distintas
+  (simétrica, asimetría positiva vía chi-cuadrado(2), bimodal vía mezcla de
+  normales, con atípico) y forzadas —mediante estandarización y reescalado,
+  aplicando explícitamente invarianza/homogeneidad de la lección 5— a
+  compartir media ($\mu_0=1800$) y desviación típica ($\sigma_0=250$)
+  comunes. $n=40$, parametrizado (=scalar n=), fácilmente ampliable a 60-80.
+  Incluye tabla de mediana/asimetría/curtosis y un Apéndice que explica y
+  verifica numéricamente la construcción.
+- /Naturaleza de los datos (tercera categoría, ver actualización §8)/:
+  "datos curados algorítmicamente" — ni reales ni simulados por puro azar
+  sin más: forma aleatoria + reescalado determinista para fijar momentos.
+- /Datasets de esta sesión, completos/: A (real, hprice2, correlación como
+  coseno), B (simulado, verificación de identidades), C (curado algorítmicamente, momentos no bastan — ESCRITO).
+
+** 7.9 Ficha — Sesión 8 (Regresión simple)
+- /Contenido/: planteamiento, supuestos, interpretación.
+
+** 7.10 Ficha — Sesión 9 (MCO sin matrices)
+- /Fichero/: =S09-Lecc07.org=.
+- /Anclaje e idea rectora/: el ajuste MCO presentado en su forma más simple
+  (la media muestral, donde \(\boldsymbol{1}\) es el único regresor, cobrado
+  en la sesión 5) se amplía ahora con un segundo regresor \(\boldsymbol{x}\).
+  La regresión simple se resuelve imponiendo /dos condiciones de ortogonalidad/:
+  \(\boldsymbol{e}\cdot\boldsymbol{1}=0\) y \(\boldsymbol{e}\cdot\boldsymbol{x}=0\),
+  sin recurrir a matrices. De ellas se deducen \(\hat\beta_1\) y \(\hat\beta_0\).
+  Mensaje explícito: añadir \(\boldsymbol{x}\) es exactamente el mismo
+  procedimiento de proyección que ya conocemos; la media era el caso \(k=1\).
+- /Promesas a cobrar/:
+  - Ses. 3: "MCO minimiza \(\|\boldsymbol{y}-\hat{\boldsymbol{y}}\|\)" (cobro
+    principal aquí, con la geometría completa).
+  - Ses. 5: "la media ES un ajuste MCO con único regresor \(\boldsymbol{1}\)"
+    (se invoca explícitamente al presentar la generalización).
+- /Demostración/: deducción algebraica de \(\hat\beta_1\) y \(\hat\beta_0\)
+  a partir de las dos ecuaciones normales escalares. No se usan matrices
+  (llegan en la sesión 13). Se puede mencionar de pasada la visión de
+  minimización de \(\|\boldsymbol{e}\|^2\) como vía alternativa equivalente.
+- /Lo que siembra para sesiones posteriores/:
+  - Ses. 10: las dos ortogonalidades implican \(\text{SST}=\text{SSR}+\text{SSE}\)
+    (Pitágoras); sembrar la pregunta "¿cómo de bueno es el ajuste?".
+  - Ses. 14: la misma lógica con \(k\) regresores agrupa las ortogonalidades
+    en \(\boldsymbol{e}\boldsymbol{\mathsf{X}}=\boldsymbol{0}\); sembrar la notación
+    matricial como compresión natural de lo ya hecho.
+- /Ejercicio tipo test/: centrado en identificar qué condición de ortogonalidad
+  implica qué (p. ej., \(\boldsymbol{e}\cdot\boldsymbol{1}=0 \Leftrightarrow
+  \bar{e}=0\); \(\boldsymbol{e}\cdot\boldsymbol{x}=0 \Leftrightarrow
+  \sum x_i e_i=0\)).
+
+** 7.11 Ficha — Sesión 10 (Bondad de ajuste)
+- /Anclaje/: Pitágoras SST = SSR + SSE; $R^2=\cos^2\theta$ entre $\boldsymbol{y}$ centrado y $\hat{\boldsymbol{y}}$ centrado.
+
+** 7.12 Ficha — Sesión 11 (Lab Gretl: regresión simple)
+- /Contenido/: regresión simple (reales); comprobar $\sum e_i=0$, $\sum x_i e_i=0$, $R^2$.
+
+** 7.13 Ficha — Sesión 12 (Propiedades MCO)
+- /Contenido/: insesgadez y varianza de $\hat\beta_1$ (deducción simple). Solo para $\hat\beta_1$ de la regresión simple; para múltiple se enuncian (ver §9.4).
+
+** 7.14 Ficha — Sesión 13 (Regresión múltiple)
+- /Anclaje/: regresores como $\mathrm{span}$. Se cobra la doble lectura de $\boldsymbol{A}\boldsymbol{x}$ y se introduce matriz–matriz al servicio de $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$. Ecuaciones normales como condición de ortogonalidad. La inversa se menciona pero no se usa (ver §9.2).
+- /Nota/: aquí aparecen naturalmente familia ortogonal y Pitágoras generalizado (pospuestos desde sesión 3).
+
+** 7.15 Ficha — Sesión 14 (Lab Gretl: regresión múltiple)
+- /Contenido/: coeficientes parciales, $R^2$ ajustado (reales).
+
+** 7.16 Ficha — Sesión 15 (Frisch–Waugh) [OPCIONAL]
+- /Anclaje/: Frisch–Waugh como geometría de proyectar sobre residuos.
+- /Recorte/: primera candidata a eliminar si el ritmo aprieta (§9.3).
+
+** 7.17 Ficha — Sesión 16 (Inferencia: $t$)
+- /Contenido/: distribución de $\hat\beta$ (enunciada, sin demostrar), EE, IC, contraste $t$.
+
+** 7.18 Ficha — Sesión 17 (Lab Gretl: $t$ e IC)
+- /Contenido/: contrastes $t$ e IC (reales); cobertura de IC (simulados).
+
+** 7.19 Ficha — Sesión 18 (Contraste $F$)
+- /Contenido/: significación conjunta, restricciones lineales.
+- /Recorte/: puede limitarse al $F$ de significación conjunta, omitiendo restricciones lineales generales (§9.3).
+
+** 7.20 Ficha — Sesión 19 (Lab Gretl: $F$)
+- /Contenido/: aplicar $F$ (reales); distribución de $F$ bajo $H_0$ (simulados).
+
+** 7.21 Ficha — Sesión 20 (Colinealidad)
+- /Anclaje/: colinealidad = regresores casi alineados ($\cos\theta\to\pm1$) ⇒ proyección inestable. VIF.
+
+** 7.22 Ficha — Sesión 21 (Lab Gretl: colinealidad)
+- /Contenido/: colinealidad creciente (simulados): oscilación de $\hat\beta$. Caso real.
+
+** 7.23 Ficha — Sesión 22 (Formas funcionales con logaritmos)
+- /Sin anclaje geométrico fuerte/, y así debe decirse. Interpretación aplicada del coeficiente según forma funcional.
+- /Contenido/: log-nivel, nivel-log, log-log. Elasticidades. Lectura del coeficiente como cambio absoluto, porcentual, efecto marginal o elasticidad.
+- /Ejemplo canónico (siempre)/: Cobb–Douglas $\log Q=\beta_0+\alpha\log L+\gamma\log K+u$, con $\alpha,\gamma$ elasticidades parciales y $\alpha+\gamma$ rendimientos a escala (mención).
+
+** 7.24 Ficha — Sesión 23 (Dummies e interacciones)
+- /Sin anclaje geométrico fuerte/, y así debe decirse.
+- /Contenido/: una dummy desplaza el intercepto (diferencia de nivel); una interacción cambia la pendiente (el efecto de $x$ depende del grupo). Con logaritmos, el coeficiente de la dummy se lee como diferencia porcentual aproximada. Modelos log + dummy. Énfasis en la interpretación.
+- /Datos/: dummy natural =chas= en el Boston original (=data/boston.csv=), no en =hprice2= (ver §8).
+- /Recorte/: si aprieta el tiempo, puede recortarse la parte de interacciones, conservando dummies simples y los modelos log (§9.3).
+
+** 7.25 Ficha — Sesión 24 (Heterocedasticidad)
+- /Sin anclaje geométrico forzado/.
+- /Contenido/: heterocedasticidad (BP, White), errores robustos. Especificación funcional (RESET) reducida a una mención dentro de esta sesión (§9.3, §9.4).
+
+** 7.26 Ficha — Sesión 25 (Lab integrador + cierre)
+- /Contenido/: caso integrador (reales) con logs, dummies y diagnóstico, incluida /palanca/ (posición geométrica del punto) y distancia de Cook, tratadas de forma aplicada aquí (no como sesión teórica autónoma — §9.4).
+- /Datos/: Boston original (=data/boston.csv=) — ver §8.
+- /Cierre (no evaluable)/: diccionario geometría ↔ probabilidad, como analogía explícita, no demostrada: vectores ↔ v.a.; $\frac1n\langle\cdot,\cdot\rangle$ ↔ $E[\cdot]$; media ↔ proyección sobre constantes; regresión ↔ esperanza condicional.
+
+* 8. Uso de datos en laboratorios (fuente canónica)
+
+Cada laboratorio debe explicitar /por qué/ se elige cada tipo de dato.
+
+- /Datos simulados/: para /verificar/ propiedades teóricas (insesgadez, identidades de ortogonalidad, efectos de colinealidad, cobertura de IC, distribución de estadísticos bajo $H_0$). Permiten "ver" que la teoría funciona.
+- /Datos reales/: para /interpretar/ y enfrentar la ambigüedad empírica.
+- /Datos curados algorítmicamente/: ni observaciones reales ni simulaciones
+  "puras" sin más objetivo que replicar un proceso aleatorio genérico. Se
+  diseñan deliberadamente —a menudo generando una forma aleatoria y
+  reescalándola después para forzar ciertos estadísticos objetivo— para
+  ilustrar un fenómeno pedagógico concreto (p. ej., que estadísticos
+  idénticos no garantizan distribuciones parecidas). Ejemplo: S07-Prct-C
+  (misma media y sd, formas distintas); el futuro cuarteto de Anscombe
+  (misma media, sd y correlación, formas distintas) pertenece también a
+  esta categoría.
+
+/Datasets (decisión canónica)/:
+- =hprice2= (dataset de muestra de Gretl; Boston, Harrison–Rubinfeld 1978): versión "de manual". /NO contiene =chas= ni dicotómicas/. Se carga desde la pestaña //~Wooldridge~//.
+- /Boston original/ (=data/boston.csv= del repositorio): contiene =chas= (dummy del río Charles) y =medv= (precio en miles de dólares). Es el /dataset integrador/ para dummies (sesión 24) y para la sesión integradora (sesión 26).
+
+* 9. Principios pedagógicos y de diseño
+
+#+begin_center
+/NO ES LECTURA DE ARRANQUE./ Esta sección documenta el /porqué/ del diseño del curso, no el /cómo/ escribir una sesión. 
+Para redactar, basta con §7 (fichas), §10 (semillas) y §4–§6 (formato). Consultar §9 únicamente en estos casos:
+- §9.1 — si necesitas justificar una decisión pedagógica ya tomada (no añade instrucciones nuevas de redacción).
+- §9.2 — si hay duda sobre si un resultado debe demostrarse, enunciarse o omitirse. Es fuente canónica (referenciada en §2, regla de oro).
+- §9.3 — si el usuario indica restricción de tiempo: recortes condicionales en orden de prioridad.
+- §9.4 — recortes estructurales ya asumidos; no reabrir.
+#+end_center
+
+** 9.1 Principios pedagógicos
+1. /Separar rigor de analogía y decirlo en voz alta/. Rigor en $\mathbb{R}^n$; analogía (no demostrada) en el espacio de v.a. Honestidad epistemológica.
+2. /Secuencia $\mathbb{R}^2 \to \mathbb{R}^3 \to \mathbb{R}^n$ sin axiomática/. El ángulo se define en $\mathbb{R}^n$ a partir del producto escalar.
+3. /Producto escalar estándar primero; el factor $1/n$ después/: anticipado en la sesión 2, derivado con rigor en la sesión 5, verificado numéricamente en la sesión 7.
+4. /Proyección como condiciones de ortogonalidad/: demostración central del curso. La notación matricial se anuncia pronto y de forma ligera (como mero anuncio, en el guiño final de la sesión 6), pero solo se opera con ella desde la sesión 13, como compresión de lo ya conocido, en paralelo con sumatorios. Se distingue /notación matricial/ (lenguaje compacto, amiga de la geometría) de /maquinaria de álgebra lineal/ (inversa, rango: ver §9.2).
+5. /Doble lectura de la media, sembrada para la notación matricial/: la
+media no es solo "proyección" (el vector $\boldsymbol{\mathop{\overline{y}}}$);
+es también, en pie de igualdad, el producto escalar
+$\mu_{\boldsymbol{y}}=\langle\boldsymbol{y},\boldsymbol{1}\rangle$ (el
+escalar). Esta doble lectura, presentada con detalle en la sesión 5, debe
+recordarse brevemente (sin repetirla en extenso) en la apertura de la
+sesión 6, en el cierre de la sesión 5 y en el guiño final de la sesión 6
+hacia la notación matricial, porque es precisamente la lectura que se
+generalizará como doble lectura de $\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$
+(productos escalares por fila / combinación lineal por columnas) a partir
+de la sesión 13.
+6. /Regresión simple vía dos condiciones de ortogonalidad/.
+7. /$R^2=\cos^2\theta$ y $r=\cos\theta$ con vectores centrados/.
+8. /Cierre del curso como "diccionario" geometría ↔ probabilidad/, no evaluable, presentado como analogía.
+9. /Geometría en el Tema 5/: sí en colinealidad y observaciones influyentes (palanca); no forzarla en heterocedasticidad, especificación funcional ni formas funcionales.
+10. /Interpretación de coeficientes como hilo conductor aplicado/: cambio absoluto, cambio porcentual, efecto marginal o elasticidad según la forma funcional. Se desarrolla en logaritmos y dummies.
+11. /Logaritmos y elasticidades/: log-nivel, nivel-log, log-log por su interpretación económica. Ejemplo canónico Cobb–Douglas (ver ficha §7.24).
+12. /Variables dicotómicas e interacciones/: dummy ⇒ desplazamiento de intercepto; interacción ⇒ cambio de pendiente. Énfasis en interpretación (ver ficha §7.25).
+
+** 9.2 Qué se demuestra y qué no
+/Se demuestra (rigor en $\mathbb{R}^n$)/:
+- /Cauchy–Schwarz/, con $\boldsymbol{h}=\boldsymbol{b}-\alpha\boldsymbol{a}$, $\alpha=\frac{\boldsymbol{a}\cdot\boldsymbol{b}}{\boldsymbol{a}\cdot\boldsymbol{a}}$ (rigor + anticipa la proyección).
+- Teorema de Pitágoras en $\mathbb{R}^n$, coseno del ángulo, desigualdad triangular (sesión 3).
+- Proyección sobre una recta como minimización (sesión 5).
+- Insesgadez y varianza de $\hat\beta_1$ en regresión simple (sesión 13).
+
+/Se usa como herramienta/ (notación, no maquinaria): producto escalar, transposición de /matrices/, producto matriz–vector y vector–matriz (doble lectura) y, solo en la sesión 14, producto matriz–matriz al servicio de $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$.
+
+/No se usa / no se demuestra/:
+- /Inversa $(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}$/ como vía de resolución de MCO: se menciona su existencia, pero el camino es siempre la condición de ortogonalidad $\boldsymbol{e}\boldsymbol{\mathsf{X}}=\boldsymbol{0}$. La fórmula con inversa oscurece la geometría (principio 1).
+- Maquinaria de álgebra lineal: rango, álgebra matricial como cálculo autónomo.
+- WLS como proyección ponderada, Gram–Schmidt, espacios de Hilbert: a lo sumo una frase de cierre.
+- Distribuciones muestrales de los estadísticos: enunciadas sin demostrar (Tema 4).
+- Insesgadez y varianza en regresión múltiple: enunciadas, no demostradas.
+
+/Pospuesto/: familia ortogonal y Pitágoras generalizado, hasta que aparezcan en regresión múltiple (sesión 14).
+
+** 9.3 Recortes condicionales (si no cupiera el tiempo)
+En orden de prioridad:
+1. Sesión 16 (Frisch–Waugh), única teórica [OPCIONAL].
+2. El bloque RESET de la sesión 25, reducible a una mención.
+3. Sesión 19 limitada al $F$ de significación conjunta (omitir restricciones lineales generales).
+4. En la sesión 24, recortar /interacciones/, conservando dummies simples y los modelos log con su interpretación. (Cobb–Douglas es irrenunciable: condición fijada en su ficha §7.24.)
+
+** 9.4 Recortes estructurales (ya asumidos)
+- Tema 4 (inferencia) reducido a lo esencial: contrastes $t$ y $F$, IC, interpretación; distribuciones muestrales enunciadas sin demostrar.
+- Tema 5: se priorizan colinealidad, formas funcionales (logaritmos y dummies) y heterocedasticidad. La especificación funcional (RESET) se reduce e integra en la sesión 25.
+- Observaciones influyentes (palanca, distancia de Cook): tratadas de forma aplicada en el laboratorio integrador (sesión 26), no como sesión teórica autónoma.
+- Insesgadez y varianza se demuestran solo para $\hat\beta_1$ de la regresión simple; para múltiple se enuncian.
+- Matrices: se introducen lo más tarde posible (sesión 14), solo como notación compacta.
+
+* 10 Semillas vivas (promesas plantadas ↔ dónde se cobran)
+
+Tabla de coherencia (control interno). Antes de escribir la sesión N,
+comprobar qué semillas debe COBRAR y cuáles deja plantadas. Fuente: las
+fichas §7; si se modifica una promesa, actualizar aquí.
+
+#+begin_center
+/Convención de lectura de la columna "Cobrada en"/: cuando una semilla se
+cobra en varias sesiones, la *sesión en negrita* es el /cobro principal/
+(donde la promesa se salda); las demás son /refuerzos/ o /aplicaciones/.
+Se admite notación abreviada en las celdas.
+
+/Orden de las filas/: la tabla se mantiene ordenada por el número de sesión
+del /cobro principal/ (la sesión en negrita de la columna "Cobrada en"),
+ascendente; a igualdad de cobro principal, por el número de "Sembrada en",
+ascendente. Al añadir una fila nueva, insértese en la posición que le
+corresponda según este criterio, no simplemente al final.
+#+end_center
+
+| <50>                                                                                                                                                                                     | <20>                                                                                                                | <80>                                                                                                                                                         |
+| Semilla / promesa                                                                                                                                                                        | Sembrada en                                                                                                         | Cobrada en                                                                                                                                                   |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Producto escalar sin interpretación geométrica aún                                                                                                                                       | Ses. 2                                                                                                              | *3*                                                                                                                                                          |
+| Pitágoras en \(\mathbb{R}^2/\mathbb{R}^3\) ⇒ general                                                                                                                                    | Ses. 2                                                                                                              | *3*                                                                                                                                                          |
+| Triangular en $\mathbb{R}^2/\mathbb{R}^3$ ⇒ Cauchy–Schwarz y triangular en $\mathbb{R}^n$                                                                                               | Ses. 2 (norma vía Pitágoras clásico)                                                                                | *3*                                                                                                                                                          |
+| Datos como vectores de \(\mathbb{R}^n\)                                                                                                                                                  | Ses. 1                                                                                                              | *5*, 6, 9, 10                                                                                                                                                |
+| Media como producto escalar $\mu_{\boldsymbol{y}}=\langle\boldsymbol{y},\boldsymbol{1}\rangle$ (no solo como proyección) | Ses. 5 ("dos caras de la misma moneda") | *5* (presentación simultánea); recordatorios breves en 6 (apertura) y guiño final de 6; cobro pleno como doble lectura de $\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$ en *13* |
+| Doble norma: euclídea vs. estadística ($1/n$) sembrada                                                                                                                                   | Ses. 2                                                                                                              | *5* (introducción, con conexión explícita a la promesa de la lección 2); 6 (varianza, covarianza, $r$)                                                       |
+| \(\boldsymbol{h}=\boldsymbol{b}-\alpha\boldsymbol{a}\) = proyec.                                                                                                                         | Ses. 3                                                                                                              | *5*                                                                                                                                                          |
+| Con \(\boldsymbol{a}=\boldsymbol{1}\), \(\alpha\) será la media                                                                                                                          | Ses. 3                                                                                                              | *5*                                                                                                                                                          |
+| Media como ajuste MCO con único regresor \(\boldsymbol{1}\)                                                                                                                              | Ses. 3                                                                                                              | *5*; 9 (gen.)                                                                                                                                                |
+| Residuo ortogonal (\(\sum e_i=0\))                                                                                                                                                       | Ses. 3 (\(\boldsymbol{h}\perp\boldsymbol{a}\))                                                                      | *5*; 9, 10, 11                                                                                                                                               |
+| Pitágoras, C–S y triangular válidos con cualquier producto escalar que tenga simetría, linealidad y positividad (herencia de propiedades)                                                | Ses. 5 (al introducir $\langle\cdot,\cdot\rangle_s$)                                                                | *5* (se afirma), 6 (se usa implícitamente)                                                                                                                   |
+| Producto escalar estadístico \(\langle\cdot,\cdot\rangle_s = \frac{1}{n}(\cdot\cdot)\) introducido                                                                                       | Ses. 5                                                                                                              | *5*; 6 (reutiliza con varianza y covarianza)                                                                                                                 |
+| \(\rho_{\boldsymbol{x}\boldsymbol{y}}=\cos\theta\) con vectores centrados                                                                                                                | Ses. 3 (coseno general), 5 (guiño), 6 (conexión con \(\rho\))                                                       | *6*; 7 (verificación numérica con datos reales, S07-Prct-A)                                                                                                  |
+| Covarianza como producto escalar de vectores centrados                                                                                                                                   | Ses. 5 (en el "Guiño a la sesión siguiente", no en el cuerpo)                                                       | *6*                                                                                                                                                          |
+| Identidad $\Vert\boldsymbol{y}\Vert^2 = \mu_{\boldsymbol{y}}^2 + \sigma_{\boldsymbol{y}}^2$ (Pitágoras estadístico)                                                                      | Ses. 5                                                                                                              | *6*                                                                                                                                                          |
+| Dimensión informal de un subespacio (mención con nota a pie de página)                                                                                                                   | Ses. 5 (nota breve, remite a ses. 6)                                                                                | *6* (desarrollo completo, con nota a pie de página propia)                                                                                                   |
+| Invarianza de \(\rho\) ante el divisor ($n$, $n-1$, sin dividir) / homogeneidad de la norma                                                                                              | Ses. 5-6 (homogeneidad de la norma; invarianza de \(\rho\) ante escala)                                             | *7* (S07-Prct-A, Apéndice: verificación programada explícita)                                                                                                |
+| Los momentos no bastan: misma media y sd, formas distintas (univariante); necesidad de histogramas y boxplots además de estadísticos escalares                                           | Ses. 4 (histograma y boxplot), 6 (media, sd, asimetría/curtosis como resúmenes parciales)                           | *7* (S07-Prct-C)                                                                                                                                             |
+| Reescalado de un vector en desviaciones para fijar media y sd (estandarizar y reescalar) como aplicación constructiva de la invarianza y la homogeneidad                                 | Ses. 5-6                                                                                                            | *7* (S07-Prct-C, construcción explícita + verificación)                                                                                                      |
+| La distancia \(d(\boldsymbol{x},\boldsymbol{y})=\Vert\boldsymbol{x}-\boldsymbol{y}\Vert\) como corazón de la regresión: "MCO minimiza \(\Vert\boldsymbol{y}-\hat{\boldsymbol{y}}\Vert\)" | Ses. 3                                                                                                              | 5 (primera aplicación: la media minimiza la distancia a \(\mathcal{L}(\boldsymbol{1})\)); *9* (generalización completa: regresión simple con dos regresores) |
+| Media como ajuste MCO (único regresor \(\boldsymbol{1}\)), generalización                                                                                                                | Ses. 5                                                                                                              | *9*; 10 (refuerzo)                                                                                                                                           |
+| Condición de primer orden = condición de ortogonalidad                                                                                                                                   | Ses. 5                                                                                                              | *9*, 13                                                                                                                                                      |
+| Notación $\boldsymbol{\mathop{\widehat{y}}},\boldsymbol{\mathop{\widehat{e}}}$ y "una condición de ortogonalidad por regresor" (preview)                                                 | Ses. 5                                                                                                              | *9*; 13                                                                                                                                                      |
+| Regresión simple = combinación lineal ...                                                                                                                                                | Germen en Ses. 3 (...); desarrollada en Ses. 5 (guiño, ambas partes: pendiente y $R^2$)                             | *9*                                                                                                                                                          |
+| $R^2=\cos^2\theta$; pendiente = correlación reescalada | Ses. 5 (ambas partes); reforzada en Ses. 6 /(solo la parte de $R^2$, no la de la pendiente)/ | Cobrada en *9* (pendiente); *10* ($R^2$); ... |
+| Ejemplo con pendiente conocida ($\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$), construido para anticipar la estimación MCO de la pendiente a partir solo de los datos observados | Ses. 7 (S07-Prct-B, Actividad 3) | *9* (deducción de $\hat\beta_1$); 11 (refuerzo en laboratorio) |
+| Dos ortogonalidades ⇒ SST = SSR + SSE (Pitágoras)                                                                                                                                       | Ses. 9                                                                                                              | *10*                                                                                                                                                         |
+| Uso de =loop= como "caja negra" (repetición masiva sin explicar mecánica), opcional                                                                                                      | Ses. 7 (S07-Prct-B, Actividad 5, OPCIONAL)                                                                          | *12* (mecánica completa del =loop=, Monte Carlo de insesgadez); 17, 19                                                                                       |
+| Combinación lineal ⇒ regresión combina regresores                                                                                                                                       | Ses. 2                                                                                                              | *13*                                                                                                                                                         |
+| Familia ortogonal y Pitágoras generalizado (POSPUESTOS)                                                                                                                                  | Ses. 3                                                                                                              | *13*                                                                                                                                                         |
+| Notación matricial ligera (compresión de lo conocido)                                                                                                                                    | Ses. 6                                                                                                              | *13*                                                                                                                                                         |
+| Lectura doble de \(\boldsymbol{A}\boldsymbol{x}\)                                                                                                                                        | Ses. 6                                                                                                              | *13*                                                                                                                                                         |
+| Notación matricial como compresión natural de las ortogonalidades                                                                                                                        | Ses. 9                                                                                                              | *13*                                                                                                                                                         |
+| Insesgadez simple ⇒ en múltiple solo se enuncia                                                                                                                                         | Ses. 12                                                                                                             | *13* (enunciado); 16                                                                                                                                         |
+| Inversa \((\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\): existe, no se usa                                                                                                | Ses. 13                                                                                                             | (anti-promesa: nunca)                                                                                                                                        |
+| Colinealidad (vectores alineados, \(\cos\theta=\pm1\))                                                                                                                                   | Ses. 3                                                                                                              | 13 (refuerzo); *20*                                                                                                                                          |
+| =chas= como vector de \(\mathbb{R}^{506}\) y relación con \(\boldsymbol{1}\)                                                                                                             | Ses. 4                                                                                                              | *23*                                                                                                                                                         |
+| Diccionario geometría ↔ probabilidad (siembra inicial)                                                                                                                                   | Ses. 1                                                                                                              | 13, 16 (refuerzos); *25* (cierre)                                                                                                                            |
+| Diccionario geometría ↔ probabilidad (refuerzo: span y E[·])                                                                                                                             | Ses. 13                                                                                                             | *25* (cierre)                                                                                                                                                |
+| Diccionario geometría ↔ probabilidad (refuerzo: regresión y E[Y∣X])                                                                                                                      | Ses. 16                                                                                                             | *25* (cierre)                                                                                                                                                |
+| Cuarteto tipo Anscombe: mismos resúmenes numéricos básicos y misma recta/mismo \(R^2\), pero nubes de puntos radicalmente distintas                                                      | Ses. 7 (S07-Prct-C, sembrada como analogía univariante \(\to\) bivariante; decisión de diseño de esta conversación) | Práctica adicional bivariante, RESERVADA para después de *10*                                                                                                |
+| Ni media+sd ni asimetría+curtosis agotan la forma de la distribución; la bimodalidad exige visualización                                                                                 | Ses. 7 (S07-Prct-C)                                                                                                 | Práctica adicional bivariante tipo Anscombe, RESERVADA para después de *10*                                                                                  |
+
+

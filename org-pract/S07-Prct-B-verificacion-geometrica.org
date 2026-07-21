@@ -117,9 +117,20 @@ print y
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ortogonalidad n=6
-#+begin_src gretl :tangle ./guiones/S07-Prct-B-verificacion-geometrica.inp :eval no
+#+begin_src gretl :eval no
 printf "Suma de (y - mu_y) = %.10f   (debe ser 0)\n", sum(y - mean(y))
 #+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet ortogonalidad.txt
+    <<Ortogonalidad n=6>>
+end outfile
+#+end_src
+
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/ortogonalidad.txt example
 #+latex: }
 
 *** Pitágoras (fórmula de cálculo de la varianza)
@@ -129,7 +140,7 @@ Recuerde la identidad de la lección 5: $\mu_{\boldsymbol{y}^2}=\mu_{\boldsymbol
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Pitagoras n=6 con divisor n
-#+begin_src gretl :tangle ./guiones/S07-Prct-B-verificacion-geometrica.inp :eval no
+#+begin_src gretl :eval no
 scalar mu_y      = mean(y)
 scalar var_n     = sum((y - mu_y)^2) / $nobs        # divisor 1/n (convención del curso)
 scalar mu_y2     = mean(y^2)
@@ -139,15 +150,39 @@ printf "mu_y^2 + sigma_y^2   = %.6f   (divisor n)\n", mu_y^2 + var_n
 #+end_src
 #+latex: }
 
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet ortogonalidad-n.txt
+    <<Pitagoras n=6 con divisor n>>
+end outfile
+#+end_src
+
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/ortogonalidad-n.txt example
+#+latex: }
+
+
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
 /IMPORTANTE --- a diferencia de la correlación (Apéndice de la práctica A), aquí el divisor SÍ importa: la identidad de Pitágoras usa el producto escalar estadístico con divisor $1/n$ (lección 5). Compruebe qué ocurre si, en su lugar, divide por $(n-1)$ (el convenio muestral habitual en estadística inferencial, y el que usa por defecto la función/=var()=/ de Gretl):/
 #+latex: }
 
 #+NAME: Pitagoras n=6 con divisor n-1
-#+begin_src gretl :tangle ./guiones/S07-Prct-B-verificacion-geometrica.inp :eval no
+#+begin_src gretl :eval no
 scalar var_n1 = sum((y - mu_y)^2) / ($nobs - 1)     # divisor 1/(n-1)
 printf "mu_y^2 + var(n-1)    = %.6f   (divisor n-1, ya NO coincide con mu_y2)\n", mu_y^2 + var_n1
 #+end_src
+
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet ortogonalidad-n-1.txt
+    <<Pitagoras n=6 con divisor n-1>>
+end outfile
+#+end_src
+
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/ortogonalidad-n-1.txt example
+#+latex: }
+
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
 /A diferencia del coseno (un cociente, invariante al divisor), la varianza es una magnitud absoluta: cambiar el divisor SÍ cambia su valor numérico. La identidad de Pitágoras de la lección 5 se demostró con el divisor $1/n$; es EXACTA con ese convenio, y solo aproximada (para $n$ grande) con $(n-1)$./
@@ -160,7 +195,7 @@ Repetimos las mismas comprobaciones (ortogonalidad y Pitágoras) con dos series 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Dos series n=50 a mano
-#+begin_src gretl :tangle ./guiones/S07-Prct-B-verificacion-geometrica.inp :eval no
+#+begin_src gretl :eval no
 nulldata 50 --preserve
 set seed 54321
 
@@ -185,18 +220,28 @@ printf "%-10s -> ortogonalidad: %.10f    Pitágoras (desajuste): %.10f\n", "y_ch
 #+end_src
 #+latex: }
 
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet dosSeriesn50amano.txt
+    <<Dos series n=50 a mano>>
+end outfile
+#+end_src
+
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
 /¿Cambia algo el resultado por tratarse de una distribución simétrica o muy asimétrica? ¿Por qué no?/
 #+latex: }
 
-*/ Una variante más compacta (opcional): el mismo cálculo con =loop=
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/dosSeriesn50amano.txt example
+#+latex: }
 
-Repetir a mano el mismo bloque de código para cada serie es razonable con dos series, pero se volvería tedioso con veinte. Gretl ofrece el comando =loop= precisamente para automatizar este tipo de repeticiones. Como en la Actividad 5, no pretendemos aquí explicar la mecánica de los bucles (=loop=) de Gretl —eso se hará con detalle en la sesión de propiedades de MCO (lección 9) y en las prácticas de las sesiones 17 y 19—; preséntelo simplemente como una =caja negra'' que aplica, serie a serie, exactamente el mismo cálculo que acabamos de hacer a mano. La ventaja se aprecia enseguida: con muy poco código adicional podríamos repetir esta misma comprobación sobre diez, veinte o cien series distintas, sin copiar el bloque una y otra vez.
+*** Una variante más compacta (opcional): el mismo cálculo con =loop=
+
+Repetir a mano el mismo bloque de código para cada serie es razonable con dos series, pero se volvería tedioso con veinte. Gretl ofrece el comando =loop= precisamente para automatizar este tipo de repeticiones. Al igual que ocurrirá en la Actividad 5, no pretendemos aquí explicar la mecánica de los bucles (=loop=) de Gretl —eso se hará con detalle en la sesión de propiedades de MCO (lección 9) y en futuras prácticas sobre inferencia (contrastes $t$ y $F$)—; aquí lo presentamos simplemente como una ``caja negra'' que aplica, serie a serie, exactamente el mismo cálculo que acabamos de hacer a mano. La ventaja se aprecia enseguida: con muy poco código adicional podríamos repetir esta misma comprobación sobre diez, veinte o cien series distintas, sin copiar el bloque una y otra vez.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos (variante con =loop=, mismo resultado que arriba)/:
 #+NAME: Dos series n=50 con loop
-#+begin_src gretl :tangle ./guiones/S07-Prct-B-verificacion-geometrica.inp :eval no
+#+begin_src gretl :eval no
 loop foreach i y_normal y_chi2 --quiet
     scalar mu    = mean($i)
     scalar var_n = sum(($i - mu)^2) / $nobs
@@ -205,6 +250,16 @@ loop foreach i y_normal y_chi2 --quiet
     printf "%-10s -> ortogonalidad: %.10f    Pitágoras (desajuste): %.10f\n", "$i", ortog, pitag
 endloop
 #+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet dosSeriesn50conloop.txt
+    <<Dos series n=50 con loop>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/dosSeriesn50conloop.txt example
 #+latex: }
 
 * Actividad 3 - Dos vectores con relación conocida (puente a la regresión)
@@ -224,18 +279,28 @@ series y = 2 + 3*x + u
 #+end_src
 #+latex: }
 
-*** Covarianza como producto escalar de centrados
+*** Covarianza como producto escalar de vectores centrados
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Covarianza manual
-#+begin_src gretl :tangle ./guiones/S07-Prct-B-verificacion-geometrica.inp :eval no
+#+begin_src gretl :eval no
 scalar x_c_dot_y_c = sum((x - mean(x)) * (y - mean(y)))
 scalar cov_manual  = x_c_dot_y_c / $nobs
 
 printf "Covarianza \"a mano\" (divisor n) = %.6f\n", cov_manual
 printf "cov(x,y) de Gretl (divisor n-1)  = %.6f\n", cov(x,y)
 #+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet covarianzamanual.txt
+    <<Covarianza manual>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/covarianzamanual.txt example
 #+latex: }
 
 *** Correlación como coseno
@@ -253,8 +318,23 @@ printf "corr(x,y) de Gretl  = %.6f\n", corr(x,y)
 #+end_src
 #+latex: }
 
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet correlacioncomocosenoxy.txt
+    <<Correlacion como coseno xy>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/correlacioncomocosenoxy.txt example
+#+latex: }
+
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-/Aquí conocemos la "verdad": $y$ se construyó con pendiente 3 respecto a $x$. En la próxima sesión veremos cómo/ recuperar /esa pendiente a partir solo de los datos observados, sin conocerla de antemano (estimación MCO)./
+/¿Qué valor obtendremos para la correlación si construimos $\boldsymbol{y}$ con la fórmula $\boldsymbol{y}=2+3\boldsymbol{x}$? (es decir, sin $\boldsymbol{u}$)./
+#+latex: }
+
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Aquí conocemos la ``verdad'': $\boldsymbol{y}$ se construyó con pendiente 3 respecto a $\boldsymbol{x}$. En la próxima sesión veremos cómo/ recuperar /esa pendiente a partir solo de los datos observados, sin conocerla de antemano (estimación MCO)./
 #+latex: }
 
 * Actividad 4 - Síntesis
@@ -264,13 +344,13 @@ Estas identidades —ortogonalidad, Pitágoras, covarianza como producto escalar
 * Actividad 5 (OPCIONAL, según el tiempo disponible y las preguntas) - ¿Y si repetimos esto cientos de veces?
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-/Esta actividad es opcional: es probable que no dé tiempo a cubrirla en clase. Resérvela para si surge la pregunta natural: "¿esto se cumple siempre, o ha sido casualidad de esta muestra concreta?" No se pretende aquí explicar la mecánica de los bucles (=loop=) de Gretl --eso se hará con detalle en la sesión de propiedades de MCO (sesión 12) y en las prácticas de las sesiones 17 y 19--; preséntelo simplemente como una "caja negra" que repite la verificación cientos de veces con una muestra nueva en cada repetición./
+/Esta actividad es opcional: es probable que no dé tiempo a cubrirla en clase. Está reservada para si surge la pregunta natural: ``¿esto se cumple siempre, o ha sido casualidad de esta muestra concreta?'' No se pretende aquí explicar la mecánica de los bucles (=loop=) de Gretl --eso se hará con detalle en la sesión de propiedades de MCO (lección 9) y en las prácticas sobre inferencia (contrastes $t$ y $F$)--; aquí se presenta como una ``caja negra'' que repite la verificación cientos de veces con una muestra nueva en cada repetición./
 #+latex: }
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Loop opcional de repeticion masiva
-#+begin_src gretl :tangle ./guiones/S07-Prct-B-verificacion-geometrica.inp :eval no
+#+begin_src gretl :eval no
 nulldata 30 --preserve
 set seed 987654
 
@@ -313,8 +393,18 @@ printf "  Desviación MÁXIMA rho = cos(theta) : %.10f\n", max_dev_rho
 #+end_src
 #+latex: }
 
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet loopopcionalderepeticionmasiva.txt
+    <<Loop opcional de repeticion masiva>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/loopopcionalderepeticionmasiva.txt example
+#+latex: }
+
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-/Las tres desviaciones máximas deberían ser minúsculas (del orden de $10^{-10}$ o menores), del mismo orden que en una sola muestra (Actividad 1). Esto ilustra que no importa/ cuántos /ejemplos distintos se generen: las identidades se cumplen siempre, no "casi siempre"./
+/Las tres desviaciones máximas deberían ser minúsculas (por errores de redondeo de Gretl) o directamente cero. Esto ilustra que no importa/ cuántos /ejemplos distintos se generen: las identidades geométricas se cumplen _siempre_./
 #+latex: }
 
 * Preguntas de interpretación para la clase
@@ -322,13 +412,13 @@ printf "  Desviación MÁXIMA rho = cos(theta) : %.10f\n", max_dev_rho
 1. ¿Por qué el resultado de la Actividad 2 no depende de si la distribución es simétrica o muy asimétrica?
 2. En la Actividad 1, ¿por qué la identidad de Pitágoras deja de cumplirse exactamente al dividir por $(n-1)$ en vez de por $n$? ¿Es esto una contradicción con la invarianza de la correlación vista en la práctica A?
 3. En la Actividad 3, ¿qué relación hay entre el signo de la pendiente conocida (3, positiva) y el signo de la correlación obtenida?
-4. ¿Qué diferencia hay entre "verificar" una identidad (lo que hacemos en esta práctica) y "demostrarla" (lo que se hizo en las lecciones 4-6)?
+4. ¿Qué diferencia hay entre ``verificar'' una identidad (lo que hacemos en esta práctica) y ``demostrarla'' (lo que se hizo en las lecciones 4-6)?
 5. (Si se trabajó la Actividad 5) Tras 500 repeticiones con muestras distintas cada vez, ¿por qué la desviación máxima observada sigue siendo del mismo orden de magnitud que en una sola muestra, en vez de ir creciendo con el número de repeticiones?
 
 *** Para profundizar
 
 - Véanse las lecciones 3, 4 y 5 (=S03-Lecc03.org=, =S05-Lecc04.org=, =S06-Lecc05.org=) para las demostraciones completas de lo que aquí se verifica numéricamente.
-- Cottrell, A. y Lucchetti, R. (2023). /Gretl User's Guide/. Funciones de generación aleatoria (=normal()=, =uniform()=), =set seed=, y estructura básica del comando =loop= (consulta puntual; su uso sistemático se explica en la sesión 12).
+- Cottrell, A. y Lucchetti, R. (2023). /Gretl User's Guide/. Funciones de generación aleatoria (=normal()=, =uniform()=), =set seed=, y estructura básica del comando =loop= (consulta puntual; su uso sistemático se explica en la lección 9).
 
 #+LATEX: \clearpage
 
@@ -350,4 +440,4 @@ printf "  Desviación MÁXIMA rho = cos(theta) : %.10f\n", max_dev_rho
 
 4. Diferencia entre ``verificar'' y ``demostrar'' una identidad. Demostrar es un argumento /general/, válido para cualquier vector de $\mathbb{R}^n$, basado únicamente en las propiedades del producto escalar y la norma (lecciones 4-6): una vez hecho, sabemos que la identidad se cumple /siempre/, sin excepción. Verificar es comprobar numéricamente que la identidad se cumple en un /caso concreto/ (un vector particular, real o simulado): por sí sola, una verificación aislada no prueba nada en general —podría ser casualidad de esos datos concretos—, pero sirve para (a) ganar confianza intuitiva, (b) detectar errores de cálculo o de comprensión, y (c) mostrar que la demostración abstracta efectivamente ``funciona'' en la práctica.
 
-5. (Actividad 5, opcional) Tras 500 repeticiones, ¿por qué la desviación máxima no crece con el número de repeticiones? Porque cada repetición es una comprobación /independiente/ de la misma identidad algebraica exacta, no una acumulación de error: en cada una de las 500 muestras nuevas, la ortogonalidad y Pitágoras se cumplen (salvo error de redondeo de la máquina, siempre del mismo orden diminuto, $10^{-10}$ o menor). No hay ningún mecanismo por el que los errores de una repetición se ``sumen'' a los de la siguiente —son 500 verificaciones independientes de un teorema, no un proceso acumulativo—. Esto contrasta con lo que veremos en la sesión 12: allí el =loop= no verificará una identidad exacta, sino que estimará una /distribución/ (la de $\hat\beta_1$ entre todas muestras), y ahí sí el número de repeticiones importa, porque cuantas más repeticiones, mejor se aproxima esa distribución empírica a la teórica.
+5. (Actividad 5, opcional) Tras 500 repeticiones, ¿por qué la desviación máxima no crece con el número de repeticiones? Porque cada repetición es una comprobación /independiente/ de la misma identidad algebraica exacta, no una acumulación de error: en cada una de las 500 muestras nuevas, la ortogonalidad y Pitágoras se cumplen (salvo error de redondeo de la máquina, siempre del mismo orden diminuto, $10^{-10}$ o menor). No hay ningún mecanismo por el que los errores de una repetición se ``sumen'' a los de la siguiente —son 500 verificaciones /numéricas/ independientes de un teorema, no un proceso acumulativo—. Esto contrasta con lo que veremos en la lección 9: allí el =loop= no verificará una identidad exacta, sino que estimará una /distribución/ (la de $\hat\beta_1$ entre todas muestras), y ahí sí el número de repeticiones importa, porque cuantas más repeticiones, mejor se aproxima esa distribución empírica a la teórica.
