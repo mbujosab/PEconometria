@@ -48,26 +48,34 @@ series D_z = (D_bruto - mean(D_bruto)) / sd(D_bruto)
 series D   = mu0 + sigma0 * D_z
 setinfo D -d "Salario mensual, Consultora Este (con un valor atípico)" -n "Consultora Este"
 
-summary A B C D
+outfile --quiet estadisticos.txt
+    summary A B C D --simple
+end outfile
 
-freq A --plot=display
-freq B --plot=display
-freq C --plot=display
-freq D --plot=display
+freq A --plot="histA.png"
+freq B --plot="histB.png"
+freq C --plot="histC.png"
+freq D --plot="histD.png"
 
-boxplot A B C D --output=display
+boxplot A B C D --output="boxplotABCD.png"
 
-printf "%-15s %10s %10s %10s %10s %10s\n", "Empresa", "Media", "Mediana", "SD", "Asimetria", "Curtosis"
-printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "TechNorte",      mean(A), median(A), sd(A), skewness(A), kurtosis(A)
-printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "Comercial Sur",  mean(B), median(B), sd(B), skewness(B), kurtosis(B)
-printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "Ind. Centro",    mean(C), median(C), sd(C), skewness(C), kurtosis(C)
-printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "Consultora Este",mean(D), median(D), sd(D), skewness(D), kurtosis(D)
+outfile --quiet tablaestadisticosadicionales.txt
+    printf "%-15s %10s %10s %10s %10s %10s\n", "Empresa", "Media", "Mediana", "SD", "Asimetria", "Curtosis"
+    printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "TechNorte",      mean(A), median(A), sd(A), skewness(A), kurtosis(A)
+    printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "Comercial Sur",  mean(B), median(B), sd(B), skewness(B), kurtosis(B)
+    printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "Ind. Centro",    mean(C), median(C), sd(C), skewness(C), kurtosis(C)
+    printf "%-15s %10.2f %10.2f %10.2f %10.4f %10.4f\n", "Consultora Este",mean(D), median(D), sd(D), skewness(D), kurtosis(D)
+end outfile
 
-printf "\nVerificación: medias y sd deberían coincidir (salvo redondeo)\n"
-printf "Media    -> A: %.6f   B: %.6f   C: %.6f   D: %.6f\n", mean(A), mean(B), mean(C), mean(D)
-printf "SD       -> A: %.6f   B: %.6f   C: %.6f   D: %.6f\n", sd(A),   sd(B),   sd(C),   sd(D)
-printf "(objetivo: mu0 = %.2f ,  sigma0 = %.2f)\n", mu0, sigma0
+outfile --quiet verificacionmomentos.txt
+    printf "\nVerificación: medias y sd deberían coincidir (salvo redondeo)\n"
+    printf "Media    -> A: %.6f   B: %.6f   C: %.6f   D: %.6f\n", mean(A), mean(B), mean(C), mean(D)
+    printf "SD       -> A: %.6f   B: %.6f   C: %.6f   D: %.6f\n", sd(A),   sd(B),   sd(C),   sd(D)
+    printf "(objetivo: mu0 = %.2f ,  sigma0 = %.2f)\n", mu0, sigma0
+end outfile
 
-printf "\nChequeo de la estandarización usada en Gretl\n"
-printf "sd(A_z) = %.6f   sd(B_z) = %.6f   sd(C_z) = %.6f   sd(D_z) = %.6f\n", sd(A_z), sd(B_z), sd(C_z), sd(D_z)
-printf "mean(A_z) = %.6f   mean(B_z) = %.6f   mean(C_z) = %.6f   mean(D_z) = %.6f\n", mean(A_z), mean(B_z), mean(C_z), mean(D_z)
+outfile --quiet estandarizacioninterna.txt
+    printf "\nChequeo de la estandarización usada en Gretl\n"
+    printf "sd(A_z) = %.6f   sd(B_z) = %.6f   sd(C_z) = %.6f   sd(D_z) = %.6f\n", sd(A_z), sd(B_z), sd(C_z), sd(D_z)
+    printf "mean(A_z) = %.6f   mean(B_z) = %.6f   mean(C_z) = %.6f   mean(D_z) = %.6f\n", mean(A_z), mean(B_z), mean(C_z), mean(D_z)
+end outfile
