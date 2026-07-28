@@ -1,0 +1,50 @@
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\pgfplotsset{compat=newest}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+% Añadimos arrows.meta para dar soporte a los estilos de vectores con flechas stealth
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+% 1. DEFINIMOS LA VISTA 3D (Ángulos de rotación para los ejes)
+\tdplotsetmaincoords{55}{70}
+%\tdplotsetmaincoords{0}{0} % arriba
+
+\begin{document}
+
+\begin{tikzpicture}[xscale=1, yscale=0.22]
+  % Ejes
+  \draw[->] (-0.5,0) -- (6,0) node[right] {$x$};
+  \draw[->] (0,-0.5) -- (0,19) node[above] {$y$};
+
+  % Marcas
+  \foreach \x in {1,2,3,4,5}
+    \draw (\x,0.15) -- (\x,-0.15) node[below] {$\x$};
+  \foreach \y in {5,10,15}
+    \draw (0.1,\y) -- (-0.1,\y) node[left] {$\y$};
+
+  % Recta ajustada: yhat = 2 + 3x
+  \draw[thick,blue,domain=0:5.6] plot (\x,{2+3*\x});
+  \node[blue,right] at (5.6,{2+3*5.6}) {$\hat y=\hat\beta_0+\hat\beta_1 x$};
+
+  % Segmentos de residuo (líneas discontinuas verticales, del punto a la recta)
+  \draw[dashed,gray] (1,6)  -- (1,5);
+  \draw[dashed,gray] (2,6)  -- (2,8);
+  \draw[dashed,gray] (4,16) -- (4,14);
+  \draw[dashed,gray] (5,16) -- (5,17);
+
+  % Puntos de datos (y_i)
+  \foreach \x/\y in {1/6,2/6,3/11,4/16,5/16}
+    \node[circle,fill=black,inner sep=1.2pt] at (\x,\y) {};
+
+  % Etiqueta de un residuo concreto (el mayor en valor absoluto)
+  \node[gray,right] at (2,7) {$\hat e_2=-2$};
+\end{tikzpicture}
+\end{document}

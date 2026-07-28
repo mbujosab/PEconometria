@@ -1,0 +1,134 @@
+\documentclass[varwidth=100cm,border=5pt]{standalone}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.9}
+
+\input{notacionLinAlg.latex}
+%\input{notacionEctr.latex}
+%\input{../01notacion.latex}
+
+\usepackage{filecontents}
+\begin{filecontents*}{data.csv}
+level
+1.84919
+0.97280
+4.78586
+3.95797
+4.50753
+2.52274
+5.13984
+0.29474
+5.39946
+4.40204
+\end{filecontents*}
+
+\begin{filecontents*}{dataA.csv}
+level
+2
+4
+6
+8
+10
+9
+7
+5
+3
+1
+\end{filecontents*}
+
+\begin{filecontents*}{ddata.csv}
+level
+3.3832
+3.3832
+3.3832
+3.3832
+3.3832
+3.3832
+3.3832
+3.3832
+3.3832
+3.3832
+\end{filecontents*}
+
+\begin{filecontents*}{ddataA.csv}
+level
+5.5
+5.5
+5.5
+5.5
+5.5
+5.5
+5.5
+5.5
+5.5
+5.5
+\end{filecontents*}
+
+
+\newcommand\DrawVMean[1][]{
+\draw[#1] 
+  (axis cs:\Mean,\pgfkeysvalueof{/pgfplots/ymin}) -- 
+  (axis cs:\Mean,\pgfkeysvalueof{/pgfplots/ymax});
+}
+\newcommand\DrawHMean[1][]{
+  \draw[#1] 
+  (axis cs:\pgfkeysvalueof{/pgfplots/xmin},\Mean) -- 
+  (axis cs:\pgfkeysvalueof{/pgfplots/xmax},\Mean);
+}
+
+\newcommand\GetMean[2]{
+  \pgfplotstableread{#1}\tableA
+  \pgfplotstableset{
+    create on use/new/.style={
+    create col/expr={\pgfmathaccuma + \thisrow{#2}}},
+  }
+  \pgfplotstablegetrowsof{\tableA}
+  \pgfmathsetmacro{\NumRows}{\pgfplotsretval}
+  \pgfplotstablegetelem{\numexpr\NumRows-1\relax}{new}\of{#1} 
+  \pgfmathsetmacro{\Sum}{\pgfplotsretval}
+  \pgfmathsetmacro{\Mean}{\Sum/\NumRows}
+}
+
+\begin{document}
+
+\begin{tikzpicture}
+\GetMean{data.csv}{level}
+\begin{axis}[ymin=0]
+    \addplot[hist={bins=6,}, fill=teal, draw=teal!50!black] table[y index=0] {data.csv};
+    \DrawVMean[red, ultra thick, dashed] 
+    %\draw (axis cs:\Mean,\pgfkeysvalueof{/pgfplots/ymin}) node [green!50!black,anchor=south west] {\large $\bar{y}$};
+    %\node[anchor=south,fill=white, fill opacity=0.9, text opacity=1]  at (axis cs:\Mean,\pgfkeysvalueof{/pgfplots/ymin}) {\LARGE$\bar{y}$};  
+    \node[anchor=south,fill=white, fill opacity=0.9, text opacity=1]  at (axis cs:\Mean,0) {$\media{\Vect{y}}$};  
+\end{axis}
+\end{tikzpicture}\qquad
+%
+\begin{tikzpicture}
+\GetMean{data.csv}{level}
+  \begin{axis}
+    \addplot[teal, mark=*] table [x expr=\coordindex+1, y index=0] {data.csv};
+    \addplot[red,  mark=*] table [x expr=\coordindex+1, y index=0] {ddata.csv};
+    %\DrawHMean[red, thick] 
+    \node[anchor=north,fill=white, fill opacity=0.9, text opacity=1]  at (axis cs:1,\Mean) {\LARGE$\Vect{\Media{y}}$};  
+  \end{axis}
+\end{tikzpicture}\par\bigskip
+
+\begin{tikzpicture}
+\GetMean{dataA.csv}{level}
+\begin{axis}[ymin=0]
+    \addplot[hist={bins=6,}, fill=cyan!20, draw=cyan!50!black] table[y index=0] {dataA.csv};
+    \DrawVMean[red, ultra thick, dashed] 
+    \node[anchor=south,fill=white, fill opacity=0.9, text opacity=1]  at (axis cs:\Mean,0) {$\media{\Vect{x}}$};  
+\end{axis}
+\end{tikzpicture}\qquad
+%
+\begin{tikzpicture}
+\GetMean{dataA.csv}{level}
+  \begin{axis}
+    \addplot[cyan!50, mark=*] table [x expr=\coordindex+1, y index=0] {dataA.csv};
+    \addplot[red,     mark=*] table [x expr=\coordindex+1, y index=0] {ddataA.csv};
+    %\DrawHMean[red, thick] 
+    \node[anchor=north,fill=white, fill opacity=0.9, text opacity=1]  at (axis cs:1,\Mean) {\LARGE$\Vect{\Media{x}}$};  
+  \end{axis}
+\end{tikzpicture}
+
+\end{document}

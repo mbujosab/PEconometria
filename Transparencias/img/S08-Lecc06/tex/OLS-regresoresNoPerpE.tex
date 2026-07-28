@@ -1,0 +1,62 @@
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\pgfplotsset{compat=newest}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+% Añadimos arrows.meta para dar soporte a los estilos de vectores con flechas stealth
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+% 1. DEFINIMOS LA VISTA 3D (Ángulos de rotación para los ejes)
+\tdplotsetmaincoords{50}{90}
+%\tdplotsetmaincoords{0}{0} % arriba
+
+\begin{document}
+
+  \begin{tikzpicture} [scale=3, tdplot_main_coords, axis/.style={-,gray,very thin},
+    vector/.style={-stealth,black,very thick},
+    vector guide/.style={dashed,black,thin}]
+    
+    % standard tikz coordinate definition using x, y, z coords
+    \tdplotsetcoord{P}{1.2}{50}{70}
+    % \tdplotsetcoord{K}{1.7}{70}{55}
+    \tdplotsetcoord{O}{0}{0}{0}
+    
+    \tdplotsetrotatedcoords{0}{0}{-45}
+    
+    \tdplotsetcoord{X}{.75}{90}{45}
+    \tdplotsetcoord{Y}{1.0}{90}{90}
+    \tdplotsetcoord{Z}{1}{00}{0}
+    
+    \tkzMarkRightAngle[fill=blue!10,size=.09](O,Pxy,P) 
+    
+    % % draw axes
+    \draw[axis]  (O) -- (X) node[color=black, anchor=west]{$\mathcal{L}(\Vect{x})$};
+    \draw[axis]  (O) -- (Y) node[color=blue!60!black, anchor=west]{$\mathcal{L}(\Vect{1})$};
+    \draw[axis]  (O) -- (Z) node[anchor=south]{$\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$};
+    
+    % draw a vector from O to P
+    \draw[vector, green!50!black] (O) -- (P) node[anchor=south]{$\Vect{{y}}$};
+    
+    % Proyección sobre 1 y x
+    \draw[vector guide]         (O) -- (Pxy);
+    \draw[vector guide]         (P) -- (Pxy);
+    \draw[vector guide]         (P) -- (Pz);
+    
+    \draw[vector, color=red!70!black,->]  (O) -- (Pxy) node[anchor=west]{$\Estmc{\Vect{y}}$};
+    \draw[vector, color=gray]  (O) -- (Pz)  node[anchor=east]{$\Estmc{\Vect{e}}$};
+    
+    \coordinate (PKyy) at (0,.56,0);
+    \draw[vector guide]                       (Pxy) -- (PKyy);
+    \draw[vector guide,tdplot_rotated_coords] (Pxy) -- (0,.44,0);
+    
+    \draw[vector, color=blue!75!white]    (O) -- (PKyy)    node[anchor=south]{${\hat\beta_0\Vect{1}}$};
+    \draw[very thick,color=black,tdplot_rotated_coords,-stealth] (O) -- (0,.44,0) node[anchor=east]{${\hat\beta_1\Vect{x}}$};
+  \end{tikzpicture}
+\end{document}

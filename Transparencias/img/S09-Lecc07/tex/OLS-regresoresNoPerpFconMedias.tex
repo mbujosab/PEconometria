@@ -1,0 +1,70 @@
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\pgfplotsset{compat=newest}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+% Añadimos arrows.meta para dar soporte a los estilos de vectores con flechas stealth
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+% 1. DEFINIMOS LA VISTA 3D (Ángulos de rotación para los ejes)
+\tdplotsetmaincoords{0}{0} % vista desde arriba
+
+\begin{document}
+  \begin{tikzpicture} [scale=3, tdplot_main_coords, axis/.style={-,gray,very thin},
+    vector/.style={-stealth,black,very thick},
+    vector guide/.style={dashed,black,thin}]
+    
+    % standard tikz coordinate definition using x, y, z coords
+    \tdplotsetcoord{P}{1.2}{50}{70}
+    \tdplotsetcoord{K}{1.7}{70}{55}
+    \tdplotsetcoord{O}{0}{0}{0}
+    
+    \tdplotsetrotatedcoords{0}{0}{-45}
+    
+    \tdplotsetcoord{X}{0.7}{90}{45}
+    \tdplotsetcoord{Y}{1.05}{90}{90}
+    \tdplotsetcoord{Z}{1}{00}{0}
+    \tdplotsetcoord{bx}{0.44}{90}{45} % Múltiplo de \Vect{x}
+    \coordinate (a1) at (0,.56,0); % Múltiplo de \Vect{1}
+
+    % --- Nueva proyección ortogonal de bx sobre L(1) ---
+    \pgfmathsetmacro{\projy}{0.44*cos(45)}
+    \coordinate (footbx) at (0,\projy,0);
+
+    
+    % draw axes
+    \draw[axis]  (O) -- (X) node[color=black, anchor=south west]{$\mathcal{L}(\Vect{x})$};
+    \draw[axis]  (O) -- (Y) node[color=blue!60!black, anchor=east]{$\mathcal{L}(\Vect{1})$};
+    \draw[axis]  (O) -- (Z); % node[anchor=north east]{$z$};
+    
+    % Proyección sobre 1 y x
+    \draw[vector guide]         (O) -- (Pxy);
+    \draw[vector guide]         (P) -- (Pxy);
+  
+    \draw[very thick,color=red!70!black,->]  (O) -- (Pxy) node[anchor=west]{$\Estmc{\Vect{y}}$};
+    % \draw[thick,color=blue,->]  (O) -- (Pz)  node[anchor=east]{$\Estmc{\Vect{e}}$};
+    
+    % draw a vector from O to P
+    \draw[vector, green!50!black] (O) -- (P) node[anchor=south]{$\Vect{{y}}$};
+    
+    \draw[vector guide]                       (Pxy) -- (a1);
+    \draw[vector guide,tdplot_rotated_coords] (Pxy) -- (bx);
+
+    \draw[vector, blue!75!white]                                 (O) -- (a1) node[anchor=east]{${\hat\beta_0\Vect{1}}$};
+    \draw[very thick,color=black,tdplot_rotated_coords,-stealth] (O) -- (bx) node[anchor=north west]{${\hat\beta_1\Vect{x}}$};
+
+    % Visualización de las medias de Y y de Y ajustado por MCO
+    \draw[vector guide, color=blue]         (P) -- (Py);
+    \draw[vector guide, color=blue]         (Pxy) -- (Py);
+
+    \draw[vector guide, color=blue] (bx) -- (footbx);
+    
+  \end{tikzpicture}
+\end{document}
