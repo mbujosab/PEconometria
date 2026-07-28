@@ -35,7 +35,7 @@ La varianza como el cuadrado de una norma, la covarianza como un producto escala
 :metadata: (slideshow . ((slide_type . slide)))
 :END:
 
-- $\mu_{\boldsymbol{y}}$: escalar que multiplica a $\boldsymbol{1}$ para obtener la proyección $\boldsymbol{\mathop{\overline{y}}}$ sobre $\mathcal{L}(\boldsymbol{1})$ (recordemos: $\mu_{\boldsymbol{y}}=\langle\boldsymbol{y},\boldsymbol{1}\rangle$, la media ES ese producto escalar).
+- $\mu_{\boldsymbol{y}}$: escalar que multiplica a $\boldsymbol{1}$ para obtener la proyección $\boldsymbol{\mathop{\overline{y}}}$ sobre $\mathcal{L}(\boldsymbol{1})$ (recordemos: $\mu_{\boldsymbol{y}}=\langle\boldsymbol{y},\boldsymbol{1}\rangle_s$, la media ES ese producto escalar).
 - $\sigma_{\boldsymbol{y}}$: norma del vector en desviaciones $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\;$ (perpendicular a $\boldsymbol{1}$).
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -81,7 +81,7 @@ Primero, vamos a mirar con más detalle la propia varianza $\sigma_{\boldsymbol{
 
 Segundo —y esto es lo verdaderamente nuevo—, vamos a dejar de trabajar con un único vector y vamos a contemplar /dos/ vectores de datos simultáneamente, $\boldsymbol{x}$ e $\boldsymbol{y}$. Cuando tenemos dos vectores, dos preguntas geométricas naturales son: ¿cuánto vale el producto escalar de sus vectores en desviaciones (sus componentes variables)? y ¿qué ángulo forman dichas componentes variables? Las respuestas son, respectivamente, la /covarianza/ y la /correlación/.
 
-Antes de empezar, una cuestión de notación. En la lección 4 introdujimos el producto escalar estadístico $\langle\boldsymbol{x},\boldsymbol{y}\rangle_s=\frac1n(\boldsymbol{x}\cdot\boldsymbol{y})$ y explicamos que hereda del producto punto[fn::que es el producto escalar usual en $\mathbb{R}^n$.] $\boldsymbol{x}\cdot\boldsymbol{y}$  las tres propiedades abstractas (simetría, linealidad en ambos argumentos y no negatividad) que bastan para que sigan siendo válidos Pitágoras, Cauchy–Schwarz y la desigualdad triangular. A partir de ahora, y salvo que sea necesario contrastarlo explícitamente con el producto escalar euclídeo, omitiremos el subíndice $s$: escribiremos $\langle\boldsymbol{x},\boldsymbol{y}\rangle$ y $\|\boldsymbol{x}\|$ en todo lo que sigue, dando por hecho que estamos en el contexto estadístico que fijamos la lección pasada (es decir, con el factor de corrección $1/n$).
+# (comento este párrafo. tras leer varias lecciones, creo que quitar el subíndice no ayuda a la comprensión, pues obliga al lector a recordar en cada momento cuál es el producto escalar que se utiliza) Antes de empezar, una cuestión de notación. En la lección 4 introdujimos el producto escalar estadístico $\langle\boldsymbol{x},\boldsymbol{y}\rangle_s=\frac1n(\boldsymbol{x}\cdot\boldsymbol{y})$ y explicamos que hereda del producto punto[fn::que es el producto escalar usual en $\mathbb{R}^n$.] $\boldsymbol{x}\cdot\boldsymbol{y}$  las tres propiedades abstractas (simetría, linealidad en ambos argumentos y no negatividad) que bastan para que sigan siendo válidos Pitágoras, Cauchy–Schwarz y la desigualdad triangular. A partir de ahora, y salvo que sea necesario contrastarlo explícitamente con el producto escalar euclídeo, omitiremos el subíndice $s$: escribiremos $\langle\boldsymbol{x},\boldsymbol{y}\rangle_s$ y $\|\boldsymbol{x}\|$ en todo lo que sigue, dando por hecho que estamos en el contexto estadístico que fijamos la lección pasada (es decir, con el factor de corrección $1/n$).
 
 /Para profundizar/:
 - Wooldridge, J. /Introductory Econometrics/ (2020), Apéndice C: repaso de varianza, covarianza y correlación desde la estadística clásica (sin la lectura geométrica que estamos construyendo aquí).
@@ -96,7 +96,7 @@ Antes de empezar, una cuestión de notación. En la lección 4 introdujimos el p
 /Definición/. La /varianza/ de $\boldsymbol{y}$ es el cuadrado de la norma del vector en desviaciones respecto a la media $\;\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$:
 #+end_quote
 \[
-\|\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\|^2 \; = \;
+\|\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\|_s^2 \; = \;
 \sigma_{\boldsymbol{y}}^2 \; = \;
 \frac{1}{n}\sum_{i=1}^n (y_i-\mu_{\boldsymbol{y}})^2.
 \]
@@ -107,11 +107,11 @@ No es un concepto verdaderamente nuevo: es, literalmente, elevar al cuadrado la 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 De la identidad de Pitágoras, despejando $\sigma_{\boldsymbol{y}}^2$ tenemos:
 \[
-\|\boldsymbol{y}\|^2 = \|\boldsymbol{\mathop{\overline{y}}}\|^2 + \sigma_{\boldsymbol{y}}^2 \;\Longrightarrow\; \sigma_{\boldsymbol{y}}^2 = \|\boldsymbol{y}\|^2 - \|\boldsymbol{\mathop{\overline{y}}}\|^2.
+\|\boldsymbol{y}\|_s^2 = \|\boldsymbol{\mathop{\overline{y}}}\|_s^2 + \sigma_{\boldsymbol{y}}^2 \;\Longrightarrow\; \sigma_{\boldsymbol{y}}^2 = \|\boldsymbol{y}\|_s^2 - \|\boldsymbol{\mathop{\overline{y}}}\|_s^2.
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-¿Qué son exactamente $\|\boldsymbol{y}\|^2$ y $\|\boldsymbol{\mathop{\overline{y}}}\|^2$ en términos de sumatorios o, mejor aún,  en términos de medias aritméticas?
+¿Qué son exactamente $\|\boldsymbol{y}\|_s^2$ y $\|\boldsymbol{\mathop{\overline{y}}}\|_s^2$ en términos de sumatorios o, mejor aún,  en términos de medias aritméticas?
 
 
 *** La varianza: el cuadrado de la norma
@@ -123,15 +123,15 @@ De la identidad de Pitágoras, despejando $\sigma_{\boldsymbol{y}}^2$ tenemos:
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
 En la lección 4 llamamos $\sigma_{\boldsymbol{y}}$ a la /norma/ del vector en desviaciones $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$. La /varianza/ no es un objeto distinto: es simplemente el cuadrado de esa norma,
 \[
-\sigma_{\boldsymbol{y}}^2 = \langle\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}},\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle = \frac{1}{n}\sum_{i=1}^n(y_i-\mu_{\boldsymbol{y}})^2.
+\sigma_{\boldsymbol{y}}^2 = \langle\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}},\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle_s = \frac{1}{n}\sum_{i=1}^n(y_i-\mu_{\boldsymbol{y}})^2.
 \]
-Esta es la definición de varianza de cualquier manual de estadística descriptiva. Aquí insistimos en que no aparece de la nada: es el cuadrado de una norma, y esa norma es la que mide la distancia de $\boldsymbol{y}$ al vector constante más próximo, $\boldsymbol{\mathop{\overline{y}}}$; o, visto de otra manera, es la longitud de la componente variable de $\boldsymbol{y}$.
+Esta es la definición habitual de la varianza en estadística descriptiva. Aquí insistimos en que no aparece de la nada: es el cuadrado de una norma, y esa norma es la que mide la distancia de $\boldsymbol{y}$ al vector constante más próximo, $\boldsymbol{\mathop{\overline{y}}}$; o, visto de otra manera, es la longitud de la componente variable de $\boldsymbol{y}$.
 
-La identidad de Pitágoras de la lección 4, $\|\boldsymbol{y}\|^2 = \|\boldsymbol{\mathop{\overline{y}}}\|_s^2 + \sigma_{\boldsymbol{y}}^2$, puede despejarse para obtener
+La identidad de Pitágoras de la lección 4, $\|\boldsymbol{y}\|_s^2 = \|\boldsymbol{\mathop{\overline{y}}}\|_s^2 + \sigma_{\boldsymbol{y}}^2$, puede despejarse para obtener
 \[
-\sigma_{\boldsymbol{y}}^2 = \|\boldsymbol{y}\|^2 - \|\boldsymbol{\mathop{\overline{y}}}\|_s^2.
+\sigma_{\boldsymbol{y}}^2 = \|\boldsymbol{y}\|_s^2 - \|\boldsymbol{\mathop{\overline{y}}}\|_s^2.
 \]
-Esta forma alternativa de escribir la varianza —la que en los cursos de estadística descriptiva se suele presentar como ``fórmula de cálculo'' o ``fórmula abreviada''— no es un truco algebraico: es exactamente lo que se obtiene del teorema de Pitágoras si se despeja la varianza. Para poder calcularla solo falta saber qué es $\|\boldsymbol{y}\|^2$ en forma de sumatorios o de medias aritméticas; y eso es justamente lo que hace la siguiente transparencia.
+Esta forma alternativa de escribir la varianza —la que en los cursos de estadística descriptiva se suele presentar como ``fórmula de cálculo'' o ``fórmula abreviada''— no es un truco algebraico: es exactamente lo que se obtiene del teorema de Pitágoras si se despeja la varianza. Para poder calcularla solo falta saber qué es $\|\boldsymbol{y}\|_s^2$ en forma de sumatorios o de medias aritméticas; y eso es justamente lo que hace la siguiente transparencia.
 
 
 * Varianza y Pitágoras
@@ -145,23 +145,23 @@ Esta forma alternativa de escribir la varianza —la que en los cursos de estad�
 
 Los tres lados del triángulo rectángulo, elevados al cuadrado:
 \[
-\underbrace{\|\boldsymbol{x}\|^2}_{\text{hipotenusa}^2} \;=\; \underbrace{\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|^2}_{\text{cateto}^2} \;+\; \underbrace{\sigma_{\boldsymbol{x}}^2}_{\text{cateto}^2}.
+\underbrace{\|\boldsymbol{x}\|_s^2}_{\text{hipotenusa}^2} \;=\; \underbrace{\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2}_{\text{cateto}^2} \;+\; \underbrace{\sigma_{\boldsymbol{x}}^2}_{\text{cateto}^2}.
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Como $\|\boldsymbol{1}\|=1$: $\quad\|\mu_{\boldsymbol{x}}\boldsymbol{1}\| = |\mu_{\boldsymbol{x}}|\cdot\|\boldsymbol{1}\| = |\mu_{\boldsymbol{x}}| \;\Longrightarrow\; \|\boldsymbol{\mathop{\overline{x}}}\|^2=\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|^2=\mu_{\boldsymbol{x}}^2$.
+Como $\|\boldsymbol{1}\|_s=1$: $\quad\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s = |\mu_{\boldsymbol{x}}|\cdot\|\boldsymbol{1}\|_s = |\mu_{\boldsymbol{x}}| \;\Longrightarrow\; \|\boldsymbol{\mathop{\overline{x}}}\|_s^2=\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2=\mu_{\boldsymbol{x}}^2$.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Despejando $\sigma_{\boldsymbol{x}}^2$ y recordando que $\|\boldsymbol{x}\|^2=\langle\boldsymbol{x},\boldsymbol{x}\rangle$:
+Despejando $\sigma_{\boldsymbol{x}}^2$ y recordando que $\|\boldsymbol{x}\|_s^2=\langle\boldsymbol{x},\boldsymbol{x}\rangle_s$:
 \[
-\boxed{\;\sigma_{\boldsymbol{x}}^2 \;=\; \|\boldsymbol{x}\|^2 - \mu_{\boldsymbol{x}}^2 \;=\; \frac{1}{n}\sum_{i=1}^n x_i^2 \,-\, \mu_{\boldsymbol{x}}^2 \;=\;
+\boxed{\;\sigma_{\boldsymbol{x}}^2 \;=\; \|\boldsymbol{x}\|_s^2 - \mu_{\boldsymbol{x}}^2 \;=\; \frac{1}{n}\sum_{i=1}^n x_i^2 \,-\, \mu_{\boldsymbol{x}}^2 \;=\;
 \mu_{\boldsymbol{x}^2}  \,-\, \mu_{\boldsymbol{x}}^2;\;}
 \]
 donde $\boldsymbol{x}^2$ denota el vector cuyas componentes son el cuadrado de las de $\boldsymbol{x}$.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 
-/La ``fórmula de cálculo'' de la varianza de los cursos de estadística no es truco algebráico: es una implicación del Tma. de Pitágoras./
+/La ``fórmula de cálculo'' de la varianza de los cursos de estadística no es truco algebraico: es una implicación del Tma. de Pitágoras./
 
 
 *** Varianza y Pitágoras
@@ -171,15 +171,15 @@ donde $\boldsymbol{x}^2$ denota el vector cuyas componentes son el cuadrado de l
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-Si nos fijamos en la figura de la primera transparencia vemos el cuadrado correspondiente a cada lado del triángulo rectángulo. El área del cuadrado de la hipotenusa es $\|\boldsymbol{x}\|^2$; el área del cuadrado del cateto que va por la recta $\mathcal{L}(\boldsymbol{1})$ es $\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|^2$; y el área del cuadrado del cateto perpendicular es $\sigma_{\boldsymbol{x}}^2$. El teorema de Pitágoras dice que el área grande es la suma de las dos pequeñas.
+Si nos fijamos en la figura de la primera transparencia vemos el cuadrado correspondiente a cada lado del triángulo rectángulo. El área del cuadrado de la hipotenusa es $\|\boldsymbol{x}\|_s^2$; el área del cuadrado del cateto que va por la recta $\mathcal{L}(\boldsymbol{1})$ es $\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2$; y el área del cuadrado del cateto perpendicular es $\sigma_{\boldsymbol{x}}^2$. El teorema de Pitágoras dice que el área grande es la suma de las dos pequeñas.
 
-Basándonos en esta identidad, vamos a obtener una segunda expresión algebráica para calcular la varianza de un vector. Primero veamos que $\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|^2$ es simplemente $\mu_{\boldsymbol{x}}^2$. El motivo procede de la /homogeneidad de la norma/ (vista en la lección 2): para cualquier escalar $\lambda$ y vector $\boldsymbol{v}$, $\|\lambda\boldsymbol{v}\|=|\lambda|\cdot\|\boldsymbol{v}\|$. Aplicándolo con $\lambda=\mu_{\boldsymbol{x}}$ y $\boldsymbol{v}=\boldsymbol{1}$:
+Basándonos en esta identidad, vamos a obtener una segunda expresión algebráica para calcular la varianza de un vector. Primero veamos que $\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2$ es simplemente $\mu_{\boldsymbol{x}}^2$. El motivo procede de la /homogeneidad de la norma/ (vista en la lección 2): para cualquier escalar $\lambda$ y vector $\boldsymbol{v}$, $\|\lambda\boldsymbol{v}\|_s=|\lambda|\cdot\|\boldsymbol{v}\|_s$. Aplicándolo con $\lambda=\mu_{\boldsymbol{x}}$ y $\boldsymbol{v}=\boldsymbol{1}$:
 \[
-\|\mu_{\boldsymbol{x}}\boldsymbol{1}\| = |\mu_{\boldsymbol{x}}|\cdot\|\boldsymbol{1}\|.
+\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s = |\mu_{\boldsymbol{x}}|\cdot\|\boldsymbol{1}\|_s.
 \]
-Y como fijamos en la lección 4 que $\|\boldsymbol{1}\|=1$ (esa fue precisamente la razón de introducir el factor $\frac1n$), tenemos $\|\mu_{\boldsymbol{x}}\boldsymbol{1}\| = |\mu_{\boldsymbol{x}}|$, y al elevar al cuadrado, $\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|^2 = \mu_{\boldsymbol{x}}^2$. Sin este paso —que solo funciona porque $\|\boldsymbol{1}\|=1$— la fórmula de cálculo no tendría esta forma tan simple.
+Y como fijamos en la lección 4 que $\|\boldsymbol{1}\|_s=1$ (esa fue precisamente la razón de introducir el factor $\frac1n$), tenemos $\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s = |\mu_{\boldsymbol{x}}|$, y al elevar al cuadrado, $\|\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2 = \mu_{\boldsymbol{x}}^2$. Sin este paso —que solo funciona porque $\|\boldsymbol{1}\|_s=1$— la fórmula de cálculo no tendría esta forma tan simple.
 
-En segundo lugar tenemos que $\|\boldsymbol{x}\|^2=\langle\boldsymbol{x},\boldsymbol{x}\rangle=\frac{1}{n}(\boldsymbol{x}\cdot\boldsymbol{x})=\frac{1}{n}\sum_{i=1}^n x_i^2$; pero esta última expresión es la media aritmética del cuadrado de las componentes del vector $\boldsymbol{x}$. Si denotamos con $\boldsymbol{x}^2$ con dicho vector, obtenemos esta bonita relación $\|\boldsymbol{x}\|^2=\mu_{\boldsymbol{x}^2}=\langle\boldsymbol{x}^2,\boldsymbol{1}\rangle$.
+En segundo lugar tenemos que $\|\boldsymbol{x}\|_s^2=\langle\boldsymbol{x},\boldsymbol{x}\rangle_s=\frac{1}{n}(\boldsymbol{x}\cdot\boldsymbol{x})=\frac{1}{n}\sum_{i=1}^n x_i^2$; pero esta última expresión es la media aritmética del cuadrado de las componentes del vector $\boldsymbol{x}$. Si denotamos con $\boldsymbol{x}^2$ con dicho vector, obtenemos esta bonita relación $\|\boldsymbol{x}\|_s^2=\mu_{\boldsymbol{x}^2}=\langle\boldsymbol{x}^2,\boldsymbol{1}\rangle_s$.
 
 Sustituyendo en Pitágoras, $\mu_{\boldsymbol{x}^2} = \mu_{\boldsymbol{x}}^2 + \sigma_{\boldsymbol{x}}^2$, y despejando:
 \[
@@ -194,7 +194,7 @@ Sustituyendo en Pitágoras, $\mu_{\boldsymbol{x}^2} = \mu_{\boldsymbol{x}}^2 + \
 \]
 Por otro, con la fórmula de cálculo:
 \[
-\|\boldsymbol{x}\|^2 = \frac{1}{2}(1^2+5^2) = \frac{26}{2}=13, \qquad \sigma_{\boldsymbol{x}}^2 = 13 - 3^2 = 13-9 = 4.
+\|\boldsymbol{x}\|_s^2 = \frac{1}{2}(1^2+5^2) = \frac{26}{2}=13, \qquad \sigma_{\boldsymbol{x}}^2 = 13 - 3^2 = 13-9 = 4.
 \]
 Ambos caminos coinciden, como debían: son la misma cosa vista desde dos ángulos distintos (uno directo, otro pasando por Pitágoras).
 
@@ -215,7 +215,7 @@ Dados $\boldsymbol{x},\boldsymbol{y}\in\mathbb{R}^n$, consideremos sus /vectores
 /Definición/. La /covarianza/ entre $\boldsymbol{x}$ e $\boldsymbol{y}$ es el producto escalar de sus vectores en desviaciones:
 #+end_quote
 \[
-\sigma_{\boldsymbol{x}\boldsymbol{y}} = \langle \boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\, \boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle = \frac{1}{n}\sum_{i=1}^n (x_i-\mu_{\boldsymbol{x}})(y_i-\mu_{\boldsymbol{y}}).
+\sigma_{\boldsymbol{x}\boldsymbol{y}} = \langle \boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\, \boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle_s = \frac{1}{n}\sum_{i=1}^n (x_i-\mu_{\boldsymbol{x}})(y_i-\mu_{\boldsymbol{y}}).
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -243,13 +243,13 @@ La pregunta más simple que podemos hacer sobre dos vectores es cuánto vale su 
 #+begin_quote
 /Definición/. La covarianza entre $\boldsymbol{x}$ e $\boldsymbol{y}$ es
 \[
-\sigma_{\boldsymbol{x}\boldsymbol{y}} = \langle\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle = \frac{1}{n}\sum_{i=1}^n(x_i-\mu_{\boldsymbol{x}})(y_i-\mu_{\boldsymbol{y}}).
+\sigma_{\boldsymbol{x}\boldsymbol{y}} = \langle\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle_s = \frac{1}{n}\sum_{i=1}^n(x_i-\mu_{\boldsymbol{x}})(y_i-\mu_{\boldsymbol{y}}).
 \]
 #+end_quote
 
-Un caso particular: si tomamos $\boldsymbol{y}=\boldsymbol{x}$, la covarianza se convierte en $\sigma_{\boldsymbol{x}\boldsymbol{x}}=\langle\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\rangle=\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|^2=\sigma_{\boldsymbol{x}}^2$. Es decir, /la varianza es la covarianza de un vector consigo mismo/. Esto no es una coincidencia: la varianza es, geométricamente, el caso degenerado de la covarianza. Consecuentemente, todo lo que digamos sobre la covarianza se aplicará, como caso particular, a la varianza.
+Un caso particular: si tomamos $\boldsymbol{y}=\boldsymbol{x}$, la covarianza se convierte en $\sigma_{\boldsymbol{x}\boldsymbol{x}}=\langle\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\rangle_s=\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|_s^2=\sigma_{\boldsymbol{x}}^2$. Es decir, /la varianza es la covarianza de un vector consigo mismo/. Esto no es una coincidencia: la varianza es, geométricamente, el caso degenerado de la covarianza. Consecuentemente, todo lo que digamos sobre la covarianza se aplicará, como caso particular, a la varianza.
 
-Como la covarianza es (por definición) un producto escalar, hereda de manera automática sus propiedades: es /simétrica/ ($\sigma_{\boldsymbol{x}\boldsymbol{y}}=\sigma_{\boldsymbol{y}\boldsymbol{x}}$, porque $\langle\boldsymbol{a},\boldsymbol{b}\rangle=\langle\boldsymbol{b},\boldsymbol{a}\rangle$) y /lineal/ en cada uno de sus dos argumentos (con respecto al primer argumento: $\sigma_{(\alpha\boldsymbol{x}+\beta\boldsymbol{y})\boldsymbol{z}}=\alpha\sigma_{\boldsymbol{x}\boldsymbol{z}}+\beta\sigma_{\boldsymbol{y}\boldsymbol{z}}$; y de manera similar respecto al segundo). No hace falta demostrar nada nuevo: son las mismas propiedades del producto escalar que fijamos en la lección 2, aplicadas ahora a los vectores en desviaciones en lugar de a los vectores originales.
+Como la covarianza es (por definición) un producto escalar, hereda de manera automática sus propiedades: es /simétrica/ ($\sigma_{\boldsymbol{x}\boldsymbol{y}}=\sigma_{\boldsymbol{y}\boldsymbol{x}}$, porque $\langle\boldsymbol{a},\boldsymbol{b}\rangle_s=\langle\boldsymbol{b},\boldsymbol{a}\rangle_s$) y /lineal/ en cada uno de sus dos argumentos (con respecto al primer argumento: $\sigma_{(\alpha\boldsymbol{x}+\beta\boldsymbol{y})\boldsymbol{z}}=\alpha\sigma_{\boldsymbol{x}\boldsymbol{z}}+\beta\sigma_{\boldsymbol{y}\boldsymbol{z}}$; y de manera similar respecto al segundo). No hace falta demostrar nada nuevo: son las mismas propiedades del producto escalar que fijamos en la lección 2, aplicadas ahora a los vectores en desviaciones en lugar de a los vectores originales.
 
 Una advertencia importante, que retomaremos en la siguiente transparencia: la covarianza, por sí sola, no tiene una escala interpretable. Su valor numérico depende de las unidades en que midamos $\boldsymbol{x}$ e $\boldsymbol{y}$ (si $\boldsymbol{x}$ está en euros y lo pasamos a céntimos, la covarianza se multiplica por 100, aunque la relación entre las dos variables no haya cambiado en absoluto). Esto es exactamente lo mismo que le ocurre al producto escalar ordinario: por sí solo no nos dice nada sobre el /ángulo/ entre dos vectores, salvo que lo dividamos por sus normas. Ese es el papel que va a jugar la correlación.
 
@@ -263,7 +263,7 @@ Una advertencia importante, que retomaremos en la siguiente transparencia: la co
 /Definición/. La /correlación/ entre dos vectores _no constantes_ $\boldsymbol{x}$ e $\boldsymbol{y}$ es el coseno del ángulo $\theta$ que forman sus vectores en desviaciones:
 #+end_quote
 \[
-\rho_{\boldsymbol{x}\boldsymbol{y}} = \cos\theta = \frac{\langle \boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\, \boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle}{\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|\,\|\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\|} = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}\,\sigma_{\boldsymbol{y}}}.
+\rho_{\boldsymbol{x}\boldsymbol{y}} = \cos\theta = \frac{\langle \boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\, \boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle_s}{\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|_s\,\|\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\|_s} = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}\,\sigma_{\boldsymbol{y}}}.
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -284,12 +284,12 @@ A diferencia de la covarianza, la correlación no depende de las unidades: es al
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-En la lección 3 definimos el coseno del ángulo entre dos vectores cualesquiera como $\cos\theta=\frac{\boldsymbol{a}\cdot\boldsymbol{b}}{\|\boldsymbol{a}\|\|\boldsymbol{b}\|}$, y demostramos que la desigualdad de Cauchy–Schwarz garantiza que ese cociente siempre cae en $[-1,1]$. No hay nada que impida aplicar exactamente la misma definición a los vectores en desviaciones $\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}$ e $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$: ambos son vectores de $\mathbb{R}^n$ como cualquier otro, y todo lo demostrado en la lección 3 (Pitágoras, Cauchy–Schwarz, la desigualdad triangular) sigue siendo válido, porque se apoya únicamente en las propiedades abstractas del producto escalar, no en cuáles sean concretamente los vectores.
+En la lección 3 definimos el coseno del ángulo entre dos vectores cualesquiera como $\cos\theta=\frac{\boldsymbol{a}\cdot\boldsymbol{b}}{\|\boldsymbol{a}\|_s\|\boldsymbol{b}\|_s}$, y demostramos que la desigualdad de Cauchy–Schwarz garantiza que ese cociente siempre cae en $[-1,1]$. No hay nada que impida aplicar exactamente la misma definición a los vectores en desviaciones $\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}$ e $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$: ambos son vectores de $\mathbb{R}^n$ como cualquier otro, y todo lo demostrado en la lección 3 (Pitágoras, Cauchy–Schwarz, la desigualdad triangular) sigue siendo válido, porque se apoya únicamente en las propiedades abstractas del producto escalar, no en cuáles sean concretamente los vectores.
 
 #+begin_quote
 /Definición/. La correlación entre dos vectores _no constantes_ $\boldsymbol{x}$ e $\boldsymbol{y}$ es
 \[
-\rho_{\boldsymbol{x}\boldsymbol{y}} = \frac{\langle\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle}{\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|\,\|\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\|} = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}\sigma_{\boldsymbol{y}}}.
+\rho_{\boldsymbol{x}\boldsymbol{y}} = \frac{\langle\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle_s}{\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|_s\,\|\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\|_s} = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}\sigma_{\boldsymbol{y}}}.
 \]
 #+end_quote
 
@@ -447,9 +447,9 @@ Como la covarianza y la correlación solo dependen de los vectores en desviacion
 \]
 Por la linealidad del producto escalar,
 \[
-\sigma_{\boldsymbol{x}'\boldsymbol{y}} = \langle\lambda(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}),\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle = \lambda\,\sigma_{\boldsymbol{x}\boldsymbol{y}}.
+\sigma_{\boldsymbol{x}'\boldsymbol{y}} = \langle\lambda(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}),\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle_s = \lambda\,\sigma_{\boldsymbol{x}\boldsymbol{y}}.
 \]
-Y como $\|\lambda(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})\| = |\lambda|\,\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|$ (homogeneidad de la norma, lección 2), la correlación se transforma como
+Y como $\|\lambda(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})\|_s = |\lambda|\,\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|_s$ (homogeneidad de la norma, lección 2), la correlación se transforma como
 \[
 \rho_{\boldsymbol{x}'\boldsymbol{y}} = \frac{\lambda\,\sigma_{\boldsymbol{x}\boldsymbol{y}}}{|\lambda|\,\sigma_{\boldsymbol{x}}\sigma_{\boldsymbol{y}}} = \frac{\lambda}{|\lambda|}\,\rho_{\boldsymbol{x}\boldsymbol{y}}.
 \]
@@ -463,7 +463,7 @@ Y de la homogeneidad ante escala, aplicada dos veces —una por cada argumento d
 \[
 \sigma_{\lambda\boldsymbol{x}}^2 = \sigma_{(\lambda\boldsymbol{x})(\lambda\boldsymbol{x})} = \lambda\,\sigma_{\boldsymbol{x}(\lambda\boldsymbol{x})} = \lambda\cdot\lambda\,\sigma_{\boldsymbol{x}\boldsymbol{x}} = \lambda^2\,\sigma_{\boldsymbol{x}}^2.
 \]
-De forma más directa, esto es también consecuencia inmediata de la homogeneidad de la norma (lección 2): $\|\lambda(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})\| = |\lambda|\,\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|$; por lo que al elevar al cuadrado la desviación típica (que es una norma), tenemos que $|\lambda|^2=\lambda^2$.
+De forma más directa, esto es también consecuencia inmediata de la homogeneidad de la norma (lección 2): $\|\lambda(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})\|_s = |\lambda|\,\|\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\|_s$; por lo que al elevar al cuadrado la desviación típica (que es una norma), tenemos que $|\lambda|^2=\lambda^2$.
 
 Ambas identidades ya estaban, en realidad, implícitas en la lección 4 (sección "Propiedades geométricas"): allí vimos que sumar una constante no cambia la desviación típica $\sigma_{\boldsymbol{x}}$, lo cual —al elevar al cuadrado— es exactamente la invarianza de la varianza ante traslaciones. Lo que añadimos aquí es el efecto, /cuadrático/, de la escala: si $\boldsymbol{x}$ pasa de medirse en euros a medirse en céntimos ($\lambda=100$), la desviación típica se multiplica por $100$, pero la varianza se multiplica por $100^2=10\,000$, no por $100$. Confundir ambos efectos es una fuente frecuente de errores al comparar varianzas expresadas en unidades distintas.
 
@@ -485,7 +485,7 @@ La lectura práctica: la covarianza cambia con las unidades (si $\boldsymbol{x}$
 | Datos                                                          | \(\mbox{$\boldsymbol{x}=(1,2,3)$}\)     | \(\mbox{$\boldsymbol{y}=(2,2,5)$}\) |
 | Media                                                          | $\mu_{\boldsymbol{x}}=2$                | $\mu_{\boldsymbol{y}}=3$            |
 | Diferencia $\boldsymbol{v}-\boldsymbol{\mathop{\overline{v}}}$ | $(-1,0,1)$                              | $(-1,-1,2)$                         |
-| Desviación típica                                              | $\sigma_{\boldsymbol{x}}^2=\frac{2}{3}$ | $\sigma_{\boldsymbol{y}}^2=2$       |
+| Varianza                                                       | $\sigma_{\boldsymbol{x}}^2=\frac{2}{3}$ | $\sigma_{\boldsymbol{y}}^2=2$       |
 
 Covarianza :  $\sigma_{\boldsymbol{x}\boldsymbol{y}} = \frac{1}{3}\big[(-1)(-1)+(0)(-1)+(1)(2)\big] = 1$.
 
@@ -553,8 +553,8 @@ El valor $\rho_{\boldsymbol{x}\boldsymbol{y}}=\frac{\sqrt3}{2}$ corresponde a un
 
 | Objeto/Concepto                                    | Definición geométrica/algebraica                                                                                                               | Fórmula en estadística descriptiva                                                              |
 |----------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------|
-| Varianza $\sigma_{\boldsymbol{x}}^2$               | $\Vert\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\Vert^2$                                                                                | $\frac{1}{n}\sum(x_i-\mu_{\boldsymbol{x}})^2 = \frac{1}{n}\sum x_i^2-\mu_{\boldsymbol{x}}^2$    |
-| Covarianza $\sigma_{\boldsymbol{x}\boldsymbol{y}}$ | $\langle\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle$                          | $\frac{1}{n}\sum(x_i-\mu_{\boldsymbol{x}})(y_i-\mu_{\boldsymbol{y}})$                           |
+| Varianza $\sigma_{\boldsymbol{x}}^2$               | $\Vert\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\Vert_s^2$                                                                              | $\frac{1}{n}\sum(x_i-\mu_{\boldsymbol{x}})^2 = \mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2$    |
+| Covarianza $\sigma_{\boldsymbol{x}\boldsymbol{y}}$ | $\langle\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}},\,\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}\rangle_s$                          | $\frac{1}{n}\sum(x_i-\mu_{\boldsymbol{x}})(y_i-\mu_{\boldsymbol{y}})$                           |
 | Correlación $\rho_{\boldsymbol{x}\boldsymbol{y}}$  | $\cos$ del ángulo $\theta$ entre $(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})$ e $(\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}})$ | $\dfrac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}\sigma_{\boldsymbol{y}}}$ |
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -589,10 +589,10 @@ La lección 6 llevará este mismo aparato —proyecciones, ortogonalidad, ángul
 /Próxima sesión: laboratorio en Gretl./ Estadísticos descriptivos, correlaciones y diagramas de dispersión con datos reales; verificación numérica de las identidades de hoy (Pitágoras, covarianza, correlación) con datos simulados.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-/Lección 6: la regresión lineal simple./ Añadiremos un segundo regresor $\boldsymbol{x}$ a la proyección sobre $\mathcal{L}(\boldsymbol{1})$: proyectaremos sobre $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, ya no una recta sino un /plano/. El ángulo $\theta$ de hoy reaparecerá al final como $R^2=\cos^2\theta$.
+/Lección 6: la regresión lineal simple./ Añadiremos un segundo regresor $\boldsymbol{x}$ a la proyección sobre $\mathcal{L}(\boldsymbol{1})$: proyectaremos sobre $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, ya no una recta sino un /plano/. El ángulo $\theta$ de hoy reaparecerá en la lección 8 como $R^2=\cos^2\theta$.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Cuando organicemos los regresores como columnas de una matriz $\boldsymbol{\mathsf{X}}=[\boldsymbol{1};\;\boldsymbol{x}]$, el producto $\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$ admitirá una doble lectura: como una lista de productos escalares, o como una combinación lineal de las columnas de $\boldsymbol{\mathsf{X}}$. Esta doble lectura no es nueva: ya apareció, en su versión más simple, con la propia media (lección 4): $\mu_{\boldsymbol{y}}$ era, a la vez, el producto escalar $\langle\boldsymbol{y},\boldsymbol{1}\rangle$ y el coeficiente de la combinación lineal (proyección) $\mu_{\boldsymbol{y}}\boldsymbol{1}$. No obstante, esa notación matricial llegará más adelante; hoy solo la anunciamos.
+Cuando organicemos los regresores como columnas de una matriz $\boldsymbol{\mathsf{X}}=[\boldsymbol{1};\;\boldsymbol{x}]$, el producto $\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$ admitirá una doble lectura: como una lista de productos escalares, o como una combinación lineal de las columnas de $\boldsymbol{\mathsf{X}}$. Esta doble lectura no es nueva: ya apareció, en su versión más simple, con la propia media (lección 4): $\mu_{\boldsymbol{y}}$ era, a la vez, el producto escalar $\langle\boldsymbol{y},\boldsymbol{1}\rangle_s$ y el coeficiente de la combinación lineal (proyección) $\mu_{\boldsymbol{y}}\boldsymbol{1}$. No obstante, esa notación matricial llegará más adelante; hoy solo la anunciamos.
 
 
 *** Guiño a la sesión siguiente
@@ -604,7 +604,7 @@ Cuando organicemos los regresores como columnas de una matriz $\boldsymbol{\math
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
 Hoy hemos visto que para relacionar dos vectores no se exige ningún concepto matemáticamente nuevo: la covarianza es un producto escalar (entre vectores en desviaciones) y la correlación es un coseno (entre esos mismos vectores). La próxima sesión es un laboratorio: en él calcularemos, con datos reales, medias, varianzas, covarianzas y correlaciones, y dibujaremos diagramas de dispersión; y comprobaremos, con datos simulados, que las identidades de hoy (en particular, la fórmula de cálculo de la varianza y la relación $\rho=\cos\theta$) se cumplen exactamente.
 
-La lección 6 dará el siguiente gran paso del curso: la /regresión lineal simple/. Hasta ahora hemos proyectado un único vector $\boldsymbol{y}$ sobre la recta $\mathcal{L}(\boldsymbol{1})$ (lección 4); ahora añadiremos un segundo regresor $\boldsymbol{x}$ y proyectaremos sobre el /plano/ $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (el conjunto de todas las combinaciones lineales de $\boldsymbol{1}$ y $\boldsymbol{x}$). La lógica —imponer condiciones de ortogonalidad— será exactamente la misma que ya conocemos; solo cambia el subespacio sobre el que proyectamos. Y al final de ese camino, cuando preguntemos ``¿cómo de bueno es el ajuste?'', la respuesta será, el coseno al cuadrado de un ángulo: $R^2=\cos^2\theta$, donde $\theta$ es el ángulo entre el vector centrado[fn::/vector centrado/ es un sinónimo de /vector en desviaciones respecto a su media/.] $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ y su ajuste centrado $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$. El ángulo de hoy no desaparece: reaparece con otro nombre.
+La lección 6 dará el siguiente gran paso del curso: la /regresión lineal simple/. Hasta ahora hemos proyectado un único vector $\boldsymbol{y}$ sobre la recta $\mathcal{L}(\boldsymbol{1})$ (lección 4); ahora añadiremos un segundo regresor $\boldsymbol{x}$ y proyectaremos sobre el /plano/ $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (el conjunto de todas las combinaciones lineales de $\boldsymbol{1}$ y $\boldsymbol{x}$). La lógica —imponer condiciones de ortogonalidad— será exactamente la misma que ya conocemos; solo cambia el subespacio sobre el que proyectamos. Y al final de ese camino, cuando preguntemos ``¿cómo de bueno es el ajuste?'', la respuesta será, el coseno al cuadrado de un ángulo: $R^2=\cos^2\theta$, donde $\theta$ es el ángulo entre el vector en desviaciones y su ajuste en desviaciones.[fn::recuerde que /vector en desviaciones/ respecto a la media y /vector centrado/ son sinónimos.] El ángulo de hoy no desaparece: reaparece con otro nombre.
 
 Por último, una pincelada de notación que solo cobrará su forma completa en la lección 10: cuando tengamos varios regresores (por ejemplo, $\boldsymbol{1}$ y $\boldsymbol{x}$), resultará cómodo organizarlos como las columnas de una única matriz $\boldsymbol{\mathsf{X}}=[\boldsymbol{1};\;\boldsymbol{x}]$. El producto $\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$ (con $\boldsymbol{\beta}=(\beta_0,\beta_1)$) admite entonces una doble lectura, que usaremos constantemente a partir de ese momento: por un lado, como la lista de los productos escalares de $\boldsymbol{\beta}$ con cada /fila/ de $\boldsymbol{\mathsf{X}}$; por otro, como la /combinación lineal/ $\beta_0\boldsymbol{1}+\beta_1\boldsymbol{x}$ de las /columnas/ de $\boldsymbol{\mathsf{X}}$. Hoy solo sembramos la idea; la notación matricial completa esperará a que de verdad la necesitemos.
 
@@ -747,7 +747,7 @@ d) Porque en $\mathbb{R}^2$ no existen vectores ortogonales a $\boldsymbol{1}$.
 
 ** Pregunta 12 [D] — Guiño a la regresión
 
-En la lección 6 se definirá $R^2=\cos^2\theta$ para la regresión lineal simple. Según la lógica de esta sesión, ¿entre qué par de vectores se medirá ese ángulo $\theta$?
+En la lección 8 se definirá $R^2=\cos^2\theta$ para la regresión lineal simple. Según la lógica de esta sesión, ¿entre qué par de vectores se medirá ese ángulo $\theta$?
 
 a) Entre $\boldsymbol{1}$ y $\boldsymbol{x}$.
 b) Entre $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ y el vector ajustado centrado $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$.

@@ -9,6 +9,139 @@
 
 * Figuras con fuente tikz
 
+** Media aritmética
+
+#+NAME: mediaAritmetica
+#+BEGIN_SRC  latex :noweb no-export :tangle tex/mediaAritmetica.tex :results discard :exports code :eval no
+  <<Preambulo comun>>
+
+  \pgfplotsset{compat=1.18}
+  \usepackage{pgfplotstable}
+  \pgfplotsset{width=10cm,height=6cm}
+  \usepgfplotslibrary{groupplots}
+
+  \usepackage{filecontents}
+  \begin{filecontents*}{data.csv}
+  level
+  1.84919
+  0.97280
+  4.78586
+  3.95797
+  4.50753
+  2.52274
+  5.13984
+  0.29474
+  5.39946
+  4.40204
+  \end{filecontents*}
+
+  \begin{filecontents*}{dataA.csv}
+  level
+  2
+  4
+  6
+  8
+  10
+  9
+  7
+  5
+  3
+  1
+  \end{filecontents*}
+
+  \begin{filecontents*}{ddata.csv}
+  level
+  3.3832
+  3.3832
+  3.3832
+  3.3832
+  3.3832
+  3.3832
+  3.3832
+  3.3832
+  3.3832
+  3.3832
+  \end{filecontents*}
+
+  \begin{filecontents*}{ddataA.csv}
+  level
+  5.5
+  5.5
+  5.5
+  5.5
+  5.5
+  5.5
+  5.5
+  5.5
+  5.5
+  5.5
+  \end{filecontents*}
+
+
+  \newcommand\DrawVMean[1][]{
+    \draw[#1] 
+    (axis cs:\Mean,\pgfkeysvalueof{/pgfplots/ymin}) -- 
+    (axis cs:\Mean,\pgfkeysvalueof{/pgfplots/ymax});
+  }
+  \newcommand\DrawHMean[1][]{
+    \draw[#1] 
+    (axis cs:\pgfkeysvalueof{/pgfplots/xmin},\Mean) -- 
+    (axis cs:\pgfkeysvalueof{/pgfplots/xmax},\Mean);
+  }
+
+  \newcommand\GetMean[2]{
+    \pgfplotstableread{#1}\tableA
+    \pgfplotstableset{
+      create on use/new/.style={
+        create col/expr={\pgfmathaccuma + \thisrow{#2}}},
+    }
+    \pgfplotstablegetrowsof{\tableA}
+    \pgfmathsetmacro{\NumRows}{\pgfplotsretval}
+    \pgfplotstablegetelem{\numexpr\NumRows-1\relax}{new}\of{#1} 
+    \pgfmathsetmacro{\Sum}{\pgfplotsretval}
+    \pgfmathsetmacro{\Mean}{\Sum/\NumRows}
+  }
+
+  \begin{document}
+
+  \begin{tikzpicture}
+\begin{groupplot}[group style={group size=2 by 2, horizontal sep=2cm, vertical sep=2cm}]
+
+\nextgroupplot[ymin=0]
+  \GetMean{data.csv}{level}
+  \addplot[hist={bins=6,}, fill=teal, draw=teal!50!black] table[y index=0] {data.csv};
+  \DrawVMean[red, ultra thick, dashed]
+  \node[anchor=south,fill=white, fill opacity=0.9, text opacity=1] at (axis cs:\Mean,0) {$\media{\Vect{y}}$};
+
+\nextgroupplot
+  \GetMean{data.csv}{level}
+  \addplot[teal, mark=*] table [x expr=\coordindex+1, y index=0] {data.csv};
+  \addplot[red,  mark=*] table [x expr=\coordindex+1, y index=0] {ddata.csv};
+  \node[anchor=north,fill=white, fill opacity=0.9, text opacity=1] at (axis cs:1,\Mean) {\LARGE$\Vect{\Media{y}}$};
+
+\nextgroupplot[ymin=0]
+  \GetMean{dataA.csv}{level}
+  \addplot[hist={bins=6,}, fill=cyan!20, draw=cyan!50!black] table[y index=0] {dataA.csv};
+  \DrawVMean[red, ultra thick, dashed]
+  \node[anchor=south,fill=white, fill opacity=0.9, text opacity=1] at (axis cs:\Mean,0) {$\media{\Vect{x}}$};
+
+\nextgroupplot
+  \GetMean{dataA.csv}{level}
+  \addplot[cyan!50, mark=*] table [x expr=\coordindex+1, y index=0] {dataA.csv};
+  \addplot[red,     mark=*] table [x expr=\coordindex+1, y index=0] {ddataA.csv};
+  \node[anchor=north,fill=white, fill opacity=0.9, text opacity=1] at (axis cs:1,\Mean) {\LARGE$\Vect{\Media{x}}$};
+
+\end{groupplot}
+\end{tikzpicture}
+
+  \end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .5\textwidth :caption \caption{Interpretación geométrica de la media de un vector de \R[n]}
+[[file:./mediaAritmetica.png]]
+
+
 ** Media aritmética 1
 
 #+NAME: MediaAritmetica1
@@ -293,16 +426,16 @@
     \draw[-,thick,gray] (-1,-1) -- (4.1,4.1) node[right]{};
     
     % Dibujar el vector X
-    \draw[-{Stealth[length=3mm, width=2mm]},very thick, blue] (O) -- (X) node[above,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{x}=(2,4,)$};
+    \draw[-{Stealth[length=3mm, width=2mm]}, thick, green!50!black] (O) -- (X) node[above,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{x}=(2,4,)$};
     
     % Dibujar el vector (-2,-2)
-    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!black] (O) -- (M) node[below right, sloped,fill=white,opacity=.9,text opacity=1]{$\mu\boldsymbol{1}$};
+    \draw[-{Stealth[length=3mm, width=2mm]}, thick, blue!75!white] (O) -- (M) node[below right, sloped,fill=white,opacity=.9,text opacity=1]{$\mu\boldsymbol{1}$};
     
     % Dibujar la línea punteada entre (-2,-2) y (2,-6)
     \draw[dashed] (M) -- (X);
     
     % Dibujar el vector Uno
-    \draw[-{Stealth[length=3mm, width=2mm]},very thick, purple] (O) -- (U) node[below right,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{1}=(1,1,)$};
+    \draw[-{Stealth[length=3mm, width=2mm]}, very thick, blue!55!black] (O) -- (U) node[below right,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{1}=(1,1,)$};
     
     % Añadir una llave con la etiqueta sigma
     \draw[decorate,decoration={brace,amplitude=5pt,mirror},xshift=0pt,yshift=0pt] (M) -- (X) node[midway, above,  yshift=5pt, sloped,fill=white,opacity=.9,text opacity=1] {$\sigma$};
@@ -355,16 +488,16 @@
     \tkzMarkRightAngle[fill=blue!10,size=.4](O,M,X)
     
     % Dibujar el vector X
-    \draw[-{Stealth[length=3mm, width=2mm]},very thick, blue] (O) -- (X) node[above,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{x}=(2,5,)$};
+    \draw[-{Stealth[length=3mm, width=2mm]}, thick, green!50!black] (O) -- (X) node[above,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{x}=(2,5,)$};
     
     % Dibujar el vector (-2,-2)
-    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!black] (O) -- (M) node[below right, sloped,fill=white,opacity=.9,text opacity=1]{$\mu\boldsymbol{1}$};
+    \draw[-{Stealth[length=3mm, width=2mm]}, thick, blue!75!white] (O) -- (M) node[below right, sloped,fill=white,opacity=.9,text opacity=1]{$\mu\boldsymbol{1}$};
     
     % Dibujar la línea punteada entre (-2,-2) y (2,-6)
     \draw[dashed] (M) -- (X);
     
     % Dibujar el vector Uno
-    \draw[-{Stealth[length=3mm, width=2mm]},very thick, purple] (O) -- (U) node[below right,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{1}=(1,1,)$};
+    \draw[-{Stealth[length=3mm, width=2mm]}, very thick, blue!55!black] (O) -- (U) node[below right,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{1}=(1,1,)$};
     
     % Añadir una llave con la etiqueta sigma
     \draw[decorate,decoration={brace,amplitude=5pt,mirror},xshift=0pt,yshift=0pt] (M) -- (X) node[midway, above,  yshift=5pt, sloped,fill=white,opacity=.9,text opacity=1] {$\sigma$};
@@ -416,14 +549,14 @@
     \tkzMarkRightAngle[fill=blue!10,size=.4](O,M,X)
 
     % Dibujar el vector Uno
-    \draw[-{Stealth[length=3mm, width=2mm]},very thick, purple] (O) -- (U) node[below right,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{1}=(1,1)$};
+    \draw[-{Stealth[length=3mm, width=2mm]}, very thick, blue!55!black] (O) -- (U) node[below right,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{1}=(1,1)$};
     
     % Dibujar el vector X
-    \draw[-{Stealth[length=3mm, width=2mm]},very thick, blue] (O) -- (X) node[below, sloped,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{x}=(2,-6)$};
+    \draw[-{Stealth[length=3mm, width=2mm]}, thick, green!50!black] (O) -- (X) node[below, sloped,fill=white,opacity=.9,text opacity=1]{$\boldsymbol{x}=(2,-6)$};
     
     % Dibujar el vector (-2,-2)
     %\node[green!50!black,align=center,fill=white,opacity=.9,text opacity=1] at (M) {$\mu\boldsymbol{1}=(-2,-2)$};
-    \draw[-{Stealth[length=3mm, width=2mm]},very thick,green!50!black] (O) -- (M) node[midway, above left, sloped,text opacity=1]{$\mu\boldsymbol{1}=(-2,-2)$};
+    \draw[-{Stealth[length=3mm, width=2mm]}, thick, blue!75!white] (O) -- (M) node[midway, above left, sloped,text opacity=1]{$\mu\boldsymbol{1}=(-2,-2)$};
     
     % Dibujar la línea punteada entre (-2,-2) y (2,-6)
     \draw[dashed] (M) -- (X);
@@ -583,6 +716,12 @@ Código para la normalización de colores en las figuras
 #+END_SRC
 
 * Ajustes de las figuras
+
+#+BEGIN_SRC bash :build yes
+convert mediaAritmetica.png -gravity center -background white -extent 6000x mediaAritmetica_ancho.png
+#+END_SRC
+
+#+RESULTS:
 
 #+BEGIN_SRC bash :build yes
 convert MediaAritmetica1.png -gravity center -background white -extent 2300x MediaAritmetica1_ancho.png
