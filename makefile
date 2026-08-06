@@ -55,6 +55,7 @@ pract:     $(PRACT_PDF) $(PRACT_HTML)
 # aquí.
 figures:
 	$(MAKE) -C $(LESSONS_IMG_DIR) all
+	$(MAKE) -C $(LESSONS_IMG_DIR) clean
 
 # ==================== org-lessons ====================
 # Prerrequisito de orden ("| figures") también en las reglas de patrón,
