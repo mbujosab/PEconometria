@@ -1,12 +1,16 @@
 (require 'org)
 (require 'ob)
+(require 'ob-shell)
+(require 'ob-emacs-lisp)
+(require 'ob-octave)
 
 (setq org-confirm-babel-evaluate nil)
 
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((shell . t)
-   (emacs-lisp . t)))
+   (emacs-lisp . t)
+   (octave . t)))
 
 ;; Directorio donde está build.el
 (defconst my-build-root
@@ -21,6 +25,16 @@
 
 ;; Extraer todos los bloques
 (org-babel-tangle)
+
+;; Ejecutar los bloques que tengan :eval yes en el heading
+(org-babel-map-src-blocks nil
+  (let* ((info   (org-babel-get-src-block-info))
+         (params (nth 2 info)))
+    (when (equal (cdr (assoc :eval params)) "yes")
+      (message "Ejecutando (eval=yes) %s"
+               (or (cdr (assoc :name params))
+                   "<sin nombre>"))
+      (org-babel-execute-src-block))))
 
 ;; Compilar figuras usando el Makefile común
 (let ((makefile
@@ -46,3 +60,5 @@
                (or (cdr (assoc :name params))
                    "<sin nombre>"))
       (org-babel-execute-src-block))))
+
+
