@@ -6,7 +6,7 @@
 <!-- 2026-08-07 vie 17:13 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sesión 4 (B) &#x2014; Importar datos desde internet: el Boston Housing original</title>
+<title>Sesión 11 (A) &#x2014; MCO con Gretl: el ejemplo de la lección 7 y verificación con datos simulados</title>
 <meta name="author" content="Marcos Bujosa" />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
@@ -281,220 +281,257 @@ org_html_manager.setup();  // activate after the parameters are set
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Sesión 4 (B) &#x2014; Importar datos desde internet: el Boston Housing original</h1>
+<h1 class="title">Sesión 11 (A) &#x2014; MCO con Gretl: el ejemplo de la lección 7 y verificación con datos simulados</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org61f1454">Descripción de la práctica</a></li>
-<li><a href="#orgc98d198">Actividad 1 - Descargar el fichero de datos</a></li>
-<li><a href="#org4c411f3">Actividad 2 - Importar el CSV en Gretl</a></li>
-<li><a href="#orgdc648ed">Actividad 3 - Declarar los datos como sección cruzada</a></li>
-<li><a href="#orgd9e91e3">Actividad 4 - La variable dicotómica <code>chas</code></a>
-<ul>
-<li>
-<ul>
-<li><a href="#org46d3456">Mostrar sus valores</a></li>
-<li><a href="#org42617be">Calcular su media</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#org8362a6f">Actividad 5 - Comparar con <code>hprice2</code></a>
-<ul>
-<li>
-<ul>
-<li><a href="#org3ef02af">Código completo de la práctica</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#org62abd47">Respuestas</a></li>
+<li><a href="#orge4493b9">Descripción de la práctica</a></li>
+<li><a href="#org7946824">Actividad 1 - El ejemplo de la lección 7, ahora con Gretl</a></li>
+<li><a href="#org68e244c">Actividad 2 - Residuos y las dos condiciones de ortogonalidad</a></li>
+<li><a href="#org540196a">Actividad 3 - Bondad de ajuste: STC = SEC + SRC y \(R^2\)</a></li>
+<li><a href="#orga20ec76">Actividad 4 - La pendiente como correlación reescalada</a></li>
+<li><a href="#org1def2f6">Actividad 5 - ¿Y si la muestra es más grande y el residuo no está ``hecho a medida''?</a></li>
+<li><a href="#org4626cb8">Actividad 6 - Síntesis</a></li>
+<li><a href="#org8c3f788">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org2ab021c">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org61f1454" class="outline-2">
-<h2 id="org61f1454">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org61f1454">
+<div id="outline-container-orge4493b9" class="outline-2">
+<h2 id="orge4493b9">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orge4493b9">
 <p>
-En la práctica anterior usamos <code>hprice2</code>, la versión <code>de manual</code> del conjunto de datos sobre la vivienda en Boston (Harrison &amp; Rubinfeld, 1978). Esa versión, distribuida con Gretl, <i>no incluye todas las variables del estudio original</i>. En particular, le falta una variable <i>dicotómica</i> muy útil para el curso: <code>chas</code> (vale 1 si la zona limita con el río Charles, 0 en caso contrario).
+En las lecciones 7 y 8 obtuvimos, con lápiz y papel, las fórmulas de \(\hat\beta_0\) y \(\hat\beta_1\) (a partir de dos condiciones de ortogonalidad) y la descomposición \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) con su cociente \(R^2\). Hoy usamos por primera vez el comando <code>ols</code> de Gretl para comprobar que reproduce exactamente esos cálculos: primero con el mismo ejemplo pequeño (\(n=5\)) ya resuelto a mano en la lección 7, y después con una muestra simulada más grande, para distinguir qué es una <i>identidad algebraica</i> (se cumple siempre, exactamente) de qué es una <i>estimación</i> (no coincide, pero se aproxima al valor verdadero que generó los datos).
 </p>
 
 <p>
-En esta práctica aprenderemos a <i>importar datos desde internet</i> —una destreza imprescindible cuando trabajamos con datos propios— y cargaremos el <i>Boston Housing original</i>, que sí contiene <code>chas</code>. Este conjunto será nuestro <i>dataset integrador</i> cuando estudiemos variables dicotómicas y en el laboratorio final.
+<i>Nota importante</i>: al pedir <code>ols</code> a Gretl, la salida incluye columnas adicionales (error estándar, valor \(t\), <i>p</i>-valor) que <i>todavía no sabemos interpretar</i>: son objeto de estudio más adelante en el curso, cuando lleguemos a inferencia. Por ahora, ignórelas deliberadamente y fíjese solo en los coeficientes estimados y en las cantidades ya conocidas (\(\hat e_i\), \(R^2\)).
 </p>
 
 <p>
-<i>Objetivo</i>:
+<i>Objetivo</i>
 </p>
 
 <ol class="org-ol">
-<li>Descargar un fichero de datos (formato CSV) desde internet.</li>
-<li>Importarlo en Gretl y reconocer sus variables.</li>
-<li>Declarar correctamente el conjunto como datos de sección cruzada.</li>
-<li>Examinar la variable dicotómica <code>chas</code> y entender qué significa su <i>media</i>.</li>
-<li>Comparar este dataset con el <code>hprice2</code> de la práctica anterior.</li>
+<li>Usar <code>ols</code> por primera vez y comprobar que reproduce exactamente el cálculo manual de la lección 7.</li>
+<li>Verificar las dos condiciones de ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) usando los residuos que guarda Gretl.</li>
+<li>Verificar \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y \(R^2\) (lección 8), comparando el cálculo manual con el que reporta Gretl.</li>
+<li>Verificar \(\hat\beta_1=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) y \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\).</li>
+<li>Distinguir, con una muestra simulada más grande, qué se cumple <i>siempre</i> (ortogonalidad) de qué es solo una <i>aproximación</i> (recuperar el coeficiente generador).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgc98d198" class="outline-2">
-<h2 id="orgc98d198">Actividad 1 - Descargar el fichero de datos</h2>
-<div class="outline-text-2" id="text-orgc98d198">
+<div id="outline-container-org7946824" class="outline-2">
+<h2 id="org7946824">Actividad 1 - El ejemplo de la lección 7, ahora con Gretl</h2>
+<div class="outline-text-2" id="text-org7946824">
 <p>
-El conjunto original está disponible en varios repositorios públicos. Usaremos una copia en formato <code>CSV</code> (valores separados por comas), el formato de intercambio de datos más habitual.
-</p>
-
-<ul class="org-ul">
-<li>Descargue el fichero <code>housing.csv</code> (o el nombre que corresponda) desde el repositorio indicado en clase, por ejemplo el <a href="https://www.kaggle.com/datasets/abhijithudayakumar/the-boston-housing-dataset">Boston Housing Dataset en Kaggle</a>.</li>
-<li>Guárdelo en una carpeta de trabajo conocida (p. ej. su carpeta de la asignatura).</li>
-</ul>
-
-<p>
-<i>Un fichero CSV es simplemente texto: la primera fila suele contener los nombres de las variables y cada fila siguiente, una observación, con los valores separados por comas. Puede abrirlo con cualquier editor de texto para inspeccionarlo antes de importarlo.</i>
-</p>
-<p>
-<i>Según la fuente, los nombres de las variables pueden variar (mayúsculas/minúsculas). Las variables del estudio original son:</i> <code>crim</code>, <code>zn</code>, <code>indus</code>, <code>chas</code>, <code>nox</code>, <code>rm</code>, <code>age</code>, <code>dis</code>, <code>rad</code>, <code>tax</code>, <code>ptratio</code>, <code>b</code>, <code>lstat</code> <i>y</i> <code>medv</code> <i>(valor mediano de la vivienda, en miles de dólares).</i>
-</p>
-<p>
-<i>Si la fuente es <a href="https://www.kaggle.com/datasets/abhijithudayakumar/the-boston-housing-dataset">Boston Housing Dataset en Kaggle</a>, los nombres aparecerán en mayúsculas (cámbielos a minúsculas, o use mayúsculas en la sesión de Gretl). Si la fuente es el repositorio del curso, los nombres estarán en minúsculas.</i>
-</p>
-</div>
-</div>
-<div id="outline-container-org4c411f3" class="outline-2">
-<h2 id="org4c411f3">Actividad 2 - Importar el CSV en Gretl</h2>
-<div class="outline-text-2" id="text-org4c411f3">
-<ul class="org-ul">
-<li>En la ventana principal de <a href="https://gretl.sourceforge.net/es.html">Gretl</a>, seleccione <i><i><code>Archivo -&gt; Abrir archivo de datos -&gt; Archivo de usuario</code></i></i> en el menú desplegable en la parte inferior de la pantalla escoja <i><i><code>texto/CSV</code></i></i> y elija el fichero descargado.</li>
-<li><p>
-Gretl detectará el separador (coma) y la fila de nombres. Acepte las opciones por defecto y confirme.
-</p>
-
-<p>
-<i>o bien teclee en línea de comandos (ajustando la ruta a su sistema)</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl" id="org4135d6f">open ../../data/boston.csv --quiet
-</pre>
-</div></li>
-</ul>
-
-<p>
-<i>Recuerde que según la fuente, los nombres de las variables pueden variar (mayúsculas/minúsculas). Las variables del estudio original son:</i> <code>crim</code>, <code>zn</code>, <code>indus</code>, <code>chas</code>, <code>nox</code>, <code>rm</code>, <code>age</code>, <code>dis</code>, <code>rad</code>, <code>tax</code>, <code>ptratio</code>, <code>b</code>, <code>lstat</code> <i>y</i> <code>medv</code> <i>(valor mediano de la vivienda, en miles de dólares).</i>
-</p>
-</div>
-</div>
-<div id="outline-container-orgdc648ed" class="outline-2">
-<h2 id="orgdc648ed">Actividad 3 - Declarar los datos como sección cruzada</h2>
-<div class="outline-text-2" id="text-orgdc648ed">
-<p>
-Al importar un CSV, Gretl trata las observaciones como una serie sin estructura temporal, lo que es correcto: estos son datos de <i>sección cruzada</i> (cada fila es una zona del área de Boston, no un instante de tiempo). Si Gretl preguntara, indique que <i>no</i> se trata de series temporales ni de panel.
-</p>
-
-<p>
-<i>en línea de comandos, para asegurarse</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl">setobs 1 1 --cross-section
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-orgd9e91e3" class="outline-2">
-<h2 id="orgd9e91e3">Actividad 4 - La variable dicotómica <code>chas</code></h2>
-<div class="outline-text-2" id="text-orgd9e91e3">
-<p>
-La variable <code>chas</code> es <i>dicotómica</i> (o <i>binaria</i>, o <i>dummy</i>): solo toma los valores 0 y 1. Vale 1 si la zona limita con el río Charles y 0 en caso contrario.
-</p>
-</div>
-<div id="outline-container-org46d3456" class="outline-4">
-<h4 id="org46d3456">Mostrar sus valores</h4>
-<div class="outline-text-4" id="text-org46d3456">
-<ul class="org-ul">
-<li><p>
-Marque <code>chas</code>, ``pinche'' con el botón derecho y seleccione <b><i><code>mostrar valores</code></i></b>.
-</p>
-
-<p>
-<i>o bien teclee en línea de comandos</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl" id="org0f140e8">print -o chas
-</pre>
-</div></li>
-</ul>
-
-<p>
-Comprobará que solo contiene ceros y unos.
-</p>
-</div>
-</div>
-<div id="outline-container-org42617be" class="outline-4">
-<h4 id="org42617be">Calcular su media</h4>
-<div class="outline-text-4" id="text-org42617be">
-<ul class="org-ul">
-<li><p>
-Marque <code>chas</code>, ``pinche'' con el botón derecho y seleccione <b><i><code>Estadísticos descriptivos</code></i></b>.
-</p>
-
-<p>
-<i>o bien teclee en línea de comandos</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl" id="orgd859378">summary chas
-</pre>
-</div></li>
-</ul>
-
-<p>
-<i>Observe que la media de una variable 0/1 es justamente la</i> proporción <i>de unos: el porcentaje de zonas que limitan con el río. Esta idea —la media de una dummy es una proporción— reaparecerá al interpretar los coeficientes de variables dicotómicas en la regresión.</i>
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-org8362a6f" class="outline-2">
-<h2 id="org8362a6f">Actividad 5 - Comparar con <code>hprice2</code></h2>
-<div class="outline-text-2" id="text-org8362a6f">
-<p>
-Compare el valor mediano de la vivienda en ambos datasets. En el original, la variable es <code>medv</code> (en <i>miles</i> de dólares); en <code>hprice2</code>, <code>price</code> (en dólares).
-</p>
-
-<ul class="org-ul">
-<li><p>
-Obtenga los estadísticos descriptivos de <code>medv</code>.
+Recuperamos exactamente el ejemplo de la lección 7: \(\boldsymbol{x}=(1,2,3,4,5)\), \(\boldsymbol{u}=(1,-2,0,2,-1)\), \(\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}\).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl">summary medv rm nox
+<pre class="src src-gretl" id="orgbd601bf">nulldata 5 --preserve
+setobs 1 1 --cross-section
+
+matrix mx = {1;2;3;4;5}
+matrix mu = {1;-2;0;2;-1}
+series x = mx
+series u = mu
+series y = 2 + 3*x + u
 </pre>
-</div></li>
+</div>
+<p>
+Ahora pedimos la regresión:
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="org47c2ba6">ols y const x
+</pre>
+</div>
+<ul class="org-ul">
+<li>GUI equivalente: <i><i><code>Modelo -&gt; Mínimos cuadrados ordinarios</code></i></i>, seleccionando <code>y</code> como variable dependiente y <code>const</code>, <code>x</code> como regresores.</li>
 </ul>
 
 <p>
-¿Coinciden el número de observaciones (506) y los órdenes de magnitud (recordando el cambio de unidades) con los de <code>hprice2</code>? Debería tratarse, esencialmente, de los mismos datos.
+<i>Antes de ejecutar</i>: ¿qué valores espera obtener para el coeficiente de <code>const</code> y para el de <code>x</code>? (Repase, si hace falta, el cálculo manual de la lección 7.)
+</p>
+</div>
+</div>
+<div id="outline-container-org68e244c" class="outline-2">
+<h2 id="org68e244c">Actividad 2 - Residuos y las dos condiciones de ortogonalidad</h2>
+<div class="outline-text-2" id="text-org68e244c">
+<p>
+Gretl guarda, tras cada regresión, el vector de residuos en el accesor <code>$uhat</code> y el vector ajustado en <code>$yhat</code>.
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="org2d42172">series ehat = $uhat
+series yhat = $yhat
+
+print x u ehat --byobs
+
+printf "\nSuma de residuos            sum(ehat)   = %.10f\n", sum(ehat)
+printf "Suma de x*residuos           sum(x*ehat) = %.10f\n", sum(x*ehat)
+printf "Diferencia maxima |ehat-u|              = %.10f\n", max(abs(ehat-u))
+</pre>
+</div>
+<pre class="example" id="org9e287db">
+             x            u         ehat
+
+1            1            1            1
+2            2           -2           -2
+3            3            0            0
+4            4            2            2
+5            5           -1           -1
+
+
+Suma de residuos            sum(ehat)   = 0,0000000000
+Suma de x*residuos           sum(x*ehat) = 0,0000000000
+Diferencia maxima |ehat-u|              = 0,0000000000
+</pre>
+<p>
+<i>Recuerde la advertencia general sobre vectores de diseño: aquí ehat coincide EXACTAMENTE con u porque este ejemplo se construyó a propósito para que así fuera (u ya era ortogonal a los regresores). Esto no es lo habitual; lo veremos en la Actividad 5.</i>
+</p>
+</div>
+</div>
+<div id="outline-container-org540196a" class="outline-2">
+<h2 id="org540196a">Actividad 3 - Bondad de ajuste: STC = SEC + SRC y \(R^2\)</h2>
+<div class="outline-text-2" id="text-org540196a">
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="org405766c">scalar mu_y = mean(y)
+scalar STC  = sum((y - mu_y)^2)
+scalar SEC  = sum((yhat - mu_y)^2)
+scalar SRC  = sum(ehat^2)
+
+printf "STC = %.4f   SEC = %.4f   SRC = %.4f   (SEC+SRC = %.4f)\n", STC, SEC, SRC, SEC+SRC
+printf "R2 (a mano)         = %.6f\n", SEC/STC
+printf "R2 de Gretl ($rsq)  = %.6f\n", $rsq
+</pre>
+</div>
+<pre class="example" id="org4afcc16">
+STC = 100,0000   SEC = 90,0000   SRC = 10,0000   (SEC+SRC = 100,0000)
+R2 (a mano)         = 0,900000
+R2 de Gretl ($rsq)  = 0,900000
+</pre>
+</div>
+</div>
+<div id="outline-container-orga20ec76" class="outline-2">
+<h2 id="orga20ec76">Actividad 4 - La pendiente como correlación reescalada</h2>
+<div class="outline-text-2" id="text-orga20ec76">
+<p>
+Recordando la lección 7 (\(\hat\beta_1=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\)) y la lección 8 (\(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\) en regresión simple):
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="orge50b612">scalar rho_xy = corr(x,y)
+scalar beta1_formula = rho_xy * sd(y)/sd(x)
+
+printf "rho_xy                       = %.6f\n", rho_xy
+printf "beta1 (formula rho*sy/sx)    = %.6f\n", beta1_formula
+printf "beta1 ($coeff(x) de Gretl)   = %.6f\n", $coeff(x)
+printf "rho_xy^2                     = %.6f\n", rho_xy^2
+printf "R2 ($rsq de Gretl)           = %.6f\n", $rsq
+</pre>
+</div>
+<pre class="example" id="org5058ccd">
+rho_xy                       = 0,948683
+beta1 (formula rho*sy/sx)    = 3,000000
+beta1 ($coeff(x) de Gretl)   = 3,000000
+rho_xy^2                     = 0,900000
+R2 ($rsq de Gretl)           = 0,900000
+</pre>
+</div>
+</div>
+<div id="outline-container-org1def2f6" class="outline-2">
+<h2 id="org1def2f6">Actividad 5 - ¿Y si la muestra es más grande y el residuo no está ``hecho a medida''?</h2>
+<div class="outline-text-2" id="text-org1def2f6">
+<p>
+Generamos una muestra nueva, mayor (\(n=60\)), con una perturbación genuinamente aleatoria (no diseñada para ser ortogonal a \(\boldsymbol{x}\)).
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="orgbe4d641">nulldata 60 --preserve
+set seed 24680
+
+series x2 = uniform(0, 10)
+series u2 = normal(0, 2)
+series y2 = 2 + 3*x2 + u2
+
+ols y2 const x2
+series ehat2 = $uhat
+</pre>
+</div>
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="org778f4a7">printf "Suma de residuos    sum(ehat2)     = %.10f    (debe ser 0, exactamente)\n", sum(ehat2)
+printf "Suma de x2*residuos sum(x2*ehat2)  = %.10f    (debe ser 0, exactamente)\n", sum(x2*ehat2)
+printf "beta1 estimado                     = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
+printf "beta0 estimado                     = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
+</pre>
+</div>
+<pre class="example" id="orgf377643">
+Suma de residuos    sum(ehat2)     = 0,0000000000    (debe ser 0, exactamente)
+Suma de x2*residuos sum(x2*ehat2)  = -0,0000000000    (debe ser 0, exactamente)
+beta1 estimado                     = 3,0601    (valor generador = 3, pero NO se recupera exacto)
+beta0 estimado                     = 1,8220    (valor generador = 2, pero NO se recupera exacto)
+</pre>
+<p>
+<i>Compare: la ortogonalidad (primeras dos líneas) se cumple exactamente, sea cual sea la muestra &#x2013;es álgebra pura, consecuencia de cómo se define MCO&#x2013;. En cambio, \(\hat\beta_0,\hat\beta_1\) solo se</i> aproximan <i>a los valores 2 y 3 que usamos para generar los datos &#x2013;son una estimación, no una identidad&#x2013;.</i>
+</p>
+</div>
+</div>
+<div id="outline-container-org4626cb8" class="outline-2">
+<h2 id="org4626cb8">Actividad 6 - Síntesis</h2>
+<div class="outline-text-2" id="text-org4626cb8">
+<p>
+Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en las lecciones 7 y 8: (i) las fórmulas de \(\hat\beta_0,\hat\beta_1\); (ii) las dos condiciones de ortogonalidad, que se cumplen <i>siempre</i>, exactamente, por construcción de MCO (no dependen de si el ejemplo está ``diseñado'' o no); (iii) \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\). Y hemos visto la diferencia esencial entre una <i>identidad algebraica</i> (ortogonalidad: exacta siempre) y una <i>estimación</i> (recuperar el coeficiente generador: solo aproximada, y solo exacta en el ejemplo ``con truco'' de la lección 7).
+</p>
+</div>
+</div>
+<div id="outline-container-org8c3f788" class="outline-2">
+<h2 id="org8c3f788">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org8c3f788">
+<ol class="org-ol">
+<li>En la Actividad 1, ¿por qué Gretl reproduce exactamente \(\hat\beta_0=2,\hat\beta_1=3\), y no una aproximación?</li>
+<li>¿Por qué la ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) se cumple exactamente en la Actividad 5, mientras que \(\hat\beta_1\) solo se aproxima a 3?</li>
+<li>¿Qué diferencia hay entre el vector generador \(\boldsymbol{u}\) y el vector de residuos \(\hat{\boldsymbol{e}}\)? ¿En qué caso particular, de los vistos hoy, coinciden exactamente?</li>
+<li>¿Por qué el signo de \(\hat\beta_1\) coincide siempre con el signo de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\)?</li>
+<li>Si en la Actividad 5 usáramos \(n=600\) en lugar de \(n=60\) (manteniendo el mismo proceso generador), ¿qué esperaría que ocurriera con la cercanía entre \(\hat\beta_1\) y 3?</li>
+</ol>
+
+<p>
+<i>Para profundizar</i>:
 </p>
 
 <ul class="org-ul">
-<li>Preguntas de interpretación para la clase</li>
-
-<li>¿Qué ventaja tiene saber importar datos en formato CSV, frente a depender solo de los datasets de muestra de Gretl?</li>
-<li>La media de <code>chas</code> es un número entre 0 y 1. ¿Qué proporción de zonas limita con el río Charles? ¿Por qué la media de una variable 0/1 es una proporción?</li>
-<li>¿Por qué decimos que estos datos son de <i>sección cruzada</i> y no una serie temporal?</li>
-<li>Las variables <code>medv</code> (original) y <code>price</code> (<code>hprice2</code>) miden lo mismo en <i>unidades distintas</i>. ¿Cómo afectaría esto a la interpretación de un coeficiente de regresión, si usáramos una u otra?</li>
-<li>La variable <code>chas</code> es una lista de 506 ceros y unos: un <i>vector de \(\mathbb{R}^{506}\)</i>. ¿Qué <code>dirección</code> tiene ese vector en relación con el vector de unos \(\boldsymbol{1}\)?</li>
-
-<li>Para profundizar</li>
-
-<li>Cottrell, A. y Lucchetti, R. (2023). <i>Gretl User's Guide</i>. Capítulo sobre importación de datos (<code>Importing data</code>). Disponible en <a href="https://gretl.sourceforge.net/">gretl.sourceforge.net</a>.</li>
-<li>Adkins, L. C. (2018). <i>Using Gretl for Principles of Econometrics</i>, 4.ª ed. Apéndice sobre lectura de datos externos.</li>
-<li>Harrison, D. and Rubinfeld, D.L. (1978), <a href="https://lawcat.berkeley.edu/record/1111234/files/fulltext.pdf">"Hedonic Housing Prices and the Demand for Clean Air"</a>, Journal of Environmental Economics and Management 5, 81-102.</li>
+<li>Véanse las lecciones 7 y 8 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html">S09-Lecc07</a>, <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html">S10-Lecc08</a>) para las demostraciones completas de lo que hoy verificamos con Gretl.</li>
+<li>Cottrell, A. y Lucchetti, R. (2023). <i>Gretl User's Guide</i>. Sección sobre el comando <code>ols</code> y los accesores tras la estimación (<code>$uhat</code>, <code>$yhat</code>, <code>$coeff</code>, <code>$rsq</code>).</li>
 </ul>
-</div>
-<div id="outline-container-org3ef02af" class="outline-4">
-<h4 id="org3ef02af">Código completo de la práctica</h4>
-<div class="outline-text-4" id="text-org3ef02af">
+
+<ul class="org-ul">
+<li>Código completo de la práctica</li>
+</ul>
+
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -506,35 +543,26 @@ Obtenga los estadísticos descriptivos de <code>medv</code>.
 <tbody>
 <tr>
 <td class="org-left"><i>Enlace al guión</i>:</td>
-<td class="org-left"><a href="https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S04-Prct-B-boston.inp">S04-Prct-B-boston.inp</a></td>
+<td class="org-left"><a href="https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S11-Prct-A-mco-simulado.inp">S11-Prct-A-mco-simulado.inp</a></td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-</div>
-<div id="outline-container-org62abd47" class="outline-2">
-<h2 id="org62abd47">Respuestas</h2>
-<div class="outline-text-2" id="text-org62abd47">
-<p>
-<b>Ventaja de saber importar CSV.</b> Permite trabajar con <i>cualquier</i> fuente de datos propia (no solo los datasets de muestra empaquetados con Gretl), una destreza imprescindible en cuanto el alumno necesite datos de su propio interés (TFG, trabajos aplicados, datos institucionales, etc.).
-</p>
+<div id="outline-container-org2ab021c" class="outline-2">
+<h2 id="org2ab021c">Respuestas</h2>
+<div class="outline-text-2" id="text-org2ab021c">
+<ol class="org-ol">
+<li>¿Por qué Gretl reproduce exactamente \(\hat\beta_0=2,\hat\beta_1=3\)? Porque <code>ols</code> no hace más que resolver, internamente, exactamente las mismas dos condiciones de ortogonalidad que resolvimos a mano en la lección 7. Como este ejemplo se construyó a propósito con un vector \(\boldsymbol{u}\) cuya covarianza muestral con \(\boldsymbol{x}\) es exactamente cero (y de media cero), el sistema de ortogonalidad recupera exactamente los coeficientes generadores 2 y 3, puesto que el vector de residuos es necesariamente igual a \(\boldsymbol{u}\) —no es una propiedad general de MCO, sino consecuencia del diseño deliberado del ejemplo.</li>
 
-<p>
-<b>Media de <code>chas</code>: ¿qué proporción de zonas limita con el río?</b> En el Boston Housing original, 35 de las 506 zonas censales limitan con el río Charles, es decir, una proporción de \(35/506\approx0{,}069\) (≈ 6,9%). La media de una variable 0/1 es siempre la proporción de unos porque \(\mu_{\boldsymbol{x}}=\frac1n\sum x_i\) y, al ser cada \(x_i\) o bien 0 o bien 1, la suma \(\sum x_i\) es sencillamente el <i>número</i> de unos; dividida por \(n\), da la <i>proporción</i>.
-</p>
+<li>¿Por qué la ortogonalidad es exacta y \(\hat\beta_1\) solo se aproxima? Porque la ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) es una consecuencia <i>algebraica</i> de cómo MCO define \(\hat\beta_0,\hat\beta_1\) (las dos condiciones que se imponen para construirlos): se cumple exactamente para <i>cualquier</i> conjunto de datos, sin excepción. En cambio, que \(\hat\beta_1\) coincida con el valor 3 usado para generar los datos es una cuestión distinta: depende de que la perturbación \(u_2\) sea ortogonal a los regresores, es decir, de media nula y que tenga, para esa muestra concreta, covarianza exactamente nula con \(x_2\) —algo que ocurre por diseño en la Actividad 1, pero que una perturbación genuinamente aleatoria (Actividad 5) solo cumple <i>aproximadamente</i>, con un error que depende de la muestra concreta.</li>
 
-<p>
-<b>¿Por qué sección cruzada y no serie temporal?</b> Porque cada fila representa una <i>unidad distinta</i> (una zona geográfica), no un instante de tiempo dentro de la evolución de una misma unidad. No existe una relación de "antes/después" entre las filas: podríamos reordenarlas arbitrariamente sin perder ninguna información (a diferencia de una serie temporal, donde el orden es esencial).
-</p>
+<li>Diferencia entre \(\boldsymbol{u}\) y \(\hat{\boldsymbol{e}}\). \(\boldsymbol{u}\) es el vector que <i>nosotros</i> usamos para <i>generar</i> los datos (una elección de diseño, no observable en la práctica real); \(\hat{\boldsymbol{e}}\) es el vector de residuos que MCO <i>calcula</i> a partir de los datos observados, sin conocer \(\boldsymbol{u}\). Coinciden exactamente solo en el caso especial de la Actividad 1, porque ahí \(\boldsymbol{u}\) se construyó deliberadamente ortogonal a los regresores —la misma situación exacta que ya advertimos en la lección 7 y que aquí volvemos a subrayar—. En la Actividad 5, con perturbación genuinamente aleatoria, \(\hat{\boldsymbol{e}}\neq\boldsymbol{u}_2\) en general.</li>
 
-<p>
-<b><code>medv</code> vs. <code>price</code>: mismas unidades distintas.</b> Si <code>medv</code> está en miles de dólares y <code>price</code> en dólares, un coeficiente de regresión estimado usando <code>medv</code> como variable dependiente sería 1000 veces <i>menor</i> (en valor absoluto) que el estimado usando <code>price</code>, para exactamente la misma relación económica subyacente. El cambio de unidades no altera el fenómeno real, solo reescala numéricamente el coeficiente —es la misma idea de "homogeneidad ante escala" que se demuestra formalmente en la lección 5 para la covarianza (\(\sigma_{\lambda\boldsymbol{x}\boldsymbol{y}}=\lambda\,\sigma_{\boldsymbol{x}\boldsymbol{y}}\))—. Por eso siempre hay que fijarse en las unidades antes de interpretar la magnitud de un coeficiente.
-</p>
+<li>Signo de \(\hat\beta_1\) y de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\). Porque \(\hat\beta_1=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) (lección 7), y tanto \(\sigma_{\boldsymbol{y}}\) como \(\sigma_{\boldsymbol{x}}\) son siempre no negativas (son normas). Por tanto, el cociente \(\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) nunca cambia el signo: el signo de \(\hat\beta_1\) es siempre el mismo que el de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\).</li>
 
-<p>
-<b><code>chas</code> como vector de \(\mathbb{R}^{506}\): ¿qué dirección tiene respecto a \(\boldsymbol{1}\)?</b> <code>chas</code> no es ortogonal a \(\boldsymbol{1}\) en general (su media, \(\approx0{,}069\), no es cero), así que se descompone en una componente en \(\mathcal{L}(\boldsymbol{1})\) —su vector de medias, \(0{,}069\cdot\boldsymbol{1}\)— y una componente ortogonal a \(\boldsymbol{1}\) —su vector en desviaciones—. Al ser una variable 0/1, esa componente en desviaciones tiene una estructura muy particular: solo toma dos valores, \(1-0{,}069\) (en las zonas junto al río) y \(-0{,}069\) (en el resto), y su norma al cuadrado (la varianza) es \(p(1-p)\) con \(p\) la proporción de unos. Es un buen ejemplo de que incluso una variable tan simple como una dummy admite la misma descomposición geométrica que cualquier otra.
-</p>
+<li>Con \(n=600\) en lugar de \(n=60\). Cabe esperar que \(\hat\beta_1\) se acerque <i>todavía más</i> a 3: con muestras más grandes, la covarianza muestral entre la perturbación \(u_2\) y el regresor \(x_2\) tiende a acercarse a cero (si, como es el caso, \(u_2\) se generó independientemente de \(x_2\)), de modo que el ``desajuste'' entre \(\hat\beta_1\) y el valor generador 3 tiende a reducirse. Esta es una primera intuición, sin demostrar todavía, de la propiedad de <i>consistencia</i> de un estimador, que se estudiará con más detalle más adelante en el curso.</li>
+</ol>
 </div>
 </div>
 </div>

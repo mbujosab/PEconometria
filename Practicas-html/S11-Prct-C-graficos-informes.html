@@ -6,7 +6,7 @@
 <!-- 2026-08-07 vie 17:13 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sesión 4 (B) &#x2014; Importar datos desde internet: el Boston Housing original</title>
+<title>Sesión 11 (C) &#x2014; Del ajuste al informe: edición y exportación de gráficos y resultados en Gretl</title>
 <meta name="author" content="Marcos Bujosa" />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
@@ -281,220 +281,225 @@ org_html_manager.setup();  // activate after the parameters are set
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Sesión 4 (B) &#x2014; Importar datos desde internet: el Boston Housing original</h1>
+<h1 class="title">Sesión 11 (C) &#x2014; Del ajuste al informe: edición y exportación de gráficos y resultados en Gretl</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org61f1454">Descripción de la práctica</a></li>
-<li><a href="#orgc98d198">Actividad 1 - Descargar el fichero de datos</a></li>
-<li><a href="#org4c411f3">Actividad 2 - Importar el CSV en Gretl</a></li>
-<li><a href="#orgdc648ed">Actividad 3 - Declarar los datos como sección cruzada</a></li>
-<li><a href="#orgd9e91e3">Actividad 4 - La variable dicotómica <code>chas</code></a>
-<ul>
-<li>
-<ul>
-<li><a href="#org46d3456">Mostrar sus valores</a></li>
-<li><a href="#org42617be">Calcular su media</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#org8362a6f">Actividad 5 - Comparar con <code>hprice2</code></a>
-<ul>
-<li>
-<ul>
-<li><a href="#org3ef02af">Código completo de la práctica</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#org62abd47">Respuestas</a></li>
+<li><a href="#orgbfd972f">Descripción de la práctica</a></li>
+<li><a href="#org8fd11fa">Actividad 1 - Reapertura y reestimación</a></li>
+<li><a href="#org95c6d56">Actividad 2 - Personalizar el diagrama de dispersión</a></li>
+<li><a href="#orgebf597b">Actividad 3 - Exportar el gráfico en distintos formatos</a></li>
+<li><a href="#org6202e84">Actividad 4 - Exportar resultados de una regresión para un informe</a></li>
+<li><a href="#org4f87fc7">Actividad 5 - Exportar histograma y diagrama de caja directamente a fichero</a></li>
+<li><a href="#org16d9e86">Actividad 6 - Checklist de buenas prácticas para un informe</a></li>
+<li><a href="#orge809614">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org8424fd0">Código completo de la práctica</a></li>
+<li><a href="#org4e270ec">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org61f1454" class="outline-2">
-<h2 id="org61f1454">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org61f1454">
+<div id="outline-container-orgbfd972f" class="outline-2">
+<h2 id="orgbfd972f">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orgbfd972f">
 <p>
-En la práctica anterior usamos <code>hprice2</code>, la versión <code>de manual</code> del conjunto de datos sobre la vivienda en Boston (Harrison &amp; Rubinfeld, 1978). Esa versión, distribuida con Gretl, <i>no incluye todas las variables del estudio original</i>. En particular, le falta una variable <i>dicotómica</i> muy útil para el curso: <code>chas</code> (vale 1 si la zona limita con el río Charles, 0 en caso contrario).
+Las dos prácticas anteriores de esta sesión se centraron en el contenido econométrico (ortogonalidad, \(R^2\)). Esta práctica es distinta: no introduce ningún concepto nuevo de la asignatura, sino <i>habilidades de oficio</i> necesarias para preparar un informe o trabajo escrito con resultados de Gretl: personalizar y exportar gráficos con calidad suficiente, y exportar tablas de resultados en un formato que se pueda incluir directamente en un documento (en vez de copiar números a mano o pegar capturas de pantalla). Reutilizamos el ajuste <code>price~rooms</code> ya estimado en la práctica anterior.
 </p>
 
 <p>
-En esta práctica aprenderemos a <i>importar datos desde internet</i> —una destreza imprescindible cuando trabajamos con datos propios— y cargaremos el <i>Boston Housing original</i>, que sí contiene <code>chas</code>. Este conjunto será nuestro <i>dataset integrador</i> cuando estudiemos variables dicotómicas y en el laboratorio final.
-</p>
-
-<p>
-<i>Objetivo</i>:
+<i>Objetivo</i>
 </p>
 
 <ol class="org-ol">
-<li>Descargar un fichero de datos (formato CSV) desde internet.</li>
-<li>Importarlo en Gretl y reconocer sus variables.</li>
-<li>Declarar correctamente el conjunto como datos de sección cruzada.</li>
-<li>Examinar la variable dicotómica <code>chas</code> y entender qué significa su <i>media</i>.</li>
-<li>Comparar este dataset con el <code>hprice2</code> de la práctica anterior.</li>
+<li>Personalizar un diagrama de dispersión (título, etiquetas de los ejes, colores).</li>
+<li>Exportar gráficos en distintos formatos (PNG, PDF, EPS) y entender cuándo conviene cada uno.</li>
+<li>Exportar los resultados de una regresión en un formato apto para un informe (LaTeX/RTF), en vez de copiarlos a mano.</li>
+<li>Exportar directamente a fichero un histograma y un diagrama de caja (ya vistos en la primera práctica del curso).</li>
+<li>Fijar un pequeño ``checklist'' de buenas prácticas para preparar un informe reproducible.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgc98d198" class="outline-2">
-<h2 id="orgc98d198">Actividad 1 - Descargar el fichero de datos</h2>
-<div class="outline-text-2" id="text-orgc98d198">
+<div id="outline-container-org8fd11fa" class="outline-2">
+<h2 id="org8fd11fa">Actividad 1 - Reapertura y reestimación</h2>
+<div class="outline-text-2" id="text-org8fd11fa">
 <p>
-El conjunto original está disponible en varios repositorios públicos. Usaremos una copia en formato <code>CSV</code> (valores separados por comas), el formato de intercambio de datos más habitual.
-</p>
-
-<ul class="org-ul">
-<li>Descargue el fichero <code>housing.csv</code> (o el nombre que corresponda) desde el repositorio indicado en clase, por ejemplo el <a href="https://www.kaggle.com/datasets/abhijithudayakumar/the-boston-housing-dataset">Boston Housing Dataset en Kaggle</a>.</li>
-<li>Guárdelo en una carpeta de trabajo conocida (p. ej. su carpeta de la asignatura).</li>
-</ul>
-
-<p>
-<i>Un fichero CSV es simplemente texto: la primera fila suele contener los nombres de las variables y cada fila siguiente, una observación, con los valores separados por comas. Puede abrirlo con cualquier editor de texto para inspeccionarlo antes de importarlo.</i>
-</p>
-<p>
-<i>Según la fuente, los nombres de las variables pueden variar (mayúsculas/minúsculas). Las variables del estudio original son:</i> <code>crim</code>, <code>zn</code>, <code>indus</code>, <code>chas</code>, <code>nox</code>, <code>rm</code>, <code>age</code>, <code>dis</code>, <code>rad</code>, <code>tax</code>, <code>ptratio</code>, <code>b</code>, <code>lstat</code> <i>y</i> <code>medv</code> <i>(valor mediano de la vivienda, en miles de dólares).</i>
-</p>
-<p>
-<i>Si la fuente es <a href="https://www.kaggle.com/datasets/abhijithudayakumar/the-boston-housing-dataset">Boston Housing Dataset en Kaggle</a>, los nombres aparecerán en mayúsculas (cámbielos a minúsculas, o use mayúsculas en la sesión de Gretl). Si la fuente es el repositorio del curso, los nombres estarán en minúsculas.</i>
-</p>
-</div>
-</div>
-<div id="outline-container-org4c411f3" class="outline-2">
-<h2 id="org4c411f3">Actividad 2 - Importar el CSV en Gretl</h2>
-<div class="outline-text-2" id="text-org4c411f3">
-<ul class="org-ul">
-<li>En la ventana principal de <a href="https://gretl.sourceforge.net/es.html">Gretl</a>, seleccione <i><i><code>Archivo -&gt; Abrir archivo de datos -&gt; Archivo de usuario</code></i></i> en el menú desplegable en la parte inferior de la pantalla escoja <i><i><code>texto/CSV</code></i></i> y elija el fichero descargado.</li>
-<li><p>
-Gretl detectará el separador (coma) y la fila de nombres. Acepte las opciones por defecto y confirme.
-</p>
-
-<p>
-<i>o bien teclee en línea de comandos (ajustando la ruta a su sistema)</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl" id="org4135d6f">open ../../data/boston.csv --quiet
-</pre>
-</div></li>
-</ul>
-
-<p>
-<i>Recuerde que según la fuente, los nombres de las variables pueden variar (mayúsculas/minúsculas). Las variables del estudio original son:</i> <code>crim</code>, <code>zn</code>, <code>indus</code>, <code>chas</code>, <code>nox</code>, <code>rm</code>, <code>age</code>, <code>dis</code>, <code>rad</code>, <code>tax</code>, <code>ptratio</code>, <code>b</code>, <code>lstat</code> <i>y</i> <code>medv</code> <i>(valor mediano de la vivienda, en miles de dólares).</i>
-</p>
-</div>
-</div>
-<div id="outline-container-orgdc648ed" class="outline-2">
-<h2 id="orgdc648ed">Actividad 3 - Declarar los datos como sección cruzada</h2>
-<div class="outline-text-2" id="text-orgdc648ed">
-<p>
-Al importar un CSV, Gretl trata las observaciones como una serie sin estructura temporal, lo que es correcto: estos son datos de <i>sección cruzada</i> (cada fila es una zona del área de Boston, no un instante de tiempo). Si Gretl preguntara, indique que <i>no</i> se trata de series temporales ni de panel.
-</p>
-
-<p>
-<i>en línea de comandos, para asegurarse</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl">setobs 1 1 --cross-section
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-orgd9e91e3" class="outline-2">
-<h2 id="orgd9e91e3">Actividad 4 - La variable dicotómica <code>chas</code></h2>
-<div class="outline-text-2" id="text-orgd9e91e3">
-<p>
-La variable <code>chas</code> es <i>dicotómica</i> (o <i>binaria</i>, o <i>dummy</i>): solo toma los valores 0 y 1. Vale 1 si la zona limita con el río Charles y 0 en caso contrario.
-</p>
-</div>
-<div id="outline-container-org46d3456" class="outline-4">
-<h4 id="org46d3456">Mostrar sus valores</h4>
-<div class="outline-text-4" id="text-org46d3456">
-<ul class="org-ul">
-<li><p>
-Marque <code>chas</code>, ``pinche'' con el botón derecho y seleccione <b><i><code>mostrar valores</code></i></b>.
-</p>
-
-<p>
-<i>o bien teclee en línea de comandos</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl" id="org0f140e8">print -o chas
-</pre>
-</div></li>
-</ul>
-
-<p>
-Comprobará que solo contiene ceros y unos.
-</p>
-</div>
-</div>
-<div id="outline-container-org42617be" class="outline-4">
-<h4 id="org42617be">Calcular su media</h4>
-<div class="outline-text-4" id="text-org42617be">
-<ul class="org-ul">
-<li><p>
-Marque <code>chas</code>, ``pinche'' con el botón derecho y seleccione <b><i><code>Estadísticos descriptivos</code></i></b>.
-</p>
-
-<p>
-<i>o bien teclee en línea de comandos</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl" id="orgd859378">summary chas
-</pre>
-</div></li>
-</ul>
-
-<p>
-<i>Observe que la media de una variable 0/1 es justamente la</i> proporción <i>de unos: el porcentaje de zonas que limitan con el río. Esta idea —la media de una dummy es una proporción— reaparecerá al interpretar los coeficientes de variables dicotómicas en la regresión.</i>
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-org8362a6f" class="outline-2">
-<h2 id="org8362a6f">Actividad 5 - Comparar con <code>hprice2</code></h2>
-<div class="outline-text-2" id="text-org8362a6f">
-<p>
-Compare el valor mediano de la vivienda en ambos datasets. En el original, la variable es <code>medv</code> (en <i>miles</i> de dólares); en <code>hprice2</code>, <code>price</code> (en dólares).
-</p>
-
-<ul class="org-ul">
-<li><p>
-Obtenga los estadísticos descriptivos de <code>medv</code>.
+Esta práctica es autocontenida: reabrimos <code>hprice2</code> y volvemos a estimar el modelo <code>price~rooms</code> de la práctica anterior.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl">summary medv rm nox
+<pre class="src src-gretl" id="org8abc048">open hprice2.gdt --quiet
+setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+setinfo rooms -d "Número medio de habitaciones" -n "Habitaciones"
+
+ols price const rooms
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org95c6d56" class="outline-2">
+<h2 id="org95c6d56">Actividad 2 - Personalizar el diagrama de dispersión</h2>
+<div class="outline-text-2" id="text-org95c6d56">
+<ul class="org-ul">
+<li><p>
+GUI: genere el gráfico <b><i><code>Gráfico X-Y</code></i></b> de <code>price</code> sobre <code>rooms</code> (como en la práctica anterior). Sobre la ventana del gráfico, botón derecho, <b><i><code>Editar</code></i></b>: se abre un panel con pestañas para el título, las etiquetas de los ejes, el estilo de los puntos/líneas y los colores. Cambie el título a algo descriptivo (p. ej. ``Precio mediano frente a número de habitaciones'') y añada unidades explícitas en las etiquetas de los ejes (p. ej. ``Precio ($)'', ``Habitaciones (número medio)'').
+</p>
+
+<p>
+<i>el equivalente en línea de comandos usa un bloque ``literal'' de gnuplot, entre llaves, para personalizar el gráfico</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="orgb474dd0">list PL = price rooms
+plot PL
+    options fit=none
+    literal set title "Precio mediano frente al numero de habitaciones"
+    literal set xlabel "Habitaciones (numero medio)"
+    literal set ylabel "Precio ($)"
+end plot --output="price_rooms_personalizado.png"
+</pre>
+</div></li>
+</ul>
+
+<figure style="display: flex; justify-content: center; gap: 10px;">
+    <img src="./S11-Prct-C-graficos-informes/price_rooms_personalizado.png" style="max-width:55%; height:auto;"/>
+    <figcaption>Diagrama de dispersión personalizado (título y etiquetas de ejes con unidades).</figcaption>
+</figure>
+
+<p>
+La estructura con el bloque <code>plot</code> es:
+</p>
+<div class="org-src-container">
+<pre class="src src-R">list MiLista = variable_y variable_x
+plot MiLista
+    options fit=none          <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">opciones de gretl para el gr&#225;fico (fit, with-lines, etc.)
+</span>    literal set title <span style="font-style: italic;">"..."</span>   <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">cualquier comando gnuplot "en crudo"
+</span>    literal set xlabel <span style="font-style: italic;">"..."</span>
+    literal set ylabel <span style="font-style: italic;">"..."</span>
+end plot --output=<span style="font-style: italic;">"nombre_fichero.png"</span>   <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">o .pdf, .eps &#8212; el --output va en el "end plot"</span>
+</pre>
+</div>
+
+<p>
+Puntos clave que vale la pena recordar:
+</p>
+
+<p>
+<code>plot</code> (a diferencia de <code>gnuplot</code>) solo admite un argumento: una lista, una serie o una matriz — de ahí que haya que definir la <code>list</code> antes.
+Dentro del bloque, cada línea empieza por una palabra clave reservada (<code>options</code>, <code>literal</code>, <code>printf</code>&#x2026;).
+El destino del fichero (<code>--output=</code>) es una opción de <code>end plot</code>, igual que <code>--output=</code> es opción del comando <code>gnuplot</code> clásico.
+</p>
+</div>
+</div>
+<div id="outline-container-orgebf597b" class="outline-2">
+<h2 id="orgebf597b">Actividad 3 - Exportar el gráfico en distintos formatos</h2>
+<div class="outline-text-2" id="text-orgebf597b">
+<ul class="org-ul">
+<li><p>
+GUI: sobre la ventana del gráfico, botón derecho, <b><i><code>Guardar como</code></i></b>, y elija el formato (PNG, PDF, EPS, SVG según disponibilidad).
+</p>
+
+<p>
+<i>o bien, en línea de comandos, repitiendo el mismo gráfico con distinta extensión</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="orgad59c49">gnuplot price rooms --output="price_rooms.png"
+gnuplot price rooms --output="price_rooms.pdf"
+gnuplot price rooms --output="price_rooms.eps"
 </pre>
 </div></li>
 </ul>
 
 <p>
-¿Coinciden el número de observaciones (506) y los órdenes de magnitud (recordando el cambio de unidades) con los de <code>hprice2</code>? Debería tratarse, esencialmente, de los mismos datos.
+<i>Discusión</i>: para un documento LaTeX, se prefiere normalmente un formato <i>vectorial</i> (PDF o EPS) frente a uno <i>de mapa de bits</i> (PNG): un PDF/EPS se puede escalar sin perder nitidez (líneas y texto siguen nítidos a cualquier tamaño), mientras que un PNG, al ampliarse, se pixela. El PNG es preferible sobre todo para páginas web o cuando el propio gráfico contiene muchísimos puntos (una nube de dispersión muy densa en PDF puede generar ficheros pesados).
+</p>
+</div>
+</div>
+<div id="outline-container-org6202e84" class="outline-2">
+<h2 id="org6202e84">Actividad 4 - Exportar resultados de una regresión para un informe</h2>
+<div class="outline-text-2" id="text-org6202e84">
+<ul class="org-ul">
+<li><p>
+GUI: en la ventana del modelo estimado (<code>price~rooms</code> de la Actividad 1), menú <b><i><code>LaTeX</code></i></b> → <b><i><code>Tabular</code></i></b> o <b><i><code>Ecuación</code></i></b>, con las opciones de <b><i><code>Ver</code></i></b>, <b><i><code>Copiar</code></i></b> o <b><i><code>Guardar</code></i></b>. También, desde <b><i><code>Archivo -&gt; Guardar como</code></i></b>, puede exportar en formato RTF (para Word) directamente.
+</p>
+
+<p>
+<i>en línea de comandos, Gretl ofrece los comandos</i> <code>eqnprint</code> <i>(la ecuación estimada) y</i> <code>tabprint</code> <i>(una tabla completa de coeficientes y errores estándar) para exportar directamente a LaTeX</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="org2f699bb">ols price const rooms --quiet
+eqnprint --output="ecuacion_price_rooms.tex"
+tabprint --output="tabla_price_rooms.tex"
+</pre>
+</div></li>
+</ul>
+
+<p>
+(<i>Consulte</i> <code>help tabprint</code> <i>y</i> <code>help eqnprint</code> <i>en la consola de Gretl si las opciones exactas difieren en su versión; ambos comandos admiten también</i> <code>--format=rtf</code> <i>para exportar directamente a RTF en lugar de LaTeX.</i>)
+</p>
+<p>
+<i>Ventaja frente a copiar a mano</i>: estos comandos generan directamente el código (LaTeX o RTF) listo para pegar en el informe, con los números exactos que calculó Gretl —evitando errores de transcripción y ahorrando el tedioso trabajo de dar formato a una tabla a mano—.
+</p>
+</div>
+</div>
+<div id="outline-container-org4f87fc7" class="outline-2">
+<h2 id="org4f87fc7">Actividad 5 - Exportar histograma y diagrama de caja directamente a fichero</h2>
+<div class="outline-text-2" id="text-org4f87fc7">
+<p>
+Recordando la primera práctica del curso (histograma y diagrama de caja de <code>price</code>):
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="orgffa1719">freq price --plot="hist_price_informe.png"
+boxplot price --output="boxplot_price_informe.png"
+</pre>
+</div>
+<figure style="display: flex; justify-content: center; gap: 10px;">
+    <img src="./S11-Prct-C-graficos-informes/hist_price_informe.png" style="max-width:48%; height:auto;"/>
+    <img src="./S11-Prct-C-graficos-informes/boxplot_price_informe.png" style="max-width:28%; height:auto;"/>
+    <figcaption>Histograma y diagrama de caja de <code>price</code>, exportados directamente a fichero.</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-org16d9e86" class="outline-2">
+<h2 id="org16d9e86">Actividad 6 - Checklist de buenas prácticas para un informe</h2>
+<div class="outline-text-2" id="text-org16d9e86">
+<ul class="org-ul">
+<li><i>Reproducibilidad</i>: conserve el guion completo (<code>.inp</code>) usado para generar cada gráfico y cada tabla, no solo el resultado final; si usa datos simulados, fije siempre <code>set seed</code>.</li>
+<li><i>Formato vectorial para figuras en LaTeX</i>: prefiera PDF/EPS a PNG cuando el documento final sea un PDF compilado con LaTeX.</li>
+<li><i>Ejes con unidades</i>: toda figura debe indicar en sus ejes qué se mide y en qué unidades (dólares, número de habitaciones, etc.), no solo el nombre abreviado de la variable en Gretl.</li>
+<li><i>Tablas generadas, no transcritas a mano</i>: use <code>tabprint/eqnprint</code> (o la vía GUI equivalente) en lugar de copiar números de la pantalla, para evitar errores de transcripción.</li>
+<li><i>Cite la fuente de los datos</i>: indique siempre el origen del dataset (aquí, <code>hprice2</code>, Harrison y Rubinfeld, 1978).</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orge809614" class="outline-2">
+<h2 id="orge809614">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-orge809614">
+<ol class="org-ol">
+<li>¿Por qué para un documento LaTeX suele preferirse exportar un gráfico en PDF o EPS en lugar de PNG?</li>
+<li>¿Qué ventaja tiene usar <code>tabprint</code> / <code>eqnprint</code> frente a copiar manualmente los números de la salida de Gretl a un documento?</li>
+<li>¿Por qué es importante incluir las unidades en las etiquetas de los ejes de un gráfico que se va a incluir en un informe?</li>
+<li>¿Por qué conviene conservar el guion completo (<code>.inp</code>) de Gretl, y no solo los gráficos y resultados finales, al preparar un informe reproducible?</li>
+<li>Si tuviera que incluir en un informe la comparación entre los modelos <code>price~rooms</code> y <code>price~nox</code> de la práctica anterior, ¿qué elementos (gráficos, tablas, estadísticos) incluiría, y por qué?</li>
+</ol>
+
+<p>
+<i>Para profundizar</i>:
 </p>
 
 <ul class="org-ul">
-<li>Preguntas de interpretación para la clase</li>
-
-<li>¿Qué ventaja tiene saber importar datos en formato CSV, frente a depender solo de los datasets de muestra de Gretl?</li>
-<li>La media de <code>chas</code> es un número entre 0 y 1. ¿Qué proporción de zonas limita con el río Charles? ¿Por qué la media de una variable 0/1 es una proporción?</li>
-<li>¿Por qué decimos que estos datos son de <i>sección cruzada</i> y no una serie temporal?</li>
-<li>Las variables <code>medv</code> (original) y <code>price</code> (<code>hprice2</code>) miden lo mismo en <i>unidades distintas</i>. ¿Cómo afectaría esto a la interpretación de un coeficiente de regresión, si usáramos una u otra?</li>
-<li>La variable <code>chas</code> es una lista de 506 ceros y unos: un <i>vector de \(\mathbb{R}^{506}\)</i>. ¿Qué <code>dirección</code> tiene ese vector en relación con el vector de unos \(\boldsymbol{1}\)?</li>
-
-<li>Para profundizar</li>
-
-<li>Cottrell, A. y Lucchetti, R. (2023). <i>Gretl User's Guide</i>. Capítulo sobre importación de datos (<code>Importing data</code>). Disponible en <a href="https://gretl.sourceforge.net/">gretl.sourceforge.net</a>.</li>
-<li>Adkins, L. C. (2018). <i>Using Gretl for Principles of Econometrics</i>, 4.ª ed. Apéndice sobre lectura de datos externos.</li>
-<li>Harrison, D. and Rubinfeld, D.L. (1978), <a href="https://lawcat.berkeley.edu/record/1111234/files/fulltext.pdf">"Hedonic Housing Prices and the Demand for Clean Air"</a>, Journal of Environmental Economics and Management 5, 81-102.</li>
+<li>Cottrell, A. y Lucchetti, R. (2023). <i>Gretl User's Guide</i>. Secciones sobre el comando <code>gnuplot</code> (incluidos los bloques ``literal'' de personalización) y sobre <code>tabprint/eqnprint</code> para exportar resultados.</li>
 </ul>
 </div>
-<div id="outline-container-org3ef02af" class="outline-4">
-<h4 id="org3ef02af">Código completo de la práctica</h4>
-<div class="outline-text-4" id="text-org3ef02af">
+</div>
+<div id="outline-container-org8424fd0" class="outline-2">
+<h2 id="org8424fd0">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org8424fd0">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -506,35 +511,26 @@ Obtenga los estadísticos descriptivos de <code>medv</code>.
 <tbody>
 <tr>
 <td class="org-left"><i>Enlace al guión</i>:</td>
-<td class="org-left"><a href="https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S04-Prct-B-boston.inp">S04-Prct-B-boston.inp</a></td>
+<td class="org-left"><a href="https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S11-Prct-C-graficos-informes.inp">S11-Prct-C-graficos-informes.inp</a></td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-</div>
-<div id="outline-container-org62abd47" class="outline-2">
-<h2 id="org62abd47">Respuestas</h2>
-<div class="outline-text-2" id="text-org62abd47">
-<p>
-<b>Ventaja de saber importar CSV.</b> Permite trabajar con <i>cualquier</i> fuente de datos propia (no solo los datasets de muestra empaquetados con Gretl), una destreza imprescindible en cuanto el alumno necesite datos de su propio interés (TFG, trabajos aplicados, datos institucionales, etc.).
-</p>
+<div id="outline-container-org4e270ec" class="outline-2">
+<h2 id="org4e270ec">Respuestas</h2>
+<div class="outline-text-2" id="text-org4e270ec">
+<ol class="org-ol">
+<li>PDF/EPS frente a PNG en LaTeX. Un formato vectorial (PDF, EPS) describe el gráfico mediante instrucciones geométricas (líneas, curvas, texto), de modo que se puede escalar a cualquier tamaño sin perder nitidez; un PNG es un mapa de bits (una cuadrícula de píxeles de tamaño fijo), y al ampliarlo dentro del documento (o al imprimirlo a alta resolución) se pixela y pierde calidad, especialmente notorio en el texto de los ejes.</li>
 
-<p>
-<b>Media de <code>chas</code>: ¿qué proporción de zonas limita con el río?</b> En el Boston Housing original, 35 de las 506 zonas censales limitan con el río Charles, es decir, una proporción de \(35/506\approx0{,}069\) (≈ 6,9%). La media de una variable 0/1 es siempre la proporción de unos porque \(\mu_{\boldsymbol{x}}=\frac1n\sum x_i\) y, al ser cada \(x_i\) o bien 0 o bien 1, la suma \(\sum x_i\) es sencillamente el <i>número</i> de unos; dividida por \(n\), da la <i>proporción</i>.
-</p>
+<li>Ventaja de <code>tabprint/eqnprint</code> frente a copiar a mano. Copiar números manualmente introduce el riesgo de errores de transcripción (un dígito mal copiado, un signo perdido) y obliga a dar formato a la tabla desde cero cada vez que cambia la regresión. Generar la tabla directamente desde Gretl garantiza que los números que aparecen en el informe coinciden exactamente con los calculados, y que si se vuelve a estimar el modelo con datos actualizados basta con volver a ejecutar el mismo comando para regenerar la tabla, sin retrabajo manual.</li>
 
-<p>
-<b>¿Por qué sección cruzada y no serie temporal?</b> Porque cada fila representa una <i>unidad distinta</i> (una zona geográfica), no un instante de tiempo dentro de la evolución de una misma unidad. No existe una relación de "antes/después" entre las filas: podríamos reordenarlas arbitrariamente sin perder ninguna información (a diferencia de una serie temporal, donde el orden es esencial).
-</p>
+<li>Unidades en las etiquetas de los ejes. Sin unidades explícitas, un lector no puede saber si ``price'' está en dólares, en miles de dólares, o en otra escala, ni si ``rooms'' es un conteo o un promedio; esto puede llevar a interpretaciones erróneas de la magnitud de los efectos mostrados en el gráfico. Las etiquetas con unidades hacen el gráfico autosuficiente, comprensible sin necesidad de leer el texto que lo acompaña.</li>
 
-<p>
-<b><code>medv</code> vs. <code>price</code>: mismas unidades distintas.</b> Si <code>medv</code> está en miles de dólares y <code>price</code> en dólares, un coeficiente de regresión estimado usando <code>medv</code> como variable dependiente sería 1000 veces <i>menor</i> (en valor absoluto) que el estimado usando <code>price</code>, para exactamente la misma relación económica subyacente. El cambio de unidades no altera el fenómeno real, solo reescala numéricamente el coeficiente —es la misma idea de "homogeneidad ante escala" que se demuestra formalmente en la lección 5 para la covarianza (\(\sigma_{\lambda\boldsymbol{x}\boldsymbol{y}}=\lambda\,\sigma_{\boldsymbol{x}\boldsymbol{y}}\))—. Por eso siempre hay que fijarse en las unidades antes de interpretar la magnitud de un coeficiente.
-</p>
+<li>Conservar el guion completo (<code>.inp</code>). Un informe reproducible debe permitir que otra persona (o uno mismo, meses después) obtenga exactamente los mismos resultados a partir de los mismos datos, sin depender de pasos manuales no documentados (clics de menú, ajustes hechos ``a ojo'' en una ventana gráfica). El guion completo documenta, de forma exacta y ejecutable, cada transformación de los datos y cada estimación realizada; los gráficos y tablas finales son solo su <i>consecuencia</i>, no una fuente independiente de verdad.</li>
 
-<p>
-<b><code>chas</code> como vector de \(\mathbb{R}^{506}\): ¿qué dirección tiene respecto a \(\boldsymbol{1}\)?</b> <code>chas</code> no es ortogonal a \(\boldsymbol{1}\) en general (su media, \(\approx0{,}069\), no es cero), así que se descompone en una componente en \(\mathcal{L}(\boldsymbol{1})\) —su vector de medias, \(0{,}069\cdot\boldsymbol{1}\)— y una componente ortogonal a \(\boldsymbol{1}\) —su vector en desviaciones—. Al ser una variable 0/1, esa componente en desviaciones tiene una estructura muy particular: solo toma dos valores, \(1-0{,}069\) (en las zonas junto al río) y \(-0{,}069\) (en el resto), y su norma al cuadrado (la varianza) es \(p(1-p)\) con \(p\) la proporción de unos. Es un buen ejemplo de que incluso una variable tan simple como una dummy admite la misma descomposición geométrica que cualquier otra.
-</p>
+<li>Elementos para comparar <code>price~rooms</code> y <code>price~nox</code>. Como mínimo: (i) una tabla con \(\hat\beta_0,\hat\beta_1,R^2\) de ambos modelos (generada con <code>tabprint</code>, no copiada a mano); (ii) los dos diagramas de dispersión con la recta ajustada, con ejes debidamente etiquetados y unidades explícitas, para que el lector aprecie visualmente la diferencia de ajuste; (iii) una breve discusión textual de los signos obtenidos y de por qué un \(R^2\) mayor no debe leerse como ``una relación causal más fuerte'', sino solo como ``una nube de puntos más alineada con la recta'' (lección 8). No haría falta incluir capturas de pantalla de la consola de Gretl.</li>
+</ol>
 </div>
 </div>
 </div>

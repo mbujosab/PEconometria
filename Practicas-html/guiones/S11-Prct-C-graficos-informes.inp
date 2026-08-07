@@ -1,0 +1,42 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+open hprice2.gdt --quiet
+setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+setinfo rooms -d "Número medio de habitaciones" -n "Habitaciones"
+
+ols price const rooms
+
+list PL = price rooms
+plot PL
+    options fit=none
+    literal set title "Precio mediano frente al numero de habitaciones"
+    literal set xlabel "Habitaciones (numero medio)"
+    literal set ylabel "Precio ($)"
+end plot --output="price_rooms_personalizado.png"
+
+gnuplot price rooms --output="price_rooms.png"
+gnuplot price rooms --output="price_rooms.pdf"
+gnuplot price rooms --output="price_rooms.eps"
+
+ols price const rooms --quiet
+eqnprint --output="ecuacion_price_rooms.tex"
+tabprint --output="tabla_price_rooms.tex"
+
+freq price --plot="hist_price_informe.png"
+boxplot price --output="boxplot_price_informe.png"

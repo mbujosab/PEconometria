@@ -1,0 +1,78 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+nulldata 5 --preserve
+setobs 1 1 --cross-section
+
+matrix mx = {1;2;3;4;5}
+matrix mu = {1;-2;0;2;-1}
+series x = mx
+series u = mu
+series y = 2 + 3*x + u
+
+ols y const x
+
+outfile --quiet residuosYortogonalidad.txt
+    series ehat = $uhat
+    series yhat = $yhat
+    
+    print x u ehat --byobs
+    
+    printf "\nSuma de residuos            sum(ehat)   = %.10f\n", sum(ehat)
+    printf "Suma de x*residuos           sum(x*ehat) = %.10f\n", sum(x*ehat)
+    printf "Diferencia maxima |ehat-u|              = %.10f\n", max(abs(ehat-u))
+end outfile
+
+outfile --quiet stcSecSrcR2.txt
+    scalar mu_y = mean(y)
+    scalar STC  = sum((y - mu_y)^2)
+    scalar SEC  = sum((yhat - mu_y)^2)
+    scalar SRC  = sum(ehat^2)
+    
+    printf "STC = %.4f   SEC = %.4f   SRC = %.4f   (SEC+SRC = %.4f)\n", STC, SEC, SRC, SEC+SRC
+    printf "R2 (a mano)         = %.6f\n", SEC/STC
+    printf "R2 de Gretl ($rsq)  = %.6f\n", $rsq
+end outfile
+
+outfile --quiet pendienteComoCorrelacion.txt
+    scalar rho_xy = corr(x,y)
+    scalar beta1_formula = rho_xy * sd(y)/sd(x)
+    
+    printf "rho_xy                       = %.6f\n", rho_xy
+    printf "beta1 (formula rho*sy/sx)    = %.6f\n", beta1_formula
+    printf "beta1 ($coeff(x) de Gretl)   = %.6f\n", $coeff(x)
+    printf "rho_xy^2                     = %.6f\n", rho_xy^2
+    printf "R2 ($rsq de Gretl)           = %.6f\n", $rsq
+end outfile
+
+nulldata 60 --preserve
+set seed 24680
+
+series x2 = uniform(0, 10)
+series u2 = normal(0, 2)
+series y2 = 2 + 3*x2 + u2
+
+ols y2 const x2
+series ehat2 = $uhat
+
+outfile --quiet verificacionMuestraGrande.txt
+    printf "Suma de residuos    sum(ehat2)     = %.10f    (debe ser 0, exactamente)\n", sum(ehat2)
+    printf "Suma de x2*residuos sum(x2*ehat2)  = %.10f    (debe ser 0, exactamente)\n", sum(x2*ehat2)
+    printf "beta1 estimado                     = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
+    printf "beta0 estimado                     = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
+end outfile
