@@ -1,0 +1,289 @@
+#+Title: Sesión 11 (C) --- Del ajuste al informe: edición y exportación de gráficos y resultados en Gretl
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil 
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L11-C-graficos-informes
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S11-Prct-C-graficos-informes"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica 
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S11-Prct-C-graficos-informes.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S11-Prct-C-graficos-informes.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+Las dos prácticas anteriores de esta sesión se centraron en el contenido econométrico (ortogonalidad, $R^2$). Esta práctica es distinta: no introduce ningún concepto nuevo de la asignatura, sino /habilidades de oficio/ necesarias para preparar un informe o trabajo escrito con resultados de Gretl: personalizar y exportar gráficos con calidad suficiente, y exportar tablas de resultados en un formato que se pueda incluir directamente en un documento (en vez de copiar números a mano o pegar capturas de pantalla). Reutilizamos el ajuste =price~rooms= ya estimado en la práctica anterior.
+
+/Objetivo/
+
+1. Personalizar un diagrama de dispersión (título, etiquetas de los ejes, colores).
+2. Exportar gráficos en distintos formatos (PNG, PDF, EPS) y entender cuándo conviene cada uno.
+3. Exportar los resultados de una regresión en un formato apto para un informe (LaTeX/RTF), en vez de copiarlos a mano.
+4. Exportar directamente a fichero un histograma y un diagrama de caja (ya vistos en la primera práctica del curso).
+5. Fijar un pequeño ``checklist'' de buenas prácticas para preparar un informe reproducible.
+
+* Actividad 1 - Reapertura y reestimación
+
+Esta práctica es autocontenida: reabrimos =hprice2= y volvemos a estimar el modelo =price~rooms= de la práctica anterior.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Reapertura y reestimacion C
+#+begin_src gretl :tangle ./guiones/S11-Prct-C-graficos-informes.inp :eval no
+open hprice2.gdt --quiet
+setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+setinfo rooms -d "Número medio de habitaciones" -n "Habitaciones"
+
+ols price const rooms
+#+end_src
+#+latex: }
+
+* Actividad 2 - Personalizar el diagrama de dispersión
+
+- GUI: genere el gráfico */~Gráfico X-Y~/* de =price= sobre =rooms= (como en la práctica anterior). Sobre la ventana del gráfico, botón derecho, */~Editar~/*: se abre un panel con pestañas para el título, las etiquetas de los ejes, el estilo de los puntos/líneas y los colores. Cambie el título a algo descriptivo (p. ej. ``Precio mediano frente a número de habitaciones'') y añada unidades explícitas en las etiquetas de los ejes (p. ej. ``Precio ($)'', ``Habitaciones (número medio)'').
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /el equivalente en línea de comandos usa un bloque ``literal'' de gnuplot, entre llaves, para personalizar el gráfico/:
+  #+NAME: Dispersion personalizada
+  #+begin_src gretl :eval no
+list PL = price rooms
+plot PL
+    options fit=none
+    literal set title "Precio mediano frente al numero de habitaciones"
+    literal set xlabel "Habitaciones (numero medio)"
+    literal set ylabel "Precio ($)"
+end plot --output="price_rooms_personalizado.png"
+  #+end_src
+  #+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-C-graficos-informes.inp :eval no :exports none :noweb yes
+<<Dispersion personalizada>>
+#+end_src
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.55\textwidth}
+  \includegraphics[width=\textwidth]{./S11-Prct-C-graficos-informes/price_rooms_personalizado.png}
+\end{minipage}%
+\caption{Diagrama de dispersión personalizado (título y etiquetas de ejes con unidades).}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="display: flex; justify-content: center; gap: 10px;">
+    <img src="./S11-Prct-C-graficos-informes/price_rooms_personalizado.png" style="max-width:55%; height:auto;"/>
+    <figcaption>Diagrama de dispersión personalizado (título y etiquetas de ejes con unidades).</figcaption>
+</figure>
+#+END_EXPORT
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+La estructura con el bloque ~plot~ es:
+#+latex: }
+
+#+BEGIN_SRC R :exports code :eval no
+list MiLista = variable_y variable_x
+plot MiLista
+    options fit=none          # opciones de gretl para el gráfico (fit, with-lines, etc.)
+    literal set title "..."   # cualquier comando gnuplot "en crudo"
+    literal set xlabel "..."
+    literal set ylabel "..."
+end plot --output="nombre_fichero.png"   # o .pdf, .eps — el --output va en el "end plot"
+#+END_SRC
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+Puntos clave que vale la pena recordar:
+
+~plot~ (a diferencia de ~gnuplot~) solo admite un argumento: una lista, una serie o una matriz — de ahí que haya que definir la ~list~ antes.
+Dentro del bloque, cada línea empieza por una palabra clave reservada (~options~, ~literal~, ~printf~...).
+El destino del fichero (~--output=~) es una opción de ~end plot~, igual que ~--output=~ es opción del comando ~gnuplot~ clásico.
+#+latex: }
+
+
+* Actividad 3 - Exportar el gráfico en distintos formatos
+
+- GUI: sobre la ventana del gráfico, botón derecho, */~Guardar como~/*, y elija el formato (PNG, PDF, EPS, SVG según disponibilidad).
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien, en línea de comandos, repitiendo el mismo gráfico con distinta extensión/:
+  #+NAME: Exportar formatos
+  #+begin_src gretl :tangle ./guiones/S11-Prct-C-graficos-informes.inp :eval no
+gnuplot price rooms --output="price_rooms.png"
+gnuplot price rooms --output="price_rooms.pdf"
+gnuplot price rooms --output="price_rooms.eps"
+  #+end_src
+  #+latex: }
+
+/Discusión/: para un documento LaTeX, se prefiere normalmente un formato /vectorial/ (PDF o EPS) frente a uno /de mapa de bits/ (PNG): un PDF/EPS se puede escalar sin perder nitidez (líneas y texto siguen nítidos a cualquier tamaño), mientras que un PNG, al ampliarse, se pixela. El PNG es preferible sobre todo para páginas web o cuando el propio gráfico contiene muchísimos puntos (una nube de dispersión muy densa en PDF puede generar ficheros pesados).
+
+* Actividad 4 - Exportar resultados de una regresión para un informe
+
+- GUI: en la ventana del modelo estimado (=price~rooms= de la Actividad 1), menú */~LaTeX~/* → */~Tabular~/* o */~Ecuación~/*, con las opciones de */~Ver~/*, */~Copiar~/* o */~Guardar~/*. También, desde */~Archivo -> Guardar como~/*, puede exportar en formato RTF (para Word) directamente.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /en línea de comandos, Gretl ofrece los comandos/ =eqnprint= /(la ecuación estimada) y/ =tabprint= /(una tabla completa de coeficientes y errores estándar) para exportar directamente a LaTeX/:
+  #+NAME: Exportar resultados regresion
+  #+begin_src gretl :tangle ./guiones/S11-Prct-C-graficos-informes.inp :eval no
+ols price const rooms --quiet
+eqnprint --output="ecuacion_price_rooms.tex"
+tabprint --output="tabla_price_rooms.tex"
+  #+end_src
+  #+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+(/Consulte/ =help tabprint= /y/ =help eqnprint= /en la consola de Gretl si las opciones exactas difieren en su versión; ambos comandos admiten también/ =--format=rtf= /para exportar directamente a RTF en lugar de LaTeX./)
+#+latex: }
+
+/Ventaja frente a copiar a mano/: estos comandos generan directamente el código (LaTeX o RTF) listo para pegar en el informe, con los números exactos que calculó Gretl —evitando errores de transcripción y ahorrando el tedioso trabajo de dar formato a una tabla a mano—.
+
+* Actividad 5 - Exportar histograma y diagrama de caja directamente a fichero
+
+Recordando la primera práctica del curso (histograma y diagrama de caja de =price=):
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Exportar histograma y boxplot
+#+begin_src gretl :tangle ./guiones/S11-Prct-C-graficos-informes.inp :eval no
+freq price --plot="hist_price_informe.png"
+boxplot price --output="boxplot_price_informe.png"
+#+end_src
+#+latex: }
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \includegraphics[width=\textwidth]{./S11-Prct-C-graficos-informes/hist_price_informe.png}
+\end{minipage}%
+\begin{minipage}{0.28\textwidth}
+  \includegraphics[width=\textwidth]{./S11-Prct-C-graficos-informes/boxplot_price_informe.png}
+\end{minipage}%
+\caption{Histograma y diagrama de caja de \texttt{price}, exportados directamente a fichero.}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="display: flex; justify-content: center; gap: 10px;">
+    <img src="./S11-Prct-C-graficos-informes/hist_price_informe.png" style="max-width:48%; height:auto;"/>
+    <img src="./S11-Prct-C-graficos-informes/boxplot_price_informe.png" style="max-width:28%; height:auto;"/>
+    <figcaption>Histograma y diagrama de caja de <code>price</code>, exportados directamente a fichero.</figcaption>
+</figure>
+#+END_EXPORT
+
+* Actividad 6 - Checklist de buenas prácticas para un informe
+
+- /Reproducibilidad/: conserve el guion completo (=.inp=) usado para generar cada gráfico y cada tabla, no solo el resultado final; si usa datos simulados, fije siempre =set seed=.
+- /Formato vectorial para figuras en LaTeX/: prefiera PDF/EPS a PNG cuando el documento final sea un PDF compilado con LaTeX.
+- /Ejes con unidades/: toda figura debe indicar en sus ejes qué se mide y en qué unidades (dólares, número de habitaciones, etc.), no solo el nombre abreviado de la variable en Gretl.
+- /Tablas generadas, no transcritas a mano/: use ~tabprint/eqnprint~ (o la vía GUI equivalente) en lugar de copiar números de la pantalla, para evitar errores de transcripción.
+- /Cite la fuente de los datos/: indique siempre el origen del dataset (aquí, =hprice2=, Harrison y Rubinfeld, 1978).
+
+* Preguntas de interpretación para la clase
+
+1. ¿Por qué para un documento LaTeX suele preferirse exportar un gráfico en PDF o EPS en lugar de PNG?
+2. ¿Qué ventaja tiene usar ~tabprint~ / ~eqnprint~ frente a copiar manualmente los números de la salida de Gretl a un documento?
+3. ¿Por qué es importante incluir las unidades en las etiquetas de los ejes de un gráfico que se va a incluir en un informe?
+4. ¿Por qué conviene conservar el guion completo (=.inp=) de Gretl, y no solo los gráficos y resultados finales, al preparar un informe reproducible?
+5. Si tuviera que incluir en un informe la comparación entre los modelos =price~rooms= y =price~nox= de la práctica anterior, ¿qué elementos (gráficos, tablas, estadísticos) incluiría, y por qué?
+
+/Para profundizar/:
+
+- Cottrell, A. y Lucchetti, R. (2023). /Gretl User's Guide/. Secciones sobre el comando =gnuplot= (incluidos los bloques ``literal'' de personalización) y sobre ~tabprint/eqnprint~ para exportar resultados.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S11-Prct-C-graficos-informes.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S11-Prct-C-graficos-informes.inp][S11-Prct-C-graficos-informes.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. PDF/EPS frente a PNG en LaTeX. Un formato vectorial (PDF, EPS) describe el gráfico mediante instrucciones geométricas (líneas, curvas, texto), de modo que se puede escalar a cualquier tamaño sin perder nitidez; un PNG es un mapa de bits (una cuadrícula de píxeles de tamaño fijo), y al ampliarlo dentro del documento (o al imprimirlo a alta resolución) se pixela y pierde calidad, especialmente notorio en el texto de los ejes.
+
+2. Ventaja de ~tabprint/eqnprint~ frente a copiar a mano. Copiar números manualmente introduce el riesgo de errores de transcripción (un dígito mal copiado, un signo perdido) y obliga a dar formato a la tabla desde cero cada vez que cambia la regresión. Generar la tabla directamente desde Gretl garantiza que los números que aparecen en el informe coinciden exactamente con los calculados, y que si se vuelve a estimar el modelo con datos actualizados basta con volver a ejecutar el mismo comando para regenerar la tabla, sin retrabajo manual.
+
+3. Unidades en las etiquetas de los ejes. Sin unidades explícitas, un lector no puede saber si ``price'' está en dólares, en miles de dólares, o en otra escala, ni si ``rooms'' es un conteo o un promedio; esto puede llevar a interpretaciones erróneas de la magnitud de los efectos mostrados en el gráfico. Las etiquetas con unidades hacen el gráfico autosuficiente, comprensible sin necesidad de leer el texto que lo acompaña.
+
+4. Conservar el guion completo (=.inp=). Un informe reproducible debe permitir que otra persona (o uno mismo, meses después) obtenga exactamente los mismos resultados a partir de los mismos datos, sin depender de pasos manuales no documentados (clics de menú, ajustes hechos ``a ojo'' en una ventana gráfica). El guion completo documenta, de forma exacta y ejecutable, cada transformación de los datos y cada estimación realizada; los gráficos y tablas finales son solo su /consecuencia/, no una fuente independiente de verdad.
+
+5. Elementos para comparar =price~rooms= y =price~nox=. Como mínimo: (i) una tabla con $\hat\beta_0,\hat\beta_1,R^2$ de ambos modelos (generada con =tabprint=, no copiada a mano); (ii) los dos diagramas de dispersión con la recta ajustada, con ejes debidamente etiquetados y unidades explícitas, para que el lector aprecie visualmente la diferencia de ajuste; (iii) una breve discusión textual de los signos obtenidos y de por qué un $R^2$ mayor no debe leerse como ``una relación causal más fuerte'', sino solo como ``una nube de puntos más alineada con la recta'' (lección 8). No haría falta incluir capturas de pantalla de la consola de Gretl.

@@ -1,0 +1,298 @@
+#+Title: Sesión 11 (B) --- Regresión simple con datos reales: ajuste y bondad de ajuste en hprice2
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil 
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L11-B-hprice2-ajuste
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S11-Prct-B-hprice2-ajuste"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica 
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S11-Prct-B-hprice2-ajuste.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S11-Prct-B-hprice2-ajuste.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+Retomamos =hprice2= (ya usado en las prácticas de correlación) y sus tres variables etiquetadas: =price=, =rooms=, =nox=. Hoy estimamos, por primera vez con datos /reales/, dos regresiones lineales simples: precio en función del número de habitaciones, y precio en función de la contaminación. Las comparamos entre sí, verificamos las dos condiciones de ortogonalidad y calculamos la bondad de ajuste, conectando con las correlaciones ya calculadas en la práctica de correlación (lección 5) y con el ángulo $\theta$ de la lección 8.
+
+/Objetivo/
+
+1. Estimar dos regresiones lineales simples con datos reales, interpretando el signo y la magnitud de la pendiente sin lenguaje causal.
+2. Verificar, con datos reales, las dos condiciones de ortogonalidad de la lección 7.
+3. Calcular $R^2$ ``a mano'' (STC/SEC/SRC) y compararlo con el que reporta Gretl y con $\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
+4. Comparar la bondad de ajuste de los dos modelos y relacionarla con el ángulo $\theta$ de la lección 8.
+5. Visualizar ambos ajustes mediante diagramas de dispersión con la recta ajustada.
+
+* Actividad 1 - Reapertura de hprice2 y etiquetas
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Reapertura y etiquetas B
+#+begin_src gretl :tangle ./guiones/S11-Prct-B-hprice2-ajuste.inp :eval no
+open hprice2.gdt --quiet
+setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+setinfo rooms -d "Número medio de habitaciones" -n "Habitaciones"
+setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
+#+end_src
+#+latex: }
+
+* Actividad 2 - Regresión: price sobre rooms
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Ols price rooms
+#+begin_src gretl :tangle ./guiones/S11-Prct-B-hprice2-ajuste.inp :eval no
+ols price const rooms
+#+end_src
+#+latex: }
+
+- GUI equivalente: //~Modelo -> Mínimos cuadrados ordinarios~//, con =price= como dependiente y =const=, =rooms= como regresores.
+
+/Interpretación (con cuidado)/: el coeficiente de =rooms= se lee como ``por cada habitación adicional, el precio mediano cambia, en promedio, en esa cantidad de dólares, /manteniendo el resto igual/ (aquí, sin ningún otro regresor)''. Evite decir que ``una habitación adicional /causa/'' ese cambio: como se discutió en la lección 8, la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ es puramente algebraica y no certifica, por sí sola, ninguna relación causal ni su dirección.
+
+* Actividad 3 - Regresión: price sobre nox
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Ols price nox
+#+begin_src gretl :tangle ./guiones/S11-Prct-B-hprice2-ajuste.inp :eval no
+ols price const nox
+#+end_src
+#+latex: }
+
+/Antes de mirar el resultado/: ¿qué signo espera para el coeficiente de =nox=? Contraste su expectativa con lo obtenido.
+
+* Actividad 4 - Verificación de las dos condiciones de ortogonalidad
+
+Repetimos ambas regresiones, guardando en cada caso los residuos, para verificar $\sum\hat e_i=0$ y $\sum x_i\hat e_i=0$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Ortogonalidad ambos modelos
+#+begin_src gretl :eval no
+ols price const rooms --quiet
+series ehat_rooms = $uhat
+scalar sum_e_rooms  = sum(ehat_rooms)
+scalar sum_xe_rooms = sum(rooms*ehat_rooms)
+
+ols price const nox --quiet
+series ehat_nox = $uhat
+scalar sum_e_nox  = sum(ehat_nox)
+scalar sum_xe_nox = sum(nox*ehat_nox)
+
+printf "Modelo price~rooms:  suma(ehat) = %.8f    suma(rooms*ehat) = %.8f\n", sum_e_rooms, sum_xe_rooms
+printf "Modelo price~nox  :  suma(ehat) = %.8f    suma(nox*ehat)   = %.8f\n", sum_e_nox,  sum_xe_nox
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-B-hprice2-ajuste.inp :eval no :exports none :noweb yes
+outfile --quiet ortogonalidadAmbosModelos.txt
+    <<Ortogonalidad ambos modelos>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-B-hprice2-ajuste/ortogonalidadAmbosModelos.txt example
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+(/Los valores no serán exactamente cero por errores de redondeo en coma flotante, pero deben ser insignificantes./)
+#+latex: }
+
+* Actividad 5 - Bondad de ajuste: STC, SEC, SRC y $R^2$ en ambos modelos
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Bondad de ajuste ambos modelos
+#+begin_src gretl :eval no
+ols price const rooms --quiet
+scalar mu_price = mean(price)
+scalar STC_r = sum((price-mu_price)^2)
+scalar SRC_r = sum($uhat^2)
+scalar SEC_r = STC_r - SRC_r
+scalar R2_r_manual = SEC_r/STC_r
+
+ols price const nox --quiet
+scalar STC_n = sum((price-mu_price)^2)
+scalar SRC_n = sum($uhat^2)
+scalar SEC_n = STC_n - SRC_n
+scalar R2_n_manual = SEC_n/STC_n
+
+printf "price~rooms:  STC=%.2f  SEC=%.2f  SRC=%.2f   R2(a mano)=%.4f\n", STC_r, SEC_r, SRC_r, R2_r_manual
+printf "price~nox  :  STC=%.2f  SEC=%.2f  SRC=%.2f   R2(a mano)=%.4f\n", STC_n, SEC_n, SRC_n, R2_n_manual
+
+printf "\nComparacion con rho^2 (recuerde: en regresion simple R2 = rho_xy^2):\n"
+printf "corr(price,rooms)^2 = %.4f\n", corr(price,rooms)^2
+printf "corr(price,nox)^2   = %.4f\n", corr(price,nox)^2
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-B-hprice2-ajuste.inp :eval no :exports none :noweb yes
+outfile --quiet bondadDeAjusteAmbosModelos.txt
+    <<Bondad de ajuste ambos modelos>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-B-hprice2-ajuste/bondadDeAjusteAmbosModelos.txt example
+#+latex: }
+
+* Actividad 6 - Diagramas de dispersión con la recta ajustada
+
+- GUI: seleccione =price= y =rooms= (con ~Ctrl~), botón derecho, */~Gráfico X-Y~/*; repita con =price= y =nox=.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en línea de comandos/:
+  #+NAME: Dispersion con recta ajustada
+  #+begin_src gretl :eval no
+gnuplot price rooms
+gnuplot price nox
+  #+end_src
+  #+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-B-hprice2-ajuste.inp :eval no :exports none :noweb yes
+gnuplot price rooms --output="price_rooms_fit.png"
+gnuplot price nox   --output="price_nox_fit.png"
+#+end_src
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \includegraphics[width=\textwidth]{./S11-Prct-B-hprice2-ajuste/price_rooms_fit.png}
+\end{minipage}%
+\begin{minipage}{0.48\textwidth}
+  \includegraphics[width=\textwidth]{./S11-Prct-B-hprice2-ajuste/price_nox_fit.png}
+\end{minipage}%
+\caption{Diagramas de dispersión con la recta ajustada.}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="display: flex; justify-content: center; gap: 10px;">
+    <img src="./S11-Prct-B-hprice2-ajuste/price_rooms_fit.png" style="max-width:48%; height:auto;"/>
+    <img src="./S11-Prct-B-hprice2-ajuste/price_nox_fit.png" style="max-width:48%; height:auto;"/>
+    <figcaption>Diagramas de dispersión con la recta ajustada.</figcaption>
+</figure>
+#+END_EXPORT
+
+Compare cómo de ``ceñidos'' están los puntos que rodean cada recta con el $R^2$ obtenido en la Actividad 5. Recuerde (lección 8) que $R^2=\cos^2\theta$, con $\theta$ el ángulo entre los vectores en desviaciones de los datos y del ajuste: cuanto más ceñida la nube a la recta, más pequeño ese ángulo.
+
+* Actividad 7 - Síntesis comparativa
+
+| Modelo      | $\hat\beta_0$ | $\hat\beta_1$ | $R^2$ |
+|-------------+---------------+---------------+-------|
+| price~rooms |               |               |       |
+| price~nox   |               |               |       |
+
+Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta mejor, según $R^2$? ¿Es coherente con lo observado en los diagramas de dispersión y con las correlaciones ya calculadas en la práctica de correlación (lección 5)?
+
+* Preguntas de interpretación para la clase
+
+1. ¿Por qué no podemos afirmar, a partir del modelo price~rooms, que ``añadir una habitación causa'' un aumento de precio?
+2. Compare los dos modelos: ¿cuál tiene mayor $R^2$? ¿Qué relación tiene esto con los valores de correlación ya calculados en la práctica de correlación?
+3. En los diagramas de dispersión con la recta ajustada, ¿qué modelo muestra una nube de puntos más ``pegada'' a la recta? ¿Cómo se traduce esto en términos del ángulo $\theta$ de la lección 8?
+4. ¿Por qué la suma de los residuos no es exactamente cero en la salida de Gretl, sino un número muy pequeño (del orden de $10^{-8}$ o menor)?
+5. Si estimáramos =price= en función de =rooms= y =nox= /simultáneamente/ (dos regresores a la vez), ¿por qué NO cabría esperar que el $R^2$ de ese modelo fuera simplemente la suma de los $R^2$ de los dos modelos simples de hoy?
+
+/Para profundizar/:
+
+- Véanse las lecciones 7 y 8 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html][S09-Lecc07]], [[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html][S10-Lecc08]]) para las demostraciones completas de lo que hoy verificamos con datos reales.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 2, sección 2.4 (advertencias sobre la interpretación causal de $R^2$).
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S11-Prct-B-hprice2-ajuste.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S11-Prct-B-hprice2-ajuste.inp][S11-Prct-B-hprice2-ajuste.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. ¿Por qué no podemos afirmar causalidad a partir de price~rooms? Porque la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y el propio ajuste MCO son consecuencias /puramente geométricas/ de la ortogonalidad del residuo: se cumplen exactamente igual para cualquier par de vectores $\boldsymbol{x},\boldsymbol{y}$, tengan o no una relación causal real entre sí (recuerde, de la lección 8, el ejemplo del queso y las muertes por enredarse en sábanas). Afirmar causalidad exige una teoría económica previa que justifique la dirección de la relación, algo que la sola regresión no proporciona.
+
+2. Comparación de $R^2$ entre los dos modelos. El modelo con mayor $|\rho_{\boldsymbol{x}\boldsymbol{y}}|$ (en valor absoluto) entre la variable y el regresor tendrá, necesariamente, mayor $R^2$, porque en regresión simple $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ exactamente (lección 8). Por tanto, el orden de los $R^2$ de hoy debe coincidir exactamente con el orden, en valor absoluto, de las correlaciones $\rho_{\text{price,rooms}}$ y $\rho_{\text{price,nox}}$ ya calculadas en la práctica de correlación.
+
+3. Nube más pegada a la recta y ángulo $\theta$. El modelo con mayor $R^2$ es el que tiene la nube de puntos más ceñida a la recta ajustada, porque $R^2=\cos^2\theta$: cuanto menor el ángulo $\theta$ entre los vectores en desviaciones de los datos y del ajuste, más cerca de 1 está $\cos^2\theta$, y más ``alineados'' (en el sentido geométrico de la lección 8) están esos dos vectores —lo que visualmente se traduce en una nube más estrecha alrededor de la recta.
+
+4. Suma de residuos no exactamente cero. Por errores de redondeo en aritmética de coma flotante: los ordenadores no representan los números reales con precisión infinita, así que operaciones que algebraicamente deberían dar cero (como $\sum\hat e_i$) arrastran un pequeñísimo error de cálculo, típicamente del orden de $10^{-8}$ o menor. Esto no contradice la identidad teórica $\sum\hat e_i=0$: es exactamente la misma situación que ya se comprobó en la práctica de verificación geométrica (con datos simulados).
+
+5. $R^2$ de un modelo con dos regresores no es la suma de los $R^2$ simples. Porque, como se explicó al cierre de la lección 8, cuando hay más de un regresor no constante el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_1,\boldsymbol{x}_2)$ centrado tiene dimensión 2, no 1: los vectores en desviaciones de =rooms= y =nox= ya no están alineados en la misma recta, así que el ajuste conjunto $\hat{\boldsymbol{y}}-\boldsymbol{\mathop{\overline{y}}}$ ya no es, en general, la suma de las contribuciones ``aisladas'' de cada regresor. Además, =rooms= y =nox= pueden estar correlacionadas entre sí, de modo que parte de lo que ``explica'' cada una por separado se solapa. Este fenómeno se estudiará con detalle en la regresión múltiple, más adelante en el curso.

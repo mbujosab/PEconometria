@@ -71,10 +71,3 @@ git add -A
 git commit -m "Actualiza material generado ($(date +%F))"
 git push origin gh-pages
 
-Hay dos tareas pendientes en este script.
-- Emacs debe exportar index.org a index.html para que ese index.html se suba a la rama gh-pages
-- Cada subdirectorio del tipo SYY-LeccXX en img/ tiene un subdirectorio tex/ con ficheros que no son necesarios en gh-pages
-No sé si es posible añadir una regla a este makefile para exportar a html el fichero index.html y cambiar el código para excluir el contenido de los subdirectorios tex/
-(también estaría bien poder eliminar dichos subdirectorios tex/ de la rama gh_pages para dejar limpio el repositorio)
-
-Probar en local que se pueden borrar y funciona la web
