@@ -1,0 +1,398 @@
+#    -*- mode: org -*-
+
+#+TITLE: Notebook 3. Bondad de ajuste: Pitágoras y $R^2=\cos^2\theta$ en $\mathbb{R}^3$
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+
+#+LATEX_HEADER: \usepackage{polyglossia}
+#+LATEX_HEADER: \setmainlanguage{spanish}
+
+#+LATEX: \maketitle
+
+#+BEGIN_SRC emacs-lisp :exports none :results silent
+(use-package ox-ipynb
+  :load-path (lambda () (expand-file-name "ox-ipynb" scimax-dir)))
+#+END_SRC
+
+#+begin_abstract
+Visualización interactiva en $\mathbb{R}^3$ del triángulo rectángulo de la lección 8: los vectores en desviaciones de $\boldsymbol{y}$ y de $\boldsymbol{\mathop{\widehat{y}}}$, el residuo como cateto, el ángulo $\theta$ entre hipotenusa y cateto, y $R^2=\cos^2\theta$. Se completa con la representación clásica de STC, SEC y SRC como áreas de cuadrados sobre el diagrama de dispersión. Complemento de la lección 8; continúa el Notebook 2.
+#+end_abstract
+
+- ([[https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?labpath=CuadernosElectronicos/S10-Notebook03.ipynb][mybinder]])
+
+* Introducción
+
+Este cuaderno retoma exactamente el punto donde dejamos el Notebook 2 (Parte 2): los vectores en desviaciones $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$, $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ y $\boldsymbol{\mathop{\widehat{e}}}$, todos ellos con media cero y, por tanto, todos dentro del mismo plano $\mathcal{L}(\boldsymbol{1})^\perp$ ya dibujado allí. Esta es, de hecho, la observación geométrica que organiza todo el cuaderno: el triángulo rectángulo de la lección 8 —hipotenusa $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$, catetos $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ y $\boldsymbol{\mathop{\widehat{e}}}$— vive /íntegramente/ dentro de ese único plano.
+
+Como en los cuadernos anteriores, cada figura 3D interactiva viene acompañada de su gemela clásica: el diagrama de dispersión $(x_i,y_i)$, y, en la Parte 2, la representación de STC, SEC y SRC como /áreas de cuadrados/ sobre ese mismo diagrama —la ilustración que muchos manuales de econometría usan para introducir $R^2$ por primera vez.
+
+* Herramientas auxiliares
+
+*** Módulos y configuración
+
+#+BEGIN_SRC jupyter-python :results silent
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+pio.renderers.default = "notebook"
+#+END_SRC
+
+*** Ajuste MCO, medias y correlación
+
+Redefinimos aquí (fichero independiente) las piezas algebraicas ya usadas en los cuadernos 1 y 2, y añadimos =covarianza= y =correlacion= (lección 5), que necesitaremos para verificar $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
+
+#+BEGIN_SRC jupyter-python :results silent
+def ajuste_mco_simple(y, x):
+    """Ajuste MCO de la regresión simple y = beta0 + beta1*x (lección 7)."""
+    y = np.asarray(y, dtype=float)
+    x = np.asarray(x, dtype=float)
+    mu_x = x.mean()
+    mu_y = y.mean()
+    sigma_x2 = np.mean((x - mu_x) ** 2)
+    sigma_xy = np.mean((x - mu_x) * (y - mu_y))
+    beta1 = sigma_xy / sigma_x2
+    beta0 = mu_y - beta1 * mu_x
+    yhat = beta0 + beta1 * x
+    ehat = y - yhat
+    return yhat, ehat, beta0, beta1
+
+def vector_de_medias(v):
+    v = np.asarray(v, dtype=float)
+    mu = v.mean()
+    return np.full(v.shape, mu), mu
+
+def vector_en_desviaciones(v):
+    v = np.asarray(v, dtype=float)
+    vbar, mu = vector_de_medias(v)
+    return v - vbar, mu
+
+def covarianza(a, b):
+    ea, _ = vector_en_desviaciones(a)
+    eb, _ = vector_en_desviaciones(b)
+    return np.mean(ea * eb)
+
+def correlacion(a, b):
+    return covarianza(a, b) / np.sqrt(covarianza(a, a) * covarianza(b, b))
+#+END_SRC
+
+*** Funciones de dibujo (el plano fijo $\mathcal{L}(\boldsymbol{1})^\perp$)
+
+#+BEGIN_SRC jupyter-python :results silent
+def base_plano_ortogonal():
+    uno = np.array([1., 1., 1.]) / np.sqrt(3)
+    u1 = np.array([1., -1., 0.])
+    u1 = u1 / np.linalg.norm(u1)
+    u2 = np.cross(uno, u1)
+    u2 = u2 / np.linalg.norm(u2)
+    return u1, u2
+
+def marcas_unitarias_L1(fig, rango=4, color='blue'):
+    """Marcas sobre L(1), una por cada valor entero de la media."""
+    uno = np.array([1., 1., 1.])
+    ks = np.arange(-rango, rango + 1)
+    puntos = np.outer(ks, uno)
+    fig.add_trace(go.Scatter3d(
+        x=puntos[:, 0], y=puntos[:, 1], z=puntos[:, 2],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol='cross'),
+        text=[f"mu = {k}" for k in ks],
+        hoverinfo='text', showlegend=False))
+
+def recta_L1(fig, rango=4, color='blue'):
+    """Dibuja L(1) con sus marcas graduadas (una por unidad de mu)."""
+    t = np.linspace(-rango, rango, 2)
+    fig.add_trace(go.Scatter3d(
+        x=t, y=t, z=t, mode='lines',
+        line=dict(color=color, width=5), name='L(1)'))
+    marcas_unitarias_L1(fig, rango=rango, color=color)
+
+def plano_ortogonal(fig, rango=4, color='lightslategray'):
+    u1, u2 = base_plano_ortogonal()
+    S, T = np.meshgrid([-rango, rango], [-rango, rango])
+    X = S * u1[0] + T * u2[0]
+    Y = S * u1[1] + T * u2[1]
+    Z = S * u1[2] + T * u2[2]
+    fig.add_trace(go.Surface(
+        x=X, y=Y, z=Z, showscale=False, opacity=0.12,
+        colorscale=[[0, color], [1, color]], hoverinfo='skip'))
+    for s in range(-rango, rango + 1):
+        p0 = s * u1 - rango * u2
+        p1 = s * u1 + rango * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+    for t in range(-rango, rango + 1):
+        p0 = -rango * u1 + t * u2
+        p1 = rango * u1 + t * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+
+def marcas_desviacion(fig, base, e, n, color, etiqueta='sigma'):
+    norma_euclidea_e = np.linalg.norm(e)
+    if norma_euclidea_e < 1e-12:
+        return
+    sigma = norma_euclidea_e / np.sqrt(n)
+    u_e = e / norma_euclidea_e
+    paso_euclideo = np.sqrt(n)
+    kmax = int(np.floor(sigma + 1e-9))
+    ks = np.arange(0, kmax + 1)
+    puntos = base + np.outer(ks, u_e * paso_euclideo)
+    fig.add_trace(go.Scatter3d(
+        x=puntos[:, 0], y=puntos[:, 1], z=puntos[:, 2],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol='cross'),
+        text=[f"{etiqueta} = {k}" for k in ks],
+        hoverinfo='text', showlegend=False))
+
+def agrega_vector(fig, punto, color='crimson', nombre='v', dash='solid', width=6):
+    """Vector desde el origen hasta 'punto' (línea + marcador en la punta)."""
+    punto = np.asarray(punto, dtype=float)
+    fig.add_trace(go.Scatter3d(
+        x=[0, punto[0]], y=[0, punto[1]], z=[0, punto[2]],
+        mode='lines+markers',
+        line=dict(color=color, width=width, dash=dash),
+        marker=dict(size=[0, 5], color=color), name=nombre))
+
+def agrega_segmento(fig, p0, p1, color='gray', width=3, dash='dot'):
+    """Segmento discontinuo entre dos puntos."""
+    fig.add_trace(go.Scatter3d(
+        x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+        mode='lines', line=dict(color=color, width=width, dash=dash),
+        showlegend=False, hoverinfo='skip'))
+#+END_SRC
+
+*** La figura del triángulo rectángulo
+
+Dibujamos, dentro de $\mathcal{L}(\boldsymbol{1})^\perp$, la hipotenusa $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ (verde), el cateto $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ (violeta) y el otro cateto, $\boldsymbol{\mathop{\widehat{e}}}$ (gris), como el segmento que va de la punta del cateto violeta a la punta de la hipotenusa —exactamente la descomposición $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}=(\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}})+\boldsymbol{\mathop{\widehat{e}}}$ de la lección 8—. Añadimos también, en azul, la propia recta $\mathcal{L}(\boldsymbol{1})$ —perpendicular a este plano— como referencia de orientación: si giras esta figura hasta que $\mathcal{L}(\boldsymbol{1})$ apunte hacia ti, y comparas con la Parte 2 del Cuaderno 2 en la misma orientación, comprobarás que ambas escenas coinciden.
+
+#+BEGIN_SRC jupyter-python :results silent
+def figura_triangulo_R3(x, y, rango=4, titulo=""):
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    n = len(x)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+    ey, mu_y = vector_en_desviaciones(y)
+    eyhat, mu_yhat = vector_en_desviaciones(yhat)
+
+    fig = go.Figure()
+    recta_L1(fig, rango=rango)
+    plano_ortogonal(fig, rango=rango)
+
+    plano_ortogonal(fig, rango=rango)
+    agrega_vector(fig, ey, color='yellowgreen', nombre='y - y_barra (hipotenusa)')
+    agrega_vector(fig, eyhat, color='darkviolet', nombre='yhat - y_barra (cateto)')
+    agrega_segmento(fig, eyhat, ey, color='dimgray', width=4)
+    agrega_vector(fig, ehat, color='gray', nombre='ehat (cateto, trasladado)', dash='dash')
+
+    marcas_desviacion(fig, np.zeros(3), ey, n, color='yellowgreen', etiqueta='sigma_y')
+    marcas_desviacion(fig, np.zeros(3), eyhat, n, color='darkviolet', etiqueta='sigma_yhat')
+    marcas_desviacion(fig, eyhat, ehat, n, color='gray', etiqueta='sigma_e')
+
+    fondo = dict(showbackground=True, backgroundcolor='rgb(235,235,245)',
+                 gridcolor='white', dtick=1, range=[-rango, rango])
+    fig.update_layout(
+        scene=dict(xaxis=fondo, yaxis=fondo, zaxis=fondo, aspectmode='cube'),
+        title=titulo, width=800, height=700,
+        margin=dict(l=0, r=0, b=0, t=40))
+    return fig
+
+def diagrama_dispersion(x, y, mostrar_residuos=False, titulo=""):
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.scatter(x, y, color='seagreen', zorder=3, label='datos (x_i, y_i)')
+    xs = np.linspace(x.min() - 0.5, x.max() + 0.5, 50)
+    ax.plot(xs, beta0 + beta1 * xs, color='crimson',
+            label=f"yhat = {beta0:.2f} + {beta1:.2f}*x")
+    if mostrar_residuos:
+        for xi, yi, yhi in zip(x, y, yhat):
+            ax.plot([xi, xi], [yi, yhi], color='gray',
+                    linestyle='dotted', zorder=2)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_title(titulo)
+    ax.legend()
+    ax.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
+ejemplos = {
+    'canonico': (np.array([1., 2., 3.]), np.array([2., 2., 5.])),
+    'fuerte':   (np.array([1., 2., 3.]), np.array([2., 5., 9.])),
+    'debil':    (np.array([1., 2., 3.]), np.array([5., 1., 6.])),
+}
+#+END_SRC
+
+* Parte 1: el triángulo rectángulo, dentro de $\mathcal{L}(\boldsymbol{1})^\perp$
+
+#+BEGIN_SRC jupyter-python
+x, y = ejemplos['canonico']
+fig = figura_triangulo_R3(x, y, rango=4,
+    titulo="Triangulo rectangulo de la leccion 8, en L(1)^perp")
+fig.show()
+#+END_SRC
+
+#+BEGIN_SRC jupyter-python
+diagrama_dispersion(x, y, mostrar_residuos=True,
+                     titulo="Diagrama de dispersion y recta ajustada")
+#+END_SRC
+
+*** Comprobación numérica: Pitágoras y $R^2=\cos^2\theta=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$
+
+#+BEGIN_SRC jupyter-python
+yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+ey, _ = vector_en_desviaciones(y)
+eyhat, _ = vector_en_desviaciones(yhat)
+
+sigma_y2 = np.mean(ey ** 2)
+sigma_yhat2 = np.mean(eyhat ** 2)
+sigma_e2 = np.mean(ehat ** 2)
+
+print(f"sigma_y^2                 = {sigma_y2:.4f}")
+print(f"sigma_yhat^2 + sigma_e^2  = {sigma_yhat2 + sigma_e2:.4f}  (Pitagoras)")
+
+cos_theta = np.dot(ey, eyhat) / (np.linalg.norm(ey) * np.linalg.norm(eyhat))
+theta_grados = np.degrees(np.arccos(cos_theta))
+R2 = sigma_yhat2 / sigma_y2
+rho_xy = correlacion(x, y)
+
+print(f"\ntheta = {theta_grados:.2f} grados")
+print(f"cos^2(theta)              = {cos_theta**2:.4f}")
+print(f"R^2 = sigma_yhat^2/sigma_y^2 = {R2:.4f}")
+print(f"rho_xy^2                   = {rho_xy**2:.4f}")
+#+END_SRC
+
+*** Actividad
+
+Repite ambas celdas con los ejemplos =fuerte= y =debil=. Observa cómo, al pasar de =fuerte= a =debil=, el ángulo $\theta$ se abre hacia $90^o$ y $R^2$ se acerca a $0$ —los “casos extremos” de la lección 8—, y comprueba en cada caso que $R^2=\cos^2\theta=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ sigue cumpliéndose.
+
+* Parte 2: STC, SEC y SRC como áreas de cuadrados
+
+Esta es la representación “de manual”: sobre el mismo diagrama de dispersión, cada sumando de STC, SEC o SRC es el /área de un cuadrado/ cuyo lado es la distancia vertical correspondiente (lección 8, figura de las tres áreas).
+
+#+BEGIN_SRC jupyter-python :results silent
+def _cuadrado(ax, x0, y0, y1, color):
+    """Dibuja, adosado al segmento vertical de (x0,y0) a (x0,y1), un
+    cuadrado de lado |y1-y0|, junto con ese segmento como línea punteada."""
+    lado = abs(y1 - y0)
+    ymin, ymax = min(y0, y1), max(y0, y1)
+    ax.plot([x0, x0], [y0, y1], color='black',
+            linestyle='dotted', linewidth=1, zorder=2)
+    if lado > 1e-9:
+        rect = patches.Rectangle((x0, ymin), lado, lado,
+                                  facecolor=color, alpha=0.35,
+                                  edgecolor=color, zorder=1)
+        ax.add_patch(rect)
+
+def cuadrados_ajuste(x, y, titulo_general=""):
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+    mu_y = y.mean()
+    xs = np.linspace(x.min() - 0.5, x.max() + 0.5, 50)
+
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.3))
+
+    ax = axes[0]
+    ax.scatter(x, y, color='seagreen', zorder=3)
+    ax.axhline(mu_y, color='blue', linewidth=1)
+    for xi, yi in zip(x, y):
+        _cuadrado(ax, xi, mu_y, yi, 'seagreen')
+    ax.set_title("STC = suma (y_i - mu_y)^2")
+    ax.set_xlabel('x'); ax.set_ylabel('y')
+
+    ax = axes[1]
+    ax.scatter(x, y, color='seagreen', zorder=3)
+    ax.plot(xs, beta0 + beta1 * xs, color='crimson', zorder=2)
+    for xi, yi, yhi in zip(x, y, yhat):
+        _cuadrado(ax, xi, yhi, yi, 'gray')
+    ax.set_title("SRC = suma ehat_i^2")
+    ax.set_xlabel('x'); ax.set_ylabel('y')
+
+    ax = axes[2]
+    ax.scatter(x, yhat, color='crimson', zorder=3)
+    ax.axhline(mu_y, color='blue', linewidth=1)
+    ax.plot(xs, beta0 + beta1 * xs, color='crimson', alpha=0.3, zorder=1)
+    for xi, yhi in zip(x, yhat):
+        _cuadrado(ax, xi, mu_y, yhi, 'darkviolet')
+    ax.set_title("SEC = suma (yhat_i - mu_y)^2")
+    ax.set_xlabel('x'); ax.set_ylabel('y')
+
+    fig.suptitle(titulo_general)
+    plt.tight_layout()
+    plt.show()
+
+    STC = np.sum((y - mu_y) ** 2)
+    SRC = np.sum(ehat ** 2)
+    SEC = np.sum((yhat - mu_y) ** 2)
+    print(f"STC = {STC:.4f}   SEC + SRC = {SEC + SRC:.4f}   "
+          f"SEC = {SEC:.4f}   SRC = {SRC:.4f}")
+#+END_SRC
+
+#+BEGIN_SRC jupyter-python
+x, y = ejemplos['canonico']
+cuadrados_ajuste(x, y, titulo_general="STC, SEC y SRC como areas de cuadrados")
+#+END_SRC
+
+*** Actividad
+
+Repite con el ejemplo =debil=: los cuadrados del panel central (SRC) deberían crecer notablemente respecto a los del panel de la izquierda (STC), reflejando un $R^2$ bajo. Comprueba que la igualdad numérica $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ se sigue cumpliendo exactamente.
+
+* Parte 3: ajuste exacto no es lo mismo que buen ajuste
+
+Retomamos el caso (b) de la Parte 3 del Notebook 2: allí, $\boldsymbol{u}$ era exactamente ortogonal al plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, y MCO recuperaba $\hat\beta_0=\beta_0=2$, $\hat\beta_1=\beta_1=3$ /con total exactitud/. Cabría pensar que, si los coeficientes se recuperan perfectamente, el ajuste también debe ser “perfecto” ($R^2=1$). No es así: recuperar los coeficientes generadores es una propiedad de la /proyección sobre el plano/ (que $\boldsymbol{u}$ sea perpendicular a dicho plano); que el ajuste sea bueno es una propiedad distinta, sobre el /tamaño/ de lo que queda fuera del plano —el propio $\boldsymbol{u}$, en este caso—.
+
+#+BEGIN_SRC jupyter-python
+x = np.array([1., 2., 3.])
+beta0, beta1 = 2., 3.
+uno = np.ones_like(x)
+u_cero = np.zeros(3)
+u_perp = 2 * np.cross(uno, x)   # el mismo u_b del Notebook 2
+
+for nombre, u in [("u = 0 (sin perturbacion)", u_cero),
+                  ("u ortogonal al plano (perturbacion 'con truco')", u_perp)]:
+    y = beta0 * uno + beta1 * x + u
+    yhat, ehat, beta0_hat, beta1_hat = ajuste_mco_simple(y, x)
+    ey, _ = vector_en_desviaciones(y)
+    eyhat, _ = vector_en_desviaciones(yhat)
+    R2 = np.mean(eyhat ** 2) / np.mean(ey ** 2) if np.mean(ey ** 2) > 0 else float('nan')
+    print(nombre)
+    print(f"   beta0_hat = {beta0_hat:.4f}   beta1_hat = {beta1_hat:.4f}   R^2 = {R2:.4f}\n")
+#+END_SRC
+
+Con $\boldsymbol{u}=\boldsymbol{0}$, $R^2=1$ (ajuste perfecto, hipotenusa y cateto coinciden). Con $\boldsymbol{u}$ ortogonal al plano pero /no/ nulo, $\hat\beta_0,\hat\beta_1$ siguen siendo exactamente $2$ y $3$ —MCO “acierta” con los coeficientes generadores—, pero $R^2<1$: hay un residuo real, $\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{u}$, y el ajuste, aunque tiene los coeficientes correctos, no reproduce los datos exactamente ($\boldsymbol{\mathop{\widehat{y}}}\ne\boldsymbol{y}$).
+
+#+BEGIN_SRC jupyter-python
+y_perp = beta0 * uno + beta1 * x + u_perp
+fig_perp = figura_triangulo_R3(x, y_perp, rango=6,
+    titulo="u ortogonal al plano, pero no nulo: coeficientes exactos, R^2 < 1")
+fig_perp.show()
+#+END_SRC
+
+*** Actividad
+
+Multiplica =u_perp= por un factor mayor (por ejemplo, =5 * np.cross(uno, x)=) y repite la comparación. Comprueba que $\hat\beta_0,\hat\beta_1$ siguen siendo exactamente $2$ y $3$ —porque la dirección de $\boldsymbol{u}$ no ha cambiado, solo su tamaño—, mientras que $R^2$ disminuye a medida que $\boldsymbol{u}$ crece. Relaciona esta observación con la transparencia “Interpretando $R^2$: casos extremos” de la lección 8.
+
+/Recuerde/: un $R^2$ bajo no implica que el modelo deba ser descartado. Aun con un $R^2$ bajo podemos estar calculando adecuadamente el valor de los parámetros.
+
+* Para seguir explorando
+
+- El diccionario =ejemplos= (heredado del Notebook 2) sirve igual aquí: cualquier par $(\boldsymbol{x},\boldsymbol{y})$ con $\boldsymbol{x}$ no constante puede usarse en =figura_triangulo_R3=, =diagrama_dispersion= y =cuadrados_ajuste=.
+- =cuadrados_ajuste= funciona con cualquier ejemplo; pruébalo con los cinco vectores $\boldsymbol{u}$ de la Parte 3 del Notebook 2 para ver, de un vistazo, cómo cambian las tres áreas.
+- La sesión de laboratorio que sigue a la lección 8 comprobará estas mismas identidades ($\sum\hat e_i=0$, $\sum x_i\hat e_i=0$, $R^2$) con datos reales.
+- La lección 9 (“El puente”) retoma la advertencia de la Parte 3 del Notebook 2 —qué le exigimos a $\boldsymbol{u}$— para plantear, ya en el espacio de variables aleatorias, la condición $E[\boldsymbol{U}\mid\boldsymbol{X}]=\boldsymbol{0}$.
+
+* COMMENT ipynb                                                    :noexport:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(require 'ox-ipynb)
+(ox-ipynb-export-org-file-to-ipynb-file "S10-Notebook03.org")
+#+END_SRC

@@ -7,19 +7,1826 @@ Ejecuto el siguiente bloque para que tengas presente el plan de escritura y el c
               (buffer-string)))
 #+end_src
 
-Y también ejecuto el siguiente bloque para que conozcas el contenido del las dos últimas lecciones (la 3 y 4, correspondientes a las sesiones 3 y 5):
+Y también ejecuto el siguiente bloque para que conozcas el contenido del las últimas lecciones, así como el otro notebook que ya escribimos y que debe servirte de referencia (formato, estilo, código, etc.):
 
 
 #+begin_src emacs-lisp :results silent
 (setq-local gptel-context
-            (list "./S05-Lecc04.org"
-		  "./S06-Lecc05.org"))
+            (list "../../org-lessons/S08-Lecc06.org"
+		  "../../org-lessons/S09-Lecc07.org"
+		  "../../org-lessons/S10-Lecc08.org"
+		  "../../CuadernosElectronicos/S05-Notebook01.org"))
 #+end_src
 
 
-Vamos a escribir el notebook pendiente. Quiero que sea un documento orgmode, que exportaré como Notebook de Jupyter usando https://github.com/jkitchin/ox-ipynb desde emacs. El código debe ser python y el objetivo es poder visualizar en 3D la recta correspondiente a los múltiplos del vector (1,1,1). Poder indicar un vector cualquiera de R3, por ejemplo el (1,2,3) y que se vea su proyección sobre sobre la recta, y su proyección sobre el plano perpendicular a dicha recta. En las figuras de las lecciones en 2D, se muestra una cuadrícula que permite contar las diagonales, y por tanto las normas de los vectores. No sé si es posible lograr algo parecido en 3D (sería cubos cuasi-transparentes de lado 1). No sé que librerías deben usarse, ni si es posible hacer algo así en un notebook de python. Lo ideal seria poder cambias la orientación de las figuras, (el punto de vista del observador) de manera interactiva. No sé si esto es posible. 
+Vamos a escribir un nuevo notebook pendiente. Se me ha ocurrido que podemos escribir un notebook similar, introduciendo dos vectores de R3, se puede hacer la proyección ortogonal del primero sobre el plano generado por el segundo y el vector (1,1,1). Ahí se puede ver que la proyección más el error es el vector original. En otra actividad se pueden visualizar los vectores también los vectores en desviaciones (en el plano ortogonal a (1,1,1). En otra actividad se puede generar una combinación del vector (1,1,1) y uno de los vectores proporcionados y sumar un vector u para obtener un vector; se realiza la proyección y se comprueba que se recuperan los parámetros de la combinación lineal si u es ortogonal a los regresores, pero no si no lo es. Quizá sería bueno diseñar funciones que permitan meter los vectores como argumentos, y proponer algunos ejemplos ilustrativos. Y si se te ocurren más ilustraciones en R3 de propiedades o conceptos vistos en la lecciones, puedes proponerlos.
 
-Por otra parte, sería estupendo poder representar simultáneamente dos vectores de R3 para ver sus proyecciones; especialmente sobre el plano ortogonal a (1,1,1) para apreciar el ángulo de sus respectivos vectores en desviaciones respecto a la media.
+No sé si me he explicado. Si tienes preguntas, hazlas antes de escribir nada.
 
-No sé si me he explicado. Si tienes preguntas, hazlas antes de escribir nada. Si conviene cambiar de modelo para acometer esta tarea, dímelo.+
 
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Antes de escribir nada, tengo varias dudas que conviene resolver primero, porque afectan a la estructura del fichero y podrían obligarme a rehacer trabajo si las decido mal por mi cuenta.
+
+*1. Nombre del fichero y ancla en el Plan.*
+El Notebook 1 (=S05-Notebook01.org=) está anclado a la lección 4 (media = proyección sobre $\mathcal{L}(\boldsymbol{1})$). Este nuevo cuaderno mezcla ideas de las lecciones 6 (S08, planteamiento del plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$), 7 (S09, resolución de $\hat\beta_0,\hat\beta_1$ y el ejemplo con $\boldsymbol{u}$ ortogonal a los regresores) y, si añadimos algo de $R^2$, 8 (S10). ¿Lo anclamos a la lección 7 (=S09-Notebook02.org=), que es donde de hecho se resuelven ambas ortogonalidades y aparece el ejemplo numérico con $\boldsymbol{u}$ diseñado a propósito? ¿O prefieres otro anclaje?
+
+*2. ¿Añadimos una parte extra con Pitágoras/$R^2$?*
+Me pides que proponga más ilustraciones si se me ocurren. Se me ocurre una natural: reutilizar el plano $\mathcal{L}(\boldsymbol{1})^\perp$ ya construido en el Notebook 1 para visualizar $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ y $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$, el ángulo $\theta$ entre ambos, y comprobar numéricamente $R^2=\cos^2\theta=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ (lección 8). ¿Lo incluyo como Parte 4 (o la numero como prefieras), o mejor dejamos el cuaderno centrado solo en las tres actividades que describes, sin desbordarse hacia la lección 8?
+
+*3. Vectores concretos de los ejemplos.*
+- Para las Partes 1-2, ¿reutilizamos el ejemplo ya canónico $\boldsymbol{x}=(1,2,3)$, $\boldsymbol{y}=(2,2,5)$ (lección 5/S06, ya usado en la Parte 2 del Notebook 1), o prefieres vectores nuevos?
+- Para la actividad 3 (recuperación de $\beta_0,\beta_1$ a partir de $\boldsymbol{y}=\beta_0\boldsymbol{1}+\beta_1\boldsymbol{x}+\boldsymbol{u}$): en $\mathbb{R}^3$, con dos regresores ($\boldsymbol{1}$ y $\boldsymbol{x}$), el complemento ortogonal $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$ es una única /recta/ (dimensión 1, no 3 como en el ejemplo $n=5$ de la lección 7). Eso significa que solo un $\boldsymbol{u}$ exactamente sobre esa recta permite recuperar $\beta_0,\beta_1$ con exactitud; cualquier otro $\boldsymbol{u}$ con media cero pero /no/ ortogonal a $\boldsymbol{x}$ ya deja de recuperarlos exactamente (aunque sí seguirá cumpliéndose $\sum\hat e_i=0$). Me parece una ilustración muy potente de por qué el ejemplo de la lección 7 era "un ejemplo con truco". ¿Construyo la actividad 3 alrededor de ese contraste (tres casos: $\boldsymbol u=\boldsymbol 0$; $\boldsymbol u$ exactamente en la recta ortogonal; $\boldsymbol u$ con media cero pero con componente dentro del plano), en vez de intentar replicar literalmente el $n=5$ de la lección 7?
+
+*4. Reutilización de código.*
+Como cada notebook es un fichero =.ipynb=/=.org= independiente (sin =import= entre ellos), entiendo que debo /redefinir/ dentro de este nuevo fichero las funciones auxiliares que necesite, generalizando (no simplemente copiando) las del Notebook 1 — en particular necesito una versión de =plano_ortogonal= que dibuje un plano genérico $\mathcal{L}(\boldsymbol{a},\boldsymbol{b})$ (no solo $\mathcal{L}(\boldsymbol{1})^\perp$), obteniendo una base ortonormal vía Gram-Schmidt para poder dibujar la rejilla aunque $\boldsymbol{a}$ y $\boldsymbol{b}$ no sean ortogonales (caso general de $\boldsymbol{1}$ y $\boldsymbol{x}$, lección 6). ¿Confirmas este enfoque?
+
+*5. Reparto de funciones.*
+Propongo algo como =ajuste_mco(y, x)= (devuelve =yhat, ehat, beta0, beta1= con las fórmulas de la lección 7) y =plano_generado(fig, a, b, rango)= (plano genérico con rejilla). ¿Te parece razonable, o tienes ya una idea más concreta de la API que quieres?
+
+Con tus respuestas a estos cinco puntos me pongo a escribir el esquema (índice) para que lo apruebes antes del código completo.
+
+Te respondo:
+
+1 y 2: Yo pondría =S10-Notebook02.org= e incluiría tu propuesta 2. (salvo que consideres que acaba siendo demasiado largo y es mejor partirlo en dos =S09-Notebook02.org= y =S10-Notebook02.org=). Además, presentaría en una segunda figura la representación de cada ejemplo también como diagrama de dispersión (creo que disponer de ambas simultáneamente puede ser positivo).
+
+3 Podemos usar el ejemplo canónico, pero si los vectores son introducidos como argumentos de una función, mucho mejor, podemos sugerir distintos ejemplos (demás del canónico) para que el alumno pruebe (o que el alumno cree sus propios experimentos).
+4 Confirmo tu enfoque
+5 Si, me parece bien. Pero además de todos esos resultados y del gráfico 3d, también quiero que se vea el diagrama de dispersión, donde se verá la relación de beta0, beta1 con la recta ajustada en el diagrama.
+
+Si tienes más preguntas (o he dejado algo sin contestar), pide lo que necesites aclarar.
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Gracias, esto aclara casi todo. Antes de pasar al esquema, me quedan solo estos puntos concretos:
+
+*1. Nombres de fichero exactos (partir en dos).*
+Como el contenido crece bastante (3 actividades de la lección 7 + la parte de Pitágoras/$R^2$ de la lección 8, cada una con figura 3D /y/ diagrama de dispersión), propongo partirlo en dos ficheros, siguiendo el precedente de =S05-Notebook01.org= pero con numeración de cuaderno /secuencial/ (no repetida):
+- =S09-Notebook02.org= — Cuaderno 2: proyección sobre el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (lección 7): las tres actividades que describes.
+- =S10-Notebook03.org= — Cuaderno 3: Pitágoras y $R^2=\cos^2\theta$ en $\mathbb{R}^3$ (lección 8).
+
+¿Confirmas esta numeración (02/03), o prefieres que ambos se llamen literalmente "Notebook02" (como escribiste), entendiendo que es "un mismo cuaderno en dos partes"?
+
+*2. Diseño de la actividad 3 (recuperación de $\hat\beta_0,\hat\beta_1$).*
+En $\mathbb{R}^3$ con dos regresores, $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$ es una /recta/ (dimensión 1), no un espacio de dimensión 3 como en el ejemplo $n=5$ de la lección 7. Propongo estructurar la actividad como una comparación de tres casos para el vector $\boldsymbol{u}$ generador de $\boldsymbol{y}=\beta_0\boldsymbol{1}+\beta_1\boldsymbol{x}+\boldsymbol{u}$:
+- (a) $\boldsymbol{u}=\boldsymbol{0}$: recuperación exacta trivial.
+- (b) $\boldsymbol{u}$ situado exactamente sobre la recta $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$ (calculada con producto vectorial): recuperación exacta de $\beta_0,\beta_1$, como en el ejemplo "con truco" de la lección 7.
+- (c) $\boldsymbol{u}$ con media cero pero /no/ ortogonal a $\boldsymbol{x}$ (con componente dentro del plano): $\sum\hat e_i=0$ sigue cumpliéndose, pero $\hat\beta_0,\hat\beta_1$ ya /no/ recuperan exactamente $\beta_0,\beta_1$.
+
+¿Te parece bien este diseño en vez de intentar replicar literalmente el caso $n=5$ (que en $\mathbb{R}^3$ no es reproducible con la misma holgura)?
+
+*3. Ejemplos sugeridos como argumentos.*
+Para que el alumno "cree sus propios experimentos", pensaba ofrecer un pequeño diccionario de ejemplos predefinidos (p. ej. =ejemplos = {"canónico": (...), "ortogonales": (...), "casi alineados": (...)}=) y que las celdas usen uno de ellos por defecto, invitando a cambiarlo. ¿Te parece razonable, o prefieres simplemente variables sueltas fácilmente editables (sin diccionario)?
+
+*4. Diagrama de dispersión: ¿plotly o matplotlib?*
+El Notebook 1 usa exclusivamente =plotly=. Para el diagrama de dispersión 2D (con la recta ajustada $\hat y=\hat\beta_0+\hat\beta_1x$), propongo mantener =plotly= (un =go.Figure= 2D independiente de la figura 3D), por coherencia de estilo e interactividad. ¿Confirmas, o prefieres =matplotlib= para el 2D (más simple/rápido, aunque estático)?
+
+*5. Alcance del cuaderno 3 (Pitágoras/$R^2$).*
+¿Quieres que también incluya ahí una versión del diagrama "áreas de cuadrados" (STC/SEC/SRC) como el de la lección 8, o basta con la figura 3D del triángulo rectángulo + el diagrama de dispersión con la recta ajustada?
+
+Con estas respuestas paso directamente al esquema/índice de ambos ficheros para tu aprobación.
+
+1. =S09-Notebook02.org= y =S10-Notebook03.org= me parece bien.
+2. Me parece bien. Incluso se pueden añadir dos casos más, (d) ortogonal a x pero no a 1. y (e) u no es perpendicular a ningún regresor. Eso anticipa la importancia de E(U|X)=0.
+3. Me parece perfecto
+4. Para el diagrama de dispersión no es necesario una figura dinámica (o yo no encuentro un motivo para hacerla dinámica, si tu lo tienes, dímelo).
+5. Me parece una idea muy buena incorporar también los dibujos con las áreas de cuadrados.
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Perfecto, con esto ya tengo todo lo necesario. Antes de generar el código, te propongo el esquema completo de ambos ficheros para que lo apruebes (o ajustes). Sigo la estructura narrativa de =S05-Notebook01.org= (introducción, herramientas auxiliares, partes numeradas, actividades, "para seguir explorando").
+
+** Esquema propuesto — =S09-Notebook02.org=
+
+*Título*: /Notebook 2. Proyección ortogonal sobre $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ en $\mathbb{R}^3$/
+*Abstract*: visualización interactiva en $\mathbb{R}^3$ de la regresión simple (lección 7): el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, el ajuste $\boldsymbol{\mathop{\widehat{y}}}$, el residuo, la identidad $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}=\hat\beta_1(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})$, y el papel de $\boldsymbol{u}$ (media nula vs. ortogonalidad a los regresores).
+
+/Introducción/: recuerda lección 6-7; explica qué se va a poder "tocar": rotar el plano, ver el diagrama de dispersión gemelo, cambiar $\boldsymbol{u}$.
+
+/Herramientas auxiliares/:
+- Módulos (=numpy=, =plotly=, =matplotlib= para el 2D estático).
+- =ajuste_mco_simple(y, x)= → =(yhat, ehat, beta0, beta1)=, fórmulas de la lección 7.
+- =base_ortonormal_gram_schmidt(a, b)=: base ortonormal genérica de $\mathcal{L}(a,b)$ (Gram–Schmidt), para dibujar el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ aunque $\boldsymbol{1}$ y $\boldsymbol{x}$ no sean ortogonales.
+- =plano_generado(fig, a, b, rango, color)=: parche + rejilla del plano (generaliza =plano_ortogonal= del Notebook 1).
+- =base_plano_ortogonal()=, =marcas_unitarias_L1=, =marcas_desviacion=, =recta_L1=, =agrega_vector=, =agrega_segmento= (redefinidas, como en el Notebook 1).
+- =agrega_componentes_plano(fig, beta0, beta1, x)=: líneas punteadas de $\boldsymbol{\mathop{\widehat{y}}}$ a $\hat\beta_0\boldsymbol{1}$ y a $\hat\beta_1\boldsymbol{x}$ (como en la figura de S08/S09).
+- =diagrama_dispersion(x, y, beta0, beta1, ehat=None)=: scatter estático (matplotlib) con la recta ajustada y, opcionalmente, los residuos como segmentos verticales.
+- Diccionario =ejemplos = {...}= con 3-4 pares $(\boldsymbol{x},\boldsymbol{y})$ predefinidos (canónico de la lección 5, uno con correlación fuerte, uno casi nula) para que el alumno elija o cree el suyo.
+
+/Parte 1 — El ajuste y su residuo/: elegir un ejemplo; figura 3D (plano, $\boldsymbol{y}$, $\boldsymbol{\mathop{\widehat{y}}}$, $\boldsymbol{\mathop{\widehat{e}}}$, componentes $\hat\beta_0\boldsymbol{1}$/$\hat\beta_1\boldsymbol{x}$); diagrama de dispersión gemelo con la recta ajustada; comprobación numérica de las dos ortogonalidades.
+
+/Parte 2 — Vectores en desviaciones en $\mathcal{L}(\boldsymbol{1})^\perp$*: figura 3D en el plano $\mathcal{L}(\boldsymbol{1})^\perp$ con $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$, $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$, $\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}$; comprobación de que los dos primeros son colineales con el tercero (identidad guardada de la lección 7).
+
+/Parte 3 — El papel de $\boldsymbol{u}$: cinco casos/: función =experimento_u(beta0, beta1, x, u)=; casos (a) $\boldsymbol{u}=\boldsymbol{0}$, (b) $\boldsymbol{u}$ exactamente en $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$ (vía producto vectorial $\boldsymbol{1}\times\boldsymbol{x}$), (c) $\boldsymbol{u}$ con media cero pero no ortogonal a $\boldsymbol{x}$, (d) $\boldsymbol{u}$ ortogonal a $\boldsymbol{x}$ pero con media no nula, (e) $\boldsymbol{u}$ sin ninguna ortogonalidad; tabla numérica comparando $\hat\beta_0,\hat\beta_1$ con $\beta_0,\beta_1$ verdaderos en los 5 casos; figuras 3D solo para (b) y (e) como contraste ilustrativo. Cierre explícito: esto anticipa por qué $E[U\mid X]=0$ importa (lección 9).
+
+/Para seguir explorando/ + bloque =COMMENT ipynb=.
+
+** Esquema propuesto — =S10-Notebook03.org=
+
+*Título*: /Notebook 3. Bondad de ajuste: Pitágoras y $R^2=\cos^2\theta$ en $\mathbb{R}^3$/
+*Abstract*: el triángulo rectángulo de la lección 8, visualizado íntegramente dentro de $\mathcal{L}(\boldsymbol{1})^\perp$; el ángulo $\theta$, $R^2$, y las áreas de cuadrados STC/SEC/SRC sobre el diagrama de dispersión clásico.
+
+/Introducción/: nota geométrica propia de $\mathbb{R}^3$: como $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp\subseteq\mathcal{L}(\boldsymbol{1})^\perp$, el triángulo entero ($\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$, $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$, $\boldsymbol{\mathop{\widehat{e}}}$) vive dentro del plano ya dibujado en el Notebook 2, Parte 2.
+
+/Herramientas auxiliares/: reutiliza (redefine) =ajuste_mco_simple=, =base_plano_ortogonal=, =marcas_desviacion=, =agrega_vector=/=agrega_segmento=; añade =angulo_recto(fig, ...)= (marca visual del ángulo recto) y =cuadrados_ajuste(x, y, beta0, beta1)= (matplotlib, 3 subplots con los cuadrados de STC/SEC/SRC, como la figura de la lección 8).
+
+/Parte 1 — El triángulo rectángulo/: figura 3D del triángulo dentro de $\mathcal{L}(\boldsymbol{1})^\perp$, con arco marcando $\theta$; diagrama de dispersión gemelo con la recta ajustada; comprobación numérica de Pitágoras ($\sigma_y^2=\sigma_{\hat y}^2+\sigma_e^2$) y de $R^2=\cos^2\theta=\rho_{xy}^2$.
+
+/Parte 2 — Áreas de cuadrados/: la figura de tres paneles (STC/SEC/SRC) sobre el mismo ejemplo, conectando la lectura vectorial con la lectura "de manual".
+
+/Parte 3 — Ajuste exacto no es lo mismo que buen ajuste/: reutilizando el caso (b) de la Parte 3 del Notebook 2 ($\boldsymbol{u}$ ortogonal a los regresores pero $\boldsymbol{u}\neq\boldsymbol{0}$): $\hat\beta_0,\hat\beta_1$ recuperan exactamente los verdaderos, y sin embargo $R^2<1$. Contraste breve con el caso $\boldsymbol{u}=\boldsymbol{0}$ ($R^2=1$).
+
+/Para seguir explorando/ + bloque =COMMENT ipynb=.
+
+---
+
+Sobre el punto 4 (dispersión estática): coincido en que aquí no aporta nada hacerla dinámica —no hay ningún ángulo que rotar en 2D—, así que uso =matplotlib=.
+
+¿Apruebas este esquema para ambos ficheros, o quieres que ajuste algo antes de escribir el código completo?
+
+Me parece perfecto. Adelante.
+
+
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Aquí tienes los dos ficheros completos.
+
+#+begin_src org
+#    -*- mode: org -*-
+
+#+TITLE: Notebook 2. Proyección ortogonal sobre $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ en $\mathbb{R}^3$
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+
+#+LATEX_HEADER: \usepackage{polyglossia}
+#+LATEX_HEADER: \setmainlanguage{spanish}
+
+#+LATEX: \maketitle
+
+#+BEGIN_SRC emacs-lisp :exports none :results silent
+(use-package ox-ipynb
+  :load-path (lambda () (expand-file-name "ox-ipynb" scimax-dir)))
+#+END_SRC
+
+#+begin_abstract
+Visualización interactiva en $\mathbb{R}^3$ de la regresión lineal simple (lección 7): el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, el ajuste $\boldsymbol{\mathop{\widehat{y}}}$ y su residuo $\boldsymbol{\mathop{\widehat{e}}}$, la identidad que relaciona los vectores en desviaciones del ajuste y del regresor, y qué le exigimos exactamente al vector generador $\boldsymbol{u}$ para que MCO recupere los coeficientes verdaderos. Complemento de las lecciones 6 y 7.
+#+end_abstract
+
+- ([[https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?labpath=CuadernosElectronicos/S09-Notebook02.ipynb][mybinder]])
+
+- Introducción
+
+Este cuaderno retoma la construcción del primer cuaderno (proyección sobre $\mathcal{L}(\boldsymbol{1})$, lección 4) y añade la pieza que introducen las lecciones 6 y 7: un /segundo/ vector generador, $\boldsymbol{x}$. Ya no proyectamos sobre una recta, sino sobre el /plano/ $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$.
+
+Seguimos trabajando en $\mathbb{R}^3$ ($n=3$ observaciones) para poder dibujar la escena, pero conviene señalar desde el principio una diferencia geométrica importante respecto al primer cuaderno: allí, con un solo generador $\boldsymbol{1}$, el complemento ortogonal $\mathcal{L}(\boldsymbol{1})^\perp$ era un /plano/ (dimensión 2) dentro de $\mathbb{R}^3$. Aquí, con /dos/ generadores ($\boldsymbol{1}$ y $\boldsymbol{x}$), el complemento ortogonal $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$ es una /recta/ (dimensión 1): solo queda una dirección posible para el residuo. Esta observación será la clave de la Parte 3.
+
+Podrás, como en el primer cuaderno, rotar las figuras con el ratón y editar los vectores en las celdas de código para crear tus propios ejemplos. Además, junto a cada figura 3D verás su gemela: el diagrama de dispersión clásico $(x_i,y_i)$ con la recta ajustada, para no perder de vista la lectura “de manual” de lo mismo.
+
+- Herramientas auxiliares
+
+*/ Módulos y configuración
+
+Como en el primer cuaderno, usamos =numpy= y =plotly= para la geometría en $\mathbb{R}^3$; añadimos =matplotlib= para el diagrama de dispersión clásico (estático: aquí no hay ningún ángulo que rotar).
+
+#+BEGIN_SRC jupyter-python :results silent
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+import matplotlib.pyplot as plt
+
+pio.renderers.default = "notebook"
+#+END_SRC
+
+*/ El ajuste MCO de la regresión simple (lección 7)
+
+Esta es la única pieza puramente algebraica del cuaderno: las fórmulas de $\hat\beta_0$ y $\hat\beta_1$ obtenidas en la lección 7 a partir de las dos condiciones de ortogonalidad. Añadimos también, como en el primer cuaderno, el vector de medias y el vector en desviaciones (lección 4), que necesitaremos para las Partes 2 y 3.
+
+#+BEGIN_SRC jupyter-python :results silent
+def ajuste_mco_simple(y, x):
+    """Ajuste MCO de la regresión simple y = beta0 + beta1*x (lección 7).
+    Devuelve (yhat, ehat, beta0, beta1)."""
+    y = np.asarray(y, dtype=float)
+    x = np.asarray(x, dtype=float)
+    mu_x = x.mean()
+    mu_y = y.mean()
+    sigma_x2 = np.mean((x - mu_x) ** 2)
+    sigma_xy = np.mean((x - mu_x) * (y - mu_y))
+    beta1 = sigma_xy / sigma_x2
+    beta0 = mu_y - beta1 * mu_x
+    yhat = beta0 + beta1 * x
+    ehat = y - yhat
+    return yhat, ehat, beta0, beta1
+
+def vector_de_medias(v):
+    """Devuelve (vector_de_medias, mu): el vector constante mu*1 y el
+    escalar mu = media aritmética de las componentes de v."""
+    v = np.asarray(v, dtype=float)
+    mu = v.mean()
+    return np.full(v.shape, mu), mu
+
+def vector_en_desviaciones(v):
+    """Devuelve (v - vector_de_medias(v), mu)."""
+    v = np.asarray(v, dtype=float)
+    vbar, mu = vector_de_medias(v)
+    return v - vbar, mu
+#+END_SRC
+
+*/ Bases ortonormales: un plano genérico y el plano fijo $\mathcal{L}(\boldsymbol{1})^\perp$
+
+Necesitamos dos construcciones distintas. La primera, ya usada en el primer cuaderno, es una base ortonormal /fija/ del plano $\mathcal{L}(\boldsymbol{1})^\perp$ (no depende de $\boldsymbol{x}$; la reutilizaremos en la Parte 2). La segunda es /nueva/: una base ortonormal del plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, obtenida por el proceso de Gram-Schmidt. Es necesaria porque, como vimos en la lección 6, $\boldsymbol{1}$ y $\boldsymbol{x}$ /no/ son ortogonales entre sí en general (salvo que $\mu_{\boldsymbol{x}}=0$); para poder dibujar una rejilla dentro del plano necesitamos, aun así, dos direcciones ortonormales que lo generen.
+
+#+BEGIN_SRC jupyter-python :results silent
+def base_plano_ortogonal():
+    """Base ortonormal (u1, u2) del plano L(1)^perp en R^3 (fija)."""
+    uno = np.array([1., 1., 1.]) / np.sqrt(3)
+    u1 = np.array([1., -1., 0.])
+    u1 = u1 / np.linalg.norm(u1)
+    u2 = np.cross(uno, u1)
+    u2 = u2 / np.linalg.norm(u2)
+    return u1, u2
+
+def base_ortonormal_gram_schmidt(a, b):
+    """Base ortonormal (u1, u2) del plano L(a,b), por Gram-Schmidt: u1 es
+    a normalizado; u2 es la parte de b ortogonal a u1, normalizada. Válido
+    aunque a y b no sean ortogonales entre sí (como a=1, b=x; lección 6)."""
+    a = np.asarray(a, dtype=float)
+    b = np.asarray(b, dtype=float)
+    u1 = a / np.linalg.norm(a)
+    b_perp = b - (b @ u1) * u1
+    u2 = b_perp / np.linalg.norm(b_perp)
+    return u1, u2
+#+END_SRC
+
+*/ Funciones de dibujo
+
+Reutilizamos (redefiniéndolas, pues este cuaderno es un fichero independiente) las funciones del primer cuaderno para dibujar $\mathcal{L}(\boldsymbol{1})$ con sus marcas graduadas y para colocar vectores y segmentos. Añadimos tres piezas nuevas: un eje genérico (para dibujar $\mathcal{L}(\boldsymbol{x})$, el segundo generador del plano), un plano genérico $\mathcal{L}(\boldsymbol{a},\boldsymbol{b})$ (usando la base de Gram-Schmidt), y una función que dibuja las dos componentes del ajuste, $\hat\beta_0\boldsymbol{1}$ y $\hat\beta_1\boldsymbol{x}$, junto con el paralelogramo que las suma en $\boldsymbol{\mathop{\widehat{y}}}$ (la misma idea que en la figura de las lecciones 6-7, ahora interactiva).
+
+#+BEGIN_SRC jupyter-python :results silent
+def marcas_unitarias_L1(fig, rango=4, color='blue'):
+    """Marcas sobre L(1), una por cada valor entero de la media."""
+    uno = np.array([1., 1., 1.])
+    ks = np.arange(-rango, rango + 1)
+    puntos = np.outer(ks, uno)
+    fig.add_trace(go.Scatter3d(
+        x=puntos[:, 0], y=puntos[:, 1], z=puntos[:, 2],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol='cross'),
+        text=[f"mu = {k}" for k in ks],
+        hoverinfo='text', showlegend=False))
+
+def marcas_desviacion(fig, base, e, n, color, etiqueta='sigma'):
+    """Marcas sobre el segmento base -> base+e, espaciadas de modo que
+    cada marca sucesiva corresponde a un incremento de 1 en sigma (norma
+    ESTADÍSTICA de e); ver primer cuaderno para el detalle geométrico."""
+    norma_euclidea_e = np.linalg.norm(e)
+    if norma_euclidea_e < 1e-12:
+        return
+    sigma = norma_euclidea_e / np.sqrt(n)
+    u_e = e / norma_euclidea_e
+    paso_euclideo = np.sqrt(n)
+    kmax = int(np.floor(sigma + 1e-9))
+    ks = np.arange(0, kmax + 1)
+    puntos = base + np.outer(ks, u_e * paso_euclideo)
+    fig.add_trace(go.Scatter3d(
+        x=puntos[:, 0], y=puntos[:, 1], z=puntos[:, 2],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol='cross'),
+        text=[f"{etiqueta} = {k}" for k in ks],
+        hoverinfo='text', showlegend=False))
+
+def recta_L1(fig, rango=4, color='blue'):
+    """Dibuja L(1) con sus marcas graduadas (una por unidad de mu)."""
+    t = np.linspace(-rango, rango, 2)
+    fig.add_trace(go.Scatter3d(
+        x=t, y=t, z=t, mode='lines',
+        line=dict(color=color, width=5), name='L(1)'))
+    marcas_unitarias_L1(fig, rango=rango, color=color)
+
+def eje_generado(fig, v, rango=4, color='black', nombre=''):
+    """Dibuja la recta L(v) que pasa por el origen en la dirección de v
+    (sin marcas graduadas: a diferencia de L(1), aquí la escala de v es
+    arbitraria y no representa directamente ningún estadístico)."""
+    v = np.asarray(v, dtype=float)
+    v_unit = v / np.linalg.norm(v)
+    t = np.linspace(-rango, rango, 2)
+    pts = np.outer(t, v_unit)
+    fig.add_trace(go.Scatter3d(
+        x=pts[:, 0], y=pts[:, 1], z=pts[:, 2],
+        mode='lines', line=dict(color=color, width=3),
+        name=nombre, hoverinfo='skip', showlegend=False))
+
+def plano_ortogonal(fig, rango=4, color='lightslategray'):
+    """Parche + rejilla de L(1)^perp (fijo)."""
+    u1, u2 = base_plano_ortogonal()
+    S, T = np.meshgrid([-rango, rango], [-rango, rango])
+    X = S * u1[0] + T * u2[0]
+    Y = S * u1[1] + T * u2[1]
+    Z = S * u1[2] + T * u2[2]
+    fig.add_trace(go.Surface(
+        x=X, y=Y, z=Z, showscale=False, opacity=0.12,
+        colorscale=[[0, color], [1, color]], hoverinfo='skip'))
+    for s in range(-rango, rango + 1):
+        p0 = s * u1 - rango * u2
+        p1 = s * u1 + rango * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+    for t in range(-rango, rango + 1):
+        p0 = -rango * u1 + t * u2
+        p1 = rango * u1 + t * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+
+def plano_generado(fig, a, b, rango=4, color='lightslategray'):
+    """Parche + rejilla de L(a,b), usando la base ortonormal de
+    Gram-Schmidt: sirve aunque a y b no sean ortogonales entre sí (como
+    a=1, b=x; lección 6). El plano es el mismo con cualquier base; solo
+    cambia la orientación de la rejilla dibujada dentro de él."""
+    u1, u2 = base_ortonormal_gram_schmidt(a, b)
+    S, T = np.meshgrid([-rango, rango], [-rango, rango])
+    X = S * u1[0] + T * u2[0]
+    Y = S * u1[1] + T * u2[1]
+    Z = S * u1[2] + T * u2[2]
+    fig.add_trace(go.Surface(
+        x=X, y=Y, z=Z, showscale=False, opacity=0.12,
+        colorscale=[[0, color], [1, color]], hoverinfo='skip'))
+    for s in range(-rango, rango + 1):
+        p0 = s * u1 - rango * u2
+        p1 = s * u1 + rango * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+    for t in range(-rango, rango + 1):
+        p0 = -rango * u1 + t * u2
+        p1 = rango * u1 + t * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+
+def agrega_vector(fig, punto, color='crimson', nombre='v', dash='solid'):
+    """Vector desde el origen hasta 'punto' (línea + marcador en la punta)."""
+    punto = np.asarray(punto, dtype=float)
+    fig.add_trace(go.Scatter3d(
+        x=[0, punto[0]], y=[0, punto[1]], z=[0, punto[2]],
+        mode='lines+markers',
+        line=dict(color=color, width=6, dash=dash),
+        marker=dict(size=[0, 5], color=color), name=nombre))
+
+def agrega_segmento(fig, p0, p1, color='gray'):
+    """Segmento discontinuo entre dos puntos."""
+    fig.add_trace(go.Scatter3d(
+        x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+        mode='lines', line=dict(color=color, width=3, dash='dot'),
+        showlegend=False, hoverinfo='skip'))
+
+def agrega_componentes_ajuste(fig, beta0, beta1, x, yhat):
+    """Dibuja beta0*1 y beta1*x, y los segmentos punteados del
+    paralelogramo que, sumados, reconstruyen yhat."""
+    x = np.asarray(x, dtype=float)
+    uno = np.ones_like(x)
+    comp0 = beta0 * uno
+    comp1 = beta1 * x
+    agrega_vector(fig, comp0, color='steelblue', nombre='beta0*1', dash='dot')
+    agrega_vector(fig, comp1, color='sienna', nombre='beta1*x', dash='dot')
+    agrega_segmento(fig, comp0, yhat, color='lightgray')
+    agrega_segmento(fig, comp1, yhat, color='lightgray')
+#+END_SRC
+
+*/ Las dos figuras compuestas: el ajuste en $\mathbb{R}^3$ y su gemela en 2D
+
+La primera función compone toda la escena del ajuste: el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (con sus dos ejes, oblicuos entre sí), el vector de datos $\boldsymbol{y}$, el ajuste $\boldsymbol{\mathop{\widehat{y}}}$, el residuo $\boldsymbol{\mathop{\widehat{e}}}$ (con su regla graduada, como en el primer cuaderno) y, opcionalmente, las dos componentes $\hat\beta_0\boldsymbol{1}$ y $\hat\beta_1\boldsymbol{x}$. La segunda es su gemela clásica: el diagrama de dispersión $(x_i,y_i)$ con la recta ajustada $\hat y=\hat\beta_0+\hat\beta_1 x$.
+
+#+BEGIN_SRC jupyter-python :results silent
+def figura_ajuste_R3(x, y, rango=5, titulo="", mostrar_componentes=True):
+    """Compone la escena: L(1), el eje L(x), el plano L(1,x), el vector y,
+    el ajuste yhat, el residuo ehat y (opcionalmente) sus dos componentes
+    sobre los generadores del plano."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    n = len(x)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+
+    fig = go.Figure()
+    recta_L1(fig, rango=rango)
+    eje_generado(fig, x, rango=rango, color='black', nombre='L(x)')
+    plano_generado(fig, np.ones(n), x, rango=rango)
+
+    agrega_vector(fig, y, color='seagreen', nombre='y')
+    agrega_vector(fig, yhat, color='crimson', nombre='yhat')
+    agrega_segmento(fig, yhat, y, color='gray')
+    marcas_desviacion(fig, yhat, ehat, n, color='gray', etiqueta='sigma_e')
+
+    if mostrar_componentes:
+        agrega_componentes_ajuste(fig, beta0, beta1, x, yhat)
+
+    fondo = dict(showbackground=True, backgroundcolor='rgb(235,235,245)',
+                 gridcolor='white', dtick=1, range=[-rango, rango])
+    fig.update_layout(
+        scene=dict(xaxis=fondo, yaxis=fondo, zaxis=fondo, aspectmode='cube'),
+        title=titulo, width=800, height=700,
+        margin=dict(l=0, r=0, b=0, t=40))
+    return fig
+
+def diagrama_dispersion(x, y, mostrar_residuos=False, titulo=""):
+    """Diagrama de dispersión clásico, con la recta MCO ajustada y,
+    opcionalmente, los residuos como segmentos verticales discontinuos."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.scatter(x, y, color='seagreen', zorder=3, label='datos (x_i, y_i)')
+    xs = np.linspace(x.min() - 0.5, x.max() + 0.5, 50)
+    ax.plot(xs, beta0 + beta1 * xs, color='crimson',
+            label=f"yhat = {beta0:.2f} + {beta1:.2f}*x")
+    if mostrar_residuos:
+        for xi, yi, yhi in zip(x, y, yhat):
+            ax.plot([xi, xi], [yi, yhi], color='gray',
+                    linestyle='dotted', zorder=2)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_title(titulo)
+    ax.legend()
+    ax.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+#+END_SRC
+
+*/ Ejemplos para explorar
+
+Un pequeño diccionario de pares $(\boldsymbol{x},\boldsymbol{y})$ con distinta fuerza de relación: =canonico= es el ejemplo de la lección 5 ($\rho_{\boldsymbol{x}\boldsymbol{y}}=\sqrt3/2$); =fuerte= tiene una correlación muy alta; =debil=, muy baja. Cámbialos, o añade el tuyo, para repetir cualquier actividad del cuaderno con otros datos.
+
+#+BEGIN_SRC jupyter-python :results silent
+ejemplos = {
+    'canonico': (np.array([1., 2., 3.]), np.array([2., 2., 5.])),
+    'fuerte':   (np.array([1., 2., 3.]), np.array([2., 5., 9.])),
+    'debil':    (np.array([1., 2., 3.]), np.array([5., 1., 6.])),
+}
+#+END_SRC
+
+- Parte 1: el ajuste y su residuo
+
+Elegimos un ejemplo y dibujamos la escena completa: el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (nota, al rotar la figura, que sus dos ejes —$\mathcal{L}(\boldsymbol{1})$ en azul y $\mathcal{L}(\boldsymbol{x})$ en negro— son oblicuos, no perpendiculares, exactamente como advertía la lección 6), el vector de datos $\boldsymbol{y}$, su ajuste $\boldsymbol{\mathop{\widehat{y}}}$, y el residuo $\boldsymbol{\mathop{\widehat{e}}}$ como el segmento perpendicular al plano que los conecta.
+
+#+BEGIN_SRC jupyter-python
+x, y = ejemplos['canonico']
+fig = figura_ajuste_R3(x, y, rango=5, titulo="Ajuste de y sobre L(1,x)")
+fig.show()
+#+END_SRC
+
+Junto a la figura 3D, su diagrama de dispersión gemelo: los mismos tres puntos $(x_i,y_i)$, ahora en el plano, con la recta de mínimos cuadrados y los residuos como segmentos verticales discontinuos (la misma información que el segmento gris de la figura 3D, vista “desde otro ángulo”, literalmente).
+
+#+BEGIN_SRC jupyter-python
+diagrama_dispersion(x, y, mostrar_residuos=True,
+                     titulo="Diagrama de dispersión y recta ajustada")
+#+END_SRC
+
+*/ Comprobación numérica: las dos ortogonalidades de la lección 7
+
+#+BEGIN_SRC jupyter-python
+yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+print(f"beta0_hat = {beta0:.4f}   beta1_hat = {beta1:.4f}")
+print(f"suma de residuos (debe ser 0):      {ehat.sum():.10f}")
+print(f"producto residuos . x (debe ser 0): {np.dot(ehat, x):.10f}")
+#+END_SRC
+
+*/ Actividad
+
+Cambia al ejemplo =fuerte= o =debil= (o crea el tuyo) y vuelve a ejecutar las tres celdas anteriores. Observa cómo cambia la /longitud/ del segmento gris (el residuo) y compárala con lo que verás en el diagrama de dispersión: cuanto más “pegados” estén los puntos a la recta, más corto será ese segmento.
+
+- Parte 2: los vectores en desviaciones, en $\mathcal{L}(\boldsymbol{1})^\perp$
+
+Recordemos la identidad guardada en la lección 7: el vector en desviaciones del ajuste coincide exactamente con el de $\hat\beta_1\boldsymbol{x}$,
+\[
+\boldsymbol{\mathop{\widehat{y}}} - \boldsymbol{\mathop{\overline{y}}} \;=\; \hat\beta_1\big(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\big).
+\]
+Como los tres vectores en desviaciones ($\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}$, $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$, $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$) tienen media cero, los tres viven dentro del mismo plano $\mathcal{L}(\boldsymbol{1})^\perp$ que usamos en el primer cuaderno. Podemos, por tanto, trasladarlos todos al origen y dibujarlos juntos.
+
+#+BEGIN_SRC jupyter-python
+def figura_desviaciones_R3(x, y, rango=4, titulo=""):
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    n = len(x)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+    ex, mu_x = vector_en_desviaciones(x)
+    ey, mu_y = vector_en_desviaciones(y)
+    eyhat, mu_yhat = vector_en_desviaciones(yhat)
+
+    fig = go.Figure()
+    plano_ortogonal(fig, rango=rango)
+    agrega_vector(fig, ex, color='black', nombre='x - x_barra', dash='dash')
+    agrega_vector(fig, ey, color='yellowgreen', nombre='y - y_barra')
+    agrega_vector(fig, eyhat, color='darkviolet',
+                  nombre='yhat - y_barra', dash='dash')
+
+    marcas_desviacion(fig, np.zeros(3), ex, n, color='black', etiqueta='sigma_x')
+    marcas_desviacion(fig, np.zeros(3), ey, n, color='yellowgreen', etiqueta='sigma_y')
+    marcas_desviacion(fig, np.zeros(3), eyhat, n, color='darkviolet', etiqueta='sigma_yhat')
+
+    fondo = dict(showbackground=True, backgroundcolor='rgb(235,235,245)',
+                 gridcolor='white', dtick=1, range=[-rango, rango])
+    fig.update_layout(
+        scene=dict(xaxis=fondo, yaxis=fondo, zaxis=fondo, aspectmode='cube'),
+        title=titulo, width=800, height=700,
+        margin=dict(l=0, r=0, b=0, t=40))
+    return fig
+
+x, y = ejemplos['canonico']
+fig2 = figura_desviaciones_R3(x, y, rango=4,
+                               titulo="Vectores en desviaciones en L(1)^perp")
+fig2.show()
+#+END_SRC
+
+Rota la figura hasta ver los tres vectores “de perfil”: los vectores negro discontinuo ($\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}$) y violeta discontinuo ($\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$) deben verse sobre la misma recta (misma dirección, o dirección opuesta si $\hat\beta_1<0$); el verde ($\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$), en cambio, forma con ellos el ángulo $\theta$ que protagonizará el próximo cuaderno.
+
+*/ Comprobación numérica
+
+#+BEGIN_SRC jupyter-python
+ex, _ = vector_en_desviaciones(x)
+eyhat, _ = vector_en_desviaciones(yhat)
+print("yhat - y_barra:       ", np.round(eyhat, 4))
+print("beta1 * (x - x_barra):", np.round(beta1 * ex, 4))
+print("¿son el mismo vector? ", np.allclose(eyhat, beta1 * ex))
+#+END_SRC
+
+*/ Actividad
+
+Repite esta figura con el ejemplo =debil=. Fíjate en el ángulo entre el vector verde y el violeta/negro: debería verse mucho más abierto que con el ejemplo =canonico=. Este ángulo, y su coseno al cuadrado, serán exactamente el $R^2$ del próximo cuaderno.
+
+- Parte 3: ¿qué necesitamos exactamente de $\boldsymbol{u}$?
+
+Como en la lección 7, imaginemos que los datos $\boldsymbol{y}$ se generaron según $\boldsymbol{y}=\beta_0\boldsymbol{1}+\beta_1\boldsymbol{x}+\boldsymbol{u}$, con $\beta_0,\beta_1$ conocidos por nosotros (el diseñador del experimento) pero /no/ por MCO, que solo ve $\boldsymbol{y}$ y $\boldsymbol{x}$. /Advertencia/ (§8 del plan del curso): $\boldsymbol{u}$ es el vector generador de la perturbación, y no debe confundirse con el vector de residuos $\boldsymbol{\mathop{\widehat{e}}}$ que MCO calcula a partir de los datos.
+
+En $\mathbb{R}^3$ con dos regresores, $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$ es una única /recta/ (recordemos la introducción): solo hay una dirección posible para que $\boldsymbol{u}$ quede /enteramente/ fuera del plano. Vamos a comparar cinco vectores $\boldsymbol{u}$ distintos y ver, en cada caso, si MCO recupera $\beta_0,\beta_1$ exactamente.
+
+#+BEGIN_SRC jupyter-python
+def experimento_u(x, beta0, beta1, u, nombre=""):
+    """Genera y = beta0*1 + beta1*x + u, ajusta MCO y devuelve un dict
+    con los resultados, listo para comparar con los valores verdaderos."""
+    x = np.asarray(x, dtype=float)
+    u = np.asarray(u, dtype=float)
+    uno = np.ones_like(x)
+    y = beta0 * uno + beta1 * x + u
+    yhat, ehat, beta0_hat, beta1_hat = ajuste_mco_simple(y, x)
+    return dict(nombre=nombre, u=u, y=y, yhat=yhat, ehat=ehat,
+                beta0_hat=beta0_hat, beta1_hat=beta1_hat,
+                suma_u=float(u.sum()), producto_u_x=float(np.dot(u, x)))
+
+def resumen(res):
+    print(f"{res['nombre']:42s} "
+          f"sum(u)={res['suma_u']:+6.2f}  u.x={res['producto_u_x']:+6.2f}   "
+          f"beta0_hat={res['beta0_hat']:+7.4f}  beta1_hat={res['beta1_hat']:+7.4f}")
+#+END_SRC
+
+Fijamos $\boldsymbol{x}=(1,2,3)$ y los valores verdaderos $\beta_0=2,\beta1=3$ (el mismo ejemplo, en espíritu, que el de la lección 7). El truco para encontrar la /única/ dirección ortogonal a la vez a $\boldsymbol{1}$ y a $\boldsymbol{x}$ es el producto vectorial: $\boldsymbol{1}\times\boldsymbol{x}$ es, por definición, perpendicular a ambos.
+
+#+BEGIN_SRC jupyter-python
+x = np.array([1., 2., 3.])
+beta0, beta1 = 2., 3.
+uno = np.ones_like(x)
+
+direccion_perp = np.cross(uno, x)
+print("dirección ortogonal a 1 y a x (1 x x):", direccion_perp)
+print("¿ortogonal a 1?", np.isclose(direccion_perp.sum(), 0))
+print("¿ortogonal a x?", np.isclose(np.dot(direccion_perp, x), 0))
+#+END_SRC
+
+Con esa dirección construimos los cinco casos:
+
+#+BEGIN_SRC jupyter-python
+u_a = np.zeros(3)                     # (a) sin perturbación
+u_b = 2 * direccion_perp              # (b) u ⟂ 1 y u ⟂ x
+u_c = np.array([-1., 0., 1.])         # (c) media(u)=0, pero u no ⟂ x
+u_d = np.array([1., 1., -1.])         # (d) u ⟂ x, pero media(u) != 0
+u_e = np.array([2., -1., 3.])         # (e) u no ⟂ 1 ni ⟂ x
+
+casos = [
+    ("(a) u = 0", u_a),
+    ("(b) u ortogonal a 1 y a x", u_b),
+    ("(c) media(u)=0, pero u no ortogonal a x", u_c),
+    ("(d) u ortogonal a x, pero media(u) != 0", u_d),
+    ("(e) u no ortogonal a 1 ni a x", u_e),
+]
+
+print(f"Valores verdaderos: beta0 = {beta0}, beta1 = {beta1}\n")
+resultados = []
+for nombre, u in casos:
+    res = experimento_u(x, beta0, beta1, u, nombre)
+    resultados.append(res)
+    resumen(res)
+#+END_SRC
+
+*/ Dos figuras, para contrastar
+
+Visualizamos el caso más favorable, (b), y el más desfavorable, (e).
+
+#+BEGIN_SRC jupyter-python
+res_b = resultados[1]
+fig_b = figura_ajuste_R3(x, res_b['y'], rango=6,
+    titulo="Caso (b): u en L(1,x)^perp -- recuperacion exacta de beta0,beta1")
+fig_b.show()
+#+END_SRC
+
+#+BEGIN_SRC jupyter-python
+res_e = resultados[4]
+fig_e = figura_ajuste_R3(x, res_e['y'], rango=6,
+    titulo="Caso (e): u sin ninguna ortogonalidad")
+fig_e.show()
+#+END_SRC
+
+*/ Interpretación
+
+El caso (a) es trivial: sin perturbación, no hay nada que estimar. El caso (b) recupera $\beta_0,\beta_1$ /exactamente/: es el análogo, en $\mathbb{R}^3$, del ejemplo “con truco” de la lección 7 —allí, con $n=5$, había todo un subespacio de dimensión 3 donde podía vivir $\boldsymbol{u}$ sin estropear el ajuste; aquí, con $n=3$ y dos regresores, esa libertad se ha reducido a una única recta—.
+
+Los casos (c) y (d) son los más instructivos. Cada uno satisface /solo una/ de las dos condiciones de ortogonalidad —(c) tiene media cero pero no es ortogonal a $\boldsymbol{x}$; (d) es ortogonal a $\boldsymbol{x}$ pero tiene media distinta de cero— y en ambos $\hat\beta_0,\hat\beta_1$ se alejan de los valores verdaderos. Esto confirma, con números, lo que ya anticipaba la lección 6 (pregunta 9 y 11 de su banco de preguntas): que el residuo de una proyección es ortogonal a /todo/ el plano exige ortogonalidad a /cada uno/ de sus generadores /simultáneamente/; satisfacer solo una de las dos condiciones no basta. El caso (e), sin ninguna de las dos, es en general el más alejado de todos.
+
+Guardemos esta idea: solo cuando $\boldsymbol{u}$ vive enteramente en la (única) dirección ortogonal al plano de los regresores, MCO recupera los coeficientes generadores con exactitud. Esta es, en miniatura, la intuición geométrica detrás de la condición $E[\boldsymbol{U}\mid\boldsymbol{X}]=\boldsymbol{0}$ que exigiremos a la perturbación poblacional en la lección 9.
+
+*/ Actividad
+
+Elige tu propio vector $\boldsymbol{u}$ (o modifica alguno de los cinco anteriores) y comprueba en qué categoría cae —calculando $\sum u_i$ y $\boldsymbol{u}\cdot\boldsymbol{x}$— antes de ejecutar =experimento_u=. Intenta encontrar un $\boldsymbol{u}\neq\boldsymbol{0}$ que, sin estar exactamente en la dirección $\boldsymbol{1}\times\boldsymbol{x}$, recupere aproximadamente bien los coeficientes: ¿qué tiene de especial, comparado con los que sí lo consiguen exactamente?
+
+- Para seguir explorando
+
+- El parámetro =rango= controla el tamaño de la escena; aumenta su valor si tus vectores tienen componentes grandes (como en el caso (b) o (e) de la Parte 3).
+- El diccionario =ejemplos= admite cualquier par $(\boldsymbol{x},\boldsymbol{y})$ nuevo: solo tienen que ser vectores de $\mathbb{R}^3$ con $\boldsymbol{x}$ no constante.
+- El próximo cuaderno (Notebook 3) retoma exactamente la figura de la Parte 2 —los vectores en desviaciones dentro de $\mathcal{L}(\boldsymbol{1})^\perp$— para construir el triángulo rectángulo de la lección 8 y visualizar $R^2=\cos^2\theta$.
+- La sesión de laboratorio que sigue a la lección 7 comprobará las mismas dos ortogonalidades, pero con datos reales.
+
+- COMMENT ipynb                                                    :noexport:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(require 'ox-ipynb)
+(ox-ipynb-export-org-file-to-ipynb-file "S09-Notebook02.org")
+#+END_SRC
+#+end_src
+
+#+begin_src org
+#    -*- mode: org -*-
+
+#+TITLE: Notebook 3. Bondad de ajuste: Pitágoras y $R^2=\cos^2\theta$ en $\mathbb{R}^3$
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+
+#+LATEX_HEADER: \usepackage{polyglossia}
+#+LATEX_HEADER: \setmainlanguage{spanish}
+
+#+LATEX: \maketitle
+
+#+BEGIN_SRC emacs-lisp :exports none :results silent
+(use-package ox-ipynb
+  :load-path (lambda () (expand-file-name "ox-ipynb" scimax-dir)))
+#+END_SRC
+
+#+begin_abstract
+Visualización interactiva en $\mathbb{R}^3$ del triángulo rectángulo de la lección 8: los vectores en desviaciones de $\boldsymbol{y}$ y de $\boldsymbol{\mathop{\widehat{y}}}$, el residuo como cateto, el ángulo $\theta$ entre hipotenusa y cateto, y $R^2=\cos^2\theta$. Se completa con la representación clásica de STC, SEC y SRC como áreas de cuadrados sobre el diagrama de dispersión. Complemento de la lección 8; continúa el Notebook 2.
+#+end_abstract
+
+- ([[https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?labpath=CuadernosElectronicos/S10-Notebook03.ipynb][mybinder]])
+
+- Introducción
+
+Este cuaderno retoma exactamente el punto donde dejamos el Notebook 2 (Parte 2): los vectores en desviaciones $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$, $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ y $\boldsymbol{\mathop{\widehat{e}}}$, todos ellos con media cero y, por tanto, todos dentro del mismo plano $\mathcal{L}(\boldsymbol{1})^\perp$ ya dibujado allí. Esta es, de hecho, la observación geométrica que organiza todo el cuaderno: el triángulo rectángulo de la lección 8 —hipotenusa $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$, catetos $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ y $\boldsymbol{\mathop{\widehat{e}}}$— vive /íntegramente/ dentro de ese único plano, sin necesidad de ningún espacio adicional.
+
+Como en los cuadernos anteriores, cada figura 3D interactiva viene acompañada de su gemela clásica: el diagrama de dispersión $(x_i,y_i)$, y, en la Parte 2, la representación de STC, SEC y SRC como /áreas de cuadrados/ sobre ese mismo diagrama —la ilustración que muchos manuales de econometría usan para introducir $R^2$ por primera vez.
+
+- Herramientas auxiliares
+
+*/ Módulos y configuración
+
+#+BEGIN_SRC jupyter-python :results silent
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+pio.renderers.default = "notebook"
+#+END_SRC
+
+*/ Ajuste MCO, medias y correlación
+
+Redefinimos aquí (fichero independiente) las piezas algebraicas ya usadas en los cuadernos 1 y 2, y añadimos =covarianza= y =correlacion= (lección 5), que necesitaremos para verificar $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
+
+#+BEGIN_SRC jupyter-python :results silent
+def ajuste_mco_simple(y, x):
+    """Ajuste MCO de la regresión simple y = beta0 + beta1*x (lección 7)."""
+    y = np.asarray(y, dtype=float)
+    x = np.asarray(x, dtype=float)
+    mu_x = x.mean()
+    mu_y = y.mean()
+    sigma_x2 = np.mean((x - mu_x) ** 2)
+    sigma_xy = np.mean((x - mu_x) * (y - mu_y))
+    beta1 = sigma_xy / sigma_x2
+    beta0 = mu_y - beta1 * mu_x
+    yhat = beta0 + beta1 * x
+    ehat = y - yhat
+    return yhat, ehat, beta0, beta1
+
+def vector_de_medias(v):
+    v = np.asarray(v, dtype=float)
+    mu = v.mean()
+    return np.full(v.shape, mu), mu
+
+def vector_en_desviaciones(v):
+    v = np.asarray(v, dtype=float)
+    vbar, mu = vector_de_medias(v)
+    return v - vbar, mu
+
+def covarianza(a, b):
+    ea, _ = vector_en_desviaciones(a)
+    eb, _ = vector_en_desviaciones(b)
+    return np.mean(ea * eb)
+
+def correlacion(a, b):
+    return covarianza(a, b) / np.sqrt(covarianza(a, a) * covarianza(b, b))
+#+END_SRC
+
+*/ Funciones de dibujo (el plano fijo $\mathcal{L}(\boldsymbol{1})^\perp$)
+
+#+BEGIN_SRC jupyter-python :results silent
+def base_plano_ortogonal():
+    uno = np.array([1., 1., 1.]) / np.sqrt(3)
+    u1 = np.array([1., -1., 0.])
+    u1 = u1 / np.linalg.norm(u1)
+    u2 = np.cross(uno, u1)
+    u2 = u2 / np.linalg.norm(u2)
+    return u1, u2
+
+def plano_ortogonal(fig, rango=4, color='lightslategray'):
+    u1, u2 = base_plano_ortogonal()
+    S, T = np.meshgrid([-rango, rango], [-rango, rango])
+    X = S * u1[0] + T * u2[0]
+    Y = S * u1[1] + T * u2[1]
+    Z = S * u1[2] + T * u2[2]
+    fig.add_trace(go.Surface(
+        x=X, y=Y, z=Z, showscale=False, opacity=0.12,
+        colorscale=[[0, color], [1, color]], hoverinfo='skip'))
+    for s in range(-rango, rango + 1):
+        p0 = s * u1 - rango * u2
+        p1 = s * u1 + rango * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+    for t in range(-rango, rango + 1):
+        p0 = -rango * u1 + t * u2
+        p1 = rango * u1 + t * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+
+def marcas_desviacion(fig, base, e, n, color, etiqueta='sigma'):
+    norma_euclidea_e = np.linalg.norm(e)
+    if norma_euclidea_e < 1e-12:
+        return
+    sigma = norma_euclidea_e / np.sqrt(n)
+    u_e = e / norma_euclidea_e
+    paso_euclideo = np.sqrt(n)
+    kmax = int(np.floor(sigma + 1e-9))
+    ks = np.arange(0, kmax + 1)
+    puntos = base + np.outer(ks, u_e * paso_euclideo)
+    fig.add_trace(go.Scatter3d(
+        x=puntos[:, 0], y=puntos[:, 1], z=puntos[:, 2],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol='cross'),
+        text=[f"{etiqueta} = {k}" for k in ks],
+        hoverinfo='text', showlegend=False))
+
+def agrega_vector(fig, punto, color='crimson', nombre='v', dash='solid'):
+    punto = np.asarray(punto, dtype=float)
+    fig.add_trace(go.Scatter3d(
+        x=[0, punto[0]], y=[0, punto[1]], z=[0, punto[2]],
+        mode='lines+markers',
+        line=dict(color=color, width=6, dash=dash),
+        marker=dict(size=[0, 5], color=color), name=nombre))
+
+def agrega_segmento(fig, p0, p1, color='gray'):
+    fig.add_trace(go.Scatter3d(
+        x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+        mode='lines', line=dict(color=color, width=3, dash='dot'),
+        showlegend=False, hoverinfo='skip'))
+#+END_SRC
+
+*/ La figura del triángulo rectángulo
+
+Dibujamos, dentro de $\mathcal{L}(\boldsymbol{1})^\perp$, la hipotenusa $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ (verde), el cateto $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ (violeta) y el otro cateto, $\boldsymbol{\mathop{\widehat{e}}}$ (gris), como el segmento que va de la punta del cateto violeta a la punta de la hipotenusa —exactamente la descomposición $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}=(\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}})+\boldsymbol{\mathop{\widehat{e}}}$ de la lección 8—.
+
+#+BEGIN_SRC jupyter-python :results silent
+def figura_triangulo_R3(x, y, rango=4, titulo=""):
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    n = len(x)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+    ey, mu_y = vector_en_desviaciones(y)
+    eyhat, mu_yhat = vector_en_desviaciones(yhat)
+
+    fig = go.Figure()
+    plano_ortogonal(fig, rango=rango)
+    agrega_vector(fig, ey, color='yellowgreen', nombre='y - y_barra (hipotenusa)')
+    agrega_vector(fig, eyhat, color='darkviolet', nombre='yhat - y_barra (cateto)')
+    agrega_segmento(fig, eyhat, ey, color='gray')
+    agrega_vector(fig, ehat, color='gray', nombre='ehat (cateto, trasladado)', dash='dash')
+
+    marcas_desviacion(fig, np.zeros(3), ey, n, color='yellowgreen', etiqueta='sigma_y')
+    marcas_desviacion(fig, np.zeros(3), eyhat, n, color='darkviolet', etiqueta='sigma_yhat')
+    marcas_desviacion(fig, eyhat, ehat, n, color='gray', etiqueta='sigma_e')
+
+    fondo = dict(showbackground=True, backgroundcolor='rgb(235,235,245)',
+                 gridcolor='white', dtick=1, range=[-rango, rango])
+    fig.update_layout(
+        scene=dict(xaxis=fondo, yaxis=fondo, zaxis=fondo, aspectmode='cube'),
+        title=titulo, width=800, height=700,
+        margin=dict(l=0, r=0, b=0, t=40))
+    return fig
+
+def diagrama_dispersion(x, y, mostrar_residuos=False, titulo=""):
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.scatter(x, y, color='seagreen', zorder=3, label='datos (x_i, y_i)')
+    xs = np.linspace(x.min() - 0.5, x.max() + 0.5, 50)
+    ax.plot(xs, beta0 + beta1 * xs, color='crimson',
+            label=f"yhat = {beta0:.2f} + {beta1:.2f}*x")
+    if mostrar_residuos:
+        for xi, yi, yhi in zip(x, y, yhat):
+            ax.plot([xi, xi], [yi, yhi], color='gray',
+                    linestyle='dotted', zorder=2)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_title(titulo)
+    ax.legend()
+    ax.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
+ejemplos = {
+    'canonico': (np.array([1., 2., 3.]), np.array([2., 2., 5.])),
+    'fuerte':   (np.array([1., 2., 3.]), np.array([2., 5., 9.])),
+    'debil':    (np.array([1., 2., 3.]), np.array([5., 1., 6.])),
+}
+#+END_SRC
+
+- Parte 1: el triángulo rectángulo, dentro de $\mathcal{L}(\boldsymbol{1})^\perp$
+
+#+BEGIN_SRC jupyter-python
+x, y = ejemplos['canonico']
+fig = figura_triangulo_R3(x, y, rango=4,
+    titulo="Triangulo rectangulo de la leccion 8, en L(1)^perp")
+fig.show()
+#+END_SRC
+
+#+BEGIN_SRC jupyter-python
+diagrama_dispersion(x, y, mostrar_residuos=True,
+                     titulo="Diagrama de dispersion y recta ajustada")
+#+END_SRC
+
+*/ Comprobación numérica: Pitágoras y $R^2=\cos^2\theta=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$
+
+#+BEGIN_SRC jupyter-python
+yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+ey, _ = vector_en_desviaciones(y)
+eyhat, _ = vector_en_desviaciones(yhat)
+
+sigma_y2 = np.mean(ey ** 2)
+sigma_yhat2 = np.mean(eyhat ** 2)
+sigma_e2 = np.mean(ehat ** 2)
+
+print(f"sigma_y^2                 = {sigma_y2:.4f}")
+print(f"sigma_yhat^2 + sigma_e^2  = {sigma_yhat2 + sigma_e2:.4f}  (Pitagoras)")
+
+cos_theta = np.dot(ey, eyhat) / (np.linalg.norm(ey) * np.linalg.norm(eyhat))
+theta_grados = np.degrees(np.arccos(cos_theta))
+R2 = sigma_yhat2 / sigma_y2
+rho_xy = correlacion(x, y)
+
+print(f"\ntheta = {theta_grados:.2f} grados")
+print(f"cos^2(theta)              = {cos_theta**2:.4f}")
+print(f"R^2 = sigma_yhat^2/sigma_y^2 = {R2:.4f}")
+print(f"rho_xy^2                   = {rho_xy**2:.4f}")
+#+END_SRC
+
+*/ Actividad
+
+Repite ambas celdas con los ejemplos =fuerte= y =debil=. Observa cómo, al pasar de =fuerte= a =debil=, el ángulo $\theta$ se abre hacia $90^o$ y $R^2$ se acerca a $0$ —los “casos extremos” de la lección 8—, y comprueba en cada caso que $R^2=\cos^2\theta=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ sigue cumpliéndose.
+
+- Parte 2: STC, SEC y SRC como áreas de cuadrados
+
+Esta es la representación “de manual”: sobre el mismo diagrama de dispersión, cada sumando de STC, SEC o SRC es el /área de un cuadrado/ cuyo lado es la distancia vertical correspondiente (lección 8, figura de las tres áreas).
+
+#+BEGIN_SRC jupyter-python :results silent
+def _cuadrado(ax, x0, y0, y1, color):
+    """Dibuja, adosado al segmento vertical de (x0,y0) a (x0,y1), un
+    cuadrado de lado |y1-y0|, junto con ese segmento como línea punteada."""
+    lado = abs(y1 - y0)
+    ymin, ymax = min(y0, y1), max(y0, y1)
+    ax.plot([x0, x0], [y0, y1], color='black',
+            linestyle='dotted', linewidth=1, zorder=2)
+    if lado > 1e-9:
+        rect = patches.Rectangle((x0, ymin), lado, lado,
+                                  facecolor=color, alpha=0.35,
+                                  edgecolor=color, zorder=1)
+        ax.add_patch(rect)
+
+def cuadrados_ajuste(x, y, titulo_general=""):
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+    mu_y = y.mean()
+    xs = np.linspace(x.min() - 0.5, x.max() + 0.5, 50)
+
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.3))
+
+    ax = axes[0]
+    ax.scatter(x, y, color='seagreen', zorder=3)
+    ax.axhline(mu_y, color='blue', linewidth=1)
+    for xi, yi in zip(x, y):
+        _cuadrado(ax, xi, mu_y, yi, 'seagreen')
+    ax.set_title("STC = suma (y_i - mu_y)^2")
+    ax.set_xlabel('x'); ax.set_ylabel('y')
+
+    ax = axes[1]
+    ax.scatter(x, y, color='seagreen', zorder=3)
+    ax.plot(xs, beta0 + beta1 * xs, color='crimson', zorder=2)
+    for xi, yi, yhi in zip(x, y, yhat):
+        _cuadrado(ax, xi, yhi, yi, 'gray')
+    ax.set_title("SRC = suma ehat_i^2")
+    ax.set_xlabel('x'); ax.set_ylabel('y')
+
+    ax = axes[2]
+    ax.scatter(x, yhat, color='crimson', zorder=3)
+    ax.axhline(mu_y, color='blue', linewidth=1)
+    ax.plot(xs, beta0 + beta1 * xs, color='crimson', alpha=0.3, zorder=1)
+    for xi, yhi in zip(x, yhat):
+        _cuadrado(ax, xi, mu_y, yhi, 'darkviolet')
+    ax.set_title("SEC = suma (yhat_i - mu_y)^2")
+    ax.set_xlabel('x'); ax.set_ylabel('y')
+
+    fig.suptitle(titulo_general)
+    plt.tight_layout()
+    plt.show()
+
+    STC = np.sum((y - mu_y) ** 2)
+    SRC = np.sum(ehat ** 2)
+    SEC = np.sum((yhat - mu_y) ** 2)
+    print(f"STC = {STC:.4f}   SEC + SRC = {SEC + SRC:.4f}   "
+          f"SEC = {SEC:.4f}   SRC = {SRC:.4f}")
+#+END_SRC
+
+#+BEGIN_SRC jupyter-python
+x, y = ejemplos['canonico']
+cuadrados_ajuste(x, y, titulo_general="STC, SEC y SRC como areas de cuadrados")
+#+END_SRC
+
+*/ Actividad
+
+Repite con el ejemplo =debil=: los cuadrados del panel central (SRC) deberían crecer notablemente respecto a los del panel de la izquierda (STC), reflejando un $R^2$ bajo. Comprueba que la igualdad numérica $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ se sigue cumpliendo exactamente.
+
+- Parte 3: ajuste exacto no es lo mismo que buen ajuste
+
+Retomamos el caso (b) de la Parte 3 del Notebook 2: allí, $\boldsymbol{u}$ era exactamente ortogonal al plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, y MCO recuperaba $\hat\beta_0=\beta_0=2$, $\hat\beta_1=\beta_1=3$ /con total exactitud/. Cabría pensar que, si los coeficientes se recuperan perfectamente, el ajuste también debe ser “perfecto” ($R^2=1$). No es así: recuperar los coeficientes generadores es una propiedad de la /proyección sobre el plano/ (que $\boldsymbol{u}$ no tenga componente dentro de él); que el ajuste sea bueno es una propiedad distinta, sobre el /tamaño/ de lo que queda fuera del plano —el propio $\boldsymbol{u}$, en este caso—.
+
+#+BEGIN_SRC jupyter-python
+x = np.array([1., 2., 3.])
+beta0, beta1 = 2., 3.
+uno = np.ones_like(x)
+u_cero = np.zeros(3)
+u_perp = 2 * np.cross(uno, x)   # el mismo u_b del Notebook 2
+
+for nombre, u in [("u = 0 (sin perturbacion)", u_cero),
+                  ("u ortogonal al plano (perturbacion 'con truco')", u_perp)]:
+    y = beta0 * uno + beta1 * x + u
+    yhat, ehat, beta0_hat, beta1_hat = ajuste_mco_simple(y, x)
+    ey, _ = vector_en_desviaciones(y)
+    eyhat, _ = vector_en_desviaciones(yhat)
+    R2 = np.mean(eyhat ** 2) / np.mean(ey ** 2) if np.mean(ey ** 2) > 0 else float('nan')
+    print(nombre)
+    print(f"   beta0_hat = {beta0_hat:.4f}   beta1_hat = {beta1_hat:.4f}   R^2 = {R2:.4f}\n")
+#+END_SRC
+
+Con $\boldsymbol{u}=\boldsymbol{0}$, $R^2=1$ (ajuste perfecto, hipotenusa y cateto coinciden). Con $\boldsymbol{u}$ ortogonal al plano pero /no/ nulo, $\hat\beta_0,\hat\beta_1$ siguen siendo exactamente $2$ y $3$ —MCO “adivina” los coeficientes generadores—, pero $R^2<1$: hay un residuo real, $\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{u}$, y el ajuste, aunque tiene los coeficientes correctos, no reproduce los datos exactamente.
+
+#+BEGIN_SRC jupyter-python
+y_perp = beta0 * uno + beta1 * x + u_perp
+fig_perp = figura_triangulo_R3(x, y_perp, rango=6,
+    titulo="u ortogonal al plano, pero no nulo: coeficientes exactos, R^2 < 1")
+fig_perp.show()
+#+END_SRC
+
+*/ Actividad
+
+Multiplica =u_perp= por un factor mayor (por ejemplo, =5 * np.cross(uno, x)=) y repite la comparación. Comprueba que $\hat\beta_0,\hat\beta_1$ siguen siendo exactamente $2$ y $3$ —porque la dirección de $\boldsymbol{u}$ no ha cambiado, solo su tamaño—, mientras que $R^2$ disminuye a medida que $\boldsymbol{u}$ crece. Relaciona esta observación con la transparencia “Interpretando $R^2$: casos extremos” de la lección 8.
+
+- Para seguir explorando
+
+- El diccionario =ejemplos= (heredado del Notebook 2) sirve igual aquí: cualquier par $(\boldsymbol{x},\boldsymbol{y})$ con $\boldsymbol{x}$ no constante puede usarse en =figura_triangulo_R3=, =diagrama_dispersion= y =cuadrados_ajuste=.
+- =cuadrados_ajuste= funciona con cualquier ejemplo; pruébalo con los cinco vectores $\boldsymbol{u}$ de la Parte 3 del Notebook 2 para ver, de un vistazo, cómo cambian las tres áreas.
+- La sesión de laboratorio que sigue a la lección 8 comprobará estas mismas identidades ($\sum\hat e_i=0$, $\sum x_i\hat e_i=0$, $R^2$) con datos reales.
+- La lección 9 (“El puente”) retoma la advertencia de la Parte 3 del Notebook 2 —qué le exigimos a $\boldsymbol{u}$— para plantear, ya en el espacio de variables aleatorias, la condición $E[\boldsymbol{U}\mid\boldsymbol{X}]=\boldsymbol{0}$.
+
+- COMMENT ipynb                                                    :noexport:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(require 'ox-ipynb)
+(ox-ipynb-export-org-file-to-ipynb-file "S10-Notebook03.org")
+#+END_SRC
+#+end_src
+
+Un par de aclaraciones sobre decisiones tomadas al escribir:
+
+- En los nombres de trazas/leyendas dentro del código (plotly/matplotlib) he evitado símbolos con acentos combinados (como "ŷ" o "x̄") y he usado siempre texto ASCII plano (=yhat=, =x_barra=, =beta0_hat=...), siguiendo el precedente del Notebook 1, que tampoco usaba LaTeX ni diacríticos dentro de las trazas.
+- En la Parte 3 del Notebook 2 he añadido los dos casos extra que propusiste (d y e), y he verificado a mano (antes de escribir el código) que los cinco vectores $\boldsymbol{u}$ elegidos —$(0,0,0)$, $2(\boldsymbol{1}\times\boldsymbol{x})$, $(-1,0,1)$, $(1,1,-1)$, $(2,-1,3)$— producen exactamente el contraste pedagógico buscado (solo el caso (b) recupera $\beta_0=2,\beta_1=3$ con exactitud).
+
+Estos dos notebooks no estaban en el plan de escritura. ¿Qué cambios sugieres en el plan para incorporar esta novedad?
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Buena observación — tienes razón, ni el primer notebook recibió nunca una entrada "canónica" propia más allá de una mención dentro de la ficha §7.6, ni estos dos nuevos tienen ancla alguna en el Plan. Para no romper la "regla de oro" (§2: cada hecho vive en una sola sección) y mantener el precedente ya establecido (§7.6 ya documenta el Cuaderno 1 como "Notebook asociado" dentro de la ficha de su sesión ancla), propongo:
+
+1. /Fijar la convención de nombres/ en §4.6 (ahora mismo no dice nada sobre =SYY-NotebookNN.org=, solo se puede inferir del propio fichero).
+2. /Centralizar el catálogo/ de los tres cuadernos en una ficha nueva §7.27 (fuera de la numeración de sesiones, mismo estatus que §7.5), en vez de repetir el detalle en cada ficha de sesión ancla — así el detalle vive en un solo sitio y las fichas de sesión solo referencian.
+3. /Añadir un puntero breve/ en las fichas §7.6 (Cuaderno 1, ya existente, se amplía para apuntar hacia adelante), §7.10 (Cuaderno 2) y §7.11 (Cuaderno 3).
+
+No creo que haga falta tocar §7.0 (cronograma, los cuadernos no son sesiones evaluables, igual que §7.5) ni §10 (semillas): los cuadernos son refuerzo visual de resultados ya sembrados/cobrados en las lecciones, no introducen ni cobran promesas nuevas.
+
+Aquí tienes los bloques listos para pegar:
+
+#+begin_src org
+ACTUALIZACIÓN DEL MANUAL
+
+* En §4.6 (Nomenclatura de ficheros y carpetas), añadir un nuevo bullet:
+
+- /Cuadernos electrónicos interactivos (notebooks)/: =SYY-NotebookNN.org=,
+  en la carpeta =CuadernosElectronicos/= (no =org-lessons/=). =YY= ancla el
+  cuaderno a la sesión con la que dialoga más directamente (no tiene por qué
+  coincidir con el =YY= de la lección teórica que lo inspira, si difieren);
+  =NN= es un contador secuencial propio de la serie de cuadernos,
+  independiente de la numeración de sesiones. Son material complementario
+  interactivo (Plotly + Jupyter), fuera de la numeración evaluable de §7.0.
+  Catálogo completo en §7.27.
+
+* Nueva ficha §7.27 (al final de §7, tras §7.26):
+
+** 7.27 Ficha — Catálogo de cuadernos electrónicos interactivos (fuera de la numeración de sesiones)
+- /Estado/: sección de referencia rápida; el detalle de cada cuaderno vive en
+  su propio fichero =.org= (regla de oro, §2). Estatus "fuera de numeración"
+  análogo al de la práctica adicional de §7.5.
+- /Naturaleza/: cuadernos Jupyter (Plotly interactivo + Matplotlib estático)
+  que dan soporte visual, en $\mathbb{R}^3$, a construcciones YA demostradas
+  en su lección ancla. No introducen contenido evaluable nuevo.
+- /Convención de nombres/: ver §4.6.
+- /Cuaderno 1/ — =S05-Notebook01.org=. Ancla: sesión 5 (lección 4).
+  Proyección ortogonal sobre $\mathcal{L}(\boldsymbol{1})$: media como
+  proyección, desviación típica, y (con dos vectores) correlación como
+  coseno. Referenciado desde la ficha §7.6.
+- /Cuaderno 2/ — =S09-Notebook02.org=. Ancla: sesión 9 (lección 7).
+  Proyección sobre $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$: ajuste y
+  residuo con diagrama de dispersión gemelo (Parte 1); vectores en
+  desviaciones dentro de $\mathcal{L}(\boldsymbol{1})^\perp$ y la identidad
+  guardada
+  $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}=\hat\beta_1(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})$
+  (Parte 2); cinco variantes del vector generador $\boldsymbol{u}$ (ortogonal
+  a ambos regresores / solo a uno / a ninguno), contrastando recuperación
+  exacta vs. aproximada de $\beta_0,\beta_1$ — anticipo visual, sin
+  nombrarla con ese rigor, de la condición $E[\boldsymbol U\mid\boldsymbol
+  X]=\boldsymbol 0$ que se formalizará en la sesión 12 (Parte 3). Funciones
+  reutilizables: =ajuste_mco_simple=,
+  =base_ortonormal_gram_schmidt=/=plano_generado= (plano genérico
+  $\mathcal{L}(\boldsymbol a,\boldsymbol b)$ con generadores no ortogonales
+  entre sí), =diagrama_dispersion= (matplotlib). Referenciado desde la ficha
+  §7.10.
+- /Cuaderno 3/ — =S10-Notebook03.org=. Ancla: sesión 10 (lección 8).
+  Continúa el Cuaderno 2 (reutiliza su Parte 2): triángulo rectángulo de
+  Pitágoras dentro de $\mathcal{L}(\boldsymbol{1})^\perp$, ángulo $\theta$ y
+  $R^2=\cos^2\theta=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ (Parte 1); áreas de
+  cuadrados STC/SEC/SRC sobre el diagrama de dispersión clásico, vía
+  matplotlib (Parte 2); contraste "ajuste exacto no es lo mismo que buen
+  ajuste", reutilizando el caso de $\boldsymbol u$ ortogonal a los regresores
+  del Cuaderno 2 (Parte 3). Referenciado desde la ficha §7.11.
+- /Pendiente/: si se escriben cuadernos adicionales (p. ej. para regresión
+  múltiple, sesión 13), añadir su entrada aquí y su referencia cruzada en la
+  ficha de la sesión ancla correspondiente.
+
+* En la ficha §7.6 (Sesión 5), en el bullet existente "Notebook asociado",
+  añadir al final la frase:
+
+  La serie continúa con el Cuaderno 2 (=S09-Notebook02.org=, sesión 9) y el
+  Cuaderno 3 (=S10-Notebook03.org=, sesión 10); catálogo completo en §7.27.
+
+* En la ficha §7.10 (Sesión 9), añadir un nuevo bullet:
+
+- /Notebook asociado/: =S09-Notebook02.org= (Cuaderno 2). Detalle completo en
+  el catálogo, §7.27.
+
+* En la ficha §7.11 (Sesión 10), añadir un nuevo bullet:
+
+- /Notebook asociado/: =S10-Notebook03.org= (Cuaderno 3, continúa el Cuaderno 2). Detalle completo en el catálogo, §7.27.
+#+end_src
+
+No propongo tocar §7.0 ni §10: el cronograma solo registra sesiones evaluables (los cuadernos, como la práctica de dispersión de §7.5, quedan fuera), y estos dos cuadernos no siembran ni cobran ninguna promesa nueva — solo dan soporte visual a resultados ya registrados en §10 para las sesiones 7 y 8.
+
+Te copio el primer notebook con cambios en cómo se marcan las secciones ( * ) y subsecciones ( *** ) y que tu versión no ha respetado.
+#+begin_src emacs-lisp :results silent
+(setq-local gptel-context
+            (list "../../CuadernosElectronicos/S09-Notebook02.org"))
+#+end_src
+Tengo varios comentarios respecto al notebook:
+1. Para generar la base ortonormal del plano L(1,x) hemos usado gram schmidt (pero me he acordado que en la lección 6 ya vimos una forma de generar ese plano con vectores ortogonales: restando a x su vector de medias). Creo que sería más didáctico usar lo visto en clase.
+2. En la leyenda del primer gráfico no se ve L(x), y el color elegido para beta0*1 casi no se ve. Tampoco se ven las guías que van de beta0*1 y de beta1*x a yhat (sería mejor pintarlas un poco más gruesas)
+3. Respecto a la figura de la parte 2. Creo que ayudaría a entender el gráfico ver L(1) en azul (perpendicular al plano). Esto permitiría al usuario poner la primera figura en la misma posición que esta otra, para ver que coinciden al mirar en la dirección de L(1)
+4. En la figura de la parte 3 ocurre lo mismo que en la primera figura: no se ven las guías ni L(x) en la leyenda. Otra cosa que ayudaría es ver marcas en la dirección de L(x) que permitan contar cuantas unidades de x hay que desplazarse por esa recta para llegar a un punto concreto.
+
+No sé si me he explicado. Si tienes dudas (o no puedes leer S09-Notebook02.org) dímelo
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Tienes toda la razón: mi versión usó =-= para las secciones y =*/ = (sintaxis inválida de org) para las subsecciones, en vez de =*= y =***= como en el original. Gracias por la corrección — la aplico ya en todo el fichero.
+
+Sobre tus cuatro comentarios, así los he resuelto:
+
+1. *Base del plano vía lección 6*: sustituyo Gram-Schmidt genérico por la construcción ya vista en clase: $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})=\mathcal{L}(\boldsymbol{1},\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$, y como el vector en desviaciones ya es ortogonal a $\boldsymbol{1}$, basta normalizar cada uno. Nueva función =base_ortonormal_L1x(x)= (sin Gram-Schmidt) y =plano_L1x(fig, x, rango, color)=.
+2. Corrijo =eje_generado= (=showlegend=True=, ahora aparece "L(x)" en la leyenda), cambio el color de $\hat\beta_0\boldsymbol{1}$ de =steelblue= a =darkorange= (se confundía visualmente con el propio $\mathcal{L}(\boldsymbol{1})$ azul, ¡porque literalmente vive sobre esa recta!), y engroso/oscurezco las guías (=dimgray=, ancho 5).
+3. Añado =recta_L1(fig, rango=rango)= dentro de =figura_desviaciones_R3=, con una frase explícita invitando a alinear ambas figuras.
+4. Añado marcas graduadas sobre $\mathcal{L}(\boldsymbol{x})$ (nueva función =marcas_eje=, análoga a =marcas_unitarias_L1= pero para un vector genérico), y se benefician automáticamente tanto la Parte 1 como la Parte 3, al ser la misma función =figura_ajuste_R3=.
+
+Aquí está el fichero completo revisado:
+
+#+begin_src org
+#    -*- mode: org -*-
+
+#+TITLE: Notebook 2. Proyección ortogonal sobre $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ en $\mathbb{R}^3$
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+
+#+LATEX_HEADER: \usepackage{polyglossia}
+#+LATEX_HEADER: \setmainlanguage{spanish}
+
+#+LATEX: \maketitle
+
+#+BEGIN_SRC emacs-lisp :exports none :results silent
+(use-package ox-ipynb
+  :load-path (lambda () (expand-file-name "ox-ipynb" scimax-dir)))
+#+END_SRC
+
+#+begin_abstract
+Visualización interactiva en $\mathbb{R}^3$ de la regresión lineal simple (lección 7): el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, el ajuste $\boldsymbol{\mathop{\widehat{y}}}$ y su residuo $\boldsymbol{\mathop{\widehat{e}}}$, la identidad que relaciona los vectores en desviaciones del ajuste y del regresor, y qué le exigimos exactamente al vector generador $\boldsymbol{u}$ para que MCO recupere los coeficientes verdaderos. Complemento de las lecciones 6 y 7.
+#+end_abstract
+
+- ([[https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?labpath=CuadernosElectronicos/S09-Notebook02.ipynb][mybinder]])
+
+- Introducción
+
+Este cuaderno retoma la construcción del primer cuaderno (proyección sobre $\mathcal{L}(\boldsymbol{1})$, lección 4) y añade la pieza que introducen las lecciones 6 y 7: un /segundo/ vector generador, $\boldsymbol{x}$. Ya no proyectamos sobre una recta, sino sobre el /plano/ $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$.
+
+Seguimos trabajando en $\mathbb{R}^3$ ($n=3$ observaciones) para poder dibujar la escena, pero conviene señalar desde el principio una diferencia geométrica importante respecto al primer cuaderno: allí, con un solo generador $\boldsymbol{1}$, el complemento ortogonal $\mathcal{L}(\boldsymbol{1})^\perp$ era un /plano/ (dimensión 2) dentro de $\mathbb{R}^3$. Aquí, con /dos/ generadores ($\boldsymbol{1}$ y $\boldsymbol{x}$), el complemento ortogonal $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$ es una /recta/ (dimensión 1): solo queda una dirección posible para el residuo. Esta observación será la clave de la Parte 3.
+
+Podrás, como en el primer cuaderno, rotar las figuras con el ratón y editar los vectores en las celdas de código para crear tus propios ejemplos. Además, junto a cada figura 3D verás su gemela: el diagrama de dispersión clásico $(x_i,y_i)$ con la recta ajustada, para no perder de vista la lectura “de manual” de lo mismo.
+
+- Herramientas auxiliares
+
+*/ Módulos y configuración
+
+Como en el primer cuaderno, usamos =numpy= y =plotly= para la geometría en $\mathbb{R}^3$; añadimos =matplotlib= para el diagrama de dispersión clásico (estático: aquí no hay ningún ángulo que rotar).
+
+#+BEGIN_SRC jupyter-python :results silent
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+import matplotlib.pyplot as plt
+
+pio.renderers.default = "notebook"
+#+END_SRC
+
+*/ El ajuste MCO de la regresión simple (lección 7)
+
+Esta es la única pieza puramente algebraica del cuaderno: las fórmulas de $\hat\beta_0$ y $\hat\beta_1$ obtenidas en la lección 7 a partir de las dos condiciones de ortogonalidad. Añadimos también, como en el primer cuaderno, el vector de medias y el vector en desviaciones (lección 4), que necesitaremos para las Partes 2 y 3.
+
+#+BEGIN_SRC jupyter-python :results silent
+def ajuste_mco_simple(y, x):
+    """Ajuste MCO de la regresión simple y = beta0 + beta1*x (lección 7).
+    Devuelve (yhat, ehat, beta0, beta1)."""
+    y = np.asarray(y, dtype=float)
+    x = np.asarray(x, dtype=float)
+    mu_x = x.mean()
+    mu_y = y.mean()
+    sigma_x2 = np.mean((x - mu_x) ** 2)
+    sigma_xy = np.mean((x - mu_x) * (y - mu_y))
+    beta1 = sigma_xy / sigma_x2
+    beta0 = mu_y - beta1 * mu_x
+    yhat = beta0 + beta1 * x
+    ehat = y - yhat
+    return yhat, ehat, beta0, beta1
+
+def vector_de_medias(v):
+    """Devuelve (vector_de_medias, mu): el vector constante mu*1 y el
+    escalar mu = media aritmética de las componentes de v."""
+    v = np.asarray(v, dtype=float)
+    mu = v.mean()
+    return np.full(v.shape, mu), mu
+
+def vector_en_desviaciones(v):
+    """Devuelve (v - vector_de_medias(v), mu)."""
+    v = np.asarray(v, dtype=float)
+    vbar, mu = vector_de_medias(v)
+    return v - vbar, mu
+#+END_SRC
+
+*/ Bases ortonormales: el plano fijo $\mathcal{L}(\boldsymbol{1})^\perp$ y el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$
+
+Necesitamos dos construcciones distintas, y en ninguna de las dos hace falta ningún proceso de Gram-Schmidt genérico. La primera, ya usada en el primer cuaderno, es una base ortonormal /fija/ del plano $\mathcal{L}(\boldsymbol{1})^\perp$ (no depende de $\boldsymbol{x}$; la reutilizaremos en la Parte 2).
+
+La segunda es la base del plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, y aquí reciclamos directamente lo visto en la lección 6: como $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})=\mathcal{L}(\boldsymbol{1},\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})$, y el vector en desviaciones $\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}$ es /automáticamente/ ortogonal a $\boldsymbol{1}$ (tiene media cero, lección 4), no necesitamos ningún truco adicional: basta normalizar cada uno de estos dos generadores ya ortogonales entre sí.
+
+#+BEGIN_SRC jupyter-python :results silent
+def base_plano_ortogonal():
+    """Base ortonormal (u1, u2) del plano L(1)^perp en R^3 (fija)."""
+    uno = np.array([1., 1., 1.]) / np.sqrt(3)
+    u1 = np.array([1., -1., 0.])
+    u1 = u1 / np.linalg.norm(u1)
+    u2 = np.cross(uno, u1)
+    u2 = u2 / np.linalg.norm(u2)
+    return u1, u2
+
+def base_ortonormal_L1x(x):
+    """Base ortonormal (u1, u2) del plano L(1,x), reutilizando la lección 6:
+    L(1,x) = L(1, x - x_barra), y x - x_barra ya es ortogonal a 1 (media
+    cero). Basta normalizar cada generador; no hace falta Gram-Schmidt."""
+    x = np.asarray(x, dtype=float)
+    n = len(x)
+    u1 = np.ones(n) / np.sqrt(n)
+    ex, _ = vector_en_desviaciones(x)
+    u2 = ex / np.linalg.norm(ex)
+    return u1, u2
+#+END_SRC
+
+*/ Funciones de dibujo
+
+Reutilizamos (redefiniéndolas, pues este cuaderno es un fichero independiente) las funciones del primer cuaderno para dibujar $\mathcal{L}(\boldsymbol{1})$ con sus marcas graduadas y para colocar vectores y segmentos. Añadimos varias piezas nuevas: un eje genérico con sus propias marcas graduadas (para dibujar $\mathcal{L}(\boldsymbol{x})$, el segundo generador del plano, y poder "contar" cuántas veces hay que desplazarse por él), el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (usando la base de la lección 6), y una función que dibuja las dos componentes del ajuste, $\hat\beta_0\boldsymbol{1}$ y $\hat\beta_1\boldsymbol{x}$, junto con el paralelogramo que las suma en $\boldsymbol{\mathop{\widehat{y}}}$ (la misma idea que en la figura de las lecciones 6-7, ahora interactiva).
+
+#+BEGIN_SRC jupyter-python :results silent
+def marcas_unitarias_L1(fig, rango=4, color='blue'):
+    """Marcas sobre L(1), una por cada valor entero de la media."""
+    uno = np.array([1., 1., 1.])
+    ks = np.arange(-rango, rango + 1)
+    puntos = np.outer(ks, uno)
+    fig.add_trace(go.Scatter3d(
+        x=puntos[:, 0], y=puntos[:, 1], z=puntos[:, 2],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol='cross'),
+        text=[f"mu = {k}" for k in ks],
+        hoverinfo='text', showlegend=False))
+
+def marcas_eje(fig, v, rango=4, color='black', etiqueta='k'):
+    """Marcas sobre la recta L(v), una por cada múltiplo entero de v (el
+    análogo, para un vector genérico v, de marcas_unitarias_L1): permiten
+    'contar', desplazándose sobre la recta, cuántas veces hay que sumar
+    (o restar) v para llegar a un punto dado de esa recta."""
+    v = np.asarray(v, dtype=float)
+    norma_v = np.linalg.norm(v)
+    if norma_v < 1e-12:
+        return
+    kmax = int(np.floor(rango / norma_v + 1e-9))
+    ks = np.arange(-kmax, kmax + 1)
+    puntos = np.outer(ks, v)
+    fig.add_trace(go.Scatter3d(
+        x=puntos[:, 0], y=puntos[:, 1], z=puntos[:, 2],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol='cross'),
+        text=[f"{etiqueta} = {k}" for k in ks],
+        hoverinfo='text', showlegend=False))
+
+def marcas_desviacion(fig, base, e, n, color, etiqueta='sigma'):
+    """Marcas sobre el segmento base -> base+e, espaciadas de modo que
+    cada marca sucesiva corresponde a un incremento de 1 en sigma (norma
+    ESTADÍSTICA de e); ver primer cuaderno para el detalle geométrico."""
+    norma_euclidea_e = np.linalg.norm(e)
+    if norma_euclidea_e < 1e-12:
+        return
+    sigma = norma_euclidea_e / np.sqrt(n)
+    u_e = e / norma_euclidea_e
+    paso_euclideo = np.sqrt(n)
+    kmax = int(np.floor(sigma + 1e-9))
+    ks = np.arange(0, kmax + 1)
+    puntos = base + np.outer(ks, u_e * paso_euclideo)
+    fig.add_trace(go.Scatter3d(
+        x=puntos[:, 0], y=puntos[:, 1], z=puntos[:, 2],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol='cross'),
+        text=[f"{etiqueta} = {k}" for k in ks],
+        hoverinfo='text', showlegend=False))
+
+def recta_L1(fig, rango=4, color='blue'):
+    """Dibuja L(1) con sus marcas graduadas (una por unidad de mu)."""
+    t = np.linspace(-rango, rango, 2)
+    fig.add_trace(go.Scatter3d(
+        x=t, y=t, z=t, mode='lines',
+        line=dict(color=color, width=5), name='L(1)'))
+    marcas_unitarias_L1(fig, rango=rango, color=color)
+
+def eje_generado(fig, v, rango=4, color='black', nombre=''):
+    """Dibuja la recta L(v) que pasa por el origen en la dirección de v
+    (sin marcas graduadas por defecto: ver marcas_eje para añadirlas)."""
+    v = np.asarray(v, dtype=float)
+    v_unit = v / np.linalg.norm(v)
+    t = np.linspace(-rango, rango, 2)
+    pts = np.outer(t, v_unit)
+    fig.add_trace(go.Scatter3d(
+        x=pts[:, 0], y=pts[:, 1], z=pts[:, 2],
+        mode='lines', line=dict(color=color, width=3),
+        name=nombre, hoverinfo='skip', showlegend=True))
+
+def plano_ortogonal(fig, rango=4, color='lightslategray'):
+    """Parche + rejilla de L(1)^perp (fijo)."""
+    u1, u2 = base_plano_ortogonal()
+    S, T = np.meshgrid([-rango, rango], [-rango, rango])
+    X = S * u1[0] + T * u2[0]
+    Y = S * u1[1] + T * u2[1]
+    Z = S * u1[2] + T * u2[2]
+    fig.add_trace(go.Surface(
+        x=X, y=Y, z=Z, showscale=False, opacity=0.12,
+        colorscale=[[0, color], [1, color]], hoverinfo='skip'))
+    for s in range(-rango, rango + 1):
+        p0 = s * u1 - rango * u2
+        p1 = s * u1 + rango * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+    for t in range(-rango, rango + 1):
+        p0 = -rango * u1 + t * u2
+        p1 = rango * u1 + t * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+
+def plano_L1x(fig, x, rango=4, color='lightslategray'):
+    """Parche + rejilla de L(1,x), usando la base ortonormal de la lección
+    6 (1 y el vector en desviaciones de x)."""
+    u1, u2 = base_ortonormal_L1x(x)
+    S, T = np.meshgrid([-rango, rango], [-rango, rango])
+    X = S * u1[0] + T * u2[0]
+    Y = S * u1[1] + T * u2[1]
+    Z = S * u1[2] + T * u2[2]
+    fig.add_trace(go.Surface(
+        x=X, y=Y, z=Z, showscale=False, opacity=0.12,
+        colorscale=[[0, color], [1, color]], hoverinfo='skip'))
+    for s in range(-rango, rango + 1):
+        p0 = s * u1 - rango * u2
+        p1 = s * u1 + rango * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+    for t in range(-rango, rango + 1):
+        p0 = -rango * u1 + t * u2
+        p1 = rango * u1 + t * u2
+        fig.add_trace(go.Scatter3d(
+            x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+            mode='lines', line=dict(color='gray', width=1),
+            showlegend=False, hoverinfo='skip'))
+
+def agrega_vector(fig, punto, color='crimson', nombre='v', dash='solid'):
+    """Vector desde el origen hasta 'punto' (línea + marcador en la punta)."""
+    punto = np.asarray(punto, dtype=float)
+    fig.add_trace(go.Scatter3d(
+        x=[0, punto[0]], y=[0, punto[1]], z=[0, punto[2]],
+        mode='lines+markers',
+        line=dict(color=color, width=6, dash=dash),
+        marker=dict(size=[0, 5], color=color), name=nombre))
+
+def agrega_segmento(fig, p0, p1, color='gray', width=3, dash='dot'):
+    """Segmento discontinuo entre dos puntos."""
+    fig.add_trace(go.Scatter3d(
+        x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+        mode='lines', line=dict(color=color, width=width, dash=dash),
+        showlegend=False, hoverinfo='skip'))
+
+def agrega_componentes_ajuste(fig, beta0, beta1, x, yhat):
+    """Dibuja beta0*1 y beta1*x, y los segmentos punteados del
+    paralelogramo que, sumados, reconstruyen yhat."""
+    x = np.asarray(x, dtype=float)
+    uno = np.ones_like(x)
+    comp0 = beta0 * uno
+    comp1 = beta1 * x
+    agrega_vector(fig, comp0, color='darkorange', nombre='beta0*1', dash='dot')
+    agrega_vector(fig, comp1, color='sienna', nombre='beta1*x', dash='dot')
+    agrega_segmento(fig, comp0, yhat, color='dimgray', width=5, dash='dash')
+    agrega_segmento(fig, comp1, yhat, color='dimgray', width=5, dash='dash')
+#+END_SRC
+
+*/ Las dos figuras compuestas: el ajuste en $\mathbb{R}^3$ y su gemela en 2D
+
+La primera función compone toda la escena del ajuste: el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (con sus dos ejes, oblicuos entre sí), el vector de datos $\boldsymbol{y}$, el ajuste $\boldsymbol{\mathop{\widehat{y}}}$, el residuo $\boldsymbol{\mathop{\widehat{e}}}$ (con su regla graduada, como en el primer cuaderno) y, opcionalmente, las dos componentes $\hat\beta_0\boldsymbol{1}$ y $\hat\beta_1\boldsymbol{x}$. La segunda es su gemela clásica: el diagrama de dispersión $(x_i,y_i)$ con la recta ajustada $\hat y=\hat\beta_0+\hat\beta_1 x$.
+
+#+BEGIN_SRC jupyter-python :results silent
+def figura_ajuste_R3(x, y, rango=5, titulo="", mostrar_componentes=True):
+    """Compone la escena: L(1), el eje L(x) con sus marcas, el plano
+    L(1,x), el vector y, el ajuste yhat, el residuo ehat y (opcionalmente)
+    sus dos componentes sobre los generadores del plano."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    n = len(x)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+
+    fig = go.Figure()
+    recta_L1(fig, rango=rango)
+    eje_generado(fig, x, rango=rango, color='black', nombre='L(x)')
+    marcas_eje(fig, x, rango=rango, color='black', etiqueta='k (punto = k*x)')
+    plano_L1x(fig, x, rango=rango)
+
+    agrega_vector(fig, y, color='seagreen', nombre='y')
+    agrega_vector(fig, yhat, color='crimson', nombre='yhat')
+    agrega_segmento(fig, yhat, y, color='gray')
+    marcas_desviacion(fig, yhat, ehat, n, color='gray', etiqueta='sigma_e')
+
+    if mostrar_componentes:
+        agrega_componentes_ajuste(fig, beta0, beta1, x, yhat)
+
+    fondo = dict(showbackground=True, backgroundcolor='rgb(235,235,245)',
+                 gridcolor='white', dtick=1, range=[-rango, rango])
+    fig.update_layout(
+        scene=dict(xaxis=fondo, yaxis=fondo, zaxis=fondo, aspectmode='cube'),
+        title=titulo, width=800, height=700,
+        margin=dict(l=0, r=0, b=0, t=40))
+    return fig
+
+def diagrama_dispersion(x, y, mostrar_residuos=False, titulo=""):
+    """Diagrama de dispersión clásico, con la recta MCO ajustada y,
+    opcionalmente, los residuos como segmentos verticales discontinuos."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.scatter(x, y, color='seagreen', zorder=3, label='datos (x_i, y_i)')
+    xs = np.linspace(x.min() - 0.5, x.max() + 0.5, 50)
+    ax.plot(xs, beta0 + beta1 * xs, color='crimson',
+            label=f"yhat = {beta0:.2f} + {beta1:.2f}*x")
+    if mostrar_residuos:
+        for xi, yi, yhi in zip(x, y, yhat):
+            ax.plot([xi, xi], [yi, yhi], color='gray',
+                    linestyle='dotted', zorder=2)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_title(titulo)
+    ax.legend()
+    ax.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+#+END_SRC
+
+*/ Ejemplos para explorar
+
+Un pequeño diccionario de pares $(\boldsymbol{x},\boldsymbol{y})$ con distinta fuerza de relación: =canonico= es el ejemplo de la lección 5 ($\rho_{\boldsymbol{x}\boldsymbol{y}}=\sqrt3/2$); =fuerte= tiene una correlación muy alta; =debil=, muy baja. Cámbialos, o añade el tuyo, para repetir cualquier actividad del cuaderno con otros datos.
+
+#+BEGIN_SRC jupyter-python :results silent
+ejemplos = {
+    'canonico': (np.array([1., 2., 3.]), np.array([2., 2., 5.])),
+    'fuerte':   (np.array([1., 2., 3.]), np.array([2., 5., 9.])),
+    'debil':    (np.array([1., 2., 3.]), np.array([5., 1., 6.])),
+}
+#+END_SRC
+
+- Parte 1: el ajuste y su residuo
+
+Elegimos un ejemplo y dibujamos la escena completa: el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (nota, al rotar la figura, que sus dos ejes —$\mathcal{L}(\boldsymbol{1})$ en azul y $\mathcal{L}(\boldsymbol{x})$ en negro— son oblicuos, no perpendiculares, exactamente como advertía la lección 6), el vector de datos $\boldsymbol{y}$, su ajuste $\boldsymbol{\mathop{\widehat{y}}}$, y el residuo $\boldsymbol{\mathop{\widehat{e}}}$ como el segmento perpendicular al plano que los conecta. Fíjate en las marcas negras sobre $\mathcal{L}(\boldsymbol{x})$: cada una indica, al pasar el ratón por encima, cuántas veces $\boldsymbol{x}$ hay que sumar (con signo) para llegar a ese punto de la recta —igual que las marcas azules sobre $\mathcal{L}(\boldsymbol{1})$ indican el valor de $\mu$, pero aquí sin traducción a ningún estadístico, pues la escala de $\boldsymbol{x}$ es arbitraria—. Fíjate también en las líneas grises discontinuas que unen $\hat\beta_0\boldsymbol{1}$ (naranja) y $\hat\beta_1\boldsymbol{x}$ (siena) con la punta de $\boldsymbol{\mathop{\widehat{y}}}$: son los dos lados del paralelogramo cuya suma reconstruye el ajuste.
+
+#+BEGIN_SRC jupyter-python
+x, y = ejemplos['canonico']
+fig = figura_ajuste_R3(x, y, rango=5, titulo="Ajuste de y sobre L(1,x)")
+fig.show()
+#+END_SRC
+
+Junto a la figura 3D, su diagrama de dispersión gemelo: los mismos tres puntos $(x_i,y_i)$, ahora en el plano, con la recta de mínimos cuadrados y los residuos como segmentos verticales discontinuos (la misma información que el segmento gris de la figura 3D, vista “desde otro ángulo”, literalmente).
+
+#+BEGIN_SRC jupyter-python
+diagrama_dispersion(x, y, mostrar_residuos=True,
+                     titulo="Diagrama de dispersión y recta ajustada")
+#+END_SRC
+
+*/ Comprobación numérica: las dos ortogonalidades de la lección 7
+
+#+BEGIN_SRC jupyter-python
+yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+print(f"beta0_hat = {beta0:.4f}   beta1_hat = {beta1:.4f}")
+print(f"suma de residuos (debe ser 0):      {ehat.sum():.10f}")
+print(f"producto residuos . x (debe ser 0): {np.dot(ehat, x):.10f}")
+#+END_SRC
+
+*/ Actividad
+
+Cambia al ejemplo =fuerte= o =debil= (o crea el tuyo) y vuelve a ejecutar las tres celdas anteriores. Observa cómo cambia la /longitud/ del segmento gris (el residuo) y compárala con lo que verás en el diagrama de dispersión: cuanto más “pegados” estén los puntos a la recta, más corto será ese segmento.
+
+- Parte 2: los vectores en desviaciones, en $\mathcal{L}(\boldsymbol{1})^\perp$
+
+Recordemos la identidad guardada en la lección 7: el vector en desviaciones del ajuste coincide exactamente con el de $\hat\beta_1\boldsymbol{x}$,
+\[
+\boldsymbol{\mathop{\widehat{y}}} - \boldsymbol{\mathop{\overline{y}}} \;=\; \hat\beta_1\big(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}\big).
+\]
+Como los tres vectores en desviaciones ($\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}$, $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$, $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$) tienen media cero, los tres viven dentro del mismo plano $\mathcal{L}(\boldsymbol{1})^\perp$ que usamos en el primer cuaderno. Podemos, por tanto, trasladarlos todos al origen y dibujarlos juntos.
+
+Añadimos también, en azul, la propia recta $\mathcal{L}(\boldsymbol{1})$: aunque no pertenece a este plano —es, de hecho, /perpendicular/ a él—, sirve como referencia para orientar la figura. Si giras esta figura hasta que $\mathcal{L}(\boldsymbol{1})$ apunte directamente hacia ti (saliendo de la pantalla), estarás mirando el plano $\mathcal{L}(\boldsymbol{1})^\perp$ "de frente"; intenta poner la figura de la Parte 1 en esa misma orientación y comprueba que ambas coinciden.
+
+#+BEGIN_SRC jupyter-python
+def figura_desviaciones_R3(x, y, rango=4, titulo=""):
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    n = len(x)
+    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+    ex, mu_x = vector_en_desviaciones(x)
+    ey, mu_y = vector_en_desviaciones(y)
+    eyhat, mu_yhat = vector_en_desviaciones(yhat)
+
+    fig = go.Figure()
+    recta_L1(fig, rango=rango)
+    plano_ortogonal(fig, rango=rango)
+    agrega_vector(fig, ex, color='black', nombre='x - x_barra', dash='dash')
+    agrega_vector(fig, ey, color='yellowgreen', nombre='y - y_barra')
+    agrega_vector(fig, eyhat, color='darkviolet',
+                  nombre='yhat - y_barra', dash='dash')
+
+    marcas_desviacion(fig, np.zeros(3), ex, n, color='black', etiqueta='sigma_x')
+    marcas_desviacion(fig, np.zeros(3), ey, n, color='yellowgreen', etiqueta='sigma_y')
+    marcas_desviacion(fig, np.zeros(3), eyhat, n, color='darkviolet', etiqueta='sigma_yhat')
+
+    fondo = dict(showbackground=True, backgroundcolor='rgb(235,235,245)',
+                 gridcolor='white', dtick=1, range=[-rango, rango])
+    fig.update_layout(
+        scene=dict(xaxis=fondo, yaxis=fondo, zaxis=fondo, aspectmode='cube'),
+        title=titulo, width=800, height=700,
+        margin=dict(l=0, r=0, b=0, t=40))
+    return fig
+
+x, y = ejemplos['canonico']
+fig2 = figura_desviaciones_R3(x, y, rango=4,
+                               titulo="Vectores en desviaciones en L(1)^perp")
+fig2.show()
+#+END_SRC
+
+Rota la figura hasta ver los tres vectores “de perfil”: los vectores negro discontinuo ($\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}}$) y violeta discontinuo ($\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$) deben verse sobre la misma recta (misma dirección, o dirección opuesta si $\hat\beta_1<0$); el verde ($\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$), en cambio, forma con ellos el ángulo $\theta$ que protagonizará el próximo cuaderno.
+
+*/ Comprobación numérica
+
+#+BEGIN_SRC jupyter-python
+ex, _ = vector_en_desviaciones(x)
+eyhat, _ = vector_en_desviaciones(yhat)
+print("yhat - y_barra:       ", np.round(eyhat, 4))
+print("beta1 * (x - x_barra):", np.round(beta1 * ex, 4))
+print("¿son el mismo vector? ", np.allclose(eyhat, beta1 * ex))
+#+END_SRC
+
+*/ Actividad
+
+Repite esta figura con el ejemplo =debil=. Fíjate en el ángulo entre el vector verde y el violeta/negro: debería verse mucho más abierto que con el ejemplo =canonico=. Este ángulo, y su coseno al cuadrado, serán exactamente el $R^2$ del próximo cuaderno.
+
+- Parte 3: ¿qué necesitamos exactamente de $\boldsymbol{u}$?
+
+Como en la lección 7, imaginemos que los datos $\boldsymbol{y}$ se generaron según $\boldsymbol{y}=\beta_0\boldsymbol{1}+\beta_1\boldsymbol{x}+\boldsymbol{u}$, con $\beta_0,\beta_1$ conocidos por nosotros (el diseñador del experimento) pero /no/ por MCO, que solo ve $\boldsymbol{y}$ y $\boldsymbol{x}$. /Advertencia/ (§8 del plan del curso): $\boldsymbol{u}$ es el vector generador de la perturbación, y no debe confundirse con el vector de residuos $\boldsymbol{\mathop{\widehat{e}}}$ que MCO calcula a partir de los datos.
+
+En $\mathbb{R}^3$ con dos regresores, $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$ es una única /recta/ (recordemos la introducción): solo hay una dirección posible para que $\boldsymbol{u}$ quede /enteramente/ fuera del plano. Vamos a comparar cinco vectores $\boldsymbol{u}$ distintos y ver, en cada caso, si MCO recupera $\beta_0,\beta_1$ exactamente.
+
+#+BEGIN_SRC jupyter-python
+def experimento_u(x, beta0, beta1, u, nombre=""):
+    """Genera y = beta0*1 + beta1*x + u, ajusta MCO y devuelve un dict
+    con los resultados, listo para comparar con los valores verdaderos."""
+    x = np.asarray(x, dtype=float)
+    u = np.asarray(u, dtype=float)
+    uno = np.ones_like(x)
+    y = beta0 * uno + beta1 * x + u
+    yhat, ehat, beta0_hat, beta1_hat = ajuste_mco_simple(y, x)
+    return dict(nombre=nombre, u=u, y=y, yhat=yhat, ehat=ehat,
+                beta0_hat=beta0_hat, beta1_hat=beta1_hat,
+                suma_u=float(u.sum()), producto_u_x=float(np.dot(u, x)))
+
+def resumen(res):
+    print(f"{res['nombre']:42s} "
+          f"sum(u)={res['suma_u']:+6.2f}  u.x={res['producto_u_x']:+6.2f}   "
+          f"beta0_hat={res['beta0_hat']:+7.4f}  beta1_hat={res['beta1_hat']:+7.4f}")
+#+END_SRC
+
+Fijamos $\boldsymbol{x}=(1,2,3)$ y los valores verdaderos $\beta_0=2,\beta1=3$ (el mismo ejemplo, en espíritu, que el de la lección 7). El truco para encontrar la /única/ dirección ortogonal a la vez a $\boldsymbol{1}$ y a $\boldsymbol{x}$ es el producto vectorial: $\boldsymbol{1}\times\boldsymbol{x}$ es, por definición, perpendicular a ambos.
+
+#+BEGIN_SRC jupyter-python
+x = np.array([1., 2., 3.])
+beta0, beta1 = 2., 3.
+uno = np.ones_like(x)
+
+direccion_perp = np.cross(uno, x)
+print("dirección ortogonal a 1 y a x (1 x x):", direccion_perp)
+print("¿ortogonal a 1?", np.isclose(direccion_perp.sum(), 0))
+print("¿ortogonal a x?", np.isclose(np.dot(direccion_perp, x), 0))
+#+END_SRC
+
+Con esa dirección construimos los cinco casos:
+
+#+BEGIN_SRC jupyter-python
+u_a = np.zeros(3)                     # (a) sin perturbación
+u_b = 2 * direccion_perp              # (b) u ⟂ 1 y u ⟂ x
+u_c = np.array([-1., 0., 1.])         # (c) media(u)=0, pero u no ⟂ x
+u_d = np.array([1., 1., -1.])         # (d) u ⟂ x, pero media(u) != 0
+u_e = np.array([2., -1., 3.])         # (e) u no ⟂ 1 ni ⟂ x
+
+casos = [
+    ("(a) u = 0", u_a),
+    ("(b) u ortogonal a 1 y a x", u_b),
+    ("(c) media(u)=0, pero u no ortogonal a x", u_c),
+    ("(d) u ortogonal a x, pero media(u) != 0", u_d),
+    ("(e) u no ortogonal a 1 ni a x", u_e),
+]
+
+print(f"Valores verdaderos: beta0 = {beta0}, beta1 = {beta1}\n")
+resultados = []
+for nombre, u in casos:
+    res = experimento_u(x, beta0, beta1, u, nombre)
+    resultados.append(res)
+    resumen(res)
+#+END_SRC
+
+*/ Dos figuras, para contrastar
+
+Visualizamos el caso más favorable, (b), y el más desfavorable, (e).
+
+#+BEGIN_SRC jupyter-python
+res_b = resultados[1]
+fig_b = figura_ajuste_R3(x, res_b['y'], rango=6,
+    titulo="Caso (b): u en L(1,x)^perp -- recuperacion exacta de beta0,beta1")
+fig_b.show()
+#+END_SRC
+
+#+BEGIN_SRC jupyter-python
+res_e = resultados[4]
+fig_e = figura_ajuste_R3(x, res_e['y'], rango=6,
+    titulo="Caso (e): u sin ninguna ortogonalidad")
+fig_e.show()
+#+END_SRC
+
+*/ Interpretación
+
+El caso (a) es trivial: sin perturbación, no hay nada que estimar. El caso (b) recupera $\beta_0,\beta_1$ /exactamente/: es el análogo, en $\mathbb{R}^3$, del ejemplo “con truco” de la lección 7 —allí, con $n=5$, había todo un subespacio de dimensión 3 donde podía vivir $\boldsymbol{u}$ sin estropear el ajuste; aquí, con $n=3$ y dos regresores, esa libertad se ha reducido a una única recta—.
+
+Los casos (c) y (d) son los más instructivos. Cada uno satisface /solo una/ de las dos condiciones de ortogonalidad —(c) tiene media cero pero no es ortogonal a $\boldsymbol{x}$; (d) es ortogonal a $\boldsymbol{x}$ pero tiene media distinta de cero— y en ambos $\hat\beta_0,\hat\beta_1$ se alejan de los valores verdaderos. Esto confirma, con números, lo que ya anticipaba la lección 6 (pregunta 9 y 11 de su banco de preguntas): que el residuo de una proyección es ortogonal a /todo/ el plano exige ortogonalidad a /cada uno/ de sus generadores /simultáneamente/; satisfacer solo una de las dos condiciones no basta. El caso (e), sin ninguna de las dos, es en general el más alejado de todos.
+
+Guardemos esta idea: solo cuando $\boldsymbol{u}$ vive enteramente en la (única) dirección ortogonal al plano de los regresores, MCO recupera los coeficientes generadores con exactitud. Esta es, en miniatura, la intuición geométrica detrás de la condición $E[\boldsymbol{U}\mid\boldsymbol{X}]=\boldsymbol{0}$ que exigiremos a la perturbación poblacional en la lección 9.
+
+*/ Actividad
+
+Elige tu propio vector $\boldsymbol{u}$ (o modifica alguno de los cinco anteriores) y comprueba en qué categoría cae —calculando $\sum u_i$ y $\boldsymbol{u}\cdot\boldsymbol{x}$— antes de ejecutar =experimento_u=. Intenta encontrar un $\boldsymbol{u}\neq\boldsymbol{0}$ que, sin estar exactamente en la dirección $\boldsymbol{1}\times\boldsymbol{x}$, recupere aproximadamente bien los coeficientes: ¿qué tiene de especial, comparado con los que sí lo consiguen exactamente?
+
+- Para seguir explorando
+
+- El parámetro =rango= controla el tamaño de la escena; aumenta su valor si tus vectores tienen componentes grandes (como en el caso (b) o (e) de la Parte 3).
+- El diccionario =ejemplos= admite cualquier par $(\boldsymbol{x},\boldsymbol{y})$ nuevo: solo tienen que ser vectores de $\mathbb{R}^3$ con $\boldsymbol{x}$ no constante.
+- El próximo cuaderno (Notebook 3) retoma exactamente la figura de la Parte 2 —los vectores en desviaciones dentro de $\mathcal{L}(\boldsymbol{1})^\perp$— para construir el triángulo rectángulo de la lección 8 y visualizar $R^2=\cos^2\theta$.
+- La sesión de laboratorio que sigue a la lección 7 comprobará las mismas dos ortogonalidades, pero con datos reales.
+
+- COMMENT ipynb                                                    :noexport:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(require 'ox-ipynb)
+(ox-ipynb-export-org-file-to-ipynb-file "S09-Notebook02.org")
+#+END_SRC
+#+end_src
+
+Una pregunta antes de darlo por cerrado: la figura del triángulo rectángulo en =S10-Notebook03.org= (=figura_triangulo_R3=, Parte 1) también vive enteramente dentro de $\mathcal{L}(\boldsymbol{1})^\perp$, igual que la Parte 2 de este cuaderno, pero todavía no incluye la recta $\mathcal{L}(\boldsymbol{1})$ como referencia de orientación. ¿Quieres que aplique ahí el mismo añadido (por coherencia entre las tres figuras que comparten ese plano), o lo dejamos como está?
+
+Si, hay que corregir también el otro notebook (pero todavía no lo he mirado, así que esperamos). Una cosa más para corregir en este: quiero que los vectores beta0*1 y beta1*x tengan un grosor mayor (quizá me puedes indicar qué cambiar en lugar de escribirlo completo de nuevo)
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Para esto no hace falta reescribir el fichero: basta un cambio mínimo en dos sitios.
+
+/1. En la definición de =agrega_vector=*, añade el parámetro =width= (con el mismo valor por defecto que tenía, =6=, para no afectar a ningún otro vector del cuaderno):
+
+#+begin_src python
+def agrega_vector(fig, punto, color='crimson', nombre='v', dash='solid', width=6):
+    """Vector desde el origen hasta 'punto' (línea + marcador en la punta)."""
+    punto = np.asarray(punto, dtype=float)
+    fig.add_trace(go.Scatter3d(
+        x=[0, punto[0]], y=[0, punto[1]], z=[0, punto[2]],
+        mode='lines+markers',
+        line=dict(color=color, width=width, dash=dash),
+        marker=dict(size=[0, 5], color=color), name=nombre))
+#+end_src
+
+(el único cambio real es sustituir el =width=6= fijo dentro de =line=dict(...)= por la variable =width=, y añadir =width=6= como parámetro con valor por defecto en la cabecera).
+
+/2. En =agrega_componentes_ajuste=*, pasa un =width= mayor al llamar a =agrega_vector= para =comp0= y =comp1= (por ejemplo =width=10=):
+
+#+begin_src python
+    agrega_vector(fig, comp0, color='darkorange', nombre='beta0*1', dash='dot', width=10)
+    agrega_vector(fig, comp1, color='sienna', nombre='beta1*x', dash='dot', width=10)
+#+end_src
+
+Con esto, =beta0*1= y =beta1*x= se dibujan más gruesos que el resto de vectores (que siguen usando el grosor por defecto =6=), sin tocar nada más del fichero. Ajusta el =10= al valor que te resulte visualmente mejor.
+
+Estupendo. Incorpora todas aquellas mejoras que también sean aplicables al otro notebook.
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Repaso las cuatro correcciones que hicimos en el Cuaderno 2 y compruebo cuáles aplican al Cuaderno 3 (=S10-Notebook03.org=):
+
+1. /Base del plano vía lección 6 (Gram-Schmidt → $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})=\mathcal{L}(\boldsymbol{1},\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})$)*: no aplica — el Cuaderno 3 nunca dibuja el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, solo $\mathcal{L}(\boldsymbol{1})^\perp$ (fijo, ya construido sin Gram-Schmidt).
+2. /Leyenda de $\mathcal{L}(\boldsymbol{x})$ y guías más gruesas para $\hat\beta_0\boldsymbol{1}$/$\hat\beta_1\boldsymbol{x}$*: no aplica directamente — el Cuaderno 3 no dibuja $\mathcal{L}(\boldsymbol{x})$ ni esas dos componentes. Pero sí hay un segmento gris punteado análogo (el que conecta $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ con $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$) con el mismo problema de contraste bajo. Lo corrijo en el mismo espíritu.
+3. /Añadir $\mathcal{L}(\boldsymbol{1})$ como referencia de orientación/: sí aplica — ya lo confirmaste. La figura del triángulo (=figura_triangulo_R3=) vive en $\mathcal{L}(\boldsymbol{1})^\perp$, igual que la Parte 2 del Cuaderno 2.
+4. /Marcas graduadas sobre $\mathcal{L}(\boldsymbol{x})$*: no aplica — el Cuaderno 3 no dibuja ese eje.
+
+También añado el parámetro =width= a =agrega_vector= (igual que en el Cuaderno 2) por coherencia entre ambos ficheros, aunque de momento no se use con un valor no-default aquí.
+
+Estos son los cambios puntuales, sin reescribir el fichero entero:
+
+/1. En =agrega_vector=*, añade el parámetro =width= (igual que en el Cuaderno 2):
+
+#+begin_src python
+def agrega_vector(fig, punto, color='crimson', nombre='v', dash='solid', width=6):
+    """Vector desde el origen hasta 'punto' (línea + marcador en la punta)."""
+    punto = np.asarray(punto, dtype=float)
+    fig.add_trace(go.Scatter3d(
+        x=[0, punto[0]], y=[0, punto[1]], z=[0, punto[2]],
+        mode='lines+markers',
+        line=dict(color=color, width=width, dash=dash),
+        marker=dict(size=[0, 5], color=color), name=nombre))
+#+end_src
+
+/2. En =agrega_segmento=*, añade =width= y usa un tono/grosor más visible para el segmento que conecta el cateto $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ con la hipotenusa $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ (el mismo problema de contraste que tenían las guías del Cuaderno 2 sobre el fondo gris del plano):
+
+#+begin_src python
+def agrega_segmento(fig, p0, p1, color='gray', width=3, dash='dot'):
+    """Segmento discontinuo entre dos puntos."""
+    fig.add_trace(go.Scatter3d(
+        x=[p0[0], p1[0]], y=[p0[1], p1[1]], z=[p0[2], p1[2]],
+        mode='lines', line=dict(color=color, width=width, dash=dash),
+        showlegend=False, hoverinfo='skip'))
+#+end_src
+
+y en =figura_triangulo_R3=, cambia la llamada:
+
+#+begin_src python
+    agrega_segmento(fig, eyhat, ey, color='dimgray', width=4)
+#+end_src
+
+/3. En =figura_triangulo_R3=*, añade la recta $\mathcal{L}(\boldsymbol{1})$ como referencia de orientación (misma idea que en la Parte 2 del Cuaderno 2), justo antes de =plano_ortogonal=:
+
+#+begin_src python
+    fig = go.Figure()
+    recta_L1(fig, rango=rango)
+    plano_ortogonal(fig, rango=rango)
+#+end_src
+
+Esto requiere tener también, en el bloque de "Funciones de dibujo" del Cuaderno 3, las funciones =marcas_unitarias_L1= y =recta_L1= (ahora mismo el fichero no las define, porque nunca dibujaba $\mathcal{L}(\boldsymbol{1})$ en sí, solo su complemento ortogonal). Añádelas —copiadas tal cual del Cuaderno 2— justo antes de =plano_ortogonal=:
+
+#+begin_src python
+def marcas_unitarias_L1(fig, rango=4, color='blue'):
+    """Marcas sobre L(1), una por cada valor entero de la media."""
+    uno = np.array([1., 1., 1.])
+    ks = np.arange(-rango, rango + 1)
+    puntos = np.outer(ks, uno)
+    fig.add_trace(go.Scatter3d(
+        x=puntos[:, 0], y=puntos[:, 1], z=puntos[:, 2],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol='cross'),
+        text=[f"mu = {k}" for k in ks],
+        hoverinfo='text', showlegend=False))
+
+def recta_L1(fig, rango=4, color='blue'):
+    """Dibuja L(1) con sus marcas graduadas (una por unidad de mu)."""
+    t = np.linspace(-rango, rango, 2)
+    fig.add_trace(go.Scatter3d(
+        x=t, y=t, z=t, mode='lines',
+        line=dict(color=color, width=5), name='L(1)'))
+    marcas_unitarias_L1(fig, rango=rango, color=color)
+#+end_src
+
+/4. En el texto que precede a la figura de la Parte 1/ (párrafo que empieza "Dibujamos, dentro de $\mathcal{L}(\boldsymbol{1})^\perp$..."), añade al final una frase equivalente a la del Cuaderno 2:
+
+#+begin_quote
+Añadimos también, en azul, la propia recta $\mathcal{L}(\boldsymbol{1})$ —perpendicular a este plano— como referencia de orientación: si giras esta figura hasta que $\mathcal{L}(\boldsymbol{1})$ apunte hacia ti, y comparas con la Parte 2 del Cuaderno 2 en la misma orientación, comprobarás que ambas escenas coinciden.
+#+end_quote
+
+Con estos cuatro cambios el Cuaderno 3 queda visualmente coherente con las correcciones ya aplicadas al Cuaderno 2, sin tocar nada que no lo necesitara (Gram-Schmidt y el eje $\mathcal{L}(\boldsymbol{x})$ simplemente no aparecen en este fichero). Cuando revises el resto de =S10-Notebook03.org= con más calma, dime si detectas algo adicional.
