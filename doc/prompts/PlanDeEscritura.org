@@ -28,8 +28,6 @@
 Este es un /manual operativo/, no un registro histórico. Informa de qué hay, qué falta y cómo escribir lo siguiente. Cada vez que el usuario pida avanzar, ejecuta este bucle:
 
 1. /Identificar el puntero de arranque/: Consulta el cronograma (§7.0) y localiza la *primera fila con Estado =PENDIENTE=*. Esa es la sesión N a escribir. (Este manual no nombra la sesión aquí para evitar desincronizaciones con §7.0).
-   /Excepción/: §7.5-extra (práctica de dispersión + correlación) está fuera del cronograma y no aparece en §7.0. Solo se escribe si el usuario lo solicita explícitamente; no cuenta como sesión PENDIENTE
-   a efectos del puntero de arranque.
 2. /Recopilar requisitos (Arranque rápido)/: Lee EN ESTE ORDEN:
    - Su ficha (§7.N) para la canónica del contenido.
    - §10 (Semillas) para comprobar qué promesas previas debe cobrar y cuáles deja plantadas.
@@ -54,27 +52,66 @@ Este es un /manual operativo/, no un registro histórico. Informa de qué hay, q
    *Si la sesión no tiene ninguna semilla que cobrar según §10 Y tampoco hay ningún fichero del mismo tipo (teoría o lab) disponible como plantilla viva*: advierte igualmente y pide al usuario que suba, como mínimo, un fichero completo de referencia del tipo correspondiente, para no arriesgar la continuidad de formato.
 4. /Esquema previo/: Para sesiones complejas, propón primero un índice/esquema detallado de los apuntes y *espera la aprobación* del usuario antes de redactar el código completo.
 5. /Generación/: Redacta el fichero completo dentro de un bloque =#+begin_src org=.
-6. /Verificación de referencias numéricas/: antes de dar por cerrado el
-   fichero, comprobar CADA aparición de "la lección N", "la sesión N" o
-   "sesión(es) N" (en singular o plural, incluidas construcciones como
-   "las sesiones 17 y 19") contra la tabla de correspondencia
-   sesión↔lección de §4.6. Prestar atención especial a dos errores
-   recurrentes: (i) usar el número de sesión interno del Plan en vez del
-   número de lección en texto visible para el alumno; (ii) citar por su
-   número interno una sesión de laboratorio sin lección propia, en vez de
-   describirla sin número o anclarla a la lección teórica que acompaña
-   (regla de §4.6, "Referencias a sesiones de laboratorio sin lección
-   propia"). Repetir esta comprobación de forma uniforme en TODAS las
-   apariciones de la misma referencia dentro de un mismo fichero: un
-   fichero puede tener el mismo referente citado de formas distintas en
-   puntos distintos (transparencia, apéndice, banco de preguntas), y todas
-   deben coincidir. Un desliz aquí es fácil de cometer incluso en ficheros
-   por lo demás cuidados. Además, comprobar que ninguna referencia a una práctica de laboratorio use
-el nombre interno de su fichero (p. ej. "S07-Prct-B") en el texto visible
-para el alumno; en su lugar, describir el contenido sin número o anclarlo a
-la lección teórica correspondiente (regla ya fijada en §4.6), y si se desea
-mayor precisión, usar un hipervínculo al pdf/html público de la práctica en
-lugar de su nombre de fichero interno. Cuando una frase atribuya un ejemplo o resultado concreto a una lección anterior (no solo un número aislado), verificar que ese ejemplo/resultado aparece efectivamente allí, no solo que el número esté bien mapeado.
+6. /Verificación de referencias numéricas/: Como paso mecánico previo a
+   la revisión manual, ejecutar una búsqueda literal (grep) (insensible a mayúsculas/minúsculas) de los
+   siguientes patrones, en singular y plural, y sobre CADA coincidencia
+   verificar el número contra la tabla de correspondencia
+   sesión↔lección de §4.6:
+   - "lección [0-9]", "lecciones [0-9]" (incluyendo construcciones con
+     dos o más números: "lecciones N y M", "lecciones N, M y P")
+   - "sesión [0-9]", "sesiones [0-9]"
+   - "en el laboratorio de la sesión [0-9]", "de la sesión [0-9]"
+   - cualquier frase con "ya hemos usado", "como vimos en", "que vimos
+     en", "hemos visto en" seguida de un numeral: estas construcciones
+     son las más propensas a arrastrar referencias obsoletas tras
+     reordenaciones (ver precedente: S12, "las lecciones 8 y 10" cuando
+     la lección 10 aún no existe — debía decir "6 y 8").
+   - "(transparencia anterior)", "(transparencia siguiente)", "de la
+     transparencia anterior", "como vimos en la transparencia anterior" y
+     construcciones equivalentes: verificar, DENTRO DEL MISMO FICHERO
+     =.org=, que el resultado o cálculo referido aparece efectivamente en
+     la transparencia inmediatamente anterior o posterior (no en otra más
+     lejana, ni en una transparencia todavía por llegar). Este tipo de
+     referencia relativa, interna a una misma sesión, es tan propensa a
+     quedar desfasada tras reordenaciones de última hora como las
+     referencias absolutas a "lección N" (precedente: S10, "de la
+     transparencia anterior" apuntando de hecho a un resultado que se
+     demuestra dos transparencias más adelante).
+   - "\hat{\boldsymbol" (insensible a mayúsculas): cualquier coincidencia debe
+     revisarse contra la regla de §4.2.1 ("nunca $\hat{\boldsymbol\beta}$ ni
+     $\hat{\boldsymbol e}$"; la forma correcta es siempre
+     $\boldsymbol{\mathop{\widehat{\cdot}}}$).
+   - "\sigma^2_{\mathop{\widehat" o "\sigma_{\mathop{\widehat" (sin
+     "\boldsymbol" inmediatamente antes de "\mathop"): cualquier coincidencia
+     indica un acento sobre un vector sin el envoltorio "\boldsymbol{...}"
+     exigido por §4.2.1. Precedente: S09, guiño final,
+     "$\sigma^2_{\mathop{\widehat{y}}}$" sin "\boldsymbol".
+
+   Completado el barrido, proceder con la revisión manual: comprobar
+   CADA aparición de "la lección N", "la sesión N" o "sesión(es) N" (en
+   singular o plural, incluidas construcciones como "las sesiones 17 y
+   19") contra la tabla de correspondencia sesión↔lección de §4.6.
+   Prestar atención especial a dos errores recurrentes: (i) usar el
+   número de sesión interno del Plan en vez del número de lección en
+   texto visible para el alumno; (ii) citar por su número interno una
+   sesión de laboratorio sin lección propia, en vez de describirla sin
+   número o anclarla a la lección teórica que acompaña (regla de §4.6,
+   "Referencias a sesiones de laboratorio sin lección propia"). Repetir
+   esta comprobación de forma uniforme en TODAS las apariciones de la
+   misma referencia dentro de un mismo fichero: un fichero puede tener
+   el mismo referente citado de formas distintas en puntos distintos
+   (transparencia, apéndice, banco de preguntas), y todas deben
+   coincidir. Un desliz aquí es fácil de cometer incluso en ficheros
+   por lo demás cuidados. Además, comprobar que ninguna referencia a
+   una práctica de laboratorio use el nombre interno de su fichero (p.
+   ej. "S07-Prct-B") en el texto visible para el alumno; en su lugar,
+   describir el contenido sin número o anclarlo a la lección teórica
+   correspondiente (regla ya fijada en §4.6), y si se desea mayor
+   precisión, usar un hipervínculo al pdf/html público de la práctica
+   en lugar de su nombre de fichero interno. Cuando una frase atribuya
+   un ejemplo o resultado concreto a una lección anterior (no solo un
+   número aislado), verificar que ese ejemplo/resultado aparece
+   efectivamente allí, no solo que el número esté bien mapeado.
 
 7. /Actualización del manual/: Al final de tu respuesta, genera un bloque =#+begin_src org= titulado =ACTUALIZACIÓN DEL MANUAL= para que el usuario lo copie y pegue. Debe contener:
    - *Actualización de la Ficha §7.N*: Redacta el nuevo bloque rellenando el extracto de memoria (título real, decisiones adoptadas, ejemplos/datasets utilizados y el guiño/semilla a la siguiente sesión).
@@ -139,6 +176,7 @@ Fuente canónica de notación.
 - Las matrices se denotan con =\boldsymbol{\mathsf{...}}= (negrita + fuente
   sans-serif), para distinguirlas tipográficamente de los vectores (negrita
   con fuente serif). Ejemplo: =\boldsymbol{\mathsf{X}}=, nunca =\boldsymbol{X}=.
+- /Matriz de datos vs. matriz aleatoria/: $\boldsymbol{\mathsf X}$ (negrita sans-serif) denota siempre la matriz de datos /observados/, un objeto determinista de $\mathbb R^{n\times k}$ (lecciones 10, 13). Cuando, a partir de la lección 12 ("El puente"), sea necesario referirse a la versión /poblacional/ de esa matriz —el objeto aleatorio sobre el que se condiciona—, se usa $\boldsymbol X$ (negrita con la forma itálica habitual de =\boldsymbol=, sin =\mathsf=), preservando en el caso matricial la misma distinción tipográfica que ya separa, desde la lección 9, la variable aleatoria $X$ (cursiva, sin negrita) del vector de datos $\boldsymbol x$ (negrita).
 - Cuando se describe una matriz por sus columnas, se usan corchetes con las
   columnas separadas por punto y coma: ~\boldsymbol{\mathsf{X}} = [\boldsymbol{1};\;\boldsymbol{x}]~. (Ya usada, como anuncio, en S06/Lección 5.)
 - /Acentos sobre vectores en negrita/ (barra y circunflejo): todo acento
@@ -148,8 +186,8 @@ Fuente canónica de notación.
   =\boldsymbol{\bar{y}}=). Vector ajustado: =\boldsymbol{\mathop{\widehat{y}}}=
   y vector de residuos =\boldsymbol{\mathop{\widehat{e}}}= (nunca
   =\hat{\boldsymbol{y}}= ni =\hat{\boldsymbol{e}}=). Esta regla /no/ afecta a
-  los coeficientes estimados, que son escalares sin negrita ($\hat\beta_0$,
-  $\hat\beta_1$): en ese caso =\hat{\beta}= es tipográficamente correcto sin
+  los coeficientes estimados, que son escalares sin negrita ($\hat\beta_1$,
+  $\hat\beta_2$): en ese caso =\hat{\beta}= es tipográficamente correcto sin
   =\mathop=.
 
 */Barra sobre un vector = proyección sobre \(\mathcal{L}(\boldsymbol{1})\)/*: de forma
@@ -183,9 +221,9 @@ de la barra (arriba) aplicada a un vector que ya tiene su propio acento.
 
 */Productos/:*
 - /Producto matriz–vector =\boldsymbol{A}\boldsymbol{x}= y vector–matriz =\boldsymbol{x}\boldsymbol{A}=, doble lectura/: (i) por productos escalares; (ii) por combinación lineal. Central a partir de la sesión 13  (regresión múltiple); consolidada en el laboratorio de la sesión 14.. Hecho clave: =\boldsymbol{\mathsf{X}}^\top\boldsymbol{e}= y =\boldsymbol{e}\boldsymbol{\mathsf{X}}= son /el mismo vector/.
-- /Producto matriz–matriz/: solo en la sesión 14, al leer =\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}=. No se introduce inversa, rango ni álgebra matricial autónoma.
+- /Producto matriz–matriz/: solo en la sesión 13, al leer =\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}=. No se introduce inversa, rango ni álgebra matricial autónoma.
 - /Notación genérica de producto escalar/: =\langle\boldsymbol{x},\boldsymbol{y}\rangle=.
-  El curso usa dos casos particulares (y anuncia un tercero al cierre):
+  El curso usa tres casos particulares:
   - /Producto escalar euclídeo/: =\boldsymbol{x}\cdot\boldsymbol{y}= (el punto).
     Es la notación de trabajo en =S02= y =S03=, donde no hay ambigüedad.
     Equivalente extendida: =\langle\boldsymbol{x},\boldsymbol{y}\rangle_e=, usada
@@ -196,8 +234,8 @@ de la barra (arriba) aplicada a un vector que ya tiene su propio acento.
     =\langle\boldsymbol{x},\boldsymbol{y}\rangle_s = \frac{1}{n}(\boldsymbol{x}\cdot\boldsymbol{y})=.
     En la transición (adopción sistemática en =S05=), explicitar el subíndice =s=.
     Después, los ángulos sin subíndice son suficientes si el contexto es estadístico.
-  - /Producto escalar probabilístico/ (anunciado en el cierre, ses. 26):
-    =\langle X,Y\rangle_P = E[XY]=. Solo se menciona como analogía.
+  - /Producto escalar probabilístico/ (introducido con desarrollo pleno en la sesión 12 ('El puente'); recapitulado en el cierre, ses. 25/26):
+    =\langle X,Y\rangle_P = E[XY]=.
   - /Convención de uso/: la notación sin subíndice se reserva para definiciones,
   propiedades o demostraciones formuladas en abstracto —válidas para
   cualquier producto escalar con las propiedades de simetría, linealidad y
@@ -223,7 +261,7 @@ momento en que efectivamente se trabaje con ese caso particular.
   con un índice).
 - Norma: =\|\boldsymbol{x}\|= (en tablas orgmode, =\Vert=). Norma estadística:
   =\|\boldsymbol{x}\|_s=, solo cuando sea necesario distinguirla de la euclídea.
-- la notación genérica para la ortogonalidad cuando hay producto estadístico asume que $\boldsymbol{x} \cdot \boldsymbol{y} = 0 \iff \langle \boldsymbol{x}, \boldsymbol{y} \rangle_s = 0$ debido a que el factor $1/n$ se anula.
+- la notación genérica para la ortogonalidad cuando hay producto estadístico asume que $\boldsymbol{x} \cdot \boldsymbol{y} = 0 \iff \langle \boldsymbol{x}, \boldsymbol{y} \rangle_s = 0$ debido a que multiplicar cero por el factor $1/n$ no cambia nada.
 - /Ángulo entre vectores/: Para referirse explícitamente al ángulo geométrico (no solo a su coseno), utilícese el comando =\measuredangle= (ej. =\theta = \measuredangle\big((\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}), (\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}})\big)=).
 
 */Estadística/:*
@@ -261,7 +299,7 @@ momento en que efectivamente se trabaje con ese caso particular.
   «vector en desviaciones respecto a la media».
 - /Vector de medias/: se denota $\boldsymbol{\mathop{\overline{y}}}$ (véase la
   regla general de acentos sobre vectores en negrita, en "Reglas de objetos").
-  Nunca $\bar{\boldsymbol{y}}$ ni $\boldsymbol{\bar{y}}$.
+  Nunca $\bar{\boldsymbol{y}}$ ni $\boldsymbol{\bar{y}}$. Esta misma regla se extiende al vector de parámetros estimados en regresión múltiple: $\boldsymbol{\mathop{\widehat{\beta}}}$ (nunca $\hat{\boldsymbol\beta}$), consistente con $\boldsymbol{\mathop{\widehat{y}}}$ y $\boldsymbol{\mathop{\widehat{e}}}$, desde que el ajuste involucra más de un coeficiente agrupado en un vector (lección 10 en adelante).
 - En los libros de estadística, $\rho_{\boldsymbol{x}\boldsymbol{y}}$ aparece
   a veces como $r_{\boldsymbol{x}\boldsymbol{y}}$ cuando se quiere enfatizar
   que es un estimador muestral. En este curso usamos siempre $\rho$.
@@ -295,7 +333,7 @@ proyección ortogonal de $\boldsymbol{y}$ sobre $\mathcal{L}(\boldsymbol{1})$"
 o "la media es el escalar de esa proyección / proviene de esa proyección".
 Esta precisión es igualmente aplicable al vector ajustado
 $\boldsymbol{\mathop{\widehat{y}}}$ en regresión (sesiones 9-10): es
-$\boldsymbol{\mathop{\widehat{y}}}$ quien es la proyección; $\hat\beta_0,\hat\beta_1$
+$\boldsymbol{\mathop{\widehat{y}}}$ quien es la proyección; $\hat\beta_1,\hat\beta_2$
 son sus coeficientes.
 
 */Producto componente a componente ($\odot$)/*: dados
@@ -307,12 +345,86 @@ explícitamente en la lección 7, al generalizar la "fórmula de cálculo" de
 la varianza ($\sigma_{\boldsymbol{x}}^2=\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2$)
 a la de la covarianza
 ($\sigma_{\boldsymbol{x}\boldsymbol{y}}=\mu_{\boldsymbol{x}\odot\boldsymbol{y}}-\mu_{\boldsymbol{x}}\mu_{\boldsymbol{y}}$).
-/Regla de disambiguación/: el subíndice de $\sigma_{\boldsymbol{x}\boldsymbol{y}}$
+- /Regla de disambiguación/: el subíndice de $\sigma_{\boldsymbol{x}\boldsymbol{y}}$
 (covarianza entre $\boldsymbol{x}$ e $\boldsymbol{y}$, ya centrados) y el de
 $\mu_{\boldsymbol{x}\odot\boldsymbol{y}}$ (media del vector sin centrar
 $\boldsymbol{x}\odot\boldsymbol{y}$) usan la misma yuxtaposición de símbolos
 pero indican construcciones distintas; no introducir nunca un
 $\mu_{\boldsymbol{x}\boldsymbol{y}}$ sin el $\odot$ explícito.
+- /Identidad puente (regla de hierro)/: debe tratarse como equivalencia canónica en el curso que $\langle\boldsymbol{x},\boldsymbol{y}\rangle_s = \mu_{\boldsymbol{x}\odot\boldsymbol{y}}$. Esta identidad (el producto escalar estadístico ES la media del vector de productos componente a componente) ya quedó formalizada en la lección 7 y debe invocarse con total naturalidad siempre que sea necesario transitar entre la geometría de los ángulos y la aritmética de las medias o covarianzas.
+
+*/Esperanza y varianza: escalar (número) vs. condicional (variable aleatoria)/*:
+- /Esperanza NO condicionada/ (un número): \mathrm{E}(\cdot), con paréntesis.
+  Ejemplos: \mathrm{E}(Y), \mathrm{E}(X^2), \mathrm{E}(XY), \mathrm{Cov}(X,Y), \mathrm{Var}(X).
+- /Esperanza condicionada/ (una variable aleatoria, función de la
+  variable condicionante): E[\cdot\mid\cdot], en cursiva SIN \mathrm,
+  con corchetes. Ejemplos: E[Y\mid X], E[Y\mid\mathit{1}], E[U\mid X] (también se acepta la forma más compacta E[Y|X], E[Y|\mathit{1}], E[U|X], pero nunca debe usarse la forma compacta dentro de las tablas).
+- La MISMA regla aplica a la varianza condicionada (incluida la forma compacta con "|")): Var[\cdot\mid\cdot]
+  (cursiva, sin \mathrm, con corchetes) — p. ej. Var[U\mid X] — frente a
+  \mathrm{Var}(\cdot) para la varianza NO condicionada (un número), p. ej.
+  \mathrm{Var}(Y), \mathrm{Var}(E[Y\mid X]).
+- /Nunca/ mezclar corchetes con \mathrm, ni paréntesis sin \mathrm, para
+  el mismo tipo de objeto: la pareja correcta es
+  \mathrm{E}(\cdot)/\mathrm{Var}(\cdot) [escalar, paréntesis] frente a
+  E[\cdot\mid\cdot]/Var[\cdot\mid\cdot] [variable aleatoria, corchetes].
+- /Regla de hierro de la variable aleatoria constante/: NUNCA se suma un escalar
+  a una variable aleatoria directamente. Es una norma innegociable para mantener
+  el paralelismo dimensional con $\mathbb{R}^n$. Todo escalar $c$ que deba
+  combinarse con una v.a. se escribe $c\cdot\mathit{1}$ (v.a. constante),
+  nunca "c" a secas. Ejemplo correcto: $Y=\beta_1\mathit{1}+\beta_2X+U$
+  (nunca $Y=\beta_1+\beta_2X+U$). Esta regla se mantendrá estrictamente al
+  escribir el modelo poblacional de regresión múltiple en la sesión 13
+  ($Y = \beta_1\mathit{1} + \beta_2X_2 + \dots + \beta_kX_k + U$).
+- /Numeración conjunta de regresores/variables y coeficientes (la constante no lleva subíndice)/: en este curso, el regresor/variable aleatoria constante ($\boldsymbol{1}$ en la muestra, $\mathit{1}$ en la población) NUNCA lleva subíndice, y su coeficiente es siempre $\beta_1$/$\hat\beta_1$. El resto de regresores se numeran a partir de 2: $\boldsymbol{x}_2,\boldsymbol{x}_3,\ldots,\boldsymbol{x}_k$ (muestra) o $X_2,X_3,\ldots,X_k$ (población), de modo que el subíndice de cada regresor coincide siempre, sin desfase, con el de su coeficiente: $\hat\beta_j$ multiplica a $\boldsymbol{x}_j$ (o a $\boldsymbol{1}$ si $j=1$). En consecuencia, $k$ denota de forma uniforme en todo el curso el número TOTAL de regresores —la constante cuenta como uno más—, que coincide con el número de columnas de $\boldsymbol{\mathsf X}$ y con el número de componentes de $\hat{\boldsymbol\beta}$. Así, la regresión simple (lecciones 6-9) es el caso $k=2$ (regresores $\boldsymbol 1,\boldsymbol x_2$; coeficientes $\hat\beta_1,\hat\beta_2$), y la regresión múltiple general (lección 10) tiene $k-1$ regresores no constantes ($\boldsymbol x_2,\ldots,\boldsymbol x_k$) más la constante. Como caso límite, $k=1$ (ningún regresor no constante, solo $\boldsymbol{1}$) recupera exactamente la proyección de las lecciones 4-5 ($\hat\beta_1=\mu_{\boldsymbol{y}}$); esta observación unificadora se hace explícita, como nota a pie de página, en el cierre de la lección 10. /Nota sobre el arranque de la indexación (aclaración de alcance, no instrucción retroactiva)/: aunque
+conceptualmente la regresión simple es el caso $k=2$ con regresor $\boldsymbol{x}_2$, las
+lecciones 6 a 9 (S08-S12: regresión simple y la sesión-puente) usan
+deliberadamente el símbolo $\boldsymbol{x}$ sin subíndice, por simplicidad
+pedagógica y porque en esas sesiones no hay ningún segundo regresor con el
+que distinguirlo. La indexación $\boldsymbol{x}_2,\boldsymbol{x}_3,\ldots,\boldsymbol{x}_k$
+(y su contrapartida poblacional $X_2,\ldots,X_k$) se vuelve operativa recién a
+partir de la lección 10 (regresión múltiple, sesión 13), que es cuando por
+primera vez conviven varios regresores no constantes simultáneamente. Esta
+nota es solo aclaratoria: /no/ reabrir S08-S12 para añadir subíndices
+retroactivamente a un único regresor $\boldsymbol{x}$.
+  - /Alerta operativa para inferencia y laboratorios (Tema 4, S15 en adelante)/: 
+    Dado que $k$ incluye la constante, los grados de libertad del modelo se denotan
+    invariablemente como $n-k$ (nunca $n-k-1$). Se debe vigilar estrictamente esta 
+    distinción en el texto: $k$ para fórmulas algebraicas o grados de libertad 
+    (ej. cuasivarianza de los residuos $SRC/(n-k)$), y $k-1$ exclusivamente cuando 
+    la prosa necesite referirse al "número de variables explicativas no constantes".
+
+  /Motivo de la decisión/: numerar desde 1 —nunca desde 0, a diferencia de Wooldridge y la mayoría de manuales, que usan $\beta_0,\beta_1,\ldots,\beta_k$— hace que el índice de cada coeficiente coincida siempre con el de la columna correspondiente de $\boldsymbol{\mathsf X}$ (que se indexa desde 1, vía el operador selector, lección 10); no asignar subíndice a la constante, en vez de llamarla "regresor 1" con su propio índice paralelo, evita además tener que decidir si cuenta o no como "$x_1$". Al citar bibliografía externa 0-indexada, adaptar la notación o advertir el desfase (§4.5).
+
+- /Precisión conceptual (regresor constante vs. subespacio que contiene a $\mathcal{L}(\boldsymbol1)$)/: se trata a $\boldsymbol{1}$ como un regresor más, no como una excepción aparte. Lo que hace válido el ajuste MCO no es que $\boldsymbol{1}$ sea literalmente una de las columnas de $\boldsymbol{\mathsf X}$, sino que el subespacio generado por los regresores CONTENGA a $\mathcal{L}(\boldsymbol{1})$ (equivalentemente, que exista una combinación lineal de los regresores igual a $\boldsymbol{1}$). Ejemplo (a explotar en la sesión de dummies, ficha §7.24): con dos indicadoras de sexo $\boldsymbol{d}_{\text{hombre}},\boldsymbol{d}_{\text{mujer}}$ tales que $\boldsymbol{d}_{\text{hombre}}+\boldsymbol{d}_{\text{mujer}}=\boldsymbol{1}$, ninguna columna de $\boldsymbol{\mathsf X}$ es constante, pero el ajuste sigue siendo válido porque $\boldsymbol{1}\in\mathcal{L}(\boldsymbol{d}_{\text{hombre}},\boldsymbol{d}_{\text{mujer}})$.
+ 
+- $\mathit{1}$ y $\mathit{0}$ denotan, respectivamente, la variable
+  aleatoria constante 1 y la variable aleatoria constante 0
+  ($\mathit{1}(\omega)=1$, $\mathit{0}(\omega)=0$ para todo $\omega\in\Omega$).
+  Ambas deben definirse explícitamente (nota a pie de página o inline)
+  la primera vez que se usen, siguiendo la regla general de primera
+  aparición.
+- Introducido en la sesión 12 ("El puente"); mantener sin excepción en
+  toda sesión que use variables aleatorias condicionadas (13, 15, 16 en
+  adelante).
+  - /Blindaje poblacional vs. muestral/: Tras cruzar "El puente" (S12), es vital 
+    NO mezclar en la misma demostración la constante muestral $\boldsymbol{1}$ 
+    (vector de $\mathbb{R}^n$) con la variable aleatoria constante $\mathit{1}$ 
+    (función sobre $\Omega$). Especial vigilancia al redactar la sesión 15 
+    (insesgadez y varianza): al plantear el modelo poblacional verdadero, debe 
+    usarse estrictamente $\mathit{1}$ (p. ej. $Y_i = \beta_1\mathit{1} + \beta_2x_i + U_i$), 
+    reservando $\boldsymbol{1}$ exclusivamente para la matriz de datos observados $\boldsymbol{\mathsf{X}}$.
+
+*/Nomenclatura del modelo poblacional (regresando, regresores, perturbación)/*:
+- "Regresando": término fijado en la sesión 12 (lección 9), para la
+  variable $Y$ del lado izquierdo del modelo poblacional, junto a
+  "regresores" ($X$ y $\mathit{1}$, fijado en la sesión 8/lección 6) y
+  "perturbación" ($U$, sesión 12), el análogo poblacional de "residuo".
+- Distinción "residuo" vs. "perturbación": "residuo"
+  ($\boldsymbol{\mathop{\widehat e}}=\boldsymbol y-\boldsymbol{\mathop{\widehat y}}$)
+  es exclusivo del contexto muestral ($\mathbb{R}^n$); "perturbación"
+  ($U=Y-E[Y\mid X]$) es su análogo exclusivo del contexto poblacional
+  (variables aleatorias). No son sinónimos y no deben intercambiarse.
+
 
 */Regla general sobre primera aparición de notación o conceptos/:*
 Cuando una notación o concepto aparece por primera vez en una sesión, la definición
@@ -352,7 +464,7 @@ fichas §7, no aquí.
   llega en la sesión 13, al agrupar los regresores en la matriz ~\boldsymbol{\mathsf{X}}~.
 
 */Remisión canónica del "cuándo"/:* ses. 8-9 para las dos ortogonalidades
-desglosadas (planteamiento en 8, resolución en 9); ses. 14 para la lectura
+desglosadas (planteamiento en 8, resolución en 9); ses. 13 para la lectura
 matricial unificada. §4.2 fija solo la notación y el orden de introducción.
 
 /(Convención de referencia: «§7.N» designa siempre la ficha de la sesión N,
@@ -385,7 +497,7 @@ duda, el número de sesión prevalece sobre el número de subsección.)/
 - En prácticas, los nombres de funciones de Gretl (=corr()=, =cov()=, =sd()=, =var()=) pueden no coincidir exactamente con la convención teórica del curso en el divisor usado. Siempre que ello importe, el guion debe explicitarlo.
 - En las prácticas de software, =vector centrado= se admite como sinónimo operativo de =vector en desviaciones respecto a la media=; en teoría se prefiere siempre la segunda expresión.
 - /Funciones estadísticas de Gretl y convenio del curso/: cuando una práctica use =corr()=, =cov()=, =sd()= o =var()=, y el divisor importe conceptualmente, el guion debe explicitar si coincide o no con la convención teórica del curso (producto escalar estadístico con divisor \(1/n\)). En particular, la correlación puede verificarse con distintos divisores porque estos se cancelan en el cociente; la varianza, en cambio, sí depende del convenio.
-- /Factor $n-1$ en cocientes/: Aunque Gretl usa $n-1$ en =sd()= y =cov()=, es seguro (y correcto) usarlos directamente en fórmulas de ratios como $\hat\beta_1 = \rho \frac{sd(y)}{sd(x)}$ o $\hat\beta_1 = \frac{cov(x,y)}{var(x)}$, porque el divisor se cancela algebraicamente (el ratio de varianzas muestrales clásicas coincide con el ratio de las varianzas geométricas del curso). No es necesario forzar la corrección por $\frac{n-1}{n}$ en estas fórmulas.
+- /Factor $n-1$ en cocientes/: Aunque Gretl usa $n-1$ en =sd()= y =cov()=, es seguro (y correcto) usarlos directamente en fórmulas de ratios como $\hat\beta_2 = \rho \frac{sd(y)}{sd(x)}$ o $\hat\beta_2 = \frac{cov(x,y)}{var(x)}$, porque el divisor se cancela algebraicamente (el ratio de varianzas muestrales clásicas coincide con el ratio de las varianzas geométricas del curso). No es necesario forzar la corrección por $\frac{n-1}{n}$ en estas fórmulas.
 
 ** 4.3 Figuras
 - Incrustar con =[[file:./img/SYY-LeccXX/nombre.png]]=. Subcarpetas según el nombre del =.org= (=SYY-LeccXX=).
@@ -547,20 +659,23 @@ Cada sesión teórica se entrega en /tres bloques/, en este orden:
    - Tras cada transparencia, unos /Apuntes desarrollados/: texto extenso, en secciones numeradas, para leer antes o después de clase. Cada sección sustantiva termina con "Para profundizar" (§4.5).
    - Cada transparencia = sección =*=; sus apuntes = subsección =**= con =#+attr_ipynb: (slideshow . ((slide_type . skip)))= antes de cada bloque. Fragmentos progresivos con =(slide_type . fragment)=.
 2. /Banco de preguntas tipo test/: 12 preguntas, marcadas [B] básica / [M] media / [D] discriminadora. Cada una con 4 opciones, respuesta correcta indicada y línea ``/Evalúa/:''. Al final, sugerencia de selección (8 y 6 preguntas) y comentario sobre las más valiosas pedagógicamente.
-   - /Precedente a vigilar (formato del banco de preguntas)/: la
-     sesión 8 (S08) se escribió con un formato ligeramente distinto del consolidado después (doble
-  marcador =* COMMENT ... :noexport:=, preguntas sin subtítulo "— Título", y la
-  respuesta correcta marcada con asteriscos /inline/ dentro de la propia
-  opción). A partir de la sesión 9 (S09) el formato se fijó como canónico:
-  cabecera =* COMMENT Banco de preguntas tipo test (sesión N)= (sin
-  =:noexport:=, redundante bajo =COMMENT=), cada pregunta como =** Pregunta N
-  [X] — Título breve=, opciones a)-d) sin marcar, y una línea separada
-  =/Respuesta correcta: X./= tras las opciones. /Al reutilizar S08 como
-  plantilla de formato para cualquier ficha futura, usar el formato consolidado
-  (S09 en adelante), no el original de S08./ El banco de preguntas de S08 se
-  reescribió a posteriori en este formato para no dejar dos convenciones
-  activas en el corpus.
- 
+   - /Precedente a vigilar (formato del banco de preguntas)/: la sesión 8 (S08) se escribió con un formato ligeramente distinto del consolidado después (doble marcador =* COMMENT ... :noexport:=, preguntas sin subtítulo "— Título", y la respuesta correcta marcada con asteriscos /inline/ dentro de la propia opción). A partir de la sesión 9 (S09) el formato se fijó como canónico: cabecera =* COMMENT Banco de preguntas tipo test (sesión N)= (sin    =:noexport:=, redundante bajo =COMMENT=), cada pregunta como =** Pregunta N [X] — Título breve=, opciones a)-d) sin marcar, y una línea separada =/Respuesta correcta: X./= tras las opciones. /Al reutilizar S08 como plantilla de formato para cualquier ficha futura, usar el formato consolidado    (S09 en adelante), no el original de S08./ El banco de preguntas de S08 se reescribió a posteriori en este formato para no dejar dos convenciones activas en el corpus.
+   - /Patrón opcional — banco de reserva de preguntas descartadas/: al
+     seleccionar las 12 preguntas activas de una sesión, es frecuente que
+     sobren variantes de dificultad alternativa, preguntas redundantes con
+     otra ya incluida, o preguntas mejor ubicadas en la sesión de
+     laboratorio correspondiente. Estas pueden conservarse, en lugar de
+     descartarse sin más, en una sección adicional =* COMMENT Banco N
+     reserva= (o =Banco 1 reserva=, =Banco 2 reserva=... si hay más de una
+     tanda de descarte), situada tras el "Comentario final" del banco
+     activo. Formato: una tabla de tres columnas —/Origen/ (p. ej. "Banco
+     1, Q5"), /Título/, /Por qué se guarda/ (redundancia con qué pregunta
+     activa, variante de dificultad, o traslado sugerido a otra sesión)—
+     seguida, si procede, de las preguntas completas correspondientes con
+     el mismo formato =** Pregunta N [X] — Título= que las activas.
+     Precedente: =S12-Lecc09.org= y =S13-Lecc10.org=, ambas con banco de
+     reserva completo. Patrón opcional: no sustituye la obligación de
+     entregar las 12 preguntas activas.
 
 /Plantilla de fichero/ (replicar):
 - Preámbulo: =#+TITLE=, =#+author: Marcos Bujosa=, =#+LANGUAGE: es=, =#+include: 00preambulo_lecciones.txt=.
@@ -610,13 +725,13 @@ No incluyas una versión actualizada de esta tabla en tu output; el usuario gest
 |   3 |   6 | Teoría    | Varianza vía Pitágoras. Traducción estadística: $1/n$, covarianza, $r=\cos\theta$.                                                   | ESCRITA   |
 |   4 |   7 | Lab Gretl | Descriptivos, correlaciones, dispersión (reales); verificar identidades (simulados).                                                 | ESCRITA   |
 |   4 |   8 | Teoría    | Regresión simple como ajuste geométrico.                                                                                             | ESCRITA   |
-|   5 |   9 | Teoría    | Estimación MCO sin matrices: dos ortogonalidades ⇒ $\hat\beta_1, \hat\beta_0$.                                                      | ESCRITA   |
+|   5 |   9 | Teoría    | Estimación MCO sin matrices: dos ortogonalidades ⇒ $\hat\beta_2, \hat\beta_1$.                                                      | ESCRITA   |
 |   5 |  10 | Teoría    | Bondad de ajuste: SST = SSR + SSE (Pitágoras). $R^2 = \cos^2\theta$.                                                                 | ESCRITA   |
 |   6 |  11 | Lab Gretl | Regresión simple (reales); comprobar $\sum e_i = 0$, $\sum x_i e_i = 0$, $R^2$.                                                      | ESCRITA   |
-|   6 |  12 | Teoría    | El puente: variables aleatorias, esperanza condicional, supuestos del modelo clásico, interpretación causal, método de los momentos. | PENDIENTE |
-|   7 |  13 | Teoría    | Regresión múltiple: $\mathrm{span}$, notación matricial, ecuaciones normales.                                                        | PENDIENTE |
+|   6 |  12 | Teoría    | El puente: variables aleatorias, esperanza condicional, supuestos del modelo clásico, interpretación causal, método de los momentos. | ESCRITA   |
+|   7 |  13 | Teoría    | Regresión múltiple: $\mathrm{span}$, notación matricial, ecuaciones normales.                                                        | ESCRITA   |
 |   7 |  14 | Lab Gretl | Regresión múltiple (reales): coeficientes parciales, $R^2$ ajustado.                                                                 | PENDIENTE |
-|   8 |  15 | Teoría    | Propiedades MCO: insesgadez y varianza de $\hat\beta_1$ (deducción simple).                                                          | PENDIENTE |
+|   8 |  15 | Teoría    | Propiedades MCO: insesgadez y varianza de $\hat\beta_2$ (deducción simple).                                                          | PENDIENTE |
 |   8 |  16 | Teoría    | Inferencia: distribución de $\hat\beta$ (enunciada), EE, IC, contraste $t$.                                                          | PENDIENTE |
 |   9 |  17 | Lab Gretl | Contrastes $t$ e IC (reales); cobertura de IC (simulados).                                                                           | PENDIENTE |
 |   9 |  18 | Teoría    | Contraste $F$: significación conjunta, restricciones lineales.                                                                       | PENDIENTE |
@@ -646,7 +761,7 @@ de sesión cuando el curso arrancó numerando las lecciones de teoría por
 separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
 #+end_center
 
-# se quitó  | 8 | 15 | Teoría | Propiedades MCO: insesgadez y varianza de $\hat\beta_1$ (deducción simple). | PENDIENTE | 
+# se quitó  | 8 | 15 | Teoría | Propiedades MCO: insesgadez y varianza de $\hat\beta_2$ (deducción simple). | PENDIENTE | 
 # - /Anclaje/: Frisch–Waugh como geometría de proyectar sobre residuos.
 # - /Recorte/: primera candidata a eliminar si el ritmo aprieta (§9.3).
 # dejo comentadas estas 4 líneas con "#" para recordar qué quitamos, por si se escribe esta lección para otros años en los que quepa (si hubiera más sesiones de clase).
@@ -726,7 +841,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   siempre $\alpha$ (coherente con =S03=). El sombrero $\hat{\cdot}$ se reserva
   para los estimadores MCO, cuyo uso arranca ya en la sesión 8
   ($\boldsymbol{\mathop{\widehat{y}}}$, $\boldsymbol{\mathop{\widehat{e}}}$,
-  $\hat\beta_0$, $\hat\beta_1$ como notación anunciada) y se consolida
+  $\hat\beta_1$, $\hat\beta_2$ como notación anunciada) y se consolida
   algebraicamente en la sesión 9.
 - /Definiciones inline a incluir/:
   - $\mathcal{L}(\boldsymbol{a})$: "el conjunto de todos los múltiplos de
@@ -952,7 +1067,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   esta sesión NO trata supuestos, interpretación causal ni modelo
   poblacional (eso se pospuso a una futura sesión-puente, a insertar
   más adelante en el cronograma, tras variables aleatorias). Aquí el
-  ajuste $\hat\beta_0,\hat\beta_1$ se presenta exactamente como en su
+  ajuste $\hat\beta_1,\hat\beta_2$ se presenta exactamente como en su
   día se presentó la media: un problema de mínima distancia en
   $\mathbb{R}^n$, sin más.
 - /Anclaje e idea rectora/: generaliza $\mathcal{L}(\boldsymbol{a})$
@@ -975,7 +1090,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   cenital). NO se pidió la figura adicional con las medias marcadas
   sobre $\mathcal{L}(\boldsymbol{1})$; queda reservada como posible
   petición para la sesión 9 (lección 7), si al derivar
-  $\hat\beta_0=\boldsymbol{\mathop{\overline{y}}}-\hat\beta_1\boldsymbol{\mathop{\overline{x}}}$
+  $\hat\beta_1=\boldsymbol{\mathop{\overline{y}}}-\hat\beta_2\boldsymbol{\mathop{\overline{x}}}$
   conviene ilustrarlo.
 - /Vocabulario fijado/: "regresor" (cada vector que multiplica a un
   $\beta$) explícitamente distinguido de "variable explicativa" (el
@@ -989,12 +1104,12 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
 - /Recorte que financia la reordenación/: Frisch-Waugh sale del tronco
   principal (afecta a la antigua ficha de "sesión 15/16"; ver
   actualización de §9.3 más abajo). El contenido de "insesgadez y
-  varianza de $\hat\beta_1$" se mantiene en su sesión propia
+  varianza de $\hat\beta_2$" se mantiene en su sesión propia
   (renumerada internamente, ver nota en la actualización de §7.0 que
   el usuario debe aplicar).
 - /Guiño a la sesión siguiente (Lección 7)/: resolver explícitamente el
-  sistema de las dos ortogonalidades para obtener $\hat\beta_0,
-  \hat\beta_1$; anticipo de que $\hat\beta_1$ se relacionará con la
+  sistema de las dos ortogonalidades para obtener $\hat\beta_1,
+  \hat\beta_2$; anticipo de que $\hat\beta_2$ se relacionará con la
   covarianza y la correlación de la lección 5.
 
 ** 7.10 Ficha — Sesión 9 (MCO sin matrices)
@@ -1002,7 +1117,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
 - /Título y entrega/: "Lección 7. Estimación MCO sin matrices: dos
   ortogonalidades, dos coeficientes". Abstract: se resuelve el sistema de
   dos ortogonalidades planteado en la lección 6 (sesión 8); de él surgen
-  $\hat\beta_1$ y $\hat\beta_0$; la pendiente es la covarianza dividida por
+  $\hat\beta_2$ y $\hat\beta_1$; la pendiente es la covarianza dividida por
   la varianza —o, equivalentemente, la correlación reescalada—. Sin
   matrices. Cita: "Imponer perpendicularidad, dos veces, y despejar: así
   nace la recta de mínimos cuadrados." Entrega: apuntes + 8 transparencias
@@ -1011,10 +1126,10 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   ortogonalidad dejadas sin resolver en la sesión 8
   ($\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{1}\rangle_s=0$,
   $\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{x}\rangle_s=0$). De
-  la primera se despeja $\hat\beta_0=\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}}$;
+  la primera se despeja $\hat\beta_1=\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}}$;
   sustituyendo en la segunda y agrupando se llega a
-  $\sigma_{\boldsymbol{x}\boldsymbol{y}}=\hat\beta_1\sigma_{\boldsymbol{x}}^2$,
-  de donde $\hat\beta_1=\sigma_{\boldsymbol{x}\boldsymbol{y}}/\sigma_{\boldsymbol{x}}^2=\rho_{\boldsymbol{x}\boldsymbol{y}}\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$.
+  $\sigma_{\boldsymbol{x}\boldsymbol{y}}=\hat\beta_2\sigma_{\boldsymbol{x}}^2$,
+  de donde $\hat\beta_2=\sigma_{\boldsymbol{x}\boldsymbol{y}}/\sigma_{\boldsymbol{x}}^2=\rho_{\boldsymbol{x}\boldsymbol{y}}\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$.
 - /Notación nueva, bautizada aquí/: el producto componente a componente
   $\boldsymbol{x}\odot\boldsymbol{y}$ (ya usado sin nombre, como
   $\boldsymbol{x}^2$, en la lección 5), que generaliza la "fórmula de
@@ -1035,7 +1150,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   $\boldsymbol{a}=\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$ y la
   fórmula de Cauchy–Schwarz
   $\alpha=\langle\boldsymbol{b},\boldsymbol{a}\rangle/\langle\boldsymbol{a},\boldsymbol{a}\rangle$,
-  se obtiene directamente $c_1=\hat\beta_1$.
+  se obtiene directamente $c_1=\hat\beta_2$.
 - /Figura nueva/: =FiguraMedias=
   (=img/S09-Lecc07/OLS-regresoresNoPerpconMedias_fila_ancho.png=), que
   reutiliza la figura de tres vistas de la sesión 8 añadiendo las medias
@@ -1043,10 +1158,10 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   $(\mu_{\boldsymbol{x}},\mu_{\boldsymbol{y}})$ y que
   $\mu_{\boldsymbol{\mathop{\widehat{y}}}}=\mu_{\boldsymbol{y}}$.
 - /Resultado adicional demostrado/: la identidad
-  $\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$
+  $\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_2(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$
   (el vector en desviaciones del ajuste coincide exactamente con el de
-  $\hat\beta_1\boldsymbol{x}$), de donde
-  $\sigma_{\boldsymbol{\mathop{\widehat{y}}}}=\sigma_{\hat\beta_1\boldsymbol{x}}$
+  $\hat\beta_2\boldsymbol{x}$), de donde
+  $\sigma_{\boldsymbol{\mathop{\widehat{y}}}}=\sigma_{\hat\beta_2\boldsymbol{x}}$
   y $\boldsymbol{y}$ forma el mismo ángulo con ambos. Se guarda
   explícitamente para la sesión 10 (traducción directa a
   $\text{SST}=\text{SSR}+\text{SSE}$ y $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$).
@@ -1054,7 +1169,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   $\boldsymbol{x}=(1,2,3,4,5)$, $\boldsymbol{u}=(1,-2,0,2,-1)$ (diseñado con
   covarianza muestral nula respecto a $\boldsymbol{x}$ y media nula),
   $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$; recupera exactamente
-  $\hat\beta_0=2,\hat\beta_1=3$. Se advierte explícitamente que esto NO es lo
+  $\hat\beta_1=2,\hat\beta_2=3$. Se advierte explícitamente que esto NO es lo
   habitual: es consecuencia de haber diseñado $\boldsymbol{u}$ ortogonal a
   los regresores, no una propiedad general de MCO (banco de preguntas,
   pregunta 11, insiste en ello). Mismo ejemplo ya sembrado en S07-Prct-B,
@@ -1068,12 +1183,12 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   - Ses. 3: $\alpha=\langle\boldsymbol{b},\boldsymbol{a}\rangle/\langle\boldsymbol{a},\boldsymbol{a}\rangle$
     generalizado a la pendiente (cobro explícito en "Vía alternativa").
   - Ses. 5: "media como ajuste MCO con único regresor $\boldsymbol{1}$"
-    (invocada al abrir, y como caso límite $\hat\beta_1=0$ en la
+    (invocada al abrir, y como caso límite $\hat\beta_2=0$ en la
     recapitulación).
   - Ses. 8: las dos condiciones de ortogonalidad planteadas sin resolver
     (resolución completa: cobro principal de la sesión).
   - Ses. 8: "la ortogonalidad del residuo a $\boldsymbol{1}$ implica que el
-    ajuste preserva la media" (retomada y usada activamente en "$\hat\beta_0$
+    ajuste preserva la media" (retomada y usada activamente en "$\hat\beta_1$
     y el lugar de las medias").
 - /Lo que siembra para sesiones posteriores/:
   - Ses. 10: SST=SSR+SSE vía Pitágoras, aplicado a
@@ -1101,7 +1216,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   transparencias + 12 preguntas (no 10; recuento verificado contra el
   fichero).
 - /Anclaje e idea rectora/: cobra la identidad guardada explícitamente en
-  la lección 7 ($\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$)
+  la lección 7 ($\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_2(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$)
   y construye, a partir de $\boldsymbol{y}=\boldsymbol{\mathop{\widehat{y}}}+\boldsymbol{\mathop{\widehat{e}}}$
   y $\mu_{\boldsymbol{y}}=\mu_{\boldsymbol{\mathop{\widehat{y}}}}$, un triángulo
   rectángulo con hipotenusa $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ y
@@ -1124,10 +1239,12 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   con $\theta$ el ángulo entre $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ y
   $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$; demostrado
   sustituyendo la descomposición ortogonal en el numerador del coseno.
-- /Demostración central 3 (cierre del hilo covarianza/correlación,
-  REESCRITA)/: en regresión simple, $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
-  /Argumento adoptado/ (sustituye la versión algebraica anterior, que queda
-  solo como confirmación secundaria): todo vector no constante del plano
+- /Demostración central 3 (cierre del hilo covarianza/correlación)/: en
+  regresión simple, $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
+  /Argumento adoptado/ (sustituye por completo la versión algebraica bruta
+  considerada en un borrador previo; en el fichero final no se conserva
+  ninguna confirmación algebraica adicional como "vía secundaria", solo
+  este argumento geométrico): todo vector no constante del plano
   $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, una vez centrado, cae en la
   MISMA recta $\mathcal{L}(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$
   (consecuencia directa de la identidad guardada, generalizada a cualquier
@@ -1136,8 +1253,8 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   y reescalado de $\boldsymbol{x}$), basta aplicar directamente las
   propiedades de traslación y escala YA DEMOSTRADAS en la lección 5
   (transparencia "Propiedades geométricas: traslación y escala") para
-  obtener $\rho_{\boldsymbol{y}\boldsymbol{\mathop{\widehat{y}}}}=\mathrm{sign}(\hat\beta_1)\,\rho_{\boldsymbol{x}\boldsymbol{y}}=|\rho_{\boldsymbol{x}\boldsymbol{y}}|$
-  (el signo se cancela porque $\hat\beta_1$ y $\rho_{\boldsymbol{x}\boldsymbol{y}}$
+  obtener $\rho_{\boldsymbol{y}\boldsymbol{\mathop{\widehat{y}}}}=\mathrm{sign}(\hat\beta_2)\,\rho_{\boldsymbol{x}\boldsymbol{y}}=|\rho_{\boldsymbol{x}\boldsymbol{y}}|$
+  (el signo se cancela porque $\hat\beta_2$ y $\rho_{\boldsymbol{x}\boldsymbol{y}}$
   comparten siempre signo, lección 7). Se explicita que esta coincidencia es
   exclusiva del caso de un único regresor: en regresión múltiple (lección
   10), el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_1,\ldots,\boldsymbol{x}_k)\cap\mathcal{L}(\boldsymbol{1})^\perp$
@@ -1146,7 +1263,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   ninguna correlación simple $\rho_{\boldsymbol{x}_j\boldsymbol{y}}$.
 - /Ejemplo numérico canónico (reutilizado, no nuevo)/: mismo $n=5$ de la
   lección 7 ($\boldsymbol{x}=(1,2,3,4,5)$, $\boldsymbol{u}=(1,-2,0,2,-1)$,
-  $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$, $\hat\beta_0=2,\hat\beta_1=3$).
+  $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$, $\hat\beta_1=2,\hat\beta_2=3$).
   STC=100, SEC=90, SRC=10, $R^2=0{,}9$; se verifica que
   $\rho_{\boldsymbol{x}\boldsymbol{y}}^2=36/40=0{,}9$ coincide exactamente.
 - /Advertencia causal (transparencia dedicada)/: STC=SEC+SRC es puramente
@@ -1161,7 +1278,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
     en gris, arco con $\theta$). Reutilizada implícitamente, sin
     re-embeberse, en la transparencia de Pitágoras (mismo precedente que en
     la lección 5: figura comentada, referencia solo textual).
-  - =ComparacionAjustes_muy_ancho.png= (nombre real verificado en el
+  - =ComparacionAjustes_ancho.png= (nombre real verificado en el
     fichero; corrige el nombre provisional =OLS-comparacionR2_fila_ancho.png=
     que constaba en un borrador anterior de esta ficha): dos escenas, misma
     longitud de $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$,
@@ -1177,7 +1294,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   "lección N" (lección 3, 4, 5, 6, 7, 9, 10); la práctica de laboratorio que
   sigue a esta lección se menciona sin número de sesión (§4.6).
 - /Promesas cumplidas (cobradas)/:
-  - Lección 7: identidad guardada $\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$
+  - Lección 7: identidad guardada $\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_2(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$
     (cobro pleno, y generalizado explícitamente a "cualquier vector no
     constante del plano" en la reescritura del argumento 3).
   - Lección 7: "dos ortogonalidades ⇒ SST=SSR+SSE" (cobro pleno).
@@ -1209,12 +1326,12 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
 - /Práctica A (=S11-Prct-A-mco-simulado=)/: "MCO con Gretl: el ejemplo de la lección 7
   y verificación con datos simulados". Retoma EXACTAMENTE el ejemplo de juguete $n=5$
   de la lección 7 ($\boldsymbol{x}=(1..5)$, $\boldsymbol{u}=(1,-2,0,2,-1)$,
-  $\hat\beta_0=2,\hat\beta_1=3$, $R^2=0{,}9$), creado en Gretl vía conversión
+  $\hat\beta_1=2,\hat\beta_2=3$, $R^2=0{,}9$), creado en Gretl vía conversión
   matriz→serie (=matrix mx={1;2;3;4;5}; series x=mx=). Usa por primera vez =ols= y
   sus accesores post-estimación (=$uhat=, =$yhat=, =$coeff(x)=, =$rsq=). Actividad 5
   (nueva, $n=60$ simulado, =set seed 24680=) contrasta explícitamente: la
   ortogonalidad se cumple SIEMPRE exactamente (identidad algebraica), mientras que
-  recuperar $\hat\beta_1\approx3$ es solo una aproximación (estimación) — distinción
+  recuperar $\hat\beta_2\approx3$ es solo una aproximación (estimación) — distinción
   pedagógica central de esta práctica, reforzada en preguntas 1-2 y su respuesta.
   Advertencia explícita al inicio sobre ignorar deliberadamente error estándar/t/p-valor
   de la salida de =ols= (pendientes de inferencia, más adelante en el curso).
@@ -1253,118 +1370,203 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   Práctica C dejan sembrada la regresión múltiple (sesión 13) y la necesidad de
   informes reproducibles, retomable en labs posteriores.
 ** 7.13 Ficha — Sesión 12 (El puente)
-- /Fichero/: =S12-Lecc09.org= (lección 9, según el cálculo de
-  correspondencia sesión↔lección de §4.6).
-- /Título propuesto/: "Lección 9. El puente: de los vectores de datos a las
-  variables aleatorias".
-- /Anclaje e idea rectora/: tras nueve sesiones trabajando exclusivamente en
-  $\mathbb{R}^n$ (datos concretos, sin ningún supuesto probabilístico), esta
-  sesión da el salto — presentado explícitamente como ANALOGÍA, no como
-  demostración (principio 1 de §9.1) — al espacio de variables aleatorias.
-  Se muestra, en paralelo directo con lo ya visto, que $E[\cdot]$ juega el
-  papel de la media, que la esperanza condicional $E[Y\mid X]$ juega el
-  papel de la proyección MCO $\hat{\boldsymbol y}$, y que los supuestos del
-  Modelo Clásico de Regresión (linealidad, $E[U\mid X]=0$, homocedasticidad)
-  son justamente las condiciones que hacen que ese paralelismo sea válido.
-- /Fuente principal/: Lec04 (§11.4), con apoyo puntual de Lec05 (§11.5) para
-  el argumento del método de los momentos. *No reproducir* el aparato
-  axiomático de 5 axiomas ni las clases de equivalencia de Lec04 — mantener
-  todo en registro informal y analógico.
-- /Contenido/:
-  1. Variables aleatorias como vectores abstractos (idea informal, sin
-     axiomática): un vector de datos $\boldsymbol y\in\mathbb{R}^n$ es UNA
-     realización concreta; una variable aleatoria $Y$ es la generalización
-     abstracta de la que ese vector es una muestra.
-  2. Analogía explícita (tabla o lista): $E[Y]\leftrightarrow\mu_{\boldsymbol
-     y}$; $E[Y\mid X]\leftrightarrow\hat{\boldsymbol y}$;
-     $\mathrm{Var}[Y]\leftrightarrow\sigma_{\boldsymbol y}^2$.
-  3. Supuestos del Modelo Clásico de Regresión, presentados de forma ligera:
-     $Y=\beta_0+\beta_1X+U$ (linealidad); $E[U\mid X]=0$ (exogeneidad
-     estricta); $\mathrm{Var}[U\mid X]=\sigma^2$ constante (homocedasticidad).
-  4. /Advertencia central, la más importante de la sesión/: la
-     descomposición $Y=E[Y\mid X]+U$ es puramente algebraica (existe
-     siempre); NUNCA implica por sí misma causalidad ni valida ningún
-     modelo económico. Solo con una teoría económica previa que justifique
-     la dirección causal cabe una lectura sustantiva. (Ejemplo recomendado,
-     tomado de Lec04: consumo en función de la renta disponible, frente al
-     absurdo de poner la superficie de una vivienda en función de su
-     precio.)
-  5. El "salto" del método de los momentos: se explica por qué
-     $\hat\beta_0,\hat\beta_1$ —ya calculados en la sesión 9 puramente vía
-     geometría muestral— SON, vistos ahora con la óptica poblacional,
-     estimadores de $\beta_0,\beta_1$ obtenidos sustituyendo momentos
-     poblacionales desconocidos ($E[\cdot]$) por sus análogos muestrales
-     ($\mu_{\boldsymbol\cdot}$, $\sigma_{\boldsymbol\cdot}^2$, etc.). Este es
-     el punto donde la sesión "reconecta" explícitamente con las fórmulas ya
-     obtenidas en las sesiones 9-10.
-  6. Nomenclatura: regresando, regresores, perturbación (u "otras cosas").
-- /Uso del "truco del vector de media nula" (principio 7 de §9.1)/:
-  reutilizarlo aquí para argumentar, de forma casi inmediata, que $E[U\mid
-  X]=0\Rightarrow \mathrm{Cov}(U,X)=0$ — el mismo argumento algebraico que
-  en $\mathbb{R}^n$ decía que un vector ortogonal a $\boldsymbol 1$ tiene
-  covarianza (no solo producto escalar) nula con cualquier otro vector.
-- /Promesas a cobrar/:
-  - Ses. 1: diccionario geometría↔probabilidad (desarrollo central aquí).
-  - Ses. 8: distinción regresor/variable explicativa con matiz causal (se
-    cobra explícitamente aquí, al introducir la interpretación causal
-    pospuesta).
-  - Ses. 8: el truco del vector de media nula (invocación directa, ver
-    arriba).
-- /Lo que siembra para sesiones posteriores/:
-  - Ses. 13: la notación matricial y las ecuaciones normales poblacionales,
-    como generalización natural de lo aquí visto con un solo regresor.
-  - Ses. 15: el propio concepto de "insesgadez" ($E[\hat\beta_1\mid
-    X]=\beta_1$) solo es enunciable una vez definido aquí qué significa
-    $E[\cdot\mid X]$ — esta sesión es un *prerrequisito conceptual* de la
-    sesión 15, no solo temporal.
-  - Ses. 16: $\mathrm{Var}[Y\mid X]=\sigma^2$ constante (homocedasticidad)
-    como supuesto necesario para construir el estadístico $t$.
-- /Lo que NO debe hacer esta sesión/: no debe demostrar insesgadez ni
-  varianza de $\hat\beta_1$ (eso es exclusivo de la sesión 15); no debe
-  introducir notación matricial de regresores múltiples (eso es exclusivo
-  de la sesión 13); no debe reproducir la axiomática formal de espacios de
-  Hilbert de Lec04.
+- /Fichero/: =S12-Lecc09.org= (ESCRITA; lección 9).
+- /Título y entrega/: "Lección 9. El puente: de los datos a las variables
+  aleatorias". Abstract: salto desde la geometría de las muestras al
+  espacio de las variables aleatorias. Cita: Diotima a Sócrates, /El
+  Banquete/. Entrega: apuntes + 9 transparencias + 12 preguntas.
+- /Fuente principal/: Lec04 (§11.4), con apoyo puntual de Lec05 (§11.5)
+  para el método de los momentos. Registro informal y analógico: NO se
+  reproduce el aparato axiomático (5 axiomas, clases de equivalencia) de
+  Lec04 — confirmado tras auditoría del fichero final.
+- /Anclaje e idea rectora/: tras nueve sesiones en $\mathbb{R}^n$, se
+  construye un diccionario analógico con el espacio de variables
+  aleatorias vía $\langle X,Y\rangle_P=E[XY]$; se muestra que $E[Y|X]$
+  juega el papel de $\hat{\boldsymbol y}$, y que los supuestos del MCRL
+  (linealidad, exogeneidad estricta, homocedasticidad) son las
+  condiciones que hacen manejable la esperanza condicional (proyección
+  sobre un subespacio de dimensión infinita).
+- /Decisiones cumplidas/: notación $E[Y]$ (escalar) vs. $E[Y|\mathit1]$
+  (vector) distinguida con rigor; honestidad sobre el semi-producto
+  escalar $\langle\cdot,\cdot\rangle_P$ ("cero casi seguro", vídeo Two
+  Envelopes); advertencia "ortogonalidad ≠ causalidad" con ejemplo
+  precio/superficie; truco del vector de media nula reutilizado
+  explícitamente; método de los momentos como puente hacia lo ya
+  calculado en la lección 7.
+- /Vocabulario fijado/: 'regresando' (Y), 'regresores' (X, 1) y 'perturbación' (U), con distinción explícita respecto a 'residuo'.
+- /Restricciones respetadas (confirmadas en la auditoría)/: no se
+  demuestra insesgadez ni varianza de $\hat\beta_2$ (reservado a sesión
+  15); no se introduce notación matricial de regresores múltiples
+  (reservado a sesión 13); no se reproduce la axiomática formal de Lec04.
+- /Promesas a cobrar (cobradas)/: diccionario geometría↔probabilidad
+  (ses. 1); distinción regresor/variable explicativa (ses. 8); truco del
+  vector de media nula (ses. 8).
+- /Lo que siembra para sesiones posteriores/: notación matricial y
+  ecuaciones normales poblacionales generalizadas a $k$ regresores (ses.
+  13); el propio concepto de insesgadez, solo enunciable una vez definido
+  $E[\cdot\mid X]$ (ses. 15, prerrequisito conceptual); homocedasticidad
+  $\mathrm{Var}[U\mid X]=\sigma^2$ como pilar de la inferencia $t$ (ses. 16).
+- /Corrección posterior a la escritura/: se añade explícitamente un cuarto
+  supuesto del MCRL ("regresores linealmente independientes", $\mathrm{Var}(X)\neq0$), en la transparencia "El Modelo Clásico de Regresión Lineal
+  (MCRL)" y sus apuntes desarrollados. Motivo: la sesión 13 necesitaba este
+  supuesto ya nombrado y precisado (incluida la distinción "casi seguro"
+  vs. igualdad en todo $\Omega$, reutilizando el semi-producto escalar ya
+  presentado en esta misma lección) para poder generalizarlo a $k$
+  regresores sin reexplicarlo desde cero. Ajustado el recuento de
+  supuestos de "tres" a "cuatro" en dos lugares del fichero (introducción
+  de la transparencia MCRL; sección "Cuidado: esta descomposición
+  ortogonal no implica causalidad"). No cambia el número de transparencias
+  (9): la adición es un bullet dentro de una transparencia ya existente.
+
 ** 7.14 Ficha — Sesión 13 (Regresión múltiple)
-- /Anclaje/: regresores como $\mathrm{span}$. Se cobra la doble lectura de $\boldsymbol{A}\boldsymbol{x}$ y se introduce matriz–matriz al servicio de $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$. Ecuaciones normales como condición de ortogonalidad. La inversa se menciona pero no se usa (ver §9.2).
-- /Nota/: aquí aparecen naturalmente familia ortogonal y Pitágoras generalizado (pospuestos desde sesión 3).
-- /Adición (reconciliación tras la incorporación de "El puente" en sesión
-  12)/: al cierre de esta sesión debe ADELANTARSE, sin demostración, que
-  $E[\hat{\boldsymbol\beta}\mid\boldsymbol{\mathsf
-  X}]=\boldsymbol\beta$ y $\mathrm{Var}[\hat{\boldsymbol\beta}\mid
-  \boldsymbol{\mathsf X}]=\sigma^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf
-  X})^{-1}$ (generalización matricial de lo que se demostrará, solo para el
-  caso $k=2$, en la sesión 15). Es una simple ASERCIÓN, apoyada en el modelo
-  poblacional ya introducido en la sesión 12 — no debe reproducirse ninguna
-  prueba matricial (§9.4).
-
+- /Fichero/: =S13-Lecc10.org= (ESCRITA; lección 10).
+- /Título y entrega/: "Lección 10. Regresión múltiple: de dos ortogonalidades
+  a $k$". Abstract: se generaliza la regresión a cualquier número de
+  regresores; la geometría es idéntica (todo lo gobierna la ortogonalidad),
+  pero el sistema de ecuaciones crece, así que se introduce una notación
+  matricial basada en un /operador selector/. Se deja planteado, para el
+  laboratorio, el concepto de efecto parcial /ceteris paribus/. Entrega:
+  apuntes + *12* transparencias (excede el rango habitual "8-11" de §6,
+  justificado por la densidad del contenido) + 12 preguntas + dos bancos de
+  reserva completos ("Banco 1 reserva", "Banco 2 reserva").
+- /Anclaje e idea rectora/: generaliza el plano
+  $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (lección 6) al hiperplano
+  $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\ldots,\boldsymbol{x}_k)$;
+  reutiliza deliberadamente, sin re-dibujarla, la figura de tres vistas de
+  la lección 8 (=img/S10-Lecc08/OLS_fila_ancho.png=), precisamente porque
+  esa figura nunca mostró $\hat\beta_2\boldsymbol{x}$ dentro del plano.
+  Mensaje martillo: "la geometría es exactamente la misma; lo único nuevo es
+  el lenguaje para no ahogarse en sumatorios".
+- /Notación nueva introducida aquí (permanente, no documentada aún en el
+  Plan §4.2 — ver punto E de la auditoría de esta fecha)/: el /operador
+  selector/ (barra vertical): $\boldsymbol{\mathsf{X}}_{|j}$ (columna $j$
+  por la derecha), ${}_{i|}\boldsymbol{\mathsf{X}}$ (fila $i$ por la
+  izquierda); sobre un vector, el selector da la componente $i$-ésima por
+  cualquier lado ($\boldsymbol{v}_{|i}={}_{i|}\boldsymbol{v}=v_i$); regla de
+  precedencia del selector sobre el producto (permite escribir
+  $\boldsymbol{v}\boldsymbol{\mathsf{X}}_{|j}$ sin ambigüedad). Notación
+  propia de Bujosa, /Curso de Álgebra Lineal/ (no la notación anglosajona
+  habitual).
+- /Definiciones centrales, en orden/: producto /vector por matriz/
+  ($(\boldsymbol{v}\boldsymbol{\mathsf{X}})_{|j}=\boldsymbol{v}\cdot\boldsymbol{\mathsf{X}}_{|j}$,
+  comprime las $k$ ortogonalidades en $\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol{0}$);
+  producto /matriz por vector/ (combinación lineal de columnas,
+  $\boldsymbol{\mathop{\widehat{y}}}=\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$,
+  con doble lectura fila/columna); /transposición/ de matrices (nunca de
+  vectores), con la identidad $\boldsymbol{v}\boldsymbol{\mathsf{X}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{v}$
+  verificada con un ejemplo numérico $2\times2$; /ecuaciones normales/
+  $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}$,
+  único lugar del curso con producto matriz-matriz (§9.2; ¡ojo!, §9.2 dice
+  por error "sesión 14", debe decir "sesión 13" — corregir en el Plan).
+- /Inversa/: se menciona $\boldsymbol{\mathop{\widehat{\beta}}}=(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}$
+  explícitamente como "la fórmula de los manuales, la que usa Gretl
+  internamente", pero se declara, de forma expresa, que el curso NUNCA la
+  usará como vía de razonamiento: el camino conceptual es siempre
+  $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}$
+  (anti-promesa ya registrada en §10).
+- /Familia ortogonal/ (transparencia 9): cobra la promesa de la lección 3
+  (Cauchy–Schwarz) y de la lección 7 ("vía alternativa"), generalizándola a
+  $k$ generadores mutuamente ortogonales: cada $\hat\beta_j$ se calcula por
+  separado, sin resolver el sistema. Incluye, en nota a pie de página, el
+  Pitágoras generalizado a $k+1$ vectores mutuamente ortogonales (extensión
+  pospuesta desde la lección 3, aún sin desarrollo completo con las $k$
+  ortogonalidades cruzadas verificadas).
+- /$R^2$ en regresión múltiple/ (transparencia 10): cobra explícitamente la
+  pregunta 5 de la práctica de la sesión 11 (S11-Prct-B), sin mencionarla
+  por su nombre de fichero (correcto per §4.6). Demuestra con detalle
+  geométrico (dimensión del subespacio centrado $>1$) por qué, en general,
+  $R^2\neq\sum_j\rho_{\boldsymbol{x}_j\boldsymbol{y}}^2$, y por qué SÍ se
+  cumple la igualdad en el caso especial de regresores mutuamente
+  ortogonales (usando el Pitágoras generalizado y la fórmula de $\hat\beta_j$
+  de la transparencia anterior).
+- /Generalización del modelo poblacional/ (transparencia 11, "El modelo
+  poblacional también se generaliza"): extiende $Y=\beta_1\mathit1+\beta_2X+U$
+  (lección 9) a $Y=\beta_1\mathit1+\beta_2X_2+\cdots+\beta_kX_k+U$, con los
+  MISMOS cuatro supuestos (linealidad, exogeneidad estricta, homocedasticidad,
+  independencia lineal), reordenando la lista para dejar "independencia
+  lineal" al final (foco de esta transparencia). Ejemplo nuevo de
+  colinealidad exacta entre dos regresores no constantes por separado:
+  temperatura en Celsius y Fahrenheit ($F=32+1{,}8\,C$).
+- /Nomenclatura y convenciones respetadas/: numeración de regresores desde
+  $\boldsymbol{x}_2$ (arranca aquí, per §4.2.1); "regresor" (nunca "variable
+  explicativa") en todo el fichero; distinción residuo/perturbación
+  respetada (perturbación solo en la transparencia 11, poblacional); STC/SEC/SRC
+  (nunca SST/SSE/SSR) mantenido; $\mathit1,\mathit0$ usados correctamente en
+  la transparencia 11 con el mismo sentido fijado en la lección 9.
+- /Precisión conceptual sembrada explícitamente para las dummies/: en "La
+  matriz de datos y el operador selector", se incluye ya el párrafo
+  anticipado por §4.2.1 sobre que lo esencial no es que alguna columna de
+  $\boldsymbol{\mathsf X}$ sea literalmente $\boldsymbol1$, sino que
+  $\boldsymbol1\in\mathcal{L}(\text{columnas})$ — con la promesa explícita de
+  que "reaparecerá al hablar de variables dummy" (ficha §7.24).
+- /Promesas cumplidas (cobradas)/: notación matricial ligera y doble lectura
+  de $\boldsymbol{A}\boldsymbol{x}$ (ambas sembradas en ses. 6); familia
+  ortogonal/Pitágoras generalizado (sembrada en ses. 3, parcialmente cobrada
+  aquí); "$R^2$ no es la suma de correlaciones" (sembrada en ses. 11);
+  colinealidad exacta/de grado (distinción sembrada aquí mismo, cobro pleno
+  en ses. 20); efecto parcial/ceteris paribus (sembrada aquí, cobro en ses.
+  14); reutilización del "truco del vector de media nula" (ses. 8) y del
+  cuarto supuesto del MCRL (ses. 12), ambos generalizados aquí a $k$
+  regresores.
+- /Lo que siembra para sesiones posteriores/: pregunta sembrada (sin fórmula)
+  sobre si $\boldsymbol{\mathop{\widehat{\beta}}}$ es buen estimador de
+  $\boldsymbol\beta$ (una sola frase en la Recapitulación), a cobrar con
+  fórmula matricial y demostración simple en ses. 15; operador selector,
+  sin fecha fija de reutilización garantizada (la ses. 15 lo evita
+  deliberadamente, per ficha §7.16); ejemplo Celsius/Fahrenheit, reutilizable
+  en ses. 20 (colinealidad) o ses. 22 (formas funcionales).
+- /Guiño a la sesión siguiente/: laboratorio (ses. 14, sin lección propia):
+  coeficientes parciales, comparación simple vs. múltiple con datos reales,
+  $R^2$ ajustado motivado por "R² nunca empeora al añadir regresores"
+  (sembrado en lección 8).
 ** 7.15 Ficha — Sesión 14 (Lab Gretl: regresión múltiple)
-- /Contenido/: coeficientes parciales, $R^2$ ajustado (reales).
-
-** 7.16 Ficha — Sesión 15 (Propiedades MCO: insesgadez y varianza de $\hat\beta_1$)
+- /Ficheros/: 3-4 prácticas encadenadas (a determinar el número exacto al
+  escribir), siguiendo el patrón ya usado en la sesión 11 (S11-Prct-A/B/C).
+- /Contenido general/: coeficientes parciales (interpretación ceteris
+  paribus), comparación explícita simple vs. múltiple con datos reales,
+  $R^2$ ajustado (motivado por "R² nunca empeora al añadir regresores",
+  sembrado en la sesión 10).
+- /Práctica con dataset de Ramanathan (14 viviendas, University City, San
+  Diego, 1990; ver §11.1-11.2)/: dataset pequeño, calculable a mano si hace
+  falta, con `rooms` (número de habitaciones) como ilustración central del
+  efecto parcial: regresión simple price~rooms frente a price~rooms+sqft
+  (o el regresor de superficie disponible), mostrando que el coeficiente de
+  `rooms` cambia de signo o deja de ser claro al controlar por superficie.
+  Dataset NO registrado aún en §8; añadir como tercera fuente canónica al
+  confirmarse su uso.
+  /Nota para el futuro/: con esta muestra reducida, el coeficiente de
+  `rooms` en el modelo múltiple es candidato natural a resultar NO
+  significativo cuando se introduzca inferencia (sesión 16-17); dejar esta
+  posibilidad anotada como gancho reutilizable, sin desarrollarla aún
+  (todavía no hay error estándar ni contraste t en el curso a esta altura).
+- /Reserva de banco de preguntas/: recuperar Banco2-Q10 de S13 (efecto
+  parcial, cambio de signo de `rooms`), adaptado a los datos concretos que
+  se usen aquí.
+** 7.16 Ficha — Sesión 15 (Propiedades MCO: insesgadez y varianza de $\hat\beta_2$)
 - /Fichero/: =S15-Lecc11.org= (lección 11).
 - /Título propuesto/: "Lección 11. ¿Es bueno nuestro estimador? Insesgadez y
-  varianza de $\hat\beta_1$".
+  varianza de $\hat\beta_2$".
 - /Anclaje e idea rectora/: ahora que la sesión 12 ("El puente") ha dado
-  sentido a preguntas del tipo "¿$\hat\beta_1$ estima bien al verdadero
-  $\beta_1$ poblacional?", esta sesión responde con dos propiedades
+  sentido a preguntas del tipo "¿$\hat\beta_2$ estima bien al verdadero
+  $\beta_2$ poblacional?", esta sesión responde con dos propiedades
   demostradas EXCLUSIVAMENTE para la regresión simple: insesgadez
-  ($E[\hat\beta_1\mid X]=\beta_1$) y varianza
-  ($\mathrm{Var}[\hat\beta_1\mid X]=\sigma^2/\sum(x_i-\mu_x)^2$).
+  ($E[\hat\beta_2\mid X]=\beta_2$) y varianza
+  ($\mathrm{Var}[\hat\beta_2\mid X]=\sigma^2/\sum(x_i-\mu_x)^2$).
 - /Fuente principal/: Lec06 (§11.6), pero DRÁSTICAMENTE recortada — tómese
-  solo la idea de escribir $\hat\beta_1$ como combinación lineal de las
+  solo la idea de escribir $\hat\beta_2$ como combinación lineal de las
   $Y_i$ (ver más abajo), evitando toda la maquinaria matricial de Lec06
   (proyectores $\boldsymbol{\mathsf P},\boldsymbol{\mathsf M}$, demostración
   de Gauss-Markov, etc. — ver §9.2, §9.4).
 - /Demostración central (única exigida, per §9.2)/:
-  1. Escribir $\hat\beta_1=\sum_i w_i Y_i$, con
+  1. Escribir $\hat\beta_2=\sum_i w_i Y_i$, con
      $w_i=\dfrac{x_i-\mu_x}{\sum_j(x_j-\mu_x)^2}$, verificando $\sum w_i=0$ y
      $\sum w_ix_i=1$.
-  2. Sustituir $Y_i=\beta_0+\beta_1x_i+U_i$ (modelo poblacional de la sesión
+  2. Sustituir $Y_i=\beta_1+\beta_2x_i+U_i$ (modelo poblacional de la sesión
      12) y usar $\sum w_i=0$, $\sum w_ix_i=1$ para obtener
-     $\hat\beta_1=\beta_1+\sum w_iU_i$.
-  3. Insesgadez: $E[\hat\beta_1\mid X]=\beta_1+\sum w_iE[U_i\mid
-     X]=\beta_1$ (usando $E[U\mid X]=0$, sesión 12).
-  4. Varianza: $\mathrm{Var}[\hat\beta_1\mid X]=\sum w_i^2\,\mathrm{Var}(U_i\mid
+     $\hat\beta_2=\beta_2+\sum w_iU_i$.
+  3. Insesgadez: $E[\hat\beta_2\mid X]=\beta_2+\sum w_iE[U_i\mid
+     X]=\beta_2$ (usando $E[U\mid X]=0$, sesión 12).
+  4. Varianza: $\mathrm{Var}[\hat\beta_2\mid X]=\sum w_i^2\,\mathrm{Var}(U_i\mid
      X)=\sigma^2\sum w_i^2=\dfrac{\sigma^2}{\sum(x_i-\mu_x)^2}$ (usando
      homocedasticidad y, de forma implícita, no autocorrelación entre las
      $U_i$ — mencionar brevemente esta última condición, aunque no se haya
@@ -1377,24 +1579,27 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
     sin demostración — "de entre todos los estimadores lineales e
     insesgados, MCO tiene la menor varianza" (per §9.2, "a lo sumo una
     frase de cierre").
-- /Para la regresión múltiple (relación con la sesión 13)/: esta sesión debe
-  recordar explícitamente que en la sesión 13 (regresión múltiple) ya se
-  ADELANTÓ, sin prueba, la fórmula matricial $E[\hat{\boldsymbol\beta}\mid
-  \boldsymbol{\mathsf X}]=\boldsymbol\beta$,
-  $\mathrm{Var}[\hat{\boldsymbol\beta}\mid\boldsymbol{\mathsf
-  X}]=\sigma^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$; aquí
-  se cumple esa promesa, pero SOLO para el caso particular de un único
-  regresor (además de la constante), que es exactamente el caso $k=2$ de esa
-  fórmula matricial. Puede ser natural, como cierre, verificar (sin nueva
-  demostración) que la fórmula matricial se reduce a la escalar aquí
-  obtenida.
+- /Para la regresión múltiple (relación con la sesión 13)/: esta sesión
+  responde a la pregunta que la sesión 13 dejó explícitamente abierta —¿es
+  $\hat{\boldsymbol\beta}$ un buen estimador de $\boldsymbol\beta$?—,
+  planteada allí en una sola frase de la Recapitulación, sin fórmula ni
+  supuestos generalizados. Es aquí, por primera vez en el curso, donde se
+  escribe la fórmula matricial $E[\hat{\boldsymbol\beta}\mid\boldsymbol
+  X]=\boldsymbol\beta$,
+  $\mathrm{Var}[\hat{\boldsymbol\beta}\mid\boldsymbol
+  X]=\sigma^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$ —como
+  ASERCIÓN de cierre, sin demostrarla en general—, y donde se verifica (sin
+  ninguna demostración adicional) que esa fórmula matricial se reduce
+  exactamente a $\mathrm{Var}[\hat\beta_2\mid X]=\sigma^2/\sum(x_i-\mu_x)^2$
+  para el caso particular $k=2$ (un único regresor además de la constante),
+  que es justamente el caso demostrado con todo detalle en esta sesión.
 - /Promesas a cobrar/:
   - Ses. 12: el concepto mismo de insesgadez, que solo tiene sentido una vez
     definida $E[\cdot\mid X]$ allí.
   - Ses. 13: la fórmula matricial adelantada sin prueba (ver punto
     anterior) — cobro parcial, solo para $k=2$.
 - /Lo que siembra/:
-  - Ses. 16: $\mathrm{Var}[\hat\beta_1\mid X]$ es el ingrediente necesario
+  - Ses. 16: $\mathrm{Var}[\hat\beta_2\mid X]$ es el ingrediente necesario
     para construir el error estándar, el estadístico $t$ y el intervalo de
     confianza.
 - /Nota de reordenamiento (para quien edite el manual)/: esta sesión
@@ -1426,7 +1631,13 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
 ** 7.23 Ficha — Sesión 22 (Formas funcionales con logaritmos)
 - /Sin anclaje geométrico fuerte/, y así debe decirse. Interpretación aplicada del coeficiente según forma funcional.
 - /Contenido/: log-nivel, nivel-log, log-log. Elasticidades. Lectura del coeficiente como cambio absoluto, porcentual, efecto marginal o elasticidad.
-- /Ejemplo canónico (siempre)/: Cobb–Douglas $\log Q=\beta_0+\alpha\log L+\gamma\log K+u$, con $\alpha,\gamma$ elasticidades parciales y $\alpha+\gamma$ rendimientos a escala (mención).
+- /Ejemplo canónico (siempre)/: Cobb–Douglas $\log Q=\beta_1+\alpha\log L+\gamma\log K+u$, con $\alpha,\gamma$ elasticidades parciales y $\alpha+\gamma$ rendimientos a escala (mención).
+- /Semilla recibida de la sesión 13/: el caso de dos indicadoras que
+  suman $\boldsymbol{1}$ (p. ej. sexo) sin que exista una columna
+  constante explícita en $\boldsymbol{\mathsf X}$, pero con
+  $\boldsymbol{1}$ en el subespacio generado — ilustración natural de que
+  "regresor constante" no es imprescindible como columna, solo como
+  elemento del subespacio (ver §4.2.1).
 
 ** 7.24 Ficha — Sesión 23 (Dummies e interacciones)
 - /Sin anclaje geométrico fuerte/, y así debe decirse.
@@ -1460,10 +1671,10 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
   residuo con diagrama de dispersión gemelo (Parte 1); vectores en
   desviaciones dentro de $\mathcal{L}(\boldsymbol{1})^\perp$ y la identidad
   guardada
-  $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}=\hat\beta_1(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})$
+  $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}=\hat\beta_2(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})$
   (Parte 2); cinco variantes del vector generador $\boldsymbol{u}$ (ortogonal
   a ambos regresores / solo a uno / a ninguno), contrastando recuperación
-  exacta vs. aproximada de $\beta_0,\beta_1$ — anticipo visual, sin
+  exacta vs. aproximada de $\beta_1,\beta_2$ — anticipo visual, sin
   nombrarla con ese rigor, de la condición $E[\boldsymbol U\mid\boldsymbol
   X]=\boldsymbol 0$ que se formalizará en la sesión 12 (Parte 3). Funciones
   reutilizables: =ajuste_mco_simple=,
@@ -1487,7 +1698,7 @@ separado. Ante cualquier ambigüedad, el número de sesión de §7.0 prevalece.
 Cada laboratorio debe explicitar /por qué/ se elige cada tipo de dato.
 
 - /Datos simulados/: para /verificar/ propiedades teóricas (insesgadez, identidades de ortogonalidad, efectos de colinealidad, cobertura de IC, distribución de estadísticos bajo $H_0$). Permiten "ver" que la teoría funciona.
-  - /Advertencia sobre vectores de diseño/: Cuando se genere una relación conocida (ej. $\boldsymbol{y} = \beta_0\boldsymbol{1} + \beta_1\boldsymbol{x} + \boldsymbol{u}$), advertir siempre al alumno que $\boldsymbol{u}$ es el vector generador de la perturbación ("el truco"), que NO debe confundirse con el vector de residuos $\boldsymbol{\mathop{\widehat{e}}}$. MCO no recupera $\boldsymbol{u}$ de forma exacta salvo en casos diseñados artificialmente.
+  - /Advertencia sobre vectores de diseño/: Cuando se genere una relación conocida (ej. $\boldsymbol{y} = \beta_1\boldsymbol{1} + \beta_2\boldsymbol{x} + \boldsymbol{u}$), advertir siempre al alumno que $\boldsymbol{u}$ es el vector generador de la perturbación ("el truco"), que NO debe confundirse con el vector de residuos $\boldsymbol{\mathop{\widehat{e}}}$. MCO no recupera $\boldsymbol{u}$ de forma exacta salvo en casos diseñados artificialmente.
 - /Datos reales/: para /interpretar/ y enfrentar la ambigüedad empírica.
 - /Datos curados algorítmicamente/: ni observaciones reales ni simulaciones
   "puras" sin más objetivo que replicar un proceso aleatorio genérico. Se
@@ -1502,6 +1713,12 @@ Cada laboratorio debe explicitar /por qué/ se elige cada tipo de dato.
 /Datasets (decisión canónica)/:
 - =hprice2= (dataset de muestra de Gretl; Boston, Harrison–Rubinfeld 1978): versión "de manual". /NO contiene =chas= ni dicotómicas/. Se carga desde la pestaña //~Wooldridge~//.
 - /Boston original/ (=data/boston.csv= del repositorio): contiene =chas= (dummy del río Charles) y =medv= (precio en miles de dólares). Es el /dataset integrador/ para dummies (sesión 24) y para la sesión integradora (sesión 26).
+- /Ramanathan (14 viviendas, University City, San Diego, 1990)/: dataset de
+  muestra de Gretl (pestaña Gretl, no Wooldridge). Muy pequeño, calculable a
+  mano; útil específicamente para ilustrar el efecto parcial con `rooms`
+  (sesión 14) por su tamaño reducido de coeficientes y por prestarse, más
+  adelante, a mostrar no significación estadística de `rooms` en el modelo
+  múltiple.
 
 * 9. Principios pedagógicos y de diseño
 
@@ -1534,9 +1751,10 @@ Para redactar, basta con §7 (fichas), §10 (semillas) y §4–§6 (formato). Co
 - /Cauchy–Schwarz/, con $\boldsymbol{h}=\boldsymbol{b}-\alpha\boldsymbol{a}$, $\alpha=\frac{\boldsymbol{a}\cdot\boldsymbol{b}}{\boldsymbol{a}\cdot\boldsymbol{a}}$ (rigor + anticipa la proyección).
 - Teorema de Pitágoras en $\mathbb{R}^n$, coseno del ángulo, desigualdad triangular (sesión 3).
 - Proyección sobre una recta como minimización (sesión 5).
-- Insesgadez y varianza de $\hat\beta_1$ en regresión simple (sesión 13).
+- Insesgadez y varianza de $\hat\beta_2$ en regresión simple (sesión 15).
 
-/Se usa como herramienta/ (notación, no maquinaria): producto escalar, transposición de /matrices/, producto matriz–vector y vector–matriz (doble lectura) y, solo en la sesión 14, producto matriz–matriz al servicio de $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$.
+/Se usa como herramienta/ (notación, no maquinaria): producto escalar, transposición de /matrices/, producto matriz–vector y vector–matriz (doble lectura) y, solo en la sesión 13, producto matriz–matriz al 
+servicio de $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$.
 
 /No se usa / no se demuestra/:
 - /Inversa $(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}$/ como vía de resolución de MCO: se menciona su existencia, pero el camino es siempre la condición de ortogonalidad $\boldsymbol{e}\boldsymbol{\mathsf{X}}=\boldsymbol{0}$. La fórmula con inversa oscurece la geometría (principio 1).
@@ -1545,7 +1763,7 @@ Para redactar, basta con §7 (fichas), §10 (semillas) y §4–§6 (formato). Co
 - Distribuciones muestrales de los estadísticos: enunciadas sin demostrar (Tema 4).
 - Insesgadez y varianza en regresión múltiple: enunciadas, no demostradas.
 
-/Pospuesto/: familia ortogonal y Pitágoras generalizado, hasta que aparezcan en regresión múltiple (sesión 14).
+/Pospuesto/: familia ortogonal y Pitágoras generalizado, hasta que aparezcan en regresión múltiple (sesión 13).
 
 ** 9.3 Recortes condicionales (si no cupiera el tiempo)
 En orden de prioridad:
@@ -1562,8 +1780,8 @@ En orden de prioridad:
 - Tema 4 (inferencia) reducido a lo esencial: contrastes $t$ y $F$, IC, interpretación; distribuciones muestrales enunciadas sin demostrar.
 - Tema 5: se priorizan colinealidad, formas funcionales (logaritmos y dummies) y heterocedasticidad. La especificación funcional (RESET) se reduce e integra en la sesión 25.
 - Observaciones influyentes (palanca, distancia de Cook): tratadas de forma aplicada en el laboratorio integrador (sesión 26), no como sesión teórica autónoma.
-- Insesgadez y varianza se demuestran solo para $\hat\beta_1$ de la regresión simple; para múltiple se enuncian.
-- Matrices: se introducen lo más tarde posible (sesión 14), solo como notación compacta.
+- Insesgadez y varianza se demuestran solo para $\hat\beta_2$ de la regresión simple; para múltiple se enuncian.
+- Matrices: se introducen lo más tarde posible (sesión 13), solo como notación compacta.
 
 * 10 Semillas vivas (promesas plantadas ↔ dónde se cobran)
 
@@ -1598,60 +1816,66 @@ donde "sembrada/cobrada" sigue bastando).
 - /Regla de registro en §10/. Si una semilla ya cobrada vuelve a aparecer más tarde como herramienta central de una demostración nueva, esa nueva aparición debe registrarse explícitamente como /reutilización estructural/ (no solo como "refuerzo" o "recordatorio"). Distinguir, cuando proceda, entre: (i) demostración teórica inicial, (ii) verificación en práctica, y (iii) uso posterior como ingrediente de otro resultado.
 #+end_center
 
-| <55>                                                                                                                                                                                                                                                                                                                        | <20>                                                                                                                                                                                                                                           | <85>                                                                                                                                                                                                                                                                                                                                                                                               |
-| Semilla / promesa                                                                                                                                                                                                                                                                                                           | Sembrada en                                                                                                                                                                                                                                    | Cobrada en                                                                                                                                                                                                                                                                                                                                                                                         |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Producto escalar sin interpretación geométrica aún                                                                                                                                                                                                                                                                          | Ses. 2                                                                                                                                                                                                                                         | *3*                                                                                                                                                                                                                                                                                                                                                                                                |
-| Pitágoras en \(\mathbb{R}^2/\mathbb{R}^3\) ⇒ general                                                                                                                                                                                                                                                                       | Ses. 2                                                                                                                                                                                                                                         | *3*                                                                                                                                                                                                                                                                                                                                                                                                |
-| Triangular en $\mathbb{R}^2/\mathbb{R}^3$ ⇒ Cauchy–Schwarz y triangular en $\mathbb{R}^n$                                                                                                                                                                                                                                  | Ses. 2 (norma vía Pitágoras clásico)                                                                                                                                                                                                           | *3*                                                                                                                                                                                                                                                                                                                                                                                                |
-| Datos como vectores de \(\mathbb{R}^n\)                                                                                                                                                                                                                                                                                     | Ses. 1                                                                                                                                                                                                                                         | *5*, 6, 9, 10                                                                                                                                                                                                                                                                                                                                                                                      |
-| Media como producto escalar $\mu_{\boldsymbol{y}}=\langle\boldsymbol{y},\boldsymbol{1}\rangle$ (no solo como proyección)                                                                                                                                                                                                    | Ses. 5 ("dos caras de la misma moneda")                                                                                                                                                                                                        | *5* (presentación simultánea); recordatorios breves en 6 (apertura) y guiño final de 6; cobro pleno como doble lectura de $\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$ en *13*                                                                                                                                                                                                                      |
-| Doble norma: euclídea vs. estadística ($1/n$) sembrada                                                                                                                                                                                                                                                                      | Ses. 2                                                                                                                                                                                                                                         | *5* (introducción, con conexión explícita a la promesa de la lección 2); 6 (varianza, covarianza, $r$)                                                                                                                                                                                                                                                                                             |
-| Con \(\boldsymbol{a}=\boldsymbol{1}\), \(\alpha\) será la media                                                                                                                                                                                                                                                             | Ses. 3                                                                                                                                                                                                                                         | *5*                                                                                                                                                                                                                                                                                                                                                                                                |
-| Media como ajuste MCO con único regresor \(\boldsymbol{1}\)                                                                                                                                                                                                                                                                 | Ses. 3                                                                                                                                                                                                                                         | *5*; 9 (gen.)                                                                                                                                                                                                                                                                                                                                                                                      |
-| Residuo ortogonal (\(\sum e_i=0\))                                                                                                                                                                                                                                                                                          | Ses. 3 (\(\boldsymbol{h}\perp\boldsymbol{a}\))                                                                                                                                                                                                 | *5*; 9, 10, 11                                                                                                                                                                                                                                                                                                                                                                                     |
-| Pitágoras, C–S y triangular válidos con cualquier producto escalar que tenga simetría, linealidad y positividad (herencia de propiedades)                                                                                                                                                                                   | Ses. 5 (al introducir $\langle\cdot,\cdot\rangle_s$)                                                                                                                                                                                           | *5* (se afirma), 6 (se usa implícitamente)                                                                                                                                                                                                                                                                                                                                                         |
-| Producto escalar estadístico \(\langle\cdot,\cdot\rangle_s = \frac{1}{n}(\cdot\cdot)\) introducido                                                                                                                                                                                                                          | Ses. 5                                                                                                                                                                                                                                         | *5*; 6 (reutiliza con varianza y covarianza)                                                                                                                                                                                                                                                                                                                                                       |
-| \(\rho_{\boldsymbol{x}\boldsymbol{y}}=\cos\theta\) con vectores centrados                                                                                                                                                                                                                                                   | Ses. 3 (coseno general), 5 (guiño), 6 (conexión con \(\rho\))                                                                                                                                                                                  | *6*; 7 (verificación numérica con datos reales, S07-Prct-A)                                                                                                                                                                                                                                                                                                                                        |
-| Covarianza como producto escalar de vectores centrados                                                                                                                                                                                                                                                                      | Ses. 5 (en el "Guiño a la sesión siguiente", no en el cuerpo)                                                                                                                                                                                  | *6*                                                                                                                                                                                                                                                                                                                                                                                                |
-| Identidad $\Vert\boldsymbol{y}\Vert^2 = \mu_{\boldsymbol{y}}^2 + \sigma_{\boldsymbol{y}}^2$ (Pitágoras estadístico)                                                                                                                                                                                                         | Ses. 5                                                                                                                                                                                                                                         | *6*                                                                                                                                                                                                                                                                                                                                                                                                |
-| Dimensión informal de un subespacio (mención con nota a pie de página)                                                                                                                                                                                                                                                      | Ses. 5 (nota breve, remite a ses. 6)                                                                                                                                                                                                           | *6* (desarrollo completo, con nota a pie de página propia)                                                                                                                                                                                                                                                                                                                                         |
-| Propiedades de traslación y escala de covarianza/correlación; invarianza de \(\rho\) ante el divisor ($n$, $n-1$, sin dividir)                                                                                                                                                                                              | Ses. 5-6 (propiedades geométricas: traslación, escala y homogeneidad de la norma)                                                                                                                                                              | *6* (demostración teórica de las propiedades); 7 (S07-Prct-A, Apéndice: verificación programada explícita de la invarianza ante el divisor); *10* (reutilización estructural del argumento de traslación/escala para probar, en regresión simple, que \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\), e invarianza de \(R^2\) al factor \(1/n\) en STC/SEC/SRC)                                     |
-| Los momentos no bastan: misma media y sd, formas distintas (univariante); necesidad de histogramas y boxplots además de estadísticos escalares                                                                                                                                                                              | Ses. 4 (histograma y boxplot), 6 (media, sd, asimetría/curtosis como resúmenes parciales)                                                                                                                                                      | *7* (S07-Prct-C)                                                                                                                                                                                                                                                                                                                                                                                   |
-| Reescalado de un vector en desviaciones para fijar media y sd (estandarizar y reescalar) como aplicación constructiva de la invarianza y la homogeneidad                                                                                                                                                                    | Ses. 5-6                                                                                                                                                                                                                                       | *7* (S07-Prct-C, construcción explícita + verificación)                                                                                                                                                                                                                                                                                                                                            |
-| La distancia \(d(\boldsymbol{x},\boldsymbol{y})=\Vert\boldsymbol{x}-\boldsymbol{y}\Vert\) como corazón de la regresión: "MCO minimiza \(\Vert\boldsymbol{y}-\hat{\boldsymbol{y}}\Vert\)"                                                                                                                                    | Ses. 3                                                                                                                                                                                                                                         | 5 (primera aplicación: la media minimiza la distancia a \(\mathcal{L}(\boldsymbol{1})\)); 8 (planteamiento con dos regresores, sin resolver); *9* (resolución completa)                                                                                                                                                                                                                            |
-| Media como ajuste MCO (único regresor \(\boldsymbol{1}\)), generalización                                                                                                                                                                                                                                                   | Ses. 5                                                                                                                                                                                                                                         | 8 (primer paso de la generalización: "la media es el caso con un solo regresor"); *9* (resolución completa); 10 (refuerzo)                                                                                                                                                                                                                                                                         |
-| Condición de primer orden = condición de ortogonalidad                                                                                                                                                                                                                                                                      | Ses. 5                                                                                                                                                                                                                                         | *8* (extendida a dos condiciones); 9, 13                                                                                                                                                                                                                                                                                                                                                           |
-| Notación $\boldsymbol{\mathop{\widehat{y}}},\boldsymbol{\mathop{\widehat{e}}}$ y "una condición de ortogonalidad por regresor" (preview)                                                                                                                                                                                    | Ses. 5                                                                                                                                                                                                                                         | 8 (uso central: ajuste y residuo del plano); *9* (resolución algebraica); 13                                                                                                                                                                                                                                                                                                                       |
-| \(\boldsymbol{h}=\boldsymbol{b}-\alpha\boldsymbol{a}\) = proyección (y, con \(\boldsymbol{a}=\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\), la pendiente de la regresión simple)                                                                                                                                      | Ses. 3                                                                                                                                                                                                                                         | 5; 8 (reforzado: ahora con dos generadores); *9* (cobro final: \(\alpha=\hat\beta_1\), sección "Vía alternativa: generadores ortogonales")                                                                                                                                                                                                                                                         |
-| $R^2=\cos^2\theta$; pendiente = correlación reescalada                                                                                                                                                                                                                                                                      | Ses. 5-6 (guiños)                                                                                                                                                                                                                              | *9* (pendiente); *10* ($R^2$, cobro pleno); *11* (S11-Prct-A/B: verificación numérica con =ols=, datos de juguete y reales)                                                                                                                                                                                                                                                                        |
-| Ejemplo con pendiente conocida ($\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$), construido para anticipar la estimación MCO de la pendiente a partir solo de los datos observados                                                                                                                                       | Ses. 7 (S07-Prct-B, Actividad 3)                                                                                                                                                                                                               | *9* (deducción de $\hat\beta_1$); *11* (S11-Prct-A: reproducido con =ols= de Gretl, distinguiendo identidad exacta de estimación aproximada)                                                                                                                                                                                                                                                       |
-| La ortogonalidad del residuo a \(\boldsymbol{1}\) implica que el ajuste preserva la media de \(\boldsymbol{y}\)                                                                                                                                                                                                             | Ses. 8                                                                                                                                                                                                                                         | *9* (y reforzada en 10)                                                                                                                                                                                                                                                                                                                                                                            |
-| \(\mathcal{L}(\boldsymbol{1},\boldsymbol{x})=\mathcal{L}(\boldsymbol{1},\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\): mismo plano, generadores centrados alternativos                                                                                                                                               | Ses. 8                                                                                                                                                                                                                                         | 9 (posible uso al relacionar pendiente con covarianza/correlación)                                                                                                                                                                                                                                                                                                                                 |
-| En regresión simple, todo vector no constante de \(\mathcal{L}(\boldsymbol{1},\boldsymbol{x})\), una vez centrado, cae en la misma recta \(\mathcal{L}(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\)                                                                                                                 | Ses. 8 (mismo plano con generadores centrados alternativos)                                                                                                                                                                                    | 9 (explicitado para \(\boldsymbol{\mathop{\widehat{y}}}\): \(\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\)); *10* (cobro pleno: explica geométricamente por qué, en regresión simple, \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\) y por qué esto deja de valer en regresión múltiple) |
-| Identidad $\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$: el vector en desviaciones de $\hat y$ coincide con el de $\hat\beta_1\boldsymbol{x}$ (misma $\sigma$, mismo ángulo con $\boldsymbol{y}$)                | Ses. 9                                                                                                                                                                                                                                         | introducida/demostrada en 9; *cobrada con desarrollo pleno en 10* ($\sigma_{\boldsymbol{\mathop{\widehat{y}}}}^2=\hat\beta_1^2\sigma_{\boldsymbol{x}}^2\Rightarrow R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$)                                                                                                                                                                                     |
-| Dos ortogonalidades ⇒ SST = SSR + SSE (Pitágoras)                                                                                                                                                                                                                                                                          | Ses. 9                                                                                                                                                                                                                                         | *10* (demostrado como $\sigma_{\boldsymbol{y}}^2=\sigma_{\boldsymbol{\mathop{\widehat{y}}}}^2+\sigma_{\boldsymbol{\mathop{\widehat{e}}}}^2$ vía las 4 marcas de ortogonalidad de la figura; nota sobre STC/SEC/SRC vs. SST/SSE/SSR y su invarianza al factor $1/n$)                                                                                                                                |
-| Advertencia "explicada no es causada" / correlaciones espurias como recordatorio recurrente                                                                                                                                                                                                                                 | Ses. 10 (ejemplo precio/superficie, Vigen)                                                                                                                                                                                                     | Mención en *10*; *11* (S11-Prct-B, refuerzo aplicado en la interpretación de price~rooms); posible refuerzo en 12 ("El puente")                                                                                                                                                                                                                                                                    |
-| Distinción "regresor" (columna/estructura) vs. "variable explicativa" (concepto, con matiz causal pospuesto)                                                                                                                                                                                                                | Ses. 8                                                                                                                                                                                                                                         | *12* ("El puente": variables aleatorias, modelo poblacional)                                                                                                                                                                                                                                                                                                                                       |
-| El truco del vector de media nula: si $\boldsymbol{v}\cdot\boldsymbol{1}=0$ (media cero), su producto escalar con cualquier otro vector $\boldsymbol{w}$ coincide con el producto con la versión centrada de $\boldsymbol{w}$ (mecánica algebraica demostrada aquí; puente directo a $E[XY]=\mathrm{Cov}(X,Y)$ si $E[X]=0$) | Ses. 8                                                                                                                                                                                                                                         | *12* ("El puente", invocación directa); posible refuerzo en 9 y 13                                                                                                                                                                                                                                                                                                                                 |
-| Combinación lineal ⇒ la regresión combina regresores; regresión simple como \(\beta_0\boldsymbol{1}+\beta_1\boldsymbol{x}\) y como proyección sobre \(\mathcal{L}(\boldsymbol{1},\boldsymbol{x})\) | Ses. 2 (combinación lineal); 5-6 (guiños) | 8 (preview con dos regresores, sin resolver); *13* (regresión múltiple, generalización a $k$ regresores) |
-| Familia ortogonal y Pitágoras generalizado (POSPUESTOS)                                                                                                                                                                                                                                                                     | Ses. 3                                                                                                                                                                                                                                         | *13*                                                                                                                                                                                                                                                                                                                                                                                               |
-| Notación matricial ligera (compresión de lo conocido)                                                                                                                                                                                                                                                                       | Ses. 6                                                                                                                                                                                                                                         | *13*                                                                                                                                                                                                                                                                                                                                                                                               |
-| Lectura doble de \(\boldsymbol{A}\boldsymbol{x}\)                                                                                                                                                                                                                                                                           | Ses. 6                                                                                                                                                                                                                                         | *13*                                                                                                                                                                                                                                                                                                                                                                                               |
-| Figuras de S08/S10 (triángulo rectángulo, distintos ángulos de visión) que deliberadamente NO muestran $\hat\beta_1\boldsymbol{x}$ dentro del plano, para servir de esquema visual también en el caso de $k$ regresores                                                                                          | Ses. 8 (figura de tres vistas, sin mostrar $\hat\beta_1\boldsymbol{x}$ explícitamente); reforzada en Ses. 10 (mención explícita: "esto es deliberado... sirve igualmente como esquema de la regresión con cualquier número $k$ de regresores") | *13* (al introducir el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_1,\ldots,\boldsymbol{x}_k)$, retomar visualmente estas mismas figuras en lugar de construir una figura nueva desde cero)                                                                                                                                                                                              |
-| Notación matricial como compresión natural de las ortogonalidades                                                                                                                                                                                                                                                           | Ses. 9                                                                                                                                                                                                                                         | *13*                                                                                                                                                                                                                                                                                                                                                                                               |
-| Cambio a generadores ortogonales ($\boldsymbol{1}$, $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$) desacopla el sistema; se generaliza a $k$ regresores                                                                                                                                                               | Ses. 9                                                                                                                                                                                                                                         | *13*                                                                                                                                                                                                                                                                                                                                                                                               |
-| Anticipo de regresión múltiple: $R^2$ de un modelo con dos regresores no es la suma de los $R^2$ de los modelos simples                                                                                                                                                                                                     | Ses. 11 (S11-Prct-B, pregunta 5)                                                                                                                                                                                                               | *13* (regresión múltiple); reforzada en *14* ($R^2$ ajustado, Lab)                                                                                                                                                                                                                                                                                                                                 |
-| Insesgadez/varianza de MCO: concepto (vía "El puente") ⇒ anticipada sin prueba en múltiple ⇒ demostrada solo en el caso simple                                                                                                                                                                                            | Ses. 12 ("El puente", da sentido al concepto)                                                                                                                                                                                                  | anticipada sin prueba en 13 (fórmula matricial, $k$ regresores); *cobrada con demostración en 15* (solo $\hat\beta_1$, caso simple)                                                                                                                                                                                                                                                                |
-| Inversa \((\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\): existe, no se usa                                                                                                                                                                                                                                   | Ses. 13                                                                                                                                                                                                                                        | (anti-promesa: nunca)                                                                                                                                                                                                                                                                                                                                                                              |
-| Colinealidad (vectores alineados, \(\cos\theta=\pm1\))                                                                                                                                                                                                                                                                      | Ses. 3                                                                                                                                                                                                                                         | 8 (mención breve del caso degenerado \(\boldsymbol{x}\) múltiplo de \(\boldsymbol{1}\)); 13 (refuerzo); *20*                                                                                                                                                                                                                                                                                       |
-| "\(R^2\) nunca empeora al añadir regresores" (propiedad mecánica; motivación directa del \(R^2\) ajustado)                                                                                                                                                                                                                  | Ses. 10                                                                                                                                                                                                                                        | anticipada sin prueba en 10; *cobrada en 14* (Lab Gretl, comparación de modelos y sentido del \(R^2\) ajustado)                                                                                                                                                                                                                                                                                    |
-| Uso de =loop= como "caja negra" (repetición masiva sin explicar mecánica), opcional                                                                                                                                                                                                                                         | Ses. 7 (S07-Prct-B, Actividad 5, OPCIONAL)                                                                                                                                                                                                     | *15* (mecánica completa del =loop=, Monte Carlo de insesgadez); 17, 19                                                                                                                                                                                                                                                                                                                             |
-| =chas= como vector de \(\mathbb{R}^{506}\) y relación con \(\boldsymbol{1}\)                                                                                                                                                                                                                                                | Ses. 4                                                                                                                                                                                                                                         | *23*                                                                                                                                                                                                                                                                                                                                                                                               |
-| Diccionario geometría ↔ probabilidad (vectores $\leftrightarrow$ v.a.; media $\leftrightarrow E[\cdot]$; regresión $\leftrightarrow E[Y\mid X]$)                                                                                                                                                                            | Ses. 1 (siembra inicial); 13 (refuerzo span/E); 16 (refuerzo regresión/E)                                                                                                                                                                      | 12 (desarrollo central en "El puente"); *25* (cierre)                                                                                                                                                                                                                                                                                                                                              |
-| Cuarteto tipo Anscombe: los resúmenes numéricos básicos (media, sd, asimetría, curtosis) no agotan la distribución ni la relación bivariada; exige visualización                                                                                                                                                            | Ses. 7 (S07-Prct-C, sembrada como analogía univariante $\to$ bivariante)                                                                                                                                                                       | Práctica adicional bivariante, RESERVADA para después de *10*                                                                                                                                                                                                                                                                                                                                      |
-| Ejemplo peso-edad-edad²-edad³ (polinomios crecientes, mejora de $R^2$ ajustado, sobreajuste evidente en el modelo de mayor grado)                                                                                                                                                                                           | Material de referencia §11.3 (Lec03); mencionado y aparcado explícitamente en *10*                                                                                                                                                             | Reservada como /práctica adicional/ fuera de la numeración de sesiones, tras que $R^2$ ajustado esté disponible (después de *14*), con el mismo estatus que el cuarteto de Anscombe (§7.7)                                                                                                                                                                                                         |
-| Uso de accesores post-estimación de Gretl ($uhat, $yhat, $coeff, $rsq) y de comandos de exportación (tabprint, eqnprint, gnuplot con bloque literal) como herramientas reutilizables de laboratorio                                                                                                                         | Ses. 11 (S11-Prct-A/B/C)                                                                                                                                                                                                                       | Reutilizada en labs posteriores (14, 17, 19, 25)                                                                                                                                                                                                                                                                                                                                                   |
+| <65>                                                                                                                                                                                                                                                                                                         | <20>                                                                                                                                                                                                                                           | <85>                                                                                                                                                                                                                                                                                                                                                                                               |
+| Semilla / promesa                                                                                                                                                                                                                                                                                            | Sembrada en                                                                                                                                                                                                                                    | Cobrada en                                                                                                                                                                                                                                                                                                                                                                                         |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Producto escalar sin interpretación geométrica aún                                                                                                                                                                                                                                                           | Ses. 2                                                                                                                                                                                                                                         | *3*                                                                                                                                                                                                                                                                                                                                                                                                |
+| Pitágoras en \(\mathbb{R}^2/\mathbb{R}^3\) ⇒ general                                                                                                                                                                                                                                                        | Ses. 2                                                                                                                                                                                                                                         | *3*                                                                                                                                                                                                                                                                                                                                                                                                |
+| Triangular en $\mathbb{R}^2/\mathbb{R}^3$ ⇒ Cauchy–Schwarz y triangular en $\mathbb{R}^n$                                                                                                                                                                                                                   | Ses. 2 (norma vía Pitágoras clásico)                                                                                                                                                                                                           | *3*                                                                                                                                                                                                                                                                                                                                                                                                |
+| Datos como vectores de \(\mathbb{R}^n\)                                                                                                                                                                                                                                                                      | Ses. 1                                                                                                                                                                                                                                         | *5*, 6, 9, 10                                                                                                                                                                                                                                                                                                                                                                                      |
+| Media como producto escalar $\mu_{\boldsymbol{y}}=\langle\boldsymbol{y},\boldsymbol{1}\rangle$ (no solo como proyección)                                                                                                                                                                                     | Ses. 5 ("dos caras de la misma moneda")                                                                                                                                                                                                        | *5* (presentación simultánea); recordatorios breves en 6 (apertura) y guiño final de 6; cobro pleno como doble lectura de $\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$ en *13*                                                                                                                                                                                                                      |
+| Doble norma: euclídea vs. estadística ($1/n$) sembrada                                                                                                                                                                                                                                                       | Ses. 2                                                                                                                                                                                                                                         | *5* (introducción, con conexión explícita a la promesa de la lección 2); 6 (varianza, covarianza, $r$)                                                                                                                                                                                                                                                                                             |
+| Con \(\boldsymbol{a}=\boldsymbol{1}\), \(\alpha\) será la media                                                                                                                                                                                                                                              | Ses. 3                                                                                                                                                                                                                                         | *5*                                                                                                                                                                                                                                                                                                                                                                                                |
+| Media como ajuste MCO con único regresor \(\boldsymbol{1}\), y su posterior generalización a dos regresores                                                                                                                                                                                                  | Ses. 3 (idea germinal); reforzada en Ses. 5                                                                                                                                                                                                    | *5* (cobro: la media ES un ajuste MCO); 8 (primer paso explícito de la generalización, sin resolver); *9* (resolución completa con dos regresores; refuerzo, caso límite \(\hat\beta_2=0\))                                                                                                                                                                                                  |
+| Residuo ortogonal (\(\sum e_i=0\))                                                                                                                                                                                                                                                                           | Ses. 3 (\(\boldsymbol{h}\perp\boldsymbol{a}\))                                                                                                                                                                                                 | *5*; 9, 10, 11                                                                                                                                                                                                                                                                                                                                                                                     |
+| Pitágoras, C–S y triangular válidos con cualquier producto escalar que tenga simetría, linealidad y positividad (herencia de propiedades)                                                                                                                                                                    | Ses. 5 (al introducir $\langle\cdot,\cdot\rangle_s$)                                                                                                                                                                                           | *5* (se afirma), 6 (se usa implícitamente)                                                                                                                                                                                                                                                                                                                                                         |
+| Producto escalar estadístico \(\langle\cdot,\cdot\rangle_s = \frac{1}{n}(\cdot\cdot)\) introducido                                                                                                                                                                                                           | Ses. 5                                                                                                                                                                                                                                         | *5*; 6 (reutiliza con varianza y covarianza)                                                                                                                                                                                                                                                                                                                                                       |
+| \(\rho_{\boldsymbol{x}\boldsymbol{y}}=\cos\theta\) con vectores centrados                                                                                                                                                                                                                                    | Ses. 3 (coseno general), 5 (guiño), 6 (conexión con \(\rho\))                                                                                                                                                                                  | *6*; 7 (verificación numérica con datos reales, S07-Prct-A)                                                                                                                                                                                                                                                                                                                                        |
+| Covarianza como producto escalar de vectores centrados                                                                                                                                                                                                                                                       | Ses. 5 (en el "Guiño a la sesión siguiente", no en el cuerpo)                                                                                                                                                                                  | *6*                                                                                                                                                                                                                                                                                                                                                                                                |
+| Identidad $\Vert\boldsymbol{y}\Vert^2 = \mu_{\boldsymbol{y}}^2 + \sigma_{\boldsymbol{y}}^2$ (Pitágoras estadístico)                                                                                                                                                                                          | Ses. 5                                                                                                                                                                                                                                         | *6*                                                                                                                                                                                                                                                                                                                                                                                                |
+| Dimensión informal de un subespacio (mención con nota a pie de página)                                                                                                                                                                                                                                       | Ses. 5 (nota breve, remite a ses. 6)                                                                                                                                                                                                           | *6* (desarrollo completo, con nota a pie de página propia)                                                                                                                                                                                                                                                                                                                                         |
+| Propiedades de traslación y escala de covarianza/correlación; invarianza de \(\rho\) ante el divisor ($n$, $n-1$, sin dividir)                                                                                                                                                                               | Ses. 5-6 (propiedades geométricas: traslación, escala y homogeneidad de la norma)                                                                                                                                                              | *6* (demostración teórica de las propiedades); 7 (S07-Prct-A, Apéndice: verificación programada explícita de la invarianza ante el divisor); *10* (reutilización estructural del argumento de traslación/escala para probar, en regresión simple, que \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\), e invarianza de \(R^2\) al factor \(1/n\) en STC/SEC/SRC)                                     |
+| Los momentos no bastan: misma media y sd, formas distintas (univariante); necesidad de histogramas y boxplots además de estadísticos escalares                                                                                                                                                               | Ses. 4 (histograma y boxplot), 6 (media, sd, asimetría/curtosis como resúmenes parciales)                                                                                                                                                      | *7* (S07-Prct-C)                                                                                                                                                                                                                                                                                                                                                                                   |
+| Reescalado de un vector en desviaciones para fijar media y sd (estandarizar y reescalar) como aplicación constructiva de la invarianza y la homogeneidad                                                                                                                                                     | Ses. 5-6                                                                                                                                                                                                                                       | *7* (S07-Prct-C, construcción explícita + verificación)                                                                                                                                                                                                                                                                                                                                            |
+| La distancia \(d(\boldsymbol{x},\boldsymbol{y})=\Vert\boldsymbol{x}-\boldsymbol{y}\Vert\) como corazón de la regresión: "MCO minimiza \(\Vert\boldsymbol{y}-\hat{\boldsymbol{y}}\Vert\)"                                                                                                                     | Ses. 3                                                                                                                                                                                                                                         | 5 (primera aplicación: la media minimiza la distancia a \(\mathcal{L}(\boldsymbol{1})\)); 8 (planteamiento con dos regresores, sin resolver); *9* (resolución completa)                                                                                                                                                                                                                            |
+| Condición de primer orden = condición de ortogonalidad                                                                                                                                                                                                                                                       | Ses. 5                                                                                                                                                                                                                                         | *8* (extendida a dos condiciones); 9, 13                                                                                                                                                                                                                                                                                                                                                           |
+| Notación $\boldsymbol{\mathop{\widehat{y}}},\boldsymbol{\mathop{\widehat{e}}}$ y "una condición de ortogonalidad por regresor" (preview)                                                                                                                                                                     | Ses. 5                                                                                                                                                                                                                                         | 8 (uso central: ajuste y residuo del plano); *9* (resolución algebraica); 13                                                                                                                                                                                                                                                                                                                       |
+| \(\boldsymbol{h}=\boldsymbol{b}-\alpha\boldsymbol{a}\) = proyección (y, con \(\boldsymbol{a}=\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\), la pendiente de la regresión simple)                                                                                                                       | Ses. 3                                                                                                                                                                                                                                         | 5; 8 (reforzado: ahora con dos generadores); *9* (cobro final: \(\alpha=\hat\beta_2\), sección "Vía alternativa: generadores ortogonales")                                                                                                                                                                                                                                                         |
+| $R^2=\cos^2\theta$; pendiente = "correlación reescalada"                                                                                                                                                                                                                                                     | Ses. 6 y 8 (guiño conceptual; el slogan literal se acuña retrospectivamente al cobrarla)                                                                                                                                                       | *9* (pendiente); *10* ($R^2$, cobro pleno); *11* (S11-Prct-A/B: verificación numérica con =ols=, datos de juguete y reales)                                                                                                                                                                                                                                                                        |
+| Ejemplo con pendiente conocida ($\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$), construido para anticipar la estimación MCO de la pendiente a partir solo de los datos observados                                                                                                                        | Ses. 7 (S07-Prct-B, Actividad 3)                                                                                                                                                                                                               | *9* (deducción de $\hat\beta_2$); *11* (S11-Prct-A: reproducido con =ols= de Gretl, distinguiendo identidad exacta de estimación aproximada)                                                                                                                                                                                                                                                       |
+| La ortogonalidad del residuo a \(\boldsymbol{1}\) implica que el ajuste preserva la media de \(\boldsymbol{y}\)                                                                                                                                                                                              | Ses. 8                                                                                                                                                                                                                                         | *9* (y reforzada en 10)                                                                                                                                                                                                                                                                                                                                                                            |
+| \(\mathcal{L}(\boldsymbol{1},\boldsymbol{x})=\mathcal{L}(\boldsymbol{1},\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\): mismo plano, generadores centrados alternativos                                                                                                                                | Ses. 8                                                                                                                                                                                                                                         | 9 (posible uso al relacionar pendiente con covarianza/correlación)                                                                                                                                                                                                                                                                                                                                 |
+| En regresión simple, todo vector no constante de \(\mathcal{L}(\boldsymbol{1},\boldsymbol{x})\), una vez centrado, cae en la misma recta \(\mathcal{L}(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\)                                                                                                  | Ses. 8 (mismo plano con generadores centrados alternativos)                                                                                                                                                                                    | 9 (explicitado para \(\boldsymbol{\mathop{\widehat{y}}}\): \(\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_2(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\)); *10* (cobro pleno: explica geométricamente por qué, en regresión simple, \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\) y por qué esto deja de valer en regresión múltiple) |
+| Identidad $\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_2(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$: el vector en desviaciones de $\hat y$ coincide con el de $\hat\beta_2\boldsymbol{x}$ (misma $\sigma$, mismo ángulo con $\boldsymbol{y}$) | Ses. 9                                                                                                                                                                                                                                         | introducida/demostrada en 9; *cobrada con desarrollo pleno en 10* ($\sigma_{\boldsymbol{\mathop{\widehat{y}}}}^2=\hat\beta_2^2\sigma_{\boldsymbol{x}}^2\Rightarrow R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$)                                                                                                                                                                                     |
+| Dos ortogonalidades ⇒ SST = SSR + SSE (Pitágoras)                                                                                                                                                                                                                                                           | Ses. 9                                                                                                                                                                                                                                         | *10* (demostrado como $\sigma_{\boldsymbol{y}}^2=\sigma_{\boldsymbol{\mathop{\widehat{y}}}}^2+\sigma_{\boldsymbol{\mathop{\widehat{e}}}}^2$ vía las 4 marcas de ortogonalidad de la figura; nota sobre STC/SEC/SRC vs. SST/SSE/SSR y su invarianza al factor $1/n$)                                                                                                                                |
+| Advertencia "explicada no es causada" / correlaciones espurias como recordatorio recurrente                                                                                                                                                                                                                  | Ses. 10 (ejemplo precio/superficie, Vigen)                                                                                                                                                                                                     | Mención en *10*; *11* (S11-Prct-B, refuerzo aplicado en la interpretación de price~rooms); posible refuerzo en 12 ("El puente")                                                                                                                                                                                                                                                                    |
+| Diccionario geometría ↔ probabilidad (vectores↔v.a.; media↔$E[\cdot]$; regresión↔$E[Y\mid X]$)                                                                                                                                                                                                               | Ses. 1 (siembra inicial); 13; 16 (refuerzos)                                                                                                                                                                                                   | *12* (desarrollo central en "El puente"); 25 (cierre no evaluable)                                                                                                                                                                                                                                                                                                                                 |
+| Producto escalar probabilístico $\langle X,Y\rangle_P=E[XY]$ (tercer caso particular de $\langle\cdot,\cdot\rangle$, tras el euclídeo y el estadístico), con advertencia de semi-producto escalar                                                                                                            | Ses. 2/5 (convención genérica $\langle\cdot,\cdot\rangle$ sin subíndice)                                                                                                                                                                       | *12* (desarrollo pleno, antes de lo previsto originalmente en §4.2.1); reutilizado en 25                                                                                                                                                                                                                                                                                                           |
+| Distinción "regresor" vs. "variable explicativa" (matiz causal pospuesto)                                                                                                                                                                                                                                    | Ses. 8                                                                                                                                                                                                                                         | *12* ("El puente", al formalizar la causalidad y el MCRL)                                                                                                                                                                                                                                                                                                                                          |
+| El truco del vector de media nula: si $\boldsymbol{v}\cdot\boldsymbol{1}=0$ (media cero), su producto escalar con cualquier otro vector coincide con el producto con la versión centrada de ese vector                                                                                                       | Ses. 8                                                                                                                                                                                                                                         | *12* ("El puente", invocación directa para deducir $\mathrm{Cov}(U,X)=0$); posible refuerzo en 9 y 13                                                                                                                                                                                                                                                                                              |
+| Combinación lineal ⇒ la regresión combina regresores; regresión simple como \(\beta_1\boldsymbol{1}+\beta_2\boldsymbol{x}\) y como proyección sobre \(\mathcal{L}(\boldsymbol{1},\boldsymbol{x})\)                                                                                                          | Ses. 2 (combinación lineal); 5-6 (guiños)                                                                                                                                                                                                      | 8 (preview con dos regresores, sin resolver); *13* (regresión múltiple, generalización a $k$ regresores)                                                                                                                                                                                                                                                                                           |
+| Familia ortogonal y Pitágoras generalizado (POSPUESTOS parcialmente) | Ses. 3 | mencionada en *13* (cálculo independiente de coeficientes, "Familia ortogonal"); la identidad de Pitágoras generalizada SÍ se despliega, de forma breve, en los apuntes de "$R^2$ en regresión múltiple" (misma sesión 13), para justificar el caso de regresores ortogonales; el desarrollo completo con verificación de las $k$ ortogonalidades cruzadas queda sin fecha fija |
+| Notación matricial ligera (compresión de lo conocido)                                                                                                                                                                                                                                                        | Ses. 6                                                                                                                                                                                                                                         | *13*                                                                                                                                                                                                                                                                                                                                                                                               |
+| Lectura doble de \(\boldsymbol{A}\boldsymbol{x}\)                                                                                                                                                                                                                                                            | Ses. 6                                                                                                                                                                                                                                         | *13*                                                                                                                                                                                                                                                                                                                                                                                               |
+| Figuras de S10 (triángulo rectángulo, distintos ángulos de visión) que deliberadamente NO muestran $\hat\beta_2\boldsymbol{x}$ dentro del plano, para servir de esquema visual también en el caso de $k$ regresores                                                                                      | Ses. 10 (figura de dos vistas de la proyección ortogonal, sin mostrar $\hat\beta_2\boldsymbol{x}$ explícitamente); reforzada (mención explícita: "esto es deliberado... sirve igualmente como esquema de la regresión con cualquier número $k$ de regresores") | *13* (al introducir el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_1,\ldots,\boldsymbol{x}_k)$, retomar visualmente estas mismas figuras en lugar de construir una figura nueva desde cero)                                                                                                                                                                                              |
+| Notación matricial como compresión natural de las ortogonalidades                                                                                                                                                                                                                                            | Ses. 9                                                                                                                                                                                                                                         | *13*                                                                                                                                                                                                                                                                                                                                                                                               |
+| $\hat\beta_1,\hat\beta_2$ calculados en la lección 7 (geometría muestral pura, sin ningún supuesto poblacional) son, reinterpretados a posteriori, estimadores por el método de los momentos de $\beta_1,\beta_2$                                                                                            | Ses. 9 (fórmulas calculadas sin interpretación poblacional)                                                                                                                                                                                    | *12* ("El salto", reinterpretación completa)                                                                                                                                                                                                                                                                                                                                                       |
+| Cambio a generadores ortogonales ($\boldsymbol{1}$, $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$) desacopla el sistema; se generaliza a $k$ regresores                                                                                                                                                | Ses. 9                                                                                                                                                                                                                                         | *13*                                                                                                                                                                                                                                                                                                                                                                                               |
+| Anticipo de regresión múltiple: $R^2$ de un modelo con dos regresores no es la suma de los $R^2$ de los modelos simples                                                                                                                                                                                      | Ses. 11 (S11-Prct-B, pregunta 5)                                                                                                                                                                                                               | *13* (regresión múltiple); reforzada en *14* ($R^2$ ajustado, Lab)                                                                                                                                                                                                                                                                                                                                 |
+| Insesgadez/varianza de MCO: pregunta sembrada (sin fórmula) ⇒ demostrada solo en el caso simple | Ses. 12 (marco epistemológico general; la formulación literal "$E[\hat{\boldsymbol\beta}\mid\boldsymbol{\mathsf X}]=\boldsymbol\beta$" quedó comentada/inactiva en el fichero final) | pregunta sembrada explícitamente, sin fórmula ni supuestos generalizados, en *13* (una sola frase en la Recapitulación); fórmula matricial y demostración simple en *15* |
+| Cuarto supuesto del MCRL (independencia lineal de regresores, $\mathrm{Var}(X)\neq0$ en el caso simple) generalizado a $k$ regresores, con ejemplo de colinealidad exacta (Celsius/Fahrenheit) | Ses. 12 | *13* (generalización explícita a $k$ regresores; refuerza la distinción "colinealidad exacta/de grado") |
+| Inversa \((\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\): existe, no se usa                                                                                                                                                                                                                    | Ses. 13                                                                                                                                                                                                                                        | (anti-promesa: nunca)                                                                                                                                                                                                                                                                                                                                                                              |
+| Operador selector y sus reglas de precedencia sobre el producto | Ses. 13 | sin fecha fija: reutilización esperada en sesiones con notación matricial, pero *no* en 15 (que evita deliberadamente las matrices, per ficha §7.16) |
+| Colinealidad (vectores alineados, \(\cos\theta=\pm1\))                                                                                                                                                                                                                                                       | Ses. 3                                                                                                                                                                                                                                         | 8 (mención breve del caso degenerado \(\boldsymbol{x}\) múltiplo de \(\boldsymbol{1}\)); 13 (refuerzo); *20*                                                                                                                                                                                                                                                                                       |
+| "\(R^2\) nunca empeora al añadir regresores" (propiedad mecánica; motivación directa del \(R^2\) ajustado)                                                                                                                                                                                                   | Ses. 10                                                                                                                                                                                                                                        | anticipada sin prueba en 10; *cobrada en 14* (Lab Gretl, comparación de modelos y sentido del \(R^2\) ajustado)                                                                                                                                                                                                                                                                                    |
+| Concepto de "efecto parcial"/interpretación /ceteris paribus/ de $\hat\beta_j$ en regresión múltiple | Ses. 13 | *14* (Lab Gretl, coeficientes parciales) |
+| Uso de =loop= como "caja negra" (repetición masiva sin explicar mecánica), opcional                                                                                                                                                                                                                          | Ses. 7 (S07-Prct-B, Actividad 5, OPCIONAL)                                                                                                                                                                                                     | *15* (mecánica completa del =loop=, Monte Carlo de insesgadez); 17, 19                                                                                                                                                                                                                                                                                                                             |
+| Supuesto de Homocedasticidad ($\mathrm{Var}[U\mid X]=\sigma^2\cdot\mathit1$ constante)                                                                                                                                                                                                                       | Ses. 12 ("El puente")                                                                                                                                                                                                                          | *16* (base de contrastes $t$ e IC)                                                                                                                                                                                                                                                                                                                                                                 |
+| Distinción terminológica "colinealidad exacta" ($\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}$ no invertible, sistema sin solución única) vs. "colinealidad de grado" (regresores casi alineados, solución única pero inestable) | Ses. 13 | *20* |
+| =chas= como vector de \(\mathbb{R}^{506}\) y relación con \(\boldsymbol{1}\)                                                                                                                                                                                                                                 | Ses. 4                                                                                                                                                                                                                                         | *23*                                                                                                                                                                                                                                                                                                                                                                                               |
+| Cuarteto tipo Anscombe: los resúmenes numéricos básicos (media, sd, asimetría, curtosis) no agotan la distribución ni la relación bivariada; exige visualización                                                                                                                                             | Ses. 7 (S07-Prct-C, sembrada como analogía univariante $\to$ bivariante)                                                                                                                                                                       | Práctica adicional bivariante, RESERVADA para después de *10*                                                                                                                                                                                                                                                                                                                                      |
+| Ejemplo peso-edad-edad²-edad³ (polinomios crecientes, mejora de $R^2$ ajustado, sobreajuste evidente en el modelo de mayor grado)                                                                                                                                                                            | Material de referencia §11.3 (Lec03); mencionado y aparcado explícitamente en *10*                                                                                                                                                             | Reservada como /práctica adicional/ fuera de la numeración de sesiones, tras que $R^2$ ajustado esté disponible (después de *14*), con el mismo estatus que el cuarteto de Anscombe (§7.7)                                                                                                                                                                                                         |
+| Uso de accesores post-estimación de Gretl ($uhat, $yhat, $coeff, $rsq) y de comandos de exportación (tabprint, eqnprint, gnuplot con bloque literal) como herramientas reutilizables de laboratorio                                                                                                          | Ses. 11 (S11-Prct-A/B/C)                                                                                                                                                                                                                       | Reutilizada en labs posteriores (14, 17, 19, 25)                                                                                                                                                                                                                                                                                                                                                   |
 
 
 * 11. Material de referencia: resumen condensado del curso de Economía (Lec01-Lec06)
@@ -1795,9 +2019,9 @@ notas de alcance en §11.7)./
   notación poblacional de notación muestral (de momento el curso PPE no lo
   hace con letras distintas, usa $\mu,\sigma,\rho$ en ambos registros).
 - /ADVERTENCIA IMPORTANTE sobre el orden de derivación/: Lec05 deriva
-  $\hat\beta_1,\hat\beta_0$ partiendo de la POBLACIÓN ($E[\boldsymbol{\mathsf
+  $\hat\beta_2,\hat\beta_1$ partiendo de la POBLACIÓN ($E[\boldsymbol{\mathsf
   X}^\top\boldsymbol{\mathsf X}]$) y sustituyendo momentos después. El plan
-  PPE, en cambio, deriva $\hat\beta_1,\hat\beta_0$ en la sesión 9 partiendo
+  PPE, en cambio, deriva $\hat\beta_2,\hat\beta_1$ en la sesión 9 partiendo
   directamente de la MUESTRA, vía las dos condiciones de ortogonalidad del
   residuo (sin pasar por ningún momento poblacional, porque "El puente" a
   las variables aleatorias no llega hasta la sesión 12). *Esto es una
@@ -1806,7 +2030,7 @@ notas de alcance en §11.7)./
   sesión 8. Es en la sesión 12, /a posteriori/, cuando conviene señalar
   (usando el argumento del método de los momentos) que esas mismas fórmulas
   ya calculadas en la sesión 9 SON, en realidad, estimadores por método de
-  los momentos de los parámetros poblacionales $\beta_0,\beta_1$.
+  los momentos de los parámetros poblacionales $\beta_1,\beta_2$.
 - /Correspondencia con el plan PPE/: refuerza sesión 12 (supuestos, método
   de los momentos) y sesión 13 (notación matricial, ecuaciones normales con
   $k$ regresores).
@@ -1827,10 +2051,10 @@ notas de alcance en §11.7)./
 - /Piezas útiles solo como INSPIRACIÓN DE ENCUADRE, no de alcance/ (ver §9.2,
   §9.4: el plan PPE NO demuestra Gauss-Markov, NO usa la inversa de
   $\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}$, y solo demuestra
-  insesgadez/varianza para $\hat\beta_1$ de la regresión simple):
-  - La idea de escribir $\hat\beta_1=\sum w_iY_i$ con ponderaciones $w_i$
+  insesgadez/varianza para $\hat\beta_2$ de la regresión simple):
+  - La idea de escribir $\hat\beta_2=\sum w_iY_i$ con ponderaciones $w_i$
     tales que $\sum w_i=0$, $\sum w_ix_i=1$, y sustituir
-    $Y_i=\beta_0+\beta_1x_i+U_i$ — /esta SÍ es exactamente la ruta que debe
+    $Y_i=\beta_1+\beta_2x_i+U_i$ — /esta SÍ es exactamente la ruta que debe
     seguir la sesión 15 para la demostración simple/, evitando toda la
     maquinaria matricial de Lec06.
   - Mención (sin demostración) de que la cuasivarianza de los residuos
@@ -1841,7 +2065,7 @@ notas de alcance en §11.7)./
     recomienda incorporarlos.
 - /Correspondencia con el plan PPE/: fuente de inspiración (muy acotada)
   para la sesión 15 ("Propiedades MCO: insesgadez y varianza de
-  $\hat\beta_1$"). Ver ficha actualizada en §7.16.
+  $\hat\beta_2$"). Ver ficha actualizada en §7.16.
 
 ** 11.7 Notas de uso y alcance
 - Lec01-03 están, en esencia, ya "consumidas": su contenido corresponde a
@@ -1854,12 +2078,12 @@ notas de alcance en §11.7)./
   debe trasladarse.
 - Lec05 aporta la mejor explicación disponible del "salto" de método de los
   momentos; es candidata a mina de texto para la sesión 12, con la salvedad
-  IMPORTANTE de que el ORDEN de derivación de $\hat\beta_1,\hat\beta_0$ es
+  IMPORTANTE de que el ORDEN de derivación de $\hat\beta_2,\hat\beta_1$ es
   inverso al del plan PPE (población→muestra en Lec05; muestra pura en
   sesión 9, población añadida a posteriori en sesión 12).
 - Lec06 es la fuente MÁS alejada del alcance del curso PPE (demasiado rigor
   matricial, Gauss-Markov completo, AIC/BIC). Úsese solo para la idea
-  puntual de la demostración de insesgadez de $\hat\beta_1$ vía
+  puntual de la demostración de insesgadez de $\hat\beta_2$ vía
   ponderaciones $w_i$ (sesión 15); ignórese el resto de su aparato.
 - /Datasets adicionales disponibles como banco de ejemplos secundario/ (no
   sustituyen las decisiones canónicas de §8: hprice2 y Boston original):

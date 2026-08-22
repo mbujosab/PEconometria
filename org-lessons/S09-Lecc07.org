@@ -20,7 +20,7 @@
 #+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
 
 #+begin_abstract
-Hoy resolvemos el sistema de dos ortogonalidades planteado en la lección anterior: de él surgen las fórmulas de $\hat\beta_1$ y $\hat\beta_0$. La pendiente resulta ser la covarianza dividida por la varianza —o, equivalentemente, la correlación reescalada—. Por ahora sin matrices de por medio.
+Hoy resolvemos el sistema de dos ortogonalidades planteado en la lección anterior: de él surgen las fórmulas de $\hat\beta_2$ y $\hat\beta_1$. La pendiente resulta ser la covarianza dividida por la varianza —o, equivalentemente, la correlación reescalada—. Por ahora sin matrices de por medio.
 
 /``Imponer perpendicularidad, dos veces, y despejar: así nace la recta de mínimos cuadrados.''/
 #+end_abstract
@@ -37,7 +37,7 @@ Hoy resolvemos el sistema de dos ortogonalidades planteado en la lección anteri
 
 En la lección 6 planteamos la regresión simple como una proyección sobre el /plano/ con todas las combinaciones lineales de $\boldsymbol{1}$ y $\boldsymbol{x}$, es decir,  sobre $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$:
 \[
-\boldsymbol{y} \quad=\quad \hat\beta_0\boldsymbol{1} + \hat\beta_1\boldsymbol{x} + \boldsymbol{\mathop{\widehat{e}}} \quad=\quad \boldsymbol{\mathop{\widehat{y}}} + \boldsymbol{\mathop{\widehat{e}}}.
+\boldsymbol{y} \quad=\quad \hat\beta_1\boldsymbol{1} + \hat\beta_2\boldsymbol{x} + \boldsymbol{\mathop{\widehat{e}}} \quad=\quad \boldsymbol{\mathop{\widehat{y}}} + \boldsymbol{\mathop{\widehat{e}}}.
 \]
 
 - $\boldsymbol{\mathop{\widehat{e}}}$ debe ser ortogonal a /todo/ el plano.
@@ -50,7 +50,7 @@ En la lección 6 planteamos la regresión simple como una proyección sobre el /
 En la lección 6 nos quedamos ahí: dos condiciones, ningún coeficiente despejado.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Hoy resolvemos ese sistema. Sin matrices: dos ecuaciones, dos incógnitas ($\hat\beta_0$, $\hat\beta_1$).
+Hoy resolvemos ese sistema. Sin matrices: dos ecuaciones, dos incógnitas ($\hat\beta_1$, $\hat\beta_2$).
 
 
 *** De dónde venimos: un plano, un problema sin resolver
@@ -64,7 +64,7 @@ Conviene recordar, antes de avanzar, el camino recorrido. En la lección 4 resol
 \[
 \langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=0, \qquad \langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{x}\rangle_s=0.
 \]
-La lección 6 dejó planteado este sistema —explicando por qué debía cumplirse— pero no lo resolvió. Esa es precisamente la tarea de hoy: determinar $\hat\beta_0$ y $\hat\beta_1$ a partir de esas dos ecuaciones, sin recurrir aún a ninguna maquinaria matricial (que llegará mucho más adelante, en la lección 10, solo como notación compacta de esto mismo).
+La lección 6 dejó planteado este sistema —explicando por qué debía cumplirse— pero no lo resolvió. Esa es precisamente la tarea de hoy: determinar $\hat\beta_1$ y $\hat\beta_2$ a partir de esas dos ecuaciones, sin recurrir aún a ninguna maquinaria matricial (que llegará mucho más adelante, en la lección 10, solo como notación compacta de esto mismo).
 
 Merece la pena insistir en que no hay ningún concepto nuevo en esta sesión. Todo lo que necesitamos —el producto escalar, la ortogonalidad, la media, la varianza, la covarianza— ya fue introducido y demostrado en las lecciones 2 a 5. Hoy simplemente /aplicamos/ esas herramientas a un sistema de dos ecuaciones. Es, en cierto sentido, la culminación aritmética de todo lo anterior: la recompensa de haber invertido tiempo en entender qué es realmente un producto escalar.
 
@@ -79,34 +79,34 @@ También conviene recordar la motivación última de todo esto, sembrada ya en l
 :metadata: (slideshow . ((slide_type . slide)))
 :END:
 
-# Para cada observación $i$: $\;\hat e_i = y_i - \hat\beta_0 - \hat\beta_1 x_i$.
-Recordemos: $\quad\boldsymbol{\mathop{\widehat{e}}}\quad=\quad\boldsymbol{y}-\boldsymbol{\mathop{\widehat{y}}}\quad=\quad\boldsymbol{y}-\hat\beta_0 \boldsymbol{1}-\hat\beta_1\boldsymbol{x}$.
+# Para cada observación $i$: $\;\hat e_i = y_i - \hat\beta_1 - \hat\beta_2 x_i$.
+Recordemos: $\quad\boldsymbol{\mathop{\widehat{e}}}\quad=\quad\boldsymbol{y}-\boldsymbol{\mathop{\widehat{y}}}\quad=\quad\boldsymbol{y}-\hat\beta_1 \boldsymbol{1}-\hat\beta_2\boldsymbol{x}$.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 De la primera condición, $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=0$:
 \[
 \langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s 
 \;=\;
-\Big\langle\big(\boldsymbol{y}-\hat\beta_0\boldsymbol{1}-\hat\beta_1\boldsymbol{x}\big) , \boldsymbol{1}\Big\rangle_s
+\Big\langle\big(\boldsymbol{y}-\hat\beta_1\boldsymbol{1}-\hat\beta_2\boldsymbol{x}\big) , \boldsymbol{1}\Big\rangle_s
 \;=\;
-\mu_{\boldsymbol{y}} - \hat\beta_0 - \hat\beta_1\mu_{\boldsymbol{x}} \;=\; 0.
+\mu_{\boldsymbol{y}} - \hat\beta_1 - \hat\beta_2\mu_{\boldsymbol{x}} \;=\; 0.
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 Despejando
 \[
-\boxed{\hat\beta_0 = \mu_{\boldsymbol{y}} - \hat\beta_1\mu_{\boldsymbol{x}}.}
+\boxed{\hat\beta_1 = \mu_{\boldsymbol{y}} - \hat\beta_2\mu_{\boldsymbol{x}}.}
 \]
 
 # \[
-# \sum_{i=1}^n \big(y_i - \hat\beta_0 - \hat\beta_1 x_i\big) = 0.
+# \sum_{i=1}^n \big(y_i - \hat\beta_1 - \hat\beta_2 x_i\big) = 0.
 # \]
 # 
 # #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 # Dividiendo por $n$:
 # \[
-# \mu_{\boldsymbol{y}} - \hat\beta_0 - \hat\beta_1\mu_{\boldsymbol{x}} = 0 \;\Longrightarrow\;
-# \boxed{\hat\beta_0 = \mu_{\boldsymbol{y}} - \hat\beta_1\mu_{\boldsymbol{x}}.}
+# \mu_{\boldsymbol{y}} - \hat\beta_1 - \hat\beta_2\mu_{\boldsymbol{x}} = 0 \;\Longrightarrow\;
+# \boxed{\hat\beta_1 = \mu_{\boldsymbol{y}} - \hat\beta_2\mu_{\boldsymbol{x}}.}
 # \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -124,24 +124,24 @@ El intercepto queda /en función de/ la pendiente: solo falta una ecuación más
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
 La primera condición de ortogonalidad, $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=0$, es la más sencilla de las dos, y ya la hemos visto en otro disfraz: es exactamente la misma condición que, en la lección 4, hacía que el vector en desviaciones tuviera suma cero. Aquí el residuo es más complejo —depende de dos coeficientes, no de uno—, pero la condición algebraica es idéntica: como la media de los residuos es cero tenemos que /la suma de los residuos es cero/.
 
-Recordando que: $\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{y}-(\hat\beta_0 \boldsymbol{1} + \hat\beta_1\boldsymbol{x})$, la primera condición queda en:
+Recordando que: $\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{y}-(\hat\beta_1 \boldsymbol{1} + \hat\beta_2\boldsymbol{x})$, la primera condición queda en:
 \[
-\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=\Big\langle(\boldsymbol{y}-\hat\beta_0 \boldsymbol{1} - \hat\beta_1\boldsymbol{x})\,,\,\boldsymbol{1}\Big\rangle_s=0
+\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=\Big\langle(\boldsymbol{y}-\hat\beta_1 \boldsymbol{1} - \hat\beta_2\boldsymbol{x})\,,\,\boldsymbol{1}\Big\rangle_s=0
 \]
 es decir (y aplicando la propiedad distributiva):
 \[
-\langle\boldsymbol{y},\boldsymbol{1}\rangle_s-\hat\beta_0\langle\boldsymbol{1},\boldsymbol{1}\rangle_s - \hat\beta_1\langle\boldsymbol{x},\boldsymbol{1}\rangle_s=0.
+\langle\boldsymbol{y},\boldsymbol{1}\rangle_s-\hat\beta_1\langle\boldsymbol{1},\boldsymbol{1}\rangle_s - \hat\beta_2\langle\boldsymbol{x},\boldsymbol{1}\rangle_s=0.
 \]
 Recordando la definición de media de un vector: $\langle\boldsymbol{v},\boldsymbol{1}\rangle_s=\mu_{\boldsymbol{v}}$, y que $\langle\boldsymbol{1},\boldsymbol{1}\rangle_s=\|\boldsymbol{1}\|_s^2=1$, llegamos a 
 \[
-\mu_{\boldsymbol{y}} - \hat\beta_0 - \hat\beta_1\mu_{\boldsymbol{x}} = 0,
+\mu_{\boldsymbol{y}} - \hat\beta_1 - \hat\beta_2\mu_{\boldsymbol{x}} = 0,
 \]
 de donde despejamos inmediatamente
 \[
-\hat\beta_0 = \mu_{\boldsymbol{y}} - \hat\beta_1\mu_{\boldsymbol{x}}.
+\hat\beta_1 = \mu_{\boldsymbol{y}} - \hat\beta_2\mu_{\boldsymbol{x}}.
 \]
 
-Este resultado, todavía incompleto (pues depende del valor —aún desconocido— de $\hat\beta_1$), revelará el papel que juega $\hat\beta_0$ en el ajuste de la recta de regresión: sea cual sea la pendiente $\hat\beta_1$, la constante $\hat\beta_0$ siempre tomará el valor necesario para que la recta ajustada pase exactamente por el punto de las medias, $(\mu_{\boldsymbol{x}},\mu_{\boldsymbol{y}})$. Volveremos sobre esta idea, con su lectura geométrica completa, más adelante en la sesión.
+Este resultado, todavía incompleto (pues depende del valor —aún desconocido— de $\hat\beta_2$), revelará el papel que juega $\hat\beta_1$ en el ajuste de la recta de regresión: sea cual sea la pendiente $\hat\beta_2$, la constante $\hat\beta_1$ siempre tomará el valor necesario para que la recta ajustada pase exactamente por el punto de las medias, $(\mu_{\boldsymbol{x}},\mu_{\boldsymbol{y}})$. Volveremos sobre esta idea, con su lectura geométrica completa, más adelante en la sesión.
 
 Hay otra lectura de este mismo resultado, igual de importante. Recordemos que en la lección 6 se señaló —como parte de la generalización de la media a la regresión— que la ortogonalidad del residuo frente a $\boldsymbol{1}$ implica que el ajuste /preserva la media/ de $\boldsymbol{y}$. En efecto: si $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=0$, entonces $\mu_{\boldsymbol{\mathop{\widehat{e}}}}=0$ (el vector de residuos tiene media cero), y como $\boldsymbol{y}=\boldsymbol{\mathop{\widehat{y}}}+\boldsymbol{\mathop{\widehat{e}}}$, tomando medias en ambos lados (la media es lineal, pues es un producto escalar) obtenemos
 \[
@@ -162,29 +162,29 @@ De la segunda condición, $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbo
 \[
 \langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{x}\rangle_s
 \;=\;
-\Big\langle\big(\boldsymbol{y}-\hat\beta_0\boldsymbol{1}-\hat\beta_1\boldsymbol{x}\big) , \boldsymbol{x}\Big\rangle_s
+\Big\langle\big(\boldsymbol{y}-\hat\beta_1\boldsymbol{1}-\hat\beta_2\boldsymbol{x}\big) , \boldsymbol{x}\Big\rangle_s
 \;=\;
-\langle\boldsymbol{y},\boldsymbol{x}\rangle_s - \hat\beta_0\,\mu_{\boldsymbol{x}} - \hat\beta_1\,\mu_{\boldsymbol{x}^2} \;=\; 0.
+\langle\boldsymbol{y},\boldsymbol{x}\rangle_s - \hat\beta_1\,\mu_{\boldsymbol{x}} - \hat\beta_2\,\mu_{\boldsymbol{x}^2} \;=\; 0.
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Sustituyendo $\hat\beta_0=\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}}$ (transparencia anterior) y agrupando:
+Sustituyendo $\hat\beta_1=\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}}$ (transparencia anterior) y agrupando:
 \[
-\langle\boldsymbol{y},\boldsymbol{x}\rangle_s - \mu_{\boldsymbol{x}}\mu_{\boldsymbol{y}} \;=\; \hat\beta_1\big(\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2\big).
+\langle\boldsymbol{y},\boldsymbol{x}\rangle_s - \mu_{\boldsymbol{x}}\mu_{\boldsymbol{y}} \;=\; \hat\beta_2\big(\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2\big).
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 Como 
 $\langle\boldsymbol{x},\boldsymbol{y}\rangle_s=\frac{1}{n}\sum_{i=1}^nx_iy_i=\mu_{\boldsymbol{x}\odot\boldsymbol{y}}$, donde $\boldsymbol{x}\odot\boldsymbol{y}$ es el vector cuyas componentes son los productos componente a componente de $\boldsymbol{x}$ e $\boldsymbol{y}$. 
 \[
-\underbrace{\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \mu_{\boldsymbol{x}}\mu_{\boldsymbol{y}}}_{\sigma_{\boldsymbol{x}\boldsymbol{y}}} \;=\; \hat\beta_1\big(\underbrace{\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2}_{\sigma_{\boldsymbol{x}}^2}\big);
+\underbrace{\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \mu_{\boldsymbol{x}}\mu_{\boldsymbol{y}}}_{\sigma_{\boldsymbol{x}\boldsymbol{y}}} \;=\; \hat\beta_2\big(\underbrace{\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2}_{\sigma_{\boldsymbol{x}}^2}\big);
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 #+latex: \noindent
 donde aparecen las ``fórmulas de cálculo'' de covarianza y varianza. Así:
 \[
-\boxed{\sigma_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_1\,\sigma_{\boldsymbol{x}}^2.}
+\boxed{\sigma_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_2\,\sigma_{\boldsymbol{x}}^2.}
 \]
 
 # #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -202,7 +202,7 @@ donde aparecen las ``fórmulas de cálculo'' de covarianza y varianza. Así:
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
 La segunda condición de ortogonalidad, $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{x}\rangle_s=0$, se desarrolla con la misma herramienta que la primera —la propiedad distributiva (bilinealidad) del producto escalar—, aplicada ahora sobre $\boldsymbol{x}$ en lugar de sobre $\boldsymbol{1}$:
 \[
-\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{x}\rangle_s = \Big\langle(\boldsymbol{y}-\hat\beta_0\boldsymbol{1}-\hat\beta_1\boldsymbol{x})\,,\,\boldsymbol{x}\Big\rangle_s = \langle\boldsymbol{y},\boldsymbol{x}\rangle_s - \hat\beta_0\langle\boldsymbol{1},\boldsymbol{x}\rangle_s - \hat\beta_1\langle\boldsymbol{x},\boldsymbol{x}\rangle_s = 0.
+\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{x}\rangle_s = \Big\langle(\boldsymbol{y}-\hat\beta_1\boldsymbol{1}-\hat\beta_2\boldsymbol{x})\,,\,\boldsymbol{x}\Big\rangle_s = \langle\boldsymbol{y},\boldsymbol{x}\rangle_s - \hat\beta_1\langle\boldsymbol{1},\boldsymbol{x}\rangle_s - \hat\beta_2\langle\boldsymbol{x},\boldsymbol{x}\rangle_s = 0.
 \]
 
 Necesitamos identificar los dos productos escalares que involucran a $\boldsymbol{x}$ consigo mismo o con $\boldsymbol{1}$. El primero ya lo conocemos: $\langle\boldsymbol{1},\boldsymbol{x}\rangle_s=\mu_{\boldsymbol{x}}$ (la media, lección 4). El segundo lo vimos en la lección 5: $\langle\boldsymbol{x},\boldsymbol{x}\rangle_s=\frac{1}{n}\sum_{i=1}^nx_ix_i=\mu_{\boldsymbol{x}^2}$, donde $\boldsymbol{x}^2$ denotaba el vector cuyas componentes son los cuadrados de las de $\boldsymbol{x}$ —aunque allí no lo dijimos con este nombre, $\boldsymbol{x}^2$ es $\boldsymbol{x}\odot\boldsymbol{x}$, el /producto componente a componente/ de $\boldsymbol{x}$ consigo mismo—. 
@@ -210,19 +210,19 @@ Del mismo modo tenemos que
 $\langle\boldsymbol{x},\boldsymbol{y}\rangle_s=\frac{1}{n}\sum_{i=1}^nx_iy_i=\mu_{\boldsymbol{x}\odot\boldsymbol{y}}$, donde $\boldsymbol{x}\odot\boldsymbol{y}$ denota el vector cuyas componentes son los productos componente a componente de $\boldsymbol{x}$ e $\boldsymbol{y}$. 
 Sustituyendo productos escalares tenemos:
 \[
-\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \hat\beta_0\,\mu_{\boldsymbol{x}} - \hat\beta_1\,\mu_{\boldsymbol{x}^2} = 0.
+\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \hat\beta_1\,\mu_{\boldsymbol{x}} - \hat\beta_2\,\mu_{\boldsymbol{x}^2} = 0.
 \]
 
-Sustituimos ahora $\hat\beta_0=\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}}$ (transparencia anterior) y agrupamos los términos con $\hat\beta_1$:
+Sustituimos ahora $\hat\beta_1=\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}}$ (transparencia anterior) y agrupamos los términos con $\hat\beta_2$:
 \[
-\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \big(\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}}\big)\mu_{\boldsymbol{x}} - \hat\beta_1\mu_{\boldsymbol{x}^2} = 0
+\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \big(\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}}\big)\mu_{\boldsymbol{x}} - \hat\beta_2\mu_{\boldsymbol{x}^2} = 0
 \;\Longrightarrow\;
-\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \mu_{\boldsymbol{x}}\mu_{\boldsymbol{y}} = \hat\beta_1\big(\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2\big).
+\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \mu_{\boldsymbol{x}}\mu_{\boldsymbol{y}} = \hat\beta_2\big(\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2\big).
 \]
 
 El paréntesis de la derecha ya lo reconocemos: es exactamente $\sigma_{\boldsymbol{x}}^2=\mu_{\boldsymbol{x}^2}-\mu_{\boldsymbol{x}}^2$, la ``fórmula de cálculo'' de la varianza que obtuvimos en la lección 5 a partir de Pitágoras. Así que
 \[
-\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \mu_{\boldsymbol{x}}\mu_{\boldsymbol{y}} = \hat\beta_1\,\sigma_{\boldsymbol{x}}^2.
+\mu_{\boldsymbol{x}\odot\boldsymbol{y}} - \mu_{\boldsymbol{x}}\mu_{\boldsymbol{y}} = \hat\beta_2\,\sigma_{\boldsymbol{x}}^2.
 \]
 
 Falta reconocer el lado izquierdo; y resulta ser la ``fórmula de cálculo'' de la /covarianza/ —el análogo exacto de la fórmula de la varianza, ahora con dos vectores distintos en lugar de uno consigo mismo—. En efecto, por la misma bilinealidad que hemos usado en toda esta lección (y que ya usamos en la lección 2):
@@ -231,9 +231,9 @@ Falta reconocer el lado izquierdo; y resulta ser la ``fórmula de cálculo'' de 
 \]
 Así que nuestra ecuación se reescribe, sin ningún ingrediente nuevo, como
 \[
-\sigma_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_1\,\sigma_{\boldsymbol{x}}^2,
+\sigma_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_2\,\sigma_{\boldsymbol{x}}^2,
 \]
-que es ya, prácticamente, el resultado final. Solo falta despejar $\hat\beta_1$, lo que hacemos en la siguiente transparencia.
+que es ya, prácticamente, el resultado final. Solo falta despejar $\hat\beta_2$, lo que hacemos en la siguiente transparencia.
 
 /Nota de notación/. El subíndice de $\sigma_{\boldsymbol{x}\boldsymbol{y}}$ (covarianza /entre/ $\boldsymbol{x}$ e $\boldsymbol{y}$, vectores ya centrados) y el de $\mu_{\boldsymbol{x}\odot\boldsymbol{y}}$ (media /del vector/ $\boldsymbol{x}\odot\boldsymbol{y}$, sin centrar) se parecen tipográficamente, pero indican cosas distintas: el primero nombra una relación entre dos vectores; el segundo nombra la media de un vector nuevo, construido multiplicando componente a componente. El símbolo $\odot$ hace explícita esa construcción para evitar la confusión entre ambos subíndices.
 
@@ -241,20 +241,20 @@ que es ya, prácticamente, el resultado final. Solo falta despejar $\hat\beta_1$
 - Bujosa, M. /Curso de Álgebra Lineal/, [[https://mbujosab.github.io/CursoDeAlgebraLineal/libro.pdf#subsection.11.3.1][cap. 11]]: bilinealidad del producto escalar.
 
 
-* $\hat\beta_1$: covarianza sobre varianza
+* $\hat\beta_2$: covarianza sobre varianza
 :PROPERTIES:
 :metadata: (slideshow . ((slide_type . slide)))
 :END:
 
-Despejando de $\sigma_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_1\,\sigma_{\boldsymbol{x}}^2$:
+Despejando de $\sigma_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_2\,\sigma_{\boldsymbol{x}}^2$:
 \[
-\boxed{\;\hat\beta_1 \;=\; \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2}\;.}
+\boxed{\;\hat\beta_2 \;=\; \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2}\;.}
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 Y recordando $\rho_{\boldsymbol{x}\boldsymbol{y}}=\dfrac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}\sigma_{\boldsymbol{y}}}$ (lección 5):
 \[
-\hat\beta_1 \;=\; \rho_{\boldsymbol{x}\boldsymbol{y}}\cdot\frac{\sigma_{\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}}.
+\hat\beta_2 \;=\; \rho_{\boldsymbol{x}\boldsymbol{y}}\cdot\frac{\sigma_{\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}}.
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -263,33 +263,33 @@ La pendiente MCO es /la correlación, reescalada por el ratio de las desviacione
 #+end_center
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Consecuencia inmediata: el /signo/ de $\hat\beta_1$ es siempre el signo de $\rho_{\boldsymbol{x}\boldsymbol{y}}$.
+Consecuencia inmediata: el /signo/ de $\hat\beta_2$ es siempre el signo de $\rho_{\boldsymbol{x}\boldsymbol{y}}$.
 
 
-*** $\hat\beta_1$: covarianza sobre varianza
+*** $\hat\beta_2$: covarianza sobre varianza
 :PROPERTIES:
 :metadata: (slideshow . ((slide_type . skip)))
 :UNNUMBERED: notoc
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-De la ecuación $\sigma_{\boldsymbol{x}\boldsymbol{y}}=\hat\beta_1\sigma_{\boldsymbol{x}}^2$ obtenida en la transparencia anterior se despeja de inmediato
+De la ecuación $\sigma_{\boldsymbol{x}\boldsymbol{y}}=\hat\beta_2\sigma_{\boldsymbol{x}}^2$ obtenida en la transparencia anterior se despeja de inmediato
 \[
-\hat\beta_1 = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2}.
+\hat\beta_2 = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2}.
 \]
 Esta es la fórmula que probablemente muchos recordéis de un curso de estadística: la pendiente de la recta de mínimos cuadrados es la covarianza entre $\boldsymbol{x}$ e $\boldsymbol{y}$ dividida por la varianza de $\boldsymbol{x}$. Lo que hemos hecho aquí es mostrar /de dónde sale/: no es una regla mnemotécnica aislada, sino la consecuencia directa —vía Pitágoras y bilinealidad del producto escalar— de imponer la segunda condición de ortogonalidad.
 
 Podemos reescribir esta fórmula de una manera todavía más reveladora. Recordando la definición de correlación de la lección 5, $\rho_{\boldsymbol{x}\boldsymbol{y}}=\sigma_{\boldsymbol{x}\boldsymbol{y}}/(\sigma_{\boldsymbol{x}}\sigma_{\boldsymbol{y}})$, despejamos $\sigma_{\boldsymbol{x}\boldsymbol{y}}=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{x}}\sigma_{\boldsymbol{y}}$ y sustituimos:
 \[
-\hat\beta_1 = \frac{\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{x}}\sigma_{\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2} = \rho_{\boldsymbol{x}\boldsymbol{y}}\cdot\frac{\sigma_{\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}}.
+\hat\beta_2 = \frac{\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{x}}\sigma_{\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2} = \rho_{\boldsymbol{x}\boldsymbol{y}}\cdot\frac{\sigma_{\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}}.
 \]
 Esta identidad, ya anticipada como promesa en las lecciones 5 y 6 (``pendiente = correlación reescalada''), tiene una lectura muy intuitiva: la pendiente MCO es el coseno del ángulo $\theta$ entre los vectores en desviaciones de $\boldsymbol{x}$ e $\boldsymbol{y}$ (la correlación), corregido por el cociente de las escalas de ambas variables ($\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$). Si $\boldsymbol{x}$ e $\boldsymbol{y}$ tuvieran la misma dispersión ($\sigma_{\boldsymbol{x}}=\sigma_{\boldsymbol{y}}$), la pendiente coincidiría exactamente con la correlación.
 
-Una consecuencia inmediata que conviene subrayar: como $\sigma_{\boldsymbol{x}}^2$ y $\sigma_{\boldsymbol{y}}$ son siempre no negativas (son normas, o normas al cuadrado), el /signo/ de $\hat\beta_1$ coincide siempre con el signo de $\sigma_{\boldsymbol{x}\boldsymbol{y}}$, que a su vez coincide siempre con el signo de $\rho_{\boldsymbol{x}\boldsymbol{y}}$. Dicho de otro modo: /la pendiente de la recta de regresión y la correlación entre las dos variables tienen siempre el mismo signo/. Esta observación, trivial una vez vista la fórmula, es la base de la intuición habitual de que ``pendiente positiva'' y ``correlación positiva'' son, en cierto sentido, la misma cosa vista desde ángulos distintos.
+Una consecuencia inmediata que conviene subrayar: como $\sigma_{\boldsymbol{x}}^2$ y $\sigma_{\boldsymbol{y}}$ son siempre no negativas (son normas, o normas al cuadrado), el /signo/ de $\hat\beta_2$ coincide siempre con el signo de $\sigma_{\boldsymbol{x}\boldsymbol{y}}$, que a su vez coincide siempre con el signo de $\rho_{\boldsymbol{x}\boldsymbol{y}}$. Dicho de otro modo: /la pendiente de la recta de regresión y la correlación entre las dos variables tienen siempre el mismo signo/. Esta observación, trivial una vez vista la fórmula, es la base de la intuición habitual de que ``pendiente positiva'' y ``correlación positiva'' son, en cierto sentido, la misma cosa vista desde ángulos distintos.
 
 /Para profundizar/:
 - Bujosa, M. /Curso de Álgebra Lineal/, [[https://mbujosab.github.io/CursoDeAlgebraLineal/][libro online]], cap. 11.
-- Wooldridge, J. M. (2020), cap. 2, ecuación (2.19) y comentario adyacente sobre el signo de $\hat\beta_1$.
+- Wooldridge, J. M. (2020), cap. 2, ecuación (2.19) y comentario adyacente sobre el signo de $\hat\beta_2$.
 
 
 * Vía alternativa: generadores ortogonales
@@ -304,10 +304,10 @@ Y ahora sí: $\boldsymbol{1}\perp(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol
 \mu_{\boldsymbol{x}} - \mu_{\boldsymbol{x}} = 0$.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Con generadores /ortogonales/, la proyección se descompone en dos componentes ortogonales, uno por generador; cada coeficiente es la razón que resulta de proyectar sobre esa dirección /por separado/ (Cauchy–Schwarz, lección 3: $\alpha=\frac{\langle\boldsymbol{b},\boldsymbol{a}\rangle}{\langle\boldsymbol{a},\boldsymbol{a}\rangle}=\frac{\langle\boldsymbol{b},\boldsymbol{a}\rangle}{\|\boldsymbol{a}\|^2}$):
+Con generadores /ortogonales/, la proyección se descompone en dos componentes ortogonales, uno por generador; cada coeficiente es la razón que resulta de proyectar sobre esa dirección /por separado/ (Cauchy–Schwarz, lección 3: $\alpha=\frac{\langle\boldsymbol{a},\boldsymbol{b}\rangle}{\langle\boldsymbol{a},\boldsymbol{a}\rangle}=\frac{\langle\boldsymbol{a},\boldsymbol{b}\rangle}{\|\boldsymbol{a}\|^2}$):
 \[
 c_0 = \frac{\langle\boldsymbol{y} \,,\, \boldsymbol{1}\rangle_s}{\|\boldsymbol{1}\|_s^2} = \mu_{\boldsymbol{y}}, \qquad
-c_1 = \frac{\Big\langle\boldsymbol{y} , (\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\Big\rangle_s}{\|\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2} = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2} = \hat\beta_1.
+c_1 = \frac{\Big\langle\boldsymbol{y} , (\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\Big\rangle_s}{\|\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2} = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2} = \hat\beta_2.
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -339,33 +339,33 @@ La razón por la que este cambio de generadores es interesante —y no un mero c
 Aplicándolo aquí: sea $\boldsymbol{\mathop{\widehat{y}}}=c_0\boldsymbol{1}+c_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$ la proyección de $\boldsymbol{y}$ sobre el plano, escrita en esta nueva base. Por ortogonalidad de los generadores,
 \[
 c_0 = \frac{\langle\boldsymbol{y} \,,\, \boldsymbol{1}\rangle_s}{\|\boldsymbol{1}\|_s^2} = \frac{\mu_{\boldsymbol{y}}}{1} = \mu_{\boldsymbol{y}}, \qquad
-c_1 = \frac{\Big\langle\boldsymbol{y} , (\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\Big\rangle_s}{\|\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2} = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2} = \hat\beta_1.
+c_1 = \frac{\Big\langle\boldsymbol{y} , (\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\Big\rangle_s}{\|\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2} = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2} = \hat\beta_2.
 \]
 /El mismo resultado/ que obtuvimos resolviendo el sistema, pero sin resolver ningún sistema.
 
-Falta un último paso: traducir $c_0,c_1$ (los coeficientes en la base ``centrada'') a $\hat\beta_0,\hat\beta_1$ (los coeficientes en la base original $\boldsymbol{1},\boldsymbol{x}$). Basta sustituir $c_0$ y $c_1$ en  $\boldsymbol{\mathop{\widehat{y}}} = c_0\boldsymbol{1} + c_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$ y reagrupar:
+Falta un último paso: traducir $c_0,c_1$ (los coeficientes en la base ``centrada'') a $\hat\beta_1,\hat\beta_2$ (los coeficientes en la base original $\boldsymbol{1},\boldsymbol{x}$). Basta sustituir $c_0$ y $c_1$ en  $\boldsymbol{\mathop{\widehat{y}}} = c_0\boldsymbol{1} + c_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$ y reagrupar:
 \[
-\boldsymbol{\mathop{\widehat{y}}} = \mu_{\boldsymbol{y}}\boldsymbol{1} + \hat\beta_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}) = \hat\beta_1\boldsymbol{x} + \underbrace{(\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}})}_{\hat\beta_0}\boldsymbol{1}.
+\boldsymbol{\mathop{\widehat{y}}} = \mu_{\boldsymbol{y}}\boldsymbol{1} + \hat\beta_2(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}) = \hat\beta_2\boldsymbol{x} + \underbrace{(\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}})}_{\hat\beta_1}\boldsymbol{1}.
 \]
-Reconocemos, en el término entre paréntesis, exactamente la fórmula de $\hat\beta_0$ que ya habíamos obtenido de la primera condición de ortogonalidad. Los dos caminos —resolver el sistema directamente, o cambiar a generadores ortogonales— llegan, como no podía ser de otro modo, al mismo resultado. El segundo camino es bastante ilustrativo: muestra con claridad que la dificultad de resolver ``un sistema de dos ecuaciones'' era, en el fondo, solo un problema de /elección de base/; con la base adecuada (generadores ortogonales), el sistema se desacopla por completo.
+Reconocemos, en el término entre paréntesis, exactamente la fórmula de $\hat\beta_1$ que ya habíamos obtenido de la primera condición de ortogonalidad. Los dos caminos —resolver el sistema directamente, o cambiar a generadores ortogonales— llegan, como no podía ser de otro modo, al mismo resultado. El segundo camino es bastante ilustrativo: muestra con claridad que la dificultad de resolver ``un sistema de dos ecuaciones'' era, en el fondo, solo un problema de /elección de base/; con la base adecuada (generadores ortogonales), el sistema se desacopla por completo.
 
 /Para profundizar/:
 - Bujosa, M. /Curso de Álgebra Lineal/, cap. 11: proyección sobre un vector, fórmula $\alpha=\boldsymbol{a}\cdot\boldsymbol{b}/\boldsymbol{a}\cdot\boldsymbol{a}$.
 - Strang, G. (2016). /Introduction to Linear Algebra/, sección sobre bases ortogonales y proyecciones independientes.
 
 
-* $\hat\beta_0$ y el lugar de las medias
+* $\hat\beta_1$ y el lugar de las medias
 :PROPERTIES:
 :metadata: (slideshow . ((slide_type . slide)))
 :END:
 
-De $\hat\beta_0=\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}}$, reordenando:
+De $\hat\beta_1=\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}}$, reordenando:
 \[
-\mu_{\boldsymbol{y}} = \hat\beta_0 + \hat\beta_1\mu_{\boldsymbol{x}}.
+\mu_{\boldsymbol{y}} = \hat\beta_1 + \hat\beta_2\mu_{\boldsymbol{x}}.
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Así, evaluando la recta ajustada $\hat y = \hat\beta_0+\hat\beta_1 x$ en el punto $x=\mu_{\boldsymbol{x}}$, el resultado es $\mu_{\boldsymbol{y}}$
+Así, evaluando la recta ajustada $\hat y = \hat\beta_1+\hat\beta_2 x$ en el punto $x=\mu_{\boldsymbol{x}}$, el resultado es $\mu_{\boldsymbol{y}}$
 
 #+begin_center
 /La recta ajustada pasa exactamente por el punto de las medias/ $(\mu_{\boldsymbol{x}},\mu_{\boldsymbol{y}})$.
@@ -377,55 +377,55 @@ Y ya vimos (transparencia 2): $\mu_{\boldsymbol{\mathop{\widehat{y}}}}=\mu_{\bol
 #+attr_latex: :width 475px
 #+attr_html: :width 700px
 #+NAME: FiguraMedias
-#+CAPTION: La proyección de la lección 6, vista desde tres ángulos, con las medias señaladas. (Izquierda) De frente al plano $(\mathcal{L}(\boldsymbol{1}),\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp)$: las proyecciones de $\boldsymbol{y}$ y de $\boldsymbol{\mathop{\widehat{y}}}$ sobre $\mathcal{L}(\boldsymbol{1})$ caen en el mismo punto. (Centro) Vista cenital: sumar la proyección de $\hat\beta_1\boldsymbol{x}$ y la de $\hat\beta_0\boldsymbol{1}$ sobre $\mathcal{L}(\boldsymbol{1})$ reconstruye ese mismo punto. (Derecha) Vista alineada con $\mathcal{L}(\boldsymbol{1})$: lo que se ve son, literalmente, los vectores en desviaciones; el ángulo entre el de $\boldsymbol{y}$ y el de $\boldsymbol{\mathop{\widehat{y}}}$ será protagonista de la lección 8.
-file:img/S09-Lecc07/OLS-regresoresNoPerpconMedias_fila_ancho.png
+#+CAPTION: La proyección de la lección 6, vista desde tres ángulos, con las medias señaladas. (Izquierda) De frente al plano $(\mathcal{L}(\boldsymbol{1}),\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp)$: las proyecciones de $\boldsymbol{y}$ y de $\boldsymbol{\mathop{\widehat{y}}}$ sobre $\mathcal{L}(\boldsymbol{1})$ caen en el mismo punto. (Centro) Vista cenital: sumar la proyección de $\hat\beta_2\boldsymbol{x}$ y la de $\hat\beta_1\boldsymbol{1}$ sobre $\mathcal{L}(\boldsymbol{1})$ reconstruye ese mismo punto. (Derecha) Vista alineada con $\mathcal{L}(\boldsymbol{1})$: lo que se ve son, literalmente, los vectores en desviaciones; el ángulo entre el de $\boldsymbol{y}$ y el de $\boldsymbol{\mathop{\widehat{y}}}$ será protagonista de la lección 8.
+[[file:img/S09-Lecc07/OLS-regresoresNoPerpconMedias_fila_ancho.png]]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Tres cantidades que coinciden: $\mu_{\boldsymbol{y}}=\mu_{\boldsymbol{\mathop{\widehat{y}}}}=\hat\beta_0+\hat\beta_1\mu_{\boldsymbol{x}}$.
+Tres cantidades que coinciden: $\mu_{\boldsymbol{y}}=\mu_{\boldsymbol{\mathop{\widehat{y}}}}=\hat\beta_1+\hat\beta_2\mu_{\boldsymbol{x}}$.
 
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Y hay más, los vectores en desviaciones de $\boldsymbol{\mathop{\widehat{y}}}$ y $\hat\beta_1\boldsymbol{x}$ son /iguales/:
+Y hay más, los vectores en desviaciones de $\boldsymbol{\mathop{\widehat{y}}}$ y $\hat\beta_2\boldsymbol{x}$ son /iguales/:
 \[
-\boldsymbol{\mathop{\widehat{y}}} - \mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1} \;=\; \big(\hat\beta_0\boldsymbol{1}+\hat\beta_1\boldsymbol{x}\big) - \big(\hat\beta_0+\hat\beta_1\mu_{\boldsymbol{x}}\big)\boldsymbol{1} \;=\; \hat\beta_1\boldsymbol{x}-\hat\beta_1\mu_{\boldsymbol{x}}\boldsymbol{1} \;=\; \hat\beta_1\big(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\big).
+\boldsymbol{\mathop{\widehat{y}}} - \mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1} \;=\; \big(\hat\beta_1\boldsymbol{1}+\hat\beta_2\boldsymbol{x}\big) - \big(\hat\beta_1+\hat\beta_2\mu_{\boldsymbol{x}}\big)\boldsymbol{1} \;=\; \hat\beta_2\boldsymbol{x}-\hat\beta_2\mu_{\boldsymbol{x}}\boldsymbol{1} \;=\; \hat\beta_2\big(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\big).
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-De ahí que $\sigma_{\boldsymbol{\mathop{\widehat{y}}}}=\sigma_{\hat\beta_1\boldsymbol{x}}$, y que $\boldsymbol{y}$ forme /el mismo ángulo/ con $\boldsymbol{\mathop{\widehat{y}}}$ que con $\hat\beta_1\boldsymbol{x}$.
+De ahí que $\sigma_{\boldsymbol{\mathop{\widehat{y}}}}=\sigma_{\hat\beta_2\boldsymbol{x}}$, y que $\boldsymbol{y}$ forme /el mismo ángulo/ con $\boldsymbol{\mathop{\widehat{y}}}$ que con $\hat\beta_2\boldsymbol{x}$.
 
 
-*** $\hat\beta_0$ y el lugar de las medias
+*** $\hat\beta_1$ y el lugar de las medias
 :PROPERTIES:
 :metadata: (slideshow . ((slide_type . skip)))
 :UNNUMBERED: notoc
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-La fórmula $\hat\beta_0=\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}}$, obtenida ya en la segunda transparencia, admite una lectura geométrica muy bonita si la reordenamos como
+La fórmula $\hat\beta_1=\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}}$, obtenida ya en la segunda transparencia, admite una lectura geométrica muy bonita si la reordenamos como
 \[
-\mu_{\boldsymbol{y}} = \hat\beta_0 + \hat\beta_1\mu_{\boldsymbol{x}}.
+\mu_{\boldsymbol{y}} = \hat\beta_1 + \hat\beta_2\mu_{\boldsymbol{x}}.
 \]
-Esta expresión dice, literalmente, que si evaluamos la recta ajustada $\hat y = \hat\beta_0+\hat\beta_1 x$ en el punto $x=\mu_{\boldsymbol{x}}$, el resultado es exactamente $\mu_{\boldsymbol{y}}$. Dicho de otro modo: /la recta de regresión MCO pasa siempre, sin excepción, por el punto de las medias/ $(\mu_{\boldsymbol{x}},\mu_{\boldsymbol{y}})$. Este resultado, que en un curso de estadística aparece a menudo como una propiedad más entre otras, es aquí una consecuencia directa e inevitable de la primera condición de ortogonalidad: no puede dejar de cumplirse.
+Esta expresión dice, literalmente, que si evaluamos la recta ajustada $\hat y = \hat\beta_1+\hat\beta_2 x$ en el punto $x=\mu_{\boldsymbol{x}}$, el resultado es exactamente $\mu_{\boldsymbol{y}}$. Dicho de otro modo: /la recta de regresión MCO pasa siempre, sin excepción, por el punto de las medias/ $(\mu_{\boldsymbol{x}},\mu_{\boldsymbol{y}})$. Este resultado, que en un curso de estadística aparece a menudo como una propiedad más entre otras, es aquí una consecuencia directa e inevitable de la primera condición de ortogonalidad: no puede dejar de cumplirse.
 
 Esta propiedad se conecta directamente con la observación que hicimos en la segunda transparencia: como $\boldsymbol{\mathop{\widehat{e}}}\perp\boldsymbol{1}$, se cumple $\mu_{\boldsymbol{\mathop{\widehat{e}}}}=0$, y por tanto $\mu_{\boldsymbol{y}}=\mu_{\boldsymbol{\mathop{\widehat{y}}}}$: la media del vector ajustado coincide con la media del vector original. Podemos ahora reunir ambas piezas en una única cadena de igualdades:
 \[
-\mu_{\boldsymbol{y}} = \mu_{\boldsymbol{\mathop{\widehat{y}}}} = \hat\beta_0 + \hat\beta_1\mu_{\boldsymbol{x}}.
+\mu_{\boldsymbol{y}} = \mu_{\boldsymbol{\mathop{\widehat{y}}}} = \hat\beta_1 + \hat\beta_2\mu_{\boldsymbol{x}}.
 \]
 La primera igualdad es un hecho sobre /vectores/ (dos vectores distintos, $\boldsymbol{y}$ y $\boldsymbol{\mathop{\widehat{y}}}$, comparten la misma media). La segunda es un hecho sobre la /recta ajustada/, evaluada en un punto concreto. Ambas son, en realidad, la misma consecuencia geométrica vista desde dos ángulos.
 
-La figura recién mostrada más arriba hace visible, con tres perspectivas complementarias, toda esta cadena de igualdades. La vista de la izquierda retoma el plano frontal $(\mathcal{L}(\boldsymbol{1}),\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp)$ ya usado en la lección 6 (la vista central de aquella figura): en ella se aprecia directamente que $\boldsymbol{y}$ y $\boldsymbol{\mathop{\widehat{y}}}$ tienen la misma proyección sobre $\mathcal{L}(\boldsymbol{1})$, es decir, $\mu_{\boldsymbol{y}}=\mu_{\boldsymbol{\mathop{\widehat{y}}}}$. La vista central es una vista /cenital/, perpendicular al plano de los regresores: en ella se ve que sumar la proyección de $\hat\beta_1\boldsymbol{x}$ (sobre $\mathcal{L}(\boldsymbol{1})$) a $\hat\beta_0\boldsymbol{1}$ reconstruye exactamente el punto $\mu_{\boldsymbol{y}}\boldsymbol{1}$; y que las longitudes de las componentes perpendiculares a $\mathcal{L}(\boldsymbol{1})$ de $\boldsymbol{\mathop{\widehat{y}}}$ y de $\hat\beta_1\boldsymbol{x}$ son iguales (es decir, que $\boldsymbol{\mathop{\widehat{y}}}$ y $\hat\beta_1\boldsymbol{x}$ tienen la misma desviación típica). La vista de la derecha, nueva, está tomada /alineada con/ $\mathcal{L}(\boldsymbol{1})$: al mirar exactamente en la dirección de $\boldsymbol{1}$, perdemos toda profundidad en esa dirección, y lo que vemos —de frente, sin distorsión— es el propio plano $\mathcal{L}(\boldsymbol{1})^\perp$; es decir, vemos literalmente los vectores en desviaciones de $\boldsymbol{y}$, de $\boldsymbol{\mathop{\widehat{y}}}$ y de $\hat\beta_1\boldsymbol{x}$, con su verdadera longitud y su verdadero ángulo entre sí.
+La figura recién mostrada más arriba hace visible, con tres perspectivas complementarias, toda esta cadena de igualdades. La vista de la izquierda retoma el plano frontal $(\mathcal{L}(\boldsymbol{1}),\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp)$ ya usado en la lección 6 (la vista central de aquella figura): en ella se aprecia directamente que $\boldsymbol{y}$ y $\boldsymbol{\mathop{\widehat{y}}}$ tienen la misma proyección sobre $\mathcal{L}(\boldsymbol{1})$, es decir, $\mu_{\boldsymbol{y}}=\mu_{\boldsymbol{\mathop{\widehat{y}}}}$. La vista central es una vista /cenital/, perpendicular al plano de los regresores: en ella se ve que sumar la proyección de $\hat\beta_2\boldsymbol{x}$ (sobre $\mathcal{L}(\boldsymbol{1})$) a $\hat\beta_1\boldsymbol{1}$ reconstruye exactamente el punto $\mu_{\boldsymbol{y}}\boldsymbol{1}$; y que las longitudes de las componentes perpendiculares a $\mathcal{L}(\boldsymbol{1})$ de $\boldsymbol{\mathop{\widehat{y}}}$ y de $\hat\beta_2\boldsymbol{x}$ son iguales (es decir, que $\boldsymbol{\mathop{\widehat{y}}}$ y $\hat\beta_2\boldsymbol{x}$ tienen la misma desviación típica). La vista de la derecha, nueva, está tomada /alineada con/ $\mathcal{L}(\boldsymbol{1})$: al mirar exactamente en la dirección de $\boldsymbol{1}$, perdemos toda profundidad en esa dirección, y lo que vemos —de frente, sin distorsión— es el propio plano $\mathcal{L}(\boldsymbol{1})^\perp$; es decir, vemos literalmente los vectores en desviaciones de $\boldsymbol{y}$, de $\boldsymbol{\mathop{\widehat{y}}}$ y de $\hat\beta_2\boldsymbol{x}$, con su verdadera longitud y su verdadero ángulo entre sí.
 
 Esta última vista no es un simple adorno: adelanta, sin demostrarlo aún, al protagonista de la lección 8. El ángulo que en ella se aprecia entre $\boldsymbol{y}$ y $\boldsymbol{\mathop{\widehat{y}}}$ —medido, como siempre, entre sus vectores en desviaciones— será exactamente el ángulo cuyo coseno al cuadrado define el $R^2$.
 
-La igualdad que anuncian las vistas central y derecha —que las componentes perpendiculares de $\boldsymbol{\mathop{\widehat{y}}}$ y de $\hat\beta_1\boldsymbol{x}$ coinciden— no es una casualidad geométrica ni requiere ningún argumento nuevo: es consecuencia inmediata de una propiedad ya demostrada en la lección 5. Como $\boldsymbol{\mathop{\widehat{y}}}=\hat\beta_0\boldsymbol{1}+\hat\beta_1\boldsymbol{x}$ y $\hat\beta_0\boldsymbol{1}$ es un vector constante, sumarlo no cambia el vector en desviaciones (lección 4: ``sumar una constante no cambia la desviación típica''; aquí usamos, más precisamente, que ni siquiera cambia el propio vector en desviaciones, no solo su norma). Por tanto:
+La igualdad que anuncian las vistas central y derecha —que las componentes perpendiculares de $\boldsymbol{\mathop{\widehat{y}}}$ y de $\hat\beta_2\boldsymbol{x}$ coinciden— no es una casualidad geométrica ni requiere ningún argumento nuevo: es consecuencia inmediata de una propiedad ya demostrada en la lección 5. Como $\boldsymbol{\mathop{\widehat{y}}}=\hat\beta_1\boldsymbol{1}+\hat\beta_2\boldsymbol{x}$ y $\hat\beta_1\boldsymbol{1}$ es un vector constante, sumarlo no cambia el vector en desviaciones (lección 4: ``sumar una constante no cambia la desviación típica''; aquí usamos, más precisamente, que ni siquiera cambia el propio vector en desviaciones, no solo su norma). Por tanto:
 \[
-\boldsymbol{\mathop{\widehat{y}}} - \mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1} \;=\; \big(\hat\beta_0\boldsymbol{1}+\hat\beta_1\boldsymbol{x}\big) - \big(\hat\beta_0+\hat\beta_1\mu_{\boldsymbol{x}}\big)\boldsymbol{1} \;=\; \hat\beta_1\boldsymbol{x}-\hat\beta_1\mu_{\boldsymbol{x}}\boldsymbol{1} \;=\; \hat\beta_1\big(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\big).
+\boldsymbol{\mathop{\widehat{y}}} - \mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1} \;=\; \big(\hat\beta_1\boldsymbol{1}+\hat\beta_2\boldsymbol{x}\big) - \big(\hat\beta_1+\hat\beta_2\mu_{\boldsymbol{x}}\big)\boldsymbol{1} \;=\; \hat\beta_2\boldsymbol{x}-\hat\beta_2\mu_{\boldsymbol{x}}\boldsymbol{1} \;=\; \hat\beta_2\big(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\big).
 \]
-El vector en desviaciones de $\boldsymbol{\mathop{\widehat{y}}}$ es, /literalmente/, el mismo vector que el vector en desviaciones de $\hat\beta_1\boldsymbol{x}$ (no solo un vector de la misma longitud: el mismísimo vector). De ahí se siguen, sin ningún paso adicional, dos consecuencias:
-- Tomando normas: $\sigma_{\boldsymbol{\mathop{\widehat{y}}}}=\sigma_{\hat\beta_1\boldsymbol{x}}$ (dos vectores idénticos tienen, evidentemente, la misma norma).
-- Como la correlación de $\boldsymbol{y}$ con cualquier vector depende únicamente del vector en desviaciones de ese vector (lección 5), y $\boldsymbol{\mathop{\widehat{y}}}$ y $\hat\beta_1\boldsymbol{x}$ comparten el mismo vector en desviaciones, $\boldsymbol{y}$ forma exactamente el mismo ángulo con ambos.
+El vector en desviaciones de $\boldsymbol{\mathop{\widehat{y}}}$ es, /literalmente/, el mismo vector que el vector en desviaciones de $\hat\beta_2\boldsymbol{x}$ (no solo un vector de la misma longitud: el mismísimo vector). De ahí se siguen, sin ningún paso adicional, dos consecuencias:
+- Tomando normas: $\sigma_{\boldsymbol{\mathop{\widehat{y}}}}=\sigma_{\hat\beta_2\boldsymbol{x}}$ (dos vectores idénticos tienen, evidentemente, la misma norma).
+- Como la correlación de $\boldsymbol{y}$ con cualquier vector depende únicamente del vector en desviaciones de ese vector (lección 5), y $\boldsymbol{\mathop{\widehat{y}}}$ y $\hat\beta_2\boldsymbol{x}$ comparten el mismo vector en desviaciones, $\boldsymbol{y}$ forma exactamente el mismo ángulo con ambos.
 
-Guardamos esta identidad —$\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_1(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$— porque reaparecerá en la lección 8: es la pieza que permite traducir directamente entre la descomposición de varianzas $\text{SST}=\text{SSR}+\text{SSE}$ y la relación $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ de la regresión simple.
+Guardamos esta identidad —$\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_2(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$— porque reaparecerá en la lección 8: es la pieza que permite traducir directamente entre la descomposición de varianzas $\text{SST}=\text{SSR}+\text{SSE}$ y la relación $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ de la regresión simple.
 
 Conviene subrayar que esta propiedad —la recta pasa por el punto de las medias— es exclusiva del criterio de mínimos cuadrados /con constante incluida/. Si forzáramos, por alguna razón, un ajuste sin intercepto (es decir, proyectando solo sobre $\mathcal{L}(\boldsymbol{x})$, sin $\boldsymbol{1}$), esta propiedad desaparecería, porque ya no tendríamos la primera condición de ortogonalidad ($\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=0$) que la garantiza. En este curso, todos los modelos de regresión incluyen constante, así que esta propiedad se cumple siempre.
 Es más, el autor de estos apuntes considera que *si no hay constante no podemos hablar de regresión*, pues automáticamente nos salimos del marco de la estadística; o dicho de otro modo, el autor de estos apuntes considera que no incluir la constante es un error conceptual.
@@ -441,7 +441,7 @@ Es más, el autor de estos apuntes considera que *si no hay constante no podemos
 
 En el mismo espíritu que en el laboratorio ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html#outline-container-org10c7a62][html]]) sobre $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$), pero con una muestra pequeña ($n=5$) calculable a mano:
 
-| $x_i$ | $u_i$ | $y_i=2+3x_i+u_i$ | $\hat y_i=\hat\beta_0+\hat\beta_1x_i$ |
+| $x_i$ | $u_i$ | $y_i=2+3x_i+u_i$ | $\hat y_i=\hat\beta_1+\hat\beta_2x_i$ |
 |-------+-------+------------------+---------------------------------------|
 |     1 |     1 |                6 |                                     5 |
 |     2 |    -2 |                6 |                                     8 |
@@ -465,11 +465,11 @@ En el mismo espíritu que en el laboratorio ([[https://mbujosab.github.io/PEcono
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 \[
-\hat\beta_1 = \frac{6}{2}=3, \qquad \hat\beta_0 = 11 - 3\cdot3 = 2.
+\hat\beta_2 = \frac{6}{2}=3, \qquad \hat\beta_1 = 11 - 3\cdot3 = 2.
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-¡En este ejemplo con truco recuperamos exactamente $\beta_0=2$, $\beta_1=3$! (No es lo habitual: aquí $\boldsymbol{u}$ se eligió, a propósito, ortogonal a los regresores.)
+¡En este ejemplo con truco recuperamos exactamente $\beta_1=2$, $\beta_2=3$! (No es lo habitual: aquí $\boldsymbol{u}$ se eligió, a propósito, ortogonal a los regresores.)
 
 #+attr_ipynb: (slideshow . ((slide_type . subslide)))
 #+attr_latex: :width 380px
@@ -508,12 +508,12 @@ Tomamos $\boldsymbol{x}=(1,2,3,4,5)$ y un vector $\boldsymbol{u}=(1,-2,0,2,-1)$ 
 
 /Pendiente y ordenada en el origen/:
 \[
-\hat\beta_1 = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2} = \frac{6}{2} = 3, \qquad \hat\beta_0 = \mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}} = 11-3\cdot3 = 2.
+\hat\beta_2 = \frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2} = \frac{6}{2} = 3, \qquad \hat\beta_1 = \mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}} = 11-3\cdot3 = 2.
 \]
 
-Recuperamos /exactamente/ los coeficientes generadores $\beta_0=2$, $\beta_1=3$. Esto no es casualidad, pero tampoco es lo que ocurre en general: sucede porque, en este ejemplo pequeño, elegimos deliberadamente $\boldsymbol{u}$ de manera que su covarianza con $\boldsymbol{x}$ fuera exactamente cero (compruébese: $\frac15\sum(x_i-\mu_{\boldsymbol{x}})u_i=\frac15[(-2)(1)+(-1)(-2)+(0)(0)+(1)(2)+(2)(-1)]=\frac15(-2+2+0+2-2)=0$) y su media cero. Con datos reales, o incluso con datos simulados de la forma habitual (perturbaciones generadas al azar, sin imponer esta cancelación exacta), $\hat\beta_1$ y $\hat\beta_0$ se /aproximarán/ a los valores generadores, pero no los reproducirán con exactitud —como puede comprobarse en la práctica de laboratorio, con su muestra de mayor tamaño y sus perturbaciones genuinamente aleatorias—.
+Recuperamos /exactamente/ los coeficientes generadores $\beta_1=2$, $\beta_2=3$. Esto no es casualidad, pero tampoco es lo que ocurre en general: sucede porque, en este ejemplo pequeño, elegimos deliberadamente $\boldsymbol{u}$ de manera que su covarianza con $\boldsymbol{x}$ fuera exactamente cero (compruébese: $\frac15\sum(x_i-\mu_{\boldsymbol{x}})u_i=\frac15[(-2)(1)+(-1)(-2)+(0)(0)+(1)(2)+(2)(-1)]=\frac15(-2+2+0+2-2)=0$) y su media cero. Con datos reales, o incluso con datos simulados de la forma habitual (perturbaciones generadas al azar, sin imponer esta cancelación exacta), $\hat\beta_2$ y $\hat\beta_1$ se /aproximarán/ a los valores generadores, pero no los reproducirán con exactitud —como puede comprobarse en la práctica de laboratorio, con su muestra de mayor tamaño y sus perturbaciones genuinamente aleatorias—.
 
-Podemos además comprobar, con este mismo ejemplo, que los residuos coinciden exactamente con $\boldsymbol{u}$: como el ajuste recupera exactamente los coeficientes generadores, $\hat e_i=y_i-(\hat\beta_0+\hat\beta_1 x_i)=y_i-(2+3x_i)=u_i$. Y, como debía ocurrir por construcción, $\sum \hat e_i=\sum u_i=0$ y $\sum x_i\hat e_i=\sum x_iu_i=0$ (la ortogonalidad con los regresores que impusimos al elegir $\boldsymbol{u}$).
+Podemos además comprobar, con este mismo ejemplo, que los residuos coinciden exactamente con $\boldsymbol{u}$: como el ajuste recupera exactamente los coeficientes generadores, $\hat e_i=y_i-(\hat\beta_1+\hat\beta_2 x_i)=y_i-(2+3x_i)=u_i$. Y, como debía ocurrir por construcción, $\sum \hat e_i=\sum u_i=0$ y $\sum x_i\hat e_i=\sum x_iu_i=0$ (la ortogonalidad con los regresores que impusimos al elegir $\boldsymbol{u}$).
 
 /Para profundizar/:
 - Wooldridge, J. M. (2020), cap. 2, ejemplo numérico análogo con datos de salario/educación.
@@ -526,10 +526,10 @@ Podemos además comprobar, con este mismo ejemplo, que los residuos coinciden ex
 
 | Condición de ortogonalidad                                             | Consecuencia                                                                                                                                                         |
 |------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=0$ | $\hat\beta_0=\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}}$;\; $\mu_{\boldsymbol{\mathop{\widehat{y}}}}=\mu_{\boldsymbol{y}}$                                 |
-| $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{x}\rangle_s=0$ | $\hat\beta_1=\sigma_{\boldsymbol{x}\boldsymbol{y}}/\sigma_{\boldsymbol{x}}^2 = \rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$ |
+| $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=0$ | $\hat\beta_1=\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}}$;\; $\mu_{\boldsymbol{\mathop{\widehat{y}}}}=\mu_{\boldsymbol{y}}$                                 |
+| $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{x}\rangle_s=0$ | $\hat\beta_2=\sigma_{\boldsymbol{x}\boldsymbol{y}}/\sigma_{\boldsymbol{x}}^2 = \rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$ |
 
-Nótese el caso límite $\hat\beta_1=0$: entonces $\hat\beta_0=\mu_{\boldsymbol{y}}$, y recuperamos exactamente el ajuste de la lección 4 —la media—. La regresión simple generaliza aquella proyección sobre una recta añadiendo una segunda dirección; no la sustituye.
+Nótese el caso límite $\hat\beta_2=0$: entonces $\hat\beta_1=\mu_{\boldsymbol{y}}$, y recuperamos exactamente el ajuste de la lección 4 —la media—. La regresión simple generaliza aquella proyección sobre una recta añadiendo una segunda dirección; no la sustituye.
 
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -538,7 +538,7 @@ Dos ortogonalidades, dos coeficientes. Nada de matrices; solo Pitágoras y bilin
 #+end_center
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-/Próxima sesión — Lección 8/: las mismas dos ortogonalidades, combinadas con el teorema de Pitágoras, dan $\sigma^2_{\boldsymbol{y}}=\sigma^2_{\mathop{\widehat{y}}}+\sigma^2_{\mathop{\widehat{e}}}$. De ahí saldrá el $R^2=\cos^2\theta$: ¿cómo de bueno es nuestro ajuste?
+/Próxima sesión — Lección 8/: las mismas dos ortogonalidades, combinadas con el teorema de Pitágoras, dan $\sigma^2_{\boldsymbol{y}}=\sigma^2_{\boldsymbol{\mathop{\widehat{y}}}}+\sigma^2_{\boldsymbol{\mathop{\widehat{e}}}}$. De ahí saldrá el $R^2=\cos^2\theta$: ¿cómo de bueno es nuestro ajuste?
 
 
 *** Recapitulación y guiño a la sesión siguiente
@@ -548,22 +548,22 @@ Dos ortogonalidades, dos coeficientes. Nada de matrices; solo Pitágoras y bilin
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-El recorrido de hoy ha sido, en el fondo, muy corto: partiendo de las dos condiciones de ortogonalidad que dejamos planteadas en la lección 6, y usando únicamente álgebra elemental (despejar, sustituir, dividir por $n$), hemos llegado a fórmulas cerradas para $\hat\beta_0$ y $\hat\beta_1$. Ninguna de las piezas era nueva: la media, la varianza, la covarianza y la correlación ya estaban completamente definidas y demostradas desde las lecciones 4 y 5. Lo único que hemos hecho hoy es plegar esas piezas sobre un problema de dos incógnitas.
+El recorrido de hoy ha sido, en el fondo, muy corto: partiendo de las dos condiciones de ortogonalidad que dejamos planteadas en la lección 6, y usando únicamente álgebra elemental (despejar, sustituir, dividir por $n$), hemos llegado a fórmulas cerradas para $\hat\beta_1$ y $\hat\beta_2$. Ninguna de las piezas era nueva: la media, la varianza, la covarianza y la correlación ya estaban completamente definidas y demostradas desde las lecciones 4 y 5. Lo único que hemos hecho hoy es plegar esas piezas sobre un problema de dos incógnitas.
 
-Merece la pena señalar, aunque no lo desarrollemos aquí, que estas mismas fórmulas podrían obtenerse igualmente por la vía puramente analítica: minimizando $\|\boldsymbol{\mathop{\widehat{e}}}\|_s^2=\frac1n\sum_i(y_i-\beta_0-\beta_1x_i)^2$ respecto a $\beta_0,\beta_1$ e igualando a cero las dos derivadas parciales. Esas dos condiciones de primer orden son, de hecho, exactamente las dos condiciones de ortogonalidad que hemos resuelto en esta lección —el mismo fenómeno que ya vimos, con un solo coeficiente, en la lección 4—:
+Merece la pena señalar, aunque no lo desarrollemos aquí, que estas mismas fórmulas podrían obtenerse igualmente por la vía puramente analítica: minimizando $\|\boldsymbol{\mathop{\widehat{e}}}\|_s^2=\frac1n\sum_i(y_i-\beta_1-\beta_2x_i)^2$ respecto a $\beta_1,\beta_2$ e igualando a cero las dos derivadas parciales. Esas dos condiciones de primer orden son, de hecho, exactamente las dos condiciones de ortogonalidad que hemos resuelto en esta lección —el mismo fenómeno que ya vimos, con un solo coeficiente, en la lección 4—:
 
-1. La primera condición de ortogonalidad ($\boldsymbol{\mathop{\widehat{e}}}\perp\boldsymbol{1}$) fija el intercepto en función de la pendiente, $\hat\beta_0=\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}}$, y garantiza que la recta ajustada pasa por el punto de las medias $(\mu_{\boldsymbol{x}},\mu_{\boldsymbol{y}})$, así como que $\mu_{\boldsymbol{\mathop{\widehat{y}}}}=\mu_{\boldsymbol{y}}$.
+1. La primera condición de ortogonalidad ($\boldsymbol{\mathop{\widehat{e}}}\perp\boldsymbol{1}$) fija el intercepto en función de la pendiente, $\hat\beta_1=\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}}$, y garantiza que la recta ajustada pasa por el punto de las medias $(\mu_{\boldsymbol{x}},\mu_{\boldsymbol{y}})$, así como que $\mu_{\boldsymbol{\mathop{\widehat{y}}}}=\mu_{\boldsymbol{y}}$.
 
-2. La segunda condición ($\boldsymbol{\mathop{\widehat{e}}}\perp\boldsymbol{x}$) fija la pendiente como el cociente entre la covarianza y la varianza, $\hat\beta_1=\sigma_{\boldsymbol{x}\boldsymbol{y}}/\sigma_{\boldsymbol{x}}^2$, que puede reescribirse como la correlación reescalada por el cociente de las desviaciones típicas, $\hat\beta_1=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$.
+2. La segunda condición ($\boldsymbol{\mathop{\widehat{e}}}\perp\boldsymbol{x}$) fija la pendiente como el cociente entre la covarianza y la varianza, $\hat\beta_2=\sigma_{\boldsymbol{x}\boldsymbol{y}}/\sigma_{\boldsymbol{x}}^2$, que puede reescribirse como la correlación reescalada por el cociente de las desviaciones típicas, $\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$.
 
 También vimos un camino alternativo —cambiar a generadores ortogonales, $\boldsymbol{1}$ y $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$— que llega al mismo resultado sin resolver ningún sistema, proyectando cada coeficiente de forma independiente. Este segundo camino es el que se generalizará, con más de un regresor, en la lección 10 (regresión múltiple), donde ya no bastará con dos condiciones de ortogonalidad, sino con tantas como regresores tengamos, y donde la notación matricial —anunciada ya en la lección 5, pero todavía no utilizada— empezará por fin a ganarse su lugar como forma compacta de escribir exactamente esto mismo.
 
-La sesión de laboratorio que sigue a esta lección (regresión simple con datos reales) comprobará numéricamente, con un dataset completo, que efectivamente $\sum \hat e_i=0$ y $\sum x_i\hat e_i=0$ —las dos condiciones de ortogonalidad de hoy—, y que las fórmulas de $\hat\beta_0,\hat\beta_1$ coinciden con las que reporta Gretl automáticamente al pedir una regresión.
+La sesión de laboratorio que sigue a esta lección (regresión simple con datos reales) comprobará numéricamente, con un dataset completo, que efectivamente $\sum \hat e_i=0$ y $\sum x_i\hat e_i=0$ —las dos condiciones de ortogonalidad de hoy—, y que las fórmulas de $\hat\beta_1,\hat\beta_2$ coinciden con las que reporta Gretl automáticamente al pedir una regresión.
 
 Y la próxima sesión teórica, la lección 8, dará el siguiente paso natural: las mismas dos condiciones de ortogonalidad —vistas ahora bajo la óptica del teorema de Pitágoras, con $\boldsymbol{y}=\boldsymbol{\mathop{\widehat{y}}}+\boldsymbol{\mathop{\widehat{e}}}$ como suma de dos vectores ortogonales— implican una descomposición de varianzas, $\sigma^2_{\boldsymbol{y}}=\sigma^2_{\mathop{\widehat{\boldsymbol{y}}}}+\sigma^2_{\mathop{\widehat{\boldsymbol{e}}}}$, de la que surgirá la medida de bondad de ajuste $R^2$, expresada geométricamente como el coseno al cuadrado de un ángulo. El ángulo de la lección 5 —el que definía la correlación— no ha desaparecido: solo cambia de protagonistas.
 
 /Para profundizar/:
-- Wooldridge, J. M. (2020), cap. 2, secciones 2.2-2.3: resumen algebraico completo de $\hat\beta_0,\hat\beta_1$ y sus propiedades.
+- Wooldridge, J. M. (2020), cap. 2, secciones 2.2-2.3: resumen algebraico completo de $\hat\beta_1,\hat\beta_2$ y sus propiedades.
 - Bujosa, M. /Curso de Álgebra Lineal/, cap. 11: proyección ortogonal sobre subespacios generados por vectores ortogonales entre sí.
 
 
@@ -573,12 +573,12 @@ Te propongo 12 preguntas. Para una prueba de 15-20 min, seleccionar 6-8. Nivel o
 
 ** Pregunta 1 [B] — Las dos condiciones
 
-Las dos condiciones de ortogonalidad que determinan $\hat\beta_0$ y $\hat\beta_1$ son:
+Las dos condiciones de ortogonalidad que determinan $\hat\beta_1$ y $\hat\beta_2$ son:
 
 a) $\boldsymbol{\mathop{\widehat{y}}}\cdot\boldsymbol{y}=0$ y $\boldsymbol{\mathop{\widehat{e}}}\cdot\boldsymbol{\mathop{\widehat{y}}}=0$.
 b) $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=0$ y $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{x}\rangle_s=0$.
 c) $\boldsymbol{x}\cdot\boldsymbol{1}=0$ y $\boldsymbol{y}\cdot\boldsymbol{1}=0$.
-d) $\hat\beta_0=0$ y $\hat\beta_1=0$.
+d) $\hat\beta_1=0$ y $\hat\beta_2=0$.
 
 /Respuesta correcta: b./
 /Evalúa/: identificación básica de las dos condiciones que resuelven el sistema.
@@ -587,17 +587,17 @@ d) $\hat\beta_0=0$ y $\hat\beta_1=0$.
 
 De $\langle\boldsymbol{\mathop{\widehat{e}}} , \boldsymbol{1}\rangle_s=0$ se deduce directamente que:
 
-a) $\hat\beta_1=0$.
+a) $\hat\beta_2=0$.
 b) $\sum_i \hat e_i = 0$.
 c) $\sum_i x_i\hat e_i=0$.
-d) $\hat\beta_0=\mu_{\boldsymbol{x}}$.
+d) $\hat\beta_1=\mu_{\boldsymbol{x}}$.
 
 /Respuesta correcta: b./
 /Evalúa/: traducción de una condición vectorial de ortogonalidad a su expresión en sumatorios.
 
 ** Pregunta 3 [B] — Fórmula de la pendiente
 
-$\hat\beta_1$ se calcula como:
+$\hat\beta_2$ se calcula como:
 
 a) $\sigma_{\boldsymbol{x}}^2/\sigma_{\boldsymbol{x}\boldsymbol{y}}$.
 b) $\sigma_{\boldsymbol{x}\boldsymbol{y}}/\sigma_{\boldsymbol{x}}^2$.
@@ -609,11 +609,11 @@ d) $\rho_{\boldsymbol{x}\boldsymbol{y}}$, sin más.
 
 ** Pregunta 4 [M] — Pendiente y correlación
 
-La relación exacta entre $\hat\beta_1$ y $\rho_{\boldsymbol{x}\boldsymbol{y}}$ es:
+La relación exacta entre $\hat\beta_2$ y $\rho_{\boldsymbol{x}\boldsymbol{y}}$ es:
 
-a) $\hat\beta_1=\rho_{\boldsymbol{x}\boldsymbol{y}}$ siempre.
-b) $\hat\beta_1=\rho_{\boldsymbol{x}\boldsymbol{y}}\cdot\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$.
-c) $\hat\beta_1=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
+a) $\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}$ siempre.
+b) $\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\cdot\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$.
+c) $\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
 d) No existe relación entre ambas cantidades.
 
 /Respuesta correcta: b./
@@ -623,20 +623,20 @@ d) No existe relación entre ambas cantidades.
 
 Si $\rho_{\boldsymbol{x}\boldsymbol{y}}<0$, entonces necesariamente:
 
-a) $\hat\beta_1<0$.
-b) $\hat\beta_1>0$.
-c) $\hat\beta_0<0$.
-d) No se puede saber el signo de $\hat\beta_1$ sin más información.
+a) $\hat\beta_2<0$.
+b) $\hat\beta_2>0$.
+c) $\hat\beta_1<0$.
+d) No se puede saber el signo de $\hat\beta_2$ sin más información.
 
 /Respuesta correcta: a./
-/Evalúa/: consecuencia directa de que $\sigma_{\boldsymbol{x}}^2>0$ y $\sigma_{\boldsymbol{y}}>0$, de modo que el signo de $\hat\beta_1$ es siempre el de $\rho_{\boldsymbol{x}\boldsymbol{y}}$ (y el de $\sigma_{\boldsymbol{x}\boldsymbol{y}}$).
+/Evalúa/: consecuencia directa de que $\sigma_{\boldsymbol{x}}^2>0$ y $\sigma_{\boldsymbol{y}}>0$, de modo que el signo de $\hat\beta_2$ es siempre el de $\rho_{\boldsymbol{x}\boldsymbol{y}}$ (y el de $\sigma_{\boldsymbol{x}\boldsymbol{y}}$).
 
 ** Pregunta 6 [M] — El punto de las medias
 
-La recta de regresión MCO $\hat y=\hat\beta_0+\hat\beta_1 x$, evaluada en $x=\mu_{\boldsymbol{x}}$, da como resultado:
+La recta de regresión MCO $\hat y=\hat\beta_1+\hat\beta_2 x$, evaluada en $x=\mu_{\boldsymbol{x}}$, da como resultado:
 
 a) $0$.
-b) $\hat\beta_1$.
+b) $\hat\beta_2$.
 c) $\mu_{\boldsymbol{y}}$.
 d) $\sigma_{\boldsymbol{y}}$.
 
@@ -649,7 +649,7 @@ d) $\sigma_{\boldsymbol{y}}$.
 
 a) Porque $\boldsymbol{\mathop{\widehat{y}}}=\boldsymbol{y}$ siempre.
 b) Porque $\boldsymbol{\mathop{\widehat{e}}}\perp\boldsymbol{1}$ implica $\mu_{\boldsymbol{\mathop{\widehat{e}}}}=0$, y $\boldsymbol{y}=\boldsymbol{\mathop{\widehat{y}}}+\boldsymbol{\mathop{\widehat{e}}}$.
-c) Porque $\hat\beta_1=1$ siempre.
+c) Porque $\hat\beta_2=1$ siempre.
 d) Es una coincidencia sin explicación geométrica.
 
 /Respuesta correcta: b./
@@ -657,12 +657,12 @@ d) Es una coincidencia sin explicación geométrica.
 
 ** Pregunta 8 [M] — Segunda condición, paso intermedio
 
-Al desarrollar $\sum_i x_i\hat e_i=0$ y sustituir $\hat\beta_0=\mu_{\boldsymbol{y}}-\hat\beta_1\mu_{\boldsymbol{x}}$, se llega a la igualdad:
+Al desarrollar $\sum_i x_i\hat e_i=0$ y sustituir $\hat\beta_1=\mu_{\boldsymbol{y}}-\hat\beta_2\mu_{\boldsymbol{x}}$, se llega a la igualdad:
 
-a) $\sigma_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_1\,\sigma_{\boldsymbol{x}}^2$.
-b) $\sigma_{\boldsymbol{y}}^2 = \hat\beta_1\,\sigma_{\boldsymbol{x}\boldsymbol{y}}$.
-c) $\mu_{\boldsymbol{x}\odot\boldsymbol{y}} = \hat\beta_0\,\mu_{\boldsymbol{x}}$.
-d) $\rho_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_1$.
+a) $\sigma_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_2\,\sigma_{\boldsymbol{x}}^2$.
+b) $\sigma_{\boldsymbol{y}}^2 = \hat\beta_2\,\sigma_{\boldsymbol{x}\boldsymbol{y}}$.
+c) $\mu_{\boldsymbol{x}\odot\boldsymbol{y}} = \hat\beta_1\,\mu_{\boldsymbol{x}}$.
+d) $\rho_{\boldsymbol{x}\boldsymbol{y}} = \hat\beta_2$.
 
 /Respuesta correcta: a./
 /Evalúa/: seguimiento del paso algebraico central de la derivación.
@@ -674,7 +674,7 @@ En la vía alternativa (generadores $\boldsymbol{1}$ y $\boldsymbol{x}-\mu_{\bol
 a) Porque $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$ tiene norma 1.
 b) Porque $\boldsymbol{1}$ y $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$ son ortogonales entre sí.
 c) Porque $\boldsymbol{y}$ es ortogonal a $\boldsymbol{1}$.
-d) Porque $\hat\beta_0=0$ en esa base.
+d) Porque $\hat\beta_1=0$ en esa base.
 
 /Respuesta correcta: b./
 /Evalúa/: comprensión de por qué el cambio de base "desacopla" el sistema — al ser los generadores ortogonales, cada proyección es independiente de la otra (fórmula de Cauchy–Schwarz aplicada dos veces).
@@ -693,7 +693,7 @@ d) Solo si $\boldsymbol{x}=\boldsymbol{1}$.
 
 ** Pregunta 11 [D] — Recuperación exacta de los coeficientes
 
-En el ejemplo numérico de la sesión, $\hat\beta_1=3$ y $\hat\beta_0=2$ coinciden exactamente con los coeficientes generadores $\beta_1=3,\beta_0=2$. Esto ocurre porque:
+En el ejemplo numérico de la sesión, $\hat\beta_2=3$ y $\hat\beta_1=2$ coinciden exactamente con los coeficientes generadores $\beta_2=3,\beta_1=2$. Esto ocurre porque:
 
 a) MCO siempre recupera exactamente los coeficientes generadores, con cualquier tamaño de muestra.
 b) En ese ejemplo concreto, $\boldsymbol{u}$ se eligió con covarianza muestral exactamente nula respecto de $\boldsymbol{x}$.

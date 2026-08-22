@@ -70,4 +70,3 @@ cd "$DEST"
 git add -A
 git commit -m "Actualiza material generado ($(date +%F))"
 git push origin gh-pages
-
