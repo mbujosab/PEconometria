@@ -1,0 +1,334 @@
+#+Title: Sesión 14 (C) --- La importancia del R² ajustado
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil 
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L14-C-peso-edad
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S14-Prct-C-peso-edad"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica 
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+Las dos prácticas anteriores mostraron que añadir un regresor nunca empeora el $R^2$, y que el $R^2$ ajustado corrige ese defecto penalizando la complejidad. Podría pensarse, entonces, que basta con perseguir el $\bar R^2$ más alto para encontrar ``el mejor modelo''. Veámoslo con un conjunto de datos (posiblemente ficticios) minúsculo: el peso y la edad de 8 niños. Ajustaremos tres modelos alternativos.
+# —recta, parábola, y función cúbica— en los que el $\bar R^2$ crece de uno al siguiente sin excepción, y sin embargo el modelo con mayor $\bar R^2$ resultará ser, con toda evidencia, el peor de los tres: predice que, pasada cierta edad, los niños empiezan a /perder/ peso.
+
+/Objetivo/
+
+1. Ajustar tres modelos polinómicos anidados (grado 1, 2 y 3) sobre la misma variable explicativa, /edad/.
+2. Comparar los modelos en función del ajuste medido por $\bar R^2$.
+3. Extrapolar los modelos más allá del rango muestral para observar las predicciones.
+4. Distinguir con precisión /variable explicativa/ (la edad) de /regresores/ (edad, edad al cuadrado, edad al cubo): tres regresores distintos al servicio de una sola variable explicativa.
+# 5. Concluir que ni $R^2$ ni $\bar R^2$, por sí solos, certifican que un modelo sea razonable: hace falta, además, mirar el gráfico y pensar si el resultado tiene sentido.
+
+* Actividad 1 - Los datos
+
+Introducimos a mano los 8 datos (posiblemente ficticios) de peso (kg) y edad (años) de 8 niños.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Datos peso edad
+#+begin_src gretl :tangle ./guiones/S14-Prct-C-peso-edad.inp :eval no
+nulldata 8 --preserve
+setobs 1 1 --cross-section
+
+matrix medad = {7;7;8;10;10;11;12;14}
+matrix mpeso = {39;40;42;49;51;54;56;58}
+series edad = medad
+series peso = mpeso
+
+setinfo peso -d "Peso (kg)" -n "Peso (kg)"
+setinfo edad -d "Edad (anios)" -n "Edad (anios)"
+
+print edad peso --byobs
+#+end_src
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Con solo 8 observaciones, este ejemplo no pretende decir nada serio sobre el crecimiento infantil: es, deliberadamente, un caso de laboratorio para poner a prueba nuestra confianza en $R^2$ y $\bar R^2$./
+#+latex: }
+
+* Actividad 2 - Modelo 1: la recta
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Modelo lineal peso edad
+#+begin_src gretl :tangle ./guiones/S14-Prct-C-peso-edad.inp :eval no
+ols peso const edad
+gnuplot peso edad --output="peso_edad_lineal.png"
+#+end_src
+#+latex: }
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.5\textwidth}
+  \includegraphics[width=\textwidth]{./S14-Prct-C-peso-edad/peso_edad_lineal.png}
+\end{minipage}%
+\caption{Modelo 1: peso~edad (recta).}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="display: flex; justify-content: center; gap: 10px;">
+    <img src="./S14-Prct-C-peso-edad/peso_edad_lineal.png" style="max-width:50%; height:auto;"/>
+    <figcaption>Modelo 1: peso~edad (recta).</figcaption>
+</figure>
+#+END_EXPORT
+
+Anote $R^2$ y $\bar R^2$ de este primer modelo.
+
+* Actividad 3 - Modelo 2: la parábola
+
+Añadimos edad al cuadrado como segundo regresor.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Modelo cuadratico peso edad
+#+begin_src gretl :tangle ./guiones/S14-Prct-C-peso-edad.inp :eval no
+series edad2 = edad^2
+ols peso const edad edad2
+gnuplot peso edad --fit=quadratic --output="peso_edad_cuadratico.png"
+#+end_src
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+(/Si su versión de Gretl no admite la opción/ =--fit=quadratic= /en/ =gnuplot=, /genere el gráfico desde el menú/ //~Gráfico X-Y~// /y seleccione, en el diálogo, un ajuste cuadrático./)
+#+latex: }
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.5\textwidth}
+  \includegraphics[width=\textwidth]{./S14-Prct-C-peso-edad/peso_edad_cuadratico.png}
+\end{minipage}%
+\caption{Modelo 2: peso~edad+edad² (parábola).}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="display: flex; justify-content: center; gap: 10px;">
+    <img src="./S14-Prct-C-peso-edad/peso_edad_cuadratico.png" style="max-width:50%; height:auto;"/>
+    <figcaption>Modelo 2: peso~edad+edad² (parábola).</figcaption>
+</figure>
+#+END_EXPORT
+
+Compare $R^2$ y $\bar R^2$ con los del Modelo 1. ¿Tiene sentido la comparación mirando ambos estadísticos? ¿O realmente sólo es lícito comparar el ajuste con uno de ellos? ¿Con cuál?
+
+* Actividad 4 - Modelo 3: la cúbica
+
+Añadimos, además, edad al cubo.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Modelo cubico peso edad
+#+begin_src gretl :tangle ./guiones/S14-Prct-C-peso-edad.inp :eval no
+series edad3 = edad^3
+ols peso const edad edad2 edad3
+gnuplot peso edad --fit=cubic --output="peso_edad_cubico.png"
+#+end_src
+#+latex: }
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.5\textwidth}
+  \includegraphics[width=\textwidth]{./S14-Prct-C-peso-edad/peso_edad_cubico.png}
+\end{minipage}%
+\caption{Modelo 3: peso~edad+edad²+edad³ (cúbica). Fíjese en el tramo final de la curva.}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="display: flex; justify-content: center; gap: 10px;">
+    <img src="./S14-Prct-C-peso-edad/peso_edad_cubico.png" style="max-width:50%; height:auto;"/>
+    <figcaption>Modelo 3: peso~edad+edad²+edad³ (cúbica). Fíjese en el tramo final de la curva.</figcaption>
+</figure>
+#+END_EXPORT
+
+/Antes de continuar/: mire con atención el tramo final de esta última curva, hacia las edades más altas de la muestra (13-14 años). ¿Ve algo que le llame la atención?
+
+* Actividad 5 - Los tres modelos, uno al lado del otro
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Comparacion tres modelos R2
+#+begin_src gretl :eval no
+ols peso const edad --quiet
+scalar Rbarsq1 = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+printf "Modelo 1 (recta):    R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq1
+
+ols peso const edad edad2 --quiet
+scalar Rbarsq2 = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+printf "Modelo 2 (parabola): R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq2
+
+ols peso const edad edad2 edad3 --quiet
+scalar Rbarsq3 = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+printf "Modelo 3 (cubica):   R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq3
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
+outfile --quiet comparacionTresModelosR2.txt
+    <<Comparacion tres modelos R2>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-C-peso-edad/comparacionTresModelosR2.txt example
+#+latex: }
+
+Tanto $R^2$ como $\bar R^2$ crecen sin excepción del Modelo 1 al Modelo 3. Si solo consideráramos esta tabla, la conclusión sería inmediata: ``el Modelo 3 es el mejor''. La siguiente actividad pone a prueba esa conclusión.
+
+* Actividad 6 - Extrapolar el modelo ``ganador''
+
+Usamos los coeficientes del Modelo 3 (el de mayor $\bar R^2$) para predecir el peso a edades /fuera/ del rango observado (7 a 14 años).
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Extrapolacion modelo cubico
+#+begin_src gretl :eval no
+ols peso const edad edad2 edad3 --quiet
+scalar b1 = $coeff(const)
+scalar b2 = $coeff(edad)
+scalar b3 = $coeff(edad2)
+scalar b4 = $coeff(edad3)
+
+scalar pred15 = b1 + b2*15 + b3*15^2 + b4*15^3
+scalar pred16 = b1 + b2*16 + b3*16^2 + b4*16^3
+scalar pred17 = b1 + b2*17 + b3*17^2 + b4*17^3
+
+printf "Peso predicho (modelo cubico) a los 15 anios = %.2f kg\n", pred15
+printf "Peso predicho (modelo cubico) a los 16 anios = %.2f kg\n", pred16
+printf "Peso predicho (modelo cubico) a los 17 anios = %.2f kg\n", pred17
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
+outfile --quiet extrapolacionModeloCubico.txt
+    <<Extrapolacion modelo cubico>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-C-peso-edad/extrapolacionModeloCubico.txt example
+#+latex: }
+
+El Modelo 3 —el de mayor $R^2$ /y/ mayor $\bar R^2$ de los tres— predice que, a partir de cierta edad, los niños empiezan a /perder/ peso con el paso del tiempo. Ningún estadístico de bondad de ajuste, por sí solo, le habría advertido de esto: hace falta mirar el gráfico (Actividad 4) o, como aquí, poner a prueba el modelo fuera del rango de datos con el que fue ajustado. De hecho, para descartar el modelo no hace falta extrapolar fuera de la muestra; incluso dentro de la muestra el modelo parece indicar que el máximo peso se da antes de alcanzar los 14 años de edad (algo que no tiene ningún fundamento).
+
+* Actividad 7 - Una variable explicativa, tres regresores
+
+En los tres modelos de esta práctica hay una única /variable explicativa/: la edad. Sin embargo, el número de /regresores/ crece de uno (Modelo 1: =edad=) a tres (Modelo 3: =edad=, =edad2=, =edad3=). Recordando la distinción de la lección 6: un regresor es cada vector que multiplica a un coeficiente $\hat\beta_j$ del modelo; una variable explicativa es el concepto económico o sustantivo que puede entrar en el modelo a través de uno o varios regresores a la vez —aquí, la propia edad, y sus potencias, todas ellas funciones de la misma variable explicativa original—.
+
+* Preguntas de interpretación para la clase
+
+1. ¿Por qué $R^2$ y $\bar R^2$ crecen sin excepción del Modelo 1 al Modelo 3, si ya sabemos (lección 8, prácticas anteriores) que $R^2$ nunca puede bajar al añadir un regresor?
+2. Si tuviera que elegir uno de los tres modelos únicamente en función de $\bar R^2$, ¿cuál elegiría? ¿Sigue eligiendo el mismo tras ver la Actividad 6?
+3. ¿Qué le dice este ejercicio sobre la costumbre de comparar modelos /solo/ mirando una tabla de estadísticos, sin generar ningún gráfico?
+4. ¿Por qué edad, edad² y edad³ cuentan como tres regresores distintos, si los tres provienen de una única variable medida (la edad)?
+5. ¿Diría que este problema (predicciones absurdas fuera del rango muestral) es exclusivo de los polinomios, o podría aparecer con cualquier modelo, lineal o no, si se extrapola lo suficiente fuera del rango de los datos con que fue estimado?
+
+/Para profundizar/:
+
+- Véanse las lecciones 8 y 10 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html][S10-Lecc08]], [[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html][S13-Lecc10]]) para la advertencia general sobre qué certifica (y qué no) un buen ajuste, y para la distinción entre regresor y variable explicativa.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 6, sección 6.2 (formas funcionales polinómicas y sus límites).
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S14-Prct-C-peso-edad.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S14-Prct-C-peso-edad.inp][S14-Prct-C-peso-edad.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. ¿Por qué crecen $R^2$ y $\bar R^2$ sin excepción aquí, si $\bar R^2$ en general puede bajar? La propiedad de la lección 8 (``$R^2$ nunca baja'') es universal: se cumple siempre. La de $\bar R^2$ (``puede bajar'') es solo una posibilidad, no una certeza: baja únicamente cuando el regresor añadido aporta muy poco a la reducción de SRC. En este ejemplo concreto, con solo 8 observaciones y una relación no lineal genuina entre peso y edad, cada potencia adicional de la edad reduce sustancialmente los residuos, lo suficiente como para que también $\bar R^2$ suba. Que $\bar R^2$ suba aquí no contradice que en otros casos (como pudo ocurrir con =radial= en la práctica anterior) pueda bajar: ambos comportamientos son compatibles con la misma fórmula.
+
+2. ¿Qué modelo elegiría solo con $\bar R^2$, y después de la Actividad 6? Mirando únicamente la tabla de la Actividad 5, la elección ``mecánica'' sería el Modelo 3, por tener el $\bar R^2$ más alto. Sin embargo, tras la Actividad 6, esa elección se revela problemática: un modelo que predice pérdida de peso con la edad, para niños en pleno crecimiento, no es creíble más allá de una tautología estadística. La cautela razonable es preferir un modelo más simple (probablemente el Modelo 1 o el 2) que, aun con menor $\bar R^2$, no produzca predicciones tan claramente absurdas al alejarse ligeramente del rango muestral.
+
+3. Lección sobre comparar solo con estadísticos, sin gráficos. Este ejercicio ilustra, con un caso extremo pero claro, por qué ningún estadístico de resumen —ni $R^2$, ni $\bar R^2$, ni ningún otro número aislado— puede sustituir a la inspección visual del ajuste. Los números pueden mejorar de forma monótona mientras el modelo se vuelve, al mismo tiempo, cada vez menos razonable; solo el gráfico (o, como aquí, poner a prueba el modelo fuera de la muestra) revela ese deterioro cualitativo que ningún estadístico agregado captura por sí solo.
+
+4. ¿Por qué edad, edad² y edad³ son tres regresores distintos de una sola variable? Porque un regresor, en el sentido técnico fijado en la lección 6, es cada vector concreto que multiplica a un coeficiente en la combinación lineal ajustada; edad, edad² y edad³ son tres vectores distintos de $\mathbb{R}^8$ (no son proporcionales entre sí), así que cuentan como tres regresores independientes a efectos del cálculo de $\boldsymbol{\mathop{\widehat{\beta}}}$, aunque los tres se calculen a partir de una sola magnitud medida (la edad) y respondan, en conjunto, a una única pregunta sustantiva: ``¿cómo varía el peso con la edad?''.
+
+5. ¿Es esto exclusivo de los polinomios? No: cualquier modelo, lineal o no en sus parámetros, puede producir predicciones absurdas si se extrapola suficientemente lejos del rango de datos con el que fue estimado. Los polinomios de grado alto son especialmente propensos a este problema porque su comportamiento fuera del rango muestral puede cambiar de forma muy brusca (curvaturas que se disparan hacia arriba o hacia abajo), pero el principio general —``un modelo ajustado a un rango de datos no garantiza nada fuera de ese rango''— es válido para cualquier forma funcional, lineal o logarítmica incluida. Tampoco es exclusivo de modelos poco razonables; un modelo adecuado a un rango muestral, puede funcionar de manera insatisfactoria fuera del rango en el que se estimó. Por otra parte, la extrapolación a valores irreales tampoco tiene sentido (por ejemplo, piense si tiene sentido interpretar el valor estimado para la constante en el modelo del precio de la vivienda de la Práctica A de hoy... sería lo mismo que preguntarse qué precio tiene una vivienda cuya superficie es cero). 

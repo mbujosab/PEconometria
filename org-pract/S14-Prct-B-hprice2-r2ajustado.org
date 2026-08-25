@@ -1,0 +1,332 @@
+#+Title: Sesión 14 (B) --- Del R² al R² ajustado: coeficientes parciales en hprice2
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil 
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L14-B-hprice2-r2ajustado
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S14-Prct-B-hprice2-r2ajustado"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica 
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S14-Prct-B-hprice2-r2ajustado.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S14-Prct-B-hprice2-r2ajustado.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+Retomamos =hprice2=, ya usado en la práctica de regresión simple con datos reales, y damos el paso a la regresión /múltiple/: primero con dos regresores (=rooms= y =nox= a la vez), y después con un tercero (=stratio=, la proporción alumnos/profesor de cada zona). El hilo conductor es doble: por un lado, observar cómo cambia el coeficiente de =rooms= al pasar del modelo simple al múltiple (efecto parcial, lección 10); por otro, comprobar con datos reales una propiedad algebraica de MCO anunciada en la lección 8 —el $R^2$ nunca disminuye al añadir un regresor— y ver por qué esto exige corregirlo con el /$R^2$ ajustado/ ($\bar R^2$), que sí puede bajar.
+
+/Objetivo/
+
+1. Estimar un modelo con dos regresores no constantes (=rooms=, =nox=) y comparar sus coeficientes con los de las regresiones simples ya conocidas.
+2. Ampliar el modelo con un tercer regresor (=stratio=) e interpretar su signo.
+3. Verificar con datos reales que $R^2$ nunca disminuye al añadir regresores, sea cual sea su aporte real.
+4. Calcular $\bar R^2$ ``a mano'' y contrastarlo con el que reporta Gretl, entendiendo por qué $\bar R^2$ sí puede bajar.
+5. Practicar, una vez más, la lectura /ceteris paribus/ de los coeficientes sin caer en lenguaje causal.
+
+* Actividad 1 - Reapertura de hprice2 y etiquetas
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Reapertura y etiquetas B14
+#+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no
+open hprice2.gdt --quiet
+setinfo price   -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+setinfo rooms   -d "Número medio de habitaciones" -n "Habitaciones"
+setinfo nox     -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
+setinfo stratio -d "Ratio alumnos/profesor en la zona" -n "Ratio alumnos/profesor"
+
+summary price rooms nox stratio
+#+end_src
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Recuerde de la práctica anterior que/ =rooms= /y/ =nox= /ya se usaron por separado en dos regresiones simples: retomamos aquí esos mismos coeficientes como punto de comparación./
+#+latex: }
+
+* Actividad 2 - De dos regresores a tres: price~rooms+nox
+
+Estimamos el modelo con ambos regresores a la vez, y recordamos (reestimándolas aquí mismo, para tener los números a mano) las dos regresiones simples correspondientes.
+
+/Antes de mirar el resultado/: ¿espera que el coeficiente de =rooms= sea muy distinto en la regresión simple y en la múltiple? ¿Y el de =nox=?
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Ols rooms nox simples y conjunto
+#+begin_src gretl :eval no
+ols price const rooms
+ols price const nox
+ols price const rooms nox
+#+end_src
+#+latex: }
+
+/Lo que debe observar/: compare $\hat\beta_{\text{rooms}}$ en =price~rooms= frente a =price~rooms+nox=, y $\hat\beta_{\text{nox}}$ en =price~nox= frente a =price~rooms+nox=. 
+
+#+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
+outfile --quiet Ols_rooms_nox_simple_y_conjunto.txt
+    <<Ols rooms nox simples y conjunto>>
+end outfile
+#+end_src
+
+#+latex: {\footnotesize
+#+include: ./S14-Prct-B-hprice2-r2ajustado/Ols_rooms_nox_simple_y_conjunto.txt example
+#+latex: }
+
+En este caso, a diferencia de lo que ocurría con =bedrms= en la práctica de Ramanathan, los coeficientes no cambian de forma tan drástica: esto sugiere (aunque no lo demuestra) que =rooms= y =nox= no están tan fuertemente correlacionadas entre sí como lo estaban =sqft= y =bedrms=. Mire la correlación entre ambas variables.
+
+* Actividad 3 - Un tercer regresor: stratio
+
+Añadimos el ratio alumnos/profesor de la zona, una variable que cabe esperar relacionada negativamente con el precio (zonas con colegios más masificados, en principio menos atractivas).
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Ols con stratio
+#+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no
+ols price const rooms nox stratio
+#+end_src
+#+latex: }
+
+/Antes de mirar el resultado/: ¿qué signo espera para el coeficiente de =stratio=? Contraste su expectativa con lo obtenido, y compare de nuevo los coeficientes de =rooms= y =nox= con los de la Actividad 2: ¿cambian mucho al incorporar =stratio=?
+
+# #+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
+# outfile --quiet Ols_multiple_con_stratio.txt
+#     <<Ols con stratio>>
+# end outfile
+# #+end_src
+# 
+# #+latex: {\footnotesize
+# #+include: ./S14-Prct-B-hprice2-r2ajustado/Ols_multiple_con_stratio.txt example
+# #+latex: }
+
+
+* Actividad 4 - $R^2$ nunca disminuye: los cuatro modelos a la vez
+
+Reunimos los cuatro modelos ya estimados (dos simples, dos múltiples) y comparamos su $R^2$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Comparacion R2 cuatro modelos
+#+begin_src gretl :eval no
+ols price const rooms --quiet
+scalar r2_rooms = $rsq
+
+ols price const nox --quiet
+scalar r2_nox = $rsq
+
+ols price const rooms nox --quiet
+scalar r2_rooms_nox = $rsq
+
+ols price const rooms nox stratio --quiet
+scalar r2_todos = $rsq
+
+printf "R2 price~rooms                = %.4f\n", r2_rooms
+printf "R2 price~nox                  = %.4f\n", r2_nox
+printf "R2 price~rooms+nox            = %.4f\n", r2_rooms_nox
+printf "R2 price~rooms+nox+stratio    = %.4f\n", r2_todos
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
+outfile --quiet comparacionR2cuatroModelos.txt
+    <<Comparacion R2 cuatro modelos>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-B-hprice2-r2ajustado/comparacionR2cuatroModelos.txt example
+#+latex: }
+
+Observe que $R^2$ del modelo con tres regresores es, como mínimo, igual al de cualquiera de los modelos que ``contiene'' (=price~rooms+nox= y, transitivamente, los dos simples). Esto no es una casualidad de estos datos: es la propiedad puramente mecánica de MCO anunciada en la lección 8 (``un $R^2$ alto no certifica nada por sí solo'', y en particular, /nunca baja/ al añadir un regresor, aporte este lo que aporte).
+
+* Actividad 5 - Del $R^2$ al $R^2$ ajustado
+
+Si $R^2$ nunca baja, ¿cómo distinguir un regresor que de verdad mejora el modelo de uno que solo lo ``infla'' artificialmente? Gretl reporta el $R^2$ con =$rsq=, pero no permite recuperar el /$R^2$ ajustado/, así que lo vamos a recalcular a mano (véase la sección [[Apéndice - De dónde sale la fórmula del $R^2$ ajustado]]). 
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: R2 ajustado cuatro modelos
+#+begin_src gretl :eval no
+ols price const rooms nox --quiet
+scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+printf "Modelo price~rooms+nox\n"
+printf "  R2          = %.4f\n", $rsq
+printf "  R2 ajustado = %.4f\n", Rbarsq
+
+ols price const rooms nox stratio --quiet
+scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+printf "Modelo price~rooms+nox+stratio\n"
+printf "  R2          = %.4f\n", $rsq
+printf "  R2 ajustado = %.4f\n", Rbarsq
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
+outfile --quiet r2AjustadoCuatroModelos.txt
+    <<R2 ajustado cuatro modelos>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-B-hprice2-r2ajustado/r2AjustadoCuatroModelos.txt example
+#+latex: }
+
+Compare cuánto sube $R^2$ y cuánto sube (o no) $\bar R^2$ al pasar de dos a tres regresores. Si =stratio= aportara muy poco, $\bar R^2$ podría incluso bajar al incluirla, mientras que $R^2$ jamás lo haría (por ejemplo, compare el ajuste con =rooms= + =proptax= (habitaciones más impuestos) con el ajuste si, además, añade =radial= (acceso a las autopistas)). 
+
+El apéndice siguiente explica de dónde sale exactamente la fórmula de $\bar R^2$ y por qué tiene esa propiedad.
+
+* Apéndice - De dónde sale la fórmula del $R^2$ ajustado
+
+Recordemos (lección 8) que $R^2=1-\mathrm{SRC}/\mathrm{STC}$, con $\mathrm{STC}=\sum_i(y_i-\mu_{\boldsymbol y})^2$ y $\mathrm{SRC}=\sum_i\hat e_i^2$. La idea del $R^2$ ajustado es sustituir, en ese cociente, cada suma de cuadrados por su /cuasivarianza/ correspondiente —es decir, dividir cada una por sus /grados de libertad/, no por el número de observaciones—:
+\[
+\bar R^2 \;=\; 1-\frac{\mathrm{SRC}/(n-k)}{\mathrm{STC}/(n-1)},
+\]
+donde $k$ es el número /total/ de regresores del modelo (incluida la constante; convención fijada en la lección 10) y $n-k$ son los grados de libertad de los residuos ($k$ parámetros ``beta'' estimados). El denominador $\mathrm{STC}/(n-1)$ es la cuasivarianza de $\boldsymbol{y}$: el estimador insesgado de la varianza de la variable $Y$ del modelo teórico. El numerador $\mathrm{SRC}/(n-k)$ es la cuasivarianza de $\boldsymbol{\mathop{\widehat{e}}}$: el estimador insesgado de la varianza de las perturbaciones $U$ del modelo teórico.
+
+Operando algebraicamente sobre esta definición se obtiene una expresión equivalente, más cómoda para el cálculo manual a partir de un $R^2$ ya conocido:
+\[
+\bar R^2 \;=\; 1-(1-R^2)\,\frac{n-1}{n-k}.
+\]
+
+
+/Por qué $R^2$ nunca baja pero $\bar R^2$ sí puede bajar/: pues porque al añadir nuevos regresores, $\mathrm{SRC}$ nunca aumenta. El motivo es que $\mathrm{SRC}$ es el cuadrado de la distancia entre el vector de datos $\boldsymbol{y}$ y la combinación lineal de los regresores que está más cerca de $\boldsymbol{y}$. Al añadir nuevos regresores sin quitar ninguno de los anteriores, usando solo los originales nos podemos acercar tanto como antes (así que la distancia mínima no puede ser mayor). Pero es que, como ahora hay nuevas combinaciones lineales posibles, podría ocurrir que alguna estuviera más cerca de $\boldsymbol{y}$ de lo que antes nos podíamos acercar. Así que $R^2=1-\mathrm{SRC}/\mathrm{STC}$ nunca baja... pero sí puede subir. 
+
+Sin embargo, en el /coeficiente de determinación ajustado/ $\bar R^2$ hay /dos/ efectos en juego: $\mathrm{SRC}$ baja (o se mantiene), lo que empuja $\bar R^2$ hacia arriba, pero $k$ sube en una unidad, lo que reduce $n-k$ y por tanto agranda el cociente $\mathrm{SRC}/(n-k)$, empujando $\bar R^2$ hacia abajo. Si el regresor añadido aporta poco (reduce muy poco $\mathrm{SRC}$), el segundo efecto puede dominar al primero, y $\bar R^2$ baja pese a que $R^2$ no pueda hacerlo.
+
+Verifiquemos que las dos fórmulas arrojan el mismo resultado:
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Verificacion formula R2ajustado
+#+begin_src gretl :eval no
+ols price const rooms nox stratio --quiet
+scalar n_obs = $nobs
+scalar k_reg = $ncoeff
+
+scalar Rbarsq_orig = 1 - ( $ess/($nobs-$ncoeff) )/( sst(price)/($nobs-1) )
+scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+
+printf "n = %d,  k = %d (incluida la constante)\n", n_obs, k_reg
+printf "R2 ajustado (formula original: 1-(SRC/(n-k))/(STC/(n-1)) ) = %.6f\n", Rbarsq_orig
+printf "R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = %.6f\n", Rbarsq
+#+end_src
+#+latex: }
+
+
+#+begin_src gretl :tangle guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
+outfile --quiet verificacionFormulaR2ajustado.txt
+    <<Verificacion formula R2ajustado>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-B-hprice2-r2ajustado/verificacionFormulaR2ajustado.txt example
+#+latex: }
+
+* Preguntas de interpretación para la clase
+
+1. ¿Por qué los coeficientes de =rooms= y =nox= cambian relativamente poco entre el modelo simple y el múltiple, a diferencia de lo que ocurría con =bedrms= en la práctica de Ramanathan?
+2. ¿Cómo interpreta el signo obtenido para =stratio=? ¿Es coherente con lo que cabría esperar económicamente?
+3. Explique, sin usar la fórmula, por qué $R^2$ no puede bajar nunca al añadir un regresor, mientras que $\bar R^2$ sí puede hacerlo.
+4. Si al añadir =stratio= el $R^2$ ajustado hubiera bajado ligeramente, ¿qué le diría eso sobre el aporte de esa variable al modelo?
+5. ¿Diría que el $R^2$ ajustado ``certifica'' que un modelo es mejor que otro, en el mismo sentido en que la lección 8 advertía que un $R^2$ alto no certifica una relación causal?
+
+/Para profundizar/:
+
+- Véanse las lecciones 8 y 10 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html][S10-Lecc08]], [[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html][S13-Lecc10]]) para la propiedad mecánica de $R^2$ y la interpretación del efecto parcial.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 6, sección 6.3 ($R^2$ ajustado).
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S14-Prct-B-hprice2-r2ajustado.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S14-Prct-B-hprice2-r2ajustado.inp][S14-Prct-B-hprice2-r2ajustado.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. ¿Por qué =rooms= y =nox= cambian poco, a diferencia de =bedrms=? Porque el cambio de un coeficiente al pasar del modelo simple al múltiple depende de cuánto esté correlacionado el regresor añadido con el que ya estaba presente. En la práctica de Ramanathan, =sqft= y =bedrms= estaban fuertemente relacionadas (las casas con más dormitorios suelen ser grandes), así que incluir una alteraba mucho la lectura de la otra. Si =rooms= y =nox= están menos correlacionadas entre sí en esta muestra, cada coeficiente ya ``capta'' en el modelo simple gran parte de lo que va a decir en el modelo múltiple, y el cambio es más discreto.
+
+2. Interpretación del signo de =stratio=. Un coeficiente negativo es coherente con la intuición: zonas con una proporción más alta de alumnos por profesor (colegios más masificados, en principio de peor calidad percibida) tienden a tener viviendas más baratas, manteniendo fijas las habitaciones y la contaminación. Como siempre, esta es una lectura /ceteris paribus/, no necesariamente causal: podría haber otros factores (nivel de renta de la zona, inversión pública) que expliquen tanto el ratio alumnos/profesor como el precio.
+
+3. Por qué $R^2$ no baja nunca y $\bar R^2$ sí puede bajar (sin fórmula). Añadir un regresor nunca puede empeorar el mejor ajuste posible: MCO siempre puede, como mínimo, ``ignorar'' el regresor nuevo (darle coeficiente cero) y quedarse exactamente igual que antes; en la práctica, suele aprovechar algo de esa dirección extra para reducir un poco más los residuos. Por eso $R^2$ nunca baja. Pero $\bar R^2$ además ``cobra un precio'' por cada regresor añadido —descuenta un grado de libertad (diferencia entre $n$ y $k$)—, así que si el regresor nuevo casi no reduce los residuos, ese ``precio'' puede pesar más que la mejora conseguida, y $\bar R^2$ se reduce.
+
+4. Si $\bar R^2$ hubiera bajado al añadir =stratio=. Eso indicaría que la reducción de residuos lograda por =stratio= es tan pequeña que no compensa el ``coste'' de estimar un parámetro adicional: una señal de que el aumento de complejidad del modelo, en términos de parsimonia, no compensa la pobre aportación de ese regresor en el ajuste del modelo.
+
+5. ¿Certifica el $R^2$ ajustado que un modelo es mejor? No, en el mismo sentido en que la lección 8 advertía sobre $R^2$: un $\bar R^2$ más alto es un indicio a favor de un modelo frente a otro en términos de ajuste penalizado por complejidad, pero no certifica que la especificación sea correcta, que los regresores incluidos sean los relevantes desde un punto de vista teórico, ni que exista ninguna relación causal. Es una herramienta de comparación entre modelos alternativos, no un veredicto definitivo sobre la validez de ninguno de ellos —la elección de qué variables incluir debe seguir estando guiada, en primer lugar, por la teoría económica, no solo por qué estadístico sube o baja.

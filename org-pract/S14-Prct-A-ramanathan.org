@@ -1,0 +1,345 @@
+#+Title: Sesión 14 (A) --- Regresión múltiple con Gretl: precios de vivienda (Ramanathan)
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil 
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L14-A-ramanathan
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S14-Prct-A-ramanathan"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica 
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S14-Prct-A-ramanathan.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S14-Prct-A-ramanathan.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+Empezamos el bloque de regresión múltiple (lección 10) con el conjunto de datos reales más pequeño y manejable de todo el curso: 14 viviendas unifamiliares de University City (San Diego, California), tomado de Ramanathan (2002). Es un dataset de sección cruzada tan reducido que, si quisiera, podría casi reproducir a mano alguno de los cálculos; pero lo usaremos únicamente para lo que de verdad importa hoy: /aprender a leer/ una regresión con más de un regresor, e interpretar sus parámetros.
+
+/Objetivo/
+
+1. Estimar por primera vez, con Gretl, una regresión con más de un regresor no constante.
+2. Comparar el coeficiente de un regresor cuando se estima /solo/ frente a cuando se estima /junto/ a otro: la esencia del efecto parcial o /ceteris paribus/ (lección 10).
+3. Ampliar el modelo con un tercer regresor y observar cómo cambia (o no) la lectura de los anteriores.
+4. Observar, sin todavía formalizarlo, que el $R^2$ no baja al añadir regresores (se formalizará, con el $R^2$ ajustado, en la práctica siguiente).
+5. Practicar la lectura de una salida de regresión múltiple sin dejarse arrastrar a conclusiones causales injustificadas.
+
+* Actividad 1 - Carga y exploración de los datos
+
+- GUI: //~Archivo -> Abrir archivo de datos -> Archivo de muestra~//, pestaña //~Ramanathan~//, fichero =data4-1= (Prices of single-family homes).
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /o bien teclee en línea de comandos/:
+  #+NAME: Apertura Ramanathan
+  #+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+open data4-1.gdt --quiet
+  #+end_src
+  #+latex: }
+
+Si lo consideramos conveniente podemos castellanizar las etiquetas de las variables para tener gráficos con las leyendas en español.
+Además, siempre conviene echar un vistazo a los estadísticos descriptivos principales de las variables.
+
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  /en línea de comandos/:
+  #+NAME: Completando la información en castellano
+  #+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+setinfo price -d "Precio de la vivienda (miles de dólares)" -n "Precio (miles $)"
+setinfo sqft   -d "Superficie habitable (pies cuadrados)" -n "Superficie (sqft)"
+setinfo bedrms -d "Número de dormitorios" -n "Dormitorios"
+setinfo baths  -d "Número de cuartos de baño" -n "Baños"
+
+summary price sqft bedrms baths --simple
+  #+end_src
+  #+latex: }
+
+Son solo 14 observaciones: puede inspeccionarlas todas de un vistazo con
+  #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+  #+NAME: vistazo de los datos
+  #+begin_src gretl :eval no
+print price sqft bedrms baths --byobs
+  #+end_src
+  #+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-A-ramanathan.inp :eval no :exports none :noweb yes
+outfile --quiet vistazoDatos.txt
+    <<vistazo de los datos>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-A-ramanathan/vistazoDatos.txt example
+#+latex: }
+
+Un conjunto de datos tan pequeño no es representativo de ningún mercado real, pero es perfecto para una primera toma de contacto con la regresión múltiple.
+
+# #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+# /Son solo 14 observaciones: puede inspeccionarlas todas de un vistazo con/ =print price sqft bedrms baths --byobs=. /Un conjunto de datos tan pequeño no es representativo de ningún mercado real, pero es perfecto para una primera toma de contacto con la regresión múltiple./
+# #+latex: }
+
+* Actividad 2 - Recordatorio: la regresión simple =price~sqft=
+
+Antes de añadir regresores, recordamos el punto de partida: la regresión simple ya vista en la lección 6.
+
+#+latex: {\vspace{0pt} \footnotesize \color{gray!70!black}
+/o bien teclee en linea de comandos/:
+#+NAME: Ols price sqft simple
+#+begin_src gretl :eval no 
+ols price const sqft
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no :exports none :noweb yes
+outfile --quiet OLS_Precio_Superficie.txt
+    <<Ols price sqft simple>>
+end outfile
+#+end_src
+
+#+latex: {\footnotesize
+#+include: ./S14-Prct-A-ramanathan/OLS_Precio_Superficie.txt example
+#+latex: }
+
+De dicha salida, ya podemos reconocer algunos de los resultados obtenidos:
+- Los números de la columna bajo el nombre =coeficiente= son los valores estimados para los parámetros $\beta_1$ (=constante=) y $\beta_2$ (=sqft=).
+- El número a la derecha del nombre =Media de la vble. dep.= es $\mu_{\boldsymbol{y}}$ donde $\boldsymbol{y}$ es el vector con los datos de los precios de las 14 viviendas unifamiliares.
+- El número a la derecha del nombre =Suma de cuad. residuos= es $SRC$, es decir, $\|\boldsymbol{\mathop{\widehat{e}}}\|_e^2$.
+- El número a la derecha del nombre =R-cuadrado= es el coeficiente de determinación $R^2$ del ajuste.
+
+Veamos la recta de regresión correspondiente al ajuste MCO que hemos logrado:
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Gráfico de la recta de regresión
+#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+gnuplot price sqft --output="price_sqft_simple.png"
+#+end_src
+#+latex: }
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.55\textwidth}
+  \includegraphics[width=\textwidth]{./S14-Prct-A-ramanathan/price_sqft_simple.png}
+\end{minipage}%
+\caption{Precio frente a superficie, con la recta ajustada (regresión simple).}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="display: flex; justify-content: center; gap: 10px;">
+    <img src="./S14-Prct-A-ramanathan/price_sqft_simple.png" style="max-width:55%; height:auto;"/>
+    <figcaption>Precio frente a superficie, con la recta ajustada (regresión simple).</figcaption>
+</figure>
+#+END_EXPORT
+
+Anote el valor de $\hat\beta_2$ (coeficiente de =sqft=) y de $R^2$: serán su punto de referencia para todo lo que sigue.
+
+* Actividad 3 - Más regresiones: con =bedrms=, y con =sqft= + =bedrms=
+
+Estimamos ahora =price= en función únicamente de =bedrms=, y a continuación en función de =sqft= /y/ =bedrms= a la vez.
+
+/Antes de mirar el resultado/: ¿qué signo espera para el coeficiente de =bedrms= en el modelo simple? ¿Y en el modelo con =sqft= incluido? ¿Espera que sea /el mismo número/ en ambos casos?
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Ols bedrms solo y acompanado
+#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+ols price const bedrms
+ols price const sqft bedrms
+#+end_src
+#+latex: }
+
+/Lo que debe observar/: compare el coeficiente de =bedrms= en ambas regresiones. En la lección 10 vimos que cada $\hat\beta_j$, en un modelo con varios regresores, mide un /efecto parcial/: ``el efecto promedio en =price= ante un dormitorio más, /manteniendo fija la superficie/''. Eso es una pregunta distinta de ``el efecto promedio en =price= ante un dormitorio más, sin ninguna información adicional'' (lo que mide el coeficiente del modelo simple). No tienen por qué coincidir, ni siquiera en signo: dos viviendas con la misma superficie pero distinto número de dormitorios reparten ese mismo espacio en habitaciones más pequeñas o más grandes, lo cual puede pesar en el precio de forma diferente a como pesa ``más dormitorios sin más información sobre otras características de la vivienda'' (pues muchos dormitorios solo caben en viviendas grandes, por lo que posiblemente en la muestra habrá una correlación positiva entre el número de habitaciones y superficie... verifíquelo).
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Chequeo de la correlación entre sqft y bedrms
+#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+corr sqft bedrms
+#+end_src
+#+latex: }
+
+
+* Actividad 4 - Añadimos =baths=
+
+Ampliamos el modelo con otro regresor adicional: el número de cuartos de baño.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Ols con baths
+#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+ols price const sqft bedrms baths
+#+end_src
+#+latex: }
+
+Compare de nuevo el coeficiente de =bedrms= (y ahora también el de =sqft=) con los obtenidos en la Actividad 3. ¿Cambian mucho al incorporar =baths=? ¿Qué signo tiene el coeficiente de =baths=, y le parece razonable? Si no le parece razonable ¿Cuál podría ser el motivo por el que el resultado obtenido es distinto de lo que usted esperaba?
+
+Observe la matriz de correlaciones entre =sqft=, =bedrms= y =baths=:
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Chequeo de la correlación entre baths y bedrms
+#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+corr sqft bedrms baths
+#+end_src
+#+latex: }
+
+A la luz de los resultados, ¿Qué signo esperaría ver para =baths= en la regresión lineal simple =ols price const baths=? *Verifique su intuición estimando el modelo*. 
+
+¿Cree que el valor estimado para =baths= debe a la valoración de los baños en el mercado inmobiliario? ¿O a que realmente se está midiendo inadvertidamente otra cosa?
+
+
+* Actividad 5 - Síntesis: cuatro modelos, una tabla
+
+Complete la tabla con los resultados de las cuatro regresiones estimadas en esta práctica.
+
+| Modelo                  | $\hat\beta_{\text{sqft}}$ | $\hat\beta_{\text{bedrms}}$ | $\hat\beta_{\text{baths}}$ | $R^2$ |
+|-------------------------+---------------------------+-----------------------------+----------------------------+-------|
+| price~sqft              |                           | ---                         | ---                        |       |
+| price~bedrms            | ---                       |                             | ---                        |       |
+| price~sqft+bedrms       |                           |                             | ---                        |       |
+| price~sqft+bedrms+baths |                           |                             |                            |       |
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos, para obtener los cuatro $R^2$ de golpe/:
+#+NAME: Sintesis R2
+#+begin_src gretl :eval no
+ols price const sqft --quiet
+scalar r2_1 = $rsq
+ols price const bedrms --quiet
+scalar r2_2 = $rsq
+ols price const sqft bedrms --quiet
+scalar r2_3 = $rsq
+ols price const sqft bedrms baths --quiet
+scalar r2_4 = $rsq
+
+printf "R2 price~sqft               = %.4f\n", r2_1
+printf "R2 price~bedrms             = %.4f\n", r2_2
+printf "R2 price~sqft+bedrms        = %.4f\n", r2_3
+printf "R2 price~sqft+bedrms+baths  = %.4f\n", r2_4
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-A-ramanathan.inp :eval no :exports none :noweb yes
+outfile --quiet sintesisR2.txt
+    <<Sintesis R2>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-A-ramanathan/sintesisR2.txt example
+#+latex: }
+
+Observe el $R^2$ a medida que se añaden regresores: nunca /baja/. Esto no es casualidad ni una propiedad de estos datos en particular: es una propiedad puramente algebraica de MCO (cuya idea sembramos en la lección 8), que discutiremos con detalle —y con su corrección adecuada, el $R^2$ ajustado— en la próxima práctica.
+
+* Preguntas de interpretación para la clase
+
+1. ¿Por qué el coeficiente de =bedrms= puede cambiar de signo (o de magnitud) al pasar del modelo simple al modelo con =sqft= incluido, si en ambos casos usamos exactamente los mismos 14 datos?
+2. ¿Tiene sentido interpretar el coeficiente de =sqft= en el modelo =price~sqft+bedrms+baths= como ``el efecto de un pie cuadrado más, manteniendo todo lo demás igual''? ¿Y como ``lo que causa'' ese cambio de precio?
+3. Con solo 14 observaciones, ¿qué cautela adicional debería tener a la hora de generalizar cualquier conclusión de esta práctica a ``el mercado de la vivienda'' en general?
+4. ¿Por qué el $R^2$ no puede bajar nunca al añadir un regresor, sea cual sea ese regresor (incluso uno completamente irrelevante)?
+5. Si tuviera que explicarle a alguien sin formación en econometría la diferencia entre ``el efecto de una habitación más'' y ``el efecto de una habitación más, manteniendo fija la superficie'', ¿cómo lo diría con sus propias palabras?
+
+/Para profundizar/:
+
+- Véase la lección 10 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html][S13-Lecc10]]) para la formalización del efecto parcial y la notación matricial.
+- Ramanathan, R. (2002). /Introductory Econometrics with Applications/, 5.ª ed. (fuente original del dataset =data4-1=).
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 3, sección 3.4 (interpretación /ceteris paribus/).
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S14-Prct-A-ramanathan.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S14-Prct-A-ramanathan.inp][S14-Prct-A-ramanathan.inp]] |
+
+# +LATEX: \clearpage
+
+* Respuestas
+
+1. ¿Por qué puede cambiar el coeficiente de =bedrms=? Porque en el modelo simple, el coeficiente de =bedrms= recoge /todo/ lo que varía con el número de dormitorios, incluida la superficie (las casas con más dormitorios suelen tener también más superficie): está, en cierto sentido, ``contaminado'' por esa variable omitida. En el modelo múltiple, al incluir =sqft= como regresor, el coeficiente de =bedrms= mide únicamente lo que aporta un dormitorio adicional /una vez fijada la superficie/ —dos viviendas de igual tamaño, pero con distinto reparto en habitaciones—. No es sorprendente que ambos números difieran, incluso en signo: están respondiendo a preguntas distintas, aunque provengan de los mismos datos.
+
+2. Interpretación del coeficiente de =sqft= en el modelo con tres regresores. Sí cabe la lectura /ceteris paribus/: ``manteniendo fijos =bedrms= y =baths=, un pie cuadrado adicional se asocia, en promedio, con ese cambio en el precio''. Lo que /no/ cabe, sin más, es la lectura causal (``un pie cuadrado más /causa/ ese cambio''): como se insistió en la lección 8 y en la lección 9 (``El puente''), la descomposición de MCO es puramente algebraica y no certifica, por sí sola, ninguna relación de causa a efecto, sea cual sea el número de regresores. Aquí, además, con solo 14 observaciones, cualquier lectura —causal o no— debe tomarse con mucha cautela.
+
+3. Cautela con solo 14 observaciones. Una muestra tan pequeña es extremadamente sensible a la presencia de una única vivienda atípica (un precio inusualmente alto o bajo, una combinación poco común de dormitorios y superficie) y ofrece muy poco margen para distinguir el efecto de =sqft= del de =bedrms= si ambas variables están, en esta muestra concreta, bastante correlacionadas entre sí. Generalizar cualquier coeficiente obtenido aquí a ``el mercado de la vivienda'' sin más matices sería, cuando menos, precipitado: 14 viviendas de un único barrio y un único año no permiten inferir nada sobre otros mercados o épocas.
+
+4. ¿Por qué el $R^2$ nunca baja al añadir un regresor? Porque MCO elige siempre los coeficientes que minimizan la suma de residuos al cuadrado (SRC) dentro del subespacio disponible; al añadir un regresor, ese subespacio se amplía (contiene, como caso particular, la solución que ya teníamos antes de incluir el regresor nuevo), así que el mínimo de SRC en el subespacio ampliado nunca puede ser mmás grande que el mínimo anterior. Como $R^2=1-\mathrm{SRC}/\mathrm{STC}$ y STC no cambia, $R^2$ no puede bajar. Esto es válido incluso si el regresor añadido no tiene ninguna relación real con la variable dependiente —una propiedad puramente mecánica, no una señal de que el nuevo regresor "importe". Si hubiéramos añadido como regresor adicional el número de hermanos del arquitecto que diseñó cada una de las casas, el $R^2$ probablemente aumentaría; lo que es seguro es que no disminuiría.
+
+5. Explicar la diferencia sin jerga técnica. Una posible formulación: ``si comparo, sin más, viviendas con distinto número de habitaciones, estoy comparando peras con manzanas, porque esas viviendas probablemente también difieren en su tamaño; en cambio, si comparo únicamente viviendas del mismo tamaño pero con distinto número de habitaciones, estoy aislando el efecto de repartir ese mismo espacio de una forma u otra''. Esa segunda comparación es, precisamente, lo que mide el coeficiente en el modelo con varios regresores a la vez.
+   
+#+LATEX: \clearpage
+
