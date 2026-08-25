@@ -1,0 +1,172 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+nulldata 40 --preserve
+set seed 97531
+
+series x2 = uniform(0,10)
+series x3 = 0.6*x2 + normal(0,2)
+series u  = normal(0,3)
+
+scalar b1 = 5
+scalar b2 = 2
+scalar b3 = -1
+series y = b1 + b2*x2 + b3*x3 + u
+
+printf "Correlacion entre x2 y x3 = %.4f  (no son ortogonales)\n", corr(x2,x3)
+
+list Xlist = const x2 x3
+matrix X = { Xlist }
+list ylist = y
+matrix Y = { ylist }
+
+matrix XtX = X'X
+matrix XtY = X'Y
+
+printf "Matriz X'X (3x3):\n"
+print XtX
+printf "\nVector X'y (3x1):\n"
+print XtY
+
+outfile --quiet matrizXyEcuacionesNormales.txt
+    list Xlist = const x2 x3
+    matrix X = { Xlist }
+    list ylist = y
+    matrix Y = { ylist }
+    
+    matrix XtX = X'X
+    matrix XtY = X'Y
+    
+    printf "Matriz X'X (3x3):\n"
+    print XtX
+    printf "\nVector X'y (3x1):\n"
+    print XtY
+end outfile
+
+matrix beta_matricial = invpd(XtX)*XtY
+printf "beta calculado como (X'X)^(-1) X'y:\n"
+print beta_matricial
+
+ols y const x2 x3 --quiet
+matrix beta_ols = $coeff
+printf "\nbeta calculado por 'ols' de Gretl:\n"
+print beta_ols
+
+matrix diferencia = beta_matricial - beta_ols
+printf "\nDiferencia (debe ser practicamente cero):\n"
+print diferencia
+
+outfile --quiet betaMatricialVsOls.txt
+    matrix beta_matricial = invpd(XtX)*XtY
+    printf "beta calculado como (X'X)^(-1) X'y:\n"
+    print beta_matricial
+    
+    ols y const x2 x3 --quiet
+    matrix beta_ols = $coeff
+    printf "\nbeta calculado por 'ols' de Gretl:\n"
+    print beta_ols
+    
+    matrix diferencia = beta_matricial - beta_ols
+    printf "\nDiferencia (debe ser practicamente cero):\n"
+    print diferencia
+end outfile
+
+series ehat = $uhat
+list elist = ehat
+matrix E = { elist }
+
+matrix XtE = X'E
+printf "X'e (columna 3x1, debe ser (aprox.) el vector nulo):\n"
+print XtE
+
+matrix eX = E'X
+printf "\ne*X (fila 1x3, el mismo resultado, transpuesto):\n"
+print eX
+
+outfile --quiet verificacionXteYeX.txt
+    series ehat = $uhat
+    list elist = ehat
+    matrix E = { elist }
+    
+    matrix XtE = X'E
+    printf "X'e (columna 3x1, debe ser (aprox.) el vector nulo):\n"
+    print XtE
+    
+    matrix eX = E'X
+    printf "\ne*X (fila 1x3, el mismo resultado, transpuesto):\n"
+    print eX
+end outfile
+
+nulldata 8 --preserve
+setobs 1 1 --cross-section
+set seed 24601
+
+matrix mz2 = {-1;-1;-1;-1;1;1;1;1}
+matrix mz3 = {-1;-1;1;1;-1;-1;1;1}
+series z2 = mz2
+series z3 = mz3
+
+printf "suma(z2)    = %.4f   (debe ser 0: media nula)\n", sum(z2)
+printf "suma(z3)    = %.4f   (debe ser 0: media nula)\n", sum(z3)
+printf "suma(z2*z3) = %.4f   (debe ser 0: ortogonalidad mutua)\n", sum(z2*z3)
+
+scalar c1 = 10
+scalar c2 = 3
+scalar c3 = -2
+series u2 = normal(0,1)
+series y2 = c1 + c2*z2 + c3*z3 + u2
+
+outfile --quiet datosFamiliaOrtogonal.txt
+    nulldata 8 --preserve
+    setobs 1 1 --cross-section
+    set seed 24601
+    
+    matrix mz2 = {-1;-1;-1;-1;1;1;1;1}
+    matrix mz3 = {-1;-1;1;1;-1;-1;1;1}
+    series z2 = mz2
+    series z3 = mz3
+    
+    printf "suma(z2)    = %.4f   (debe ser 0: media nula)\n", sum(z2)
+    printf "suma(z3)    = %.4f   (debe ser 0: media nula)\n", sum(z3)
+    printf "suma(z2*z3) = %.4f   (debe ser 0: ortogonalidad mutua)\n", sum(z2*z3)
+    
+    scalar c1 = 10
+    scalar c2 = 3
+    scalar c3 = -2
+    series u2 = normal(0,1)
+    series y2 = c1 + c2*z2 + c3*z3 + u2
+end outfile
+
+outfile --quiet familiaOrtogonalComparacion.txt
+    ols y2 const z2 z3 --quiet
+    scalar b2_conjunto = $coeff(z2)
+    scalar b3_conjunto = $coeff(z3)
+    scalar r2_conjunto = $rsq
+    
+    scalar b2_aislado = cov(z2,y2)/var(z2)
+    scalar b3_aislado = cov(z3,y2)/var(z3)
+    
+    scalar rho2 = corr(z2,y2)
+    scalar rho3 = corr(z3,y2)
+    scalar suma_rho2 = rho2^2 + rho3^2
+    
+    printf "beta2: conjunto (ols z2 z3) = %.6f   aislado (cov/var) = %.6f\n", b2_conjunto, b2_aislado
+    printf "beta3: conjunto (ols z2 z3) = %.6f   aislado (cov/var) = %.6f\n", b3_conjunto, b3_aislado
+    printf "\nR2 (modelo conjunto)                 = %.6f\n", r2_conjunto
+    printf "rho(z2,y)^2 + rho(z3,y)^2             = %.6f\n", suma_rho2
+end outfile

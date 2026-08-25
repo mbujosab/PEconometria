@@ -6,7 +6,7 @@
 <!-- 2026-08-25 mar 11:39 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sesión 11 (B) &#x2014; Regresión simple con datos reales: ajuste y bondad de ajuste en hprice2</title>
+<title>Sesión 14 (D) &#x2014; La matriz de regresores en la práctica: verificación con datos simulados</title>
 <meta name="author" content="Marcos Bujosa" />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
@@ -281,30 +281,29 @@ org_html_manager.setup();  // activate after the parameters are set
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Sesión 11 (B) &#x2014; Regresión simple con datos reales: ajuste y bondad de ajuste en hprice2</h1>
+<h1 class="title">Sesión 14 (D) &#x2014; La matriz de regresores en la práctica: verificación con datos simulados</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgcff902d">Descripción de la práctica</a></li>
-<li><a href="#orgb5ed370">Actividad 1 - Reapertura de hprice2 y etiquetas</a></li>
-<li><a href="#org7aac739">Actividad 2 - Regresión: price sobre rooms</a></li>
-<li><a href="#orgcdda698">Actividad 3 - Regresión: price sobre nox</a></li>
-<li><a href="#org59cb835">Actividad 4 - Verificación de las dos condiciones de ortogonalidad</a></li>
-<li><a href="#orga051b2f">Actividad 5 - Bondad de ajuste: STC, SEC, SRC y \(R^2\) en ambos modelos</a></li>
-<li><a href="#orgf306269">Actividad 6 - Diagramas de dispersión con la recta ajustada</a></li>
-<li><a href="#orgea198a0">Actividad 7 - Síntesis comparativa</a></li>
-<li><a href="#org3a61d91">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org036c754">Código completo de la práctica</a></li>
-<li><a href="#orge456fc6">Respuestas</a></li>
+<li><a href="#org6d13dc2">Descripción de la práctica</a></li>
+<li><a href="#orgdfc067f">Actividad 1 - Datos simulados: un caso general, no ortogonal</a></li>
+<li><a href="#org1d1e0c6">Actividad 2 - La matriz de regresores y las ecuaciones normales</a></li>
+<li><a href="#orgffc8444">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</a></li>
+<li><a href="#org1b87277">Actividad 4 - Familia ortogonal: un diseño con regresores mutuamente ortogonales</a></li>
+<li><a href="#org0e2a86e">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</a></li>
+<li><a href="#org47a361a">Actividad 6 - Síntesis</a></li>
+<li><a href="#org4c7f549">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org9a2b753">Código completo de la práctica</a></li>
+<li><a href="#org20853ae">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgcff902d" class="outline-2">
-<h2 id="orgcff902d">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-orgcff902d">
+<div id="outline-container-org6d13dc2" class="outline-2">
+<h2 id="org6d13dc2">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org6d13dc2">
 <p>
-Retomamos <code>hprice2</code> (ya usado en las prácticas de correlación) y sus tres variables etiquetadas: <code>price</code>, <code>rooms</code>, <code>nox</code>. Hoy estimamos, por primera vez con datos <i>reales</i>, dos regresiones lineales simples: precio en función del número de habitaciones, y precio en función de la contaminación. Las comparamos entre sí, verificamos las dos condiciones de ortogonalidad y calculamos la bondad de ajuste, conectando con las correlaciones ya calculadas en la práctica de correlación (lección 5) y con el ángulo \(\theta\) de la lección 8.
+Cerramos la sesión de regresión múltiple volviendo, por primera vez con Gretl, sobre la notación matricial de la lección 10: la matriz de datos \(\boldsymbol{\mathsf{X}}\), las ecuaciones normales \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}\), y la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\). Trabajamos con datos <i>simulados</i> porque ahora no queremos <i>interpretar</i> ningún fenómeno económico; queremos <i>verificar</i> que la maquinaria algebraica de la lección 10 funciona exactamente como se demostró: primero en un caso general, y después en el caso especial de regresores mutuamente ortogonales (``familia ortogonal''), donde cada coeficiente se puede calcular de forma aislada.
 </p>
 
 <p>
@@ -312,218 +311,279 @@ Retomamos <code>hprice2</code> (ya usado en las prácticas de correlación) y su
 </p>
 
 <ol class="org-ol">
-<li>Estimar dos regresiones lineales simples con datos reales, interpretando el signo y la magnitud de la pendiente sin lenguaje causal.</li>
-<li>Verificar, con datos reales, las dos condiciones de ortogonalidad de la lección 7.</li>
-<li>Calcular \(R^2\) ``a mano'' (STC/SEC/SRC) y compararlo con el que reporta Gretl y con \(\rho_{\boldsymbol{x}\boldsymbol{y}}^2\).</li>
-<li>Comparar la bondad de ajuste de los dos modelos y relacionarla con el ángulo \(\theta\) de la lección 8.</li>
-<li>Visualizar ambos ajustes mediante diagramas de dispersión con la recta ajustada.</li>
+<li>Construir explícitamente, con el comando <code>matrix</code> de Gretl, la matriz de datos \(\boldsymbol{\mathsf{X}}\) de un modelo con dos regresores no constantes.</li>
+<li>Calcular \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\) y \(\boldsymbol{\mathop{\widehat{\beta}}}=(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}\), comparando el resultado con el que da <code>ols</code> directamente.</li>
+<li>Verificar \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\), en sus dos lecturas (matriz por vector y vector por matriz).</li>
+<li>Construir un caso de <i>familia ortogonal</i> (regresores mutuamente ortogonales) y comprobar que cada \(\hat\beta_j\) se puede calcular de forma aislada, sin resolver ningún sistema.</li>
+<li>Verificar, en ese mismo caso, que \(R^2=\rho_{\boldsymbol{z}_2\boldsymbol{y}}^2+\rho_{\boldsymbol{z}_3\boldsymbol{y}}^2\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgb5ed370" class="outline-2">
-<h2 id="orgb5ed370">Actividad 1 - Reapertura de hprice2 y etiquetas</h2>
-<div class="outline-text-2" id="text-orgb5ed370">
+<div id="outline-container-orgdfc067f" class="outline-2">
+<h2 id="orgdfc067f">Actividad 1 - Datos simulados: un caso general, no ortogonal</h2>
+<div class="outline-text-2" id="text-orgdfc067f">
 <p>
-<i>en línea de comandos</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl" id="orgdb9df18">open hprice2.gdt --quiet
-setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
-setinfo rooms -d "Número medio de habitaciones" -n "Habitaciones"
-setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-org7aac739" class="outline-2">
-<h2 id="org7aac739">Actividad 2 - Regresión: price sobre rooms</h2>
-<div class="outline-text-2" id="text-org7aac739">
-<p>
-<i>en línea de comandos</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl" id="orgca107ce">ols price const rooms
-</pre>
-</div>
-<ul class="org-ul">
-<li>GUI equivalente: <i><i><code>Modelo -&gt; Mínimos cuadrados ordinarios</code></i></i>, con <code>price</code> como dependiente y <code>const</code>, <code>rooms</code> como regresores.</li>
-</ul>
-
-<p>
-<i>Interpretación (con cuidado)</i>: el coeficiente de <code>rooms</code> se lee como ``por cada habitación adicional, el precio mediano cambia, en promedio, en esa cantidad de dólares, <i>manteniendo el resto igual</i> (aquí, sin ningún otro regresor)''. Evite decir que ``una habitación adicional <i>causa</i>'' ese cambio: como se discutió en la lección 8, la descomposición \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) es puramente algebraica y no certifica, por sí sola, ninguna relación causal ni su dirección.
-</p>
-</div>
-</div>
-<div id="outline-container-orgcdda698" class="outline-2">
-<h2 id="orgcdda698">Actividad 3 - Regresión: price sobre nox</h2>
-<div class="outline-text-2" id="text-orgcdda698">
-<p>
-<i>en línea de comandos</i>:
-</p>
-<div class="org-src-container">
-<pre class="src src-gretl" id="orgb93cade">ols price const nox
-</pre>
-</div>
-<p>
-<i>Antes de mirar el resultado</i>: ¿qué signo espera para el coeficiente de <code>nox</code>? Contraste su expectativa con lo obtenido.
-</p>
-</div>
-</div>
-<div id="outline-container-org59cb835" class="outline-2">
-<h2 id="org59cb835">Actividad 4 - Verificación de las dos condiciones de ortogonalidad</h2>
-<div class="outline-text-2" id="text-org59cb835">
-<p>
-Repetimos ambas regresiones, guardando en cada caso los residuos, para verificar \(\sum\hat e_i=0\) y \(\sum x_i\hat e_i=0\).
+Generamos \(n=40\) observaciones con dos regresores no constantes, \(x_2\) y \(x_3\), deliberadamente <i>correlacionados entre sí</i> (para no caer, sin darnos cuenta, en el caso especial de la Actividad 4).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org52a3384">ols price const rooms --quiet
-series ehat_rooms = $uhat
-scalar sum_e_rooms  = sum(ehat_rooms)
-scalar sum_xe_rooms = sum(rooms*ehat_rooms)
+<pre class="src src-gretl" id="orgade0058">nulldata 40 --preserve
+set seed 97531
 
-ols price const nox --quiet
-series ehat_nox = $uhat
-scalar sum_e_nox  = sum(ehat_nox)
-scalar sum_xe_nox = sum(nox*ehat_nox)
+series x2 = uniform(0,10)
+series x3 = 0.6*x2 + normal(0,2)
+series u  = normal(0,3)
 
-printf "Modelo price~rooms:  suma(ehat) = %.8f    suma(rooms*ehat) = %.8f\n", sum_e_rooms, sum_xe_rooms
-printf "Modelo price~nox  :  suma(ehat) = %.8f    suma(nox*ehat)   = %.8f\n", sum_e_nox,  sum_xe_nox
+scalar b1 = 5
+scalar b2 = 2
+scalar b3 = -1
+series y = b1 + b2*x2 + b3*x3 + u
+
+printf "Correlacion entre x2 y x3 = %.4f  (no son ortogonales)\n", corr(x2,x3)
 </pre>
 </div>
-<pre class="example" id="org4fdd09d">
-Modelo price~rooms:  suma(ehat) = -0,00000001    suma(rooms*ehat) = -0,00000019
-Modelo price~nox  :  suma(ehat) = -0,00000001    suma(nox*ehat)   = 0,00000005
-</pre>
 <p>
-(<i>Los valores no serán exactamente cero por errores de redondeo en coma flotante, pero deben ser insignificantes.</i>)
+<i>Recuerde la advertencia de siempre sobre los vectores de diseño: <code>u</code> es el vector que nosotros usamos para generar los datos; no debe confundirse con el vector de residuos \(\boldsymbol{\mathop{\widehat{e}}}\) que calculará más adelante MCO a partir de los datos simulados.</i>
 </p>
 </div>
 </div>
-<div id="outline-container-orga051b2f" class="outline-2">
-<h2 id="orga051b2f">Actividad 5 - Bondad de ajuste: STC, SEC, SRC y \(R^2\) en ambos modelos</h2>
-<div class="outline-text-2" id="text-orga051b2f">
+<div id="outline-container-org1d1e0c6" class="outline-2">
+<h2 id="org1d1e0c6">Actividad 2 - La matriz de regresores y las ecuaciones normales</h2>
+<div class="outline-text-2" id="text-org1d1e0c6">
+<p>
+Construimos explícitamente la matriz de datos \(\boldsymbol{\mathsf{X}}=[\boldsymbol{1};\;\boldsymbol{x}_2;\;\boldsymbol{x}_3]\) (lección 10) con el comando <code>matrix</code> de Gretl, a partir de una lista de series.
+</p>
+
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org80af586">ols price const rooms --quiet
-scalar mu_price = mean(price)
-scalar STC_r = sum((price-mu_price)^2)
-scalar SRC_r = sum($uhat^2)
-scalar SEC_r = STC_r - SRC_r
-scalar R2_r_manual = SEC_r/STC_r
+<pre class="src src-gretl" id="org5445857">list Xlist = const x2 x3
+matrix X = { Xlist }
+list ylist = y
+matrix Y = { ylist }
 
-ols price const nox --quiet
-scalar STC_n = sum((price-mu_price)^2)
-scalar SRC_n = sum($uhat^2)
-scalar SEC_n = STC_n - SRC_n
-scalar R2_n_manual = SEC_n/STC_n
+matrix XtX = X'X
+matrix XtY = X'Y
 
-printf "price~rooms:  STC=%.2f  SEC=%.2f  SRC=%.2f   R2(a mano)=%.4f\n", STC_r, SEC_r, SRC_r, R2_r_manual
-printf "price~nox  :  STC=%.2f  SEC=%.2f  SRC=%.2f   R2(a mano)=%.4f\n", STC_n, SEC_n, SRC_n, R2_n_manual
-
-printf "\nComparacion con rho^2 (recuerde: en regresion simple R2 = rho_xy^2):\n"
-printf "corr(price,rooms)^2 = %.4f\n", corr(price,rooms)^2
-printf "corr(price,nox)^2   = %.4f\n", corr(price,nox)^2
+printf "Matriz X'X (3x3):\n"
+print XtX
+printf "\nVector X'y (3x1):\n"
+print XtY
 </pre>
 </div>
-<pre class="example" id="orga7e7b9c">
-price~rooms:  STC=42825531146,45  SEC=20732259424,69  SRC=22093271721,76   R2(a mano)=0,4841
-price~nox  :  STC=42825531146,45  SEC=7773157316,47  SRC=35052373829,98   R2(a mano)=0,1815
+<pre class="example" id="orgd0212c1">
+Matriz X'X (3x3):
+XtX (3 x 3)
 
-Comparacion con rho^2 (recuerde: en regresion simple R2 = rho_xy^2):
-corr(price,rooms)^2 = 0,4841
-corr(price,nox)^2   = 0,1815
+      40,000       193,05       114,98 
+      193,05       1290,6       715,42 
+      114,98       715,42       612,46 
+
+
+Vector X'y (3x1):
+XtY (3 x 1)
+
+      472,54 
+      2881,9 
+      1421,0 
 </pre>
-</div>
-</div>
-<div id="outline-container-orgf306269" class="outline-2">
-<h2 id="orgf306269">Actividad 6 - Diagramas de dispersión con la recta ajustada</h2>
-<div class="outline-text-2" id="text-orgf306269">
-<ul class="org-ul">
-<li><p>
-GUI: seleccione <code>price</code> y <code>rooms</code> (con <code>Ctrl</code>), botón derecho, <b><i><code>Gráfico X-Y</code></i></b>; repita con <code>price</code> y <code>nox</code>.
+<p>
+Ahora resolvemos las ecuaciones normales <i>usando la inversa</i> —tal como aparece en la mayoría de los manuales (lección 10)— y comparamos el resultado con lo que da <code>ols</code> directamente.
 </p>
 
 <p>
-<i>o bien teclee en línea de comandos</i>:
+<i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgdf12181">gnuplot price rooms
-gnuplot price nox
+<pre class="src src-gretl" id="org83430b2">matrix beta_matricial = invpd(XtX)*XtY
+printf "beta calculado como (X'X)^(-1) X'y:\n"
+print beta_matricial
+
+ols y const x2 x3 --quiet
+matrix beta_ols = $coeff
+printf "\nbeta calculado por 'ols' de Gretl:\n"
+print beta_ols
+
+matrix diferencia = beta_matricial - beta_ols
+printf "\nDiferencia (debe ser practicamente cero):\n"
+print diferencia
 </pre>
-</div></li>
-</ul>
+</div>
+<pre class="example" id="orgd01100e">
+beta calculado como (X'X)^(-1) X'y:
+beta_matricial (3 x 1)
 
-<figure style="display: flex; justify-content: center; gap: 10px;">
-    <img src="./S11-Prct-B-hprice2-ajuste/price_rooms_fit.png" style="max-width:48%; height:auto;"/>
-    <img src="./S11-Prct-B-hprice2-ajuste/price_nox_fit.png" style="max-width:48%; height:auto;"/>
-    <figcaption>Diagramas de dispersión con la recta ajustada.</figcaption>
-</figure>
+      4,4307 
+      2,1139 
+    -0,98078 
 
+
+beta calculado por 'ols' de Gretl:
+beta_ols (3 x 1)
+
+      4,4307 
+      2,1139 
+    -0,98078 
+
+
+Diferencia (debe ser practicamente cero):
+diferencia (3 x 1)
+
+  2,6645e-15 
+  4,4409e-16 
+ -1,3323e-15 
+</pre>
 <p>
-Compare cómo de ``ceñidos'' están los puntos que rodean cada recta con el \(R^2\) obtenido en la Actividad 5. Recuerde (lección 8) que \(R^2=\cos^2\theta\), con \(\theta\) el ángulo entre los vectores en desviaciones de los datos y del ajuste: cuanto más ceñida la nube a la recta, más pequeño ese ángulo.
+<i>Recuerde la advertencia de la lección 10: esta fórmula con inversa EXISTE, y es exactamente lo que Gretl calcula ``por dentro'' al ejecutar</i> <code>ols</code>; <i>pero el camino conceptual del curso nunca ha sido, ni será, invertir una matriz: es siempre la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\), que verificamos en la siguiente actividad.</i>
 </p>
 </div>
 </div>
-<div id="outline-container-orgea198a0" class="outline-2">
-<h2 id="orgea198a0">Actividad 7 - Síntesis comparativa</h2>
-<div class="outline-text-2" id="text-orgea198a0">
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-left" />
-
-<col  class="org-left" />
-
-<col  class="org-left" />
-
-<col  class="org-left" />
-</colgroup>
-<thead>
-<tr>
-<th scope="col" class="org-left">Modelo</th>
-<th scope="col" class="org-left">\(\hat\beta_1\)</th>
-<th scope="col" class="org-left">\(\hat\beta_2\)</th>
-<th scope="col" class="org-left">\(R^2\)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="org-left">price~rooms</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">&#xa0;</td>
-</tr>
-
-<tr>
-<td class="org-left">price~nox</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">&#xa0;</td>
-</tr>
-</tbody>
-</table>
+<div id="outline-container-orgffc8444" class="outline-2">
+<h2 id="orgffc8444">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</h2>
+<div class="outline-text-2" id="text-orgffc8444">
+<p>
+Recuperamos el vector de residuos de la última regresión y verificamos que es ortogonal a las tres columnas de \(\boldsymbol{\mathsf{X}}\) simultáneamente, en sus dos lecturas equivalentes (lección 10, ``Transposición'').
+</p>
 
 <p>
-Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta mejor, según \(R^2\)? ¿Es coherente con lo observado en los diagramas de dispersión y con las correlaciones ya calculadas en la práctica de correlación (lección 5)?
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="org4855d4e">series ehat = $uhat
+list elist = ehat
+matrix E = { elist }
+
+matrix XtE = X'E
+printf "X'e (columna 3x1, debe ser (aprox.) el vector nulo):\n"
+print XtE
+
+matrix eX = E'X
+printf "\ne*X (fila 1x3, el mismo resultado, transpuesto):\n"
+print eX
+</pre>
+</div>
+<pre class="example" id="org8331f69">
+X'e (columna 3x1, debe ser (aprox.) el vector nulo):
+XtE (3 x 1)
+
+ -1,5543e-13 
+  5,7732e-13 
+ -4,0945e-13 
+
+
+e*X (fila 1x3, el mismo resultado, transpuesto):
+eX (1 x 3)
+
+ -1,5543e-13   5,7732e-13  -4,0945e-13 
+</pre>
+<p>
+Observe que <code>XtE</code> y <code>eX</code> contienen <i>los mismos tres números</i>, solo que uno en forma de columna y el otro en forma de fila: es exactamente la identidad \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) de la lección 10, comprobada aquí numéricamente.
 </p>
 </div>
 </div>
-<div id="outline-container-org3a61d91" class="outline-2">
-<h2 id="org3a61d91">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org3a61d91">
+<div id="outline-container-org1b87277" class="outline-2">
+<h2 id="org1b87277">Actividad 4 - Familia ortogonal: un diseño con regresores mutuamente ortogonales</h2>
+<div class="outline-text-2" id="text-org1b87277">
+<p>
+Construimos ahora un caso muy distinto: dos regresores, \(\boldsymbol{z}_2\) y \(\boldsymbol{z}_3\), diseñados a propósito para ser <i>mutuamente ortogonales</i> (y de media nula), siguiendo un patrón de diseño factorial con \(n=8\).
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="orgced476c">nulldata 8 --preserve
+setobs 1 1 --cross-section
+set seed 24601
+
+matrix mz2 = {-1;-1;-1;-1;1;1;1;1}
+matrix mz3 = {-1;-1;1;1;-1;-1;1;1}
+series z2 = mz2
+series z3 = mz3
+
+printf "suma(z2)    = %.4f   (debe ser 0: media nula)\n", sum(z2)
+printf "suma(z3)    = %.4f   (debe ser 0: media nula)\n", sum(z3)
+printf "suma(z2*z3) = %.4f   (debe ser 0: ortogonalidad mutua)\n", sum(z2*z3)
+
+scalar c1 = 10
+scalar c2 = 3
+scalar c3 = -2
+series u2 = normal(0,1)
+series y2 = c1 + c2*z2 + c3*z3 + u2
+</pre>
+</div>
+<pre class="example" id="org0b583e2">
+suma(z2)    = 0,0000   (debe ser 0: media nula)
+suma(z3)    = 0,0000   (debe ser 0: media nula)
+suma(z2*z3) = 0,0000   (debe ser 0: ortogonalidad mutua)
+</pre>
+<p>
+<i>Note que \(\boldsymbol{z}_2\) y \(\boldsymbol{z}_3\) valen siempre \(\pm1\): es un diseño ``de juguete'' (parecido a los que reaparecerán, con otro propósito, cuando estudiemos variables dummy), elegido únicamente para lograr una ortogonalidad EXACTA (no aproximada) entre ambos regresores.</i>
+</p>
+</div>
+</div>
+<div id="outline-container-org0e2a86e" class="outline-2">
+<h2 id="org0e2a86e">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</h2>
+<div class="outline-text-2" id="text-org0e2a86e">
+<p>
+Recordando la transparencia ``Familia ortogonal'' de la lección 10: si los regresores son mutuamente ortogonales, cada \(\hat\beta_j\) puede calcularse <i>de forma aislada</i>, sin resolver ningún sistema, con la misma fórmula de Cauchy–Schwarz de la lección 3. Verificamos esto comparando dos vías de cálculo completamente independientes.
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="orgee53783">ols y2 const z2 z3 --quiet
+scalar b2_conjunto = $coeff(z2)
+scalar b3_conjunto = $coeff(z3)
+scalar r2_conjunto = $rsq
+
+scalar b2_aislado = cov(z2,y2)/var(z2)
+scalar b3_aislado = cov(z3,y2)/var(z3)
+
+scalar rho2 = corr(z2,y2)
+scalar rho3 = corr(z3,y2)
+scalar suma_rho2 = rho2^2 + rho3^2
+
+printf "beta2: conjunto (ols z2 z3) = %.6f   aislado (cov/var) = %.6f\n", b2_conjunto, b2_aislado
+printf "beta3: conjunto (ols z2 z3) = %.6f   aislado (cov/var) = %.6f\n", b3_conjunto, b3_aislado
+printf "\nR2 (modelo conjunto)                 = %.6f\n", r2_conjunto
+printf "rho(z2,y)^2 + rho(z3,y)^2             = %.6f\n", suma_rho2
+</pre>
+</div>
+<pre class="example" id="orgd1827dd">
+beta2: conjunto (ols z2 z3) = 2,952111   aislado (cov/var) = 2,952111
+beta3: conjunto (ols z2 z3) = -2,488857   aislado (cov/var) = -2,488857
+
+R2 (modelo conjunto)                 = 0,968065
+rho(z2,y)^2 + rho(z3,y)^2             = 0,968065
+</pre>
+<p>
+Los dos cálculos de cada coeficiente coinciden (salvo errores de redondeo), y \(R^2\) coincide con la suma de las dos correlaciones al cuadrado: exactamente lo que predice la lección 10 para este caso especial. Compare este resultado con el caso general de la Actividad 1, donde \(x_2\) y \(x_3\) estaban correlacionados entre sí: allí no habría tenido ningún sentido calcular \(\hat\beta_2\) ignorando a \(x_3\), porque el resultado NO habría coincidido con el coeficiente del modelo conjunto.
+</p>
+</div>
+</div>
+<div id="outline-container-org47a361a" class="outline-2">
+<h2 id="org47a361a">Actividad 6 - Síntesis</h2>
+<div class="outline-text-2" id="text-org47a361a">
+<p>
+Hoy hemos verificado con Gretl, en dos escenarios bien distintos, la maquinaria matricial completa de la lección 10: (i) en el caso general, que \(\boldsymbol{\mathop{\widehat{\beta}}}=(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}\) coincide con lo que calcula <code>ols</code>, y que \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\) (que es lo mismo que \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol{0}\)); (ii) en el caso especial de regresores mutuamente ortogonales, que cada coeficiente puede aislarse sin resolver ningún sistema, y que \(R^2\) se descompone como suma de correlaciones al cuadrado es ese caso tan especial. 
+</p>
+</div>
+</div>
+<div id="outline-container-org4c7f549" class="outline-2">
+<h2 id="org4c7f549">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org4c7f549">
 <ol class="org-ol">
-<li>¿Por qué no podemos afirmar, a partir del modelo price~rooms, que ``añadir una habitación causa'' un aumento de precio?</li>
-<li>Compare los dos modelos: ¿cuál tiene mayor \(R^2\)? ¿Qué relación tiene esto con los valores de correlación ya calculados en la práctica de correlación?</li>
-<li>En los diagramas de dispersión con la recta ajustada, ¿qué modelo muestra una nube de puntos más ``pegada'' a la recta? ¿Cómo se traduce esto en términos del ángulo \(\theta\) de la lección 8?</li>
-<li>¿Por qué la suma de los residuos no es exactamente cero en la salida de Gretl, sino un número muy pequeño (del orden de \(10^{-8}\) o menor)?</li>
-<li>Si estimáramos <code>price</code> en función de <code>rooms</code> y <code>nox</code> <i>simultáneamente</i> (dos regresores a la vez), ¿por qué NO cabría esperar que el \(R^2\) de ese modelo fuera simplemente la suma de los \(R^2\) de los dos modelos simples de hoy?</li>
+<li>En la Actividad 2, ¿por qué la diferencia entre <code>beta_matricial</code> y <code>beta_ols</code> no es exactamente cero, sino un número muy pequeño?</li>
+<li>¿Por qué necesitamos que <code>x2</code> y <code>x3</code> estén correlacionados en la Actividad 1 para que el ejercicio tenga sentido pedagógico? ¿Qué habría pasado si, por descuido, hubieran resultado casi ortogonales?</li>
+<li>En la Actividad 4, ¿por qué es importante que \(\boldsymbol{z}_2\) y \(\boldsymbol{z}_3\) tengan media <i>exactamente</i> cero, y no solo estén incorrelados?</li>
+<li>Si en la Actividad 5 hubiéramos calculado \(\hat\beta_2\) ``aislado'' (<code>cov(z2,y2)/var(z2)</code>) usando los datos de la Actividad 1 (<code>x2</code>, <code>x3</code>, correlacionados), ¿coincidiría con el coeficiente de <code>x2</code> en el modelo conjunto <code>ols y const x2 x3</code>? ¿Por qué sí o por qué no?</li>
+<li>¿Diría que el uso de la inversa \((\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\) en esta práctica contradice la advertencia de la lección 10 de que el curso ``nunca la usa como vía de razonamiento''? ¿Qué diferencia hay entre usarla para <i>verificar</i> una fórmula ya conocida y usarla como <i>método</i> para resolver MCO?</li>
 </ol>
 
 <p>
@@ -531,14 +591,14 @@ Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta m
 </p>
 
 <ul class="org-ul">
-<li>Véanse las lecciones 7 y 8 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html">S09-Lecc07</a>, <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html">S10-Lecc08</a>) para las demostraciones completas de lo que hoy verificamos con datos reales.</li>
-<li>Wooldridge, J. M. (2020). <i>Introductory Econometrics</i>, cap. 2, sección 2.4 (advertencias sobre la interpretación causal de \(R^2\)).</li>
+<li>Véase la lección 10 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html">S13-Lecc10</a>) para la notación matricial completa, el operador selector y la transparencia ``Familia ortogonal''.</li>
+<li>Cottrell, A. y Lucchetti, R. (2023). <i>Gretl User's Guide</i>. Sección sobre construcción y operaciones con matrices a partir de listas de series.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org036c754" class="outline-2">
-<h2 id="org036c754">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org036c754">
+<div id="outline-container-org9a2b753" class="outline-2">
+<h2 id="org9a2b753">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org9a2b753">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -550,25 +610,25 @@ Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta m
 <tbody>
 <tr>
 <td class="org-left"><i>Enlace al guión</i>:</td>
-<td class="org-left"><a href="https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S11-Prct-B-hprice2-ajuste.inp">S11-Prct-B-hprice2-ajuste.inp</a></td>
+<td class="org-left"><a href="https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S14-Prct-D-simulados-matricial.inp">S14-Prct-D-simulados-matricial.inp</a></td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<div id="outline-container-orge456fc6" class="outline-2">
-<h2 id="orge456fc6">Respuestas</h2>
-<div class="outline-text-2" id="text-orge456fc6">
+<div id="outline-container-org20853ae" class="outline-2">
+<h2 id="org20853ae">Respuestas</h2>
+<div class="outline-text-2" id="text-org20853ae">
 <ol class="org-ol">
-<li>¿Por qué no podemos afirmar causalidad a partir de price~rooms? Porque la descomposición \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y el propio ajuste MCO son consecuencias <i>puramente geométricas</i> de la ortogonalidad del residuo: se cumplen exactamente igual para cualquier par de vectores \(\boldsymbol{x},\boldsymbol{y}\), tengan o no una relación causal real entre sí (recuerde, de la lección 8, el ejemplo del queso y las muertes por enredarse en sábanas). Afirmar causalidad exige una teoría económica previa que justifique la dirección de la relación, algo que la sola regresión no proporciona.</li>
+<li>¿Por qué la diferencia no es exactamente cero? Por errores de redondeo en aritmética de coma flotante, exactamente la misma razón por la que \(\sum\hat e_i\) no era exactamente cero en las prácticas anteriores. Invertir una matriz \(3\times3\) y multiplicarla por otro vector implica varias operaciones aritméticas encadenadas, cada una con su pequeñísimo error de precisión; el resultado final coincide con el de <code>ols</code> hasta un margen del orden de \(10^{-10}\) o menor, que es indistinguible de cero a efectos prácticos.</li>
 
-<li>Comparación de \(R^2\) entre los dos modelos. El modelo con mayor \(|\rho_{\boldsymbol{x}\boldsymbol{y}}|\) (en valor absoluto) entre la variable y el regresor tendrá, necesariamente, mayor \(R^2\), porque en regresión simple \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\) exactamente (lección 8). Por tanto, el orden de los \(R^2\) de hoy debe coincidir exactamente con el orden, en valor absoluto, de las correlaciones \(\rho_{\text{price,rooms}}\) y \(\rho_{\text{price,nox}}\) ya calculadas en la práctica de correlación.</li>
+<li>¿Por qué necesitamos correlación entre <code>x2</code> y <code>x3</code>? Porque el objetivo pedagógico de la Actividad 1 es mostrar el caso <i>general</i> de la regresión múltiple, en el que resolver el sistema completo (o, equivalentemente, usar la matriz inversa) es imprescindible. Si <code>x2</code> y <code>x3</code> hubieran resultado casi ortogonales por accidente, el ejercicio se habría parecido demasiado al caso especial de la Actividad 4, y no habría quedado clara la diferencia entre ``hay que resolver el sistema'' (caso general) y ``cada coeficiente se calcula aislado'' (familia ortogonal): precisamente el contraste que se explota, con toda intención, entre las Actividades 1-3 y las Actividades 4-5.</li>
 
-<li>Nube más pegada a la recta y ángulo \(\theta\). El modelo con mayor \(R^2\) es el que tiene la nube de puntos más ceñida a la recta ajustada, porque \(R^2=\cos^2\theta\): cuanto menor el ángulo \(\theta\) entre los vectores en desviaciones de los datos y del ajuste, más cerca de 1 está \(\cos^2\theta\), y más ``alineados'' (en el sentido geométrico de la lección 8) están esos dos vectores —lo que visualmente se traduce en una nube más estrecha alrededor de la recta.</li>
+<li>¿Por qué la media exactamente nula, no solo la incorrelación? Porque la fórmula de la transparencia ``Familia ortogonal'' (lección 10) exige que \(\boldsymbol{1},\boldsymbol{z}_2,\boldsymbol{z}_3\) sean <i>mutuamente</i> ortogonales: no basta con que \(\boldsymbol{z}_2\perp\boldsymbol{z}_3\), hace falta además que cada uno de ellos sea ortogonal a la constante \(\boldsymbol{1}\), es decir, que tenga media cero. Sin esa condición, \(\hat\beta_1\) (el coeficiente de la constante) no sería, en general, la media de \(\boldsymbol{y}\), y las fórmulas aisladas de \(\hat\beta_2,\hat\beta_3\) como covarianza dividida por varianza dejarían de coincidir con los coeficientes del modelo conjunto.</li>
 
-<li>Suma de residuos no exactamente cero. Por errores de redondeo en aritmética de coma flotante: los ordenadores no representan los números reales con precisión infinita, así que operaciones que algebraicamente deberían dar cero (como \(\sum\hat e_i\)) arrastran un pequeñísimo error de cálculo, típicamente del orden de \(10^{-8}\) o menor. Esto no contradice la identidad teórica \(\sum\hat e_i=0\): es exactamente la misma situación que ya se comprobó en la práctica de verificación geométrica (con datos simulados).</li>
+<li>¿Coincidiría el cálculo aislado con los datos de la Actividad 1? No, en general no coincidiría (salvo coincidencia numérica improbable). La fórmula aislada \(\hat\beta_2=\mathrm{cov}(x_2,y)/\mathrm{var}(x_2)\) solo reproduce el coeficiente del modelo conjunto cuando los regresores son mutuamente ortogonales; con <code>x2</code> y <code>x3</code> correlacionados (como en la Actividad 1), el cálculo aislado ignora por completo la información compartida entre ambos regresores, y por tanto ``atribuye'' a <code>x2</code> parte del efecto que en realidad corresponde a <code>x3</code>. Es exactamente el mismo fenómeno que se observó en la práctica de Ramanathan con <code>sqft</code> y <code>bedrms</code>.</li>
 
-<li>\(R^2\) de un modelo con dos regresores no es la suma de los \(R^2\) simples. Porque, como se explicó al cierre de la lección 8, cuando hay más de un regresor no constante el subespacio \(\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_1,\boldsymbol{x}_2)\) centrado tiene dimensión 2, no 1: los vectores en desviaciones de <code>rooms</code> y <code>nox</code> ya no están alineados en la misma recta, así que el ajuste conjunto \(\hat{\boldsymbol{y}}-\boldsymbol{\mathop{\overline{y}}}\) ya no es, en general, la suma de las contribuciones ``aisladas'' de cada regresor. Además, <code>rooms</code> y <code>nox</code> pueden estar correlacionadas entre sí, de modo que parte de lo que ``explica'' cada una por separado se solapa. Este fenómeno se estudiará con detalle en la regresión múltiple, más adelante en el curso.</li>
+<li>¿Contradice esta práctica la advertencia de la lección 10 sobre la inversa? No, y la distinción es importante. La advertencia de la lección 10 es que el curso nunca usa la inversa como <i>vía de razonamiento</i> para justificar por qué MCO funciona, ni como herramienta habitual de cálculo: el argumento conceptual sigue siendo, siempre, la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\). Aquí hemos usado la inversa una única vez, con un propósito muy distinto: <i>verificar numéricamente</i> que una fórmula ya demostrada por otro camino (las ecuaciones normales, obtenidas de la ortogonalidad) da, en efecto, el mismo resultado que <code>ols</code>. Usarla como comprobación puntual de una fórmula ya justificada no es lo mismo que apoyarse en ella para <i>explicar</i> por qué MCO funciona.</li>
 </ol>
 </div>
 </div>

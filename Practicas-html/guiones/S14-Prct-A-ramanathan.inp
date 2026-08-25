@@ -1,0 +1,61 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+open data4-1.gdt --quiet
+
+setinfo price -d "Precio de la vivienda (miles de dólares)" -n "Precio (miles $)"
+setinfo sqft   -d "Superficie habitable (pies cuadrados)" -n "Superficie (sqft)"
+setinfo bedrms -d "Número de dormitorios" -n "Dormitorios"
+setinfo baths  -d "Número de cuartos de baño" -n "Baños"
+
+summary price sqft bedrms baths --simple
+
+outfile --quiet vistazoDatos.txt
+    print price sqft bedrms baths --byobs
+end outfile
+
+outfile --quiet OLS_Precio_Superficie.txt
+    ols price const sqft
+end outfile
+
+gnuplot price sqft --output="price_sqft_simple.png"
+
+ols price const bedrms
+ols price const sqft bedrms
+
+corr sqft bedrms
+
+ols price const sqft bedrms baths
+
+corr sqft bedrms baths
+
+outfile --quiet sintesisR2.txt
+    ols price const sqft --quiet
+    scalar r2_1 = $rsq
+    ols price const bedrms --quiet
+    scalar r2_2 = $rsq
+    ols price const sqft bedrms --quiet
+    scalar r2_3 = $rsq
+    ols price const sqft bedrms baths --quiet
+    scalar r2_4 = $rsq
+    
+    printf "R2 price~sqft               = %.4f\n", r2_1
+    printf "R2 price~bedrms             = %.4f\n", r2_2
+    printf "R2 price~sqft+bedrms        = %.4f\n", r2_3
+    printf "R2 price~sqft+bedrms+baths  = %.4f\n", r2_4
+end outfile

@@ -1,0 +1,79 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+open hprice2.gdt --quiet
+setinfo price   -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+setinfo rooms   -d "Número medio de habitaciones" -n "Habitaciones"
+setinfo nox     -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
+setinfo stratio -d "Ratio alumnos/profesor en la zona" -n "Ratio alumnos/profesor"
+
+summary price rooms nox stratio
+
+outfile --quiet Ols_rooms_nox_simple_y_conjunto.txt
+    ols price const rooms
+    ols price const nox
+    ols price const rooms nox
+end outfile
+
+ols price const rooms nox stratio
+
+outfile --quiet comparacionR2cuatroModelos.txt
+    ols price const rooms --quiet
+    scalar r2_rooms = $rsq
+    
+    ols price const nox --quiet
+    scalar r2_nox = $rsq
+    
+    ols price const rooms nox --quiet
+    scalar r2_rooms_nox = $rsq
+    
+    ols price const rooms nox stratio --quiet
+    scalar r2_todos = $rsq
+    
+    printf "R2 price~rooms                = %.4f\n", r2_rooms
+    printf "R2 price~nox                  = %.4f\n", r2_nox
+    printf "R2 price~rooms+nox            = %.4f\n", r2_rooms_nox
+    printf "R2 price~rooms+nox+stratio    = %.4f\n", r2_todos
+end outfile
+
+outfile --quiet r2AjustadoCuatroModelos.txt
+    ols price const rooms nox --quiet
+    scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+    printf "Modelo price~rooms+nox\n"
+    printf "  R2          = %.4f\n", $rsq
+    printf "  R2 ajustado = %.4f\n", Rbarsq
+    
+    ols price const rooms nox stratio --quiet
+    scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+    printf "Modelo price~rooms+nox+stratio\n"
+    printf "  R2          = %.4f\n", $rsq
+    printf "  R2 ajustado = %.4f\n", Rbarsq
+end outfile
+
+outfile --quiet verificacionFormulaR2ajustado.txt
+    ols price const rooms nox stratio --quiet
+    scalar n_obs = $nobs
+    scalar k_reg = $ncoeff
+    
+    scalar Rbarsq_orig = 1 - ( $ess/($nobs-$ncoeff) )/( sst(price)/($nobs-1) )
+    scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+    
+    printf "n = %d,  k = %d (incluida la constante)\n", n_obs, k_reg
+    printf "R2 ajustado (formula original: 1-(SRC/(n-k))/(STC/(n-1)) ) = %.6f\n", Rbarsq_orig
+    printf "R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = %.6f\n", Rbarsq
+end outfile

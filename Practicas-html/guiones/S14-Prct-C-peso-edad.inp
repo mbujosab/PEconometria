@@ -1,0 +1,71 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+nulldata 8 --preserve
+setobs 1 1 --cross-section
+
+matrix medad = {7;7;8;10;10;11;12;14}
+matrix mpeso = {39;40;42;49;51;54;56;58}
+series edad = medad
+series peso = mpeso
+
+setinfo peso -d "Peso (kg)" -n "Peso (kg)"
+setinfo edad -d "Edad (anios)" -n "Edad (anios)"
+
+print edad peso --byobs
+
+ols peso const edad
+gnuplot peso edad --output="peso_edad_lineal.png"
+
+series edad2 = edad^2
+ols peso const edad edad2
+gnuplot peso edad --fit=quadratic --output="peso_edad_cuadratico.png"
+
+series edad3 = edad^3
+ols peso const edad edad2 edad3
+gnuplot peso edad --fit=cubic --output="peso_edad_cubico.png"
+
+outfile --quiet comparacionTresModelosR2.txt
+    ols peso const edad --quiet
+    scalar Rbarsq1 = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+    printf "Modelo 1 (recta):    R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq1
+    
+    ols peso const edad edad2 --quiet
+    scalar Rbarsq2 = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+    printf "Modelo 2 (parabola): R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq2
+    
+    ols peso const edad edad2 edad3 --quiet
+    scalar Rbarsq3 = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+    printf "Modelo 3 (cubica):   R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq3
+end outfile
+
+outfile --quiet extrapolacionModeloCubico.txt
+    ols peso const edad edad2 edad3 --quiet
+    scalar b1 = $coeff(const)
+    scalar b2 = $coeff(edad)
+    scalar b3 = $coeff(edad2)
+    scalar b4 = $coeff(edad3)
+    
+    scalar pred15 = b1 + b2*15 + b3*15^2 + b4*15^3
+    scalar pred16 = b1 + b2*16 + b3*16^2 + b4*16^3
+    scalar pred17 = b1 + b2*17 + b3*17^2 + b4*17^3
+    
+    printf "Peso predicho (modelo cubico) a los 15 anios = %.2f kg\n", pred15
+    printf "Peso predicho (modelo cubico) a los 16 anios = %.2f kg\n", pred16
+    printf "Peso predicho (modelo cubico) a los 17 anios = %.2f kg\n", pred17
+end outfile
