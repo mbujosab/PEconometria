@@ -1,99 +1,695 @@
 #+TITLE: Principios de Econometría
 #+AUTHOR: Marcos Bujosa
 #+LANGUAGE: es
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: toc:nil num:nil html-style:nil html-scripts:nil html-postamble:nil html-preamble:nil title:nil
 
-#+SETUPFILE: css/readtheorg_inline.theme
+#+HTML_HEAD: <meta charset="utf-8">
+#+HTML_HEAD: <meta name="viewport" content="width=device-width, initial-scale=1">
+#+HTML_HEAD: <meta name="description" content="Principios de Econometría (Grado en PPE, UCM): un curso que fundamenta la regresión lineal en la geometría de R^n. Apuntes, transparencias, prácticas de Gretl y cuadernos interactivos.">
+#+HTML_HEAD: <meta name="keywords" content="econometría, regresión lineal, mínimos cuadrados, MCO, Gretl, proyección ortogonal, geometría, PPE, UCM, estadística, Universidad Complutense de Madrid">
+#+HTML_HEAD: <link rel="stylesheet" href="css/index.css">
+#+HTML_HEAD: <script>
+#+HTML_HEAD: window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] } };
+#+HTML_HEAD: </script>
+#+HTML_HEAD: <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+# ---------------------------------------------------------------------
+# Página de índice del curso. Mantenimiento:
+#   - Al pasar una sesión de PENDIENTE a ESCRITA (ver Plan de escritura,
+#     §7.0), mover su bloque de <div class="session pending"> a
+#     <div class="session"> con sus badges/enlaces reales, y actualizar
+#     el contador de "Cómo usar este material" (X de 25) y el ancho de
+#     .progress-fill.
+#   - Las fechas están fijadas para el curso académico 2026-2027
+#     (martes/miércoles; festivo: martes 8 de diciembre de 2026).
+# ---------------------------------------------------------------------
+# https://www.ucm.es/data/cont/docs/3-2016-07-21-Marca%20UCM%20logo%20negro.png
+# https://economicasyempresariales.ucm.es/themes/ucm16/media/img/logo.png
+#+begin_export html
+<header class="hero">
+  <div class="container">
+    <div class="hero-top">
+      <div>
+        <h1>Principios de Econometría</h1>
+        <p class="subtitle">Grado en Filosofía, Política y Economía (PPE) · UCM</p>
+        <p class="meta">Curso 2026-2027 · Marcos Bujosa · Martes y miércoles</p>
+      </div>
+      <img class="ucm-logo" src="./img/Logo.jpg" alt="Universidad Complutense de Madrid">
+    </div>
 
-* Presentación
+    <div class="quote-box">
+      «La econometría es la medida de lo económico.» — Ragnar Frisch
+    </div>
+    <p class="mantra">Menos contenido, pero mejor entendido.</p>
+  </div>
+</header>
 
-Material docente de la asignatura *Principios de Econometría*. 
-Cada sesión está disponible en formato PDF, HTML y como transparencias para el proyector del aula
-(slides con formato reveal.js). 
-Las prácticas de laboratorio incluyen además el guion de Gretl de la práctica completa.
+<nav class="blocknav">
+  <div class="container">
+    <a href="#intro">Introducción</a>
+    <a href="#algebra">Álgebra lineal</a>
+    <a href="#descriptiva">Estadística descriptiva</a>
+    <a href="#simple">Regresión simple</a>
+    <a href="#puente">El puente</a>
+    <a href="#multiple">Regresión múltiple</a>
+    <a href="#inferencia">Inferencia</a>
+    <a href="#diagnostico">Diagnóstico</a>
+    <a href="#cierre">Cierre</a>
+  </div>
+</nav>
 
-| Sesión | Documento                               | PDF | HTML | Otros ficheros    |
-|--------+-----------------------------------------+-----+------+-------------------|
-| S01    | Lecc-01 Introducción                    | [[file:Lecciones-pdf/S01-Lecc01.pdf][PDF]] | [[file:Lecciones-html/S01-Lecc01.html][HTML]] | [[file:Transparencias/S01-Lecc01.slides.html][Slides]]            |
-|--------+-----------------------------------------+-----+------+-------------------|
-| S02    | Lecc-02 Vectores                        | [[file:Lecciones-pdf/S02-Lecc02.pdf][PDF]] | [[file:Lecciones-html/S02-Lecc02.html][HTML]] | [[file:Transparencias/S02-Lecc02.slides.html][Slides]]            |
-| S03    | Lecc-03 Proyección                      | [[file:Lecciones-pdf/S03-Lecc03.pdf][PDF]] | [[file:Lecciones-html/S03-Lecc03.html][HTML]] | [[file:Transparencias/S03-Lecc03.slides.html][Slides]]            |
-| S04-A  | Práctica hprice2                        | [[file:Practicas-pdf/S04-Prct-A-hprice2.pdf][PDF]] | [[file:Practicas-html/S04-Prct-A-hprice2.html][HTML]] | [[file:Practicas-html/guiones/S04-Prct-A-hprice2.inp][Guion Gretl]]       |
-| S04-B  | Práctica boston                         | [[file:Practicas-pdf/S04-Prct-B-boston.pdf][PDF]] | [[file:Practicas-html/S04-Prct-B-boston.html][HTML]] | [[file:Practicas-html/guiones/S04-Prct-B-boston.inp][Guion Gretl]]       |
-|--------+-----------------------------------------+-----+------+-------------------|
-| S05    | Lecc-04 Estadística I                   | [[file:Lecciones-pdf/S05-Lecc04.pdf][PDF]] | [[file:Lecciones-html/S05-Lecc04.html][HTML]] | [[file:Transparencias/S05-Lecc04.slides.html][Slides]]            |
-| S05    | Cuaderno-01                             |     |      | [[file:CuadernosElectronicos/S05-Notebook01.ipynb][.ipynb]] ([[https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?filepath=CuadernosElectronicos/S05-Notebook01.ipynb][MyBinder]]) |
-| S06    | Lecc-05 Estadística II                  | [[file:Lecciones-pdf/S06-Lecc05.pdf][PDF]] | [[file:Lecciones-html/S06-Lecc05.html][HTML]] | [[file:Transparencias/S06-Lecc05.slides.html][Slides]]            |
-| S07-A  | Práctica hprice2 (correlación)          | [[file:Practicas-pdf/S07-Prct-A-hprice2.pdf][PDF]] | [[file:Practicas-html/S07-Prct-A-hprice2.html][HTML]] | [[file:Practicas-html/guiones/S07-Prct-A-hprice2.inp][Guion Gretl]]       |
-| S07-B  | Práctica verificación geométrica        | [[file:Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf][PDF]] | [[file:Practicas-html/S07-Prct-B-verificacion-geometrica.html][HTML]] | [[file:Practicas-html/guiones/S07-Prct-B-verificacion-geometrica.inp][Guion Gretl]]       |
-| S07-C  | Práctica momentos no bastan             | [[file:Practicas-pdf/S07-Prct-C-momentos-no-bastan.pdf][PDF]] | [[file:Practicas-html/S07-Prct-C-momentos-no-bastan.html][HTML]] | [[file:Practicas-html/guiones/S07-Prct-C-momentos-no-bastan.inp][Guion Gretl]]       |
-|--------+-----------------------------------------+-----+------+-------------------|
-| S08    | Lecc-06 Regresión simple                | [[file:Lecciones-pdf/S08-Lecc06.pdf][PDF]] | [[file:Lecciones-html/S08-Lecc06.html][HTML]] | [[file:Transparencias/S08-Lecc06.slides.html][Slides]]            |
-| S09    | Lecc-07 Ajuste MCO                      | [[file:Lecciones-pdf/S09-Lecc07.pdf][PDF]] | [[file:Lecciones-html/S09-Lecc07.html][HTML]] | [[file:Transparencias/S09-Lecc07.slides.html][Slides]]            |
-| S09    | Cuaderno-02                             |     |      | [[file:CuadernosElectronicos/S09-Notebook02.ipynb][.ipynb]] ([[https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?filepath=CuadernosElectronicos/S09-Notebook02.ipynb][MyBinder]]) |
-| S10    | Lecc-08 Bondad de ajuste                | [[file:Lecciones-pdf/S10-Lecc08.pdf][PDF]] | [[file:Lecciones-html/S10-Lecc08.html][HTML]] | [[file:Transparencias/S10-Lecc08.slides.html][Slides]]            |
-| S10    | Cuaderno-03                             |     |      | [[file:CuadernosElectronicos/S10-Notebook03.ipynb][.ipynb]] ([[https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?filepath=CuadernosElectronicos/S10-Notebook03.ipynb][MyBinder]]) |
-| S11-A  | Práctica MCO simulado                   | [[file:Practicas-pdf/S11-Prct-A-mco-simulado.pdf][PDF]] | [[file:Practicas-html/S11-Prct-A-mco-simulado.html][HTML]] | [[file:Practicas-html/guiones/S11-Prct-A-mco-simulado.inp][Guion Gretl]]       |
-| S11-B  | Práctica hprice2 (ajuste)               | [[file:Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf][PDF]] | [[file:Practicas-html/S11-Prct-B-hprice2-ajuste.html][HTML]] | [[file:Practicas-html/guiones/S11-Prct-B-hprice2-ajuste.inp][Guion Gretl]]       |
-| S11-C  | Práctica gráficos e informes            | [[file:Practicas-pdf/S11-Prct-C-graficos-informes.pdf][PDF]] | [[file:Practicas-html/S11-Prct-C-graficos-informes.html][HTML]] | [[file:Practicas-html/guiones/S11-Prct-C-graficos-informes.inp][Guion Gretl]]       |
-| S12    | Lecc-09 De datos a variables aleatorias | [[file:Lecciones-pdf/S12-Lecc09.pdf][PDF]] | [[file:Lecciones-html/S12-Lecc09.html][HTML]] | [[file:Transparencias/S12-Lecc09.slides.html][Slides]]            |
-| S13    | Lecc-10 Regresión múltiple              | [[file:Lecciones-pdf/S13-Lecc10.pdf][PDF]] | [[file:Lecciones-html/S13-Lecc10.html][HTML]] | [[file:Transparencias/S13-Lecc10.slides.html][Slides]]            |
-| S14-A  | Práctica MCO simulado                   | [[file:Practicas-pdf/S14-Prct-A-ramanathan.pdf][PDF]] | [[file:Practicas-html/S14-Prct-A-ramanathan.html][HTML]] | [[file:Practicas-html/guiones/S14-Prct-A-ramanathan.inp][Guion Gretl]]       |
-| S14-B  | Práctica hprice2 (ajuste)               | [[file:Practicas-pdf/S14-Prct-B-hprice2-r2ajustado.pdf][PDF]] | [[file:Practicas-html/S14-Prct-B-hprice2-r2ajustado.html][HTML]] | [[file:Practicas-html/guiones/S14-Prct-B-hprice2-r2ajustado.inp][Guion Gretl]]       |
-| S14-C  | Práctica gráficos e informes            | [[file:Practicas-pdf/S14-Prct-C-peso-edad.pdf][PDF]] | [[file:Practicas-html/S14-Prct-C-peso-edad.html][HTML]] | [[file:Practicas-html/guiones/S14-Prct-C-peso-edad.inp][Guion Gretl]]       |
-| S14-D  | Práctica gráficos e informes            | [[file:Practicas-pdf/S14-Prct-D-simulados-matricial.pdf][PDF]] | [[file:Practicas-html/S14-Prct-D-simulados-matricial.html][HTML]] | [[file:Practicas-html/guiones/S14-Prct-D-simulados-matricial.inp][Guion Gretl]]       |
-|--------+-----------------------------------------+-----+------+-------------------|
+<main class="container">
 
+  <section class="howto">
+    <h2>Cómo usar este material</h2>
+    <p>Cada sesión se ofrece en varios formatos. Para las prácticas de laboratorio,
+    además, el guion completo de Gretl. Los cuadernos electrónicos son material
+    interactivo complementario.</p>
+    <ul class="legend">
+      <li><span class="badge pdf">PDF</span> para leer o imprimir sin conexión.</li>
+      <li><span class="badge html">HTML</span> la misma lección para navegador.</li>
+      <li><span class="badge slides">Slides</span> transparencias (reveal.js), las mismas que se proyectan en clase.</li>
+      <li><span class="badge gretl">Guion Gretl</span> código <code>.inp</code> completo de la práctica.</li>
+      <li><span class="badge notebook">Cuaderno</span> notebook Jupyter interactivo (ejecutable online sin instalar nada desde MyBinder).</li>
+    </ul>
+    <p style="margin-top:.6rem;">El software del curso es <a href="https://gretl.sourceforge.net/" target="_blank" rel="noopener">Gretl</a> (libre y gratuito); conviene instalarlo antes de la primera práctica.</p>
+    <p class="license-note">Salvo los guiones de Gretl (licencia <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GNU GPL v3 o posterior</a>), todo el material (apuntes, transparencias, cuadernos) se distribuye bajo licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">Creative Commons BY-SA 4.0</a>.</p>
+  </section>
 
+  <div class="progress-wrap">
+    <div class="progress-label">14 de 25 sesiones publicadas (56&nbsp;%) — el resto se irá completando conforme avance el curso</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div>
+  </div>
+#+end_export
 
+#+begin_export html
+  <section class="block" id="intro">
+    <h2>Introducción</h2>
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S01</span>
+        <time class="session-date">mar 08-sep-2026</time>
+        <span class="session-title">Introducción a la econometría</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S01-Lecc01.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S01-Lecc01.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S01-Lecc01.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">Qué es la econometría, sus tres usos (describir, predecir, inferir causalmente) y la primera pista de la idea que vertebra el curso: los datos como vectores.</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Arrancamos con la cita de Ragnar Frisch —«la econometría es la medida de lo económico»— y con el mantra que preside todo el programa: preferimos entender bien pocas cosas a entender mal muchas. Se presenta la tipología de datos (sección cruzada, series temporales) y una batería de ejemplos que reaparecerán durante el curso: salarios y educación, demanda de tabaco, precios de la vivienda de Boston. Y se siembra, sin desarrollarla aún, la idea que da título a este programa: los datos de una muestra son vectores de \(\mathbb{R}^n\), y muchas herramientas estadísticas —media, varianza, regresión, \(R^2\)— son, en realidad, construcciones geométricas.</p>
+      </details>
+    </div>
+  </section>
+#+end_export
 
-* COMMENT Lecciones
+#+begin_export html
+  <section class="block" id="algebra">
+    <h2>Tema I · El lenguaje: álgebra lineal en \(\mathbb{R}^n\) <span class="block-range">(S02–S04)</span></h2>
+    <p class="block-intro">Antes de hablar de estadística, necesitamos un lenguaje común. Aquí se construyen, sin ningún contenido estadístico todavía, las herramientas geométricas —producto escalar, norma, ángulo, ortogonalidad, proyección— sobre las que se apoyará todo lo demás.</p>
 
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S02</span>
+        <time class="session-date">mié 09-sep-2026</time>
+        <span class="session-title">Vectores en \(\mathbb{R}^n\): producto escalar y norma</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S02-Lecc02.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S02-Lecc02.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S02-Lecc02.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">Los datos como listas de números: combinaciones lineales, producto escalar y norma euclídea, sin ningún contenido estadístico todavía.</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Un vector deja de ser la flecha de bachillerato para convertirse en lo que realmente usaremos: una lista ordenada de números. Se presenta la combinación lineal —pieza central de toda la asignatura, porque la regresión será una combinación lineal de sus regresores—, el producto escalar y la norma euclídea, deducida vía Pitágoras. Al final se anticipa, sin resolverlo aún, un segundo producto escalar —el «estadístico», con un factor \(1/n\)— que se justificará con detalle más adelante.</p>
+      </details>
+    </div>
 
-| Sesión               | PDF | HTML | Diapositivas |
-|----------------------+-----+------+--------------|
-| S01 · Introducción   | [[file:Lecciones-pdf/S01-Lecc01.pdf][PDF]] | [[file:Lecciones-html/S01-Lecc01.html][HTML]] | [[file:Transparencias/S01-Lecc01.slides.html][Slides]]       |
-| S02 · Vectores       | [[file:Lecciones-pdf/S02-Lecc02.pdf][PDF]] | [[file:Lecciones-html/S02-Lecc02.html][HTML]] | [[file:Transparencias/S02-Lecc02.slides.html][Slides]]       |
-| S03 · Proyección     | [[file:Lecciones-pdf/S03-Lecc03.pdf][PDF]] | [[file:Lecciones-html/S03-Lecc03.html][HTML]] | [[file:Transparencias/S03-Lecc03.slides.html][Slides]]       |
-| S05 · Estadística I  | [[file:Lecciones-pdf/S05-Lecc04.pdf][PDF]] | [[file:Lecciones-html/S05-Lecc04.html][HTML]] | [[file:Transparencias/S05-Lecc04.slides.html][Slides]]       |
-| S06 · Estadística II | [[file:Lecciones-pdf/S06-Lecc05.pdf][PDF]] | [[file:Lecciones-html/S06-Lecc05.html][HTML]] | [[file:Transparencias/S06-Lecc05.slides.html][Slides]]       |
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S03</span>
+        <time class="session-date">mar 15-sep-2026</time>
+        <span class="session-title">Ángulo, ortogonalidad y teorema de Pitágoras</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S03-Lecc03.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S03-Lecc03.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S03-Lecc03.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">Pitágoras en \(\mathbb{R}^n\), el coseno como consecuencia de Pitágoras, Cauchy–Schwarz y la ortogonalidad: la piedra angular de toda regresión.</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Se demuestran, con todo rigor y para \(\mathbb{R}^n\) en general, el teorema de Pitágoras, la fórmula del coseno de un ángulo, la desigualdad de Cauchy–Schwarz y la desigualdad triangular. Dos vectores son ortogonales cuando su producto escalar es cero. Queda sembrada, para varias sesiones más adelante, la idea de que minimizar una distancia —el criterio que define el ajuste por mínimos cuadrados— es, geométricamente, proyectar.</p>
+      </details>
+    </div>
 
-* COMMENT Prácticas de laboratorio (Gretl)
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S04</span>
+        <time class="session-date">mié 16-sep-2026</time>
+        <span class="session-title">Primer contacto con Gretl</span>
+        <span class="badges"></span>
+      </div>
+      <p class="session-summary">Dos prácticas de manejo básico del programa: estadísticos descriptivos e importación de datos externos.</p>
 
-| Práctica        | PDF | HTML | Guion (.inp) |
-|-----------------+-----+------+--------------|
-| S04-A · hprice2 | [[file:Practicas-pdf/S04-Prct-A-hprice2.pdf][PDF]] | [[file:Practicas-html/S04-Prct-A-hprice2.html][HTML]] | [[file:Practicas-html/guiones/S04-Prct-A-hprice2.inp][Guion Gretl]]  |
-| S04-B · boston  | [[file:Practicas-pdf/S04-Prct-B-boston.pdf][PDF]] | [[file:Practicas-html/S04-Prct-B-boston.html][HTML]] | [[file:Practicas-html/guiones/S04-Prct-B-boston.inp][Guion Gretl]]  |
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S04-A</span>
+          <span></span>
+          <span class="session-title">Práctica A · Estadísticos descriptivos (hprice2)</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S04-Prct-A-hprice2.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S04-Prct-A-hprice2.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S04-Prct-A-hprice2.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Interfaz de Gretl, carga de un dataset de muestra, estadísticos descriptivos, histograma y diagrama de caja.</p>
+      </div>
 
-* COMMENT Cuadernos electrónicos (Jupyter)
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S04-B</span>
+          <span></span>
+          <span class="session-title">Práctica B · Importar datos (Boston Housing)</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S04-Prct-B-boston.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S04-Prct-B-boston.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S04-Prct-B-boston.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Importación del dataset original de Boston Housing (Harrison y Rubinfeld, 1978) desde un fichero externo, con una variable dicotómica que reaparecerá más adelante.</p>
+      </div>
+    </div>
+  </section>
+#+end_export
 
-| Cuaderno          | Notebook |
-|-------------------+----------|
-| S05 · Notebook 01 | [[file:CuadernosElectronicos/S05-Notebook01.ipynb][.ipynb]]   |
+#+begin_export html
+  <section class="block" id="descriptiva">
+    <h2>Tema II.1 · Regresión con un regresor constante (k=1): la estadística descriptiva <span class="block-range">(S05–S07)</span></h2>
+    <p class="block-intro">El primer caso, y el más sencillo, de la idea central del curso: proyectar sobre la recta generada por el vector de unos. Aquí la media, la varianza, la covarianza y la correlación dejan de ser fórmulas sueltas: son, todas ellas, la misma construcción geométrica —proyección, norma, ángulo— vista desde ángulos distintos.</p>
 
-/Nota: estos cuadernos se pueden descargar y abrir con Jupyter. Para
-verlos renderizados en el navegador sin descargarlos, puedes usar
-[[https://nbviewer.org/][nbviewer]] pegando la URL del fichero en este
-sitio./
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S05</span>
+        <time class="session-date">mar 22-sep-2026</time>
+        <span class="session-title">La media como proyección</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S05-Lecc04.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S05-Lecc04.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S05-Lecc04.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">La media aritmética no es un cálculo aparte: es la proyección ortogonal del vector de datos sobre la recta generada por el vector de unos.</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Se resuelve, por primera vez, un problema de mínima distancia en \(\mathbb{R}^n\): proyectar un vector sobre una recta. Aplicado a la recta generada por el vector de unos, el resultado es exactamente la media aritmética —y el residuo de ese ajuste, ortogonal a la recta, tiene siempre suma cero—. Es la primera vez que se dice explícitamente: calcular una media ES, sin saberlo, resolver un ajuste por mínimos cuadrados.</p>
+      </details>
 
-* COMMENT Datos y código fuente
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S05</span>
+          <span></span>
+          <span class="session-title">Cuaderno interactivo 1</span>
+          <span class="badges">
+            <a class="badge notebook" href="CuadernosElectronicos/S05-Notebook01.ipynb">Cuaderno</a>
+            <a class="badge notebook" href="https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?filepath=CuadernosElectronicos/S05-Notebook01.ipynb" target="_blank" rel="noopener">MyBinder</a>
+          </span>
+        </div>
+        <p class="session-summary">Visualización interactiva en 3D de la proyección ortogonal sobre la recta de los unos.</p>
+      </div>
+    </div>
 
-El código fuente (=.org=) de todo el material, así como los datasets
-usados en las prácticas, están disponibles en el repositorio:
-[[https://github.com/mbujosab/peconometria][GitHub: peconometria]].
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S06</span>
+        <time class="session-date">mié 23-sep-2026</time>
+        <span class="session-title">Varianza, covarianza y correlación vía Pitágoras</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S06-Lecc05.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S06-Lecc05.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S06-Lecc05.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">La varianza es el cuadrado de una norma; la covarianza, un producto escalar; la correlación, el coseno de un ángulo.</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Se generaliza la idea anterior a dos vectores. El teorema de Pitágoras de la lección previa entrega, sin ningún truco algebraico adicional, la conocida «fórmula de cálculo» de la varianza. La covarianza se define como el producto escalar de los vectores en desviaciones, y la correlación, como el coseno del ángulo entre ellos —por lo que está, necesariamente, entre \(-1\) y \(1\).</p>
+      </details>
+    </div>
 
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S07</span>
+        <time class="session-date">mar 29-sep-2026</time>
+        <span class="session-title">Laboratorio: correlación, verificación geométrica y los límites de los momentos</span>
+        <span class="badges"></span>
+      </div>
 
-* COMMENT Para planificar la web
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S07-A</span>
+          <span></span>
+          <span class="session-title">Práctica A · Correlación como coseno (hprice2)</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S07-Prct-A-hprice2.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S07-Prct-A-hprice2.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S07-Prct-A-hprice2.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Verificación numérica, con datos reales, de que la correlación es exactamente el coseno de un ángulo —y de que no importa por qué número se divida.</p>
+      </div>
 
-** Calendario
-Las clases se imparten en el intervalo que va del 7 de septiembre al 11 de diciembre de 2026. Son los martes y miércoles.
-Por tanto se pude indicar qué día se imparte cada sesión. 
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S07-B</span>
+          <span></span>
+          <span class="session-title">Práctica B · Verificación geométrica (datos simulados)</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S07-Prct-B-verificacion-geometrica.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S07-Prct-B-verificacion-geometrica.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Con datos generados por el propio guion, se comprueban «a mano» las identidades de ortogonalidad y Pitágoras de las dos lecciones anteriores.</p>
+      </div>
 
-** Distribución de las sesiones
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S07-C</span>
+          <span></span>
+          <span class="session-title">Práctica C · Los momentos no bastan</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S07-Prct-C-momentos-no-bastan.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S07-Prct-C-momentos-no-bastan.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S07-Prct-C-momentos-no-bastan.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Cuatro conjuntos de datos con la misma media y desviación típica, pero formas radicalmente distintas: por qué un resumen numérico nunca sustituye a un gráfico.</p>
+      </div>
+    </div>
+  </section>
+#+end_export
 
-- Introducción: S01
-- Álgebra lineal: S02 a S04
-- Estadística: S05 a S07
-- Ajuste lineal simple: S08 a S11
+#+begin_export html
+  <section class="block" id="simple">
+    <h2>Tema II.2 · Regresión con dos regresores (k=2): la regresión lineal simple <span class="block-range">(S08–S11)</span></h2>
+    <p class="block-intro">Se añade un segundo regresor a la constante: ajustar una recta es, ahora, proyectar sobre un plano. La misma lógica de proyección y ortogonalidad —ahora con dos condiciones en vez de una— entrega la recta de mínimos cuadrados y su medida de bondad de ajuste, \(R^2=\cos^2\theta\).</p>
 
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S08</span>
+        <time class="session-date">mié 30-sep-2026</time>
+        <span class="session-title">La regresión simple como ajuste geométrico</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S08-Lecc06.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S08-Lecc06.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S08-Lecc06.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">Ajustar una recta es proyectar sobre el plano generado por el vector de unos y el regresor.</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Generalización directa de la lección de la media: en vez de proyectar sobre una recta, se proyecta sobre el plano generado por el vector de unos y el regresor. La ortogonalidad del residuo frente a todo el plano se traduce en dos condiciones —una por cada generador— que quedan planteadas, sin resolver todavía, como un pequeño misterio para la sesión siguiente.</p>
+      </details>
+    </div>
+
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S09</span>
+        <time class="session-date">mar 06-oct-2026</time>
+        <span class="session-title">Estimación por mínimos cuadrados, sin matrices</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S09-Lecc07.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S09-Lecc07.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S09-Lecc07.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">Resolviendo las dos condiciones de ortogonalidad se obtienen, sin ninguna matriz, los dos coeficientes de la recta de regresión.</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Se despeja el sistema planteado en la lección anterior: la pendiente resulta ser la covarianza dividida por la varianza del regresor —equivalentemente, la correlación reescalada por el cociente de desviaciones típicas—. Una vía alternativa, cambiando a generadores ortogonales, cobra una promesa hecha varias sesiones atrás con la desigualdad de Cauchy–Schwarz.</p>
+      </details>
+
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S09</span>
+          <span></span>
+          <span class="session-title">Cuaderno interactivo 2</span>
+          <span class="badges">
+            <a class="badge notebook" href="CuadernosElectronicos/S09-Notebook02.ipynb">Cuaderno</a>
+            <a class="badge notebook" href="https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?filepath=CuadernosElectronicos/S09-Notebook02.ipynb" target="_blank" rel="noopener">MyBinder</a>
+          </span>
+        </div>
+        <p class="session-summary">Ajuste, residuo y el efecto de distintos tipos de perturbación sobre la recta recuperada.</p>
+      </div>
+    </div>
+
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S10</span>
+        <time class="session-date">mié 07-oct-2026</time>
+        <span class="session-title">Bondad de ajuste: de Pitágoras a \(R^2\)</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S10-Lecc08.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S10-Lecc08.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S10-Lecc08.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">Un triángulo rectángulo escondido en cada regresión: de él nace la descomposición de la varianza y el coeficiente \(R^2\).</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Las dos condiciones de ortogonalidad de la lección anterior, vistas con el teorema de Pitágoras, descomponen la varianza de los datos en la del ajuste más la del error. El cociente entre ambas es, literalmente, el coseno al cuadrado de un ángulo: así nace \(R^2\). Se cierra con una advertencia importante: esta descomposición es puramente algebraica y nunca implica, por sí sola, una relación causal.</p>
+      </details>
+
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S10</span>
+          <span></span>
+          <span class="session-title">Cuaderno interactivo 3</span>
+          <span class="badges">
+            <a class="badge notebook" href="CuadernosElectronicos/S10-Notebook03.ipynb">Cuaderno</a>
+            <a class="badge notebook" href="https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?filepath=CuadernosElectronicos/S10-Notebook03.ipynb" target="_blank" rel="noopener">MyBinder</a>
+          </span>
+        </div>
+        <p class="session-summary">El triángulo de Pitágoras, el ángulo \(\theta\) y las áreas STC/SEC/SRC, en un mismo diagrama de dispersión.</p>
+      </div>
+    </div>
+
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S11</span>
+        <time class="session-date">mar 13-oct-2026</time>
+        <span class="session-title">Laboratorio: regresión simple con Gretl</span>
+        <span class="badges"></span>
+      </div>
+
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S11-A</span>
+          <span></span>
+          <span class="session-title">Práctica A · MCO con datos simulados</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S11-Prct-A-mco-simulado.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S11-Prct-A-mco-simulado.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S11-Prct-A-mco-simulado.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">El ejemplo resuelto a mano en la lección anterior, reproducido con el comando <code>ols</code> de Gretl.</p>
+      </div>
+
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S11-B</span>
+          <span></span>
+          <span class="session-title">Práctica B · Ajuste con datos reales (hprice2)</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S11-Prct-B-hprice2-ajuste.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S11-Prct-B-hprice2-ajuste.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Dos regresiones simples sobre precios de vivienda, con verificación manual de \(R^2=\rho^2\).</p>
+      </div>
+
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S11-C</span>
+          <span></span>
+          <span class="session-title">Práctica C · De la estimación al informe</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S11-Prct-C-graficos-informes.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S11-Prct-C-graficos-informes.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S11-Prct-C-graficos-informes.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Personalizar y exportar gráficos y resultados de una regresión, para un informe reproducible.</p>
+      </div>
+    </div>
+  </section>
+#+end_export
+
+#+begin_export html
+  <section class="block" id="puente">
+    <h2>Tema II.3 · El puente: variables aleatorias y modelo lineal simple <span class="block-range">(S12)</span></h2>
+    <p class="block-intro">Todo lo anterior se hizo sobre datos concretos, sin ningún supuesto probabilístico. Esta sesión da el salto: de vectores de \(\mathbb{R}^n\) a variables aleatorias, con la esperanza condicional como análogo de la proyección.</p>
+
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S12</span>
+        <time class="session-date">mié 14-oct-2026</time>
+        <span class="session-title">El puente: de los datos a las variables aleatorias</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S12-Lecc09.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S12-Lecc09.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S12-Lecc09.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">El salto de la muestra a la población: la esperanza condicional hace de proyección, y nace el modelo clásico de regresión lineal.</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Tras nueve sesiones trabajando exclusivamente con datos, esta lección construye un diccionario entre la geometría de \(\mathbb{R}^n\) y el espacio de las variables aleatorias: la esperanza condicional \(E[Y\mid X]\) ocupa el lugar del vector ajustado. Se presentan los supuestos del modelo clásico de regresión lineal y se insiste, de nuevo, en que ortogonalidad no es causalidad.</p>
+      </details>
+    </div>
+  </section>
+#+end_export
+
+#+begin_export html
+  <section class="block" id="multiple">
+    <h2>Tema II.4 · Regresión lineal múltiple y modelo clásico de regresión lineal <span class="block-range">(S13–S14)</span></h2>
+    <p class="block-intro">La generalización a cualquier número de regresores. La geometría es exactamente la misma que en los casos anteriores; lo único nuevo es un lenguaje —la notación matricial— para no ahogarse en sumatorios.</p>
+
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S13</span>
+        <time class="session-date">mar 20-oct-2026</time>
+        <span class="session-title">Regresión múltiple: la misma geometría, más regresores</span>
+        <span class="badges">
+          <a class="badge pdf" href="Lecciones-pdf/S13-Lecc10.pdf">PDF</a>
+          <a class="badge html" href="Lecciones-html/S13-Lecc10.html">HTML</a>
+          <a class="badge slides" href="Transparencias/S13-Lecc10.slides.html">Slides</a>
+        </span>
+      </div>
+      <p class="session-summary">La geometría no cambia con más regresores: solo el lenguaje para manejarla sin ahogarse en sumatorios.</p>
+      <details class="session-detail">
+        <summary>+ más detalles</summary>
+        <p>Se introduce una notación matricial ligera —y un operador selector para leer filas y columnas— que comprime en una sola expresión las condiciones de ortogonalidad ya conocidas, ahora una por cada regresor. Se plantean las ecuaciones normales y se explica, con un ejemplo, por qué \(R^2\) deja de coincidir con ninguna correlación simple cuando hay más de un regresor.</p>
+      </details>
+    </div>
+
+    <div class="session">
+      <div class="session-row">
+        <span class="session-code">S14</span>
+        <time class="session-date">mié 21-oct-2026</time>
+        <span class="session-title">Laboratorio: regresión múltiple con Gretl</span>
+        <span class="badges"></span>
+      </div>
+
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S14-A</span>
+          <span></span>
+          <span class="session-title">Práctica A · Interpretación de coeficientes (Ramanathan)</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S14-Prct-A-ramanathan.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S14-Prct-A-ramanathan.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S14-Prct-A-ramanathan.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Con solo 14 viviendas, un coeficiente cambia de signo al controlar por otra variable: el efecto parcial, <em>ceteris paribus</em>.</p>
+      </div>
+
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S14-B</span>
+          <span></span>
+          <span class="session-title">Práctica B · Comparación de ajustes: el \(\bar R^2\) (hprice2)</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S14-Prct-B-hprice2-r2ajustado.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S14-Prct-B-hprice2-r2ajustado.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S14-Prct-B-hprice2-r2ajustado.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Por qué \(R^2\) nunca empeora al añadir regresores, y cómo el \(R^2\) ajustado corrige ese sesgo mecánico.</p>
+      </div>
+
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S14-C</span>
+          <span></span>
+          <span class="session-title">Práctica C · Cuándo desconfiar de un buen ajuste (peso y edad)</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S14-Prct-C-peso-edad.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S14-Prct-C-peso-edad.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S14-Prct-C-peso-edad.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">Ajustes polinómicos de grado creciente mejoran el ajuste… hasta producir una extrapolación absurda.</p>
+      </div>
+
+      <div class="subsession">
+        <div class="session-row">
+          <span class="session-code">S14-D</span>
+          <span></span>
+          <span class="session-title">Práctica D · Verificación matricial con datos simulados</span>
+          <span class="badges">
+            <a class="badge pdf" href="Practicas-pdf/S14-Prct-D-simulados-matricial.pdf">PDF</a>
+            <a class="badge html" href="Practicas-html/S14-Prct-D-simulados-matricial.html">HTML</a>
+            <a class="badge gretl" href="Practicas-html/guiones/S14-Prct-D-simulados-matricial.inp">Guion Gretl</a>
+          </span>
+        </div>
+        <p class="session-summary">La notación matricial de la lección anterior, puesta a prueba con datos simulados.</p>
+      </div>
+    </div>
+  </section>
+#+end_export
+
+#+begin_export html
+  <section class="block" id="inferencia">
+    <h2>Tema III · Inferencia estadística <span class="block-range">(S15–S19, próximamente)</span></h2>
+    <p class="block-intro">Con el modelo ya estimado, cabe preguntar si el ajuste obtenido es fiable: ¿es \(\hat\beta\) un buen estimador?, ¿qué tan precisos son los coeficientes?, ¿son las variables explicativas significativas? Un bloque compacto: los contrastes esenciales (\(t\), \(F\)), sin ánimo de exhaustividad.</p>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S15</span>
+        <time class="session-date">mar 27-oct-2026</time>
+        <span class="session-title">Propiedades de MCO: insesgadez y varianza de \(\hat\beta_2\)</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">¿Es \(\hat\beta_2\) un buen estimador? Insesgadez y varianza, demostradas para la regresión simple.</p>
+    </div>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S16</span>
+        <time class="session-date">mié 28-oct-2026</time>
+        <span class="session-title">Inferencia: el contraste \(t\)</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Distribución de \(\hat\beta\), error estándar, intervalos de confianza y el contraste \(t\).</p>
+    </div>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S17</span>
+        <time class="session-date">mar 03-nov-2026</time>
+        <span class="session-title">Laboratorio: contrastes \(t\) e intervalos de confianza</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Aplicación con datos reales; cobertura de los intervalos de confianza con datos simulados.</p>
+    </div>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S18</span>
+        <time class="session-date">mié 04-nov-2026</time>
+        <span class="session-title">El contraste \(F\): significación conjunta</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Significación conjunta de varios regresores y contraste de restricciones lineales.</p>
+    </div>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S19</span>
+        <time class="session-date">mar 10-nov-2026</time>
+        <span class="session-title">Laboratorio: el contraste \(F\)</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Aplicación con datos reales; distribución de \(F\) bajo la hipótesis nula, con datos simulados.</p>
+    </div>
+  </section>
+#+end_export
+
+#+begin_export html
+  <section class="block" id="diagnostico">
+    <h2>Tema IV · Diagnóstico del modelo <span class="block-range">(S20–S24, próximamente)</span></h2>
+    <p class="block-intro">¿Qué puede fallar? Regresores casi alineados, formas funcionales que no leen bien el efecto de una variable, grupos que se comportan de forma distinta, varianzas que cambian con las observaciones. Un bloque con menos geometría y más oficio aplicado del econometrista.</p>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S20</span>
+        <time class="session-date">mié 11-nov-2026</time>
+        <span class="session-title">Colinealidad: regresores casi alineados</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Cuando dos regresores casi apuntan en la misma dirección, la proyección se vuelve inestable. El factor de inflación de la varianza (VIF).</p>
+    </div>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S21</span>
+        <time class="session-date">mar 17-nov-2026</time>
+        <span class="session-title">Laboratorio: colinealidad creciente</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Con datos simulados, se observa la oscilación de los coeficientes al aumentar la colinealidad; un caso real.</p>
+    </div>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S22</span>
+        <time class="session-date">mié 18-nov-2026</time>
+        <span class="session-title">Formas funcionales con logaritmos</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Modelos log-nivel, nivel-log y log-log; elasticidades; el ejemplo de Cobb–Douglas.</p>
+    </div>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S23</span>
+        <time class="session-date">mar 24-nov-2026</time>
+        <span class="session-title">Variables dummy e interacciones</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Una dummy desplaza el intercepto; una interacción cambia la pendiente. Modelos con logaritmos y dummies.</p>
+    </div>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S24</span>
+        <time class="session-date">mié 25-nov-2026</time>
+        <span class="session-title">Heterocedasticidad y errores robustos</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Contrastes de Breusch-Pagan y White, errores estándar robustos; una mención breve al contraste RESET.</p>
+    </div>
+  </section>
+#+end_export
+
+#+begin_export html
+  <section class="block" id="cierre">
+    <h2>Tema V · Cierre: caso integrador <span class="block-range">(S25, próximamente)</span></h2>
+    <p class="block-intro">Una última sesión práctica que reúne todo lo anterior sobre un caso real completo, y cierra el curso con una analogía: el diccionario que traduce la geometría de \(\mathbb{R}^n\) al lenguaje de la probabilidad.</p>
+
+    <div class="session pending">
+      <div class="session-row">
+        <span class="session-code">S25</span>
+        <time class="session-date">mar 01-dic-2026</time>
+        <span class="session-title">Laboratorio integrador y cierre del curso</span>
+        <span class="badges"><span class="badge pending">Próximamente</span></span>
+      </div>
+      <p class="session-summary">Un caso real completo (logaritmos, dummies, diagnóstico) y el diccionario final geometría ↔ probabilidad.</p>
+    </div>
+  </section>
+
+  <div class="calendar-extra">
+    <strong>Después de las 25 sesiones:</strong>
+    miércoles 2 de diciembre de 2026, prueba de evaluación;
+    martes 8 de diciembre de 2026, festivo (Inmaculada Concepción);
+    miércoles 9 de diciembre de 2026, sesión de dudas y repaso.
+  </div>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>Marcos Bujosa · Grado en Filosofía, Política y Economía (PPE) · Universidad Complutense de Madrid.</p>
+    <p>Código fuente y material en construcción en <a href="https://github.com/mbujosab/PEconometria" target="_blank" rel="noopener">GitHub</a>.</p>
+    <p class="license-note">Material docente bajo licencia Creative Commons BY-SA 4.0, salvo los guiones de Gretl (GNU GPL v3 o posterior).</p>
+  </div>
+</footer>
+#+end_export

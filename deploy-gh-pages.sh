@@ -36,11 +36,14 @@ echo "-- OK, desplegando --"
 git -C "$DEST" rm -rf --ignore-unmatch . >/dev/null
 git -C "$DEST" clean -fd
 
-mkdir -p "$DEST"/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos}
+mkdir -p "$DEST"/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos,img}
 
 find org-lessons -maxdepth 1 -name '*.slides.html'                  -exec cp {} "$DEST"/Transparencias/ \;
 find org-lessons -maxdepth 1 -name '*.html' ! -name '*.slides.html' -exec cp {} "$DEST"/Lecciones-html/ \;
 find org-lessons -maxdepth 1 -name '*.pdf'                          -exec cp {} "$DEST"/Lecciones-pdf/ \;
+
+# Logo: para insertar en la página web
+cp -r img/Logo.jpg "$DEST"/img/
 
 # Figuras: tanto el HTML como los slides referencian img/<subcarpeta>/*.png
 # con ruta relativa a org-lessons/. Sin esto no se ve ninguna figura.
@@ -63,6 +66,7 @@ done
 find CuadernosElectronicos -maxdepth 1 -name '*.ipynb' -exec cp {} "$DEST"/CuadernosElectronicos/ \;
 
 cp index.html "$DEST"/
+cp doc/google17677b077c5d0c0d.html "$DEST"/
 cp requirements.txt "$DEST"/
 touch "$DEST"/.nojekyll
 
