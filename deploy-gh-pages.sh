@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+!/usr/bin/env bash
 set -euo pipefail
 
 # --- Ubicación fija: este script vive siempre en la raíz de "main" ---
@@ -36,7 +36,7 @@ echo "-- OK, desplegando --"
 git -C "$DEST" rm -rf --ignore-unmatch . >/dev/null
 git -C "$DEST" clean -fd
 
-mkdir -p "$DEST"/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos,img}
+mkdir -p "$DEST"/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos,img,css}
 
 find org-lessons -maxdepth 1 -name '*.slides.html'                  -exec cp {} "$DEST"/Transparencias/ \;
 find org-lessons -maxdepth 1 -name '*.html' ! -name '*.slides.html' -exec cp {} "$DEST"/Lecciones-html/ \;
@@ -44,6 +44,9 @@ find org-lessons -maxdepth 1 -name '*.pdf'                          -exec cp {} 
 
 # Logo: para insertar en la página web
 cp -r img/Logo.jpg "$DEST"/img/
+
+# Logo: para insertar en la página web
+cp -r css/index.css "$DEST"/css/
 
 # Figuras: tanto el HTML como los slides referencian img/<subcarpeta>/*.png
 # con ruta relativa a org-lessons/. Sin esto no se ve ninguna figura.
