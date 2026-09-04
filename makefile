@@ -1,7 +1,8 @@
 # ==================== Configuración general ====================
 EMACS       ?= emacs
 SCIMAX_INIT ?= $(HOME)/Software/scimax/init.el
-EMACS_BATCH := $(EMACS) --batch --load "$(SCIMAX_INIT)"
+#EMACS_BATCH := $(EMACS) --batch --load "$(SCIMAX_INIT)"
+EMACS_BATCH := $(EMACS) --batch --load "$(SCIMAX_INIT)" --load "lisp/mb-org-export-filters.el"
 
 LESSONS_DIR   := org-lessons
 LESSONS_IMG_DIR := $(LESSONS_DIR)/img
@@ -62,14 +63,23 @@ figures:
 # por si algún día se invoca "make org-lessons/S01-Lecc01.pdf" a mano
 # sin pasar por el target "lessons".
 $(LESSONS_DIR)/%.pdf: $(LESSONS_DIR)/%.org | figures
-	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-latex-export-to-pdf))'
+	$(EMACS_BATCH) --eval '(progn (setq org-confirm-babel-evaluate nil) (find-file "$<") (org-babel-execute-buffer) (org-latex-export-to-pdf))'
 
 $(LESSONS_DIR)/%.html: $(LESSONS_DIR)/%.org | figures
-	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-html-export-to-html))'
+	$(EMACS_BATCH) --eval '(progn (setq org-confirm-babel-evaluate nil) (find-file "$<") (org-babel-execute-buffer) (org-html-export-to-html))'
 
 $(LESSONS_DIR)/%.ipynb: $(LESSONS_DIR)/%.org | figures
 	$(EMACS_BATCH) --eval \
-	  '(progn (require (quote ox-ipynb)) (find-file "$<") (ox-ipynb-export-to-ipynb-file))'
+	  '(progn (setq org-confirm-babel-evaluate nil) (require (quote ox-ipynb)) (find-file "$<") (org-babel-execute-buffer) (ox-ipynb-export-to-ipynb-file))'
+# $(LESSONS_DIR)/%.pdf: $(LESSONS_DIR)/%.org | figures
+# 	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-latex-export-to-pdf))'
+# 
+# $(LESSONS_DIR)/%.html: $(LESSONS_DIR)/%.org | figures
+# 	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-html-export-to-html))'
+# 
+# $(LESSONS_DIR)/%.ipynb: $(LESSONS_DIR)/%.org | figures
+# 	$(EMACS_BATCH) --eval \
+# 	  '(progn (require (quote ox-ipynb)) (find-file "$<") (ox-ipynb-export-to-ipynb-file))'
 
 $(LESSONS_DIR)/%.slides.html: $(LESSONS_DIR)/%.ipynb
 	cd $(LESSONS_DIR) && jupyter nbconvert \
