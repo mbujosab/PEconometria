@@ -500,8 +500,50 @@ __pycache__/
 # Sistema
 .DS_Store
 
-#
-doc/
+# Directorios auxiliares de las prácticas
+org-pract/S04-Prct-A-hprice2/
+org-pract/S07-Prct-A-hprice2/
+org-pract/S07-Prct-B-verificacion-geometrica/
+org-pract/S07-Prct-C-momentos-no-bastan/
+org-pract/S11-Prct-A-mco-simulado/
+org-pract/S11-Prct-B-hprice2-ajuste/
+org-pract/S11-Prct-C-graficos-informes/
+org-pract/S14-Prct-A-ramanathan/
+org-pract/S14-Prct-B-hprice2-r2ajustado/
+org-pract/S14-Prct-C-peso-edad/
+org-pract/S14-Prct-D-simulados-matricial/
+
+# Ficheros auxiliares de las prácticas
+org-lessons/img/S10-Lecc08/SumasCuadradros.csv
+org-lessons/img/S10-Lecc08/SumasCuadradros.dat
+org-lessons/img/S10-Lecc08/SumasCuadradros.txt
+
+# Otros ficheros sin seguimiento
+org-lessons/notas.txt
+
+
+# doc/
+TODO.org
+doc/prompts/PlanDeEscritura.pdf
+doc/prompts/PlanDeEscritura.tex
+doc/prompts/PreparacionLeccionGemini.org
+doc/prompts/PreparacionLeccionNew.org
+doc/prompts/Revisión2.org
+doc/prompts/RevisiónPuntual.org
+doc/prompts/ayudaRepo.org
+doc/prompts/notas-geometria-sd-se.org
+doc/prompts/notas-geometria-sd-se.pdf
+doc/prompts/web.org
+
+# basura
+index.kkorg
+kk/
+lisp/
+mycfg-GitHubPageskk.py
+org-lessons/img/OperacionesConPNGs.org
+org-lessons/img/README.pdf
+org-lessons/kk/
+org-pract/NotasDesviacioTipicaErrorEstandar.kkorg
 #+end_src
 
 ** Despliegue del material y publicación en GitHub
@@ -512,7 +554,8 @@ doc/
 # ==================== Configuración general ====================
 EMACS       ?= emacs
 SCIMAX_INIT ?= $(HOME)/Software/scimax/init.el
-EMACS_BATCH := $(EMACS) --batch --load "$(SCIMAX_INIT)"
+#EMACS_BATCH := $(EMACS) --batch --load "$(SCIMAX_INIT)"
+EMACS_BATCH := $(EMACS) --batch --load "$(SCIMAX_INIT)" --load "lisp/mb-org-export-filters.el"
 
 LESSONS_DIR   := org-lessons
 LESSONS_IMG_DIR := $(LESSONS_DIR)/img
@@ -566,20 +609,30 @@ pract:     $(PRACT_PDF) $(PRACT_HTML)
 # aquí.
 figures:
 	$(MAKE) -C $(LESSONS_IMG_DIR) all
+	$(MAKE) -C $(LESSONS_IMG_DIR) clean
 
 # ==================== org-lessons ====================
 # Prerrequisito de orden ("| figures") también en las reglas de patrón,
 # por si algún día se invoca "make org-lessons/S01-Lecc01.pdf" a mano
 # sin pasar por el target "lessons".
 $(LESSONS_DIR)/%.pdf: $(LESSONS_DIR)/%.org | figures
-	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-latex-export-to-pdf))'
+	$(EMACS_BATCH) --eval '(progn (setq org-confirm-babel-evaluate nil) (find-file "$<") (org-babel-execute-buffer) (org-latex-export-to-pdf))'
 
 $(LESSONS_DIR)/%.html: $(LESSONS_DIR)/%.org | figures
-	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-html-export-to-html))'
+	$(EMACS_BATCH) --eval '(progn (setq org-confirm-babel-evaluate nil) (find-file "$<") (org-babel-execute-buffer) (org-html-export-to-html))'
 
 $(LESSONS_DIR)/%.ipynb: $(LESSONS_DIR)/%.org | figures
 	$(EMACS_BATCH) --eval \
-	  '(progn (require (quote ox-ipynb)) (find-file "$<") (ox-ipynb-export-to-ipynb-file))'
+	  '(progn (setq org-confirm-babel-evaluate nil) (require (quote ox-ipynb)) (find-file "$<") (org-babel-execute-buffer) (ox-ipynb-export-to-ipynb-file))'
+# $(LESSONS_DIR)/%.pdf: $(LESSONS_DIR)/%.org | figures
+# 	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-latex-export-to-pdf))'
+# 
+# $(LESSONS_DIR)/%.html: $(LESSONS_DIR)/%.org | figures
+# 	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-html-export-to-html))'
+# 
+# $(LESSONS_DIR)/%.ipynb: $(LESSONS_DIR)/%.org | figures
+# 	$(EMACS_BATCH) --eval \
+# 	  '(progn (require (quote ox-ipynb)) (find-file "$<") (ox-ipynb-export-to-ipynb-file))'
 
 $(LESSONS_DIR)/%.slides.html: $(LESSONS_DIR)/%.ipynb
 	cd $(LESSONS_DIR) && jupyter nbconvert \
@@ -689,11 +742,17 @@ echo "-- OK, desplegando --"
 git -C "$DEST" rm -rf --ignore-unmatch . >/dev/null
 git -C "$DEST" clean -fd
 
-mkdir -p "$DEST"/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos}
+mkdir -p "$DEST"/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos,img,css}
 
 find org-lessons -maxdepth 1 -name '*.slides.html'                  -exec cp {} "$DEST"/Transparencias/ \;
 find org-lessons -maxdepth 1 -name '*.html' ! -name '*.slides.html' -exec cp {} "$DEST"/Lecciones-html/ \;
 find org-lessons -maxdepth 1 -name '*.pdf'                          -exec cp {} "$DEST"/Lecciones-pdf/ \;
+
+# Logo: para insertar en la página web
+cp -r img/Logo.jpg "$DEST"/img/
+
+# Logo: para insertar en la página web
+cp -r css/index.css "$DEST"/css/
 
 # Figuras: tanto el HTML como los slides referencian img/<subcarpeta>/*.png
 # con ruta relativa a org-lessons/. Sin esto no se ve ninguna figura.
@@ -715,7 +774,16 @@ done
 
 find CuadernosElectronicos -maxdepth 1 -name '*.ipynb' -exec cp {} "$DEST"/CuadernosElectronicos/ \;
 
+# --- Índices navegables para las carpetas sin index.html propio ---
+for carpeta in Transparencias Lecciones-html Lecciones-pdf \
+               Practicas-html Practicas-pdf CuadernosElectronicos; do
+    tree -H '.' -L 1 --noreport --charset utf-8 \
+         -T "$carpeta" -o "$DEST/$carpeta/index.html" \
+         "$DEST/$carpeta"
+done
+
 cp index.html "$DEST"/
+cp doc/google17677b077c5d0c0d.html "$DEST"/
 cp requirements.txt "$DEST"/
 touch "$DEST"/.nojekyll
 

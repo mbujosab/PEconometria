@@ -68,6 +68,14 @@ done
 
 find CuadernosElectronicos -maxdepth 1 -name '*.ipynb' -exec cp {} "$DEST"/CuadernosElectronicos/ \;
 
+# --- Índices navegables para las carpetas sin index.html propio ---
+for carpeta in Transparencias Lecciones-html Lecciones-pdf \
+               Practicas-html Practicas-pdf CuadernosElectronicos; do
+    tree -H '.' -L 1 --noreport --charset utf-8 \
+         -T "$carpeta" -o "$DEST/$carpeta/index.html" \
+         "$DEST/$carpeta"
+done
+
 cp index.html "$DEST"/
 cp doc/google17677b077c5d0c0d.html "$DEST"/
 cp requirements.txt "$DEST"/
