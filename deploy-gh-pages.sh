@@ -71,7 +71,7 @@ find CuadernosElectronicos -maxdepth 1 -name '*.ipynb' -exec cp {} "$DEST"/Cuade
 # --- Índices navegables para las carpetas sin index.html propio ---
 for carpeta in Transparencias Lecciones-html Lecciones-pdf \
                Practicas-html Practicas-pdf CuadernosElectronicos; do
-    tree -H '.' -L 1 --noreport --charset utf-8 \
+    tree -H '.' --noreport --charset utf-8 \
          -T "$carpeta" -o "$DEST/$carpeta/index.html" \
          "$DEST/$carpeta"
 done
