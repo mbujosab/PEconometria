@@ -53,10 +53,10 @@ pract:     $(PRACT_PDF) $(PRACT_HTML)
 # Recursive make: el makefile de img/ decide él solo (por timestamps
 # .org vs .png) si algo necesita regenerarse. Lo invocamos siempre como
 # prerrequisito de las lecciones para no tener que duplicar esa lógica
-# aquí.
+# aquí. No limpiamos tex/ aquí: así latexmk conserva su caché
+# incremental entre invocaciones (solo se borra en "make clean").
 figures:
 	$(MAKE) -C $(LESSONS_IMG_DIR) all
-	$(MAKE) -C $(LESSONS_IMG_DIR) clean
 
 # ==================== org-lessons ====================
 # Prerrequisito de orden ("| figures") también en las reglas de patrón,
