@@ -1,0 +1,490 @@
+#+Title: Sesión 16 (A) --- El experimento de Montecarlo: ¿de verdad está centrado $\hat\beta_2$?
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L16-A-montecarlo
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S16-Prct-A-montecarlo"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+La lección 11 demostró dos cosas sobre $\hat\beta_2$: que es /insesgado/ ($\mathrm{E}(\hat\beta_2)=\beta_2$) y que su varianza condicional vale exactamente
+\[
+Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-\overline{X})^2}.
+\]
+Son dos afirmaciones sobre /todas las muestras que podríamos haber observado/, y por eso resultan difíciles de creer con una sola muestra delante: por definición, de ese conjunto de muestras posibles solo vemos una.
+
+Esta práctica hace trampa —una trampa legítima y muy instructiva—: /fabrica/ ese conjunto de muestras posibles. Inventamos un mundo artificial en el que conocemos $\beta_1$, $\beta_2$ y $\sigma^2$ porque los hemos elegido nosotros; generamos cientos de muestras de ese mundo; estimamos $\hat\beta_2$ en cada una; y comparamos lo que sale con lo que la lección 11 predice. Es lo que se conoce como un /experimento de Montecarlo/.
+
+/Objetivos/
+
+1. Construir un mundo artificial con parámetros conocidos, anclado a un ajuste real sobre =hprice2=.
+2. Generar /una/ muestra simulada a mano y estimarla, para ver con claridad qué es lo que se va a repetir después.
+3. Aprender la mecánica completa del comando =loop= de Gretl: cómo repetir un experimento, cómo guardar resultados de cada repetición y cómo analizarlos después.
+4. Comprobar que la media de las estimaciones se acerca a $\beta_2$ (insesgadez) y que su varianza se acerca a la fórmula de la lección 11.
+5. Ver el histograma de $\hat\beta_2$ y empezar a preguntarse por su /forma/ —una pregunta que esta práctica deliberadamente deja sin responder.
+
+/Nota sobre el =loop=/. Ya usamos este comando una vez, en la práctica de verificación geométrica que siguió a la lección 5, pero allí lo presentamos como una ``caja negra'': servía para repetir una comprobación muchas veces, sin explicar su mecánica. Hoy toca abrir la caja.
+
+
+* Actividad 1 - Un mundo artificial con parámetros conocidos
+
+Para simular necesitamos un mundo del que conozcamos la verdad. Podríamos inventar los números de la nada, pero es más instructivo tomarlos prestados de un ajuste real: así el mundo artificial se parece al que ya hemos estado estudiando.
+
+Partimos de =hprice2= y de la regresión =price~rooms= que ya estimamos en la práctica que siguió a la lección 8. Sus resultados dejan de ser ``estimaciones'' para convertirse, /por decreto/, en los parámetros verdaderos de nuestro mundo inventado.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Mundo artificial datos
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet
+
+ols price const rooms --quiet
+scalar b1_true = $coeff(const)          # beta_1 "verdadero"
+scalar b2_true = $coeff(rooms)          # beta_2 "verdadero"
+scalar sigma   = sqrt($ess/$df)         # sigma "verdadera" (raiz de la cuasivarianza)
+scalar n       = $nobs
+scalar Sxx     = sum((rooms - mean(rooms))^2)
+scalar var_teo = sigma^2 / Sxx          # formula de la leccion 11
+
+#+end_src
+
+#+NAME: Mundo artificial
+#+begin_src gretl :eval no
+printf "n            = %d\n", n
+printf "beta_1       = %.4f\n", b1_true
+printf "beta_2       = %.4f\n", b2_true
+printf "sigma        = %.4f\n", sigma
+printf "Sxx          = %.4f\n", Sxx
+printf "Var[b2 | X]  = sigma^2/Sxx = %.4f\n", var_teo
+printf "desv. tipica = %.4f\n", sqrt(var_teo)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
+<<Mundo artificial datos>>
+outfile --quiet mundoArtificial.txt
+    <<Mundo artificial>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-A-montecarlo/mundoArtificial.txt example
+#+latex: }
+
+*** Una notación nueva, solo para el guion: =Sxx=
+
+En el código aparece un nombre que no hemos usado en ninguna lección teórica: =Sxx=. No es un concepto nuevo, solo una abreviatura cómoda para el denominador de la fórmula de la varianza:
+\[
+\mathrm{Sxx}\;=\;\sum_i(X_i-\overline{X})^2.
+\]
+Conviene reconocerla bajo sus otros dos disfraces, que sí son del curso:
+
+- Es el /cuadrado de la norma euclídea del vector en desviaciones del regresor/, $\|\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\|_e^2$ —exactamente la lectura geométrica que daba la nota a pie de página de la lección 11—.
+- Y es $n$ veces la varianza del regresor con el convenio del curso: $\mathrm{Sxx}=n\,S^2$, con $S^2=\frac1n\sum_i(X_i-\overline{X})^2$. Por eso la fórmula de la lección 11 se puede escribir indistintamente $\sigma^2/\mathrm{Sxx}$ o $\sigma^2/(nS^2)$.
+
+La usamos aquí porque en un guion resulta más legible que cualquiera de las dos expresiones completas, pero no es notación del curso: fuera de estas prácticas, escriba $\sum_i(X_i-\overline{X})^2$ o $nS^2$.
+
+*** Tres observaciones sobre lo que acabamos de hacer
+
+- =rooms= /no se toca/. El vector de datos del regresor se queda exactamente como está, con sus 506 valores observados. Es el $\boldsymbol x$ de la lección 11, y permanecerá fijo durante todo el experimento. Esto es precisamente lo que significa ``condicionar en $\boldsymbol X$''; en la práctica siguiente veremos qué pasa si dejamos de hacerlo.
+- $\sigma$ se toma como la raíz de $\mathrm{SRC}/(n-k)$, es decir, de la cuasivarianza de los residuos $\mathfrak s^2$ que definimos en la lección 11. Aquí no la usamos como /estimación/ de nada: la usamos como el valor /verdadero/ de nuestro mundo inventado.
+- =var_teo= es la predicción de la lección 11. Anótela: es el número contra el que vamos a contrastar todo lo que sigue.
+
+
+* Actividad 2 - Una sola muestra simulada, a mano
+
+Antes de repetir nada mil veces, conviene hacer /una/ vez, despacio, lo que después se va a repetir.
+
+Una ``muestra de nuestro mundo'' se construye en dos pasos: primero la parte sistemática $\beta_1\boldsymbol 1+\beta_2\boldsymbol x$, que es siempre la misma; después una perturbación aleatoria nueva, que es lo único que cambia de una muestra a otra. Sumadas dan un regresando simulado.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Una replica
+#+begin_src gretl :eval no
+set seed 20261030                       # para que el resultado sea reproducible
+
+series u_sim = normal(0, sigma)                    # perturbacion nueva
+series y_sim = b1_true + b2_true*rooms + u_sim     # muestra simulada
+
+ols y_sim const rooms
+printf "\nbeta_2 verdadero  = %.4f\n", b2_true
+printf "beta_2 estimado   = %.4f\n", $coeff(rooms)
+printf "diferencia        = %.4f\n", $coeff(rooms) - b2_true
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
+outfile --quiet unaReplica.txt
+    <<Una replica>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-A-montecarlo/unaReplica.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La estimación /no/ coincide con el valor verdadero. No es un fallo: es exactamente lo que la lección 11 predice. Recuerde la identidad central de aquella lección:
+\[
+\hat\beta_2=\beta_2\cdot\mathit 1+\sum_iW_iU_i.
+\]
+El segundo sumando no se anula en una muestra cualquiera; es una variable aleatoria con media cero pero dispersión no nula. Lo que acabamos de obtener es, precisamente, $\beta_2$ más una realización concreta de ese término.
+
+La pregunta interesante no es, por tanto, ``¿por qué no ha salido exacto?'', sino ``¿cómo de grande suele ser ese error, y se compensa en promedio?''. Y a esa pregunta no se puede responder con una sola muestra. Hay que repetir.
+
+
+* Actividad 3 - El comando =loop=: repetir el experimento muchas veces
+
+Aquí está la novedad técnica de la sesión. El comando =loop= de Gretl repite un bloque de instrucciones un número dado de veces. Su forma general es
+
+#+begin_src gretl :eval no
+loop NUMERO_DE_REPETICIONES --progressive --quiet
+    ... instrucciones que se repiten ...
+endloop
+#+end_src
+
+Dos opciones merecen comentario:
+
+- =--quiet= evita que Gretl imprima la salida completa de cada una de las repeticiones (imagine 1000 tablas de regresión seguidas).
+- =--progressive= es la que hace el trabajo interesante: le dice a Gretl que va a acumular resultados a lo largo de las repeticiones, en lugar de olvidarlos al terminar cada una. Es lo que permite usar =store= dentro del bucle.
+
+Y =store= es la pieza que convierte el experimento en datos analizables:
+
+#+begin_src gretl :eval no
+store "@workdir/fichero.gdt" escalar1 escalar2
+#+end_src
+
+Dentro de un bucle =--progressive=, =store= no sobrescribe el fichero en cada vuelta: va /añadiendo/ una fila por repetición. Al terminar el bucle tenemos un conjunto de datos nuevo en el que *cada observación es una repetición del experimento* y cada variable es un resultado que hemos decidido guardar. Después basta con abrirlo, fuera del bucle, y tratarlo como cualquier otro conjunto de datos.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Bucle montecarlo datos
+#+begin_src gretl :eval no
+scalar R = 2000                         # numero de replicas
+
+set seed 20261030
+loop R --progressive --quiet
+    series u    = normal(0, sigma)
+    series ysim = b1_true + b2_true*rooms + u
+    ols ysim const rooms --quiet
+    scalar b1hat = $coeff(const)
+    scalar b2hat = $coeff(rooms)
+    store "@workdir/replicas.gdt" b1hat b2hat
+endloop
+
+#+end_src
+
+#+NAME: Bucle montecarlo
+#+begin_src gretl :eval no
+printf "Hecho: %d replicas guardadas en replicas.gdt\n", R
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
+<<Bucle montecarlo datos>>
+outfile --quiet bucle.txt
+    <<Bucle montecarlo>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-A-montecarlo/bucle.txt example
+#+latex: }
+
+Merece la pena detenerse un segundo en /qué cambia y qué no/ dentro del bucle. Cambia una sola cosa: la perturbación =u=, que se sortea de nuevo en cada vuelta. No cambian ni =rooms=, ni =b1_true=, ni =b2_true=, ni =sigma=. Estamos generando, literalmente, las muestras que ``podrían haber salido'' del mismo mundo con el mismo regresor.
+
+
+* Actividad 4 - ¿Se cumple la insesgadez? ¿Y la fórmula de la varianza?
+
+Abrimos ahora el fichero de réplicas y lo tratamos como lo que es: un conjunto de datos con $R$ observaciones, donde cada observación es una estimación que /podríamos/ haber obtenido.
+
+/Atención a un detalle práctico/: al abrir un conjunto de datos nuevo, Gretl descarta los escalares que teníamos definidos. Por eso imprimimos los valores teóricos /antes/ de abrir el fichero de réplicas, y los empíricos después.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Teoria replicas
+#+begin_src gretl :eval no
+printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
+printf "beta_2 verdadero          = %.4f\n", b2_true
+printf "Var[b2 | X] = sigma^2/Sxx = %.4f\n", var_teo
+printf "desviacion tipica         = %.4f\n\n", sqrt(var_teo)
+#+end_src
+
+#+begin_src gretl :eval no
+open "@workdir/replicas.gdt" --quiet
+#+end_src
+
+#+NAME: Empirico replicas
+#+begin_src gretl :eval no
+printf "=== LO QUE SALE DE %d REPLICAS SIMULADAS ===\n", $nobs
+printf "media de b2hat            = %.4f\n", mean(b2hat)
+printf "varianza de b2hat         = %.4f\n", sum((b2hat-mean(b2hat))^2)/$nobs
+printf "desviacion tipica         = %.4f\n", sd(b2hat)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
+outfile --quiet analisisReplicas.txt
+    <<Teoria replicas>>
+end outfile
+open "@workdir/replicas.gdt" --quiet
+outfile --quiet --append analisisReplicas.txt
+    <<Empirico replicas>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-A-montecarlo/analisisReplicas.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Compare las dos mitades de la salida, línea por línea:
+
+1. /Insesgadez/. La media de las estimaciones debe quedar muy cerca de $\beta_2$. No exactamente igual: con un número finito de réplicas, la media muestral de las estimaciones es a su vez una variable aleatoria. Pero la distancia debe ser pequeña comparada con la dispersión de las propias estimaciones.
+2. /Varianza/. La varianza empírica de las $R$ estimaciones debe quedar cerca de $\sigma^2/\sum_i(X_i-\overline{X})^2$. Esta es la comprobación más llamativa de la práctica: una fórmula obtenida con álgebra y esperanzas condicionales, sin simular nada, acierta el resultado de un experimento numérico.
+3. /La insesgadez no dice nada sobre la varianza/. Fíjese en que el error típico de una estimación individual es mucho mayor que la distancia entre la media de las estimaciones y $\beta_2$. Estar bien centrado no equivale a ser preciso: son las dos preguntas distintas que la lección 11 planteó desde su primera transparencia.
+
+/Nota sobre la reproducibilidad/. La instrucción =set seed= fija la secuencia de números pseudoaleatorios, de modo que este guion produce siempre los mismos números. Si la comenta y lo ejecuta dos veces, obtendrá resultados ligeramente distintos —y ese es, en sí mismo, un buen experimento: la propia media de las réplicas tiene su dispersión.
+
+
+* Actividad 5 - El histograma de $\hat\beta_2$
+
+Tenemos 2000 estimaciones. Veamos cómo se reparten.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Histograma
+#+begin_src gretl :eval no
+freq b2hat --normal --plot=display
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none
+freq b2hat --normal --plot="@workdir/histograma_b2.png"
+#+end_src
+
+#+attr_latex: :width 0.7\textwidth
+#+attr_html: :width 600px
+#+CAPTION: Distribución de $\hat\beta_2$ sobre 2000 muestras simuladas del mismo mundo, con una densidad normal superpuesta.
+[[file:./S16-Prct-A-montecarlo/histograma_b2.png]]
+
+La opción =--normal= superpone al histograma la densidad de una normal con la misma media y la misma varianza que los datos, además de contrastar formalmente si la distribución es normal.
+
+*** Una pregunta que esta práctica NO responde
+
+El histograma tiene una forma muy reconocible. Y es tentador dar el paso siguiente: si conocemos la media de $\hat\beta_2$, su varianza, y /además/ su forma, entonces podríamos calcular la probabilidad de que $\hat\beta_2$ caiga en tal o cual intervalo, y con eso construir intervalos de confianza y contrastes de hipótesis.
+
+Conviene resistirse a ese paso, por dos motivos:
+
+- El primero es de método: lo que vemos es la forma que sale /en este experimento concreto/, en el que hemos generado las perturbaciones con una distribución normal porque así lo hemos decidido nosotros. No hemos demostrado nada sobre la forma; la hemos impuesto al construir el mundo. En la práctica C veremos qué ocurre si la cambiamos.
+- El segundo es de alcance: la lección 11 demostró la media y la varianza, y se detuvo ahí explícitamente. La /forma/ de la distribución de $\hat\beta_2$ —y lo que hace falta suponer para conocerla— es el asunto de la lección 12.
+
+
+* Apéndice - La matriz de varianzas y covarianzas
+
+/Material complementario/. Este apéndice va más allá de lo que da tiempo a hacer en clase; queda aquí para quien quiera completarlo por su cuenta, con el mismo estatus que el apéndice matricial de la práctica sobre datos simulados de la sesión 14.
+
+La última transparencia de la lección 11 enunció, /sin demostrarla/, la generalización matricial de lo que sí demostramos:
+\[
+Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}.
+\]
+Podemos verificarla numéricamente con el mismo experimento, guardando también $\hat\beta_1$ y comparando la matriz de varianzas y covarianzas /empírica/ de las réplicas con la que predice la fórmula.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Matriz teorica datos
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet                  # recuperamos los regresores
+ols price const rooms --quiet
+scalar sigma = sqrt($ess/$df)
+
+#+end_src
+
+#+NAME: Matriz teorica
+#+begin_src gretl :eval no
+matrix X      = {const, rooms}
+matrix invXTX = invpd(X'X)
+matrix Vteo   = sigma^2 * invXTX
+printf "Matriz sigma^2 (X'X)^{-1} predicha por la leccion 11:\n"
+print Vteo
+#+end_src
+
+#+NAME: Matriz empirica
+#+begin_src gretl :eval no
+matrix B    = {b1hat}~{b2hat}
+matrix Vemp = mcov(B)
+printf "\nMatriz de varianzas y covarianzas EMPIRICA de las replicas:\n"
+print Vemp
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
+<<Matriz teorica datos>>
+outfile --quiet matrizVCV.txt
+    <<Matriz teorica>>
+end outfile
+open "@workdir/replicas.gdt" --quiet
+outfile --quiet --append matrizVCV.txt
+    <<Matriz empirica>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-A-montecarlo/matrizVCV.txt example
+#+latex: }
+
+Compare las dos matrices elemento a elemento. El elemento $(2,2)$ es la varianza de $\hat\beta_2$ que ya habíamos comprobado en la Actividad 4; el $(1,1)$ es la de $\hat\beta_1$; y los de fuera de la diagonal son la covarianza entre ambos coeficientes —que, como señalaba la lección 11, es negativa: si la recta se inclina más, tiene que bajar el punto de corte para seguir pasando cerca de la nube de puntos.
+
+
+* Preguntas de interpretación para la clase
+
+1. En la Actividad 2 obtuvimos una estimación distinta del valor verdadero. ¿Significa eso que MCO ha fallado en esa muestra? ¿Qué habría tenido que ocurrir para que coincidieran exactamente?
+2. ¿Por qué mantenemos =rooms= fijo dentro del bucle, en lugar de generarlo de nuevo en cada repetición? ¿Con qué expresión de la lección 11 tiene eso que ver?
+3. La media de las 2000 estimaciones no coincide exactamente con $\beta_2$. ¿Contradice eso la insesgadez? ¿Qué esperaría que ocurriese con esa diferencia si hiciéramos 200 000 réplicas en lugar de 2000?
+4. Suponga que repetimos todo el experimento con un $\sigma$ diez veces mayor. ¿Qué cambiaría en la media de las estimaciones? ¿Y en su dispersión?
+5. Un compañero sugiere que, como el histograma de la Actividad 5 parece una campana, ya podemos calcular la probabilidad de que $\hat\beta_2$ se aleje más de 500 de su valor verdadero. ¿Qué objeción le haría?
+
+/Para profundizar/:
+
+- Lección 11 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html][S15-Lecc11]]): insesgadez y varianza de $\hat\beta_2$.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 2, Teoremas 2.1 y 2.2.
+- Manual de Gretl, capítulo sobre /loop constructs/ (en particular, los bucles =--progressive=).
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S16-Prct-A-montecarlo.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S16-Prct-A-montecarlo.inp][S16-Prct-A-montecarlo.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /¿Ha fallado MCO?/ No. MCO ha hecho exactamente lo que sabe hacer: encontrar la combinación lineal de los regresores más próxima al regresando /de esa muestra/. Lo que ocurre es que el regresando de esa muestra incluye una perturbación concreta que no conocemos y que MCO no puede separar de la parte sistemática. Según la identidad de la lección 11, $\hat\beta_2=\beta_2\cdot\mathit 1+\sum_iW_iU_i$: para que coincidieran exactamente tendría que anularse $\sum_iW_iU_i$, es decir, la perturbación sorteada tendría que resultar ortogonal al regresor centrado. Con una perturbación generada al azar eso no ocurre nunca (salvo casualidad numérica); en la práctica C lo forzaremos a propósito para ver qué pasa.
+
+2. /¿Por qué el regresor se queda fijo?/ Porque lo que la lección 11 calculó es la varianza /condicional/ $Var[\hat\beta_2\mid\boldsymbol X]$: la dispersión de las estimaciones /para un conjunto dado de valores del regresor/. Mantener =rooms= fijo en todas las réplicas es, literalmente, la versión experimental de condicionar en $\boldsymbol X$: fijamos la matriz de regresores y dejamos variar solo lo que el modelo considera aleatorio, la perturbación. La práctica B explora qué ocurre si dejamos de condicionar.
+
+3. /La media no coincide exactamente/. No lo contradice. La insesgadez es una afirmación sobre la esperanza, es decir, sobre el promedio en el límite de infinitas muestras posibles. Con $R$ réplicas obtenemos un promedio /muestral/ de estimaciones, que es él mismo una variable aleatoria con varianza aproximadamente $Var[\hat\beta_2\mid\boldsymbol X]/R$. Al multiplicar $R$ por cien, esa varianza se divide por cien y la desviación típica por diez: cabe esperar que la diferencia con $\beta_2$ se reduzca aproximadamente a la décima parte.
+
+4. /Un $\sigma$ diez veces mayor/. La media de las estimaciones seguiría centrada en $\beta_2$: la insesgadez no depende de $\sigma$ en absoluto (la demostración de la lección 11 solo usa $E[U_i\mid\boldsymbol X]=\mathit 0$). La dispersión, en cambio, se multiplicaría por diez la desviación típica —y por cien la varianza—, porque $\sigma^2$ aparece como factor en el numerador de la fórmula. Dicho de otro modo: más ruido no descentra el estimador, solo lo vuelve menos preciso.
+
+5. /La objeción al compañero/. Que la forma de campana del histograma no la hemos /descubierto/, sino /impuesto/: hemos generado las perturbaciones con =normal(0, sigma)= porque así lo decidimos al construir el mundo artificial. Nada de lo demostrado en la lección 11 garantiza esa forma; allí se demostraron la media y la varianza, y ambas se obtuvieron sin suponer nada sobre la distribución de $U$. Para calcular probabilidades hace falta un supuesto adicional sobre esa distribución, y ese supuesto —con sus consecuencias— es justamente el asunto de la lección 12. La práctica C de hoy muestra, además, que con perturbaciones muy poco normales la media y la varianza siguen cumpliéndose igual de bien.
+
+
+* COMMENT Banco de preguntas de reserva
+
+** Pregunta R1 — El papel de =--progressive=
+¿Qué permite hacer la opción =--progressive= de =loop= que no sería posible sin ella?
+a) Acelerar la ejecución del bucle.
+b) Acumular resultados a lo largo de las repeticiones, de modo que =store= añada una fila por repetición en lugar de sobrescribir.
+c) Mostrar una barra de progreso.
+d) Fijar la semilla del generador de números aleatorios.
+/Respuesta correcta: b./
+/Evalúa/: comprensión de la mecánica del bucle, no solo de su uso.
+
+** Pregunta R2 — Qué cambia entre réplicas
+En el bucle de la Actividad 3, ¿qué objeto se sortea de nuevo en cada repetición?
+a) El regresor =rooms=.
+b) Los parámetros =b1_true= y =b2_true=.
+c) La perturbación =u=.
+d) El tamaño muestral.
+/Respuesta correcta: c./
+/Evalúa/: identificación de la única fuente de aleatoriedad del experimento, base de la lectura condicional.
+
+** Pregunta R3 — Insesgadez y precisión
+Un estimador insesgado con varianza enorme:
+a) Es contradictorio: si es insesgado, es preciso.
+b) Está centrado en el parámetro verdadero, pero puede alejarse mucho de él en una muestra concreta.
+c) No puede existir.
+d) Coincide con el parámetro verdadero en la mitad de las muestras.
+/Respuesta correcta: b./
+/Evalúa/: distinción entre las dos propiedades, que la práctica hace visible numéricamente.

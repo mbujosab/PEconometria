@@ -305,6 +305,80 @@ end outfile
 
 Observe el $R^2$ a medida que se añaden regresores: nunca /baja/. Esto no es casualidad ni una propiedad de estos datos en particular: es una propiedad puramente algebraica de MCO (cuya idea sembramos en la lección 8), que discutiremos con detalle —y con su corrección adecuada, el $R^2$ ajustado— en la próxima práctica.
 
+* Actividad 6 - ¿Cuánto depende el ajuste de las viviendas que nos han tocado?
+
+Hasta aquí hemos cambiado el /modelo/ y hemos visto moverse los coeficientes. Ahora vamos a hacer justo lo contrario: dejar el modelo quieto y cambiar los /datos/. Concretamente, vamos a quitar una vivienda de las catorce y reestimar exactamente la misma regresión.
+
+La pregunta es sencilla y conviene planteársela antes de ejecutar nada: /si una sola de estas catorce casas hubiera sido distinta —o sencillamente no estuviera en nuestra lista—, ¿cambiaría mucho la recta que hemos ajustado?/
+
+Gretl permite restringir la muestra con =smpl=. Desde la interfaz gráfica, lo natural es ir acumulando los ajustes en la /tabla de modelos/ (menú //~Archivo -> Tabla de modelos~//, o el comando =modeltab add=); en un guion que se ejecuta por lotes, en cambio, resulta más cómodo guardar los coeficientes en escalares e imprimirlos juntos al final. Eso es lo que hace el código siguiente.
+
+*** Estimamos el mismo modelo sobre cuatro muestras distintas
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Submuestras
+#+begin_src gretl :eval no
+smpl full                       # las 14 viviendas
+ols price const sqft --quiet
+scalar a_todas = $coeff(const)
+scalar b_todas = $coeff(sqft)
+
+smpl 1 13                       # quitamos la ULTIMA vivienda
+ols price const sqft --quiet
+scalar a_sin14 = $coeff(const)
+scalar b_sin14 = $coeff(sqft)
+
+smpl 2 14                       # quitamos la PRIMERA vivienda
+ols price const sqft --quiet
+scalar a_sin1 = $coeff(const)
+scalar b_sin1 = $coeff(sqft)
+
+smpl 2 13                       # quitamos la primera Y la ultima
+ols price const sqft --quiet
+scalar a_sinambas = $coeff(const)
+scalar b_sinambas = $coeff(sqft)
+
+smpl full                       # recuperamos siempre la muestra completa
+#+end_src
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/y ahora los comparamos/:
+#+NAME: Tabla submuestras
+#+begin_src gretl :eval no
+printf "muestra                      constante    pendiente(sqft)\n"
+printf "---------------------------------------------------------\n"
+printf "las 14 viviendas           %11.3f      %11.4f\n", a_todas, b_todas
+printf "sin la ultima (n=13)       %11.3f      %11.4f\n", a_sin14, b_sin14
+printf "sin la primera (n=13)      %11.3f      %11.4f\n", a_sin1, b_sin1
+printf "sin la primera y la ultima %11.3f      %11.4f\n", a_sinambas, b_sinambas
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no :exports none :noweb yes
+<<Submuestras>>
+outfile --quiet submuestras.txt
+    <<Tabla submuestras>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-A-ramanathan/submuestras.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Compare las cuatro filas de la tabla: la pendiente y, sobre todo, la constante. Fíjese en /cuánto/ se mueven al quitar una única observación de catorce, y compare ese movimiento con la magnitud del propio coeficiente.
+
+Conviene subrayar tres cosas:
+
+1. /No hemos cambiado el modelo/. La especificación es idéntica en las cuatro columnas; lo único que cambia es qué viviendas entran en el cálculo. Todo el movimiento que vea procede exclusivamente de la muestra.
+2. /No todas las observaciones pesan igual/. Probablemente habrá notado que quitar una de las dos viviendas mueve el ajuste bastante más que quitar la otra. Una observación situada en un extremo del rango de superficies tiene más capacidad de ``tirar'' de la recta que una situada en el centro. Volveremos sobre esta idea —con nombre propio y con una medida concreta— en el laboratorio integrador que cierra el curso.
+3. /Con $n=14$ esto es muy visible; con $n=506$ lo sería mucho menos/. La fragilidad que acaba de observar no es un defecto de MCO: es lo que ocurre cuando se dispone de pocos datos.
+
+Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que el ajuste /se mueve/ cuando cambian los datos, pero no tenemos todavía ninguna forma de decir /cuánto/ se mueve, ni de anticiparlo antes de mirar. Para eso hace falta hablar de la variabilidad del estimador, y eso exige un aparato que aún no tenemos. Es exactamente lo que hará la lección 11: dar una fórmula —no una impresión— para la dispersión de $\hat\beta_2$, y mostrar que en ella aparecen, precisamente, el número de observaciones y cuán dispersas están las superficies de las viviendas.
+
 * Preguntas de interpretación para la clase
 
 1. ¿Por qué el coeficiente de =bedrms= puede cambiar de signo (o de magnitud) al pasar del modelo simple al modelo con =sqft= incluido, si en ambos casos usamos exactamente los mismos 14 datos?

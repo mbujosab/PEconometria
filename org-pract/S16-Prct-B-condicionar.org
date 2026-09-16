@@ -1,0 +1,426 @@
+#+Title: Sesión 16 (B) --- En la práctica, ¿qué significa condicionar en $\boldsymbol X$?
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L16-B-condicionar
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S16-Prct-B-condicionar"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+/Sobre el título/. Qué es condicionar en $\boldsymbol X$ ya está dicho, y dicho con precisión: la lección 9 definió $E[Z\mid\boldsymbol X]$ como la proyección ortogonal de $Z$ sobre el espacio de las funciones de $\boldsymbol X$, y la lección 11 trabajó con esa definición sin pedir prestado nada. Aquí no vamos a mejorar esa respuesta —no se puede— sino a buscar otra distinta: qué /consecuencia observable/ tiene condicionar, qué cambia en los números cuando se condiciona y cuando no. Es, si se quiere, una lectura abusiva: sustituimos una definición matemática por un experimento que la ilustra. Pero es un abuso útil, porque quien practica la econometría se encuentra a diario con errores estándar condicionales sin llegar a ver nunca qué distingue esa cifra de la que habría salido sin condicionar.
+
+En la práctica anterior mantuvimos el regresor =rooms= fijo a lo largo de las 2000 réplicas, y solo dejamos cambiar la perturbación. Lo justificamos con una frase que conviene ahora tomarse en serio: /``eso es lo que significa condicionar en $\boldsymbol X$''/.
+
+Esta práctica pone esa frase a prueba haciendo lo contrario. Vamos a repetir el mismo experimento de Montecarlo dos veces:
+
+- /Experimento A/: el regresor se fija una vez y no cambia; solo cambia la perturbación.
+- /Experimento B/: en cada réplica se sortea /también/ un regresor nuevo.
+
+Si la distinción fuera irrelevante, ambos experimentos darían lo mismo. Veremos que no.
+
+/Objetivos/
+
+1. Comprobar que la fórmula $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-\overline{X})^2$ describe el experimento A, no el B.
+2. Ver qué consecuencia numérica concreta tiene la barra vertical de $Var[\cdot\mid\boldsymbol X]$, que las lecciones 9 y 11 ya definieron con precisión.
+3. Ver que la insesgadez, en cambio, se cumple en /ambos/ experimentos —y entender por qué las dos propiedades se comportan de forma distinta.
+4. Apreciar por qué el resultado que reportan los programas estadísticos es siempre el condicional.
+
+/Advertencia de diseño/. Para que la diferencia se vea con claridad, trabajaremos con una muestra deliberadamente /pequeña/: doce viviendas. Cuanto mayor es la muestra, menos importa la distinción que queremos ilustrar, y con las 506 observaciones de la práctica anterior costaría apreciarla. En la última actividad repetiremos el experimento con una muestra grande para comprobar precisamente eso.
+
+
+* Actividad 1 - El mismo mundo, pero con doce viviendas
+
+Reutilizamos el mundo artificial de la práctica A —mismos $\beta_1$, $\beta_2$ y $\sigma$—, pero nos quedamos solo con doce viviendas, elegidas al azar. Además, anotamos la media y la desviación típica de =rooms= en el conjunto completo: harán de ``población'' de la que se sortean regresores nuevos en el experimento B.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Preparacion datos
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet
+
+ols price const rooms --quiet
+scalar b1_true = $coeff(const)
+scalar b2_true = $coeff(rooms)
+scalar sigma   = sqrt($ess/$df)
+
+scalar mu_r = mean(rooms)               # "poblacion" del regresor
+scalar sd_r = sd(rooms)
+#+end_src
+
+#+NAME: Preparacion
+#+begin_src gretl :eval no
+printf "Poblacion del regresor: media = %.4f   desv. tipica = %.4f\n", mu_r, sd_r
+
+set seed 160
+smpl 12 --random                        # doce viviendas elegidas AL AZAR
+scalar Sxx_obs  = sum((rooms-mean(rooms))^2)
+scalar var_cond = sigma^2 / Sxx_obs
+
+printf "\nSubmuestra observada (n = %d):\n", $nobs
+printf "  media(rooms) = %.4f    desv. tipica(rooms) = %.4f\n", mean(rooms), sd(rooms)
+printf "  Sxx = suma de cuadrados en desviaciones = %.4f\n", Sxx_obs
+printf "  Sxx tipico de una muestra de este tamano = %.4f\n", ($nobs-1)*sd_r^2
+printf "\nVar[b2 | X] que predice la leccion 11 = %.1f   (desv. tipica %.1f)\n", var_cond, sqrt(var_cond)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+<<Preparacion datos>>
+outfile --quiet preparacion.txt
+    <<Preparacion>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-B-condicionar/preparacion.txt example
+#+latex: }
+
+Recuerde que =Sxx= es la abreviatura que introdujimos en la práctica A para $\sum_i(X_i-\overline{X})^2$ —el cuadrado de la norma euclídea del vector en desviaciones del regresor, o equivalentemente $n\,S^2$—. No es notación del curso, solo una comodidad para los guiones.
+
+Dos detalles del código merecen comentario. El primero es =smpl 12 --random=: elegimos las doce viviendas /al azar/, en lugar de tomar las doce primeras. Es importante, porque =hprice2= viene ordenado por distritos censales y las primeras viviendas se parecen mucho entre sí; tomarlas sin más nos daría una submuestra rara por un motivo ajeno a lo que queremos estudiar. El segundo es =set seed=, que fija /qué/ doce viviendas salen, para que el resultado sea reproducible.
+
+Compare ahora las dos últimas cifras: el Sxx de nuestras doce viviendas y el Sxx que cabría esperar de doce viviendas cualesquiera. Guarde esa comparación: será la clave de todo lo que sigue.
+
+
+* Actividad 2 - Experimento A: el regresor se queda quieto
+
+Es el experimento de la práctica anterior, sin más cambio que el tamaño muestral.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Experimento A
+#+begin_src gretl :eval no
+scalar R = 4000
+
+set seed 160
+loop R --progressive --quiet
+    series u = normal(0, sigma)
+    series y = b1_true + b2_true*rooms + u      # rooms NO cambia
+    ols y const rooms --quiet
+    scalar b_fijo = $coeff(rooms)
+    store "@workdir/repFijo.gdt" b_fijo
+endloop
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+<<Experimento A>>
+#+end_src
+
+
+* Actividad 3 - Experimento B: el regresor también se sortea
+
+Ahora añadimos una línea dentro del bucle: antes de construir el regresando, sorteamos un regresor nuevo. Conceptualmente estamos diciendo ``no solo podría haber sido otra la perturbación; también podrían haber sido otras las doce viviendas''.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Experimento B
+#+begin_src gretl :eval no
+set seed 160
+loop R --progressive --quiet
+    series xnew = mu_r + sd_r*normal(0,1)       # doce viviendas NUEVAS
+    series u    = normal(0, sigma)
+    series y    = b1_true + b2_true*xnew + u
+    ols y const xnew --quiet
+    scalar b_var = $coeff(xnew)
+    scalar Sxx_i = sum((xnew-mean(xnew))^2)     # el Sxx de ESTA replica
+    store "@workdir/repVar.gdt" b_var Sxx_i
+endloop
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+<<Experimento B>>
+#+end_src
+
+Guardamos también =Sxx_i=, la suma de cuadrados en desviaciones del regresor /de cada réplica/. En el experimento A ese número era una constante; aquí es una variable aleatoria más, y en ella está la explicación de todo.
+
+
+* Actividad 4 - Las dos varianzas, cara a cara
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Comparacion teoria
+#+begin_src gretl :eval no
+printf "=== LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===\n"
+printf "beta_2 verdadero  = %.2f\n", b2_true
+printf "Var[b2 | X]       = %.1f\n\n", var_cond
+#+end_src
+
+#+NAME: Comparacion A
+#+begin_src gretl :eval no
+printf "=== EXPERIMENTO A: regresor FIJO ===\n"
+printf "media de b2hat    = %.2f\n", mean(b_fijo)
+printf "varianza de b2hat = %.1f\n\n", sum((b_fijo-mean(b_fijo))^2)/$nobs
+#+end_src
+
+#+NAME: Comparacion B
+#+begin_src gretl :eval no
+printf "=== EXPERIMENTO B: regresor REGENERADO en cada replica ===\n"
+printf "media de b2hat    = %.2f\n", mean(b_var)
+printf "varianza de b2hat = %.1f\n", sum((b_var-mean(b_var))^2)/$nobs
+printf "\nSxx a lo largo de las replicas del experimento B:\n"
+printf "  medio = %.4f    minimo = %.4f    maximo = %.4f\n", mean(Sxx_i), min(Sxx_i), max(Sxx_i)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+outfile --quiet comparacion.txt
+    <<Comparacion teoria>>
+end outfile
+open "@workdir/repFijo.gdt" --quiet
+outfile --quiet --append comparacion.txt
+    <<Comparacion A>>
+end outfile
+open "@workdir/repVar.gdt" --quiet
+outfile --quiet --append comparacion.txt
+    <<Comparacion B>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-B-condicionar/comparacion.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Tres hechos, en este orden:
+
+1. /El experimento A reproduce la fórmula/. La varianza empírica de las estimaciones con el regresor fijo queda cerca de $\sigma^2/\mathrm{Sxx}$, calculado con el Sxx de /nuestras doce viviendas/. La fórmula de la lección 11 describe este experimento.
+2. /El experimento B da otra cosa/. Con el regresor regenerado, la varianza es apreciablemente distinta. No es un error de programación ni ruido de Montecarlo: los dos experimentos responden a preguntas diferentes.
+3. /Las medias, en cambio, coinciden/. En ambos experimentos la media de las estimaciones queda cerca de $\beta_2$. La insesgadez sobrevive a los dos diseños; la fórmula de la varianza, no.
+
+*** De dónde viene la diferencia
+
+Mire la última línea de la salida: el recorrido de =Sxx_i= a lo largo de las réplicas del experimento B. Verá que ese número varía muchísimo de una réplica a otra, y compárelo con el Sxx fijo de nuestras doce viviendas observadas.
+
+Ahí está todo. En el experimento A la varianza de $\hat\beta_2$ es $\sigma^2$ dividido por /un número fijo/. En el experimento B es, en promedio, $\sigma^2$ multiplicado por el promedio de $1/\mathrm{Sxx}$ —y el promedio de un cociente no es el cociente de los promedios—. Si nuestras doce viviendas concretas resultan tener valores de =rooms= más apretados de lo habitual, su Sxx será menor que el típico y, en consecuencia, condicionar en ellas dará una varianza /mayor/ que la que resulta de promediar sobre todos los conjuntos posibles de doce viviendas. Si hubieran salido más dispersas, ocurriría lo contrario.
+
+Esta es, exactamente, la razón por la que la lección 11 se detuvo en la fórmula condicional y solo mencionó de pasada la incondicional: al intentar calcular $\mathrm{Var}(\hat\beta_2)$ aparecía $\mathrm{E}\big(\sigma^2/(nS^2)\big)$, la esperanza de un cociente, que no se simplifica.
+
+
+* Actividad 5 - ¿Y si la muestra fuera grande?
+
+Repita el experimento con cuatrocientas viviendas en lugar de doce, dejando todo lo demás igual.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Muestra grande datos
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet
+ols price const rooms --quiet
+scalar b1_true = $coeff(const)
+scalar b2_true = $coeff(rooms)
+scalar sigma   = sqrt($ess/$df)
+scalar mu_r = mean(rooms)
+scalar sd_r = sd(rooms)
+
+set seed 160
+smpl 400 --random
+scalar Sxx_obs  = sum((rooms-mean(rooms))^2)
+scalar var_cond = sigma^2 / Sxx_obs
+
+set seed 160
+loop 4000 --progressive --quiet
+    series u = normal(0, sigma)
+    series y = b1_true + b2_true*rooms + u
+    ols y const rooms --quiet
+    scalar bg_fijo = $coeff(rooms)
+    series xnew = mu_r + sd_r*normal(0,1)
+    series u2   = normal(0, sigma)
+    series y2   = b1_true + b2_true*xnew + u2
+    ols y2 const xnew --quiet
+    scalar bg_var = $coeff(xnew)
+    store "@workdir/repGrande.gdt" bg_fijo bg_var
+endloop
+
+#+end_src
+
+#+NAME: Muestra grande teoria
+#+begin_src gretl :eval no
+printf "Con n = 400:  Sxx observado = %.2f   (tipico: %.2f)\n", Sxx_obs, ($nobs-1)*sd_r^2
+printf "             Var[b2|X] condicional teorica = %.2f\n", var_cond
+#+end_src
+
+#+NAME: Muestra grande resultado
+#+begin_src gretl :eval no
+printf "  regresor FIJO       : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
+printf "  regresor REGENERADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+<<Muestra grande datos>>
+outfile --quiet muestraGrande.txt
+    <<Muestra grande teoria>>
+end outfile
+open "@workdir/repGrande.gdt" --quiet
+outfile --quiet --append muestraGrande.txt
+    <<Muestra grande resultado>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-B-condicionar/muestraGrande.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La diferencia entre las dos varianzas /se reduce mucho/ al pasar de doce a cuatrocientas observaciones, pero no llega a desaparecer. Conviene entender por qué, porque en esa distinción hay dos efectos superpuestos:
+
+1. /Nuestra muestra deja de ser excepcional/. Con doce viviendas, el Sxx que nos tocó podía quedar muy lejos del típico; con cuatrocientas, cualquier muestra tiene un Sxx bastante parecido al típico. Este efecto se desvanece al crecer $n$, pero despacio.
+2. /El promedio de un cociente no es el cociente de los promedios/. Aunque el Sxx medio coincidiera exactamente con el observado, promediar $\sigma^2/\mathrm{Sxx}$ sobre las réplicas no daría $\sigma^2$ dividido por el Sxx medio. Este segundo efecto también se atenúa con $n$, y más deprisa que el primero.
+
+La conclusión práctica es que con muestras grandes la distinción tiene poca consecuencia numérica. La conclusión conceptual, en cambio, no cambia en absoluto: siguen siendo dos preguntas distintas, y la que responde la fórmula de la lección 11 —y la que responde su programa estadístico— es siempre la condicional.
+
+
+* Preguntas de interpretación para la clase
+
+1. ¿Qué pregunta responde el experimento A y qué pregunta, distinta, responde el experimento B? Formule ambas con palabras, sin fórmulas.
+2. ¿Por qué la insesgadez se cumple en los dos experimentos, mientras que la fórmula de la varianza solo describe el primero? (Pista: ¿en qué paso de la demostración de la lección 11 interviene $\boldsymbol X$ de forma esencial?)
+3. Cuando Gretl le muestra el error estándar de un coeficiente, ¿está respondiendo a la pregunta del experimento A o a la del B? ¿Por qué cree que es así?
+4. Imagine que un investigador /diseña/ el experimento y puede elegir los valores del regresor (por ejemplo, las dosis en un ensayo). A la vista de la fórmula de la lección 11, ¿qué le convendría hacer con esas dosis?
+5. En la Actividad 5, con $n=400$, las dos varianzas casi coinciden. ¿Diría entonces que la distinción entre condicionar y no condicionar es irrelevante en la práctica? Argumente a favor y en contra.
+
+/Para profundizar/:
+
+- Lección 11 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html][S15-Lecc11]]), sección ``Varianza'', en particular el párrafo final sobre la varianza incondicional y la ley de la varianza total.
+- Lección 9 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S12-Lecc09.html][S12-Lecc09]]) para la esperanza condicional como proyección.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 2, sección 2.5.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S16-Prct-B-condicionar.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S16-Prct-B-condicionar.inp][S16-Prct-B-condicionar.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /Las dos preguntas/. El experimento A pregunta: ``dadas /estas/ doce viviendas, con estos valores concretos de =rooms=, ¿cuánto variaría mi estimación si el azar hubiera repartido otras perturbaciones?''. El experimento B pregunta algo más amplio: ``¿cuánto variaría mi estimación entre todos los estudios posibles de doce viviendas, considerando que también podrían haberme tocado otras viviendas?''. La primera toma la muestra de regresores como un dato del problema; la segunda la considera parte de lo que podría haber sido distinto.
+
+2. /Por qué la insesgadez sobrevive/. Porque la demostración de la insesgadez pasa por $E[\hat\beta_2\mid\boldsymbol X]=\beta_2\cdot\mathit 1$ y después aplica la ley de las esperanzas iteradas: el resultado condicional /no depende de $\boldsymbol X$/, es la misma constante sea cual sea la matriz de regresores, y por tanto su promedio sobre todas las $\boldsymbol X$ posibles vuelve a ser esa constante. Con la varianza ocurre lo contrario: $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\mathrm{Sxx}$ /sí depende/ de $\boldsymbol X$, así que promediar sobre las $\boldsymbol X$ posibles da un número distinto del que corresponde a una $\boldsymbol X$ concreta.
+
+3. /Lo que reporta Gretl/. Responde a la pregunta del experimento A: el error estándar se calcula con la matriz de datos efectivamente observada, sustituyendo $\sigma^2$ por su estimación $\mathfrak s^2$. Tiene sentido que sea así por dos motivos. Uno práctico: no conocemos la distribución de la que salieron los regresores, así que no podríamos promediar sobre ella aunque quisiéramos. Y otro conceptual, más importante: la pregunta que le interesa a quien analiza unos datos es cuánta confianza merece /su/ estimación, con /su/ muestra —no cuánta merecería en promedio un estudio hipotético que nunca hizo.
+
+4. /Si se pueden elegir los valores del regresor/. La fórmula dice que la varianza es $\sigma^2$ dividido por $\sum_i(X_i-\overline{X})^2$. Conviene, por tanto, hacer ese denominador lo más grande posible: elegir dosis muy separadas entre sí, en los extremos del rango admisible, en lugar de concentrarlas en torno a un valor central. Es el mismo principio que hemos visto al revés en esta práctica: nuestras doce viviendas tenían valores de =rooms= poco dispersos, y eso encarecía la estimación. (Naturalmente, esto supone que el modelo lineal es válido en todo ese rango: separar mucho las dosis mejora la precisión, pero solo si la relación sigue siendo lineal allí.)
+
+5. /¿Es irrelevante con $n$ grande?/ A favor de que lo es: numéricamente las dos varianzas se acercan mucho —la diferencia pasa de ser enorme con doce observaciones a ser modesta con cuatrocientas—, así que a efectos de calcular un error estándar la distinción cambia poco las cifras. En contra: primero, que ``$n$ grande'' no siempre se da —con muestras pequeñas, que abundan en economía aplicada, la diferencia es la que hemos visto—; y segundo, que la distinción no es solo numérica, sino conceptual: aclara qué población de muestras estamos imaginando cuando decimos que un estimador ``varía''. Confundir ambas preguntas lleva a interpretar mal qué significa exactamente un error estándar.
+
+
+* COMMENT Banco de preguntas de reserva
+
+** Pregunta R1 — Qué fija el condicionamiento
+Decir que $Var[\hat\beta_2\mid\boldsymbol X]$ es ``condicional en $\boldsymbol X$'' significa que:
+a) El regresor se considera constante conocida en el cálculo de la varianza.
+b) El regresor tiene varianza cero.
+c) El regresor no está correlado con la perturbación.
+d) El regresor es no aleatorio en la población.
+/Respuesta correcta: a./
+/Evalúa/: distinción entre condicionar (tratar como dado) y suponer no aleatorio o incorrelado.
+
+** Pregunta R2 — Insesgadez frente a varianza
+En el experimento B (regresor regenerado en cada réplica), ¿qué ocurre?
+a) Se pierden tanto la insesgadez como la fórmula de la varianza.
+b) Se mantiene la insesgadez, pero la varianza empírica ya no coincide con $\sigma^2/\mathrm{Sxx}$ de la muestra observada.
+c) Se mantiene todo igual.
+d) El estimador pasa a estar sesgado.
+/Respuesta correcta: b./
+/Evalúa/: el punto central de la práctica.
+
+** Pregunta R3 — El papel de Sxx
+La diferencia entre las varianzas de los experimentos A y B se explica porque:
+a) En B la perturbación tiene más varianza.
+b) En B el número de observaciones es mayor.
+c) En B la suma de cuadrados en desviaciones del regresor cambia de una réplica a otra, y el promedio de $1/\mathrm{Sxx}$ no es $1/\mathrm{E}(\mathrm{Sxx})$.
+d) En B el estimador deja de ser lineal.
+/Respuesta correcta: c./
+/Evalúa/: comprensión del mecanismo, no solo del fenómeno.
