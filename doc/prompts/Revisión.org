@@ -9,13 +9,18 @@ En este momento no quiero escribir una nueva sesión. Quiero que revises retrosp
               (buffer-string)))
 
 (setq-local gptel-context
-            (list "../../org-lessons/S13-Lecc10.org"
+            (list "../../org-lessons/S15-Lecc11.org"
+		  "../../org-lessons/S13-Lecc10.org"
 		  "../../org-lessons/S12-Lecc09.org"
 		  "../../org-lessons/S10-Lecc08.org"
 		  "../../org-lessons/S09-Lecc07.org"
 		  "../../org-lessons/S08-Lecc06.org"
 		  "../../org-lessons/S06-Lecc05.org"
-		  "../../org-lessons/S05-Lecc04.org"))
+		  "../../org-lessons/S05-Lecc04.org"
+		  "../../org-lessons/S03-Lecc03.org"
+		  "../../org-lessons/S02-Lecc02.org"
+		  "../../org-pract/S14-Prct-B-hprice2-r2ajustado.org"
+		  ))
 
 #+end_src
 
@@ -37,3 +42,611 @@ No verifiques la aritmética completa del ejemplo compartido S09/S10/S11-A ($\mu
 
 Si para revisar la lección necesitas que te pase lecciones anteriores, dímelo.
 
+
+
+#+begin_reasoning
+
+#+end_reasoning
+
+* Informe de revisión retrospectiva (S05 → S15 + S14-Prct-B)
+
+He leído el Plan y los nueve ficheros con detenimiento. En conjunto, la cadena de dependencias notacionales está bien construida y la mayoría de los conceptos se introducen antes de usarse. No hay ningún problema estructural grave, pero sí hay un puñado de errores puntuales (dos de ellos matemáticos en el texto), varias referencias internas desfasadas, y unas cuantas incoherencias entre el Plan y los ficheros que conviene arreglar. Los agrupo según la estructura pedida.
+
+---
+
+** A. Inconsistencias de notación
+
+/A.1 — Índice del coeficiente de la constante: $\beta_0$ vs. $\beta_1$ (S06)/
+- =S06-Lecc05.org=, "Guiño a la sesión siguiente" (transparencia y apuntes): «$\boldsymbol{\mathsf{X}}\boldsymbol{\beta}$ (con $\boldsymbol{\beta}=(\beta_0,\beta_1)$) ... la combinación lineal $\beta_0\boldsymbol{1}+\beta_1\boldsymbol{x}$». Contradice la convención de §4.2.1 (la constante lleva $\beta_1$, nunca $\beta_0$) y a S08, que ya escribe $\beta_1\boldsymbol{1}+\beta_2\boldsymbol{x}$. Es la única aparición de $\beta_0$ en todo el corpus revisado; debería corregirse a $(\beta_1,\beta_2)$.
+
+/A.2 — Coeficientes auxiliares indexados desde cero ($c_0,c_1$) en S09 y S10/
+- S09 ("Vía alternativa") y S10 ("En el caso de la regresión simple") usan $\boldsymbol w=c_0\boldsymbol1+c_1\boldsymbol x$. Es consistente entre ambas lecciones, pero choca con el espíritu de la regla "la constante lleva índice 1". No es grave (son etiquetas locales), pero conviene decidir: o se renombran $c_1,c_2$, o se registra en §4.2.1 como excepción admitida para coeficientes auxiliares transitorios.
+
+/A.3 — Siglas SST/SSR/SSE en S09 antes de fijarse la convención STC/SEC/SRC/
+- =S09-Lecc07.org=, apuntes de "$\hat\beta_1$ y el lugar de las medias": «traducir directamente entre la descomposición de varianzas $\text{SST}=\text{SSR}+\text{SSE}$». S10 fija a continuación STC/SEC/SRC con advertencia sobre el falso amigo "SSE". S09 usa la versión inglesa (y con un orden SSR+SSE que, en la convención anglosajona, es residual+explicada — sumando en orden invertido). Sugiero sustituir por «STC = SEC + SRC» o, al menos, por prosa («descomposición de la suma de cuadrados»).
+
+/A.4 — Infracciones puntuales de la notación de esperanza/varianza (S12)/
+- Apuntes del supuesto 3 del MCRL: «$\|X-E(X)\cdot\mathit{1}\|_p^2=\textrm{Var}(X)\neq0$». Tres infracciones en una sola fórmula: =E(X)= sin =\mathrm=, =\textrm= en vez de =\mathrm=, y subíndice =_p= minúscula (debe ser =_P=).
+- Apuntes de "Esperanza condicional": «hace mínima $\textrm{E}\Big(\big(Y-g(X)\big)^2\Big)$» → =\mathrm{E}=.
+
+/A.5 — Regla de hierro de la variable aleatoria constante (S12, S15)/
+- S12, apuntes de "Cuidado: ... no implica causalidad": «Los cuatro supuestos garantizan que $\beta_1+\beta_2X$ es una buena aproximación...» → $\beta_1\mathit1+\beta_2X$.
+- S12, apuntes de "El salto": «con el modelo poblacional $Y=\beta_1+\beta_2X+U$ ya construido» → $\beta_1\mathit1$.
+- S12, apuntes de "El salto", primer párrafo: «las dos condiciones poblacionales ... consecuencias de $E[U\mid X]=0$» → $=\mathit0$ (en el resto del fichero sí aparece $\mathit0$).
+- S15, apuntes de "Sustituyendo el modelo poblacional": «$\sum_iW_i(\beta_1+\beta_2X_i+U_i)$» mientras la transparencia escribe $\beta_1\cdot\mathit1$.
+
+/A.6 — Acento sobre vector sin =\mathop= (S10)/
+- Apuntes de "Ejemplo numérico: STC, SEC, SRC": «$\hat{\boldsymbol{y}}=(5,8,11,14,17)$». Debe ser $\boldsymbol{\mathop{\widehat{y}}}$ (patrón de búsqueda =\hat{\boldsymbol= de §1 paso 6).
+
+/A.7 — "Distancia euclídea" con norma estadística (S08)/
+- Apuntes de "El problema de ajuste": «la distancia euclídea entre $\boldsymbol{y}$ y el punto...» mientras la transparencia minimiza $\|\cdot\|_s$. Sustituir por "la distancia (norma estadística)" o simplemente "la distancia".
+
+/A.8 — Producto escalar "de aquí en adelante euclídeo" que no se mantiene (S13)/
+- Nota al pie en "Vector por Matriz": «de aquí en adelante trabajamos con el producto euclídeo». Pero "Familia ortogonal" y "$R^2$ en regresión múltiple" vuelven a $\langle\cdot,\cdot\rangle_s$. No es un error matemático, pero la frase promete algo que el propio fichero incumple. Cambiar a «en esta y en las siguientes transparencias de notación matricial».
+
+/A.9 — Reutilización del símbolo $\boldsymbol z$ con dos significados en la misma sección (S05)/
+- Apuntes de "Propiedades geométricas": en la Propiedad 2 se define $\boldsymbol z=\boldsymbol y+\boldsymbol x$; tres líneas después, al describir la figura, $\boldsymbol z$ es otro vector de media cero distinto de $\boldsymbol x$ («$\boldsymbol y+\boldsymbol z$ tiene exactamente la misma varianza»). Confunde. Renombrar el vector de la prueba (p. ej. $\boldsymbol w$).
+
+/A.10 — Índice $i$ para regresores en la matriz $\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}$ (S13)/
+- Apuntes de "Ecuaciones normales": «el elemento $(i,j)$ es $\langle\boldsymbol{x}_i,\boldsymbol{x}_j\rangle_e$». En todo el fichero $i$ indexa observaciones y $j$ regresores; además $\boldsymbol x_1$ no existe (la constante no lleva subíndice). Usar $(j,l)$ o $(j,j')$.
+
+/A.11 — Orden de subíndices de la correlación (S10)/
+- «$\rho_{\boldsymbol{\mathop{\widehat{y}}}\boldsymbol{y}} = \mathrm{sign}(\rho_{\boldsymbol{x}\boldsymbol{y}})\cdot\rho_{\boldsymbol{x}\boldsymbol{y}}$» frente a $\rho_{\boldsymbol y\boldsymbol{\mathop{\widehat y}}}$ en el resto. Simétrico, pero conviene unificar.
+
+/A.12 — "$k$ regresores" vs. "tres regresores" (S14-Prct-B)/
+- Actividad 4: «$R^2$ del modelo con tres regresores» (los no constantes) mientras el Apéndice usa $k$ total incluida la constante (correcto según §4.2.1). Escribir «tres regresores no constantes» para no reabrir la ambigüedad.
+
+---
+
+** B. Conceptos o notación que "caen del cielo"
+
+/B.1 — El término "regresor" (S05, S06) antes de su definición formal (S08)/
+- S05, apuntes de "El vector en desviaciones": «los residuos serán ortogonales a /cada uno/ de los regresores... Con un regresor (la constante $\boldsymbol1$)...»; y S06, guiño: «Cuando organicemos los regresores como columnas...». S08 dice explícitamente «Introducimos aquí ... el término que va a acompañarnos: /regresor/». Es un uso anticipado inocuo, pero conviene o (i) añadir en S05 un paréntesis inline («regresor: cada vector que multiplica a un coeficiente»), o (ii) suavizar en S08 la frase «introducimos aquí» a «formalizamos aquí».
+
+/B.2 — Vector $\boldsymbol a$ sin definir (S15)/
+- Apuntes de "$\hat\beta_2$: la misma fórmula...": «obtuvimos ... $\hat\beta_2(\boldsymbol x,\boldsymbol y)=\frac{\langle\boldsymbol y,\boldsymbol a\rangle_s}{\langle\boldsymbol a,\boldsymbol a\rangle_s}=\ldots$». $\boldsymbol a$ no se define en ningún sitio del párrafo (se sobreentiende $\boldsymbol a=\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1$). Mismo patrón que el precedente $a_j$ ya corregido; añadir «con $\boldsymbol a=\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1$».
+
+/B.3 — "Estimador insesgado" y "cuasivarianza" en S14-Prct-B, antes de la lección 11/
+- Apéndice: «$\mathrm{STC}/(n-1)$ es la cuasivarianza de $\boldsymbol y$: el estimador insesgado de la varianza de la variable $Y$ del modelo teórico. El numerador ... el estimador insesgado de la varianza de las perturbaciones $U$». A la altura de la sesión 14 no existe aún el concepto de insesgadez (llega en S15). §10 lo registra como semilla deliberada, pero el texto lo usa como si fuera sabido. Bastaría un inciso: «(propiedad —"insesgadez"— que estudiaremos en la próxima lección teórica)».
+
+/B.4 — Atribución a la lección 7 de las identidades $\sum_iW_i=0$, $\sum_iW_iX_i=1$ (S15)/
+- Transparencia "Dos propiedades de los pesos": «Las dos identidades algebraicas de la lección 7 —obtenidas allí para cualquier conjunto de números—». En S09 los pesos $w_i$ nunca se escriben explícitamente; lo que existe allí es $\langle\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1,\boldsymbol1\rangle_s=0$ y la fórmula con productos escalares. Los apuntes lo reconocen a medias («allí no las bautizamos»). Sugiero: «consecuencia directa de $\sum_i(x_i-\mu_{\boldsymbol x})=0$ (lección 4) y de la vía alternativa (lección 7)».
+
+/B.5 — Condición de la "excepción" del $R^2$ aditivo: transparencia vs. apuntes (S13)/
+- Transparencia "$R^2$ en regresión múltiple": «si los regresores son mutuamente ortogonales, entonces $R^2=\sum_j\rho^2$». Apuntes: «Cuando los regresores /en desviaciones/ ... son mutuamente ortogonales». La condición correcta es la segunda (regresores centrados ortogonales, i.e. covarianzas nulas); regresores brutos ortogonales entre sí pero no a $\boldsymbol1$ no desacoplan el sistema. Añadir "en desviaciones" (o "incorrelados") en la transparencia.
+
+/B.6 — "Varianza" en S05, antes de la lección 5/
+- Apuntes de "Propiedades geométricas": «$\boldsymbol y+\boldsymbol x$ tiene mayor varianza que $\boldsymbol y$» y solo después el paréntesis aclaratorio («recordemos que la varianza no es más que $\sigma^2$... la lección 5 la presentará»). Mover la aclaración antes del primer uso o decir "desviación típica".
+
+/B.7 — Acrónimo "MCO" (S05, banco de preguntas)/
+- Q9 «La media como caso de MCO»; el acrónimo se define en S08 (nota al pie). Inofensivo, pero es la primera aparición sin expandir.
+
+/B.8 — Menores/: $S^2$ en la transparencia de varianza de S15 (definido solo en apuntes — admisible por §4.2.1, pero véase E.4); $\overline Y$ en la recapitulación de S15 sin definir (obvio por analogía); $\cap$ de subespacios en S13 sin presentar (S10 lo dice en prosa); $F_{X_i}$, $\operatorname P$ en nota al pie de S15 (recuerdo del curso de estadística, aceptable).
+
+---
+
+** C. Promesas / semillas
+
+/C.1 — Fila §10 desfasada: "Ejemplo peso-edad ... reservada como práctica adicional fuera de numeración"/
+- Según la ficha §7.15, ya está ESCRITA como =S14-Prct-C-peso-edad.org= dentro de la sesión 14. La fila de §10 debe pasar a «cobrada en /14/ (Práctica C)».
+
+/C.2 — Semilla de S13 no registrada en §10: "$\boldsymbol1$ no necesita ser columna, basta $\boldsymbol1\in\mathcal L(\text{cols}\,\boldsymbol{\mathsf X})$"/
+- S13 lo siembra explícitamente («reaparecerá al hablar de variables dummy»); §4.2.1 lo menciona; §10 no tiene fila. Añadir: sembrada 13, cobrada en /23/. (Además, esta semilla está anotada en la ficha §7.23 = Sesión 22 (logaritmos) cuando corresponde a §7.24 = Sesión 23 (dummies); véase E.1.)
+
+/C.3 — Semillas nuevas de S15 sin registrar/
+- Ley de las esperanzas iteradas como consecuencia de $E[\cdot\mid\boldsymbol X]\perp\mathit1$ (sembrada implícitamente en S12, donde el "Teorema de las esperanzas iteradas" quedó como texto comentado; cobrada con demostración en 15).
+- Lema "sacar funciones de $\boldsymbol X$ de la esperanza condicionada" (nuevo en 15; herramienta previsible en 16).
+- Notación $\overline X$ y $S^2$ (estadísticos por sustitución) — solo $\overline X$ está en §4.2.1.
+
+/C.4 — Filas de §10 que deberían añadir la sesión 15 como reutilización estructural/
+- "Supuesto de Homocedasticidad ... cobrada en 16": S15 la usa como pieza central de la varianza. Añadir «15 (varianza de $\hat\beta_2$)».
+- "Diccionario geometría↔probabilidad ... 13, 16": S15 lo usa (esperanza condicional como proyección, caracterización pertenencia+ortogonalidad). Añadir 15.
+- "Producto escalar probabilístico ... reutilizado en 25": S15 usa $\|\cdot\|_P$. Añadir 15.
+- "Advertencia 'explicada no es causada' ... posible refuerzo en 12": el refuerzo se produjo (sección completa de S12). Cambiar «posible» por «reforzada en 12».
+
+/C.5 — Sobreafirmación en §10 respecto a S15/
+- Fila "Cuasivarianza $\mathrm{SRC}/(n-k)$ ... /15/ (justificación geométrica completa del divisor $n-k$)". S15 dice textualmente que la insesgadez de $\mathfrak s^2$ «no la demostramos aquí»: lo que da es una intuición geométrica de dimensión, no una prueba. Reescribir «intuición geométrica (dimensión de $\mathcal L(\boldsymbol{\mathsf X})^\perp$) del divisor; insesgadez enunciada sin demostrar».
+
+/C.6 — Contradicción ficha §7.15 ↔ S14-Prct-B sobre =$adjrsq=/
+- La ficha dice «contraste R² vs. R² ajustado con =$adjrsq=» y «verificación numérica manual vs. =$adjrsq=». El fichero dice «Gretl ... no permite recuperar el R² ajustado, así que lo vamos a recalcular a mano», y no usa =$adjrsq= en ningún sitio. Además, la afirmación es falsa: Gretl sí ofrece el accesor =$adjrsq=. Y el Objetivo 4 del propio fichero («contrastarlo con el que reporta Gretl») queda cojo porque las salidas de la Actividad 5 son =--quiet=. Recomiendo corregir la frase, añadir =$adjrsq= al bloque de la Actividad 5 y alinear la ficha.
+
+---
+
+** D. Observaciones menores
+
+/D.1 — Error matemático tipográfico (S05)*, apuntes de "Propiedades geométricas", Propiedad 2: «el vector en desviaciones de $\boldsymbol{z}$ es $(\boldsymbol{z} - \boldsymbol{\mathop{\overline{z}}}) + \boldsymbol{x}$». Es circular; debe ser $(\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}})+\boldsymbol{x}$ (la frase siguiente ya lo dice bien). También arranca el ítem en minúscula («el vector») frente al anterior.
+
+/D.2 — Cuadrado perdido (S10)*, apuntes de "El coeficiente de determinación": «$\cos^2\theta = \frac{\sigma_{\hat y}^2}{\sigma_y^2} = R^2$, donde, además, $\cos^2\theta = \rho_{\boldsymbol{y}\boldsymbol{\mathop{\widehat{y}}}}$» → $\cos\theta=\rho$ o $\cos^2\theta=\rho^2$.
+
+/D.3 — Referencias numéricas erróneas a lecciones (patrón §1 paso 6)/
+- S10, sección "Una advertencia", último párrafo: «el ejemplo de correlación tratado en la lección 7. Allí, $\rho_{xy}=\cos\theta'$ era el coseno...» → lección *5*. Además, ese párrafo está colocado /después/ de la lista "Para profundizar", donde no debería haber texto; parece un resto de reordenación (debería ir antes o al inicio de la sección siguiente).
+- S13, Respuestas Q5: «generalización directa de las dos condiciones de las lecciones 8-9» → lecciones *6-7*. Respuestas Q9: «generalizando la vía alternativa de la lección 9» → lección *7*. (Números de sesión colados como números de lección.)
+- S15, apuntes de la Recapitulación: «heterocedasticidad en la sesión 24, por ejemplo» → visible para el alumno; usar «lección 17» o «más adelante, al tratar la heterocedasticidad» (§4.6).
+- S15, apuntes de "El marco": «La matriz de regresores $\boldsymbol{\mathsf X}$ ... y su versión aleatoria —introducidas en la lección 10—»: la versión aleatoria no se introdujo en la lección 10.
+
+/D.4 — Referencias internas "transparencia N" desfasadas (S10)/
+- Tras la inserción de "¿Qué ajuste es mejor?" y otras, varias referencias quedaron obsoletas: Respuestas Q6 «resultado central de la transparencia 5» ($R^2=\rho^2$ está en la 9); Respuestas Q10/Q11 y Comentario: «transparencia 6» para la advertencia/Vigen (está en la 8); apuntes de la Recapitulación: «(transparencia 5)» para $R^2=\rho_{xy}^2$ (es la 9); apuntes de "En el caso de la regresión simple": «$R^2=\rho_{y\hat y}^2$ (transparencia anterior)» — la anterior es "Una advertencia", no "El coeficiente de determinación". Las referencias a las transparencias 2 y 3 sí son correctas. Recomiendo sustituir números por títulos entrecomillados.
+- S05 también cita «transparencia 3» y «transparencia 5» en Respuestas (correctas hoy, pero frágiles).
+
+/D.5 — "Como ya sabemos" prematuro (S10)*, apuntes de "Una advertencia": «(como ya sabemos, en la regresión lineal simple $R^2=\rho_{xy}^2$...)». En ese punto solo se ha verificado numéricamente; la demostración viene en la sección siguiente. Cambiar a «como veremos en la próxima transparencia (y como sugiere el ejemplo numérico)».
+
+/D.6 — Recuento de supuestos desfasado tras la corrección de S12/
+- S12, Respuestas Q10: «definición formal del tercer supuesto del MCRL» → es el *cuarto* (homocedasticidad) en la lista corregida.
+- S13, apuntes de la Recapitulación: «el modelo poblacional de la lección 9 —con sus tres supuestos, y un cuarto que allí permanecía disfrazado dentro de $\mathrm{Var}(X)\neq0$—» → ya son cuatro explícitos en S12; la transparencia de S13 sí lo dice bien.
+
+/D.7 — Uso de $\boldsymbol{\mathsf X}$ en S15 antes de lo anunciado/
+- Apuntes de "El marco" prometen no usar la matriz hasta la última transparencia; los apuntes de "MCO es BLUE" la usan ($\boldsymbol{\mathsf X}^\top\boldsymbol{\mathop{\widehat e}}=\boldsymbol0$, «subespacio ortogonal a las columnas de $\boldsymbol{\mathsf X}$»). Matizar la promesa («salvo una mención al justificar $n-k$»).
+
+/D.8 — Cambio de argumentos $\hat\beta_2(\boldsymbol X,\boldsymbol Y)\to\hat\beta_2(\boldsymbol X,\boldsymbol U)$ (S15)*, transparencia "Sustituyendo el modelo poblacional", sin una frase que lo justifique. Una cláusula basta («escrito ahora en función de $\boldsymbol U$, pues $\boldsymbol Y$ ha sido sustituida»).
+
+/D.9 — "Variable explicativa" en S13/: apuntes de "De dónde venimos" («$k-1$ variables explicativas») y Q1 (distractor). La ficha §7.14 afirma "regresor (nunca variable explicativa) en todo el fichero". Dos lapsus.
+
+/D.10 — Principio del vector de media nula, formulación imprecisa (S08)*: «Si un vector tiene media cero, su producto escalar con cualquier otro vector en desviaciones resulta ser la covarianza». Lo demostrado (y lo útil) es que su producto con cualquier vector /sin centrar/ coincide con la covarianza; S13 lo enuncia correctamente. Quitar "en desviaciones".
+
+/D.11 — Lección citada para la propiedad de traslación (S09)*: apuntes de "$\hat\beta_1$ y el lugar de las medias": «propiedad ya demostrada en la lección 5 ... (lección 4: 'sumar una constante no cambia la desviación típica')». La traslación de un solo vector es lección 4; la frase cita ambas para lo mismo. Unificar en lección 4.
+
+/D.12 — S14-Prct-B, Actividad 3/: el bloque =outfile=/=#+include= está comentado, así que la salida de =ols price const rooms nox stratio= no aparece en el documento (a diferencia de las Actividades 2, 4, 5), pese a «Contraste su expectativa con lo obtenido». Si es deliberado, indicarlo; si no, descomentar.
+
+/D.13 — Texto de enlace con nombres internos (S14-Prct-B)*: «Véanse las lecciones 8 y 10 ([[...][S10-Lecc08]], [[...][S13-Lecc10]])»: los nombres de fichero quedan visibles como texto del enlace. Mejor «[[...][lección 8]]».
+
+/D.14 — Erratas y estilo/: S06 «en deviaciones» → desviaciones; S08 «en ingles» → inglés; S08 «el residuo o /vector residuos/» → vector de residuos; S10 «(trasparente y grande)» → transparente; S13 «nos dice cuanto avanzar» → cuánto; S13 «una matriz cuadrada de $(k)\times(k)$» → $k\times k$; S05 comillas rectas =\"sombra\"= en apuntes de "Ilustración geométrica" (§4.1 pide = ''); S08 Respuestas Q6 comillas rectas =\"cruda\"=; S05 la transparencia "Ilustración con la visión estadística" usa $\boldsymbol v$ y sus apuntes $\boldsymbol y$; S05 en la apertura alterna $\langle\boldsymbol a,\boldsymbol h\rangle=0$ y $\boldsymbol a\cdot\boldsymbol h=0$ para la misma condición; S05 «"sombra"» ok; S05, banco de preguntas (Q6, Q9, Q10, Q11): normas y productos escalares sin subíndice $_s$ mientras el cuerpo de la lección lo lleva siempre.
+
+*D.15 — "Hiperplano" (S13)*: se usa para un subespacio de dimensión $k$ («lo que en geometría se denomina de manera genérica un hiperplano»). En sentido estricto un hiperplano tiene dimensión $n-1$. Dado el registro informal, basta decir «subespacio (de dimensión $k$)».
+
+*D.16 — S10, Recapitulación (apuntes)*: «retoma exactamente los datos con los que se trabajó en la lección 5» — la lección 5 no usó datos; se refiere a la práctica que siguió a la lección 5 (=hprice2=). Reformular.
+
+---
+
+## E. Retoques sugeridos al Plan de Escritura
+
+*E.1 — Desfases de numeración de sesiones dentro del propio Plan (importante para el algoritmo de §1)*
+- §2 y título de §7.0 hablan de «26 sesiones»; la tabla tiene 25. Ajustar.
+- Las referencias a sesiones en varias secciones parecen arrastrar una numeración antigua (+1): §9.3.1 «RESET de la sesión 25» (es la 24); §9.3.2 «Sesión 19 limitada al $F$» (es la 18); §9.3.3 y §7.24 «en la sesión 24, recortar interacciones» (dummies es la 23); §8 «dummies (sesión 24) ... sesión integradora (sesión 26)» (23 y 25); §9.4 «laboratorio integrador (sesión 26)» (25); §7.25 «integra en la sesión 25» (24). Además, §7.23 (Sesión 22, logaritmos) contiene una "semilla recibida de la sesión 13" que es de dummies y pertenece a §7.24 (Sesión 23).
+- La nota de §7.0 dice que la sesión 8 «ya se actualizó», pero la fila 10 de la tabla sigue diciendo «SST = SSR + SSE» en vez de STC = SEC + SRC (contradice §4.2.1).
+
+*E.2 — §7.11 (ficha S10)*: «$\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_1,\ldots,\boldsymbol{x}_k)$ tiene dimensión $k>1$» contradice la convención (la constante no lleva subíndice, los regresores van de $\boldsymbol x_2$ a $\boldsymbol x_k$, dimensión del subespacio centrado $k-1$) y lo que dice el propio fichero S10. Corregir la ficha. También «traducción directa a $\text{SST}=\text{SSR}+\text{SSE}$» en §7.10 → STC/SEC/SRC.
+
+*E.3 — Notación mixta del propio Plan*: §7.13 y §10 escriben «$\mathrm{Var}[U\mid X]=\sigma^2$» (=\mathrm= con corchetes, prohibido por §4.2.1); §7.18 escribe «$\sigma^2/\sum_i(x_i-\bar x)^2$» ($\bar x$, prohibido; debe ser $\mu_{\boldsymbol x}$). Conviene que el Plan predique con el ejemplo, dado que §1 paso 6 manda buscar exactamente esos patrones.
+
+*E.4 — §4.2.1, añadir*: (i) el símbolo $S^2=\frac1n\sum_i(X_i-\overline X)^2$ (varianza de la muestra aleatoria del regresor, introducido en S15 junto a $\overline X$), advirtiendo de no confundirlo con $\mathfrak s^2$ ni con $\sigma^2_{\boldsymbol x}$; (ii) una decisión sobre los coeficientes auxiliares $c_0,c_1$ (A.2); (iii) una advertencia sobre el riesgo visual de $\boldsymbol X^\top$ (matriz aleatoria escrita con la tipografía de vector; §4.2.1 lo admite, pero es la única transposición del curso que "parece" transponer un vector — merece una línea de alerta).
+
+*E.5 — §1 paso 6, ampliar patrones de búsqueda*: (i) «hiperplano» (revisar uso informal); (ii) «tres supuestos» / «cuatro supuestos» (recuento del MCRL tras la corrección de S12); (iii) texto situado *después* de una lista "Para profundizar" dentro de una misma sección (resto de reordenaciones, D.3); (iv) «como ya sabemos» además de «como vimos en» (D.5).
+
+*E.6 — §10*: aplicar C.1–C.5 (fila peso-edad; nueva fila $\boldsymbol1\in\mathcal L(\text{cols})$ → 23; nuevas filas de S15: ley de esperanzas iteradas y Lema; añadir 15 a homocedasticidad, diccionario y $\langle\cdot,\cdot\rangle_P$; matizar la fila de la cuasivarianza).
+
+*E.7 — §5.1 / §8*: añadir la regla "no afirmar cualitativamente el resultado antes de la salida real" o, si se admite (como en S14-Prct-B Actividad 2: «los coeficientes no cambian de forma tan drástica»), explicitar que se admite solo cuando el autor lo ha comprobado ejecutando el guion.
+
+---
+
+## Fuera de la estructura: dos observaciones
+
+1. *S14-Prct-B y Gretl*: la afirmación «Gretl no permite recuperar el $R^2$ ajustado» es incorrecta (existe =$adjrsq=) y, si se deja, un alumno atento la detectará. Es el único error factual sobre el software que he encontrado.
+
+2. *No necesito más ficheros para lo revisado*, pero dos comprobaciones quedarían más sólidas con S02/S03: (a) si la definición de "regresor" o de "MCO" aparece ya, aunque sea de pasada, en la lección 3 (lo que atenuaría B.1 y B.7); (b) si la lección 3 define $\alpha$ con $\langle\cdot,\cdot\rangle$ o con el punto, para juzgar la alternancia $\langle\boldsymbol a,\boldsymbol h\rangle$ / $\boldsymbol a\cdot\boldsymbol h$ de la apertura de S05. Si quiere, cárguelos y cierro esos dos puntos.
+
+- Sugiere un texto concreto para la observación B.4 y donde colocarlo
+- Sugiere un texto concreto para la observación D.7 y donde colocarlo
+- E.1: Reescribe 7.0 y 9.3 del plan de escritura
+- E.2: Reescribe 7.11
+- E.4 (i): Sugiere un texto concreto para la advertencia respecto del símbolo $S^2=\frac1n\sum_i(X_i-\overline X)^2$ (varianza de la muestra aleatoria del regresor, introducido en S15 junto a $\overline X$), advirtiendo de no confundirlo con $\mathfrak s^2$ ni con $\sigma^2_{\boldsymbol x}$;
+- Respecto a E.4 (iii): Quizá es mejor introducir en la propia lección que $\boldsymbol X$ es una matriz (que en el caso del modelo lineal simple, solo tiene una columna... eso creo que resolvería el problema).
+- E.5 (iv): Redacta (e indica donde colocarlo) patrones de búsqueda para incluir «como ya sabemos» además de «como vimos en»
+- E.6: Escribe las filas de la tabla de semillas y donde colocarlas (o a qué filas sustituyen)
+- E.7: Redacta la regla e indica donde colocarla  
+
+- C.6 Gretl no tiene =$adjrsq=  (o al menos la versión que yo tengo no lo tiene, y la documentación en la web no lo documenta)
+He añadido a gptel-context S02 y S03.
+
+#+begin_reasoning
+
+#+end_reasoning
+
+- Respuesta a las peticiones concretas
+
+Voy por orden. Cuando propongo texto para un fichero =.org= lo doy en un bloque =org= listo para pegar, indicando la sección y la frase que sustituye.
+
+---
+
+* B.4 — Atribución de las identidades $\sum_iW_i=\mathit0$, $\sum_iW_iX_i=\mathit1$ (S15)
+
+/Dónde/: =S15-Lecc11.org=, transparencia «Dos propiedades de los pesos». Sustituye el párrafo inicial («Las dos identidades algebraicas de la lección 7 —obtenidas allí para /cualquier/ conjunto de números $x_1,\ldots,x_n$— siguen siendo ciertas, sin cambiar una coma, al sustituir $x_i$ por $X_i$: son hechos aritméticos, no probabilísticos.») por:
+
+#+begin_src org
+Dos identidades algebraicas sobre los pesos. Ninguna es nueva: la primera es la condición $\sum_i(X_i-\overline{X})=\mathit0$ de la transparencia anterior (la misma cuenta que en la lección 4 daba media cero al vector en desviaciones); la segunda es la razón por la que, en la ``vía alternativa'' de la lección 7, el coeficiente de $\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1$ resultaba ser exactamente $\hat\beta_2$. Ambas valen para /cualquier/ lista de números y, por tanto, siguen siendo ciertas al sustituir $x_i$ por $X_i$: son hechos aritméticos, no probabilísticos.
+#+end_src
+
+Y en los apuntes de esa misma transparencia, sustituir la primera frase («necesitamos dos propiedades de los pesos $W_i$ que, en realidad, ya conocemos: son las mismas dos propiedades que en la lección 7 hicieron funcionar la =vía alternativa'', solo que allí no las bautizamos como propiedades de unos =pesos''.») por:
+
+#+begin_src org
+necesitamos dos propiedades de los pesos $W_i$ que, en realidad, ya conocemos aunque nunca las hayamos escrito con este nombre: la primera es, literalmente, $\langle\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1,\boldsymbol1\rangle_s=0$ (lección 4: el vector en desviaciones tiene media cero), dividida por el denominador común de los $W_i$; la segunda es lo que, en la =vía alternativa'' de la lección 7, hacía que al proyectar $\boldsymbol y$ sobre $\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1$ el coeficiente obtenido fuera exactamente la pendiente $\hat\beta_2$ (en la lección 7 no aislamos unos =pesos''; escribimos la fórmula como cociente de productos escalares).
+#+end_src
+
+---
+
+* D.7 + E.4 (iii) — $\boldsymbol X$ como matriz aleatoria desde el principio (S15)
+
+Acepto su propuesta, con una precisión importante: en el modelo lineal simple /con constante/ la matriz tiene /dos/ columnas (la de constantes y la del regresor), no una. Lo delata la propia última transparencia de S15: el elemento $(1,1)$ de $\boldsymbol X^\top\boldsymbol X$ vale $n$, que es el producto de la columna de unos consigo misma. Como la columna de constantes no es aleatoria, «condicionar en $\boldsymbol X$» sigue siendo condicionar en $X_1,\ldots,X_n$; así que la ventaja que usted busca (que el símbolo $\boldsymbol X$ no cambie de significado en la última sección) se consigue igual. Con esto, D.7 desaparece como problema: la matriz se declara desde el principio y la promesa «no hace falta en esta sesión» se sustituye por una frase honesta sobre dónde reaparece.
+
+Son cuatro retoques en =S15-Lecc11.org=:
+
+/(1) Transparencia «El marco: muestra aleatoria», segundo bullet/. Sustituir «$X$ (sin subíndice) es la variable poblacional (lección 9); $\boldsymbol X=(X_1,\ldots,X_n)$ es el vector con las $n$ copias del muestreo —el análogo aleatorio del vector de datos $\boldsymbol x=(x_1,\ldots,x_n)$ de la lección 4. De manera similar, $\boldsymbol U=(U_1,\ldots,U_n)$.» por:
+
+#+begin_src org
+$X$ (sin subíndice) es la variable poblacional (lección 9). $\boldsymbol X$ es la /versión aleatoria de la matriz de regresores/ $\boldsymbol{\mathsf X}=[\boldsymbol 1;\;\boldsymbol x]$ (lección 10): dos columnas, una de constantes y otra con las $n$ copias $X_1,\ldots,X_n$ del muestreo. Como solo la segunda es aleatoria, condicionar en $\boldsymbol X$ equivale a condicionar en $(X_1,\ldots,X_n)$. Los vectores $\boldsymbol Y=(Y_1,\ldots,Y_n)$ y $\boldsymbol U=(U_1,\ldots,U_n)$ son los análogos aleatorios de $\boldsymbol y$ y de las perturbaciones.
+#+end_src
+
+/(2) Apuntes de «El marco», párrafo que empieza «Formalicemos esa idea con la notación más sencilla posible...»/. Sustituir desde ahí hasta el final del párrafo «/Una precisión de notación, para evitar una posible confusión/...» por:
+
+#+begin_src org
+Formalicemos esa idea. Desde las lecciones 5-6 venimos usando $\boldsymbol x=(x_1,\ldots,x_n)$ para el vector de datos observados de un regresor, y en la lección 10 agrupamos los regresores observados en la matriz de datos $\boldsymbol{\mathsf X}$ (en el modelo simple, $\boldsymbol{\mathsf X}=[\boldsymbol1;\;\boldsymbol x]$, dos columnas). Hoy introducimos su análogo aleatorio, el objeto sobre el que condicionaremos toda la sesión, y lo denotamos $\boldsymbol X$: la misma negrita que usamos para pasar de $\boldsymbol y$ a $\boldsymbol Y$, pero sin la letra de palo seco que reservamos a las matrices de datos observados. Sus dos columnas son una columna de constantes —que, por no ser aleatoria, no aporta nada al condicionamiento— y la columna formada por las $n$ variables aleatorias $X_1,\ldots,X_n$: cada una copia idéntica e independiente de la variable poblacional $X$ de la lección 9.[fn::(la nota al pie existente sobre copias idénticas e independientes se mantiene aquí)] Es la misma relación dato/variable aleatoria que venimos usando desde la lección 9 (entre $y_i$ e $Y$), aplicada componente a componente a los $n$ elementos de la muestra.
+
+/Una precisión de uso/. Durante casi toda la sesión no necesitaremos ninguna operación matricial con $\boldsymbol X$: bastarán sumatorios sobre las $X_i$, y =condicionar en $\boldsymbol X$'' significará siempre condicionar en las $n$ variables $X_1,\ldots,X_n$. La estructura de matriz reaparecerá puntualmente al justificar el divisor $n-k$ (sección =MCO es BLUE; estimando $\sigma^2$'', donde hablaremos de las columnas de $\boldsymbol{\mathsf X}$) y, con todas sus columnas, en la generalización final a $k$ regresores. Es decir: el símbolo $\boldsymbol X$ significa lo mismo al principio y al final de la sesión; lo único que cambia es cuántas columnas tiene.
+#+end_src
+
+/(3) Apuntes de «¿Y con más regresores?»/. Sustituir «Aquí $\boldsymbol X$, en negrita pero con la misma tipografía que empleamos para los vectores (...) denota la versión /aleatoria/ de la matriz de regresores —la extensión, a $k$ columnas, del vector aleatorio $\boldsymbol X=(X_1,\ldots,X_n)$ de un único regresor que usamos en toda esta sesión—, mientras que $\boldsymbol{\mathsf X}$ sigue denotando, como en la lección 10, la matriz de datos /observados/.» por:
+
+#+begin_src org
+Aquí $\boldsymbol X$ es la misma matriz aleatoria de regresores que fijamos al abrir la sesión, solo que ahora con $k$ columnas en lugar de dos; $\boldsymbol{\mathsf X}$ sigue denotando, como en la lección 10, la matriz de datos /observados/.
+#+end_src
+
+/(4) Apuntes de «MCO es BLUE», donde se define $\hat{\boldsymbol E}$/: sustituir «$\hat{\boldsymbol E}=\boldsymbol Y-\hat\beta_1(\boldsymbol X,\boldsymbol Y)\cdot\mathit1-\hat\beta_2(\boldsymbol X,\boldsymbol Y)\boldsymbol X$» (que multiplica una matriz por un escalar como si fuera el vector del regresor) por «$\boldsymbol{\mathop{\widehat E}}=\boldsymbol Y-\boldsymbol X\boldsymbol{\mathop{\widehat\beta}}(\boldsymbol X,\boldsymbol Y)$, es decir, $\hat E_i=Y_i-\hat\beta_1\mathit1-\hat\beta_2X_i$» (de paso corrige el acento: $\boldsymbol{\mathop{\widehat E}}$, no $\hat{\boldsymbol E}$).
+
+/Plan, §4.2.1/: sustituir los dos bullets «Caso de un único regresor (sesión 15 en adelante)» y «Precedente autorizado» por uno solo:
+
+#+begin_src org
+  - /Caso de un único regresor no constante (sesión 15 en adelante)/: aunque solo haya un regresor no constante, $\boldsymbol X$ denota igualmente la versión aleatoria de la matriz de regresores $\boldsymbol{\mathsf X}=[\boldsymbol1;\;\boldsymbol x]$, con dos columnas (constantes y $X_1,\ldots,X_n$). No se introduce un símbolo vectorial aparte para $(X_1,\ldots,X_n)$: se escribe con subíndices ($X_i$, $\overline X=\frac1n\sum_iX_i$) o como =las $n$ copias del regresor''. Condicionar en $\boldsymbol X$ equivale a condicionar en $X_1,\ldots,X_n$, porque la columna de constantes no es aleatoria. Ventaja: el significado de $\boldsymbol X$ no cambia al generalizar a $k$ columnas al final de la lección 11 (S15); el elemento $(1,1)$ de $\boldsymbol X^\top\boldsymbol X$, igual a $n$, recuerda que la columna de constantes está incluida. Al reutilizar $\boldsymbol X$ para $k$ columnas basta una frase que diga =la misma matriz, ahora con $k$ columnas''. Precedente: S15 (tras revisión).
+#+end_src
+
+Además, en el bullet «Blindaje poblacional vs. muestral» de §4.2.1, el ejemplo «$Y_i=\beta_1\mathit1+\beta_2x_i+U_i$» debería llevar $X_i$ (mayúscula): el regresor es aleatorio en el modelo poblacional, y así lo escribe S15. Y en la ficha §7.16 conviene añadir una línea: «/Notación de $\boldsymbol X$ (tras revisión)/: matriz aleatoria de dos columnas desde la transparencia 2, mismo objeto con $k$ columnas en la última; ver §4.2.1».
+
+---
+
+* E.1 — Reescritura de §7.0 y §9.3
+
+Antes de los textos, tres avisos:
+- §2 dice «las 26 sesiones»; el título de §7.0 y la tabla dicen 25. Corregir §2 a 25.
+- La fila 15 aparece =PENDIENTE= pero la ficha §7.16 dice ESCRITA. Si el algoritmo de §1 se ejecutara ahora, intentaría reescribir la sesión 15. En la tabla de abajo la pongo =ESCRITA=; revierta si no procede.
+- La fila 10 seguía con la sigla inglesa (SST/SSR/SSE) contra §4.2.1.
+
+*/ §7.0 (reemplazo íntegro)
+
+#+begin_src org
+** 7.0 Cronograma de las 25 sesiones
+
+#+begin_center
+/ATENCIÓN IA/: Esta tabla es de solo lectura para ti. Úsala únicamente para encontrar la primera sesión =PENDIENTE=.
+No incluyas una versión actualizada de esta tabla en tu output; el usuario gestionará el cambio a =ESCRITA= manualmente.
+#+end_center
+
+| Sem | Ses | Tipo      | Contenido                                                                                                                            | Estado    |
+|-----+-----+-----------+--------------------------------------------------------------------------------------------------------------------------------------+-----------|
+|   1 |   1 | Teoría    | Introducción: econometría, tipología de datos.                                                                                       | ESCRITA   |
+|   1 |   2 | Teoría    | Vectores en $\mathbb{R}^n$, producto escalar, norma.                                                                                 | ESCRITA   |
+|   2 |   3 | Teoría    | Ángulo, ortogonalidad, Pitágoras, Cauchy–Schwarz.                                                                                    | ESCRITA   |
+|   2 |   4 | Lab Gretl | Introducción a Gretl: dos prácticas (A: hprice2; B: importar Boston).                                                                | ESCRITA   |
+|   3 |   5 | Teoría    | Proyección sobre una recta (minimización). Media como proyección.                                                                    | ESCRITA   |
+|   3 |   6 | Teoría    | Varianza vía Pitágoras. Traducción estadística: $1/n$, covarianza, $\rho=\cos\theta$.                                                | ESCRITA   |
+|   4 |   7 | Lab Gretl | Descriptivos, correlaciones, dispersión (reales); verificar identidades (simulados); momentos no bastan (curados).                   | ESCRITA   |
+|   4 |   8 | Teoría    | Regresión simple como ajuste geométrico (dos ortogonalidades planteadas, sin resolver).                                              | ESCRITA   |
+|   5 |   9 | Teoría    | Estimación MCO sin matrices: dos ortogonalidades ⇒ $\hat\beta_2, \hat\beta_1$.                                                      | ESCRITA   |
+|   5 |  10 | Teoría    | Bondad de ajuste: STC = SEC + SRC (Pitágoras). $R^2 = \cos^2\theta$; en regresión simple $R^2=\rho_{xy}^2$.                          | ESCRITA   |
+|   6 |  11 | Lab Gretl | Regresión simple (juguete, reales); comprobar $\sum \hat e_i = 0$, $\sum x_i \hat e_i = 0$, $R^2$; gráficos e informes.              | ESCRITA   |
+|   6 |  12 | Teoría    | El puente: variables aleatorias, esperanza condicional, supuestos del modelo clásico, interpretación causal, método de los momentos. | ESCRITA   |
+|   7 |  13 | Teoría    | Regresión múltiple: $\mathcal{L}(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$, operador selector, ecuaciones normales.     | ESCRITA   |
+|   7 |  14 | Lab Gretl | Regresión múltiple (reales y simulados): coeficientes parciales, $R^2$ ajustado, verificación matricial.                             | ESCRITA   |
+|   8 |  15 | Teoría    | Propiedades MCO: insesgadez y varianza de $\hat\beta_2$ (deducción simple, $k=2$).                                                   | ESCRITA   |
+|   8 |  16 | Teoría    | Inferencia: distribución de $\hat\beta$ (enunciada), EE, IC, contraste $t$.                                                          | PENDIENTE |
+|   9 |  17 | Lab Gretl | Monte Carlo de insesgadez/varianza; contrastes $t$ e IC (reales); cobertura de IC (simulados).                                       | PENDIENTE |
+|   9 |  18 | Teoría    | Contraste $F$: significación conjunta, restricciones lineales.                                                                       | PENDIENTE |
+|  10 |  19 | Lab Gretl | Aplicar $F$ (reales); distribución de $F$ bajo $H_0$ (simulados).                                                                    | PENDIENTE |
+|  10 |  20 | Teoría    | Diagnóstico I: colinealidad (geometría: casi alineados). VIF.                                                                        | PENDIENTE |
+|  11 |  21 | Lab Gretl | Colinealidad creciente (simulados): oscilación de $\hat\beta$. Caso real.                                                            | PENDIENTE |
+|  11 |  22 | Teoría    | Formas funcionales con logaritmos: log-nivel, nivel-log, log-log. Elasticidades. Cobb–Douglas.                                       | PENDIENTE |
+|  12 |  23 | Teoría    | Variables dummy e interacciones; modelos log + dummy. Interpretación de coeficientes.                                                | PENDIENTE |
+|  12 |  24 | Teoría    | Diagnóstico II: heterocedasticidad (BP, White), errores robustos. Especificación (RESET, breve).                                     | PENDIENTE |
+|  13 |  25 | Lab Gretl | Caso integrador (reales): logs, dummies, diagnóstico (incl. palanca/Cook). Cierre: diccionario geometría ↔ esperanza.                | PENDIENTE |
+
+#+begin_center
+/Nota histórica (no reabrir)/: las sesiones 12 y 15 intercambiaron su
+contenido respecto a versiones anteriores del plan. El contenido vigente de
+cada una está en sus fichas: §7.13 (sesión 12, "El puente") y §7.16 (sesión
+15, "Propiedades MCO"). Frisch–Waugh salió del tronco principal (ficha §7.9
+y §9.3, punto 4).
+#+end_center
+
+#+begin_center
+/Nota sobre la doble numeración/: el número de sesión (columna «Ses») es el
+identificador canónico para §10 y para las referencias cruzadas entre fichas.
+El número de lección que aparece en el título de los ficheros =.org=
+(p. ej. «Lección 4» en =S05-Lecc04.org=) es el orden de la sesión entre las
+sesiones de tipo Teoría (regla de cálculo en §4.6). Correspondencia actual:
+1→L1, 2→L2, 3→L3, 5→L4, 6→L5, 8→L6, 9→L7, 10→L8, 12→L9, 13→L10, 15→L11,
+16→L12, 18→L13, 20→L14, 22→L15, 23→L16, 24→L17. Ante cualquier ambigüedad,
+el número de sesión de §7.0 prevalece.
+#+end_center
+#+end_src
+
+(He añadido la tabla de correspondencia sesión↔lección al pie porque es lo que el paso 6 de §1 pide verificar y hasta ahora había que recalcularla cada vez. Nótese que S15 ya cita «lección 17» implícitamente al hablar de heterocedasticidad como «sesión 24»: con esta tabla se ve de un vistazo que debe decir «lección 17».)
+
+*/ §9.3 (reemplazo íntegro)
+
+#+begin_src org
+** 9.3 Recortes condicionales (si no cupiera el tiempo)
+En orden de prioridad:
+1. El bloque RESET de la sesión 24 (lección 17), reducible a una mención.
+2. Sesión 18 (lección 13) limitada al $F$ de significación conjunta (omitir
+   restricciones lineales generales).
+3. En la sesión 23 (lección 16), recortar /interacciones/, conservando dummies
+   simples y los modelos log con su interpretación. (Cobb–Douglas, que
+   pertenece a la sesión 22 / lección 15, es irrenunciable: condición fijada
+   en su ficha §7.23.)
+4. [RETIRADO] Frisch–Waugh salió del tronco principal como sesión autónoma
+   (decisión tomada al escribir la sesión 8, ver ficha §7.9). Ya no es un
+   recorte condicional: es un recorte firme. Puede sobrevivir, a lo sumo,
+   como mención de una frase en la sesión 9 o 13 (ver ficha §7.9,
+   "Recorte que financia la reordenación").
+#+end_src
+
+*/ Correcciones puntuales de numeración en otras secciones (una línea cada una)
+- §2: «las 26 sesiones» → «las 25 sesiones».
+- §8, datasets: «dummies (sesión 24)» → «(sesión 23)»; «sesión integradora (sesión 26)» → «(sesión 25)».
+- §9.1, principio 12: «(ver ficha §7.24)» → «§7.23»; principio 13: «(ver ficha §7.25)» → «§7.24».
+- §9.4: «se reduce e integra en la sesión 25» → «sesión 24»; «laboratorio integrador (sesión 26)» → «(sesión 25)».
+- §7.23 (Sesión 22, logaritmos): mover íntegro el bullet «/Semilla recibida de la sesión 13/: el caso de dos indicadoras que suman $\boldsymbol1$...» a §7.24 (Sesión 23, dummies), que es donde se cobra.
+- §7.24: «puede recortarse la parte de interacciones ... (§9.3)» — correcto; no tocar.
+- §7.25: «reducida a una mención dentro de esta sesión (§9.3, §9.4)» — correcto.
+- §7.10 (ficha S09): «traducción directa a $\text{SST}=\text{SSR}+\text{SSE}$» → «STC = SEC + SRC».
+- §7.13 y §10: «$\mathrm{Var}[U\mid X]=\sigma^2$» → «$Var[U\mid X]=\sigma^2\cdot\mathit1$» (regla de §4.2.1).
+- §7.18: «$\sigma^2/\sum_i(x_i-\bar x)^2$» → «$\sigma^2/\sum_i(x_i-\mu_{\boldsymbol x})^2$».
+
+---
+
+* E.2 — Reescritura de §7.11 (ficha S10)
+
+#+begin_src org
+** 7.11 Ficha — Sesión 10 (Bondad de ajuste)
+- /Fichero/: =S10-Lecc08.org= (ESCRITA; ver "Correcciones pendientes sobre el
+  fichero" al final de esta ficha).
+- /Título y entrega/: "Lección 8. Bondad de ajuste: de Pitágoras a $R^2$".
+  Abstract: las dos ortogonalidades de la lección 7, vistas bajo Pitágoras,
+  descomponen la varianza de $\boldsymbol{y}$ en la del ajuste más la del
+  error; el cociente es $\cos^2\theta$ entre $\boldsymbol{y}$ y
+  $\boldsymbol{\mathop{\widehat{y}}}$ centrados. Cita: "Un triángulo
+  rectángulo escondido en cada regresión." Entrega: apuntes + 11
+  transparencias + 12 preguntas.
+- /Anclaje e idea rectora/: cobra la identidad guardada en la lección 7
+  ($\boldsymbol{\mathop{\widehat{y}}}-\mu_{\boldsymbol{\mathop{\widehat{y}}}}\boldsymbol{1}=\hat\beta_2(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$)
+  y construye, a partir de $\boldsymbol{y}=\boldsymbol{\mathop{\widehat{y}}}+\boldsymbol{\mathop{\widehat{e}}}$
+  y $\mu_{\boldsymbol{y}}=\mu_{\boldsymbol{\mathop{\widehat{y}}}}$, un triángulo
+  rectángulo con hipotenusa $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ y
+  catetos $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ y
+  $\boldsymbol{\mathop{\widehat{e}}}$. Se demuestran con detalle las 4 marcas
+  de ortogonalidad de la figura (la cuarta,
+  $\boldsymbol{\mathop{\widehat{e}}}\perp(\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}})$,
+  combinando $\boldsymbol{\mathop{\widehat{e}}}\perp\boldsymbol{1}$ y
+  $\boldsymbol{\mathop{\widehat{e}}}\perp\boldsymbol{\mathop{\widehat{y}}}$).
+- /Demostración central 1/: Pitágoras (lección 3) sobre ese triángulo da
+  $\sigma_{\boldsymbol{y}}^2=\sigma_{\boldsymbol{\mathop{\widehat{y}}}}^2+\sigma_{\boldsymbol{\mathop{\widehat{e}}}}^2$;
+  multiplicando por $n$, STC=SEC+SRC. Se presenta primero con varianzas
+  (registro $\langle\cdot,\cdot\rangle_s$, coherente con lecciones 4-7) y
+  después la versión sin el factor $1/n$, señalando que es un cambio tácito
+  de producto escalar (al euclídeo), inocuo para $R^2$ por ser un cociente.
+  Incluye la advertencia sobre el falso amigo inglés SST=SSE+SSR ("SSE" =
+  explicada, no "error").
+- /Demostración central 2/: $R^2=\mathrm{SEC}/\mathrm{STC}=\sigma^2_{\boldsymbol{\mathop{\widehat{y}}}}/\sigma^2_{\boldsymbol y}=\cos^2\theta=\rho^2_{\boldsymbol y\boldsymbol{\mathop{\widehat{y}}}}$,
+  con $\theta=\measuredangle\big((\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}),(\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}})\big)$;
+  demostrado sustituyendo la descomposición ortogonal en el numerador del
+  coseno. Precede a la definición una transparencia motivadora ("¿Qué ajuste
+  es mejor: el de arriba o el de abajo?") que justifica comparar solo los
+  vectores en desviaciones (la componente en $\mathcal L(\boldsymbol1)$ es
+  común a $\boldsymbol y$ y $\boldsymbol{\mathop{\widehat y}}$).
+- /Demostración central 3 (cierre del hilo covarianza/correlación)/: en
+  regresión simple, $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$. Argumento
+  adoptado (único en el fichero; no se conserva confirmación algebraica
+  alternativa): todo vector no constante del plano
+  $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, una vez centrado, cae en la
+  MISMA recta $\mathcal{L}(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})$
+  (la identidad guardada, generalizada a cualquier
+  $\boldsymbol{w}=c_1\boldsymbol{1}+c_2\boldsymbol{x}$ con $c_2\neq0$; ver
+  decisión pendiente A.2 sobre el nombre de estos coeficientes auxiliares).
+  Como $\boldsymbol{\mathop{\widehat{y}}}$ es uno de esos vectores
+  (traslación y reescalado de $\boldsymbol{x}$), basta aplicar las
+  propiedades de traslación y escala de la correlación demostradas en la
+  lección 5 para obtener
+  $\rho_{\boldsymbol{y}\boldsymbol{\mathop{\widehat{y}}}}=\mathrm{sign}(\hat\beta_2)\,\rho_{\boldsymbol{x}\boldsymbol{y}}=|\rho_{\boldsymbol{x}\boldsymbol{y}}|$
+  (signo común de $\hat\beta_2$ y $\rho_{\boldsymbol{x}\boldsymbol{y}}$,
+  lección 7). Se explicita que esta coincidencia es exclusiva de la
+  regresión simple: en regresión múltiple (lección 10), el subespacio de
+  vectores en desviaciones de
+  $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\ldots,\boldsymbol{x}_k)$
+  tiene dimensión $k-1>1$, así que
+  $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ ya no
+  está alineado con ningún regresor centrado, y $R^2=\cos^2\theta$ deja de
+  coincidir con ninguna correlación simple $\rho_{\boldsymbol{x}_j\boldsymbol{y}}$.
+- /Ejemplo numérico canónico (reutilizado)/: el $n=5$ de la lección 7
+  ($\boldsymbol{x}=(1,2,3,4,5)$, $\boldsymbol{u}=(1,-2,0,2,-1)$,
+  $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$, $\hat\beta_1=2,\hat\beta_2=3$).
+  STC=100, SEC=90, SRC=10, $R^2=0{,}9=\rho_{\boldsymbol{x}\boldsymbol{y}}^2=36/40$.
+- /Advertencia causal (transparencia dedicada)/: STC=SEC+SRC es puramente
+  algebraica; ejemplo precio/superficie invertidos; cita a Tyler Vigen,
+  /Spurious Correlations/ (queso per cápita vs. muertes por enredarse en
+  sábanas, $\rho\approx0{,}947$). Anticipo sin desarrollo: "R² nunca empeora
+  al añadir regresores" (cobrado en 14).
+- /Figuras/ (en =img/S10-Lecc08/=): =OLS_fila_ancho.png= (dos vistas del
+  triángulo, arco con $\theta$; reutilizada en la lección 10 como esquema
+  del caso $k$ precisamente porque no dibuja $\hat\beta_2\boldsymbol x$);
+  =ComparacionAjustes_ancho.png= (dos escenas con igual
+  $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ y distinto
+  $\boldsymbol{\mathop{\widehat{e}}}$); =SumaCuadradosModeloLinealSimple.png=
+  (STC, SEC, SRC como áreas sobre el diagrama de dispersión).
+- /Vocabulario fijado/: siglas STC/SEC/SRC como convención del curso.
+- /Promesas cumplidas (cobradas)/: identidad guardada de la lección 7
+  (cobro pleno, generalizada a "cualquier vector no constante del plano");
+  "dos ortogonalidades ⇒ STC=SEC+SRC" (lección 7); invarianza de $\rho$
+  ante el divisor (práctica que sigue a la lección 5, S07-Prct-A, Apéndice),
+  reutilizada para la invarianza de $R^2$; propiedades de traslación y
+  escala de $\rho$ (lección 5), reutilización estructural en la
+  demostración 3.
+- /Lo que siembra/: lección 9 (cuándo cabe lectura causal de un buen
+  ajuste); lección 10 ($R^2=\cos^2\theta$ en dimensión $k$, con la razón
+  geométrica de por qué no es suma de correlaciones); práctica de la sesión
+  14 ("R² nunca empeora" → $R^2$ ajustado).
+- /Guiño a la sesión siguiente/: laboratorio (verificar ortogonalidades y
+  $R^2$ con datos reales); lección 9 ("El puente").
+- /Notebook asociado/: =S10-Notebook03.org= (Cuaderno 3). Detalle en §7.27.
+- /Correcciones pendientes sobre el fichero/ (detectadas en revisión
+  retrospectiva; aplicar la próxima vez que se toque el fichero):
+  1. Apuntes de "El coeficiente de determinación": «$\cos^2\theta=\rho_{\boldsymbol{y}\boldsymbol{\mathop{\widehat{y}}}}$» → «$\cos\theta=\rho_{\boldsymbol{y}\boldsymbol{\mathop{\widehat{y}}}}$».
+  2. Apuntes de "Una advertencia", último párrafo: «lección 7» → «lección 5»; y ese párrafo está colocado tras la lista "Para profundizar" (mover antes de ella).
+  3. Mismo lugar: «(como ya sabemos, en la regresión lineal simple $R^2=\rho_{xy}^2$...)» → «(como veremos en la próxima transparencia, y como sugiere el ejemplo numérico...)».
+  4. Referencias internas "transparencia N" desfasadas tras inserciones: Respuestas Q6 («transparencia 5» → "En el caso de la regresión simple"), Q10/Q11 y Comentario («transparencia 6» → "Una advertencia"), apuntes de Recapitulación («(transparencia 5)» → "En el caso de la regresión simple"), apuntes de "En el caso de la regresión simple" («(transparencia anterior)» → "El coeficiente de determinación"). Sustituir números por títulos.
+  5. Apuntes de "Ejemplo numérico": «$\hat{\boldsymbol{y}}=(5,8,11,14,17)$» → «$\boldsymbol{\mathop{\widehat{y}}}=\ldots$».
+  6. Unificar el orden de subíndices: $\rho_{\boldsymbol{y}\boldsymbol{\mathop{\widehat{y}}}}$ en todo el fichero.
+  7. Apuntes de Recapitulación: «los datos con los que se trabajó en la lección 5» → «en la práctica que siguió a la lección 5».
+  8. Errata «trasparente» → «transparente».
+#+end_src
+
+---
+
+* E.4 (i) — Aviso sobre $S^2$ en §4.2.1
+
+/Dónde/: §4.2.1, inmediatamente después del bullet «/Notación $\overline{X}$ para el estimador de la media muestral/».
+
+#+begin_src org
+- /Notación $S^2$ (varianza de la muestra aleatoria del regresor)/: por el
+  mismo principio de sustitución, la fórmula de la varianza de un vector de
+  datos (lección 5) evaluada sobre la muestra aleatoria del regresor da el
+  estadístico $S^2=\frac1n\sum_i(X_i-\overline X)^2$ (mayúscula latina, como
+  $\overline X$: es una variable aleatoria, no un número). Divisor $n$,
+  conforme a la convención del curso, no $n-1$. No confundir con ninguno de
+  estos cuatro objetos, todos distintos: (a) $\sigma^2_{\boldsymbol x}$, la
+  varianza del vector de datos observado —un número, lección 5—; (b)
+  $\mathrm{Var}(X)$, la varianza poblacional del regresor —un número
+  desconocido, lección 9—; (c) $\mathfrak s^2=\mathrm{SRC}/(n-k)$, la
+  cuasivarianza de los residuos, que estima la varianza de la
+  /perturbación/ $\sigma^2$, no la del regresor; (d) la $s^2$ de los
+  manuales clásicos (que suele ser (c) con otra tipografía). Introducida en
+  S15 al escribir $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/(nS^2)$;
+  reutilizable en la lección 12 (error estándar). Regla de primera
+  aparición: definirla inline en la propia transparencia donde aparezca
+  (en S15 falta: añadir «donde $S^2=\frac1n\sum_i(X_i-\overline X)^2$» junto
+  a la fórmula recuadrada de la transparencia "Varianza: cuán dispersas
+  están las estimaciones").
+#+end_src
+
+---
+
+* E.5 (iv) — Nuevo patrón de búsqueda para §1, paso 6
+
+/Dónde/: §1, paso 6, inmediatamente después del bullet que empieza «cualquier frase con "ya hemos usado", "como vimos en", ...».
+
+#+begin_src org
+   - "como ya sabemos", "ya sabemos que", "como acabamos de ver",
+     "como acabamos de demostrar", "como acabamos de comprobar", "recordemos
+     que", "según vimos" (insensible a mayúsculas), cuando NO van seguidas de
+     un numeral de lección o sesión: a diferencia del patrón anterior, aquí
+     no hay número que verificar sino el /estatus/ del resultado invocado.
+     Localizar dónde se establece ese resultado (en el mismo fichero o en
+     una lección anterior) y comprobar dos cosas: (i) que esa posición es
+     efectivamente ANTERIOR a la frase, y (ii) que allí el resultado se
+     demostró o definió, no solo se verificó con un ejemplo numérico, se
+     enunció sin prueba o se anunció como promesa. Si se establece más
+     adelante, reformular como anticipo ("como veremos en la próxima
+     transparencia"); si solo se verificó numéricamente, decirlo ("como
+     sugiere el ejemplo numérico"). Precedente: S10, «como ya sabemos, en
+     la regresión lineal simple $R^2=\rho_{xy}^2$», escrito una
+     transparencia antes de la demostración de ese hecho.
+#+end_src
+
+---
+
+* E.6 — Filas de §10
+
+Orden según la regla de §10 (cobro principal ascendente; a igualdad, sembrada ascendente).
+
+/A. Filas nuevas/
+
+Insertar después de la fila «Insesgadez/varianza de MCO: pregunta sembrada...» (cobro 15, sembrada 12):
+
+#+begin_src org
+| Ley de las esperanzas iteradas, $\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)$, obtenida como consecuencia de $Z-E[Z\mid\boldsymbol X]\perp\mathit1$ (no como teorema externo) | Ses. 12 (caso particular $\mathrm{E}\big(Y-E[Y\mid\mathit1]\big)=0$; la mención explícita del =Teorema de las esperanzas iteradas'' quedó comentada en el fichero final) | /15/ (enunciada y demostrada en =Insesgadez''); previsible reutilización estructural en 16 |
+#+end_src
+
+Insertar después de la fila «Distinción entre pasos algebraicos ... y pasos probabilísticos» (cobro 16, sembrada 15):
+
+#+begin_src org
+| Lema =sacar de la esperanza condicionada las funciones de la variable condicionante'': $E[c(\boldsymbol X)\cdot Z\mid\boldsymbol X]=c(\boldsymbol X)\cdot E[Z\mid\boldsymbol X]$, demostrado desde la caracterización pertenencia + ortogonalidad de $E[\cdot\mid\boldsymbol X]$ | Ses. 15 (herramienta, demostrada allí) | previsible reutilización estructural en /16/ (distribución de $\hat\beta_2$, error estándar) |
+| Estadísticos por sustitución: $\overline X=\frac1n\sum_iX_i$ y $S^2=\frac1n\sum_i(X_i-\overline X)^2$ (fórmulas de las lecciones 4-5 evaluadas sobre la muestra aleatoria; variables aleatorias, no números) | Ses. 15 | /16/ (error estándar de $\hat\beta_2$ vía $\mathfrak s^2/(nS^2)$); 17 (cálculo en Lab) |
+#+end_src
+
+Insertar después de la fila «=chas= como vector de $\mathbb{R}^{506}$...» (cobro 23, sembrada 4):
+
+#+begin_src org
+| Lo esencial para la validez del ajuste MCO no es que $\boldsymbol1$ sea una columna de $\boldsymbol{\mathsf X}$, sino que $\boldsymbol1\in\mathcal L(\text{columnas de }\boldsymbol{\mathsf X})$ (ej.: dos indicadoras de sexo que suman $\boldsymbol1$) | Ses. 13 (apuntes de =La matriz de datos y el operador selector'', con remisión explícita a las dummies); registrado también en §4.2.1 | /23/ (variables dummy: $k$ indicadoras excluyentes sin columna constante explícita) |
+#+end_src
+
+/B. Filas que se mueven/
+
+- La fila «Ejemplo peso-edad-edad²-edad³ ...» (actualmente al final, junto a Anscombe) pasa a situarse justo después de la fila «"$R^2$ nunca empeora al añadir regresores"...» (cobro 14, sembrada 10) y se reescribe:
+
+#+begin_src org
+| Ejemplo peso-edad-edad²-edad³ (polinomios crecientes, $R^2$ y $\bar R^2$ crecientes, extrapolación absurda) | Material de referencia §11.3 (Lec03); mencionado y aparcado en 10 | *14* (S14-Prct-C, ESCRITA: grado 1/2/3, extrapolación a edades 15-17 con peso decreciente; cobra además la distinción regresor/variable explicativa de la sesión 8) |
+#+end_src
+
+/C. Filas que se modifican (solo la columna «Cobrada en»)/
+
+- «Supuesto de Homocedasticidad ($Var[U\mid X]=\sigma^2\cdot\mathit1$ constante)»: → «15 (reutilización estructural: reduce $Var[\hat\beta_2\mid\boldsymbol X]$ a $\sigma^2\sum_iW_i^2$); /16/ (base de contrastes $t$ e IC)».
+- «Diccionario geometría ↔ probabilidad»: → «*12* (desarrollo central en "El puente"); 13, 15, 16 (reutilización estructural: en 15, $E[\cdot\mid\boldsymbol X]$ como proyección caracterizada por pertenencia + ortogonalidad); 25 (cierre no evaluable)».
+- «Producto escalar probabilístico $\langle X,Y\rangle_P=E[XY]$...»: → «*12* (desarrollo pleno); reutilizado en 15 ($\|\cdot\|_P$; el carácter de semi-producto escalar al precisar $\mathrm{Var}(X)\neq0$) y en 25».
+- «Advertencia "explicada no es causada" / correlaciones espurias»: → «Mención en *10*; *11* (S11-Prct-B, refuerzo aplicado); reforzada en 12 (sección propia "Cuidado: esta descomposición ortogonal no implica causalidad")».
+- «Cuasivarianza de los residuos $\mathrm{SRC}/(n-k)$ ...»: → «*15* (intuición geométrica del divisor $n-k$ como dimensión de $\mathcal L(\boldsymbol{\mathsf X})^\perp$; insesgadez de $\mathfrak s^2$ ENUNCIADA sin demostrar; se acuña $\mathfrak s^2$ y el tercer producto escalar $\langle\cdot,\cdot\rangle_{n-k}$)».
+
+---
+
+* E.7 — Regla sobre afirmar resultados antes de la salida real
+
+/Dónde/: §5.1, como nuevo bullet tras el de =set seed=.
+
+#+begin_src org
+- /No afirmar el resultado antes de la salida/: el texto de una práctica
+  (enunciados, bloques =Lo que debe observar'', Respuestas) no debe
+  afirmar el signo, la magnitud ni el sentido cualitativo de un resultado
+  numérico que se genera en la ejecución real del guion
+  (=outfile=/=#+include=) salvo que el autor lo haya comprobado ejecutando
+  ese guion sobre los datos definitivos. Cuando se haga, formularlo como
+  constatación sobre esos datos (=En este caso, los coeficientes cambian
+  poco''), no como predicción general, y mantener las Respuestas en
+  términos cualitativos válidos con independencia del valor exacto
+  obtenido. Precedente: S14-Prct-B, Actividad 2 (=los coeficientes no
+  cambian de forma tan drástica''), redactado tras ejecutar el guion.
+#+end_src
+
+Añadir en §8 una referencia cruzada al final del párrafo de datos reales: «(sobre cuándo puede el texto anticipar el resultado empírico, ver §5.1)».
+
+---
+
+* C.6 — Retiro mi afirmación sobre =$adjrsq=
+
+Tiene razón: en la lista de accesores documentados de Gretl está =$rsq= (y =$trsq=), pero no un =$adjrsq=. Me equivoqué al darlo por existente. Consecuencias:
+
+- La frase de S14-Prct-B («Gretl reporta el $R^2$ con =$rsq=, pero no permite recuperar el $R^2$ ajustado») es correcta en lo que respecta a los accesores. Si quiere, puede añadir la coletilla «como accesor directo» para ser exactos, porque el valor sí aparece impreso en la salida estándar de =ols= («R-cuadrado corregido»). (Es posible que en versiones recientes el /bundle/ =$model= contenga una clave =adjrsq=; no lo afirmo, compruébelo en su versión. Si no existe, no hay nada que cambiar.)
+- Lo que sí queda pendiente es el Objetivo 4 de la propia práctica («contrastarlo con el que reporta Gretl»): con las regresiones de la Actividad 5 en =--quiet=, y el bloque de salida de la Actividad 3 comentado (D.12), el alumno no ve nunca el «R-cuadrado corregido» de Gretl para compararlo con el cálculo manual. Sugiero descomentar el bloque =outfile=/=#+include= de la Actividad 3 (así aparece la salida completa del modelo con tres regresores no constantes, incluido su R² corregido) y añadir en la Actividad 5 una frase: «Compare con el =R-cuadrado corregido'' de la salida completa de la Actividad 3».
+- Ficha §7.15: sustituir las dos menciones a =$adjrsq= por «comparando con el ``R-cuadrado corregido'' que imprime la salida estándar de =ols=».
+
+---
+
+* Cierre con S02 y S03 cargados
+
+/(a) «regresor» y «MCO»/
+- S03, transparencia «Ortogonalidad en $\mathbb R^n$» y su nota al pie, ya presenta «regresores» con una glosa: «(las variables explicativas del modelo; ya lo veremos)» / «Las variables explicativas que se combinan para construir el ajuste». Por tanto B.1 se atenúa en S05/S06 (el término ya se había presentado), pero aparece un problema nuevo: la glosa de S03 /identifica/ regresor con variable explicativa, y S08 dedica una transparencia a /distinguirlos/. Sugiero cambiar la glosa de S03 por «(los vectores que se combinan para construir el ajuste; los definiremos con precisión al llegar a la regresión)», en ambos lugares, y en S08 cambiar «Introducimos aquí» por «Formalizamos aquí el término que ya asomó en la lección 3».
+- Corrijo B.7: S05 sí expande el acrónimo en el título de la Q9 («MCO (de mínimos cuadrados ordinarios)»). La primera aparición sin expandir está en /S02/, transparencia «Combinación lineal» («los $\alpha_j$ serán los coeficientes estimados por MCO»), y luego en S03 (Q12, opciones). Bastaría añadir en S02 «por MCO (mínimos cuadrados ordinarios)».
+- S03 dice «/Avance Tema 5/: regresores muy correlacionados» en la transparencia «Ángulo, alineación, normalización»: «Tema 5» es numeración interna del Plan, invisible para el alumno. Sustituir por «/Avance/: al final del curso, al hablar de colinealidad…».
+
+/(b) $\alpha$ con $\langle\cdot,\cdot\rangle$ o con el punto/
+- El cuerpo de S03 define $\alpha=\frac{\langle\boldsymbol a,\boldsymbol b\rangle}{\langle\boldsymbol a,\boldsymbol a\rangle}$ de forma genérica (correcto según §4.2.1), pero su banco de preguntas (Q7, Q11 y las Respuestas) escribe $\boldsymbol a\cdot\boldsymbol b$ y $\boldsymbol x\cdot\boldsymbol y$. Dado que S05 abre citando esa fórmula, conviene que S05 use $\langle\cdot,\cdot\rangle$ en los apuntes de apertura (donde ahora pone «$\boldsymbol a\cdot\boldsymbol h=0$») y, si se toca S03, homogeneizar su banco a la notación genérica.
+
+/Dos hallazgos nuevos en S02/
+- Transparencia y apuntes de «Hay más de una forma de medir»: «el coeficiente $R^2$ se escribe a veces como un cociente de /sumas de cuadrados/ ($\mathrm{SCE}/\mathrm{SCT}$)». Es un tercer juego de siglas (SCE/SCT) que no coincide ni con STC/SEC/SRC (convención fijada en S10) ni con SST/SSE/SSR. Además el alumno de la lección 2 no ha visto ninguna. Sugiero quitar las siglas de S02 («un cociente de sumas de cuadrados, y otras veces un cociente de varianzas»), o poner SEC/STC.
+- Nada más que señalar en S02: producto escalar, norma, doble norma y la nota al pie con $\langle\cdot,\cdot\rangle_s$ son coherentes con todo lo posterior.
+
+/Una decisión que queda abierta (A.2)*: $c_0,c_1$ en S09/S10. Si opta por renombrarlos $c_1,c_2$, la reescritura de §7.11 de arriba ya lo refleja; si opta por conservar $c_0,c_1$, añada a §4.2.1 una línea «Coeficientes auxiliares transitorios ($c_0,c_1$ en las lecciones 7-8) pueden indexarse desde cero; la convención "la constante lleva índice 1" se reserva a los $\beta$» y cambie en §7.11 «$c_1\boldsymbol1+c_2\boldsymbol x$ con $c_2\neq0$» por «$c_0\boldsymbol1+c_1\boldsymbol x$ con $c_1\neq0$».

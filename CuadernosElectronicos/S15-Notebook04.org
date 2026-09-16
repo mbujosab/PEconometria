@@ -1,0 +1,132 @@
+#    -*- mode: org -*-
+
+#+TITLE: Cuaderno 4. Insesgadez y varianza de $\hat\beta_2$: una simulación
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+
+#+LATEX_HEADER: \usepackage{polyglossia}
+#+LATEX_HEADER: \setmainlanguage{spanish}
+
+#+LATEX: \maketitle
+
+#+begin_abstract
+Complemento visual, interactivo, de la lección 11 (sesión 15). Simulamos muchas muestras de tamaño $n$ generadas por el mismo modelo poblacional $Y=\beta_1\cdot\mathit1+\beta_2X+U$, calculamos $\hat\beta_2$ en cada una, y observamos con nuestros propios ojos las dos propiedades demostradas algebraicamente en la lección: la nube de estimaciones se centra exactamente en $\beta_2$ (insesgadez) y se dispersa según la fórmula exacta $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-\overline X)^2$ (varianza).
+
+Este cuaderno no introduce contenido evaluable nuevo: es una ilustración de un resultado ya demostrado en la lección 11.
+#+end_abstract
+
+* Actividad: Simulación de un modelo lineal simple 
+
+** Preparación
+
+#+BEGIN_SRC jupyter-python :session s15 :exports code
+import numpy as np
+import plotly.graph_objects as go
+import matplotlib.pyplot as plt
+
+rng = np.random.default_rng(seed=42)
+#+END_SRC
+
+** Parte 1 — Muchas muestras, muchas rectas
+
+Fijamos un modelo poblacional conocido: $\beta_1=2$, $\beta_2=3$, $\sigma=2$, y un vector de regresores $\boldsymbol x$ fijo (los mismos valores del regresor en cada muestra simulada — así aislamos, con total nitidez, la única fuente de variación que nos interesa hoy: la de la perturbación $U$).
+
+#+BEGIN_SRC jupyter-python :session s15 :exports code
+beta1, beta2, sigma = 2.0, 3.0, 2.0
+n = 20
+x = np.linspace(-1, 10, n)
+
+n_muestras = 500
+betas2_hat = np.empty(n_muestras)
+
+A = x - x.mean()          # vector en desviaciones del regresor (fijo)
+denom = np.sum(A**2)      # sum_j A_j^2
+
+for m in range(n_muestras):
+    u = rng.normal(0, sigma, size=n)
+    y = beta1 + beta2 * x + u
+    betas2_hat[m] = np.sum(A * y) / denom   # la "vía alternativa" de la lección 7
+#+END_SRC
+
+#+BEGIN_SRC jupyter-python :session s15 :exports results
+media_simulada = betas2_hat.mean()
+var_simulada = betas2_hat.var(ddof=0)
+var_teorica = sigma**2 / denom
+print(f"Media de las 500 estimaciones: {media_simulada:.4f}  (beta_2 verdadero = {beta2})")
+print(f"Varianza simulada:            {var_simulada:.4f}")
+print(f"Varianza teórica (fórmula):    {var_teorica:.4f}")
+#+END_SRC
+
+* Actividad: comprobar que la media simulada se aproxima a \(\beta_2=3\) (insesgadez) 
+
+** Parte 2 — Visualización interactiva: rectas dispersas alrededor de la recta verdadera
+
+#+BEGIN_SRC jupyter-python :session s15 :exports code
+fig = go.Figure()
+
+xs_line = np.array([x.min(), x.max()])
+fig.add_trace(go.Scatter(x=xs_line, y=beta1 + beta2*xs_line,
+                          mode="lines", line=dict(color="black", width=4),
+                          name="Recta poblacional verdadera"))
+
+for m in range(40):  # solo 40 rectas, para no saturar la figura
+    u = rng.normal(0, sigma, size=n)
+    y = beta1 + beta2 * x + u
+    b2 = np.sum(A * (y - y.mean())) / denom if False else np.sum(A*y)/denom
+    b1 = y.mean() - b2 * x.mean()
+    fig.add_trace(go.Scatter(x=xs_line, y=b1 + b2*xs_line,
+                              mode="lines",
+                              line=dict(color="royalblue", width=1),
+                              opacity=0.35, showlegend=False))
+
+fig.update_layout(title="40 muestras, 40 rectas ajustadas — todas girando en torno a la recta verdadera",
+                   xaxis_title="x", yaxis_title="y")
+fig.show()
+#+END_SRC
+
+/Lectura/: cada recta azul es el resultado de una muestra distinta del mismo proceso generador. Ninguna coincide exactamente con la recta negra (poblacional), pero todas ``giran'' alrededor de ella sin sesgo sistemático hacia un lado — la insesgadez, vista.
+
+** Parte 3 — Histograma de $\hat\beta_2$ y la fórmula de la varianza
+
+#+BEGIN_SRC jupyter-python :session s15 :exports both
+fig2, ax = plt.subplots(figsize=(6,4))
+ax.hist(betas2_hat, bins=30, color="royalblue", alpha=0.7, edgecolor="white")
+ax.axvline(beta2, color="black", linewidth=2, label=r"$\beta_2$ verdadero")
+ax.set_title(r"Distribución de las 500 estimaciones $\hat\beta_2$")
+ax.set_xlabel(r"$\hat\beta_2$")
+ax.legend()
+plt.tight_layout()
+plt.show()
+#+END_SRC
+
+* Actividad: comprobar que varianza del estimador se reduce si la varianza del regresor aumenta
+
+
+** Parte 4 — ¿Qué pasa si aumentamos la dispersión de $\boldsymbol x$?
+
+Repetimos la simulación con un $\boldsymbol x$ mucho más disperso, manteniendo $n$ y $\sigma$ fijos, para comprobar visualmente la lectura de la fórmula $Var[\hat\beta_2\mid\boldsymbol x]=\sigma^2/(n\sigma_{\boldsymbol x}^2)$: a más dispersión en $x$, menor varianza de $\hat\beta_2$.
+
+#+BEGIN_SRC jupyter-python :session s15 :exports both
+x_disperso = np.linspace(1, 100, n)   # mucho más disperso que el original
+A2 = x_disperso - x_disperso.mean()
+denom2 = np.sum(A2**2)
+
+betas2_hat_disperso = np.empty(n_muestras)
+for m in range(n_muestras):
+    u = rng.normal(0, sigma, size=n)
+    y = beta1 + beta2 * x_disperso + u
+    betas2_hat_disperso[m] = np.sum(A2 * y) / denom2
+
+print(f"Varianza simulada (x poco disperso): {betas2_hat.var(ddof=0):.5f}")
+print(f"Varianza simulada (x muy disperso):  {betas2_hat_disperso.var(ddof=0):.5f}")
+#+END_SRC
+
+*Conclusión esperada*: la segunda varianza debe ser mucho menor — exactamente lo que predice la fórmula demostrada en la lección 11, ahora visto con datos simulados.
+
+* COMMENT ipynb :noexport:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(require 'ox-ipynb)
+(ox-ipynb-export-org-file-to-ipynb-file "S15-Notebook04.org")
+#+END_SRC
+

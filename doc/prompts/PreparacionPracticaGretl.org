@@ -7,18 +7,235 @@ Ejecuto el siguiente bloque para que tengas presente el plan de escritura, el co
               (buffer-string)))
 
 (setq-local gptel-context
-            (list "../../org-pract/S11-Prct-A-mco-simulado.org"
-		  "../../org-pract/S11-Prct-B-hprice2-ajuste.org"
-		  "../../org-pract/S11-Prct-C-graficos-informes.org"
-		  "../../org-pract/S04-Prct-B-boston.org"
-		  "../../org-lessons/S10-Lecc08.org"
+            (list "../../org-pract/S14-Prct-A-ramanathan.org"
+		  "../../org-pract/S14-Prct-B-hprice2-r2ajustado.org"
+		  "../../org-pract/S14-Prct-C-peso-edad.org"
+		  "../../org-pract/S14-Prct-D-simulados-matricial.org"
+		  "../../org-lessons/S01-Lecc01.org"
 		  "../../org-lessons/S12-Lecc09.org"
 		  "../../org-lessons/S13-Lecc10.org"
+		  "../../org-lessons/S15-Lecc11.org"
+		  "../../org-pract/CursoAntiguo/Lecc05.org"
+		  "../../org-pract/CursoAntiguo/Lecc06.org"
 		  ))
 #+end_src
 
-
 Vamos a escribir varias prácticas de laboratorio con Gretl (para ilustrar las dos últimas lecciones). Fíjate en el formato de las prácticas de laboratorio con Gretl anteriores. Si necesitas el contenido completo de alguna otra sesión o lección anteriores, dímelo. Podemos preparar entre tres y cuatro prácticas. A estas alturas del curso los alumno ya tendrán cierto manejo de Gretl y debemos tener material de trabajo para dos horas. 
 
-Si tienes preguntas, hazlas antes de escribir nada. 
+Entre el material que te he pasado, he incluido dos ficheros de prácticas que acompañaban al las lecciones 5 y 6 del curso mencionado como material de referencia en la sección 11 del plan de escritura.
 
+Si tienes preguntas, hazlas antes de escribir nada. Si necesitas más materiales, dímelo antes de empezar.
+1
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Antes de ponerme a escribir, quiero fijar bien el encaje de esta tanda de prácticas en el plan, porque veo varias decisiones estructurales que conviene resolver contigo primero.
+
+*Lo que interpreto de tu petición*
+
+Los dos ficheros "Curso Antiguo" que me pasas (=Lecc05.org= y =Lecc06.org=) se corresponden, según tu propia indicación, con §11.5 (Lec05 — "Especificación y Estimación del Modelo Lineal General", que incluye simulaciones con varios regresores no ortogonales, ortogonales, y perturbaciones que violan supuestos) y §11.6 (Lec06 — "Propiedades estadísticas de los estimadores MCO", con el bloque de Montecarlo que verifica $\mathrm{Var}(\hat\beta_2)=\sigma^2/\sum(x_i-\bar x)^2$ contra la matriz $(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$).
+
+Esto encaja con precisión quirúrgica con dos huecos reales de nuestro plan:
+- /Lección 10/ (regresión múltiple, sesión 13) ya tiene su laboratorio (sesión 14, A-D), así que no necesita más práctica dedicada... salvo que quieras un refuerzo específico con regresores /simulados/ (a diferencia de S14, que usa siempre datos reales o casi-reales).
+- /Lección 11/ (insesgadez y varianza de $\hat\beta_2$, sesión 15) /no tiene todavía ningún laboratorio propio/. Según la ficha §7.18 (sesión 17), su verificación Montecarlo estaba prevista como "primera actividad" de la sesión 17, /empaquetada junto con/ contrastes $t$ e IC — pero esos contrastes exigen la lección 12 (inferencia), que aún no está escrita.
+
+*Preguntas antes de empezar*
+
+1. //Encaje en el cronograma/*: ¿quieres que esta tanda de prácticas /sea/ la sesión 17 completa —absorbiendo y ampliando lo que la ficha 7.18 preveía como "primera actividad", dejando "contrastes $t$ e IC" para una sesión posterior que habrá que renumerar cuando la lección 12 esté escrita— o prefieres tratarla como /material adicional fuera de la numeración/ de las 26 sesiones (mismo estatus que el cuarteto de Anscombe, §7.7), dejando intacta la sesión 17 tal cual está prevista en el plan? Esto determina el nombre de fichero (=S17-Prct-X...= vs. algo fuera de numeración) y qué debo anotar en §10/§7.0.
+
+2. //Alcance teórico/*: lección 11 /solo demuestra/ insesgadez y varianza para $k=2$ (un único regresor no constante). El viejo Lecc05/Lecc06 trabaja con $k=3$ (dos regresores, $S$ y $D$) y matrices ($\boldsymbol{\mathsf X}$, =invpd(X'X)=), que es exactamente la notación de la /lección 10/, no de la 11. ¿Quieres que la tanda:
+   (a) se quede en $k=2$ para la verificación Montecarlo rigurosa (fiel a lo demostrado en lección 11), y solo mencione como "aserción, no demostrada" el caso general $k>2$; o
+   (b) incluya explícitamente una práctica con $k=3$ regresores simulados (más fiel al viejo Lecc05/Lecc06), apoyándose en la generalización matricial que la lección 11 deja enunciada sin demostrar al final?
+
+3. //Supuestos violados/*: el viejo Lecc05 dedica bastante espacio a violar supuestos a propósito (perturbaciones con esperanza no nula, perturbaciones correladas con un regresor). Eso pedagógicamente pertenece más a sesiones futuras ya reservadas (heterocedasticidad-24, colinealidad-20, e incluso el propio "El puente"-12 para exogeneidad). ¿Excluimos esa parte de esta tanda y la reservamos como semilla explícita para esas sesiones, o quieres una pincelada aquí también (como contraste rápido "qué pasa si no se cumple")?
+
+4. //Datos/*: ¿reutilizamos =hprice2=/Ramanathan (ya usados en S11 y S14) para anclar los valores "verdaderos" de $\beta_1,\beta_2,\sigma^2$ de la simulación (como hace el viejo Lecc06 con =data3-1=), o prefieres una simulación completamente autocontenida (parámetros elegidos por nosotros, sin depender de ningún ajuste real previo)?
+
+5. //El =loop= de Gretl/*: según la semilla de §10, esta seria la primera sesión donde se explica su mecánica completa (=loop N --progressive --quiet=, =store=), tras haberlo usado como "caja negra" opcional en S07-Prct-B. Confirmo que esta tanda es el lugar adecuado para hacerlo con detalle (no solo como opción oculta).
+
+6. //Número de prácticas y reparto/*: propongo, salvo que prefieras otra cosa, algo así para dos horas:
+   - /Práctica A/: Montecarlo con $k=2$ — verificación de insesgadez y varianza de $\hat\beta_2$ (cobro directo de lección 11), con histogramas de la distribución de $\hat\beta_2$ sobre miles de réplicas.
+   - /Práctica B/: extensión a $k=3$ (regresores simulados tipo $S,D$ del viejo Lecc05) con notación matricial de la lección 10, comparando $\mathrm{Var}(\hat\beta_j)$ empírica contra $\sigma^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$.
+   - /Práctica C/: ¿regresores que cambian en cada réplica vs. regresores fijos y solo la perturbación cambia? (distinción pedagógica interesante del viejo Lecc05, útil para entender qué significa "condicionar en $X$").
+   - ¿Una cuarta práctica, o dejamos estas tres bien desarrolladas?
+
+Con tus respuestas a estos puntos me pongo a proponer el esquema detallado (paso previo antes de generar el código, según el propio procedimiento del plan).
+
+*Voy a demorar mis respuesta a más adelante, pero no quiero perder lo que has pensado ahora* 
+
+No me había dado cuenta de que la siguiente sesión según el plan es teórica; así que mi petición a ti (Claude) para preparar la sesión de laboratorio ha sido prematura. No obstante, el análisis que has hecho sobre cómo reciclar las prácticas del curso de referencia creo que es muy valioso para cuando escribamos los siguientes laboratorios (incluso escribir alguna práctica adicional para añadir a alguna sesión anterior). Para no perder este análisis y que pueda abordar y responder a todas estas las cuestiones de diseño que me preguntas, voy a guardar este fichero .org tal cual. Pero quizá consideres pertinente escribir algún apunte más que nos pueda servir una vez hallamos escrito la sesión teórica correspondiente a la lección 12. Si crees que debes apuntar más cosas, hazlo aquí debajo. Luego guardaré el fichero, y comenzaré otra sesión contigo para escribir la lección 12.
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Buena decisión. Añado aquí debajo todo lo que me parece valioso conservar de este análisis, para no perderlo cuando retomemos el tema tras escribir la lección 12.
+
+---
+
+- Notas adicionales para la futura sesión de laboratorio (post-lección 12)
+
+* Corrección de encaje en el cronograma (importante)
+
+Repasando §7.0 y §7.18 con más cuidado: la sesión inmediatamente siguiente
+(16) es /Teoría/ (lección 12, inferencia), no laboratorio. El laboratorio
+que según la ficha §7.18 debía incluir, como "primera actividad", la
+verificación Montecarlo de la lección 11 (insesgadez y varianza de
+$\hat\beta_2$) es la /sesión 17/, y esa misma ficha lo empaqueta /junto con/
+contrastes $t$ e IC — que sí dependen de la lección 12.
+
+Esto crea una tensión que merece resolverse explícitamente cuando lleguemos
+allí: /la verificación Montecarlo de la lección 11 NO necesita nada de la
+lección 12/. Solo necesita:
+- La notación y resultados de la lección 11 (insesgadez, $\mathrm{Var}[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum(x_i-\bar x)^2$).
+- El comando =loop= de Gretl (cuya mecánica completa, según §10, se anuncia precisamente para esta sesión).
+- Opcionalmente, la notación matricial de la lección 10 si se quiere generalizar a $k>2$ regresores.
+
+Por tanto, cuando lleguemos a esta sesión, conviene decidir explícitamente
+entre dos caminos:
+1. /Mantener el empaquetado de la ficha 7.18/ tal cual: una única sesión 17
+   con dos bloques (Montecarlo de insesgadez/varianza + contrastes t/IC),
+   escrita solo cuando la lección 12 ya exista.
+2. /Desacoplar/: escribir el bloque Montecarlo de la lección 11 como
+   /práctica adicional fuera de numeración/ (mismo estatus que Anscombe,
+   §7.7, o el ejemplo peso-edad bivariante) e insertarla ya, sin esperar a
+   la lección 12 — aprovechando que es autocontenida. Esto liberaría a la
+   futura sesión 17 para centrarse exclusivamente en $t$/IC.
+
+Mi impresión (a valorar cuando lleguemos) es que la opción 2 es
+pedagógicamente más limpia: el Montecarlo de la lección 11 tiene entidad
+propia y no se beneficia de compartir sesión con la inferencia $t$/IC, que
+es material bastante denso por sí solo.
+
+* Mapa de las once escenas del viejo Lecc05/Lecc06
+
+Guardo aquí, con nombre de fichero, qué hace cada guion — para poder
+elegir directamente de este menú en vez de releer los ficheros completos.
+
+*/ Serie "EjPvivienda3.inp" (Lecc06, un solo ajuste, sin bucle)
+- Construye =invXTX= a mano con =matrix X={const,sqft}; matrix invXTX=invpd(X'X)=.
+- Compara =invXTX= multiplicada por la cuasivarianza de los residuos
+  (=$ess/$df=) contra la matriz =--vcv= que reporta =ols= directamente:
+  verificación numérica de que ambas coinciden.
+- Reestima el modelo eliminando observaciones (=smpl 1 13=, =smpl 2 14=,
+  =smpl 2 13=) y compara, vía =modeltab=, cómo cambia la precisión de las
+  estimaciones con distintos subconjuntos de datos. /Util como ilustración
+  intuitiva, previa al Montecarlo, de que "menos datos → más varianza",
+  sin necesidad todavía de simular nada./
+
+*/ Serie "samplinghousesN.inp" (Lecc06, con bucle)
+- =samplinghouses0.inp=: una única réplica manual (sin =loop=), genera
+  =y1=parte sistemática + perturbación normal=, reestima, compara
+  gráficamente con el modelo original. /Buen paso intermedio antes de
+  introducir el =loop=: "esto es lo que se repite muchas veces"./
+- =samplinghouses1.inp=: primera introducción completa del =loop N
+  --progressive --quiet=, con =store "@workdir\coef.gdt" b1 b2 cs2=, reapertura
+  del =.gdt= generado, e histogramas =freq b1 --normal --silent
+  --plot="display"=. /Candidato directo a plantilla de la explicación
+  "mecánica del loop" que anuncia §10./
+- =samplinghouses2.inp=: añade a la simulación anterior los tres elementos
+  de =invXTX= (=m11=, =m21=, =m22=) guardados en cada iteración, y cierra
+  comparando la matriz de varianzas-covarianzas /empírica/ de
+  $(\hat\beta_1,\hat\beta_2)$ (=var(b1)=, =cov(b1,b2)=, =var(b2)=) contra el
+  promedio de $\mathfrak s^2\cdot\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf
+  X})^{-1}$ sobre las réplicas. /Esta es, literalmente, la verificación
+  empírica de la fórmula matricial que la lección 11 deja como aserción sin
+  demostrar (transparencia final) — pieza muy valiosa a reutilizar./
+- =samplinghouses3.inp=: repite el Montecarlo con perturbaciones /no
+  Gaussianas/ (uniforme, beta centrada, $\chi^2$ centrada). /Punto
+  pedagógico fino a preservar/: como la demostración de la lección 11 NO
+  usa normalidad en ningún paso (solo linealidad, exogeneidad estricta y
+  homocedasticidad), este bloque permite mostrar que insesgadez y varianza
+  se cumplen igual de bien con perturbaciones muy distintas de la normal —
+  reforzando, por contraste, que la /forma/ de la distribución de $\hat\beta_2$
+  (lo que se pospone a la lección 12) sí necesitará normalidad, mientras que
+  estas dos propiedades no la necesitan en absoluto.
+
+*/ Serie "BucleSimuladorEjPviviendaN.inp" (Lecc05, tres regresores)
+Progresión de ocho guiones ($k=3$: constante, $S$ uniforme, $D$
+chi-cuadrado), cada uno aislando una única variación sobre el diseño base.
+Muy útil como /escalera pedagógica/ para sesiones futuras, no solo para el
+Montecarlo de la lección 11:
+
+- =...Pvivienda.inp= (base): regresores fijados /una vez/ fuera del
+  bucle; solo la perturbación $U$ cambia en cada iteración. Verifica
+  ortogonalidad muestral $U$-regresores (=mU=, =mUS=, =mUD=, =cUS=, =cUD=)
+  en cada réplica.
+- =...Pvivienda2.inp=: regresores /y/ perturbación se regeneran en /cada/
+  iteración. /Distinción crucial para explicar qué significa
+  "condicionar en $\boldsymbol X$"/ en la notación $\mathrm{Var}[\hat\beta_2\mid\boldsymbol X]$
+  de la lección 11: aquí ya no se condiciona en nada, se promedia sobre
+  todo.
+- =...Pvivienda3.inp=: regresores cambian en cada iteración, pero la
+  perturbación $U$ se genera /una sola vez/ y se mantiene fija. (Caso
+  "espejo" del anterior; utilidad pedagógica más dudosa, pero completa la
+  combinatoria.)
+- =...Pvivienda4.inp=: regresores /ortogonalizados/ vía residuos
+  sucesivos (=ols S0 0; series S=$uhat; ols D0 0 S; series D=$uhat=).
+  /Conexión directa con "familia ortogonal"/ (lección 10, transparencia 9)
+  — podría sernos útil para una futura práctica que verifique esa
+  transparencia con datos simulados en vez de con el ejemplo de juguete de
+  S14-Prct-D.
+- =...Pvivienda5.inp=: fuerza a la perturbación simulada a cumplir
+  /exactamente/ (no solo en esperanza) media cero, varianza $\sigma^2$ y
+  ortogonalidad a los regresores, vía estandarización + residualización.
+  Isla conceptual interesante sobre la diferencia entre "cumplir un
+  supuesto en esperanza" y "cumplirlo exactamente en una muestra concreta".
+- =...Pvivienda6.inp=: perturbación con esperanza /no nula/
+  ($\mu=1000$) — viola exogeneidad estricta a propósito. /Semilla directa
+  para "El puente" (lección 9, ya escrita) o para reforzar por qué
+  $E[U\mid X]=\mathit 0$ importa/; también posible refuerzo en colinealidad/heterocedasticidad.
+- =...Pvivienda7.inp=: perturbación /correlada/ con uno de los
+  regresores, vía una matriz de mezcla $C$ aplicada a =Z={S,D,U0}=. /Muy
+  relevante para una futura discusión de endogeneidad/, aunque el plan
+  actual no tiene una sesión dedicada a instrumentales — al menos sirve
+  como contraejemplo vívido de exogeneidad estricta.
+
+* Comandos y patrones de Gretl ya confirmados como funcionales
+(a añadir, en su momento, como referencia de §5 si se reutilizan):
+- =nulldata N --preserve= (preserva escalares ya definidos, como el tamaño
+  muestral, al crear el dataset vacío).
+- =loop N --progressive --quiet ... endloop=: con =--progressive= evita
+  imprimir cada iteración y permite =store= acumulativo de escalares.
+- =store "@workdir/fichero.gdt" esc1 esc2 ...= dentro del bucle, seguido de
+  =open "@workdir/fichero.gdt"= /fuera/ del bucle para analizar la
+  colección de resultados como si fueran observaciones (cada fila = una
+  réplica).
+- =freq variable --normal --silent --plot="display"=: histograma con curva
+  normal superpuesta, para contrastar visualmente la forma de la
+  distribución de un estimador.
+- =ols ... --vcv=: matriz de varianzas-covarianzas de los coeficientes
+  estimados, comparable con el cálculo manual $\mathfrak s^2(\boldsymbol{\mathsf
+  X}^\top\boldsymbol{\mathsf X})^{-1}$.
+- Construcción de =invXTX= vía =matrix X = {const, sqft}; matrix invXTX =
+  invpd(X'X)=, y extracción de elementos =invXTX[1,1]=, =invXTX[2,1]=,
+  =invXTX[2,2]= — ya usado en S14-Prct-D, reutilizable aquí con $k=3$.
+
+* Preguntas de diseño que quedaron abiertas (sin responder aún)
+Las mantengo tal cual las planteé, para retomarlas cuando corresponda:
+1. ¿Esta futura práctica es la sesión 17 completa (con $t$/IC, esperando a
+   la lección 12) o material desacoplado, insertable antes?
+2. ¿Nos quedamos en $k=2$ (fiel a lo demostrado en lección 11) o
+   incorporamos explícitamente $k=3$ con matrices (más fiel al viejo
+   Lecc05/06, pero apoyado en una aserción no demostrada de la lección 11)?
+3. ¿Incluimos aquí mismo alguna violación de supuestos (perturbación con
+   media no nula, perturbación correlada con un regresor), o lo dejamos
+   íntegramente para sesiones futuras (12, 20, 24) y aquí solo se cumplen
+   los supuestos?
+4. ¿Anclamos los parámetros "verdaderos" de la simulación a un ajuste real
+   ya conocido (=hprice2=/Ramanathan), como hacía el viejo Lecc06 con
+   =data3-1=, o usamos una simulación autocontenida con parámetros propios?
+5. Confirmado: esta es la sesión donde corresponde explicar la mecánica
+   completa del =loop= (no como "caja negra" opcional, como en S07-Prct-B).
+6. Reparto tentativo en 3-4 prácticas (Montecarlo simple $k=2$; extensión
+   matricial $k=3$; regresores fijos vs. cambiantes en cada réplica;
+   posible cuarta práctica con perturbaciones no Gaussianas, a la manera de
+   =samplinghouses3.inp=).
+
+* Nota de alcance (recordatorio de §9.2/§9.4)
+El viejo Lecc06 incluye demostración completa de Gauss-Markov y criterios
+AIC/BIC/HQC — /ambos explícitamente fuera de alcance/ del curso PPE. Ningún
+guion de esta futura práctica debe introducir esos conceptos, aunque el
+material original los mencione de pasada.

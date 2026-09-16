@@ -67,7 +67,7 @@ Hasta ahora hemos avanzado sumando dimensiones de una en una. En la lección 4 r
 
 Hoy damos el salto definitivo. En la realidad empírica, un solo regresor casi nunca es suficiente. Si queremos explicar el salario de una persona, no basta con conocer sus años de educación ($\boldsymbol{x}_2$); necesitamos conocer su experiencia laboral ($\boldsymbol{x}_3$), su antigüedad en la empresa ($\boldsymbol{x}_4$), etc. 
 
-Geométricamente, esto equivale a añadir más ``ejes'' o vectores generadores a nuestro subespacio. Si tenemos $k-1$ variables explicativas, más el vector constante de unos $\boldsymbol{1}$, el subespacio sobre el que proyectaremos será $\mathcal{L}(\boldsymbol{1}, \boldsymbol{x}_2, \dots, \boldsymbol{x}_k)$. Este subespacio ya no es un plano bidimensional, sino lo que en geometría se denomina de manera genérica un /hiperplano/ (un espacio de dimensión $k$). 
+Geométricamente, esto equivale a añadir más ``ejes'' o vectores generadores a nuestro subespacio. Si tenemos $k-1$ regresores no constantes más el vector de unos $\boldsymbol{1}$, el subespacio sobre el que proyectaremos será $\mathcal{L}(\boldsymbol{1}, \boldsymbol{x}_2, \dots, \boldsymbol{x}_k)$. Este subespacio ya no es un plano bidimensional, sino lo que en geometría se denomina de manera genérica un /hiperplano/ (un espacio de dimensión $k$). 
 
 ¿Qué cambia en nuestra manera de afrontar el problema? Conceptualmente, **absolutamente nada**. Seguimos buscando el vector $\boldsymbol{\mathop{\widehat{y}}}$ (el ajuste) de ese subespacio que está más cerca de $\boldsymbol{y}$. Y, como sabemos desde la lección 3, ese punto de mínima distancia es la /proyección ortogonal/: el punto que garantiza que el vector de residuos $\boldsymbol{\mathop{\widehat{e}}} = \boldsymbol{y} - \boldsymbol{\mathop{\widehat{y}}}$ sea estrictamente perpendicular a todo el subespacio.
 Dicho de otro modo, seguimos exactamente en la misma ecuación con la que abrimos la lección 7, $\boldsymbol{y}=\boldsymbol{\mathop{\widehat{y}}}+\boldsymbol{\mathop{\widehat{e}}}$, solo que ahora $\boldsymbol{\mathop{\widehat{y}}}$ es una combinación lineal de $k$ regresores en lugar de dos.
@@ -203,6 +203,8 @@ La mecánica es muy visual:
 
 # Esta simetría del vector ante el selector es la clave que nos va a permitir definir las operaciones matriciales sin tener que recurrir al clásico algoritmo ``filas por columnas'' (recuerde *los vectores son listas de números y nunca se transponen*).
 
+Adviértase que esta barra vertical no tiene nada que ver con la barra de condicionamiento que empleamos en la lección 9 (como en $E[Y\mid X]$): allí separaba una variable aleatoria de aquello sobre lo que se condiciona; aquí es, sencillamente, un subíndice que indica qué fila o columna extraer de una matriz (o qué componente de un vector). Son dos usos tipográficamente parecidos pero conceptualmente ajenos; el contexto —esperanza condicional en un caso, matriz o vector en el otro— no deja lugar a confusión real.
+
 Conviene cerrar esta sección con una precisión que no cambia nada de lo dicho,
 pero que conviene señalar cuanto antes, porque reaparecerá al hablar de
 variables dummy: lo verdaderamente necesario para que el ajuste sea válido no
@@ -228,7 +230,8 @@ separado, constante.
 
 Definiremos la operación /vector $\times$ matriz/ ($\boldsymbol{v}\boldsymbol{\mathsf{X}}$) de forma que el resultado sea un nuevo vector, cuya componente \(j\)-ésima sea el /producto escalar/ entre $\boldsymbol{v}$ y la columna $j$ de la matriz:
 \[
-(\boldsymbol{v}\boldsymbol{\mathsf{X}})_{|j} \;=\; \boldsymbol{v} \cdot \boldsymbol{\mathsf{X}}_{|j}
+(\boldsymbol{v}\boldsymbol{\mathsf{X}})_{|j} \;=\; \boldsymbol{v} \cdot \boldsymbol{\mathsf{X}}_{|j}\,;
+\quad\text{es decir}\quad \langle\boldsymbol{v},\,\boldsymbol{\mathsf{X}}_{|j}\rangle_e
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -260,7 +263,7 @@ Lo re-interpretamos como: ``el selector sobre la matriz tiene precedencia sobre 
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-Si recordamos la transparencia 3, nuestro problema aritmético consistía en que teníamos $k$ ecuaciones de la forma $\boldsymbol{\mathop{\widehat{e}}} \cdot \boldsymbol{x}_j = 0$. Necesitamos una operación que ``empaquete'' todos esos productos escalares de una sola vez.
+Si recordamos la transparencia 3, nuestro problema aritmético consistía en que teníamos $k$ ecuaciones de la forma $\langle\boldsymbol{\mathop{\widehat{e}}},\,\boldsymbol{x}_j\rangle_e=\boldsymbol{\mathop{\widehat{e}}} \cdot \boldsymbol{x}_j = 0$. Necesitamos una operación que ``empaquete'' todos esos productos escalares de una sola vez.[fn::Fíjese que en esta y en las siguientes transparencias de notación matricial trabajamos con el producto euclídeo (también conocido como producto punto) $\langle\_,\,\_\rangle_e=\_ \cdot \_$; recuerde que esto no cambia ninguna condición de ortogonalidad.]
 
 Esa operación es precisamente el producto de un vector por una matriz. Lo definimos geométricamente: $\boldsymbol{v}\boldsymbol{\mathsf{X}}$ da como resultado un vector, y su componente \(j\)-ésima se calcula haciendo el producto escalar del vector $\boldsymbol{v}$ contra la columna \(j\)-ésima de la matriz $\boldsymbol{\mathsf{X}}$.
 
@@ -337,13 +340,15 @@ Agrupamos todos nuestros coeficientes $\hat\beta_j$ en un único vector de pará
 
 Definiremos $\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$ de la manera más natural para nuestro marco de referencia: como una /combinación lineal/ de las columnas. Es decir, tomamos cada columna de la matriz $\boldsymbol{\mathsf{X}}$, la multiplicamos por su correspondiente coeficiente en el vector $\boldsymbol{\mathop{\widehat{\beta}}}$, y sumamos todo.
 
-Si nos fijamos bien, esta suma ponderada de las columnas de $\boldsymbol{\mathsf{X}}$ es literalmente la ecuación que define nuestro ajuste $\boldsymbol{\mathop{\widehat{y}}}$. El vector $\boldsymbol{\mathop{\widehat{y}}}$ pertenece al hiperplano generado por las columnas de $\boldsymbol{\mathsf{X}}$, y $\boldsymbol{\mathop{\widehat{\beta}}}$ nos da las ``coordenadas'' de $\boldsymbol{\mathop{\widehat{y}}}$ en ese hiperplano (nos dice cuanto avanzar o retroceder en la dirección de cada regresor para llegar al punto $\boldsymbol{\mathop{\widehat{y}}}$. 
+Si nos fijamos bien, esta suma ponderada de las columnas de $\boldsymbol{\mathsf{X}}$ es literalmente la ecuación que define nuestro ajuste $\boldsymbol{\mathop{\widehat{y}}}$. El vector $\boldsymbol{\mathop{\widehat{y}}}$ pertenece al hiperplano generado por las columnas de $\boldsymbol{\mathsf{X}}$, y $\boldsymbol{\mathop{\widehat{\beta}}}$ nos da las ``coordenadas'' de $\boldsymbol{\mathop{\widehat{y}}}$ en ese hiperplano (nos dice cuánto avanzar o retroceder en la dirección de cada regresor para llegar al punto $\boldsymbol{\mathop{\widehat{y}}}$. 
 
 A partir de ahora, cuando veamos la expresión $\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$, debemos leerla mentalmente como ``la combinación lineal de los regresores'' que queda más cerca del vector del vector $\boldsymbol{y}$ (del regresando).
 
 Merece la pena detenerse en esta pieza, porque es, literalmente, la ecuación que nos va a acompañar el resto del curso. Recordemos que, desde la lección 6, veníamos escribiendo $\boldsymbol{y}=\boldsymbol{\mathop{\widehat{y}}}+\boldsymbol{\mathop{\widehat{e}}}$ (forma que la lección 7 hizo explícita en su primera transparencia). Con la notación matricial recién definida, esa misma ecuación se escribe, sin ningún ingrediente nuevo, como $\boldsymbol{y}=\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}+\boldsymbol{\mathop{\widehat{e}}}$, de donde también $\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{y}-\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$. Esta última expresión es, precisamente, la que sustituiremos dentro de la condición de ortogonalidad más adelante en esta misma lección, al derivar las ecuaciones normales.
 
 Ahora sabemos que $\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$ es el vector con todos los valores ajustados $\boldsymbol{\mathop{\widehat{y}}}$. Para seleccionar el ajuste correspondiente a un individuo $i$ aplicaremos el operador selector por la izquierda: gracias a las reglas de nuestro operador selector[fn::La misma regla de precedencia sobre el producto fijada para $\boldsymbol v\boldsymbol X$ por la derecha se aplica, simétricamente, cuando el selector actúa por la izquierda.], ${}_{i|}\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$ se evalúa como el producto escalar de la fila \(i\)-ésima de la matriz $\boldsymbol{\mathsf{X}}$ por el vector $\boldsymbol{\mathop{\widehat{\beta}}}$, es decir ${}_{i|}\boldsymbol{\mathsf{X}} \cdot \boldsymbol{\mathop{\widehat{\beta}}}$. Esto arroja una *doble lectura* del producto /matriz por vector/: en su conjunto es una combinación lineal de columnas pero, ``por dentro'' (componente a componente) es un listado de productos punto de cada fila por el vector. 
+
+Esta dualidad no es una novedad aislada de la regresión múltiple: ya la vimos, en su versión más simple, en la lección 4 (transparencia ``La media: dos caras de la misma moneda''). Allí $\mu_{\boldsymbol{y}}$ era, a la vez, el producto escalar $\langle\boldsymbol{y},\boldsymbol{1}\rangle_s$ (la lectura ``por fila'', con un único regresor $\boldsymbol{1}$) y el coeficiente de la combinación lineal $\mu_{\boldsymbol{y}}\boldsymbol{1}$ que reconstruía la proyección $\boldsymbol{\mathop{\overline{y}}}$ (la lectura ``por columna''). Lo que hacemos aquí es, sencillamente, generalizar esa misma dualidad —anunciada ya, de pasada, en el guiño final de la lección 5— a $k$ regresores simultáneos.
 
 /Para profundizar/:
 - Wooldridge, J. M. (2020), Apéndice E.1-E.2: la notación matricial de las
@@ -461,14 +466,14 @@ condiciones de ortogonalidad, es decir, de perpendicularidad o
 
 Aquí aparece, por primera y única vez en todo el curso, un /producto
 matriz-matriz/: $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$, una
-matriz cuadrada de $(k)\times(k)$. No vamos a desarrollar ninguna teoría
+matriz cuadrada de $k\times k$. No vamos a desarrollar ninguna teoría
 general sobre productos de matrices; nos basta con saber que su elemento
-$(i,j)$ es un producto escalar del espacio euclídeo: el producto entre la
-columna \(i\)-ésima y la columna \(j\)-ésima de $\boldsymbol{\mathsf{X}}$ —es
+$(j,j')$ es un producto escalar del espacio euclídeo: el producto entre la
+columna \(j\)-ésima y la columna \(j'\)-ésima de $\boldsymbol{\mathsf{X}}$ —es
 decir, entre regresores—. Por ejemplo, el
 elemento $(1,1)$ (fila y columna constantes $\boldsymbol{1}$) es
 $\langle\boldsymbol{1},\boldsymbol{1}\rangle_e=n$; el elemento $(1,j)$ es $\langle\boldsymbol{1},\boldsymbol{x}_j\rangle_e=n\mu_{\boldsymbol{x}_j}$
-(recordando la lección 4); y el elemento  $(i,j)$ es $\langle\boldsymbol{x}_i,\boldsymbol{x}_j\rangle_e$. Es
+(recordando la lección 4); y el elemento  $(j,j')$ es $\langle\boldsymbol{x}_j,\boldsymbol{x}_{j'}\rangle_e$. Es
 decir: toda la matriz $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$
 está construida, literalmente, con los mismos productos escalares que ya
 sabíamos calcular desde la lección 2; la novedad es solo organizarlos en una
@@ -508,7 +513,7 @@ La siguiente transparencia se ocupa de la situación contraria: cuando los regre
 :END:
 
 Recordemos (lección 3, Cauchy–Schwarz) la fórmula de proyección sobre /un/
-generador: $\alpha=\langle\boldsymbol{b},\boldsymbol{a}\rangle/\langle\boldsymbol{a},\boldsymbol{a}\rangle$.
+generador: $\alpha=\langle\boldsymbol{a},\boldsymbol{b}\rangle/\langle\boldsymbol{a},\boldsymbol{a}\rangle$.
 Y (lección 7) la ``vía alternativa'' con /dos/ generadores ortogonales.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -593,17 +598,17 @@ R^2 \;\neq\; \rho_{\boldsymbol{x}_2\boldsymbol{y}}^2+\cdots+\rho_{\boldsymbol{x}
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 /¿Por qué?/ En la lección 8, $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ puesto que
-el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})\cap\mathcal{L}(\boldsymbol{1})^\perp$
+el subespacio de vectores de $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ con media cero
 era una recta (dimensión 1): cualquier vector del plano en desviaciones estaba alineado con $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$ (todos están contenidos en la misma recta).
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Con $k>2$ regresores, el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\dots,\boldsymbol{x}_k)\cap\mathcal{L}(\boldsymbol{1})^\perp$ tiene /dimensión $k-1$/: así $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$
+Con $k>2$ regresores, el subespacio de vectores de  $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\dots,\boldsymbol{x}_k)$ con media cero tiene /dimensión $k-1$/: así $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$
 ya no está, en general, alineado con ningún $\boldsymbol{x}_j-\mu_{\boldsymbol{x}_j}\boldsymbol{1}$
 en particular.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-/Excepción/ (caso transparencia anterior): si los regresores son mutuamente
-ortogonales, entonces  $R^2=\rho_{\boldsymbol{x}_2\boldsymbol{y}}^2+\cdots+\rho_{\boldsymbol{x}_k\boldsymbol{y}}^2$ — Pitágoras generalizado.
+/Excepción/ (caso transparencia anterior): si los regresores en desviaciones son mutuamente
+ortogonales $\implies R^2=\rho_{\boldsymbol{x}_2\boldsymbol{y}}^2+\cdots+\rho_{\boldsymbol{x}_k\boldsymbol{y}}^2$ — Pitágoras generalizado.
 
 
 *** $R^2$ en regresión múltiple
@@ -648,7 +653,7 @@ $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ a estar
 alineado con $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$, y de ahí
 salía $\rho_{\boldsymbol{y}\boldsymbol{\mathop{\widehat{y}}}}=|\rho_{\boldsymbol{x}\boldsymbol{y}}|$.
 
-Con $k>2$ regresores, el subespacio de vectores en desviaciones $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\ldots,\boldsymbol{x}_k)\cap\mathcal{L}(\boldsymbol{1})^\perp$ tiene, en general, dimensión $k-1$ en lugar de dimensión $1$.
+Con $k>2$ regresores, el subespacio de vectores de $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\ldots,\boldsymbol{x}_k)$ que están en desviaciones tiene, en general, dimensión $k-1$ en lugar de dimensión $1$.
 El vector $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$
 es, ahora, una combinación de los $k-1$ vectores en desviaciones
 $\boldsymbol{x}_2-\mu_{\boldsymbol{x}_2}\boldsymbol{1},\ldots,\boldsymbol{x}_k-\mu_{\boldsymbol{x}_k}\boldsymbol{1}$,
@@ -658,7 +663,7 @@ el cuadrado de ninguna correlación simple $\rho_{\boldsymbol{x}_j\boldsymbol{y}
 —y tampoco con la suma de esos cuadrados.
 
 Hay, sin embargo, una excepción donde $R^2$ es la suma de las correlaciones al cuadrado, y es precisamente el caso especial de la transparencia anterior. Cuando los regresores en desviaciones
-$\boldsymbol{x}_2-\mu_{\boldsymbol{x}_2}\boldsymbol{1},\ldots,\boldsymbol{x}_k-\mu_{\boldsymbol{x}_k}\boldsymbol{1}$ son /mutuamente ortogonales/, el Pitágoras generalizado[fn::El teorema de Pitágoras (lección 3) se enunció para /dos/ vectores ortogonales, pero se extiende, sin ninguna dificultad adicional, a $k+1$ vectores mutuamente ortogonales: si $\boldsymbol{1},\boldsymbol{v}_2,\dots,\boldsymbol{v}_2,\boldsymbol{\mathop{\widehat e}}$ son mutuamente ortogonales, e $\boldsymbol y=\hat\beta_1\boldsymbol 1+\hat\beta_2\boldsymbol{v}_2+\cdots+\hat\beta_k\boldsymbol{v}_k+\boldsymbol{\mathop{\widehat e}}$, entonces:
+$\boldsymbol{x}_2-\mu_{\boldsymbol{x}_2}\boldsymbol{1},\ldots,\boldsymbol{x}_k-\mu_{\boldsymbol{x}_k}\boldsymbol{1}$ son /mutuamente ortogonales/, el Pitágoras generalizado[fn::El teorema de Pitágoras (lección 3) se enunció para /dos/ vectores ortogonales, pero se extiende, sin ninguna dificultad adicional, a $k+1$ vectores mutuamente ortogonales: si $\boldsymbol{1},\boldsymbol{v}_2,\dots,\boldsymbol{v}_k,\boldsymbol{\mathop{\widehat e}}$ son mutuamente ortogonales, e $\boldsymbol y=\hat\beta_1\boldsymbol 1+\hat\beta_2\boldsymbol{v}_2+\cdots+\hat\beta_k\boldsymbol{v}_k+\boldsymbol{\mathop{\widehat e}}$, entonces:
 \(\;\|\boldsymbol{y}\|_s^2 \;=\; \mu_{\boldsymbol{y}}^2 + \|\hat\beta_2\boldsymbol{v}_2\|_s^2+\cdots+\|\hat\beta_k\boldsymbol{v}_k\|_s^2 + \|\boldsymbol{\mathop{\widehat{e}}}\|_s^2.\)] 
 nos da
 \[
@@ -804,12 +809,22 @@ Por último, el método de los momentos —el ``salto'' de la lección 9— se e
 | $\hat\beta_1,\hat\beta_2$ (escalares)                                                                  | $\boldsymbol{\mathop{\widehat{\beta}}}$ (vector), resolviendo  $\;\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}$ |
 | $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ (caso particular)                                          | $R^2=\rho_{\boldsymbol{y}\boldsymbol{\mathop{\widehat{y}}}}^2$ (siempre); $=\sum_j\rho_{\boldsymbol{x}_j\boldsymbol{y}}^2$ solo si ortogonales                                                         |
 
-Con el modelo poblacional generalizado a $k$ regresores, la pregunta de la lección 9 no cambia: ¿es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador del verdadero $\boldsymbol{\beta}$ poblacional? En la lección 11 retomaremos la cuestión.
+Como caso límite, obsérvese que $k=1$ (ningún regresor no constante, solo la
+columna de unos $\boldsymbol{1}$) recupera exactamente la proyección de las
+lecciones 4 y 5.[fn::En ese caso, la única condición de ortogonalidad
+$\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}$
+se reduce a $\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{1}\rangle_s=0$,
+y las ecuaciones normales colapsan en la única ecuación escalar
+$\hat\beta_1=\mu_{\boldsymbol{y}}$: la media aritmética. La regresión múltiple
+no sustituye aquella construcción; la contiene como caso particular.]
+
+
+Con el modelo poblacional generalizado a $k$ regresores, aún queda pendiente la misma pregunta: ¿es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador del verdadero $\boldsymbol{\beta}$ poblacional? En la lección 11 retomaremos la cuestión.
 # ¿Es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador del verdadero $\boldsymbol{\beta}$ poblacional? En la lección 11 retomaremos la cuestión.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 /Respecto a la interpretación de parámetros/: cada $\hat\beta_j$ mide un /efecto parcial/ —``manteniendo constantes los demás regresores'' (/ceteris paribus/)—.
-En la práctica que sigue a esta lección veremos esto con datos reales y, además, hablaremos del $R^2$ ajustado. 
+En la práctica que sigue a esta lección lo veremos con datos reales. Además hablaremos del $R^2$ ajustado. 
 
 
 *** Recapitulación y guiño a las sesiones siguientes
@@ -835,7 +850,7 @@ $\rho_{\boldsymbol{x}\boldsymbol{y}}^2$, porque el subespacio de vectores en des
 ninguna suma del cuadrado de correlaciones simples, salvo en el caso especial (y poco
 frecuente con datos reales) de regresores mutuamente ortogonales.
 
-Aún queda una pregunta por responder. La transparencia anterior mostró que el modelo poblacional de la lección 9 —con sus tres supuestos, y un cuarto que allí permanecía disfrazado dentro de $\mathrm{Var}(X)\neq0$— se generaliza a $k$ regresores sin ningún ingrediente conceptual nuevo. Con ese modelo ya generalizado, podemos formular con precisión la pregunta que quedaba pendiente: ¿es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador del verdadero $\boldsymbol\beta$ poblacional?
+Aún queda una pregunta por responder. La transparencia anterior mostró que el modelo poblacional de la lección 9 —con sus cuatro supuestos— se generaliza a $k$ regresores sin ningún ingrediente conceptual nuevo. Con ese modelo ya generalizado, podemos formular con precisión la pregunta que quedaba pendiente: ¿es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador del verdadero $\boldsymbol\beta$ poblacional?
 # Aún queda una pregunta por responder, que ya podemos formular con el vocabulario de la lección 9: ¿es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador del verdadero $\boldsymbol\beta$ poblacional? 
 
 La advertencia sobre la interpretación de los coeficientes que merece subrayarse, porque es la
@@ -886,7 +901,7 @@ Las más valiosas: la 9 (obliga a entender /por qué/ el cambio a generadores or
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
 Al usar el operador selector por la izquierda sobre la matriz de datos $\boldsymbol{\mathsf{X}}$ (${}_{i|}\boldsymbol{\mathsf{X}}$), ¿qué parte de la información estamos extrayendo?
 
-1) La columna \(i\)-ésima, correspondiente a los datos de la variable explicativa $i$.
+1) La columna \(i\)-ésima, correspondiente a los datos del regresor $i$.
 2) La matriz inversa de la observación $i$.
 3) El coeficiente $\hat\beta_i$.
 4) La fila \(i\)-ésima, correspondiente al conjunto de datos del individuo $i$.
@@ -1084,7 +1099,7 @@ Según la Recapitulación de esta lección, la cuestión de si $\boldsymbol{\mat
    :END:
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
 /Respuesta correcta: 2./
-/Evalúa/: generalización directa de las dos condiciones de las lecciones 8-9 a $k$ generadores.
+/Evalúa/: generalización directa de las dos condiciones de las lecciones 6-7 a $k$ generadores.
 
 **** Pregunta 6 [M] — Identidad de dualidad $\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}$ vs. $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}$
    :PROPERTIES:
@@ -1120,7 +1135,7 @@ Según la Recapitulación de esta lección, la cuestión de si $\boldsymbol{\mat
    :END:
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
 /Respuesta correcta: 3./
-/Evalúa/: comprensión profunda de por qué el cambio a generadores ortogonales "desacopla" el sistema, generalizando la vía alternativa de la lección 9.
+/Evalúa/: comprensión profunda de por qué el cambio a generadores ortogonales "desacopla" el sistema, generalizando la vía alternativa de la lección 7.
 
 **** Pregunta 10 [D] — Por qué $R^2$ no es la suma de correlaciones al cuadrado
    :PROPERTIES:

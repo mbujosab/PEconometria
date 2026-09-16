@@ -1,0 +1,959 @@
+#    -*- mode: org -*-
+
+#+TITLE: Lección 11. ¿Es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador? Insesgadez y varianza
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+
+#+include: 00preambulo_lecciones.txt
+
+#+BEGIN_SRC emacs-lisp :exports none :results silent
+(use-package ox-ipynb
+  :load-path (lambda () (expand-file-name "ox-ipynb" scimax-dir)))
+(use-package htmlize)
+#+END_SRC
+
+#+LATEX: \maketitle
+
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+#+begin_abstract
+La lección 10 dejó una pregunta pendiente: ¿es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador del parámetro poblacional $\boldsymbol\beta$? Hoy respondemos, con todo detalle, para el caso más sencillo —el modelo lineal simple—: $\hat\beta_2$ es insesgado, y calculamos exactamente su varianza. 
+
+Para verlo: simplemente /reutilizamos/ la fórmula de $\hat\beta_2$ obtenida en la lección 7, y la evaluamos sobre variables aleatorias en lugar de sobre datos fijos —la misma aritmética, un argumento distinto—.
+
+/``¿Es bueno un estimador? Dos preguntas distintas: ¿está bien centrado, en promedio? ¿Y cuánto se dispersa alrededor de ese centro?''/
+#+end_abstract
+
+- ([[https://mbujosab.github.io/PEconometria/Transparencias/S15-Lecc11.slides.html][slides]]) --- ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html][html]]) --- ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S15-Lecc11.pdf][pdf]])
+
+
+* De dónde venimos: una pregunta pendiente
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Recordemos cómo cerraba la lección 10: /``¿es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador del verdadero $\boldsymbol\beta$?''/
+
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+$\hat\beta_1,\hat\beta_2$ —calculados primero con argumentos geométricos sobre los vectores de datos— se reinterpretaron después como /estimadores/ de $\beta_1,\beta_2$ por el método de los momentos.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Hoy, para el modelo lineal simple —constante $\mathit1$ más un regresor /no constante/ $X$—, demostraremos dos propiedades de $\hat\beta_2$:
+1. /Insesgadez/: $\mathrm{E}(\hat\beta_2)=\beta_2$.
+2. /Varianza/: una fórmula exacta de $Var[\hat\beta_2\mid\boldsymbol X]$.
+
+Nos centramos en $\hat\beta_2$ (la pendiente, de mayor interés económico); los mismos argumentos, sobre la fórmula $\hat\beta_1$, permiten probar la insesgadez de $\hat\beta_1$ —no las desarrollamos aquí para no ser repetitivos.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Ningún ingrediente geométrico nuevo: la fórmula de $\hat\beta_2$ que obtuvimos por geometría, la reutilizamos hoy tal cual —evaluada sobre variables aleatorias en lugar de sobre datos: /una fórmula aritmética vieja, aplicada sobre un objeto nuevo/.
+
+
+*** De dónde venimos: una pregunta pendiente
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Esta sesión cierra un hilo que llevamos arrastrando desde hace varias lecciones. En la lección 9 (``El puente'') dimos sentido, por primera vez, a la pregunta ``¿$\hat\beta_2$ estima bien al verdadero $\beta_2$ poblacional?'', al construir el modelo poblacional $Y=\beta_1\cdot\mathit1+\beta_2X+U$ y reinterpretar las fórmulas de la lección 7 como estimadores por el método de los momentos. En la lección 10 (regresión múltiple) esa misma pregunta se generalizó a $k$ regresores, pero se dejó explícitamente sin respuesta —una sola frase en la recapitulación, sin fórmula ni supuestos generalizados—, precisamente para retomarla hoy con calma, en el caso más sencillo posible: $k=2$, es decir, /dos/ regresores en total —la constante $\mathit1$ y un único regresor no constante $X$.
+
+La estrategia de esta sesión no introduce ninguna geometría nueva. Vamos a reutilizar, tal cual, la fórmula de $\hat\beta_2$ que obtuvimos en la lección 7 mediante la ``vía alternativa'' (proyección sobre generadores ortogonales, vía Cauchy–Schwarz). Esa fórmula, una vez concluido el cálculo geométrico, quedó escrita como una expresión puramente aritmética: una suma de productos dividida por una suma de cuadrados. Precisamente por ser aritmética —y ya no geométrica—, podemos evaluarla en cualquier conjunto de $2n$ números que le demos como argumento. Hoy le daremos, en lugar de datos fijos $x_1,\ldots,x_n,y_1,\ldots,y_n$, las variables aleatorias de una muestra $X_1,\ldots,X_n,Y_1,\ldots,Y_n$. El resultado de esa sustitución ya no es un número: es una nueva variable aleatoria, el /estimador/ $\hat\beta_2(\boldsymbol X,\boldsymbol Y)$.
+
+Conviene ser honestos, desde el principio, sobre qué NO vamos a hacer. No vamos a definir un nuevo producto escalar $\langle\cdot,\cdot\rangle$ sobre ``vectores cuyas componentes son variables aleatorias'', ni vamos a apelar de nuevo a Cauchy–Schwarz para justificar la fórmula de $\hat\beta_2$: esa demostración geométrica ya se hizo, una vez, en la lección 7, sobre datos fijos, y no hay que repetirla ni reinventarla sobre un objeto distinto. Lo único que hacemos hoy es sustituir números por variables aleatorias dentro de una fórmula ya obtenida —una operación mucho más modesta que una nueva demostración geométrica, y que no exige comprobar ninguna propiedad de producto escalar—. Es la diferencia entre demostrar un teorema y usar la fórmula que el teorema produjo: hoy solo hacemos lo segundo.
+
+Conviene también ser explícitos, desde el principio, sobre el alcance de esta sesión: demostramos insesgadez y la expresión de la varianza /solo/ para $\hat\beta_2$ en la regresión con dos regresores (el modelo lineal simple). La generalización a $k$ regresores existe (y la citaremos, sin demostrarla, al final de la sesión), pero requiere álgebra matricial que para este curso he preferido no desarrollar.[fn::para no saturar al estudiante.] Lo que sí haremos, como cierre, es comprobar que la fórmula general, evaluada en el caso particular $k=2$, coincide exactamente con lo que aquí probamos sin matrices.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 2, secciones 2.4-2.5: insesgadez y varianza de los estimadores MCO en regresión simple (Teoremas 2.1 y 2.2).
+
+
+* El marco: muestra aleatoria
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Recordemos: asumimos que ``los $n$ datos son la realización de $n$ copias _idénticas e independientes_'' del par poblacional $(X,Y)$ —o, equivalentemente, de $(X,U)$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+El modelo muestral asume que, para cada $i=1,\ldots,n$:
+\[
+Y_i=\beta_1\cdot\mathit1+\beta_2X_i+U_i,
+\]
+con los mismos supuestos de la lección 9: linealidad, exogeneidad estricta $(E[U_i\mid\boldsymbol X]=\mathit0)$, homocedasticidad  $(Var[U_i\mid\boldsymbol X]=\sigma^2\cdot\mathit1)\;$ y $\,\mathrm{Var}(X)\neq0$.
+
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+$\boldsymbol X$ denotará la /versión aleatoria de la matriz de regresores/ $\boldsymbol{\mathsf X}=[\boldsymbol 1;\;\boldsymbol x]$: su segunda columna está formada por las $n$ copias $X_1,\ldots,X_n$ del muestreo de $X$ (la primera, por las $n$ copias de $\mathit 1$). Los vectores $\boldsymbol Y=(Y_1,\ldots,Y_n)$ y $\boldsymbol U=(U_1,\ldots,U_n)$ denotarán los muestreos de $Y$ y de $U$.
+# $X$ (sin subíndice) es la variable poblacional (lección 9); $\boldsymbol X=(X_1,\ldots,X_n)$ es el vector con las $n$ copias del muestreo —el análogo aleatorio del vector de datos $\boldsymbol x=(x_1,\ldots,x_n)$ de la lección 4. De manera similar, $\boldsymbol U=(U_1,\ldots,U_n)$.
+
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+/Lo nuevo, consecuencia directa de la independencia en el muestreo de $U$/:
+\[
+Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0 \qquad (i\neq j).
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+Condicionar en ``$\boldsymbol X$'' significa condicionar sobre el espacio de funciones de las $n$ copias de $X$ a la vez — la misma esperanza condicional de la lección 9, con más variables.
+#+end_center
+
+
+*** El marco: muestra aleatoria
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La lección 9 introdujo, de pasada, una frase que hoy se convierte en el ingrediente central de la sesión: ``asumiremos que nuestros $n$ datos son el resultado de observar la realización de $n$ copias idénticas e independientes de esa variable $Y$''. Allí esa frase servía únicamente para justificar por qué tenía sentido tratar cada dato $y_i$ como la realización de una variable aleatoria. Hoy la necesitamos con mucho más detalle, porque para hablar de la /distribución/ de $\hat\beta_2$ —de cuánto varía de una muestra a otra— necesitamos, precisamente, imaginar que la muestra entera podría haber sido distinta.
+
+Formalicemos esa idea. Desde las lecciones 5-6 venimos usando $\boldsymbol x=(x_1,\ldots,x_n)$ para el vector de datos observados de un regresor, y en la lección 10 agrupamos los regresores observados en la matriz de datos $\boldsymbol{\mathsf X}$ (en el modelo lineal simple, $\boldsymbol{\mathsf X}=[\boldsymbol1;\;\boldsymbol x]$, dos columnas). Hoy introducimos su análogo aleatorio: la matriz[fn::Denotada en negrita cursiva pero sin letra de palo seco (reservada para las matrices de datos observados).] $\boldsymbol X$. Este es el objeto sobre el que condicionaremos todos los momentos a lo largo de la sesión. Cada columna de $\boldsymbol X$ corresponderá al muestreo de uno de los regresores poblacionales. En el modelo lineal simple son $\mathit 1$ y $X$; por tanto, la segunda columna de $\boldsymbol X$ está formada por las $n$ variables aleatorias $X_1,\ldots,X_n$: cada una copia idéntica e independiente de la variable poblacional $X$ de la lección 9.[fn::Para decir que son copias idénticas, basta con que compartan el mismo conjunto de llegada y tengan la misma función de distribución de probabilidad individual: $F_{X_i}(x) = \operatorname{P}(X_i \leq x) \quad \text{para todo } i = 1, \dots, n$. Esto no exige que dos variables tomen el mismo valor puntual en un elemento $\omega \in \Omega$; puede ocurrir que $X_i(\omega) \neq X_j(\omega)$ siempre que el conjunto de sucesos donde difieren tenga probabilidad cero. Por otro lado, la independencia entre variables aleatorias implica que su función de distribución de probabilidad conjunta equivale al producto de sus distribuciones individuales. Para el caso de $n$ variables, esto se expresa como: $F_{X_1, X_2, \dots, X_n}(x_1, x_2, \dots, x_n) = \prod_{i=1}^{n} F_{X_i}(x_i)$.] Es la misma relación dato/variable aleatoria que venimos usando desde la lección 9 (entre $y_i$ e $Y$), aplicada componente a componente a los $n$ elementos de la muestra correspondiente a cada columna.
+
+/Una precisión de uso/. Durante casi toda la sesión no necesitaremos ninguna operación matricial con $\boldsymbol X$: bastarán sumatorios sobre las $X_i$, y ``condicionar en $\boldsymbol X$'' significará siempre proyectar sobre el espacio de funciones cuyo argumento son, simultáneamente, todas las variables aleatorias presentes en $\boldsymbol X$. La estructura de matriz de $\boldsymbol X$ reaparecerá puntualmente al justificar el divisor $n-k$ (sección ``MCO es BLUE; estimando $\sigma^2$'', donde hablaremos de las columnas de $\boldsymbol{\mathsf X}$) y, con más de 2 columnas, en la generalización final a $k$ regresores. Es decir: el símbolo $\boldsymbol X$ significa lo mismo al principio y al final de la sesión; lo único que cambia es cuántas columnas tiene.
+
+# Formalicemos esa idea con la notación más sencilla posible, sin recurrir todavía a ninguna matriz. Desde las lecciones 5-6 venimos usando $\boldsymbol x=(x_1,\ldots,x_n)$ para el vector de datos observados de un regresor. Hoy introducimos su análogo aleatorio: $\boldsymbol X=(X_1,\ldots,X_n)$, el vector formado por las $n$ variables aleatorias que, antes de observar la muestra, podrían haber tomado cualquier valor —cada una copia idéntica e independiente de la variable poblacional $X$ de la lección 9.[fn::Para decir que son copias idénticas, basta con que compartan el mismo conjunto de llegada y tengan la misma función de distribución de probabilidad individual: $F_{X_i}(x) = \operatorname{P}(X_i \leq x) \quad \text{para todo } i = 1, \dots, n$. Esto no exige que dos variables tomen el mismo valor puntual en un elemento $\omega \in \Omega$; puede ocurrir que $X_i(\omega) \neq X_j(\omega)$ siempre que el conjunto de sucesos donde difieren tenga probabilidad cero. Por otro lado, la independencia entre variables aleatorias implica que su función de distribución de probabilidad conjunta equivale al producto de sus distribuciones individuales. Para el caso de $n$ variables, esto se expresa como: $F_{X_1, X_2, \dots, X_n}(x_1, x_2, \dots, x_n) = \prod_{i=1}^{n} F_{X_i}(x_i)$.] Es la misma relación dato/variable aleatoria que venimos usando desde la lección 9 (entre $y_i$ e $Y$), aplicada, componente a componente, a los $n$ elementos de la muestra.
+
+# /Una precisión de notación, para evitar una posible confusión/: la matriz de regresores $\boldsymbol{\mathsf X}$ (todas las columnas, incluida la constante) —introducida en la lección 10 para el caso de varios regresores— no hace falta en esta sesión. Aquí trabajamos con un único regresor no constante, así que basta con el vector $\boldsymbol X=(X_1,\ldots,X_n)$, sin ninguna estructura matricial. Retomaremos la notación matricial, y su generalización a variables aleatorias, en la última transparencia de esta sesión, cuando comentemos qué cambia con $k$ regresores.
+
+Para cada observación $i$, el modelo poblacional de la lección 9 se aplica sin ningún cambio, con subíndice $i$ añadido:
+\[
+Y_i=\beta_1\cdot\mathit1+\beta_2X_i+U_i, \qquad i=1,\ldots,n,
+\]
+con los cuatro supuestos del Modelo Clásico de Regresión Lineal aplicados a cada par $(X_i,U_i)$: linealidad, exogeneidad estricta $E[U_i\mid\boldsymbol X]=\mathit0$, homocedasticidad $Var[U_i\mid\boldsymbol X]=\sigma^2\cdot\mathit1$, e independencia lineal ($\mathrm{Var}(X)\neq0$).
+
+Sobre este último supuesto conviene una precisión, porque es fácil que el símbolo ``$X$'' despiste una vez que ya solo hablamos de $X_1,\ldots,X_n$: $X$, sin subíndice, sigue denotando —exactamente como en la lección 9— la variable poblacional de la que $X_1,\ldots,X_n$ son copias; el supuesto $\mathrm{Var}(X)\neq0$ se enuncia sobre esa variable poblacional, y se aplica automáticamente a cada copia $X_i$, porque, al ser copias idénticas, cada $X_i$ tiene la misma distribución que $X$ (y, en particular, la misma varianza). Nótese, además, que la exogeneidad y la homocedasticidad de cada $U_i$ se condicionan a /toda/ la matriz $\boldsymbol X$, no solo a $X_i$: esto es una hipótesis ligeramente más fuerte que condicionar solo al propio regresor de esa observación, y es la que hace falta para todo lo que sigue.
+
+Aquí aparece el único ingrediente genuinamente nuevo de la sesión, y es, en realidad, una simple /consecuencia/ de la independencia entre observaciones ya anunciada en la lección 9 (``copias idénticas e independientes''): si $(X_i,U_i)$ y $(X_j,U_j)$ son independientes para $i\neq j$, entonces, en particular, $U_i$ y $U_j$ son independientes, y dos variables independientes tienen covarianza cero:
+\[
+Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0 \qquad (i\neq j).
+\]
+No se trata, por tanto, de un supuesto añadido /ex novo/: es la traducción, en términos de covarianzas, de algo que ya habíamos dado por sentado desde la lección 9 al hablar de ``muestreo aleatorio simple'' (el mismo concepto, con el mismo nombre, que probablemente recordéis de vuestro curso de estadística del cuatrimestre anterior). Hoy es la primera vez que necesitamos esta consecuencia de forma explícita, porque es la primera vez que trabajamos con /varias/ perturbaciones $U_1,\ldots,U_n$ simultáneamente, en lugar de con una sola $U$ genérica.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 2, sección 2.5, supuesto SLR.2 (muestreo aleatorio).
+
+
+* $\hat\beta_2$: la misma fórmula, aplicada a variables aleatorias
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+/Estimador vs. estimación/ (recordemos la distinción, hoy imprescindible):
+- $\hat\beta_2(\boldsymbol x,\boldsymbol y)$: la /estimación/ — un número, calculado con los datos disponibles.
+- $\hat\beta_2(\boldsymbol X,\boldsymbol Y)$: el /estimador/ — una variable aleatoria: la MISMA fórmula operando sobre la muestra aleatoria.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Recordando la fórmula aritmética de la ``vía alternativa'' (regresores ortogonales, lecc. 7):
+\[
+\hat\beta_2(\boldsymbol x,\boldsymbol y)=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}=\sum_i w_i y_i; \quad\text{donde } w_i=\frac{(x_i-\mu_{\boldsymbol x})}{\sum_j(x_j-\mu_{\boldsymbol x})^2}.
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Hoy sencillamente sustituimos $x_i,y_i$ por $X_i,Y_i$ en dicha fórmula.
+
+\[
+\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\frac{\sum_i(X_i-\overline{X})Y_i}{\sum_j(X_j-\overline{X})^2}=\sum_i {W_i}Y_i; \quad\text{donde } W_i = \frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}.
+\]
+donde $\overline{X}=\frac1n\sum_iX_i$ es la /media muestral/; y $\sum_i (X_i - \overline{X}) = \mathit 0$.
+
+
+*** $\hat\beta_2$: la misma fórmula, aplicada a variables aleatorias
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Antes de seguir, conviene fijar una distinción que hasta ahora el curso no había requerido. Cuando escribimos $\hat\beta_2=\sigma_{\boldsymbol{x}\boldsymbol{y}}/\sigma_{\boldsymbol{x}}^2=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}$ (lección 7) y evaluamos esa fórmula empleando dos vectores de datos concretos $\boldsymbol x$ e $\boldsymbol y$, obtenemos un /número/ —la /estimación/ $\hat\beta_2$ de $\beta_2$. Pero esa fórmula con sumatorios, aplicada a dos muestras $\boldsymbol X$ y $\boldsymbol Y$ resulta ser una /función de variables aleatorias/; es decir, ella misma es una variable aleatoria[fn::Una función de $\omega\in\Omega$, donde $\Omega$ el espacio de sucesos.]: en tal caso es el /estimador/ $\hat\beta_2$ de $\beta_2$.[fn::En la literatura estadística y econométrica es costumbre usar la misma notación para ambos objetos (la estimación y el estimador), pero recuerde que son muy distintos (un número el primero y una variable aleatoria el segundo).]
+
+Detengámonos, con todo el cuidado que merece, en qué significa exactamente ``sustituir datos por variables aleatorias en una fórmula''. Una fórmula como $\mu_{\boldsymbol x}=f(x_1,\ldots,x_n)=\frac1n\sum_ix_i$ es, matemáticamente, una función que toma $n$ números y devuelve un solo número: /la media/. Pero nada impide evaluar esa MISMA fórmula con otro tipo de argumento (si la operación sigue estando bien definida): si en lugar de $n$ números le damos $n$ variables aleatorias $X_1,\ldots,X_n$, el resultado $f(X_1,\ldots,X_n)=\frac1n\sum_iX_i$ ya no es un número, ahora es una variable aleatoria. A esta nueva variable aleatoria la llamamos /estimador de la media/ o sencillamente /media muestral/, y la denotamos con ${\overline{X}}$. Su definición emplea la MISMA fórmula aritmética que en la lección 4 usamos para definir la media de un vector de datos, pero ahora la fórmula es aplicada a las $n$ variables aleatorias de la muestra (de ahí el nombre de /media muestral/).
+
+Dicha observación —sencilla pero sustancial— guiará el desarrollo de la presente sesión. Conviene enunciarla explícitamente para evitar atribuirle una complejidad que no tiene: nos limitamos a definir nuevas variables aleatorias mediante la aplicación de fórmulas preexistentes (desarrolladas en su momento en $\mathbb{R}^n$) a las variables aleatorias de una muestra. Dichas variables aleatorias se conocen como /estadísticos/ o /estadísticos muestrales/.
+
+Con esto aclarado, retomamos la fórmula de la ``vía alternativa'' de la lección 7. Allí, cambiando a los generadores ortogonales  $\boldsymbol 1$ y $\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1$, obtuvimos, para dos vectores de datos $\boldsymbol x$ e $\boldsymbol y$,
+\[
+\hat\beta_2(\boldsymbol x,\boldsymbol y)=\frac{\langle\boldsymbol y,(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1)\rangle_s}{\langle(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1),(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1)\rangle_s}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}.
+\]
+El lado izquierdo de esta igualdad ($\langle\cdot,\cdot\rangle_s$) es geometría: un cociente de dos productos escalares, con todo su significado y papel en la proyección ortogonal. El lado derecho, en cambio, ya no necesita esa maquinaria para ser evaluado: es una simple expresión aritmética (los factores $1/n$ de cada producto escalar se cancelan al dividir, así que ni siquiera hace falta llevar la cuenta del divisor). Hoy nos quedamos con esta expresión aritmética —prescindiendo de la geometría subyacente— y sustituimos directamente las observaciones $x_i, y_i$ por las variables aleatorias $X_i, Y_i$; y reescribimos la expresión como una suma ponderada:[fn::El nombre correcto de la operación debería ser /forma bilineal definida sobre el anillo de las variables aleatorias/. Pero ese nombre aquí no ayuda; dado el nivel matemático del curso. Tan solo advertir que el nombre de /suma ponderada/ es abusivo, pues en la expresión $\sum_{i=1}^n {W_i}Y_i$ no hay ``números'' que hagan de poderaciones en la suma de las $Y_i$; lo que aparece son las variables aleatorias $W_i$, que son funciones (no números). Por el mismo motivo, tampoco es correcto el nombre de /combinación lineal/ de las $Y_i$.]
+\[
+\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\frac{\sum_i(X_i-\overline{X})Y_i}{\sum_j(X_j-\overline{X})^2}=\sum_{i=1}^n\underbrace{\left(\frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}\right)}_{W_i}Y_i
+=\sum_{i=1}^n {W_i}Y_i.
+\]
+Escribimos los pesos aleatorios $W_i$ con mayúscula por ser estadísticos (i.e., variables aleatorias).
+
+Respecto a la media muestral, fijémonos que como $\overline{X}=\frac1nX_i$, entonces $\sum_i X_i=n\overline{X}$ y que $\sum_{i=1}^n \overline{X}=\underbrace{\overline{X}+\dots+\overline{X}}_{n\text{ veces}}=n\overline{X}$; así
+\[
+\sum_i (X_i - \overline{X}) = \sum_i X_i - \sum_i \overline{X} = n\overline{X} - n\overline{X} = \mathit 0.
+\]
+Usaremos esta propiedad de la /media muestral/ en la siguiente transparencia.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 2, sección 2.4 (donde $\hat\beta_2$ se escribe, con la misma idea, como $\sum w_iy_i$ mediante sumatorios).
+
+
+* Dos propiedades de los pesos
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Dos identidades algebraicas sobre los pesos. Ninguna es nueva
+
+Ambas valen para /cualquier/ lista de números y, por tanto, siguen siendo ciertas al sustituir $x_i$ por $X_i$: son hechos aritméticos, no probabilísticos:
+- la primera es la condición $\sum_i(X_i-\overline{X})=\mathit0$ de la transparencia anterior (la misma cuenta que en la lección 4 daba media cero al vector en desviaciones); 
+\[
+\sum_iW_i=\mathit 0;
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+
+- la segunda es la razón por la que, en la ``vía alternativa'' de la lección 7, el coeficiente de $\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1$ resultaba ser exactamente $\hat\beta_2$. 
+\[
+\sum_iW_iX_i=\mathit 1 \qquad\Big(\text{pues } \textstyle\frac{\sum_i(X_i-{\overline{X}})X_i}{\sum_j(X_j-{\overline{X}})^2}=\frac{\sum_i(X_i-{\overline{X}})^2}{\sum_j(X_j-{\overline{X}})^2}\Big).
+\]
+
+*** Dos propiedades de los pesos
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Antes de sustituir el modelo poblacional en $\hat\beta_2=\sum_iW_iY_i$, necesitamos dos propiedades de los pesos $W_i$ que, en realidad, ya conocemos aunque nunca las hayamos escrito con este nombre: la primera es, literalmente, $\langle\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1,\boldsymbol1\rangle_s=0$ (lección 4: el vector en desviaciones tiene media cero), dividida por el denominador común de los $W_i$; la segunda es lo que, en la ``vía alternativa'' de la lección 7, hacía que al proyectar $\boldsymbol y$ sobre $\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1$ el coeficiente obtenido fuera exactamente la pendiente $\hat\beta_2$ (en la lección 7 no aislamos unos ``pesos''; allí tan solo nos limitamos a escribir la fórmula como cociente de productos escalares).
+
+Conviene subrayar, antes de nada, un punto que puede pasar desapercibido y que es clave para no reintroducir la confusión de la transparencia anterior: estas dos propiedades NO son afirmaciones probabilísticas. Son identidades /algebraicas/, del mismo tipo que ``$2+3=5$'': se cumplen para cualquier elección de $n$ números $x_1,\ldots,x_n$ —iguales o distintos entre sí, positivos o negativos, no importa—, porque se deducen únicamente de la propia definición de $\overline{X}$ y $W_i$, nunca de ninguna propiedad estadística de esos números. Por eso, cuando sustituimos $x_i$ por la variable aleatoria $X_i$, la identidad sigue siendo cierta sin necesidad de ningún argumento adicional (salvo, quizá, en el caso extremo de que todos los $X_i$ coincidieran exactamente, en cuyo caso $\sum_j(X_j-{\overline{X}})^2=\mathit 0$ y $W_i$ ni siquiera estaría definido; esto queda excluido, con probabilidad 1, precisamente por el supuesto $\mathrm{Var}(X)\neq0$).
+
+/Primera propiedad/: $\sum_iW_i=\mathit 0$. Como $W_i=\frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}$ y el denominador es común a todos los términos, $\sum_iW_i=\frac{\sum_i(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}$; y donde el numerador sabemos que es nulo: $\sum_i(X_i-\overline{X})=\mathit 0$ .
+
+/Segunda propiedad/: $\sum_iW_iX_i=\mathit 1$. Usando de nuevo que $\sum_i(X_i-{\overline{X}})=\mathit 0$
+\[
+\sum_i(X_i-{\overline{X}})X_i=\sum_i(X_i-{\overline{X}})(X_i-\overline{X}+\overline{X})=\sum_i (X_i-{\overline{X}})(X_i-\overline{X})+\overline{X}\underbrace{\sum_i(X_i-{\overline{X}})}_{=\mathit 0};
+\]
+y donde hemos sacado factor común $\overline{X}$ en el sumatorio $\sum_i(X_i-{\overline{X}})\overline{X}$ para comprobar que es cero.
+
+
+Por tanto $\sum_iW_iX_i=\frac{\sum_i(X_i-{\overline{X}})X_i}{\sum_j(X_j-{\overline{X}})^2}=\frac{\sum_i(X_i-{\overline{X}})^2}{\sum_j(X_j-{\overline{X}})^2}=\mathit 1$.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 2, sección 2.4 (donde estas dos propiedades se verifican mediante sumatorios, sin distinguir explícitamente su estatus puramente algebraico).
+
+
+* Sustituyendo el modelo poblacional
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+\[
+\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\sum_iW_iY_i=\sum_iW_i(\beta_1\cdot\mathit1+\beta_2X_i+U_i)
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+\[
+=\beta_1\underbrace{\sum_iW_i}_{=\mathit0}+\beta_2\underbrace{\sum_iW_iX_i}_{=\mathit1}+\sum_iW_iU_i
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+\[
+\boxed{\;\hat\beta_2(\boldsymbol X,\boldsymbol U)=\beta_2\cdot\mathit{1}+\sum_{i=1}^nW_iU_i\;}
+\]
+(escrito ahora en función de $\boldsymbol U$, pues $\boldsymbol Y$ ha sido sustituida).
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Mediante manipulción algebraica (sustitución y las dos identidades de la transparencia anterior): /el estimador es el parámetro verdadero MÁS una ``suma ponderada'' de las perturbaciones/. Todo lo que sigue sale de estudiar ese segundo término.
+
+
+*** Sustituyendo el modelo poblacional
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Con las dos propiedades de la transparencia anterior —propiedades puramente algebraicas, válidas para cualquier valor que tomen $X_1,\ldots,X_n$—, el cálculo es puramente mecánico. Partimos de $\hat\beta_2=\sum_iW_iY_i$ (transparencia 3) y sustituimos el modelo poblacional $Y_i=\beta_1\cdot\mathit1+\beta_2X_i+U_i$ (transparencia 2) en cada sumando:
+\[
+\hat\beta_2(\boldsymbol X,\boldsymbol U)=\sum_iW_i(\beta_1\cdot\mathit1+\beta_2X_i+U_i)=\beta_1\sum_iW_i+\beta_2\sum_iW_iX_i+\sum_iW_iU_i.
+\]
+El primer término se anula ($\sum_iW_i=\mathit 0$); el segundo se reduce exactamente a $\beta_2\cdot\mathit1$ ($\sum_iW_iX_i=\mathit 1$):
+\[
+\hat\beta_2(\boldsymbol X,\boldsymbol U)=\beta_2\cdot\mathit1+\sum_{i=1}^nW_iU_i.
+\]
+
+Esta identidad es el corazón algebraico de toda la sesión, y merece leerse con detenimiento: dice que el estimador $\hat\beta_2$ es la variable aleatoria constante $\beta_2\cdot\mathit1$ (donde $\beta_2$ es el verdadero parámetro poblacional) /más/ una ``suma ponderada'' de las perturbaciones $U_1,\ldots,U_n$ —con los pesos $W_i$ que ya conocemos—. Todo lo que necesitamos demostrar sobre $\hat\beta_2$ (que su valor esperado sea $\beta_2$, y que su dispersión sea tal o cual) se reduce, a partir de aquí, a estudiar el comportamiento de esa suma ponderada $\sum_iW_iU_i$. Y como los $W_i$, según acabamos de comprobar, son —al margen de toda probabilidad— sencillamente funciones de $X_1,\ldots,X_n$, esa suma ponderada se comporta, una vez condicionada en $\boldsymbol X$, exactamente como una combinación lineal (esta vez sí, con coeficientes fijos) de variables aleatorias que ya sabemos manejar desde la lección 9 (bilinealidad de la esperanza y de la varianza).
+
+Merece la pena notar, de pasada, la coherencia con el ejemplo numérico de la lección 7: allí, con $\boldsymbol u=(1,-2,0,2,-1)$ diseñado deliberadamente con $\sum w_iu_i=0$ (covarianza muestral nula con el regresor), obtuvimos la /estimación/ $\hat\beta_2=\beta_2$ exactamente. La fórmula de hoy explica /por qué/ ese resultado era una casualidad de diseño y no lo esperable en general: $\hat\beta_2=\beta_2\cdot\mathit1+\sum_iW_iU_i$, y solo cuando esa suma se anula por construcción (como en aquel ejemplo, ya con datos y no con variables aleatorias) coinciden estimador y parámetro. En una muestra genuinamente aleatoria, $\sum_iW_iU_i$ no será cero, sino una variable aleatoria con su propia media y su propia dispersión —que es, precisamente, lo que estudiamos en las dos transparencias siguientes.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 2, ecuación (2.35) y comentario adyacente.
+
+
+* Insesgadez: $\mathrm{E}(\hat\beta_2)=\beta_2$
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+# Hasta aquí, solo álgebra: ninguna esperanza, ninguna condicionalidad. Ahora sí hacen falta ambas, porque 
+Cambiemos de pregunta: 
+- de ``¿Cuánto vale la _estimación_ $\hat\beta_2$ con los datos disponibles $\boldsymbol x$ e $\boldsymbol y?$'' 
+- a ``¿Cuál es la función constante que mejor se aproxima al _estimador_ $\hat\beta_2?$'' normalmente reinterpretada como ``¿cuánto vale $\hat\beta_2$, en promedio, sobre todas las muestras posibles?''.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+
+#+begin_quote
+/Lema/ (demostrado en los apuntes): si $c(\boldsymbol X)$ es una función de $\boldsymbol X$,
+\[
+E\big[c(\boldsymbol X)\cdot Z\mid\boldsymbol X\big]=c(\boldsymbol X)\cdot E[Z\mid\boldsymbol X].
+\]
+#+end_quote
+$\mbox{ }$
+
+#+attr_ipynb: (slideshow . ((slide_type . subslide)))
+
+Aplicándolo con $c(\boldsymbol X)=W_i$ (pues cada $W_i$ es función de $\boldsymbol X$, transparencia 3):
+\[
+E[\hat\beta_2\mid\boldsymbol X]=\beta_2\cdot\mathit1+\sum_iW_i\,E[U_i\mid\boldsymbol X]=\beta_2\cdot\mathit1+\sum_iW_i\cdot\mathit0=\beta_2\cdot\mathit1.
+\]
+# \beta_2\cdot\mathit1+\sum_iE[W_iU_i\mid\boldsymbol X]=
+
+#+begin_quote
+/Ley de las esperanzas iteradas/: Como $E[Z\mid\boldsymbol X]$ es la proyección ortogonal de $Z$ sobre el espacio de las funciones de $\boldsymbol X$ (y $\mathit1$ es una de ellas), entonces $Z-E[Z\mid\boldsymbol X]\perp\mathit1$. Por tanto, $$\mathrm{E}(Z)=\mathrm{E}\big(E[Z\mid\boldsymbol X]\big).$$
+#+end_quote
+$\mbox{ }$
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+\[
+\boxed{\;\mathrm{E}(\hat\beta_2)=\mathrm{E}\big(E[\hat\beta_2\mid\boldsymbol X]\big)=\beta_2.\;}
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+$\hat\beta_2$ no acierta en cada muestra — pero no se equivoca /sistemáticamente/ en ninguna dirección.
+#+end_center
+
+
+*** Insesgadez: $\mathrm{E}(\hat\beta_2)=\beta_2$
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Partimos de $\hat\beta_2=\beta_2\cdot\mathit1+\sum_iW_iU_i$ (transparencia anterior) y tomamos esperanza condicionada a $\boldsymbol X$ —el primer paso de la sesión que de verdad usa probabilidad—.
+
+Antes de seguir, conviene explicitar algo que en la lección 9 quedó implícito en la propia definición de $E[Z\mid\boldsymbol X]$ como la función de $\boldsymbol X$ que minimiza la distancia $\|Z-g(\boldsymbol X)\|_P$. Exactamente igual que en $\mathbb R^n$ (lecciones 3 y 4: minimizar la distancia de un vector a un subespacio equivale a que el residuo sea ortogonal a /todo/ el subespacio), esa minimización es equivalente a esta caracterización, que usaremos repetidamente de aquí en adelante:
+
+#+begin_quote
+/Caracterización de $E[Z\mid\boldsymbol X]$/. Es la única variable aleatoria (salvo, como advertimos en la lección 9, en un conjunto de sucesos de probabilidad nula) que cumple, a la vez:
+1. /Pertenencia/: es una función de $\boldsymbol X$.
+2. /Ortogonalidad del residuo/: $\mathrm{E}\Big((Z-E[Z\mid\boldsymbol X])\cdot h(\boldsymbol X)\Big)=0$ para /toda/ función $h(\boldsymbol X)$.
+#+end_quote
+
+Con esta caracterización podemos demostrar el siguiente lema:
+
+#+begin_quote
+/Lema (sacar fuera de la esperanza condicionada las funciones de variables sobre las que se condiciona)/. Si $c(\boldsymbol X)$ es una función de la lista de variables aleatorias $\boldsymbol X$,
+\[
+E[c(\boldsymbol X)\cdot Z\mid\boldsymbol X]=c(\boldsymbol X)\cdot E[Z\mid\boldsymbol X].
+\]
+#+end_quote
+
+/Demostración/. Comprobamos que el candidato $c(\boldsymbol X)E[Z\mid\boldsymbol X]$ cumple las DOS propiedades que caracterizan a $E[c(\boldsymbol X)Z\mid\boldsymbol X]$:
+
+- /Pertenencia/: el producto $c(\boldsymbol X)E[Z\mid\boldsymbol X]$ es función de $\boldsymbol X$ (producto de funciones de $\boldsymbol X$).
+- /Ortogonalidad/: para cualquier $h(\boldsymbol X)$,
+\[
+\mathrm{E}\Big(\big(c(\boldsymbol X)Z - c(\boldsymbol X)E[Z\mid \boldsymbol{X}]\big)\,h(\boldsymbol{X})\Big)
+= \mathrm{E}\Big(\big(Z - E[Z\mid \boldsymbol{X}]\big)\,\underbrace{c(\boldsymbol X)h(\boldsymbol{X})}_{\text{función de }\boldsymbol X}\Big)=0
+\]
+porque $c(\boldsymbol X)h(\boldsymbol X)$ es, ella misma, función de $\boldsymbol X$, y ya sabemos que $Z-E[Z\mid\boldsymbol X]$ es ortogonal a /cualquiera/ de ellas.
+
+Como $c(\boldsymbol X)E[Z\mid\boldsymbol X]$ cumple las dos propiedades que caracterizan a $E[c(\boldsymbol X)Z\mid\boldsymbol X]$, concluimos $E\big[c(\boldsymbol X)\cdot Z\mid\boldsymbol X\big]=c(\boldsymbol X)\cdot E[Z\mid\boldsymbol X]$. $\blacksquare$
+
+Aplicamos el lema con $c(\boldsymbol X)=W_i$ y con $Z=U_i$:
+\[
+E[\hat\beta_2\mid\boldsymbol X]=\beta_2\cdot\mathit1+\sum_iE[W_iU_i\mid\boldsymbol X]=\beta_2\cdot\mathit1+\sum_iW_i\,E[U_i\mid\boldsymbol X]=\beta_2\cdot\mathit1+\sum_iW_i\cdot\mathit0=\beta_2\cdot\mathit1,
+\]
+donde hemos usando la exogeneidad estricta $E[U_i\mid\boldsymbol X]=\mathit0$ de la transparencia 2.
+
+Falta un último paso, pasar de la esperanza condicional a la esperanza incondicional: queremos encontrar $\mathrm{E}(\hat\beta_2)$, no $E[\hat\beta_2\mid\boldsymbol X]$. Aquí es donde entra la Ley de las Esperanzas Iteradas, que —como puede comprobarse— es, en realidad, la /misma/ idea que ya usamos en la lección 9 para deducir $\mathrm{E}(U)=0$ a partir de $U\perp\mathit1$. En general: la función constante $\mathit1$ es, trivialmente, una función de $\boldsymbol X$; aplicando la ortogonalidad del residuo (recordada más arriba) con $h(\boldsymbol X)=\mathit1$, obtenemos $Z-E[Z\mid\boldsymbol X]\perp\mathit1$ para /cualquier/ $Z$
+\[
+\mathrm{E}\Big(\big(Z-E[Z\mid\boldsymbol X]\big)\cdot \mathit 1 \Big)=0 \iff \mathrm{E}(Z)-\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=0,
+\]
+es decir, $\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)$ —sin ninguna restricción sobre $Z$—. Esta es, precisamente, la Ley de las Esperanzas Iteradas, una consecuencia inmediata de nuestra propia definición geométrica de esperanza condicional.
+
+Aplicándola a $Z=\hat\beta_2$, y usando que $E[\hat\beta_2\mid\boldsymbol X]=\beta_2\cdot\mathit1$ es constante:
+\[
+\mathrm{E}(\hat\beta_2)=\mathrm{E}\big(E[\hat\beta_2\mid\boldsymbol X]\big)=\mathrm{E}(\beta_2\cdot\mathit1)=\beta_2.
+\]
+$\hat\beta_2$ es, por tanto, un /estimador insesgado/ de $\beta_2$: en promedio, sobre todas las muestras posibles que podríamos haber observado, ni sobreestima ni subestima el verdadero parámetro poblacional.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 2, Teorema 2.1 (insesgadez de $\hat\beta_1,\hat\beta_2$).
+
+
+* Varianza: cuán dispersas están las estimaciones
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Aplicando el /Lema/ de la transparencia anterior (dos veces)...
+\[
+Var[\hat\beta_2\mid\boldsymbol X]=Var\Big[\textstyle\sum_iW_iU_i\,\Big|\,\boldsymbol X\Big]=\sum_iW_i^2\,Var[U_i\mid\boldsymbol X]+\sum_{i\neq j}W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X]
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Homocedasticidad + $Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0$ (transparencia 2) $\;\Longrightarrow\;$
+\[
+Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2\sum_iW_i^2.
+\]
+
+# =\sigma^2\cdot\frac1{\sum_jA_j^2}.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+\[
+\boxed{\;Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-{\overline{X}})^2}=\frac{\sigma^2}{n\,S^2}.\;}
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+Más dispersión en $X$, o más observaciones: más precisión. Más ruido ($\sigma^2$): menos precisión.
+#+end_center
+
+
+*** Varianza: cuán dispersas están las estimaciones
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La insesgadez nos dice que $\hat\beta_2$ está bien ``centrado'' en $\beta_2$. Pero un estimador insesgado puede, aun así, ser muy poco fiable en una muestra concreta si su dispersión es enorme. Necesitamos, por tanto, calcular $Var[\hat\beta_2\mid\boldsymbol X]$.
+
+Partimos de $\hat\beta_2=\beta_2\cdot\mathit1+\sum_iW_iU_i$. Como $\beta_2$ es una constante, no aporta varianza: $Var[\hat\beta_2\mid\boldsymbol X]=Var\big[\sum_iW_iU_i\mid\boldsymbol X\big]$. Para desarrollar la varianza de esta suma necesitamos una extensión, a varias variables aleatorias distintas, de la bilinealidad de $\langle\cdot,\cdot\rangle_P$ ya usada en la lección 9 —la misma bilinealidad, aplicada ahora no a las componentes de un único vector, sino a $U_1,\ldots,U_n$ vistas como $n$ variables aleatorias distintas—:
+\[
+Var\Big[\sum_iW_iU_i\,\Big|\,\boldsymbol X\Big]=\sum_iW_i^2\,Var[U_i\mid\boldsymbol X]+\sum_{i\neq j}W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X].
+\]
+Calculemos primero, para un único sumando, $Var[W_iU_i\mid\boldsymbol X]$. Ya vimos que $E[W_iU_i\mid\boldsymbol X]=\mathit0$ (Lema, con $c(\boldsymbol X)=W_i$). Por tanto, la definición de varianza condicional ($Var[Z\mid\boldsymbol X]=E[(Z-E[Z\mid\boldsymbol X])^2\mid\boldsymbol X]$) se simplifica exactamente como en la lección 9 ($Var[U\mid X]=E[U^2\mid X]$, porque también allí $E[U\mid X]=\mathit0$):
+\[
+Var[W_iU_i\mid\boldsymbol X]=E[(W_iU_i)^2\mid\boldsymbol X]=E[W_i^2U_i^2\mid\boldsymbol X]=W_i^2\,E[U_i^2\mid\boldsymbol X]=W_i^2\,Var[U_i\mid\boldsymbol X],
+\]
+donde la penúltima igualdad es, de nuevo, el Lema (con $c(\boldsymbol X)=W_i^2$, sobre $Z=U_i^2$).
+
+Por el mismo argumento, para $i\neq j$ (recordando que $Cov[Z,W\mid\boldsymbol X]=E[(Z-E[Z\mid\boldsymbol X])(W-E[W\mid\boldsymbol X])\mid\boldsymbol X]$, análoga a la varianza):
+\[
+Cov[W_iU_i,W_jU_j\mid\boldsymbol X]=E[W_iU_iW_jU_j\mid\boldsymbol X]=W_iW_j\,E[U_iU_j\mid\boldsymbol X]=W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X],
+\]
+usando el Lema con $c(\boldsymbol X)=W_iW_j$.
+
+Con estas dos piezas —consecuencia, ambas, solo del Lema— la varianza de la suma se desarrolla como la varianza de una combinación lineal de variables aleatorias —esta vez con pesos ya fijos, pues estamos condicionando en $\boldsymbol X$— (bilinealidad de $\langle\cdot,\cdot\rangle_P$, lección 9):
+\[
+Var\Big[\sum_iW_iU_i\,\Big|\,\boldsymbol X\Big]=\sum_iW_i^2\,Var[U_i\mid\boldsymbol X]+\sum_{i\neq j}W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X].
+\]
+
+Ahora entran en juego, por fin, la homocedasticidad ($Var[U_i\mid\boldsymbol X]=\sigma^2\cdot\mathit 1$ para todo $i$, supuesto de la lección 9) y la ausencia de covarianza cruzada ($Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0$ para $i\neq j$, consecuencia del muestreo aleatorio, transparencia 2). Con ambas, la doble suma se reduce a
+\[
+Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2\sum_iW_i^2.
+\]
+
+Calculemos $\sum_iW_i^2$. Como $W_i=\frac{X_i-{\overline{X}}}{\sum_j(X_j-{\overline{X}})^2}$:
+\[
+\sum_iW_i^2=\sum_i\left(\frac{X_i-{\overline{X}}}{\sum_j(X_j-{\overline{X}})^2}\right)^2=\frac{\sum_i(X_i-{\overline{X}})^2}{\left(\sum_j(X_j-{\overline{X}})^2\right)^2}=\frac{1}{\sum_j(X_j-{\overline{X}})^2}.
+\]
+Sustituyendo:
+\[
+Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-{\overline{X}})^2}.
+\]
+
+Esta expresión admite una segunda lectura, útil para su interpretación. Como $\sum_i(X_i-{\overline{X}})^2=n\cdot\frac1n\sum_i(X_i-{\overline{X}})^2=n\,S^2$ (la varianza muestral del regresor, con la convención estadística del curso, $S^2=\frac1n\sum_i(X_i-{\overline{X}})^2$), podemos escribir, equivalentemente,
+\[
+Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{n\,S^2}.
+\]
+Esta segunda forma hace explícitos los tres ingredientes que determinan la precisión de $\hat\beta_2$: (i) cuanto mayor sea $\sigma^2$ (más ruido en la perturbación), menor será la precisión; (ii) cuanto mayor sea $n$ (más observaciones), mayor será la precisión; (iii) cuanto mayor sea $S^2$ (más dispersión en los valores del regresor), mayor será la precisión —una muestra donde $X$ apenas varía da muy poca información sobre la pendiente que relaciona $X$ con $Y$—.[fn::/Un apunte geométrico, antes de seguir/. La fórmula de $W_i$ no es una
+construcción de esta lección: ya estaba latente en la propia
+definición de $c_1$, el coeficiente que la ``vía alternativa'' de la lección 7
+nos dio como pendiente. Recordemos aquella fórmula:
+\[
+c_1 = 
+\frac{\Big\langle\boldsymbol{y},\,(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\Big\rangle_s}{\|\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2} = 
+\hat\beta_2
+\]
+Si desarrollamos ambos productos escalares como sumas —cancelando el factor
+$1/n$ entre numerador y denominador, exactamente la misma observación que
+hicimos al abrir esta sesión, al pasar de $\langle\cdot,\cdot\rangle_s$ a la
+expresión con sumatorios—, obtenemos
+\[
+c_1=\frac{\frac1n\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\frac1n\sum_j(x_j-\mu_{\boldsymbol x})^2}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}=\sum_i\underbrace{\left(\frac{(x_i-\mu_{\boldsymbol x})}{\sum_j(x_j-\mu_{\boldsymbol x})^2}\right)}_{w_i}y_i.
+\]
+Es decir: los pesos $w_i=(x_i-\mu_{\boldsymbol x})/\sum_j(x_j-\mu_{\boldsymbol x})^2$
+—aquí evaluados sobre un vector de datos fijo $\boldsymbol x$, no sobre la
+muestra aleatoria $\boldsymbol X$— no son más que el numerador de $c_1$
+descompuesto término a término. No hay ninguna fórmula nueva: es la misma
+proyección de Cauchy–Schwarz de la lección 3, la misma que la lección 7 aplicó
+al generador $\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1$, ahora simplemente
+mirada componente a componente.
+Esta reconexión nos regala, sin ningún cálculo adicional, la cantidad
+$\sum_iw_i^2$ que acabamos de necesitar para la varianza. Como el denominador
+$\sum_j(x_j-\mu_{\boldsymbol x})^2$ es común a todos los $w_i$:
+\[
+\sum_iw_i^2=\sum_i\frac{(x_i-\mu_{\boldsymbol x})^2}{\left(\sum_j(x_j-\mu_{\boldsymbol x})^2\right)^2}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})^2}{\left(\sum_j(x_j-\mu_{\boldsymbol x})^2\right)^2}=\frac1{\sum_j(x_j-\mu_{\boldsymbol x})^2},
+\]
+exactamente la misma expresión de unas líneas más arriba —allí evaluado sobre la muestra aleatoria $\boldsymbol X$; aquí, sobre
+el vector de datos $\boldsymbol x$—. La varianza de $\hat\beta_2$ es, pues,
+$\sigma^2$ dividido entre el cuadrado de la longitud /euclídea/ (lección 2,
+sin el factor $1/n$) del vector en desviaciones del regresor,
+$\|\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\|_e^2$ —el mismo vector con
+el que, en la lección 7, calculamos la propia pendiente—. Cuanto más
+``largo'' sea ese vector en desviaciones, menor la varianza: la misma
+intuición de ``más dispersión, más precisión'' que ya leímos en la fórmula
+con $S^2$, ahora vista como una propiedad exacta de la longitud de un vector
+concreto en $\mathbb R^n$.]
+
+Nótese, por último, que este resultado es /condicional/ a $\boldsymbol X$: distintas muestras, con distintos valores del regresor, tendrían distinta precisión. Si quisiéramos la varianza /incondicional/ $\mathrm{Var}(\hat\beta_2)$, tendríamos que aplicar la /ley de la varianza total/ —que no es sino la misma identidad pitagórica de la lección 9 (allí enunciada para $Y$, condicionando en $X$), ahora aplicada a $Z=\hat\beta_2$, condicionando en $\boldsymbol X$: para cualquier variable aleatoria $Z$ con varianza finita, $E[Z\mid\boldsymbol X]$ es la proyección ortogonal de $Z$ sobre las funciones de $\boldsymbol X$, así que $Z=E[Z\mid\boldsymbol X]+\big(Z-E[Z\mid\boldsymbol X]\big)$ descompone $Z$ en dos partes ortogonales entre sí; aplicando Pitágoras a esa descomposición se obtiene—
+\[
+\mathrm{Var}(\hat\beta_2)=\mathrm{E}\big(Var[\hat\beta_2\mid\boldsymbol X]\big)+\mathrm{Var}\big(E[\hat\beta_2\mid\boldsymbol X]\big),
+\]
+donde el segundo sumando es cero (pues $E[\hat\beta_2\mid\boldsymbol X]=\beta_2\cdot\mathit1$ es constante, transparencia 6, y la varianza de una constante es cero). Pero el primer sumando, $\mathrm{E}\big(\sigma^2/(nS^2)\big)$, es la esperanza de un /cociente/, y no se simplifica en general (la esperanza de $1/S^2$ no es $1/\mathrm{E}(S^2)$). Por eso, en la práctica —y en el resto de este curso—, trabajaremos siempre con la fórmula /condicional/ recién obtenida, evaluada en la muestra efectivamente observada: es, de hecho, exactamente lo que hace cualquier programa estadístico al reportar el error estándar de un coeficiente.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 2, Teorema 2.2 (varianza de $\hat\beta_1,\hat\beta_2$ bajo los supuestos SLR.1-SLR.5).
+
+
+* MCO es BLUE; estimando $\sigma^2$
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Sin demostrarlo (Gauss–Markov): de entre todos los estimadores /lineales e insesgados/ de $\beta_2$, $\hat\beta_2$ tiene la menor varianza — MCO es /BLUE/ (/Best Linear Unbiased Estimator/).
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+$\sigma^2$ (desconocido) se estima con la /cuasivarianza de los residuos/, un /tercer/ producto escalar (tras $\langle\cdot,\cdot\rangle_e=\langle\cdot,\cdot\rangle_1$ y $\langle\cdot,\cdot\rangle_s=\langle\cdot,\cdot\rangle_n$):
+\[
+\langle\cdot,\cdot\rangle_{n-k}=\frac1{n-k}\langle\cdot,\cdot\rangle_{e}, \qquad \mathfrak{s}^2=\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{\mathop{\widehat{e}}}\rangle_{n-k}=\frac{\mathrm{SRC}}{n-k}.
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Tres divisores, tres motivos distintos: $1$ (geometría pura, sin más), $n$ (para que $\|\boldsymbol1\|_s=1$, lección 4), $n-k$ (para que $\mathfrak s^2$ sea un estimador insesgado de $\sigma^2$).
+
+
+*** MCO es BLUE; estimando $\sigma^2$
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Con insesgadez y varianza ya establecidas, cerramos con dos observaciones importantes que, por su naturaleza, no vamos a demostrar en este curso, pero que conviene conocer con precisión.
+
+La primera es el /Teorema de Gauss–Markov/: bajo los cuatro supuestos del Modelo Clásico de Regresión Lineal, $\hat\beta_2$ no es solo insesgado; es, además, el estimador de /menor varianza/ entre todos los estimadores que sean, simultáneamente, /lineales/ en la muestra del regresando —es decir, de la forma $\sum_ic_iY_i$, donde $Y_1,\ldots,Y_n$ son las variables aleatorias de la muestra (no los datos observados $y_1,\ldots,y_n$), para cualquier elección de pesos $c_i$ que no dependan de $\boldsymbol Y$— e /insesgados/. Este resultado se resume con el acrónimo /BLUE/ (/Best Linear Unbiased Estimator/, ``el mejor estimador lineal insesgado''). No lo demostraremos —la demostración general requiere comparar $\hat\beta_2$ con un estimador lineal insesgado arbitrario y maquinaria matricial que este curso ha decidido no desarrollar—, pero merece una mención explícita porque es la justificación teórica última de por qué, entre todas las posibles rectas que podríamos ajustar de otras maneras, elegimos precisamente la de mínimos cuadrados.
+
+La segunda observación es más práctica: la fórmula $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-{\overline{X}})^2$ depende de $\sigma^2$, la varianza de la perturbación poblacional —una cantidad que, como toda cantidad poblacional, no conocemos—. Para poder usar esta fórmula en la práctica (algo que haremos en la próxima sesión teórica, al construir errores estándar), necesitamos estimar $\sigma^2$ a partir de los residuos $\boldsymbol{\mathop{\widehat e}}$: estos residuos observados se interpretan aquí como la realización, sobre nuestra muestra concreta, de una muestra de tamaño $n$ del vector aleatorio de residuos $\boldsymbol{\mathop{\widehat E}}=\boldsymbol Y-\boldsymbol X\boldsymbol{\mathop{\widehat\beta}}\;=\;\boldsymbol Y-\hat\beta_1{\boldsymbol X}_{|1}-\hat\beta_2{\boldsymbol X}_{|2}$ —el mismo paso de variable aleatoria a dato que hemos dado ya varias veces en esta sesión (transparencia 3)—, cuyas componentes $\hat E_i$ aproximan, sin ser idénticas a ellas, a las perturbaciones $U_i$ del modelo poblacional.[fn::Esta es, precisamente, la posición de Eros con la que abríamos la lección 9: ni conocemos $U_i$ (eso sería la posición del dios), ni carecemos de toda información sobre ella (la posición del ignorante); $\hat E_i$ es nuestro mejor sustituto calculable, construido para que, bajo los supuestos del modelo, su comportamiento medio reproduzca el de $U_i$.]
+
+La estimación natural sería $\langle\boldsymbol{\mathop{\widehat e}},\boldsymbol{\mathop{\widehat e}}\rangle_s=\mathrm{SRC}/n$ —la varianza de los residuos, con nuestra convención estadística habitual—. Pero puede demostrarse (no lo haremos aquí) que el estimador subyacente a esta fórmula —es decir, la misma fórmula, evaluada sobre la muestra aleatoria $\boldsymbol{\mathop{\widehat{E}}}$ en lugar de sobre los datos observados $\boldsymbol{\mathop{\widehat e}}$— es /sesgado/: subestima $\sigma^2$ en promedio.[fn::Seguimos aquí, por simplicidad, la misma convención del resto de esta sección: escribimos las fórmulas con los datos observados $\boldsymbol{\mathop{\widehat e}}$, aunque hablemos de propiedades —como el sesgo o la insesgadez— que, en sentido estricto, son propiedades del estimador (la variable aleatoria subyacente), no de un número concreto. Es el mismo tipo de abuso de notación, ya señalado en la transparencia 3, habitual en toda la literatura econométrica; introducir aquí toda la notación necesaria para evitarlo tendría un coste en claridad mayor que el beneficio.] La razón de este sesgo es geométrica, y ya la conocemos en parte: por construcción (ecuaciones normales, lección 10), los residuos $\boldsymbol{\mathop{\widehat e}}$ no son un vector arbitrario de $\mathbb R^n$, sino que viven siempre en el subespacio ortogonal a las columnas de $\boldsymbol{\mathsf X}$. Como ese subespacio de regresores tiene dimensión $k$ (hay $k$ regresores, incluida la constante), su complemento ortogonal tiene dimensión $n-k$ —la misma cuenta informal de dimensión que empleamos ya en la lección 4 para $\mathcal L(\boldsymbol1)^\perp$, de dimensión $n-1$, el caso particular $k=1$—. Dicho de otro modo: aunque $\boldsymbol{\mathop{\widehat e}}$ tiene $n$ componentes, solo $n-k$ de ellas son realmente ``libres''; las $k$ restantes quedan fijadas por las $k$ condiciones de ortogonalidad $\boldsymbol{\mathsf X}^\top\boldsymbol{\mathop{\widehat e}}=\boldsymbol 0$. Dividir por $n-k$, en vez de por $n$, es la manera de tener en cuenta esta pérdida de $k$ grados de libertad, y es precisamente lo que hace insesgado al estimador resultante. El estimador que sí resulta insesgado usa, por tanto, ese divisor distinto: $n-k$ (el número de observaciones menos el número total de coeficientes estimados, incluida la constante) en vez de $n$.[fn::Esta idea ya la usamos, sin justificarla del todo, en la práctica de laboratorio que sigue a la lección 10, al motivar por qué dividir por $n-k$ (y no por $n$) produce estimadores insesgados. Precisemos ahora, con algo más de rigor, el motivo exacto de ese divisor.]
+
+Esto nos lleva, de forma natural, a introducir un /tercer/ producto escalar en la familia que el curso ha ido construyendo desde la lección 2: junto al euclídeo $\langle\cdot,\cdot\rangle_e$ (divisor $1$) y al estadístico $\langle\cdot,\cdot\rangle_s=\langle\cdot,\cdot\rangle_n$ (divisor $n$), definimos
+\[
+\langle\boldsymbol v,\boldsymbol w\rangle_{n-k}=\frac{1}{n-k}\langle\boldsymbol v,\boldsymbol w\rangle_e.
+\]
+Sigue siendo, técnicamente, un producto escalar legítimo (multiplicar por una constante positiva no rompe simetría, linealidad ni positividad), y con él definimos la /cuasivarianza de los residuos/
+\[
+\mathfrak s^2=\langle\boldsymbol{\mathop{\widehat e}},\boldsymbol{\mathop{\widehat e}}\rangle_{n-k}=\frac{\mathrm{SRC}}{n-k},
+\]
+que sí es un estimador insesgado de $\sigma^2$ (afirmación que no demostramos). Merece la pena subrayar, con la misma honestidad que hemos mantenido en cada elección de divisor a lo largo del curso, que el motivo último de cada uno de los tres divisores es distinto: $1$ no obedece a ningún motivo particular (es la geometría euclídea sin más); $n$ se eligió, en la lección 4, para que $\|\boldsymbol1\|_s=1$ —un motivo puramente geométrico—; $n-k$ se elige aquí, en última instancia, por un motivo /estadístico/ —lograr insesgadez—, aunque, como acabamos de ver, admite también una intuición geométrica razonable: es exactamente la dimensión del subespacio donde vive $\boldsymbol{\mathop{\widehat e}}$. El símbolo $\mathfrak s^2$ (con la ese gótica) se reserva deliberadamente para esta cantidad, para no confundirla con la varianza muestral $\sigma^2$ (nuestra notación habitual) ni con la $s^2$ de los manuales clásicos de estadística, que suele denotar precisamente esto mismo con otra convención tipográfica.
+
+La expresión $n-k$ recibe, en la jerga habitual de la estadística, el nombre de /grados de libertad/ del modelo: el número de observaciones menos el número de parámetros ya estimados. En esta sesión, con dos regresores en total, $k=2$, así que $\mathfrak s^2=\mathrm{SRC}/(n-2)$. Volveremos sobre los grados de libertad, con más detalle, en la próxima sesión teórica.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 2, Teorema 2.2 (parte final: BLUE) y cap. 3, sección 3.5 (Teorema de Gauss-Markov, versión general con $k$ regresores).
+- Wooldridge, J. M. (2020), cap. 3, sección 3.6 (estimación insesgada de $\sigma^2$, grados de libertad).
+
+
+* ¿Y con más regresores?
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Sin demostrarlo (generalización matricial de lo probado hoy; recordando la notación de la lección 10 y su extensión aleatoria de la transparencia 2):
+\[
+E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\cdot\mathit1,\qquad
+Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}.
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+En la diagonal de esta matriz están $Var[\hat\beta_1|\boldsymbol X],\ldots,Var[\hat\beta_k|\boldsymbol X]$; fuera de la diagonal, las covarianzas $Cov[\hat\beta_i,\hat\beta_j\mid\boldsymbol X]$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Evaluada en una muestra ya observada, y con $\sigma^2$ sustituido por su estimación $\mathfrak s^2$ (transparencia anterior) —la fórmula que de hecho calculan los programas estadísticos—:
+\[
+\mathfrak s^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}.
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Para $k=2$, esta fórmula matricial se reduce, elemento a elemento, exactamente a lo que hoy hemos demostrado sin matrices.
+
+
+*** ¿Y con más regresores?
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Todo lo demostrado en esta sesión se limita, deliberadamente, al caso con dos regresores: la constante $\mathit1$ y un único regresor no constante $X$. Con $k$ regresores (lección 10), el resultado análogo existe, y su enunciado —sin demostración— es la generalización matricial natural de lo que hoy hemos probado:
+\[
+E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\cdot\mathit1,\qquad Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}.
+\]
+Aquí $\boldsymbol X$ es la misma matriz aleatoria de regresores que fijamos al abrir la sesión, solo que ahora con $k$ columnas en lugar de dos; $\boldsymbol{\mathsf X}$ sigue denotando, como en la lección 10, la matriz de datos /observados/. La primera igualdad generaliza la insesgadez de la transparencia 6: $\boldsymbol\beta\cdot\mathit1$ denota el vector cuyas componentes son las variables aleatorias constantes $\beta_1\mathit1,\ldots,\beta_k\mathit1$ —el análogo, para un vector de parámetros, de la constante $\beta_2\cdot\mathit1$ que obtuvimos en la transparencia 6—. La segunda generaliza la varianza de la transparencia 7: es una matriz $k\times k$ que ocupa el lugar que antes ocupaba el escalar $1/\sum_i(X_i-{\overline{X}})^2$; en su diagonal contiene las varianzas $Var[\hat\beta_1|\boldsymbol X],\ldots,Var[\hat\beta_k|\boldsymbol X]$ (con $Var[\hat\beta_2|\boldsymbol X]$ como caso particular, ya conocido, en la posición $(2,2)$), y fuera de la diagonal, las covarianzas $Cov[\hat\beta_i,\hat\beta_j\mid\boldsymbol X]$ entre cada par de coeficientes.
+
+Al evaluar esta fórmula en una muestra ya observada, sustituimos la matriz aleatoria $\boldsymbol X$ por la matriz de datos $\boldsymbol{\mathsf X}$, con lo que queda por calcular $(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$: esta es la matriz que, multiplicada por $\mathfrak s^2$ (la estimación de $\sigma^2$ de la transparencia anterior, pues el propio $\sigma^2$ sigue siendo desconocido), da $\mathfrak s^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$ —literalmente, la fórmula que Gretl (y cualquier otro programa estadístico) usa internamente para calcular los errores estándar que veremos en la próxima sesión teórica.
+
+Es razonable preguntarse si esta fórmula, presentada aquí sin demostración, es compatible con lo que sí hemos demostrado hoy. La respuesta es sí, y podemos comprobarlo con un cálculo elemental. Para $k=2$ (constante más un único regresor no constante), la matriz $\boldsymbol{X}^\top\boldsymbol{X}$ (lección 10) es
+\[
+\boldsymbol{X}^\top\boldsymbol{X}=\begin{pmatrix}n & n\overline{X}\\ n\overline{X} & \sum_iX_i^2\end{pmatrix}.
+\]
+Usando la fórmula general para invertir una matriz $2\times2$, obtenemos[fn::$\begin{pmatrix}a&b\\c&d\end{pmatrix}^{-1}=\dfrac{1}{ad-bc}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}$, con $a=n$, $b=c=n\overline{X}$, $d=\sum_iX_i^2$, y usando que $ad-bc=n\sum_iX_i^2-n^2\overline{X}^2=n\sum_i(X_i-\overline{X})^2$ (la ``fórmula de cálculo'' de la varianza, lección 5, evaluada sobre $\boldsymbol{X}$ y multiplicada por $n$).]
+\[
+(\boldsymbol{X}^\top\boldsymbol{X})^{-1}=\frac{1}{n\sum_i(X_i-\overline{X})^2}\begin{pmatrix}\sum_iX_i^2 & -n\overline{X}\\ -n\overline{X} & n\end{pmatrix}.
+\]
+El elemento $(2,2)$ de esta matriz —el que corresponde a la varianza condicional del segundo coeficiente, $\hat\beta_2$— vale $n\big/\big(n\sum_i(X_i-\overline{X})^2\big)=1\big/\sum_i(X_i-\overline{X})^2$. Multiplicando por $\sigma^2$:
+\[
+\sigma^2\cdot\big[(\boldsymbol{X}^\top\boldsymbol{X})^{-1}\big]_{22}=\frac{\sigma^2}{\sum_i(X_i-\overline{X})^2},
+\]
+exactamente la fórmula de la transparencia 7. Y, de propina, la misma matriz nos da las otras dos cantidades que no hemos demostrado con detalle en esta sesión (transparencia 1): el elemento $(1,1)$, multiplicado por $\sigma^2$, da $Var[\hat\beta_1|\boldsymbol{X}]=\sigma^2\sum_iX_i^2\big/\big(n\sum_i(X_i-\overline{X})^2\big)$; y el elemento $(1,2)=(2,1)$, multiplicado por $\sigma^2$, da $Cov[\hat\beta_1,\hat\beta_2\mid\boldsymbol{X}]=-\sigma^2\overline{X}\big/\sum_i(X_i-\overline{X})^2$. La generalización matricial, aunque no la hayamos demostrado, es consistente con todo lo que sí hemos probado en esta sesión —y nos regala, sin coste adicional, dos fórmulas más que no habíamos calculado en la lección.
+
+/Para profundizar/: Wooldridge, J. M. (2020), Apéndice E.2 (fórmulas matriciales de insesgadez y varianza para el modelo de regresión múltiple).
+
+
+* Recapitulación y guiño a la sesión siguiente
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+#+ATTR_LATEX: :align |p{1.8cm}|p{6.5cm}|p{6.3cm}|
+| Propiedad  | Resultado (regresión simple, $k=2$)                                       | Supuestos usados                                                         |
+|------------+---------------------------------------------------------------------------+--------------------------------------------------------------------------|
+| Insesgadez | $\mathrm{E}(\hat\beta_2)=\beta_2$                                         | Linealidad, exogeneidad estricta                                         |
+| Varianza   | $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-{\overline{X}})^2$ | + Homocedasticidad, + muestreo aleatorio (incorrelación entre $U_i,U_j$) |
+| Eficiencia | MCO es BLUE (mejor entre los lineales e insesgados)                       | Los cuatro supuestos anteriores (Gauss–Markov, sin demostrar)            |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Casi sin ingredientes nuevos: la fórmula de la vía alternativa (lección 7), la esperanza condicional (lección 9), la independencia entre observaciones (lección 9). Lo único nuevo: evaluar la fórmula sobre variables aleatorias en lugar de sobre datos: eso, y solo eso, es lo que convierte $\hat\beta_2$ en un estimador.
+
+/Nota/: los mismos argumentos —mutatis mutandis, sustituyendo $\hat\beta_2$ por $\hat\beta_1=\overline{Y}-\hat\beta_2{\overline{X}}$— probarían la insesgadez para $\hat\beta_1$.
+# ; sus fórmulas de varianza, y la de la covarianza entre $\hat\beta_1$ y $\hat\beta_2$, no las hemos demostrado con el mismo detalle, pero aparecen ya calculadas —vía la matriz $(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$— en la transparencia anterior.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+/Próxima sesión (Lección 12)/: ahora ya conocemos la esperanza y varianza del estimador  $\hat\beta_2$— pero para construir un intervalo de confianza o un contraste de hipótesis necesitamos algo más: la /forma/ de la distribución de $\hat\beta_2$, no solo su media y su varianza.
+
+
+*** Recapitulación y guiño a la sesión siguiente
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El recorrido de esta sesión, visto en conjunto, es notablemente corto en ingredientes nuevos. Hemos demostrado dos propiedades —insesgadez y varianza de $\hat\beta_2$— con piezas que ya teníamos: la fórmula de la ``vía alternativa'' de la lección 7 (que nos dio $\hat\beta_2$ como combinación lineal de los datos), la esperanza condicional de la lección 9 (que nos permitió tomar esperanzas y varianzas ``condicionando en $\boldsymbol X$''), y la independencia entre observaciones anunciada en esa misma lección 9 (``copias idénticas e independientes'').
+
+Conviene decir con toda claridad qué es lo único genuinamente nuevo, porque es fácil confundirlo con algo más sofisticado que no es: la idea de tomar una fórmula ARITMÉTICA ya obtenida —geométricamente, en la lección 7, sobre datos fijos— y evaluarla en variables aleatorias en lugar de en datos. Eso, sin más, es lo que convierte una fórmula (un número, calculado a partir de una muestra concreta) en un estimador (una variable aleatoria, cuya distribución depende de qué muestra hubiéramos observado). No hemos definido ningún producto escalar nuevo sobre ``vectores de variables aleatorias'', ni hemos vuelto a demostrar Cauchy–Schwarz sobre un objeto distinto: sencillamente, hemos sustituido números por variables aleatorias dentro de una fórmula que ya sabíamos cierta, y hemos reservado la maquinaria probabilística de la lección 9 (esperanza condicional, independencia) exclusivamente para el momento en que de verdad hacía falta: al tomar esperanzas y varianzas de esa suma ponderada.
+
+La tabla resume las dos propiedades centrales, junto con los supuestos exactos que cada una requiere: la insesgadez solo necesita linealidad y exogeneidad estricta; la varianza necesita, además, homocedasticidad y la ausencia de covarianza cruzada entre perturbaciones (consecuencia del muestreo aleatorio). Esta jerarquía de supuestos —cada propiedad exige un subconjunto distinto de los cuatro supuestos del Modelo Clásico— es importante tenerla presente: en las próximas sesiones, cuando alguno de estos supuestos se ponga en duda (más adelante, al tratar la heterocedasticidad, por ejemplo), sabremos exactamente qué propiedad de $\hat\beta_2$ queda en entredicho y cuál sigue intacta.
+
+Queda, sin embargo, una limitación importante que esta sesión no resuelve, y que conviene señalar con la misma honestidad epistemológica que ha guiado todo el curso: saber que $\hat\beta_2$ está bien centrado en $\beta_2$ (insesgadez) y saber exactamente cuánto se dispersa alrededor de ese centro (varianza) NO es suficiente para responder preguntas del tipo ``¿es $\hat\beta_2=0{,}5$ una estimación compatible con $\beta_2=0$?'' o ``¿en qué rango de valores podemos tener razonable confianza de que se encuentra el verdadero $\beta_2$?''. Para responder a ese tipo de preguntas —los contrastes de hipótesis y los intervalos de confianza que ocuparán buena parte del resto del curso— no basta con la media y la varianza de $\hat\beta_2$: hace falta conocer, además, la /forma/ completa de su distribución de probabilidad. Esa es, precisamente, la tarea de la próxima sesión teórica: enunciar (sin demostrarla desde cero, apoyándonos en un supuesto adicional sobre la distribución de la perturbación $U$) la distribución de $\hat\beta_2$, y a partir de ella construir el error estándar, el intervalo de confianza y el contraste $t$.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 2, sección 2.6 (unidades de medida y forma funcional; transición natural hacia la inferencia del capítulo 4).
+
+
+* Preguntas de repaso (sesión 15)                                  :htmlonly:
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Te propongo 12 preguntas.
+Las marco con un nivel orientativo: [B] básica, [M] media, [D] discriminadora.
+
+*** Comentario
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Las preguntas más valiosas pedagógicamente son la 7 (obliga a entender que la Ley de las Esperanzas Iteradas no es un teorema traído de fuera, sino una consecuencia inmediata de la propia definición geométrica de esperanza condicional de la lección 9) y la 9 (exige reconocer que la incorrelación entre perturbaciones no es un supuesto añadido, sino una consecuencia del muestreo aleatorio ya anunciado en esa misma lección). La 12 es la más discriminadora en términos de honestidad epistemológica: distingue con precisión qué se ha demostrado hoy y qué se ha solo enunciado por analogía matricial. Conviene comentar en clase la 8, porque la lectura de la fórmula de la varianza (qué la hace grande o pequeña) es la que más se usará en las prácticas de laboratorio venideras.
+
+*** Pregunta 1 [B] — Estimador vs. estimación
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La distinción entre $\hat\beta_2(\boldsymbol X,\boldsymbol Y)$ y $\hat\beta_2(\boldsymbol x,\boldsymbol y)$ es:
+
+1) Una diferencia sin importancia, ambas notaciones significan siempre lo mismo.
+2) $\hat\beta_2(\boldsymbol X,\boldsymbol Y)$ es el estimador (variable aleatoria); $\hat\beta_2(\boldsymbol x,\boldsymbol y)$ es la estimación (un número).
+3) $\hat\beta_2(\boldsymbol X,\boldsymbol Y)$ es la estimación; $\hat\beta_2(\boldsymbol x,\boldsymbol y)$ es el estimador.
+4) Solo tiene sentido hablar de $\hat\beta_2(\boldsymbol x,\boldsymbol y)$; el estimador no existe como objeto matemático.
+
+*** Pregunta 2 [B] — El supuesto de muestreo aleatorio
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La condición $Cov[U_i,U_j\mid\boldsymbol X]=0$ para $i\neq j$ es:
+
+1) Un supuesto completamente nuevo, no relacionado con nada visto antes.
+2) Consecuencia de la homocedasticidad.
+3) Consecuencia de la independencia entre observaciones (``copias idénticas e independientes''), ya anunciada en la lección 9.
+4) Una consecuencia de la insesgadez de $\hat\beta_2$.
+
+*** Pregunta 3 [M] — Origen de los pesos $W_i$
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Los pesos $W_i=(X_i-{\overline{X}})/\sum_j(X_j-{\overline{X}})^2$ que aparecen en $\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\sum_iW_iY_i$ provienen de:
+
+1) Una definición completamente nueva, exclusiva de esta sesión.
+2) Evaluar, sobre las variables aleatorias de la muestra, la MISMA fórmula aritmética que la ``vía alternativa'' de la lección 7 obtuvo geométricamente sobre datos fijos.
+3) El teorema de Gauss-Markov.
+4) La cuasivarianza de los residuos.
+
+*** Pregunta 4 [M] — Las dos propiedades de los pesos
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La propiedad $\sum_iW_i=0$ se deduce de:
+
+1) La homocedasticidad de la perturbación.
+2) Que $X_i-{\overline{X}}$ suma cero por pura aritmética —la misma cuenta que en la lección 4, aplicada ahora a $n$ variables aleatorias en lugar de a $n$ datos—.
+3) Que $\hat\beta_2$ es insesgado.
+4) La independencia entre $U_i$ y $U_j$.
+
+*** Pregunta 5 [M] — El paso de sustitución
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Al sustituir $Y_i=\beta_1\cdot1+\beta_2X_i+U_i$ en $\hat\beta_2=\sum_iW_iY_i$, el término con $\beta_1$ desaparece porque:
+
+1) $\beta_1$ siempre vale cero.
+2) $\sum_iW_i=0$.
+3) $\sum_iW_iX_i=1$.
+4) $W_i$ no depende de $\beta_1$.
+
+*** Pregunta 6 [M] — ``Sacar lo que se conoce''
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La propiedad $E[c(\boldsymbol X)\cdot Z\mid\boldsymbol X]=c(\boldsymbol X)\cdot E[Z\mid\boldsymbol X]$, usada para justificar que $W_i$ ``sale'' de la esperanza condicionada, se demuestra:
+
+1) Citando un teorema de un curso de probabilidad más avanzado, no visto en esta asignatura.
+2) A partir de la propia definición de $E[Z\mid\boldsymbol X]$ como proyección ortogonal sobre las funciones de $\boldsymbol X$.
+3) Solo es válida si $Z$ es independiente de $\boldsymbol X$.
+4) Es una consecuencia de la homocedasticidad.
+
+*** Pregunta 7 [D] — Ley de las esperanzas iteradas
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La igualdad $\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)$ se justifica en esta sesión porque:
+
+1) Es un axioma que se acepta sin más.
+2) $\mathit1$ es una función de $\boldsymbol X$, y $E[Z\mid\boldsymbol X]$ se define como la proyección de $Z$ sobre todas las funciones de $\boldsymbol X$; por tanto $Z-E[Z\mid\boldsymbol X]\perp\mathit1$.
+3) Solo es cierta cuando $Z=\hat\beta_2$.
+4) Es consecuencia de la homocedasticidad.
+
+*** Pregunta 8 [M] — Lectura de la fórmula de la varianza
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Según $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/(nS^2)$, la precisión de $\hat\beta_2$ (menor varianza) aumenta cuando:
+
+1) $\sigma^2$ aumenta.
+2) $n$ disminuye.
+3) $S^2$ (la dispersión del regresor observado) aumenta.
+4) $\beta_2$ aumenta.
+
+*** Pregunta 9 [D] — Por qué hace falta la incorrelación entre perturbaciones
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Si $Cov[U_i,U_j\mid\boldsymbol X]\neq0$ para algún $i\neq j$, ¿qué parte de la derivación de esta sesión dejaría de ser válida?
+
+1) La insesgadez de $\hat\beta_2$.
+2) Nada; todo el desarrollo es independiente de este supuesto.
+3) La fórmula de la varianza, $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-{\overline{X}})^2$, que dejaría de reducirse a esa expresión tan simple.
+4) La propia definición de $\hat\beta_2$ como combinación lineal de los datos.
+
+*** Pregunta 10 [M] — El tercer producto escalar
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El divisor $n-k$ de $\langle\cdot,\cdot\rangle_{n-k}$ se elige, a diferencia del divisor $n$ de $\langle\cdot,\cdot\rangle_s$, por un motivo:
+
+1) Geométrico, igual que el divisor $n$ (para que $\|\boldsymbol1\|=1$).
+2) Estadístico: para que $\mathfrak s^2=SRC/(n-k)$ sea un estimador insesgado de $\sigma^2$.
+3) Arbitrario, sin ninguna justificación.
+4) Relacionado con el teorema de Gauss-Markov.
+
+*** Pregunta 11 [B] — Gauss-Markov
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Que MCO sea BLUE significa que:
+
+1) $\hat\beta_2$ acierta siempre el verdadero valor de $\beta_2$.
+2) $\hat\beta_2$ tiene la menor varianza entre todos los estimadores lineales e insesgados de $\beta_2$.
+3) $\hat\beta_2$ es el único estimador insesgado posible.
+4) $\hat\beta_2$ no depende de los supuestos del modelo clásico.
+
+*** Pregunta 12 [D] — Qué está demostrado y qué no
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Respecto a la generalización a $k$ regresores ($E[\boldsymbol{\mathop{\widehat\beta}}\mid\boldsymbol X]=\boldsymbol\beta\cdot\mathit1$, $Var[\boldsymbol{\mathop{\widehat\beta}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}$), esta sesión:
+
+1) La demuestra íntegramente, generalizando paso a paso el argumento de los pesos $W_i$.
+2) La presenta como aserción, sin demostrarla, y solo verifica —con un cálculo elemental de una inversa $2\times2$— que es consistente con lo demostrado para $k=2$.
+3) No la menciona en absoluto.
+4) La demuestra solo para el caso $k=3$.
+
+
+* Respuestas                                                       :htmlonly:
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+
+**** Pregunta 1 [B] — Estimador vs. estimación
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: retención de la distinción notacional introducida al abrir la sesión, necesaria para hablar con propiedad de la distribución de $\hat\beta_2$.
+
+**** Pregunta 2 [B] — El supuesto de muestreo aleatorio
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 3./
+/Evalúa/: reconocimiento de que la incorrelación entre perturbaciones no es un supuesto añadido, sino consecuencia de algo ya sembrado en la lección 9.
+
+**** Pregunta 3 [M] — Origen de los pesos $W_i$
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: comprensión de que hoy no se repite ninguna demostración geométrica; se reutiliza, sobre variables aleatorias, la fórmula aritmética que la lección 7 ya obtuvo.
+
+**** Pregunta 4 [M] — Las dos propiedades de los pesos
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: reconocimiento de que $\sum_iW_i=0$ es un hecho algebraico —la misma cuenta que ya vimos en la lección 4—, no una propiedad geométrica de un supuesto ``espacio de variables aleatorias-vector''.
+
+**** Pregunta 5 [M] — El paso de sustitución
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: seguimiento del paso algebraico central de la transparencia 5.
+
+**** Pregunta 6 [M] — ``Sacar lo que se conoce''
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: comprensión de que esta propiedad, aunque parezca ``de manual'', se deduce de nuestra propia definición geométrica de esperanza condicional.
+
+**** Pregunta 7 [D] — Ley de las esperanzas iteradas
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: comprensión profunda de que la Ley de las Esperanzas Iteradas no es un teorema citado desde fuera, sino consecuencia inmediata de la definición de esperanza condicional como proyección (lección 9).
+
+**** Pregunta 8 [M] — Lectura de la fórmula de la varianza
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 3./
+/Evalúa/: interpretación correcta de los tres ingredientes ($\sigma^2$, $n$, $S^2$) de la fórmula de la varianza, clave para las prácticas de laboratorio venideras.
+
+**** Pregunta 9 [D] — Por qué hace falta la incorrelación entre perturbaciones
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 3./
+/Evalúa/: identificación precisa de qué parte de la demostración depende de qué supuesto (la insesgadez sobrevive; la simplicidad de la fórmula de varianza, no).
+
+**** Pregunta 10 [M] — El tercer producto escalar
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: distinción honesta entre los motivos geométrico y estadístico de los tres divisores usados en el curso.
+
+**** Pregunta 11 [B] — Gauss-Markov
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: comprensión correcta, sin exageraciones, de qué garantiza (y qué no garantiza) el teorema de Gauss-Markov.
+
+**** Pregunta 12 [D] — Qué está demostrado y qué no
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: honestidad epistemológica sobre el alcance exacto de la sesión: qué se demuestra con detalle (k=2) y qué se asevera por generalización, con una única verificación puntual.
+
+
+* COMMENT ipynb y slides                                           :noexport:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(require 'ox-ipynb)
+(ox-ipynb-export-org-file-to-ipynb-file "S15-Lecc11.org")
+#+END_SRC
+
+#+BEGIN_SRC sh :results silent
+#jupyter nbconvert --config ../mycfg-GitHubPages.py --to slides --reveal-prefix "https://unpkg.com/reveal.js@5.2.1" --execute --embed-images S15-Lecc11.ipynb
+#+END_SRC
+
+#+BEGIN_SRC sh :results silent
+#jupyter nbconvert S15-Lecc11.ipynb --to slides --embed-images
+#+END_SRC

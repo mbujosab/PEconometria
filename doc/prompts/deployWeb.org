@@ -1,0 +1,221 @@
+#+begin_src emacs-lisp :results silent
+(setq-local gptel--system-message
+            (with-temp-buffer
+              (insert-file-contents "./PlanDeEscritura.org")
+              (buffer-string)))
+
+(setq-local gptel-context
+            (list "./deploy-gh-pages.sh"
+		  "./makefile"))
+
+#+end_src
+
+En el README.org de este repositorio alojado en GitHub aparece el siguiente texto
+
+- Transparencias (reveal.js): [[https://github.com/mbujosab/PEconometria/tree/gh-pages/Transparencias][enlace]]
+- Apuntes en HTML: [[https://github.com/mbujosab/PEconometria/tree/gh-pages/Lecciones-html][enlace]]
+- Apuntes en PDF: [[https://github.com/mbujosab/PEconometria/tree/gh-pages/Lecciones-pdf][enlace]]
+- Cuadernos Jupyter interactivos: [[https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages][mybinder]]
+- Prácticas en HTML: [[https://github.com/mbujosab/PEconometria/tree/gh-pages/Practicas-pdf][enlace]]
+- Prácticas en PDF: [[https://github.com/mbujosab/PEconometria/tree/gh-pages/Practicas-pdf][enlace]]
+
+Las carpetas de la rama gp-pages las genero localmente con =./deploy-gh-pages.sh= (creo que lo puedes leer). Hay una cosa que querría añadir al script: los enlaces del texto que te he copiado apuntan a las carpetas, pero dichas carpetas no contienen un fichero index.html o contents.html (o lo que sea lo habitual en este contexto) que permita navegar por el contenido de la carpeta. Si uno hace clic en en enlace a la carpeta de apuntes en html verá los fichero html en bruto, en lugar visualizados en el navegador (que es lo que querría conseguir, dado que están en la rama gh-pages). No sé si me explico.
+
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Entiendo perfectamente el problema: GitHub Pages sirve los ficheros tal cual, pero si una carpeta no tiene =index.html=, al visitarla por HTTP simplemente no hay nada que mostrar de forma "amigable" (o GitHub te redirige a la vista bruta del repo, no a un listado navegable).
+
+La solución típica es generar un =index.html= autogenerado en cada carpeta de salida, con enlaces a su contenido. Se puede hacer fácil con el comando =tree -H= (genera un índice HTML con enlaces) o con un pequeño bucle en bash.
+
+Como no veo el contenido exacto de tu script en este mensaje (aunque lo tengo en el contexto, indícame si quieres que lo cite literalmente para editarlo con precisión), te propongo la función genérica que añadirías:
+
+#+begin_src bash
+generar_index () {
+    local carpeta="$1"
+    local titulo="$2"
+    (
+        echo "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        echo "<title>${titulo}</title></head><body>"
+        echo "<h1>${titulo}</h1><ul>"
+        for f in "$carpeta"/*; do
+            nombre=$(basename "$f")
+            echo "<li><a href=\"${nombre}\">${nombre}</a></li>"
+        done
+        echo "</ul></body></html>"
+    ) > "$carpeta/index.html"
+}
+#+end_src
+
+Y luego, después de generar/copiar los ficheros a cada carpeta de =gh-pages= (Transparencias, Lecciones-html, Lecciones-pdf, Practicas-pdf), llamarías:
+
+#+begin_src bash
+generar_index "Transparencias"   "Transparencias (reveal.js)"
+generar_index "Lecciones-html"   "Apuntes en HTML"
+generar_index "Lecciones-pdf"    "Apuntes en PDF"
+generar_index "Practicas-pdf"    "Prácticas en PDF/HTML"
+#+end_src
+
+Alternativa más simple si tienes =tree= instalado:
+
+#+begin_src bash
+tree -H '.' -L 1 -o index.html "$carpeta"
+#+end_src
+
+¿Quieres que te indique el punto exacto del script donde insertarlo? Si me confirmas los nombres de variables que usas para las rutas de destino (o pegas aquí el fragmento relevante), te preparo el diff exacto.
+
+Tengo tree instalado. Y sí, dime con exactitud qué debo escribir en el script y donde.
+
+#+begin_reasoning
+
+#+end_reasoning
+
+No tengo visibilidad real del contenido de =deploy-gh-pages.sh= en este momento (aunque esté declarado en el contexto), así que no puedo darte el diff exacto sin arriesgarme a inventar variables o rutas que no coincidan con tu script real.
+
+¿Puedes pegar aquí el contenido de =deploy-gh-pages.sh=? Así te indico línea por línea dónde insertar la llamada a =tree -H=.
+
+Mientras tanto, te adelanto la forma exacta del comando que usarás (con =tree= instalado), para cada carpeta de destino en la rama =gh-pages=:
+
+#+begin_src bash
+tree -H '.' -L 1 --noreport --charset utf-8 -o index.html "$carpeta"
+#+end_src
+
+Notas sobre las opciones:
+- =-H '.'= genera HTML con rutas relativas a partir de ese punto (importante: debe coincidir con la URL base real, normalmente basta con =.=).
+- =-L 1= limita la profundidad a un nivel (evita listar subcarpetas si no quieres eso; quita esta opción si prefieres el árbol completo).
+- =--noreport= omite la línea final con el resumen de "N directories, M files".
+- =-o index.html= escribe la salida directamente al fichero, en vez de stdout.
+- Debe ejecutarse /después/ de copiar/generar todos los ficheros definitivos en esa carpeta, y /antes/ del =git add=/=git commit= de la rama =gh-pages=.
+
+Pega el script y te doy el parche exacto (con las cuatro llamadas, una por cada carpeta: Transparencias, Lecciones-html, Lecciones-pdf, Practicas-pdf).
+
+#+BEGIN_SRC bash :eval no
+!/usr/bin/env bash
+set -euo pipefail
+
+# --- Ubicación fija: este script vive siempre en la raíz de "main" ---
+REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+DEST="$REPO_ROOT/_ghpages"
+
+cd "$REPO_ROOT"
+
+# --- Salvaguardas ---
+MAIN_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$MAIN_BRANCH" = "gh-pages" ]; then
+    echo "ERROR: estás en la rama 'gh-pages' en $REPO_ROOT. ¿Seguro que" >&2
+    echo "       este es el checkout de 'main'? Abortando." >&2
+    exit 1
+fi
+
+if [ ! -e "$DEST/.git" ]; then
+    echo "ERROR: $DEST no existe o no es un worktree git válido." >&2
+    echo "       Crea el worktree con:" >&2
+    echo "       git worktree add _ghpages gh-pages" >&2
+    exit 1
+fi
+
+WT_BRANCH=$(git -C "$DEST" rev-parse --abbrev-ref HEAD)
+if [ "$WT_BRANCH" != "gh-pages" ]; then
+    echo "ERROR: $DEST está en la rama '$WT_BRANCH', no 'gh-pages'. Abortando." >&2
+    exit 1
+fi
+
+echo "Repo principal (main): $REPO_ROOT"
+echo "Destino (gh-pages):    $DEST"
+echo "-- OK, desplegando --"
+
+# --- Limpieza confinada al worktree: SIN -x, nunca toca ignorados ---
+git -C "$DEST" rm -rf --ignore-unmatch . >/dev/null
+git -C "$DEST" clean -fd
+
+mkdir -p "$DEST"/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos,img,css}
+
+find org-lessons -maxdepth 1 -name '*.slides.html'                  -exec cp {} "$DEST"/Transparencias/ \;
+find org-lessons -maxdepth 1 -name '*.html' ! -name '*.slides.html' -exec cp {} "$DEST"/Lecciones-html/ \;
+find org-lessons -maxdepth 1 -name '*.pdf'                          -exec cp {} "$DEST"/Lecciones-pdf/ \;
+
+# Logo: para insertar en la página web
+cp -r img/Logo.jpg "$DEST"/img/
+
+# Logo: para insertar en la página web
+cp -r css/index.css "$DEST"/css/
+
+# Figuras: tanto el HTML como los slides referencian img/<subcarpeta>/*.png
+# con ruta relativa a org-lessons/. Sin esto no se ve ninguna figura.
+cp -r org-lessons/img "$DEST"/Lecciones-html/
+cp -r org-lessons/img "$DEST"/Transparencias/
+
+find org-pract -maxdepth 1 -name '*.html'        -exec cp {} "$DEST"/Practicas-html/ \;
+find org-pract -maxdepth 1 -name '*.pdf'         -exec cp {} "$DEST"/Practicas-pdf/ \;
+find org-pract/guiones -maxdepth 1 -name '*.inp' -exec cp {} "$DEST"/Practicas-html/guiones/ \;
+
+# Salida de gretlcli por práctica (gráficos, estimaciones, etc.): una
+# carpeta por cada .org de org-pract, mismo nombre sin extensión.
+# "guiones" no es una de ellas (ya se copia aparte, arriba).
+for d in org-pract/*/; do
+    nombre=$(basename "$d")
+    [ "$nombre" = "guiones" ] && continue
+    cp -r "$d" "$DEST"/Practicas-html/
+done
+
+find CuadernosElectronicos -maxdepth 1 -name '*.ipynb' -exec cp {} "$DEST"/CuadernosElectronicos/ \;
+
+cp index.html "$DEST"/
+cp doc/google17677b077c5d0c0d.html "$DEST"/
+cp requirements.txt "$DEST"/
+touch "$DEST"/.nojekyll
+
+cd "$DEST"
+git add -A
+git commit -m "Actualiza material generado ($(date +%F))"
+git push origin gh-pages
+#+END_SRC
+
+
+
+#+begin_reasoning
+
+#+end_reasoning
+
+Perfecto, ahora sí puedo darte el parche exacto.
+
+*Dónde insertarlo:* justo después de la copia de =CuadernosElectronicos= y antes de =cp index.html "$DEST"/= (para no generar un índice de la carpeta raíz, que ya tiene su propio =index.html= fijo).
+
+*Qué añadir:*
+
+#+begin_src bash
+find CuadernosElectronicos -maxdepth 1 -name '*.ipynb' -exec cp {} "$DEST"/CuadernosElectronicos/ \;
+
+# --- Índices navegables para las carpetas sin index.html propio ---
+for carpeta in Transparencias Lecciones-html Lecciones-pdf \
+               Practicas-html Practicas-pdf CuadernosElectronicos; do
+    tree -H '.' -L 1 --noreport --charset utf-8 \
+         -T "$carpeta" -o "$DEST/$carpeta/index.html" \
+         "$DEST/$carpeta"
+done
+
+cp index.html "$DEST"/
+#+end_src
+
+Notas sobre las opciones que añadí respecto a lo que comenté antes:
+
+- =-T "$carpeta"=: pone el nombre de la carpeta como título de la página (aparece en =<title>= y como encabezado).
+- =-L 1=: solo primer nivel. *Importante:* en =Practicas-html= tienes subcarpetas (=guiones=, y una por cada práctica). Si quieres que el índice muestre también su contenido, cambia a =-L 2= solo para esa carpeta, o simplemente quita =-L 1= en todos para tener el árbol completo. Ejemplo si quieres tratar =Practicas-html= aparte:
+
+#+begin_src bash
+for carpeta in Transparencias Lecciones-html Lecciones-pdf Practicas-pdf CuadernosElectronicos; do
+    tree -H '.' -L 1 --noreport --charset utf-8 \
+         -T "$carpeta" -o "$DEST/$carpeta/index.html" \
+         "$DEST/$carpeta"
+done
+
+tree -H '.' -L 2 --noreport --charset utf-8 \
+     -T "Practicas-html" -o "$DEST/Practicas-html/index.html" \
+     "$DEST/Practicas-html"
+#+end_src
+
+- El =-H '.'= hace que las rutas generadas sean relativas a la propia carpeta (correcto, porque el índice vive dentro de ella).
+
+Con esto, cada carpeta enlazada en el README tendrá su =index.html= generado automáticamente en cada despliegue, así que al hacer clic verás un listado navegable en vez de los ficheros en bruto.
