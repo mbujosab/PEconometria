@@ -5,6 +5,7 @@ SUBDIRS := $(shell find . -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
 all:
 	@for d in $(SUBDIRS); do \
 	    org=$$(find "$$d" -maxdepth 1 -name '*.org'); \
+	    [ -z "$$org" ] && { echo "$$d: sin .org, se omite"; continue; }; \
 	    png=$$(find "$$d" -maxdepth 1 -name '*.png' | head -1); \
 	    if [ ! -f "$$png" ] || [ "$$org" -nt "$$png" ]; then \
 	        echo "Compilando $$org"; \

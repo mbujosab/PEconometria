@@ -1,0 +1,55 @@
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings}
+\usepackage{tkz-euclide}
+\begin{document}
+  \def\Rojo{red!50!black}
+  \def\RojoOscuro{red!20!black}
+  \def\RojoClaro{red!90!black}
+  \def\Verde{green!50!black}
+  \def\VerdeOscuro{green!30!black}
+  \def\VerdeClaro{green!50!gray}
+  \def\Azul{blue!50!black}
+  \def\AzulOscuro{blue!35!black}
+  \def\AzulClaro{blue!60!gray}
+
+  \tdplotsetmaincoords{60}{105}
+  \newcommand{\Prho}{.8}%
+  \newcommand{\Ptheta}{20}%
+  \newcommand{\Pphi}{60}%  
+  \newcommand{\Qtheta}{90}%  
+  \begin{tikzpicture}
+    [scale=4.2,
+      tdplot_main_coords,
+      axis/.style={-},
+      vector/.style={-{Stealth[length=3mm, width=2mm]},\Azul,very thick},]    
+    %standard tikz coordinate definition using x, y, z coords
+    \coordinate (O) at (0,0,0);
+    %tikz-3dplot coordinate definition using r, theta, phi coords
+    \tdplotsetcoord{P}{\Prho}{\Ptheta}{\Pphi}
+    \tdplotsetcoord{Q}{\Prho}{\Qtheta}{\Pphi}
+    
+    %draw theta arc and label, using rotated coordinate system
+    \tdplotsetthetaplanecoords{\Pphi}   
+    \tdplotdrawarc[-,tdplot_rotated_coords,\Verde]
+    {(0,0,0)}{0.15}{\Ptheta}{90}{anchor=south west}{$\theta$}
+    \path[fill=\VerdeClaro!30] (0,0,0) -- plot[variable=\t,domain=70:0]
+(xyz spherical cs:radius=.15,longitude=30,latitude=\t); 
+
+    % draw axes
+    \draw[axis] (0,0,0) -- (0.6,0,0); %  node[anchor=north east]{$x$};
+    \draw[axis] (0,0,0) -- (0,1.12,0); %  node[anchor=north west]{$y$};
+    \draw[axis] (0,0,0) -- (0,0,.57); %  node[anchor=south]{$z$};
+    %draw a vectors from O to P
+    \draw[vector] (O) -- node[below] {A} (Q) node[right] {$\Vect{a}=(a_1,a_2,a_3,)$};
+    \draw[vector] (O) -- node[left]  {B} (P) node[right] {$\Vect{b}=(b_1,b_2,b_3,)$};
+    \draw[-,\AzulClaro]      (P)   -- node[right] {C} (Q);
+    \draw[dashed,gray,thick] (Pxy) -- node[right] {H} (P);
+
+  \end{tikzpicture}
+\end{document}

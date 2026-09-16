@@ -1,0 +1,37 @@
+\documentclass[border=10pt]{standalone} 
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
+\usetikzlibrary{calc}
+
+\pgfplotstableread{../SumasCuadradros.dat}\loadedtable
+
+\begin{document}
+
+\begin{tikzpicture}
+  \begin{axis}[
+    xlabel=$x$, %Weight (kg), % label x axis
+    ylabel=$y$, %Height (cm), % label y axis
+    axis lines=left, %set the position of the axes
+    xmin=44, xmax=95, % set the min and max values of the x-axis
+    ymin=129, ymax=137, % set the min and max values of the y-axis
+    clip=false
+    ]
+    
+    \addplot [only marks, mark=*, mark size=1.4, green!30!black] table [y=y, x=x] {\loadedtable};
+    \addplot [no markers, gray!50, , draw=green!40!black, fill opacity=0.5,%thick, red,
+    error bars/.cd,
+    y dir=plus,
+    y explicit,
+    draw error bar/.code 2 args={
+      \edef\expression{($##1!1.414!45:##2$)}
+      \fill ##1 rectangle \expression;
+    }
+    ] table [y=yhat, y error expr=\thisrow{ehat}] {\loadedtable};
+    \addplot [no markers, very thick, red!70!gray] table [y=yhat, x=x] {\loadedtable};
+    \addplot [only marks, mark=*, mark size=1.3, red!60!black] table [y=yhat, x=x] {\loadedtable};
+  \end{axis}
+\end{tikzpicture}
+\end{document}

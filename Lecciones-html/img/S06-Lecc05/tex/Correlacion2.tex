@@ -1,0 +1,74 @@
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\pgfplotsset{compat=newest}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+% Añadimos arrows.meta para dar soporte a los estilos de vectores con flechas stealth
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+% 1. DEFINIMOS LA VISTA 3D (Ángulos de rotación para los ejes)
+\tdplotsetmaincoords{90}{0}
+
+\begin{document}
+  \def\Rojo{red!50!black}
+  \def\RojoOscuro{red!20!black}
+  \def\RojoClaro{red!90!black}
+  \def\Verde{green!50!black}
+  \def\VerdeOscuro{green!30!black}
+  \def\VerdeClaro{green!50!gray}
+  \def\Azul{blue!50!black}
+  \def\AzulOscuro{blue!35!black}
+  \def\AzulClaro{blue!60!gray}
+
+  \begin{tikzpicture} [scale=3,
+    tdplot_main_coords,
+    axis/.style={-,black, thin},
+    vector/.style={-stealth},
+    vector guide/.style={dashed,gray,very thin}]
+    
+    % standard tikz coordinate definition using x, y, z coords
+    \tdplotsetcoord{P}{1.2}{50}{70}
+    \tdplotsetcoord{Q}{1}{-70}{-140}
+    \tdplotsetcoord{C}{1.9}{45}{40}
+    \tdplotsetcoord{O}{0}{0}{0}
+    
+    \tdplotsetrotatedcoords{0}{0}{-45}
+    
+    \tdplotsetcoord{X}{1.0}{90}{0}   
+    \tdplotsetcoord{XX}{.1}{-90}{0}   
+    \tdplotsetcoord{Y}{1.2}{90}{90}    % vectores constantes
+    \tdplotsetcoord{YY}{.3}{90}{-90}
+    \tdplotsetcoord{Z}{0.9}{0}{0}
+    \tdplotsetcoord{ZZ}{-.1}{0}{0}     % vertical
+    \tdplotsetcoord{H}{1}{-90}{-60}
+  
+    % draw axes
+    \draw[axis]  (XX) -- (X); 
+    \draw[axis]  (ZZ) -- (Z); 
+  
+    \coordinate (Ymedia) at (0,0.865,0);
+    \coordinate (Yhat)   at (Pxy);
+
+    \coordinate (Xmedia) at (0,0.605,0);
+  
+    \draw[vector guide,gray!50!black]         (Pxz) -- (P);
+    \draw[vector guide]         (Ymedia) -- (P);
+  
+    \draw[vector guide,gray!50!black]         (Qxz) -- (Q);
+    \draw[vector guide]         (Xmedia) -- (Q);
+    
+    \draw[vector, red!50!black,thick]  (O) --  (Pxz)node[anchor=south, xshift=0.55mm]{$\Vect{v}-\Vect{\Media{v}}$};
+
+    \draw[vector, green!40!black,thick]  (O) --  (Qxz)node[anchor=north west]{$\Vect{X}-\Vect{\Media{x}}$};
+
+    \draw pic[draw=black,angle radius=17,angle eccentricity=1.4,gray!50!black,thick] {angle = Qxz--O--Pxz} node[anchor=south west, xshift=1.2mm, yshift=1.1mm, inner sep=0.7pt,  fill=white, opacity=.2, text opacity=1]{$\theta$};
+    
+  \end{tikzpicture}
+\end{document}

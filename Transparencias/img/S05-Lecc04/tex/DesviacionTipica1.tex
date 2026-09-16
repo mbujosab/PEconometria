@@ -1,0 +1,88 @@
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+% 1. DEFINIMOS LA VISTA 3D (Ángulos de rotación para los ejes)
+\tdplotsetmaincoords{55}{65}
+
+\begin{document}
+  \def\Rojo{red!50!black}
+  \def\RojoOscuro{red!20!black}
+  \def\RojoClaro{red!90!black}
+  \def\Verde{green!50!black}
+  \def\VerdeOscuro{green!30!black}
+  \def\VerdeClaro{green!50!gray}
+  \def\Azul{blue!50!black}
+  \def\AzulOscuro{blue!35!black}
+  \def\AzulClaro{blue!60!gray}
+
+  \begin{tikzpicture} [scale=3,
+    tdplot_main_coords,
+    axis/.style={-,black, thin},
+    vector/.style={-stealth},
+    vector guide/.style={dashed,gray,very thin}]
+    
+    % standard tikz coordinate definition using x, y, z coords
+    \tdplotsetcoord{P}{1.2}{50}{70}
+    \tdplotsetcoord{Q}{1}{-70}{-140}
+    \tdplotsetcoord{C}{1.9}{45}{40}
+    \tdplotsetcoord{O}{0}{0}{0}
+    
+    \tdplotsetrotatedcoords{0}{0}{-45}
+    
+    \tdplotsetcoord{X}{.7}{90}{0}   
+    \tdplotsetcoord{XX}{.8}{-90}{0}   
+    \tdplotsetcoord{Y}{1.2}{90}{90}    % vectores constantes
+    \tdplotsetcoord{YY}{.3}{90}{-90}
+    \tdplotsetcoord{Z}{1.0}{0}{0}
+    \tdplotsetcoord{ZZ}{-.45}{0}{0}     % vertical
+    \tdplotsetcoord{H}{1}{-90}{-60}
+  
+    % draw axes
+    \draw[axis]  (XX) -- (X); 
+    \draw[axis,color=blue!95!black,thin]  (YY) -- (Y) node[color=blue!90!black, anchor=west,font=\footnotesize]{$\Span{\Vect{1}}$};
+    \draw[axis]  (ZZ) -- (Z); 
+  
+    \coordinate (Ymedia) at (0,0.865,0);
+    \coordinate (Yhat)   at (Pxy);
+
+    \coordinate (Xmedia) at (0,0.605,0);
+
+    \tkzMarkRightAngle[size=.08,gray](O,Pxz,P) 
+    \tkzMarkRightAngle[size=.08,gray](O,Qxz,Q) 
+
+    % REEMPLAZO 3D SEGURO: Dibujamos los indicadores de ángulo recto manualmente
+    % usando proyecciones relativas cortas para que sigan la perspectiva 3D real
+    %\draw[gray, very thin] ($(Pxz)!0.06!(O)$) -- ($(Pxz)!0.06!(O)+(P)-(Pxz)$) -- ($(Pxz)!0.06!(P)$);
+    %\draw[gray, very thin] ($(Qxz)!0.06!(O)$) -- ($(Qxz)!0.06!(O)+(Q)-(Qxz)$) -- ($(Qxz)!0.06!(Q)$);
+  
+    \draw[vector guide,gray!50!black]         (Pxz) -- (P);
+    \draw[vector guide]         (Ymedia) -- (P);
+  
+    \draw[vector guide,gray!50!black]         (Qxz) -- (Q);
+    \draw[vector guide]         (Xmedia) -- (Q);
+
+    \draw[decorate, decoration={brace,mirror,raise=2pt},green!45!orange!85!black] (O) -- (Qxz) node [midway, anchor=north east, yshift=-1.7mm, xshift=0.35mm, outer sep=0pt, inner sep=0.3pt, font=\scriptsize, fill=white, opacity=.9, text opacity=1]{$\norma[s]{\Vect{X}-\Vect{\Media{x}}}=\dt{\Vect{x}}$};
+
+    \draw[decorate, decoration={brace,raise=2pt},red!85!orange!75!black] (O) -- (Pxz) node [midway, anchor=east, yshift=0.9mm, xshift=-1.8mm, outer sep=0.0pt, inner sep=0.3pt, font=\scriptsize, fill=white, opacity=.9, text opacity=1]{$\norma[s]{\Vect{v}-\Vect{\Media{v}}}=\dt{\Vect{v}}$};
+    % gray!85!black
+    
+    % draw a vector from O to P
+    \draw[vector, red!30!gray] (O) -- (P) node[anchor=south west]{$\Vect{v}$};
+    \draw[vector, color=blue!20!gray,thick]  (O) -- (Ymedia) node[anchor=south west]{${\Vect{\Media{v}}}$};
+    \draw[vector, red!50!black,thick]  (O) --  (Pxz)node[anchor=south, xshift=0.55mm]{$\Vect{v}-\Vect{\Media{v}}$};
+
+    \draw[vector, green!30!gray] (O) -- (Q) node[anchor=west]{$\Vect{x}$};
+    \draw[vector, color=blue!30!gray,thick]  (O) -- (Xmedia) node[anchor=south]{${\Vect{\Media{x}}}$};
+    \draw[vector, green!40!black,thick]  (O) --  (Qxz)node[anchor=north west]{$\Vect{X}-\Vect{\Media{x}}$};
+    
+  \end{tikzpicture}
+\end{document}

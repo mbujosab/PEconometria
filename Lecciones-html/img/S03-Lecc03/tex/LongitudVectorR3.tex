@@ -1,0 +1,63 @@
+\documentclass[border=10pt]{standalone} 
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+\usepackage{tikz} 
+\usetikzlibrary{matrix,decorations.pathreplacing}
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings}
+\usepackage{tkz-euclide}
+
+\pgfplotsset{width=10cm,height=6cm}
+
+\begin{document}
+  \def\Rojo{red!50!black}
+  \def\RojoOscuro{red!20!black}
+  \def\RojoClaro{red!90!black}
+  \def\Verde{green!50!black}
+  \def\VerdeOscuro{green!30!black}
+  \def\VerdeClaro{green!50!gray}
+  \def\Azul{blue!50!black}
+  \def\AzulOscuro{blue!35!black}
+  \def\AzulClaro{blue!60!gray}
+
+  \tdplotsetmaincoords{60}{105}
+  \newcommand{\Prho}{.8}%
+  \newcommand{\Ptheta}{55}%
+  \newcommand{\Pphi}{60}%  
+  \begin{tikzpicture}
+    [scale=6,
+     tdplot_main_coords,
+     axis/.style={-,gray},
+     vector/.style={-{Stealth[length=3mm, width=2mm]},\Verde,very thick},
+     guide/.style={dashed, very thin, gray},
+     vector guide/.style={-{Stealth[length=2mm, width=1mm]},dashed,\AzulClaro,thick}]
+    
+    %standard tikz coordinate definition using x, y, z coords
+    \coordinate (O) at (0,0,0);
+    %tikz-3dplot coordinate definition using r, theta, phi coords
+    \tdplotsetcoord{P}{\Prho}{\Ptheta}{\Pphi}
+    %draw axes
+    \draw[axis] (0,0,0) -- (0.6,0,0);  %  node[anchor=north east]{$x$};
+    \draw[axis] (0,0,0) -- (0,1.12,0); %  node[anchor=north west]{$y$};
+    \draw[axis] (0,0,0) -- (0,0,.52);  %  node[anchor=south]{$z$};
+    %draw a vector from O to P
+    \draw[vector] (O) -- (P) node[right] {$\Vect{y}=(y_1,y_2,y_3,)$};
+    %draw guide lines to components
+    \draw[vector guide] (O) -- (Px) node [left]  {$y_1$};
+    \draw[vector guide] (O) -- (Py) node [above] {$y_2$};
+    \draw[vector guide] (O) -- (Pz) node [left]  {$y_3$};
+    \draw[vector guide,thin] (O) -- (Pxy);   
+    % Compute x,y,z
+    \pgfmathsetmacro{\PxCoord}{\Prho * sin(\Pphi) * cos(\Ptheta)}%
+    \pgfmathsetmacro{\PyCoord}{\Prho * sin(\Pphi) * sin(\Ptheta)}%
+    \pgfmathsetmacro{\PzCoord}{\Prho * cos(\Pphi)}%
+    \draw[guide] (P) -- (Pxy) node [below] {$(y_1,y_2,0,)$};              ;
+    \draw[guide] (Pxy) -- (Px);  %{\PxCoord};
+    \draw[guide] (Pxy) -- (Py);  %{\PyCoord};
+    \draw[guide] (P)   -- (Pxz); %{\PxCoord};
+
+    \draw[guide] (P)   -- (Pyz); %{\PyCoord};
+    \draw[guide] (P)   -- (Pz);  %{\PzCoord};
+  \end{tikzpicture}
+\end{document}
