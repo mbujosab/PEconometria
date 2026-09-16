@@ -1,0 +1,122 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open hprice2.gdt --quiet
+
+ols price const rooms --quiet
+scalar b1_true = $coeff(const)
+scalar b2_true = $coeff(rooms)
+scalar sigma   = sqrt($ess/$df)
+
+scalar mu_r = mean(rooms)               # "poblacion" del regresor
+scalar sd_r = sd(rooms)
+outfile --quiet preparacion.txt
+    printf "Poblacion del regresor: media = %.4f   desv. tipica = %.4f\n", mu_r, sd_r
+    
+    set seed 160
+    smpl 12 --random                        # doce viviendas elegidas AL AZAR
+    scalar Sxx_obs  = sum((rooms-mean(rooms))^2)
+    scalar var_cond = sigma^2 / Sxx_obs
+    
+    printf "\nSubmuestra observada (n = %d):\n", $nobs
+    printf "  media(rooms) = %.4f    desv. tipica(rooms) = %.4f\n", mean(rooms), sd(rooms)
+    printf "  Sxx = suma de cuadrados en desviaciones = %.4f\n", Sxx_obs
+    printf "  Sxx tipico de una muestra de este tamano = %.4f\n", ($nobs-1)*sd_r^2
+    printf "\nVar[b2 | X] que predice la leccion 11 = %.1f   (desv. tipica %.1f)\n", var_cond, sqrt(var_cond)
+end outfile
+
+scalar R = 4000
+
+set seed 160
+loop R --progressive --quiet
+    series u = normal(0, sigma)
+    series y = b1_true + b2_true*rooms + u      # rooms NO cambia
+    ols y const rooms --quiet
+    scalar b_fijo = $coeff(rooms)
+    store "@workdir/repFijo.gdt" b_fijo
+endloop
+
+set seed 160
+loop R --progressive --quiet
+    series xnew = mu_r + sd_r*normal(0,1)       # doce viviendas NUEVAS
+    series u    = normal(0, sigma)
+    series y    = b1_true + b2_true*xnew + u
+    ols y const xnew --quiet
+    scalar b_var = $coeff(xnew)
+    scalar Sxx_i = sum((xnew-mean(xnew))^2)     # el Sxx de ESTA replica
+    store "@workdir/repVar.gdt" b_var Sxx_i
+endloop
+
+outfile --quiet comparacion.txt
+    printf "=== LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===\n"
+    printf "beta_2 verdadero  = %.2f\n", b2_true
+    printf "Var[b2 | X]       = %.1f\n\n", var_cond
+end outfile
+open "@workdir/repFijo.gdt" --quiet
+outfile --quiet --append comparacion.txt
+    printf "=== EXPERIMENTO A: regresor FIJO ===\n"
+    printf "media de b2hat    = %.2f\n", mean(b_fijo)
+    printf "varianza de b2hat = %.1f\n\n", sum((b_fijo-mean(b_fijo))^2)/$nobs
+end outfile
+open "@workdir/repVar.gdt" --quiet
+outfile --quiet --append comparacion.txt
+    printf "=== EXPERIMENTO B: regresor REGENERADO en cada replica ===\n"
+    printf "media de b2hat    = %.2f\n", mean(b_var)
+    printf "varianza de b2hat = %.1f\n", sum((b_var-mean(b_var))^2)/$nobs
+    printf "\nSxx a lo largo de las replicas del experimento B:\n"
+    printf "  medio = %.4f    minimo = %.4f    maximo = %.4f\n", mean(Sxx_i), min(Sxx_i), max(Sxx_i)
+end outfile
+
+open hprice2.gdt --quiet
+ols price const rooms --quiet
+scalar b1_true = $coeff(const)
+scalar b2_true = $coeff(rooms)
+scalar sigma   = sqrt($ess/$df)
+scalar mu_r = mean(rooms)
+scalar sd_r = sd(rooms)
+
+set seed 160
+smpl 400 --random
+scalar Sxx_obs  = sum((rooms-mean(rooms))^2)
+scalar var_cond = sigma^2 / Sxx_obs
+
+set seed 160
+loop 4000 --progressive --quiet
+    series u = normal(0, sigma)
+    series y = b1_true + b2_true*rooms + u
+    ols y const rooms --quiet
+    scalar bg_fijo = $coeff(rooms)
+    series xnew = mu_r + sd_r*normal(0,1)
+    series u2   = normal(0, sigma)
+    series y2   = b1_true + b2_true*xnew + u2
+    ols y2 const xnew --quiet
+    scalar bg_var = $coeff(xnew)
+    store "@workdir/repGrande.gdt" bg_fijo bg_var
+endloop
+
+outfile --quiet muestraGrande.txt
+    printf "Con n = 400:  Sxx observado = %.2f   (tipico: %.2f)\n", Sxx_obs, ($nobs-1)*sd_r^2
+    printf "             Var[b2|X] condicional teorica = %.2f\n", var_cond
+end outfile
+open "@workdir/repGrande.gdt" --quiet
+outfile --quiet --append muestraGrande.txt
+    printf "  regresor FIJO       : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
+    printf "  regresor REGENERADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
+end outfile

@@ -1,0 +1,170 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open hprice2.gdt --quiet
+ols price const rooms --quiet
+scalar b1_true = $coeff(const)
+scalar b2_true = $coeff(rooms)
+scalar sigma   = sqrt($ess/$df)
+scalar Sxx     = sum((rooms-mean(rooms))^2)
+scalar var_teo = sigma^2 / Sxx
+scalar a_unif  = sigma*sqrt(3)          # semiamplitud de la uniforme
+
+scalar R = 2000
+set seed 20261030
+loop R --progressive --quiet
+    series u_nor = normal(0, sigma)
+    series y1 = b1_true + b2_true*rooms + u_nor
+    ols y1 const rooms --quiet
+    scalar b_nor = $coeff(rooms)
+
+    series u_uni = -a_unif + 2*a_unif*uniform(0,1)
+    series y2 = b1_true + b2_true*rooms + u_uni
+    ols y2 const rooms --quiet
+    scalar b_uni = $coeff(rooms)
+
+    series u_chi = (randgen(X,4) - 4)/sqrt(8) * sigma
+    series y3 = b1_true + b2_true*rooms + u_chi
+    ols y3 const rooms --quiet
+    scalar b_chi = $coeff(rooms)
+
+    store "@workdir/repC.gdt" b_nor b_uni b_chi
+endloop
+
+outfile --quiet comparacionTres.txt
+    printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
+    printf "beta_2     = %.4f\n", b2_true
+    printf "Var[b2|X]  = %.2f   (desv. tipica %.2f)\n\n", var_teo, sqrt(var_teo)
+end outfile
+open "@workdir/repC.gdt" --quiet
+outfile --quiet --append comparacionTres.txt
+    printf "=== LO QUE SALE DE %d REPLICAS, SEGUN COMO SEA LA PERTURBACION ===\n", $nobs
+    printf "perturbacion normal    : media = %10.2f    varianza = %12.2f\n", mean(b_nor), sum((b_nor-mean(b_nor))^2)/$nobs
+    printf "perturbacion uniforme  : media = %10.2f    varianza = %12.2f\n", mean(b_uni), sum((b_uni-mean(b_uni))^2)/$nobs
+    printf "perturbacion chi2(4)   : media = %10.2f    varianza = %12.2f\n", mean(b_chi), sum((b_chi-mean(b_chi))^2)/$nobs
+end outfile
+
+freq b_chi --normal --plot="@workdir/hist_chi_grande.png"
+
+open hprice2.gdt --quiet
+ols price const rooms --quiet
+scalar b1_true = $coeff(const)
+scalar b2_true = $coeff(rooms)
+scalar sigma   = sqrt($ess/$df)
+
+set seed 160
+smpl 12 --random
+set seed 99
+loop 4000 --progressive --quiet
+    series u_p = (randgen(X,1) - 1)/sqrt(2) * sigma     # chi2 con 1 g.l., muy asimetrica
+    series y_p = b1_true + b2_true*rooms + u_p
+    ols y_p const rooms --quiet
+    scalar b_peq = $coeff(rooms)
+    store "@workdir/repCpeq.gdt" b_peq
+endloop
+open "@workdir/repCpeq.gdt" --quiet
+outfile --quiet chiPequeno.txt
+    scalar m_p = mean(b_peq)
+    scalar s_p = sqrt(sum((b_peq-m_p)^2)/$nobs)
+    printf "n = 12, perturbacion chi2 con 1 g.l.\n"
+    printf "  media     = %.1f\n", m_p
+    printf "  varianza  = %.1f\n", s_p^2
+    printf "  asimetria = %.3f\n", (sum((b_peq-m_p)^3)/$nobs)/s_p^3
+end outfile
+freq b_peq --normal --plot="@workdir/hist_chi_peq.png"
+
+open hprice2.gdt --quiet
+ols price const rooms --quiet
+scalar b1_true = $coeff(const)
+scalar b2_true = $coeff(rooms)
+scalar sigma   = sqrt($ess/$df)
+
+smpl 1 12
+series x_eq  = rooms        # regresor equilibrado: las doce viviendas
+series x_pal = 6            # regresor con una observacion dominante:
+x_pal[1]     = 14           #   once iguales y una que se sale
+set seed 99
+loop 8000 --progressive --quiet
+    series u_nor = normal(0, sigma)                     # perturbacion normal
+    series u_chi = (randgen(X,1) - 1)/sqrt(2) * sigma   # perturbacion chi2(1)
+
+    series y1 = b1_true + b2_true*x_eq + u_nor
+    ols y1 const x_eq --quiet
+    scalar eq_nor = $coeff(x_eq)
+
+    series y2 = b1_true + b2_true*x_pal + u_nor
+    ols y2 const x_pal --quiet
+    scalar pal_nor = $coeff(x_pal)
+
+    series y3 = b1_true + b2_true*x_eq + u_chi
+    ols y3 const x_eq --quiet
+    scalar eq_chi = $coeff(x_eq)
+
+    series y4 = b1_true + b2_true*x_pal + u_chi
+    ols y4 const x_pal --quiet
+    scalar pal_chi = $coeff(x_pal)
+
+    store "@workdir/repDD.gdt" eq_nor pal_nor eq_chi pal_chi
+endloop
+open "@workdir/repDD.gdt" --quiet
+outfile --quiet dosPorDos.txt
+    scalar m1 = mean(eq_nor)
+    scalar s1 = sqrt(sum((eq_nor-m1)^2)/$nobs)
+    scalar m2 = mean(pal_nor)
+    scalar s2 = sqrt(sum((pal_nor-m2)^2)/$nobs)
+    scalar m3 = mean(eq_chi)
+    scalar s3 = sqrt(sum((eq_chi-m3)^2)/$nobs)
+    scalar m4 = mean(pal_chi)
+    scalar s4 = sqrt(sum((pal_chi-m4)^2)/$nobs)
+    
+    printf "ASIMETRIA DE b2 ESTIMADO      regresor equilibrado   regresor con palanca\n"
+    printf "perturbacion NORMAL                %8.3f               %8.3f\n", (sum((eq_nor-m1)^3)/$nobs)/s1^3,  (sum((pal_nor-m2)^3)/$nobs)/s2^3
+    printf "perturbacion CHI2(1)               %8.3f               %8.3f\n", (sum((eq_chi-m3)^3)/$nobs)/s3^3,  (sum((pal_chi-m4)^3)/$nobs)/s4^3
+end outfile
+freq pal_nor --normal --plot="@workdir/hist_pal_nor.png"
+freq pal_chi --normal --plot="@workdir/hist_pal_chi.png"
+
+open hprice2.gdt --quiet
+ols price const rooms --quiet
+scalar b1_true = $coeff(const)
+scalar b2_true = $coeff(rooms)
+scalar sigma   = sqrt($ess/$df)
+
+set seed 20261030
+loop 2000 --progressive --quiet
+    series u0  = normal(0,1)
+    ols u0 const rooms --quiet
+    series uex = $uhat                                    # ortogonal EXACTAMENTE a 1 y a rooms
+    series uex = uex / sqrt(sum(uex^2)/$nobs) * sigma      # y con varianza exactamente sigma^2
+    series y_e = b1_true + b2_true*rooms + uex
+    ols y_e const rooms --quiet
+    scalar b_exa = $coeff(rooms)
+    store "@workdir/repExacta.gdt" b_exa
+endloop
+
+outfile --quiet uExacta.txt
+    printf "beta_2 verdadero = %.6f\n", b2_true
+end outfile
+open "@workdir/repExacta.gdt" --quiet
+outfile --quiet --append uExacta.txt
+    printf "media de las 2000 estimaciones = %.6f\n", mean(b_exa)
+    printf "varianza de las estimaciones   = %.10f\n", sum((b_exa-mean(b_exa))^2)/$nobs
+    printf "minimo = %.6f    maximo = %.6f\n", min(b_exa), max(b_exa)
+end outfile

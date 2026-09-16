@@ -59,3 +59,33 @@ outfile --quiet sintesisR2.txt
     printf "R2 price~sqft+bedrms        = %.4f\n", r2_3
     printf "R2 price~sqft+bedrms+baths  = %.4f\n", r2_4
 end outfile
+
+smpl full                       # las 14 viviendas
+ols price const sqft --quiet
+scalar a_todas = $coeff(const)
+scalar b_todas = $coeff(sqft)
+
+smpl 1 13                       # quitamos la ULTIMA vivienda
+ols price const sqft --quiet
+scalar a_sin14 = $coeff(const)
+scalar b_sin14 = $coeff(sqft)
+
+smpl 2 14                       # quitamos la PRIMERA vivienda
+ols price const sqft --quiet
+scalar a_sin1 = $coeff(const)
+scalar b_sin1 = $coeff(sqft)
+
+smpl 2 13                       # quitamos la primera Y la ultima
+ols price const sqft --quiet
+scalar a_sinambas = $coeff(const)
+scalar b_sinambas = $coeff(sqft)
+
+smpl full                       # recuperamos siempre la muestra completa
+outfile --quiet submuestras.txt
+    printf "muestra                      constante    pendiente(sqft)\n"
+    printf "---------------------------------------------------------\n"
+    printf "las 14 viviendas           %11.3f      %11.4f\n", a_todas, b_todas
+    printf "sin la ultima (n=13)       %11.3f      %11.4f\n", a_sin14, b_sin14
+    printf "sin la primera (n=13)      %11.3f      %11.4f\n", a_sin1, b_sin1
+    printf "sin la primera y la ultima %11.3f      %11.4f\n", a_sinambas, b_sinambas
+end outfile
