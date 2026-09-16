@@ -79,7 +79,32 @@ done
 cp index.html "$DEST"/
 cp doc/google17677b077c5d0c0d.html "$DEST"/
 cp requirements.txt "$DEST"/
+cp robots.txt "$DEST"/
 touch "$DEST"/.nojekyll
+
+# --- sitemap.xml -----------------------------------------------------------
+# Se genera aquí, al final, para que siempre refleje lo que de verdad se ha
+# copiado (el worktree se vacía en cada despliegue, así que un sitemap.xml
+# estático se perdería). Incluye la portada y las paginas HTML de lecciones y
+# practicas; no incluye los PDF ni las transparencias, que son otra
+# presentacion del mismo contenido y solo servirian para diluirlo.
+BASE="https://mbujosab.github.io/PEconometria"
+HOY=$(date +%F)
+{
+    echo '<?xml version="1.0" encoding="UTF-8"?>'
+    echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+    printf '  <url><loc>%s/</loc><lastmod>%s</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>\n' "$BASE" "$HOY"
+    for carpeta in Lecciones-html Practicas-html; do
+        find "$DEST/$carpeta" -maxdepth 1 -name '*.html' ! -name 'index.html' \
+             | LC_ALL=C sort \
+             | while read -r f; do
+            printf '  <url><loc>%s/%s/%s</loc><lastmod>%s</lastmod><priority>0.8</priority></url>\n' \
+                   "$BASE" "$carpeta" "$(basename "$f")" "$HOY"
+        done
+    done
+    echo '</urlset>'
+} > "$DEST"/sitemap.xml
+echo "sitemap.xml: $(grep -c '<url>' "$DEST"/sitemap.xml) URLs"
 
 cd "$DEST"
 git add -A
