@@ -30,19 +30,6 @@ series y = b1 + b2*x2 + b3*x3 + u
 
 printf "Correlacion entre x2 y x3 = %.4f  (no son ortogonales)\n", corr(x2,x3)
 
-list Xlist = const x2 x3
-matrix X = { Xlist }
-list ylist = y
-matrix Y = { ylist }
-
-matrix XtX = X'X
-matrix XtY = X'Y
-
-printf "Matriz X'X (3x3):\n"
-print XtX
-printf "\nVector X'y (3x1):\n"
-print XtY
-
 outfile --quiet matrizXyEcuacionesNormales.txt
     list Xlist = const x2 x3
     matrix X = { Xlist }
@@ -57,19 +44,6 @@ outfile --quiet matrizXyEcuacionesNormales.txt
     printf "\nVector X'y (3x1):\n"
     print XtY
 end outfile
-
-matrix beta_matricial = invpd(XtX)*XtY
-printf "beta calculado como (X'X)^(-1) X'y:\n"
-print beta_matricial
-
-ols y const x2 x3 --quiet
-matrix beta_ols = $coeff
-printf "\nbeta calculado por 'ols' de Gretl:\n"
-print beta_ols
-
-matrix diferencia = beta_matricial - beta_ols
-printf "\nDiferencia (debe ser practicamente cero):\n"
-print diferencia
 
 outfile --quiet betaMatricialVsOls.txt
     matrix beta_matricial = invpd(XtX)*XtY
@@ -86,18 +60,6 @@ outfile --quiet betaMatricialVsOls.txt
     print diferencia
 end outfile
 
-series ehat = $uhat
-list elist = ehat
-matrix E = { elist }
-
-matrix XtE = X'E
-printf "X'e (columna 3x1, debe ser (aprox.) el vector nulo):\n"
-print XtE
-
-matrix eX = E'X
-printf "\ne*X (fila 1x3, el mismo resultado, transpuesto):\n"
-print eX
-
 outfile --quiet verificacionXteYeX.txt
     series ehat = $uhat
     list elist = ehat
@@ -108,65 +70,35 @@ outfile --quiet verificacionXteYeX.txt
     print XtE
     
     matrix eX = E'X
-    printf "\ne*X (fila 1x3, el mismo resultado, transpuesto):\n"
+    printf "\ne*X (Gretl lo presenta como fila 1x3; mismos tres numeros):\n"
     print eX
 end outfile
 
-nulldata 8 --preserve
-setobs 1 1 --cross-section
-set seed 24601
-
-matrix mz2 = {-1;-1;-1;-1;1;1;1;1}
-matrix mz3 = {-1;-1;1;1;-1;-1;1;1}
-series z2 = mz2
-series z3 = mz3
-
-printf "suma(z2)    = %.4f   (debe ser 0: media nula)\n", sum(z2)
-printf "suma(z3)    = %.4f   (debe ser 0: media nula)\n", sum(z3)
-printf "suma(z2*z3) = %.4f   (debe ser 0: ortogonalidad mutua)\n", sum(z2*z3)
-
-scalar c1 = 10
-scalar c2 = 3
-scalar c3 = -2
-series u2 = normal(0,1)
-series y2 = c1 + c2*z2 + c3*z3 + u2
-
 outfile --quiet datosFamiliaOrtogonal.txt
-    nulldata 8 --preserve
-    setobs 1 1 --cross-section
-    set seed 24601
+    series z2 = x2 - mean(x2)        # centrado: media nula
+    ols x3 const z2 --quiet
+    series z3 = $uhat                # residuos: ortogonales a 1 y a z2 por construccion
     
-    matrix mz2 = {-1;-1;-1;-1;1;1;1;1}
-    matrix mz3 = {-1;-1;1;1;-1;-1;1;1}
-    series z2 = mz2
-    series z3 = mz3
+    series yo = b1 + b2*z2 + b3*z3 + u   # MISMOS beta, MISMA perturbacion u
     
-    printf "suma(z2)    = %.4f   (debe ser 0: media nula)\n", sum(z2)
-    printf "suma(z3)    = %.4f   (debe ser 0: media nula)\n", sum(z3)
-    printf "suma(z2*z3) = %.4f   (debe ser 0: ortogonalidad mutua)\n", sum(z2*z3)
-    
-    scalar c1 = 10
-    scalar c2 = 3
-    scalar c3 = -2
-    series u2 = normal(0,1)
-    series y2 = c1 + c2*z2 + c3*z3 + u2
+    printf "media(z2)    = %.10f   (debe ser 0)\n", mean(z2)
+    printf "media(z3)    = %.10f   (debe ser 0)\n", mean(z3)
+    printf "suma(z2*z3)  = %.10f   (debe ser 0: ortogonalidad mutua)\n", sum(z2*z3)
+    printf "corr(z2,z3)  = %.10f   (era 0,5046 entre x2 y x3)\n", corr(z2,z3)
 end outfile
 
 outfile --quiet familiaOrtogonalComparacion.txt
-    ols y2 const z2 z3 --quiet
-    scalar b2_conjunto = $coeff(z2)
-    scalar b3_conjunto = $coeff(z3)
-    scalar r2_conjunto = $rsq
+    printf "================ CASO GENERAL (Actividad 1) ================\n"
+    printf "correlacion entre los regresores = %.4f\n\n", corr(x2,x3)
+    ols y const x2 x3 --quiet
+    printf "beta2:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(x2), cov(x2,y)/var(x2)
+    printf "beta3:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(x3), cov(x3,y)/var(x3)
+    printf "R2    : conjunto = %10.6f     suma de rho^2     = %10.6f\n", $rsq, corr(x2,y)^2 + corr(x3,y)^2
     
-    scalar b2_aislado = cov(z2,y2)/var(z2)
-    scalar b3_aislado = cov(z3,y2)/var(z3)
-    
-    scalar rho2 = corr(z2,y2)
-    scalar rho3 = corr(z3,y2)
-    scalar suma_rho2 = rho2^2 + rho3^2
-    
-    printf "beta2: conjunto (ols z2 z3) = %.6f   aislado (cov/var) = %.6f\n", b2_conjunto, b2_aislado
-    printf "beta3: conjunto (ols z2 z3) = %.6f   aislado (cov/var) = %.6f\n", b3_conjunto, b3_aislado
-    printf "\nR2 (modelo conjunto)                 = %.6f\n", r2_conjunto
-    printf "rho(z2,y)^2 + rho(z3,y)^2             = %.6f\n", suma_rho2
+    printf "\n================ CASO ORTOGONAL (Actividad 4) ==============\n"
+    printf "correlacion entre los regresores = %.4f\n\n", corr(z2,z3)
+    ols yo const z2 z3 --quiet
+    printf "beta2:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(z2), cov(z2,yo)/var(z2)
+    printf "beta3:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(z3), cov(z3,yo)/var(z3)
+    printf "R2    : conjunto = %10.6f     suma de rho^2     = %10.6f\n", $rsq, corr(z2,yo)^2 + corr(z3,yo)^2
 end outfile

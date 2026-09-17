@@ -54,18 +54,34 @@ outfile --quiet comparacionTresModelosR2.txt
     printf "Modelo 3 (cubica):   R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq3
 end outfile
 
-outfile --quiet extrapolacionModeloCubico.txt
+outfile --quiet extrapolacionTresModelos.txt
     ols peso const edad edad2 edad3 --quiet
     scalar b1 = $coeff(const)
     scalar b2 = $coeff(edad)
     scalar b3 = $coeff(edad2)
     scalar b4 = $coeff(edad3)
     
-    scalar pred15 = b1 + b2*15 + b3*15^2 + b4*15^3
-    scalar pred16 = b1 + b2*16 + b3*16^2 + b4*16^3
-    scalar pred17 = b1 + b2*17 + b3*17^2 + b4*17^3
+    ols peso const edad --quiet
+    scalar r1 = $coeff(const)
+    scalar r2 = $coeff(edad)
     
-    printf "Peso predicho (modelo cubico) a los 15 anios = %.2f kg\n", pred15
-    printf "Peso predicho (modelo cubico) a los 16 anios = %.2f kg\n", pred16
-    printf "Peso predicho (modelo cubico) a los 17 anios = %.2f kg\n", pred17
+    ols peso const edad edad2 --quiet
+    scalar p1 = $coeff(const)
+    scalar p2 = $coeff(edad)
+    scalar p3 = $coeff(edad2)
+    
+    printf "edad    Modelo 1     Modelo 2     Modelo 3\n"
+    printf "        (recta)     (parabola)    (cubica)\n"
+    printf "--------------------------------------------\n"
+    loop e=13..20 --quiet
+        printf "%3d   %9.2f    %9.2f   %9.2f\n", e, \
+               r1 + r2*e, \
+               p1 + p2*e + p3*e^2, \
+               b1 + b2*e + b3*e^2 + b4*e^3
+    endloop
+    
+    printf "\nEdad a la que cada modelo alcanza su maximo:\n"
+    printf "  Modelo 1 (recta)    : nunca, siempre crece\n"
+    printf "  Modelo 2 (parabola) : %.1f anios\n", -p2/(2*p3)
+    printf "  Modelo 3 (cubica)   : %.1f anios\n", (-2*b3 - sqrt(4*b3^2 - 12*b2*b4))/(6*b4)
 end outfile

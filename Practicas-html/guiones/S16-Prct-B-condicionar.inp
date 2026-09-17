@@ -98,7 +98,7 @@ scalar Sxx_obs  = sum((rooms-mean(rooms))^2)
 scalar var_cond = sigma^2 / Sxx_obs
 
 set seed 160
-loop 4000 --progressive --quiet
+loop 40000 --progressive --quiet      # diez veces mas replicas: ver nota
     series u = normal(0, sigma)
     series y = b1_true + b2_true*rooms + u
     ols y const rooms --quiet
@@ -114,9 +114,11 @@ endloop
 outfile --quiet muestraGrande.txt
     printf "Con n = 400:  Sxx observado = %.2f   (tipico: %.2f)\n", Sxx_obs, ($nobs-1)*sd_r^2
     printf "             Var[b2|X] condicional teorica = %.2f\n", var_cond
+    printf "             cociente Sxx observado/tipico = %.3f  <- lo que cabe esperar de var_B/var_A\n", Sxx_obs/(($nobs-1)*sd_r^2)
 end outfile
 open "@workdir/repGrande.gdt" --quiet
 outfile --quiet --append muestraGrande.txt
     printf "  regresor FIJO       : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
     printf "  regresor REGENERADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
+    printf "  cociente observado  : %.3f\n", (sum((bg_var-mean(bg_var))^2))/(sum((bg_fijo-mean(bg_fijo))^2))
 end outfile

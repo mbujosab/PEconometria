@@ -64,28 +64,34 @@ smpl full                       # las 14 viviendas
 ols price const sqft --quiet
 scalar a_todas = $coeff(const)
 scalar b_todas = $coeff(sqft)
+series resid   = $uhat          # distancia de cada vivienda a la recta
+scalar media_sqft = mean(sqft)
 
-smpl 1 13                       # quitamos la ULTIMA vivienda
+smpl full
+smpl obs != 1 --restrict --quiet    # fuera la vivienda 1: la MAS PEQUEÑA
 ols price const sqft --quiet
-scalar a_sin14 = $coeff(const)
-scalar b_sin14 = $coeff(sqft)
+scalar a_s1 = $coeff(const)
+scalar b_s1 = $coeff(sqft)
 
-smpl 2 14                       # quitamos la PRIMERA vivienda
+smpl full
+smpl obs != 12 --restrict --quiet   # fuera la 12: NO es extrema en tamaño
 ols price const sqft --quiet
-scalar a_sin1 = $coeff(const)
-scalar b_sin1 = $coeff(sqft)
+scalar a_s12 = $coeff(const)
+scalar b_s12 = $coeff(sqft)
 
-smpl 2 13                       # quitamos la primera Y la ultima
+smpl full
+smpl obs != 14 --restrict --quiet   # fuera la 14: la MAS GRANDE
 ols price const sqft --quiet
-scalar a_sinambas = $coeff(const)
-scalar b_sinambas = $coeff(sqft)
+scalar a_s14 = $coeff(const)
+scalar b_s14 = $coeff(sqft)
 
 smpl full                       # recuperamos siempre la muestra completa
 outfile --quiet submuestras.txt
-    printf "muestra                      constante    pendiente(sqft)\n"
-    printf "---------------------------------------------------------\n"
-    printf "las 14 viviendas           %11.3f      %11.4f\n", a_todas, b_todas
-    printf "sin la ultima (n=13)       %11.3f      %11.4f\n", a_sin14, b_sin14
-    printf "sin la primera (n=13)      %11.3f      %11.4f\n", a_sin1, b_sin1
-    printf "sin la primera y la ultima %11.3f      %11.4f\n", a_sinambas, b_sinambas
+    printf "media de sqft en las 14 viviendas = %.1f\n\n", media_sqft
+    printf "se quita         sqft   residuo    constante   pendiente\n"
+    printf "-----------------------------------------------------------\n"
+    printf "nadie (n=14)        -         -   %10.3f  %10.4f\n", a_todas, b_todas
+    printf "obs 1 (n=13)     %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[1],  resid[1],  a_s1,  b_s1
+    printf "obs 12 (n=13)    %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[12], resid[12], a_s12, b_s12
+    printf "obs 14 (n=13)    %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[14], resid[14], a_s14, b_s14
 end outfile
