@@ -131,6 +131,7 @@ Estimamos el modelo con ambos regresores a la vez, y recordamos (reestimándolas
 ols price const rooms
 ols price const nox
 ols price const rooms nox
+corr rooms nox
 #+end_src
 #+latex: }
 
@@ -146,7 +147,18 @@ end outfile
 #+include: ./S14-Prct-B-hprice2-r2ajustado/Ols_rooms_nox_simple_y_conjunto.txt example
 #+latex: }
 
-En este caso, a diferencia de lo que ocurría con =bedrms= en la práctica de Ramanathan, los coeficientes no cambian de forma tan drástica: esto sugiere (aunque no lo demuestra) que =rooms= y =nox= no están tan fuertemente correlacionadas entre sí como lo estaban =sqft= y =bedrms=. Mire la correlación entre ambas variables.
+Aquí conviene mirar los dos coeficientes por separado, porque no se comportan igual:
+
+- =rooms= apenas se mueve: pasa de $9119{,}55$ a $8178{,}56$, un descenso de aproximadamente el $10\%$.
+- =nox=, en cambio, se reduce /casi a la mitad/: de $-3386{,}85$ a $-1884{,}68$.
+
+Es decir, el mismo par de regresores, estimado conjuntamente, deja casi intacto a uno y transforma al otro. Conviene resistir la tentación de explicarlo únicamente por la correlación entre ambos: la correlación que acaba de imprimir el guion es $-0{,}3028$, /menor/ en valor absoluto que el $+0{,}4647$ entre =sqft= y =bedrms= de la práctica de Ramanathan, y sin embargo aquí uno de los dos desplazamientos es mucho mayor.
+
+La razón es que el desplazamiento del coeficiente de $\boldsymbol{x}_2$ al añadir $\boldsymbol{x}_3$ no depende solo de cuán correlacionados estén, sino del producto
+\[
+\hat\beta_3\cdot\frac{\sigma_{\boldsymbol{x}_2\boldsymbol{x}_3}}{\sigma^2_{\boldsymbol{x}_2}},
+\]
+donde interviene también la /magnitud/ del coeficiente del regresor añadido y la escala de cada variable —y =rooms= (habitaciones, entre 3,6 y 8,8) y =nox= (partes por cien millones, entre 3,9 y 8,7) viven en escalas muy distintas—. La correlación dice si habrá desplazamiento; no dice cuánto.
 
 * Actividad 3 - Un tercer regresor: stratio
 
@@ -214,7 +226,7 @@ Observe que $R^2$ del modelo con tres regresores no constantes es, como mínimo,
 
 * Actividad 5 - Del $R^2$ al $R^2$ ajustado
 
-Si $R^2$ nunca baja, ¿cómo distinguir un regresor que de verdad mejora el modelo de uno que solo lo ``infla'' artificialmente? Gretl reporta el $R^2$ con =$rsq=, pero no permite recuperar el /$R^2$ ajustado/, así que lo vamos a recalcular a mano (véase la sección [[Apéndice - De dónde sale la fórmula del $R^2$ ajustado]]). 
+Si $R^2$ nunca baja, ¿cómo distinguir un regresor que de verdad mejora el modelo de uno que solo lo ``infla'' artificialmente? Gretl reporta el $R^2$ con =$rsq=, pero no ofrece ningún /accesor/ (=$...=) para el /$R^2$ ajustado/ —aunque sí lo imprime, como ``R-cuadrado corregido'', en la salida habitual de =ols=—, así que lo vamos a recalcular a mano (véase la sección [[Apéndice - De dónde sale la fórmula del $R^2$ ajustado]]). 
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -231,6 +243,12 @@ scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
 printf "Modelo price~rooms+nox+stratio\n"
 printf "  R2          = %.4f\n", $rsq
 printf "  R2 ajustado = %.4f\n", Rbarsq
+
+ols price const rooms nox stratio radial --quiet
+scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
+printf "Modelo price~rooms+nox+stratio+radial\n"
+printf "  R2          = %.4f\n", $rsq
+printf "  R2 ajustado = %.4f\n", Rbarsq
 #+end_src
 #+latex: }
 
@@ -244,7 +262,18 @@ end outfile
 #+include: ./S14-Prct-B-hprice2-r2ajustado/r2AjustadoCuatroModelos.txt example
 #+latex: }
 
-Compare cuánto sube $R^2$ y cuánto sube (o no) $\bar R^2$ al pasar de dos a tres regresores no constantes. Si =stratio= aportara muy poco, $\bar R^2$ podría incluso bajar al incluirla, mientras que $R^2$ jamás lo haría (por ejemplo, compare el ajuste con =rooms= + =proptax= (habitaciones más impuestos) con el ajuste si, además, añade =radial= (acceso a las autopistas)). 
+Lea la salida en dos pasos, porque contiene los dos comportamientos posibles.
+
+/Primer paso: un regresor que aporta/. Al pasar de =price~rooms+nox= a =price~rooms+nox+stratio=, suben los dos índices: $R^2$ y $\bar R^2$. =stratio= aporta lo bastante como para compensar con creces el parámetro adicional que hay que estimar.
+
+/Segundo paso: un regresor que no aporta/. Ahora añadimos =radial= (un índice de accesibilidad a las autopistas radiales) al modelo que acabamos de construir. Mire las dos últimas líneas con atención, porque es el momento de la práctica:
+
+- $R^2$ /sube/: de $0{,}6005$ a $0{,}6008$. Tenía que subir; no sabe hacer otra cosa.
+- $\bar R^2$ /baja/: de $0{,}5981$ a $0{,}5976$.
+
+Ahí está, con datos reales, la diferencia entre los dos índices. =radial= mejora el ajuste —toda variable lo hace, aunque sea por casualidad—, pero lo mejora /tan poco/ que no compensa el grado de libertad que consume. $R^2$ es incapaz de detectarlo; $\bar R^2$ sí, y responde bajando.
+
+Conviene subrayar que esto no convierte a $\bar R^2$ en un criterio infalible para elegir modelos: solo lo hace menos ingenuo que $R^2$. La práctica siguiente está dedicada, precisamente, a enseñar hasta dónde llega esa mejora.
 
 El apéndice siguiente explica de dónde sale exactamente la fórmula de $\bar R^2$ y por qué tiene esa propiedad.
 
@@ -254,7 +283,9 @@ Recordemos (lección 8) que $R^2=1-\mathrm{SRC}/\mathrm{STC}$, con $\mathrm{STC}
 \[
 \bar R^2 \;=\; 1-\frac{\mathrm{SRC}/(n-k)}{\mathrm{STC}/(n-1)},
 \]
-donde $k$ es el número /total/ de regresores del modelo (incluida la constante; convención fijada en la lección 10) y $n-k$ son los grados de libertad de los residuos ($k$ parámetros ``beta'' estimados). El denominador $\mathrm{STC}/(n-1)$ es la cuasivarianza de $\boldsymbol{y}$: el estimador insesgado de la varianza de la variable $Y$ del modelo teórico.[fn::las propiedad de /insesgadez/ que ya conoce del curso de estaística y probabilidad, y que abordaremos en la próxima lección teórica.] El numerador $\mathrm{SRC}/(n-k)$ es la cuasivarianza de $\boldsymbol{\mathop{\widehat{e}}}$: el estimador insesgado de la varianza de las perturbaciones $U$ del modelo teórico.
+donde $k$ es el número /total/ de regresores del modelo (incluida la constante; convención fijada en la lección 10) y $n-k$ son los grados de libertad de los residuos ($k$ parámetros ``beta'' estimados). El denominador $\mathrm{STC}/(n-1)$ es la cuasivarianza de $\boldsymbol{y}$: el estimador insesgado de la varianza de la variable $Y$ del modelo teórico.[fn::La propiedad de /insesgadez/ que ya conoce del curso de estadística y probabilidad, y que abordaremos en la próxima lección teórica.] El numerador $\mathrm{SRC}/(n-k)$ es la cuasivarianza de $\boldsymbol{\mathop{\widehat{e}}}$: el estimador insesgado de la varianza de las perturbaciones $U$ del modelo teórico.
+
+Conviene no pasar por alto que numerador y denominador estiman /dos cosas distintas/: el numerador, la dispersión de las perturbaciones alrededor de la recta; el denominador, la dispersión total de $Y$ alrededor de su media. $\bar R^2$ no es, por tanto, el cociente de dos estimaciones de la misma cantidad, sino —igual que $R^2$— una comparación entre lo que queda sin explicar y lo que había que explicar, esta vez con cada suma de cuadrados dividida por sus propios grados de libertad.
 
 Operando algebraicamente sobre esta definición se obtiene una expresión equivalente, más cómoda para el cálculo manual a partir de un $R^2$ ya conocido:
 \[
@@ -321,7 +352,7 @@ end outfile
 
 * Respuestas
 
-1. ¿Por qué =rooms= y =nox= cambian poco, a diferencia de =bedrms=? Porque el cambio de un coeficiente al pasar del modelo simple al múltiple depende de cuánto esté correlacionado el regresor añadido con el que ya estaba presente. En la práctica de Ramanathan, =sqft= y =bedrms= estaban fuertemente relacionadas (las casas con más dormitorios suelen ser grandes), así que incluir una alteraba mucho la lectura de la otra. Si =rooms= y =nox= están menos correlacionadas entre sí en esta muestra, cada coeficiente ya ``capta'' en el modelo simple gran parte de lo que va a decir en el modelo múltiple, y el cambio es más discreto.
+1. ¿Cambian =rooms= y =nox= al pasar del modelo simple al múltiple? De forma muy desigual: =rooms= baja alrededor de un $10\%$ y =nox= se reduce casi a la mitad. Conviene resistir la explicación fácil —``estarán muy correlacionadas''—, porque los números no la respaldan: la correlación entre =rooms= y =nox= es $-0{,}3028$, /menor/ en valor absoluto que el $+0{,}4647$ entre =sqft= y =bedrms= de la práctica de Ramanathan. El desplazamiento de $\hat\beta_2$ al incorporar $\boldsymbol{x}_3$ vale $\hat\beta_3\,\sigma_{\boldsymbol{x}_2\boldsymbol{x}_3}/\sigma^2_{\boldsymbol{x}_2}$: intervienen también el tamaño del coeficiente del regresor añadido y las escalas de ambas variables, que aquí son muy distintas (habitaciones frente a partes por cien millones). La correlación anticipa /si/ habrá desplazamiento, no /cuánto/.
 
 2. Interpretación del signo de =stratio=. Un coeficiente negativo es coherente con la intuición: zonas con una proporción más alta de alumnos por profesor (colegios más masificados, en principio de peor calidad percibida) tienden a tener viviendas más baratas, manteniendo fijas las habitaciones y la contaminación. Como siempre, esta es una lectura /ceteris paribus/, no necesariamente causal: podría haber otros factores (nivel de renta de la zona, inversión pública) que expliquen tanto el ratio alumnos/profesor como el precio.
 

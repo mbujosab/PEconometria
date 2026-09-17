@@ -101,7 +101,7 @@ Las dos prácticas anteriores mostraron que añadir un regresor nunca empeora el
 
 * Actividad 1 - Los datos
 
-Introducimos a mano los 8 datos (posiblemente ficticios) de peso (kg) y edad (años) de 8 niños.
+Introducimos a mano los datos de peso (kg) y edad (años) de los 8 niños.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -258,13 +258,17 @@ end outfile
 
 Tanto $R^2$ como $\bar R^2$ crecen sin excepción del Modelo 1 al Modelo 3. Si solo consideráramos esta tabla, la conclusión sería inmediata: ``el Modelo 3 es el mejor''. La siguiente actividad pone a prueba esa conclusión.
 
-* Actividad 6 - Extrapolar el modelo ``ganador''
+* Actividad 6 - Extrapolar los tres modelos
 
-Usamos los coeficientes del Modelo 3 (el de mayor $\bar R^2$) para predecir el peso a edades /fuera/ del rango observado (7 a 14 años).
+Vamos a predecir el peso a edades /fuera/ del rango observado (7 a 14 años). Y
+lo haremos con los /tres/ modelos a la vez, no solo con el ``ganador'': si
+extrapoláramos únicamente el Modelo 3 podríamos llevarnos una impresión
+equivocada sobre los otros dos. Además, llegaremos hasta los 20 años, porque el
+problema que buscamos no aparece al mismo tiempo en todos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Extrapolacion modelo cubico
+#+NAME: Extrapolacion tres modelos
 #+begin_src gretl :eval no
 ols peso const edad edad2 edad3 --quiet
 scalar b1 = $coeff(const)
@@ -272,27 +276,61 @@ scalar b2 = $coeff(edad)
 scalar b3 = $coeff(edad2)
 scalar b4 = $coeff(edad3)
 
-scalar pred15 = b1 + b2*15 + b3*15^2 + b4*15^3
-scalar pred16 = b1 + b2*16 + b3*16^2 + b4*16^3
-scalar pred17 = b1 + b2*17 + b3*17^2 + b4*17^3
+ols peso const edad --quiet
+scalar r1 = $coeff(const)
+scalar r2 = $coeff(edad)
 
-printf "Peso predicho (modelo cubico) a los 15 anios = %.2f kg\n", pred15
-printf "Peso predicho (modelo cubico) a los 16 anios = %.2f kg\n", pred16
-printf "Peso predicho (modelo cubico) a los 17 anios = %.2f kg\n", pred17
+ols peso const edad edad2 --quiet
+scalar p1 = $coeff(const)
+scalar p2 = $coeff(edad)
+scalar p3 = $coeff(edad2)
+
+printf "edad    Modelo 1     Modelo 2     Modelo 3\n"
+printf "        (recta)     (parabola)    (cubica)\n"
+printf "--------------------------------------------\n"
+loop e=13..20 --quiet
+    printf "%3d   %9.2f    %9.2f   %9.2f\n", e, \
+           r1 + r2*e, \
+           p1 + p2*e + p3*e^2, \
+           b1 + b2*e + b3*e^2 + b4*e^3
+endloop
+
+printf "\nEdad a la que cada modelo alcanza su maximo:\n"
+printf "  Modelo 1 (recta)    : nunca, siempre crece\n"
+printf "  Modelo 2 (parabola) : %.1f anios\n", -p2/(2*p3)
+printf "  Modelo 3 (cubica)   : %.1f anios\n", (-2*b3 - sqrt(4*b3^2 - 12*b2*b4))/(6*b4)
 #+end_src
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
-outfile --quiet extrapolacionModeloCubico.txt
-    <<Extrapolacion modelo cubico>>
+outfile --quiet extrapolacionTresModelos.txt
+    <<Extrapolacion tres modelos>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S14-Prct-C-peso-edad/extrapolacionModeloCubico.txt example
+#+include: ./S14-Prct-C-peso-edad/extrapolacionTresModelos.txt example
 #+latex: }
 
-El Modelo 3 —el de mayor $R^2$ /y/ mayor $\bar R^2$ de los tres— predice que, a partir de cierta edad, los niños empiezan a /perder/ peso con el paso del tiempo. Ningún estadístico de bondad de ajuste, por sí solo, le habría advertido de esto: hace falta mirar el gráfico (Actividad 4) o, como aquí, poner a prueba el modelo fuera del rango de datos con el que fue ajustado. De hecho, para descartar el modelo no hace falta extrapolar fuera de la muestra; incluso dentro de la muestra el modelo parece indicar que el máximo peso se da antes de alcanzar los 14 años de edad (algo que no tiene ningún fundamento).
+La tabla se lee de izquierda a derecha, y cuenta una historia muy ordenada.
+
+El /Modelo 3/ —el de mayor $R^2$ /y/ mayor $\bar R^2$ de los tres— se desmorona enseguida: a los 15 años predice $55{,}49$ kg, a los 17 baja a $41{,}82$, y a los 20 da un peso /negativo/. Ningún estadístico de bondad de ajuste le habría advertido de esto.
+
+Pero lo verdaderamente instructivo es la columna de en medio. El /Modelo 2/, la parábola, tiene exactamente el mismo defecto: su máximo está en los $16{,}0$ años, y a partir de ahí también predice pérdida de peso ($59{,}44$ kg a los 16, $58{,}43$ a los 18, $55{,}41$ a los 20). Lo que ocurre es que lo hace /más tarde y más despacio/, de modo que si solo hubiéramos extrapolado a 15, 16 y 17 años —como es tentador hacer— la parábola habría parecido inocente.
+
+Y el /Modelo 1/, la recta, es el único que no gira nunca. También es el de /menor/ $\bar R^2$ de los tres.
+
+Ordenando los tres puntos de giro:
+
+| modelo             | máximo    | $\bar R^2$  |
+|--------------------+-----------+-------------|
+| recta (grado 1)    | nunca     | el más bajo |
+| parábola (grado 2) | 16,0 años | intermedio  |
+| cúbica (grado 3)   | 13,4 años | el más alto |
+
+Cuanto mayor es el grado —y mayor el $\bar R^2$—, /antes/ llega el absurdo. Esa es la moraleja de la práctica, y conviene enunciarla sin suavizarla: aquí el orden de los modelos según $\bar R^2$ es exactamente el orden inverso de su credibilidad.
+
+De hecho, para descartar el Modelo 3 ni siquiera hace falta salir de la muestra: su máximo (13,4 años) cae /dentro/ del rango de edades observado, que llega hasta los 14. El descenso dentro de la muestra es pequeño —de $58{,}08$ kg a los 13 a $57{,}92$ a los 14, apenas 0,16 kg— y por eso en el gráfico de la Actividad 4 se aprecia como un aplanamiento más que como una caída; pero está ahí, y no tiene ningún fundamento.
 
 * Actividad 7 - Una variable explicativa, tres regresores
 
@@ -325,7 +363,7 @@ En los tres modelos de esta práctica hay una única /variable explicativa/: la 
 
 1. ¿Por qué crecen $R^2$ y $\bar R^2$ sin excepción aquí, si $\bar R^2$ en general puede bajar? La propiedad de la lección 8 (``$R^2$ nunca baja'') es universal: se cumple siempre. La de $\bar R^2$ (``puede bajar'') es solo una posibilidad, no una certeza: baja únicamente cuando el regresor añadido aporta muy poco a la reducción de SRC. En este ejemplo concreto, con solo 8 observaciones y una relación no lineal genuina entre peso y edad, cada potencia adicional de la edad reduce sustancialmente los residuos, lo suficiente como para que también $\bar R^2$ suba. Que $\bar R^2$ suba aquí no contradice que en otros casos (como pudo ocurrir con =radial= en la práctica anterior) pueda bajar: ambos comportamientos son compatibles con la misma fórmula.
 
-2. ¿Qué modelo elegiría solo con $\bar R^2$, y después de la Actividad 6? Mirando únicamente la tabla de la Actividad 5, la elección ``mecánica'' sería el Modelo 3, por tener el $\bar R^2$ más alto. Sin embargo, tras la Actividad 6, esa elección se revela problemática: un modelo que predice pérdida de peso con la edad, para niños en pleno crecimiento, no es creíble más allá de una tautología estadística. La cautela razonable es preferir un modelo más simple (probablemente el Modelo 1 o el 2) que, aun con menor $\bar R^2$, no produzca predicciones tan claramente absurdas al alejarse ligeramente del rango muestral.
+2. ¿Qué modelo elegiría solo con $\bar R^2$, y después de la Actividad 6? Mirando únicamente la tabla de la Actividad 5, la elección ``mecánica'' sería el Modelo 3, por tener el $\bar R^2$ más alto. Sin embargo, tras la Actividad 6, esa elección se revela problemática: un modelo que predice pérdida de peso con la edad, para niños en pleno crecimiento, no es creíble más allá de una tautología estadística. Ahora bien, la Actividad 6 muestra algo más incómodo que eso: el Modelo 2 /no se salva/. Su parábola también gira, a los 16,0 años, y también predice pérdida de peso a partir de ahí; solo lo hace más tarde que la cúbica, lo justo para pasar inadvertido si uno extrapola poco. El único de los tres sin punto de giro es el Modelo 1, que es precisamente el de menor $\bar R^2$. Dicho de otro modo: en este ejemplo, el orden de los modelos según $\bar R^2$ es el orden inverso de su credibilidad, y la elección razonable —la recta— es la que el criterio mecánico coloca en último lugar.
 
 3. Lección sobre comparar solo con estadísticos, sin gráficos. Este ejercicio ilustra, con un caso extremo pero claro, por qué ningún estadístico de resumen —ni $R^2$, ni $\bar R^2$, ni ningún otro número aislado— puede sustituir a la inspección visual del ajuste. Los números pueden mejorar de forma monótona mientras el modelo se vuelve, al mismo tiempo, cada vez menos razonable; solo el gráfico (o, como aquí, poner a prueba el modelo fuera de la muestra) revela ese deterioro cualitativo que ningún estadístico agregado captura por sí solo.
 

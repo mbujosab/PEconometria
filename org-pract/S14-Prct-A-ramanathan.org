@@ -175,7 +175,7 @@ end outfile
 De dicha salida, ya podemos reconocer algunos de los resultados obtenidos:
 - Los números de la columna bajo el nombre =coeficiente= son los valores estimados para los parámetros $\beta_1$ (=constante=) y $\beta_2$ (=sqft=).
 - El número a la derecha del nombre =Media de la vble. dep.= es $\mu_{\boldsymbol{y}}$ donde $\boldsymbol{y}$ es el vector con los datos de los precios de las 14 viviendas unifamiliares.
-- El número a la derecha del nombre =Suma de cuad. residuos= es $SRC$, es decir, $\|\boldsymbol{\mathop{\widehat{e}}}\|_e^2$.
+- El número a la derecha del nombre =Suma de cuad. residuos= es $\mathrm{SRC}$, es decir, $\|\boldsymbol{\mathop{\widehat{e}}}\|_e^2$.
 - El número a la derecha del nombre =R-cuadrado= es el coeficiente de determinación $R^2$ del ajuste.
 
 Veamos la recta de regresión correspondiente al ajuste MCO que hemos logrado:
@@ -313,7 +313,13 @@ La pregunta es sencilla y conviene planteársela antes de ejecutar nada: /si una
 
 Gretl permite restringir la muestra con =smpl=. Desde la interfaz gráfica, lo natural es ir acumulando los ajustes en la /tabla de modelos/ (menú //~Archivo -> Tabla de modelos~//, o el comando =modeltab add=); en un guion que se ejecuta por lotes, en cambio, resulta más cómodo guardar los coeficientes en escalares e imprimirlos juntos al final. Eso es lo que hace el código siguiente.
 
-*** Estimamos el mismo modelo sobre cuatro muestras distintas
+*** Estimamos el mismo modelo quitando, cada vez, una sola vivienda
+
+Quitaremos siempre /una/ vivienda, y elegiremos tres que se diferencian en dos
+rasgos distintos: dónde están dentro del rango de superficies, y a qué
+distancia quedan de la recta ajustada con las catorce. Anotamos ambas cosas
+junto a cada resultado, porque la comparación entre las tres filas es todo el
+contenido de la actividad.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -323,21 +329,26 @@ smpl full                       # las 14 viviendas
 ols price const sqft --quiet
 scalar a_todas = $coeff(const)
 scalar b_todas = $coeff(sqft)
+series resid   = $uhat          # distancia de cada vivienda a la recta
+scalar media_sqft = mean(sqft)
 
-smpl 1 13                       # quitamos la ULTIMA vivienda
+smpl full
+smpl obs != 1 --restrict --quiet    # fuera la vivienda 1: la MAS PEQUEÑA
 ols price const sqft --quiet
-scalar a_sin14 = $coeff(const)
-scalar b_sin14 = $coeff(sqft)
+scalar a_s1 = $coeff(const)
+scalar b_s1 = $coeff(sqft)
 
-smpl 2 14                       # quitamos la PRIMERA vivienda
+smpl full
+smpl obs != 12 --restrict --quiet   # fuera la 12: NO es extrema en tamaño
 ols price const sqft --quiet
-scalar a_sin1 = $coeff(const)
-scalar b_sin1 = $coeff(sqft)
+scalar a_s12 = $coeff(const)
+scalar b_s12 = $coeff(sqft)
 
-smpl 2 13                       # quitamos la primera Y la ultima
+smpl full
+smpl obs != 14 --restrict --quiet   # fuera la 14: la MAS GRANDE
 ols price const sqft --quiet
-scalar a_sinambas = $coeff(const)
-scalar b_sinambas = $coeff(sqft)
+scalar a_s14 = $coeff(const)
+scalar b_s14 = $coeff(sqft)
 
 smpl full                       # recuperamos siempre la muestra completa
 #+end_src
@@ -347,12 +358,13 @@ smpl full                       # recuperamos siempre la muestra completa
 /y ahora los comparamos/:
 #+NAME: Tabla submuestras
 #+begin_src gretl :eval no
-printf "muestra                      constante    pendiente(sqft)\n"
-printf "---------------------------------------------------------\n"
-printf "las 14 viviendas           %11.3f      %11.4f\n", a_todas, b_todas
-printf "sin la ultima (n=13)       %11.3f      %11.4f\n", a_sin14, b_sin14
-printf "sin la primera (n=13)      %11.3f      %11.4f\n", a_sin1, b_sin1
-printf "sin la primera y la ultima %11.3f      %11.4f\n", a_sinambas, b_sinambas
+printf "media de sqft en las 14 viviendas = %.1f\n\n", media_sqft
+printf "se quita         sqft   residuo    constante   pendiente\n"
+printf "-----------------------------------------------------------\n"
+printf "nadie (n=14)        -         -   %10.3f  %10.4f\n", a_todas, b_todas
+printf "obs 1 (n=13)     %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[1],  resid[1],  a_s1,  b_s1
+printf "obs 12 (n=13)    %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[12], resid[12], a_s12, b_s12
+printf "obs 14 (n=13)    %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[14], resid[14], a_s14, b_s14
 #+end_src
 #+latex: }
 
@@ -369,12 +381,16 @@ end outfile
 
 *** Lo que debe observar
 
-Compare las cuatro filas de la tabla: la pendiente y, sobre todo, la constante. Fíjese en /cuánto/ se mueven al quitar una única observación de catorce, y compare ese movimiento con la magnitud del propio coeficiente.
+Las tres viviendas que hemos ido quitando se comportan de tres maneras muy distintas, y esa es justamente la lección:
 
-Conviene subrayar tres cosas:
+- /La obs. 1/ es la más pequeña de todas (1065 pies cuadrados, el mínimo de la muestra): está en el borde mismo del rango. Y sin embargo quitarla no mueve nada: la pendiente pasa de $0{,}1388$ a $0{,}1387$. Mire su residuo: $-0{,}22$. Esa vivienda cae prácticamente /encima/ de la recta.
+- /La obs. 14/ es la más grande (3000 pies cuadrados, el máximo): también está en el borde. Pero su residuo es $-53{,}60$, y quitarla mueve la pendiente de $0{,}1388$ a $0{,}1593$ y la constante de $52{,}351$ a $18{,}962$.
+- /La obs. 12/ (2600 pies cuadrados) /no/ está en ningún extremo. Y aun así, con un residuo de $+91{,}90$, quitarla mueve la pendiente a $0{,}1209$ y la constante a $78{,}380$.
 
-1. /No hemos cambiado el modelo/. La especificación es idéntica en las cuatro columnas; lo único que cambia es qué viviendas entran en el cálculo. Todo el movimiento que vea procede exclusivamente de la muestra.
-2. /No todas las observaciones pesan igual/. Probablemente habrá notado que quitar una de las dos viviendas mueve el ajuste bastante más que quitar la otra. Una observación situada en un extremo del rango de superficies tiene más capacidad de ``tirar'' de la recta que una situada en el centro. Volveremos sobre esta idea —con nombre propio y con una medida concreta— en el laboratorio integrador que cierra el curso.
+De donde se siguen dos conclusiones que conviene no confundir:
+
+1. /No hemos cambiado el modelo/. La especificación es idéntica en las cuatro filas; lo único que cambia es qué viviendas entran en el cálculo. Todo el movimiento que vea procede exclusivamente de la muestra.
+2. /No todas las observaciones pesan igual, y la posición no lo explica sola/. Estar en un extremo del rango de superficies no basta para tirar de la recta (la obs. 1 está en el extremo y no tira de nada), y no estar en un extremo no protege (la obs. 12 está en el interior y es de las que más mueven el ajuste). Lo que hace falta son /las dos cosas a la vez/: estar lejos del centro en el eje del regresor, /y además/ quedar lejos de la recta. Volveremos sobre esta idea —con nombre propio, /apalancamiento/ e /influencia/, y con una medida concreta— en el laboratorio integrador que cierra el curso.
 3. /Con $n=14$ esto es muy visible; con $n=506$ lo sería mucho menos/. La fragilidad que acaba de observar no es un defecto de MCO: es lo que ocurre cuando se dispone de pocos datos.
 
 Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que el ajuste /se mueve/ cuando cambian los datos, pero no tenemos todavía ninguna forma de decir /cuánto/ se mueve, ni de anticiparlo antes de mirar. Para eso hace falta hablar de la variabilidad del estimador, y eso exige un aparato que aún no tenemos. Es exactamente lo que hará la lección 11: dar una fórmula —no una impresión— para la dispersión de $\hat\beta_2$, y mostrar que en ella aparecen, precisamente, el número de observaciones y cuán dispersas están las superficies de las viviendas.
@@ -389,7 +405,7 @@ Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que
 
 /Para profundizar/:
 
-- Véase la lección 10 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html][lección 10]]) para la formalización del efecto parcial y la notación matricial.
+- Véase la lección 10 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html][lección 10]]) para la notación matricial y el enunciado del efecto parcial, cuyo desarrollo con datos reales es el objeto de esta práctica.
 - Ramanathan, R. (2002). /Introductory Econometrics with Applications/, 5.ª ed. (fuente original del dataset =data4-1=).
 - Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 3, sección 3.4 (interpretación /ceteris paribus/).
 
@@ -411,7 +427,7 @@ Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que
 
 3. Cautela con solo 14 observaciones. Una muestra tan pequeña es extremadamente sensible a la presencia de una única vivienda atípica (un precio inusualmente alto o bajo, una combinación poco común de dormitorios y superficie) y ofrece muy poco margen para distinguir el efecto de =sqft= del de =bedrms= si ambas variables están, en esta muestra concreta, bastante correlacionadas entre sí. Generalizar cualquier coeficiente obtenido aquí a ``el mercado de la vivienda'' sin más matices sería, cuando menos, precipitado: 14 viviendas de un único barrio y un único año no permiten inferir nada sobre otros mercados o épocas.
 
-4. ¿Por qué el $R^2$ nunca baja al añadir un regresor? Porque MCO elige siempre los coeficientes que minimizan la suma de residuos al cuadrado (SRC) dentro del subespacio disponible; al añadir un regresor, ese subespacio se amplía (contiene, como caso particular, la solución que ya teníamos antes de incluir el regresor nuevo), así que el mínimo de SRC en el subespacio ampliado nunca puede ser mmás grande que el mínimo anterior. Como $R^2=1-\mathrm{SRC}/\mathrm{STC}$ y STC no cambia, $R^2$ no puede bajar. Esto es válido incluso si el regresor añadido no tiene ninguna relación real con la variable dependiente —una propiedad puramente mecánica, no una señal de que el nuevo regresor "importe". Si hubiéramos añadido como regresor adicional el número de hermanos del arquitecto que diseñó cada una de las casas, el $R^2$ probablemente aumentaría; lo que es seguro es que no disminuiría.
+4. ¿Por qué el $R^2$ nunca baja al añadir un regresor? Porque MCO elige siempre los coeficientes que minimizan la suma de residuos al cuadrado (SRC) dentro del subespacio disponible; al añadir un regresor, ese subespacio se amplía (contiene, como caso particular, la solución que ya teníamos antes de incluir el regresor nuevo), así que el mínimo de SRC en el subespacio ampliado nunca puede ser más grande que el mínimo anterior. Como $R^2=1-\mathrm{SRC}/\mathrm{STC}$ y STC no cambia, $R^2$ no puede bajar. Esto es válido incluso si el regresor añadido no tiene ninguna relación real con la variable dependiente —una propiedad puramente mecánica, no una señal de que el nuevo regresor "importe". Si hubiéramos añadido como regresor adicional el número de hermanos del arquitecto que diseñó cada una de las casas, el $R^2$ probablemente aumentaría; lo que es seguro es que no disminuiría.
 
 5. Explicar la diferencia sin jerga técnica. Una posible formulación: ``si comparo, sin más, viviendas con distinto número de habitaciones, estoy comparando peras con manzanas, porque esas viviendas probablemente también difieren en su tamaño; en cambio, si comparo únicamente viviendas del mismo tamaño pero con distinto número de habitaciones, estoy aislando el efecto de repartir ese mismo espacio de una forma u otra''. Esa segunda comparación es, precisamente, lo que mide el coeficiente en el modelo con varios regresores a la vez.
    

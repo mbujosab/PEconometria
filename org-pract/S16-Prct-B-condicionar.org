@@ -306,7 +306,7 @@ scalar Sxx_obs  = sum((rooms-mean(rooms))^2)
 scalar var_cond = sigma^2 / Sxx_obs
 
 set seed 160
-loop 4000 --progressive --quiet
+loop 40000 --progressive --quiet      # diez veces mas replicas: ver nota
     series u = normal(0, sigma)
     series y = b1_true + b2_true*rooms + u
     ols y const rooms --quiet
@@ -325,12 +325,14 @@ endloop
 #+begin_src gretl :eval no
 printf "Con n = 400:  Sxx observado = %.2f   (tipico: %.2f)\n", Sxx_obs, ($nobs-1)*sd_r^2
 printf "             Var[b2|X] condicional teorica = %.2f\n", var_cond
+printf "             cociente Sxx observado/tipico = %.3f  <- lo que cabe esperar de var_B/var_A\n", Sxx_obs/(($nobs-1)*sd_r^2)
 #+end_src
 
 #+NAME: Muestra grande resultado
 #+begin_src gretl :eval no
 printf "  regresor FIJO       : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
 printf "  regresor REGENERADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
+printf "  cociente observado  : %.3f\n", (sum((bg_var-mean(bg_var))^2))/(sum((bg_fijo-mean(bg_fijo))^2))
 #+end_src
 #+latex: }
 
@@ -351,10 +353,21 @@ end outfile
 
 *** Lo que debe observar
 
-La diferencia entre las dos varianzas /se reduce mucho/ al pasar de doce a cuatrocientas observaciones, pero no llega a desaparecer. Conviene entender por qué, porque en esa distinción hay dos efectos superpuestos:
+Lo primero que conviene mirar no es el tamaño de la diferencia, sino su /signo/.
+
+Con doce viviendas, la varianza del experimento B salía *menor* que la del A. Con cuatrocientas sale *mayor*. Puede parecer que algo se ha estropeado, pero es justo lo contrario: es la confirmación más limpia del mecanismo que explicamos en la actividad anterior. Allí dijimos que todo dependía de si nuestra muestra concreta tenía un Sxx más pequeño o más grande que el típico, y añadimos: ``si hubieran salido más dispersas, ocurriría lo contrario''. Compruébelo en las salidas:
+
+- /Doce viviendas/: Sxx observado $=3{,}27$ frente a un típico de $5{,}43$. Nuestra muestra estaba *apretada*, condicionar en ella daba una varianza mayor que el promedio, y por eso B quedaba por debajo de A.
+- /Cuatrocientas viviendas/: Sxx observado $=205{,}76$ frente a un típico de $196{,}96$. Ahora la muestra está, ligeramente, *más dispersa* de lo normal; condicionar en ella da una varianza menor que el promedio, y B queda por encima de A.
+
+El cambio de signo no es un accidente: es la predicción, cumplida. Y de paso desactiva una moraleja falsa que sería fácil sacar de la actividad anterior —``condicionar infla la varianza''—: condicionar no la infla ni la desinfla, la /ajusta a la muestra que tenemos/, y hacia qué lado la ajuste depende de cómo sea esa muestra.
+
+En cuanto al tamaño, la diferencia /se reduce mucho/ al pasar de doce a cuatrocientas observaciones, pero no llega a desaparecer. Conviene entender por qué, porque en esa distinción hay dos efectos superpuestos:
 
 1. /Nuestra muestra deja de ser excepcional/. Con doce viviendas, el Sxx que nos tocó podía quedar muy lejos del típico; con cuatrocientas, cualquier muestra tiene un Sxx bastante parecido al típico. Este efecto se desvanece al crecer $n$, pero despacio.
 2. /El promedio de un cociente no es el cociente de los promedios/. Aunque el Sxx medio coincidiera exactamente con el observado, promediar $\sigma^2/\mathrm{Sxx}$ sobre las réplicas no daría $\sigma^2$ dividido por el Sxx medio. Este segundo efecto también se atenúa con $n$, y más deprisa que el primero.
+
+Con $n=400$ el segundo efecto ya es prácticamente invisible, y todo lo que queda es el primero. Eso se puede comprobar con los números delante: el cociente de varianzas que observamos debería parecerse al cociente Sxx observado/típico, que la salida imprime, y en efecto se le parece.[fn::Aquí hemos subido el número de réplicas de 4.000 a 40.000, y merece la pena decir por qué: con 4.000 réplicas el ruido de Montecarlo sobre un cociente de varianzas es de un $3\%$ largo, del mismo orden que el efecto de un $4{,}5\%$ que queremos medir. Repitiendo el experimento con distintas semillas, el cociente oscilaba entre $1{,}00$ y $1{,}08$ —es decir, con algunas semillas el efecto /parecía/ desaparecer del todo—. Con 40.000 réplicas el cociente se estabiliza por encima de uno y el experimento ilustra lo que pretende ilustrar. El coste es de unos pocos segundos. Es, de paso, una lección sobre el propio método de Montecarlo: un experimento simulado tiene su propia precisión, y conviene asegurarse de que es mejor que el efecto que se quiere ver.]
 
 La conclusión práctica es que con muestras grandes la distinción tiene poca consecuencia numérica. La conclusión conceptual, en cambio, no cambia en absoluto: siguen siendo dos preguntas distintas, y la que responde la fórmula de la lección 11 —y la que responde su programa estadístico— es siempre la condicional.
 

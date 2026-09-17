@@ -92,7 +92,7 @@ set verbose off
 
 * Descripción de la práctica
 
-Cerramos la sesión con dos experimentos que responden a dos preguntas incómodas.
+Cerramos la sesión con tres experimentos que responden a dos preguntas incómodas.
 
 La primera nació al final de la práctica A: el histograma de $\hat\beta_2$ tenía forma de campana, y dijimos que no debíamos sacar conclusiones de ello porque habíamos /impuesto/ esa forma al generar las perturbaciones con una normal. Toca comprobarlo: ¿qué pasa si las generamos con distribuciones muy poco normales? ¿Se desmorona algo?
 
@@ -102,7 +102,7 @@ La segunda es más antigua. En el ejemplo de juguete de la lección 7 —aquel $
 
 1. Comprobar que la insesgadez y la fórmula de la varianza se cumplen con perturbaciones uniformes y con perturbaciones muy asimétricas, exactamente igual que con perturbaciones normales.
 2. Entender por qué eso tenía que ocurrir: repasar la demostración de la lección 11 y localizar en qué paso se usa la distribución de $U$ (en ninguno).
-3. Ver que la /forma/ de la distribución de $\hat\beta_2$, en cambio, sí depende de la distribución de $U$ —y del tamaño muestral—.
+3. Ver que la /forma/ de la distribución de $\hat\beta_2$, en cambio, sí depende de la distribución de $U$ —y averiguar qué papel juegan, además, el tamaño muestral y el /diseño del regresor/, separando un efecto del otro—.
 4. Forzar a la muestra de perturbaciones a cumplir los supuestos de forma /exacta/, no solo en esperanza, y observar el resultado.
 5. Dejar planteada, con datos delante, la pregunta que abre la lección 12.
 
@@ -396,11 +396,11 @@ De donde se sigue la respuesta a la pregunta del epígrafe, y conviene enunciarl
 /La asimetría procede de la distribución de la perturbación. El regresor no la crea: solo decide si sobrevive./
 #+end_center
 
-Que el regresor no pueda crearla no es casualidad ni un accidente de estos números, y se ve directamente en la fórmula de la lección 11. Una vez condicionamos en $\boldsymbol X$, los pesos $W_i$ dejan de ser aleatorios: son números. Y entonces
+Que el regresor no pueda crearla no es casualidad ni un accidente de estos números, y se ve directamente en la fórmula de la lección 11. En estos cuatro experimentos el regresor lo hemos /fijado nosotros/ —=x_eq= y =x_pal= se construyen una vez y no vuelven a tocarse dentro del bucle—, de modo que los pesos son números: son los $w_i$ de la lección 7, proporcionales a $(x_i-\mu_{\boldsymbol x})$. Y entonces
 \[
-\hat\beta_2=\beta_2\cdot\mathit 1+\sum_iW_iU_i
+\hat\beta_2=\beta_2\cdot\mathit 1+\sum_iw_iU_i
 \]
-es una combinación lineal /con coeficientes fijos/ de las perturbaciones. Si esas perturbaciones son normales, cualquier combinación lineal suya vuelve a ser normal —sean cuales sean los pesos—. Por eso la fila de arriba es plana: el diseño del regresor no tiene por dónde introducir asimetría.
+es, ahora sí, una auténtica /combinación lineal/ de las perturbaciones, con coeficientes que son números.[fn::Conviene no generalizar el atajo. En la lección 11 el regresor es aleatorio, los pesos $W_i$ son variables aleatorias, y NO se convierten en números por el hecho de condicionar en $\boldsymbol X$: lo que autoriza allí a sacarlos fuera de la esperanza es el Lema, no ninguna transmutación de funciones en números. Aquí el atajo es legítimo por un motivo distinto y mucho más humilde: el regresor está fijado de antemano, así que los $w_i$ son números desde el principio.] Si esas perturbaciones son normales, cualquier combinación lineal suya vuelve a ser normal —sean cuales sean los pesos—. Por eso la fila de arriba es plana: el diseño del regresor no tiene por dónde introducir asimetría.
 
 Lo que el regresor sí controla es /cuánta/ de la asimetría de $U$ llega al resultado. Con pesos repartidos, la suma mezcla muchas perturbaciones y sus asimetrías se compensan; con un peso que domina a los demás, $\hat\beta_2\approx\beta_2+W_1U_1$ y el estimador reproduce casi tal cual la forma de una sola perturbación.
 
@@ -420,7 +420,7 @@ Las dos primeras filas están /demostradas/ en la lección 11 y verificadas en l
 
 * Actividad 3 - El experimento imposible: forzar los supuestos exactamente
 
-Los supuestos del modelo se enuncian /en esperanza/: $E[U_i\mid\boldsymbol X]=\mathit 0$ dice que la perturbación vale cero /en promedio/, no que valga cero en ninguna muestra concreta. En cualquier muestra real, el vector de perturbaciones tendrá una media muestral que no será exactamente cero y no será exactamente ortogonal al regresor.
+Tanto los supuestos del modelo como el corolario de la exogeneidad se enuncian /en esperanza/: $E[U_i\mid\boldsymbol X]=\mathit 0$ dice que la perturbación vale cero /en promedio/, no que valga cero en ninguna muestra concreta. En cualquier muestra real, el vector de perturbaciones tendrá una media muestral que no será exactamente cero y no será exactamente ortogonal al regresor.
 
 ¿Y si lo forzáramos? Podemos construir un vector de perturbaciones a medida: se sortea al azar, se le quita su proyección sobre los regresores —con lo que queda /exactamente/ ortogonal a $\boldsymbol 1$ y a $\boldsymbol x$— y se reescala para que su varianza sea exactamente $\sigma^2$. El truco es el mismo que usamos en el ejemplo de juguete de la lección 7, ahora automatizado.
 
@@ -543,7 +543,7 @@ b) Que la media condicional de la perturbación sea nula.
 c) Que la perturbación sea homocedástica.
 d) Que la muestra sea grande.
 /Respuesta correcta: b./
-/Evalúa/: identificación del supuesto mínimo, confirmada experimentalmente en la práctica.
+/Evalúa/: identificación de la condición mínima, confirmada experimentalmente en la práctica.
 
 ** Pregunta R2 — Media, varianza y forma
 Del experimento con perturbaciones uniformes y chi-cuadrado se concluye que:
