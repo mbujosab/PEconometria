@@ -1,0 +1,310 @@
+#+title:  Lección 11
+#+author: Marcos Bujosa
+#+STARTUP: show4levels
+#+LANGUAGE: es-es
+
+#+EXPORT_FILE_NAME: pub/Lecc11
+
+# +OPTIONS: toc:nil
+#+OPTIONS: tags:nil
+
+#+LATEX_CLASS: article
+
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+#+LATEX_HEADER: \usepackage[margin=0.5in]{geometry}
+#+LaTeX_HEADER: \usepackage[svgnames,x11names]{xcolor}
+#+LaTeX_HEADER: \hypersetup{linktoc = all, colorlinks = true, urlcolor = DodgerBlue4, citecolor = PaleGreen1, linkcolor = SpringGreen4}
+#+LaTeX_HEADER: \PassOptionsToPackage{hyphens}{url}
+#+LaTeX_HEADER: \usepackage{nacal}
+
+#+bibliography: ref.bib
+
+#+LaTeX_HEADER: \usepackage{framed}
+
+#+LaTeX_HEADER: \usepackage{listings}
+#+LaTeX_HEADER: \input{hansl.tex}
+#+LaTeX_HEADER: \lstnewenvironment{hansl-gretl}
+#+LaTeX_HEADER: {\lstset{language={hansl},basicstyle={\ttfamily\footnotesize},numbers,rame=single,breaklines=true}}
+#+LaTeX_HEADER: {}
+#+LaTeX_HEADER: \newcommand{\hansl}[1]{\lstset{language={hansl},basicstyle={\ttfamily\small}}\lstinline{#1}}
+# +LaTeX_HEADER: \lstset{backgroundcolor=\color{white},basicstyle=\ttfamily\footnotesize,breaklines=true, captionpos=b,commentstyle=\color{mygreen},escapeinside={\%*}{*)}, keywordstyle=\color{blue},stringstyle=\color{mymauve}, }
+# +LaTeX_HEADER: \lstset{backgroundcolor=\color{lightgray!20},basicstyle=\ttfamily\footnotesize,breaklines=true, }
+#+LaTeX_HEADER: \lstset{backgroundcolor=\color{lightgray!20}, }
+
+#+name: setup-listings
+#+begin_src emacs-lisp :exports none :results silent
+  (setq org-latex-listings 'listings)
+  (setq org-latex-custom-lang-environments
+  	;'((emacs-lisp "common-lispcode")))
+  	'((emacs-lisp "hansl-gretl")))
+  (setq org-latex-listings-options
+	'(("frame" "lines")
+	  ("basicstyle" "\\scriptsize")
+	  ("basicstyle" "\\ttfamily")
+	  ("numbers=none" "left")
+	  ("backgroundcolor=\\color{lightgray!20}")
+	  ("numberstyle" "\\tiny")))
+  (setq org-latex-to-pdf-process
+	'("pdflatex -interaction nonstopmode -output-directory %o %f"
+	"pdflatex -interaction nonstopmode -output-directory %o %f"
+	"pdflatex -interaction nonstopmode -output-directory %o %f"))
+  (org-add-link-type
+   "latex" nil
+   (lambda (path desc format)
+     (cond
+      ((eq format 'html)
+       (format "<span class=\"%s\">%s</span>" path desc))
+      ((eq format 'latex)
+       (format "\\%s{%s}" path desc)))))
+#+end_src
+
+
+# \lstnewenvironment{code}
+#     {\lstset{language=haskell,
+#     basicstyle=\small\ttfamily,
+#     numbers=left,
+#     numberstyle=\tiny\color{gray},
+#     backgroundcolor=\color{lightgray},
+#     firstnumber=auto
+#     }}
+#     {}
+
+#+bibliography: ref.bib
+
+# +latex: \clearpage
+
+#+LATEX: \clearpage
+
+#+macro: lugar [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/$1][$1]]
+
+#+macro: codigo \lstinputlisting{scripts/$1} 
+
+* Diferencias salariales entre hombres y mujeres
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanPp7-1.inp
+   :END:
+   
+| Guión: | {{{lugar(RamanathanPp7-1.inp)}}} |
+
+#+begin_src hansl :exports none
+open data7-1
+ols WAGE 0 D
+
+scalar Wbar  = mean(WAGE)
+scalar Hbar  = sum(WAGE*D)/sum(D)
+scalar Mbar  = sum(WAGE*(1-D))/sum(1-D)
+
+summary WAGE --simple --by=D
+
+scalar difer = Hbar-Mbar
+#+end_src
+
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanPp7-1.inp}
+#+LATEX: \clearpage
+
+
+* Diferencias salariales entre hombres y mujeres (II)
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanEX7-1.inp
+   :END:
+   
+| Guión: | {{{lugar(RamanathanEX7-1.inp)}}}           |
+
+#+begin_src hansl :exports none
+open data7-2
+/* Primer modelo e interpretación */
+Modelo1     <- ols WAGE const GENDER EXPER
+scalar efG1 =  $coeff(GENDER)                
+printf "\n \
+En media, un hombre gana %4.2f dólares más que una mujer\n\n",  $coeff(GENDER)
+
+printf "\n \
+En media, por cada año adicional de experiencia el salario (de hombres y mujeres)\n\
+aumenta %4.2f dólares\n\n", $coeff(EXPER)
+
+/* Segundo modelo e interpretación */
+logs WAGE
+Modelo2     <- ols l_WAGE const GENDER EXPER 
+printf "\n Un hombre cobra en media (aprox.) un %3.1f%% más que una mujer\n\n", 
+100*(exp( $coeff(GENDER))-1)
+
+printf "\n En media, el salario de una mujer es (aprox.) un %3.1f%% menor que el de un hombre\n\n", 
+100*(exp(-$coeff(GENDER))-1)*(-1)
+
+printf "\n \
+Cada año de experiencia aumenta el salario esperado (de hombres y mujeres) un %2.2f%% (aprox.)\n\n", 
+$coeff(EXPER)*100
+
+# Como \$coeff(EXPER) es pequeño, la aproximacion anterior es suficientemente buena. 
+# Comprobémoslo con el calculo correcto...
+printf "\n (con mayor precision) \n \
+Cada año de experiencia aumenta el salario esperado (de hombres y mujeres) un %2.2f%%\n\n", 
+(exp($coeff(EXPER))-1)*100
+
+/* Tercer modelo e interpretación */
+Modelo3     <- ols l_WAGE const GENDER EXPER EDUC 
+printf "\n Un hombre cobra en media (aprox.) un %3.1f%% más que una mujer\n\n", 
+100*(exp( $coeff(GENDER))-1)
+
+printf "\n En media, el salario de una mujer es (aprox.) un %3.1f%% menor que el de un hombre\n\n", 
+100*(exp(-$coeff(GENDER))-1)*(-1)
+
+printf "\n \
+Cada año de experiencia aumenta el salario esperado (de hombres y mujeres) un %2.2f%%\n\n", 
+(exp($coeff(EXPER))-1)*100
+
+printf "\n \
+Cada año de educación aumenta el salario esperado (de hombres y mujeres) un %2.2f%%\n\n", 
+(exp($coeff(EDUC))-1)*100
+#+end_src
+
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanEX7-1.inp}
+#+LATEX: \clearpage
+
+
+* Cambio estructural en la participación de las mujeres en el mercado laboral
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanPS7-6.inp
+   :END:
+   
+| Guión: | {{{lugar(RamanathanPS7-6.inp)}}} |
+
+#+begin_src hansl :exports none
+open data7-4
+Modelo0        <- ols WLFP const YF YM EDUC UE MR DR URB WH
+chow D90 --dummy
+
+# generando interacciones entre D90 y el resto de variables explicativas
+series D90YF   = D90*YF
+series D90YM   = D90*YM
+series D90EDUC = D90*EDUC
+series D90UE   = D90*UE
+series D90MR   = D90*MR
+series D90DR   = D90*DR
+series D90URB  = D90*URB
+series D90WH   = D90*WH
+varlist
+# estimando el modelo mas general 
+ols WLFP const D90 YF D90YF YM D90YM EDUC D90EDUC UE D90UE MR D90MR DR D90DR URB D90URB WH D90WH 
+
+# reduciendo el modelo
+Modelo1 <- omit --auto
+
+printf "\n En 1980 un incremento en un 1 por ciento de mujeres casadas\n\
+supone un incremento de la participación en de %2.3f por ciento (aprox.)\n\n", $coeff(MR)
+
+printf "\n En 1990 un incremento en un 1 por ciento de mujeres casadas\n\
+supone un incremento de la participación en de %2.3f por ciento (aprox.)\n\n", $coeff(D90MR)
+
+printf "\n En 1980 un incremento en un 1 por ciento de la tasa de desempleo\n\
+supone un incremento de la participación en de %2.4f por ciento (aprox.)\n\n", $coeff(UE)
+
+printf "\n En 1990 un incremento en un 1 por ciento de la tasa de desempleo\n\
+supone un incremento de la participación en de %2.4f por ciento (aprox.)\n\n", $coeff(D90UE)
+
+printf "\n En 1980 un incremento del salario mediano de las mujeres de 1000 dólares\n\
+supone un incremento de la participación en de %2.4f por ciento (aprox.)\n\n", $coeff(YF)
+
+printf "\n En 1990 un incremento del salario mediano de las mujeres de 1000 dólares\n\
+supone un incremento de la participación en de %2.4f por ciento (aprox.)\n\n", $coeff(D90YF)
+
+vif
+corr YF D90YF
+#+end_src
+
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanPS7-6.inp}
+#+LATEX: \clearpage
+
+
+* Modelo Log-lin con variables ficticias: diferencias salariales entre grupos 
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/wage1dummiesB.inp
+   :END:
+   
+| Guión: | {{{lugar(wage1dummiesB.inp)}}} |
+
+#+begin_src hansl :exports none
+open wage1.gdt 
+series marrmale   = married*(1-female)
+series marrfem    = married*female
+series singmale   = (1-married)*(1-female)
+series singfem    = (1-married)*female
+Modelo1 <- ols lwage 0 marrmale marrfem singfem educ exper expersq tenure tenursq
+
+scalar efectoHombreCas   = 100*(exp($coeff(marrmale)) -1)
+scalar efectoMujerCas    = 100*(exp($coeff(marrfem) ) -1)
+scalar efectoMujerSolt   = 100*(exp($coeff(singfem) ) -1)
+
+scalar DifemSolCas       = $coeff(singfem)-$coeff(marrfem)
+
+scalar EDifemSolCas      = 100*(exp(DifemSolCas) -1)
+
+scalar VarDif    = $vcv(singfem,singfem) + $vcv(marrfem,marrfem) - 2*$vcv(singfem,marrfem)
+scalar StdDif    = sqrt(VarDif)
+scalar c1        = critical(t, $T-$ncoeff, 0.975)
+scalar c2        = critical(t, $T-$ncoeff, 0.025)
+matrix int       = { DifemSolCas+c1*StdDif , DifemSolCas+c2*StdDif }
+print int
+
+Modelo2 <- ols lwage 0 marrmale singmale singfem educ exper expersq tenure tenursq
+
+scalar efecto    = 100*(exp($coeff(singfem))-1)
+matrix intervalo = 100*(exp(int)-1)
+
+print int intervalo
+#+end_src
+
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/wage1dummiesB.inp}
+#+LATEX: \clearpage
+
+
+
+* Precio de viviendas unifamiliares
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanEX7-2.inp
+   :END:
+   
+| Guión: | {{{lugar(RamanathanEX7-2.inp)}}}              |
+
+#+begin_src hansl :exports none
+open data7-3
+Modelo1 <- ols price const sqft
+Modelo2 <- ols price const sqft bedrms baths pool famroom firepl
+Modelo3 <- omit --auto
+
+series lsqft = log(sqft)
+Modelo4 <- ols price 0 lsqft
+Modelo5 <- ols price 0 lsqft bedrms baths pool famroom firepl
+Modelo6 <- omit --auto
+Modelo7 <- omit lsqft
+#+end_src
+
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanEX7-2.inp}
+#+LATEX: \clearpage
+
+

@@ -49,13 +49,22 @@ outfile --quiet stcSecSrcR2.txt
     printf "R2 de Gretl ($rsq)  = %.6f\n", $rsq
 end outfile
 
+outfile --quiet mediasYpuntoDeLasMedias.txt
+    scalar mu_x    = mean(x)
+    scalar mu_yhat = mean(yhat)
+    
+    printf "mu_y = %.10f     mu_yhat = %.10f   (el ajuste preserva la media)\n", mu_y, mu_yhat
+    printf "beta1 + beta2*mu_x = %.10f          (la recta pasa por el punto de las medias)\n", $coeff(const) + $coeff(x)*mu_x
+    printf "Diferencia maxima |(yhat-mu_yhat) - beta2*(x-mu_x)| = %.10f\n", max(abs((yhat-mu_yhat) - $coeff(x)*(x-mu_x)))
+end outfile
+
 outfile --quiet pendienteComoCorrelacion.txt
     scalar rho_xy = corr(x,y)
-    scalar beta1_formula = rho_xy * sd(y)/sd(x)
+    scalar beta2_formula = rho_xy * sd(y)/sd(x)
     
     printf "rho_xy                       = %.6f\n", rho_xy
-    printf "beta1 (formula rho*sy/sx)    = %.6f\n", beta1_formula
-    printf "beta1 ($coeff(x) de Gretl)   = %.6f\n", $coeff(x)
+    printf "beta2 (formula rho*sy/sx)    = %.6f\n", beta2_formula
+    printf "beta2 ($coeff(x) de Gretl)   = %.6f\n", $coeff(x)
     printf "rho_xy^2                     = %.6f\n", rho_xy^2
     printf "R2 ($rsq de Gretl)           = %.6f\n", $rsq
 end outfile
@@ -73,6 +82,6 @@ series ehat2 = $uhat
 outfile --quiet verificacionMuestraGrande.txt
     printf "Suma de residuos    sum(ehat2)     = %.10f    (debe ser 0, exactamente)\n", sum(ehat2)
     printf "Suma de x2*residuos sum(x2*ehat2)  = %.10f    (debe ser 0, exactamente)\n", sum(x2*ehat2)
-    printf "beta1 estimado                     = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
-    printf "beta0 estimado                     = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
+    printf "beta2 estimado (pendiente)         = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
+    printf "beta1 estimado (constante)         = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
 end outfile
