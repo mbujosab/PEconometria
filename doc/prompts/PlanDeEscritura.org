@@ -989,7 +989,22 @@ En lugar de "apuntes teóricos", un /guion de laboratorio/ paso a paso:
     =grep -Pzo '#\+end_src\n\n\n\s+#\+latex: \}' fichero.org= debe dar cero.
 
 ** 5.4 Notación y comandos gráficos confirmados
-- /Comandos gráficos/: =freq price --plot=display=, =boxplot price --output=display=.
+- */Comandos gráficos: SIEMPRE a fichero, nunca a pantalla (decisión del usuario, sept. 2026)/*.
+  En los bloques que se /tanglan/ al guion se escribe =freq price --plot="histograma_price.png"=
+  y =boxplot price --output="boxplot_price.png"=; el bloque /visible/ para el alumno muestra la
+  forma que este teclearía en su sesión interactiva (=freq price=, =boxplot price=), y la figura
+  resultante se incrusta en el documento con sendos bloques =#+BEGIN_EXPORT latex= / =#+BEGIN_EXPORT HTML=.
+  Es el idioma que ya usaban las prácticas de la sesión 7 en adelante.
+  /Motivo, comprobado ejecutando/: con =--plot=display= o =--output=display=, =gretlcli -b= no se
+  limita a no hacer nada: invoca =gnuplot -persist= con =set term wxt= y *abre una ventana por
+  gráfico*, también al lanzar =make all=. Con destino a fichero, gretl sigue llamando a gnuplot,
+  pero /sin/ =-persist= y con terminal PNG: no hay ventana. Precedente: las dos prácticas de la
+  sesión 4 usaban =display= (lo prescribía este mismo apartado) y abrían dos ventanas en cada
+  compilación; corregido.
+  /Aviso para quien lo compruebe/: no basta con sustituir =gnuplot= por un script propio en el
+  =PATH= para ver si se llama. Gretl ejecuta antes =gnuplot --version=, y si esa sonda no devuelve
+  una cadena de versión válida, desactiva el dibujo en silencio; el sustituto debe responder a
+  =--version= como lo haría gnuplot, o la comprobación concluye lo contrario de la verdad.
 - =open ../../data/boston.csv= carga como sección cruzada (Gretl pregunta si la primera columna es serie ordinaria; responder /sí/).
 - =setobs 1 1 --cross-section= devuelve =Rango de datos completo: 1 - 506 (n = 506)=.
 - /Bloques de código/: siempre =#+begin_src gretl ... #+end_src= (el lexer real es =octave=, ver §5.5).
@@ -1244,13 +1259,29 @@ como síntesis y cierre —poner en juego todo lo visto sobre un caso real— y 
 como vehículo de contenido nuevo que alguien pudiera echar en falta en el
 examen.
 
+*Sesión doble del 25 de septiembre de 2026 (acordada en sept. 2026)*: a
+petición de un compañero, ese *viernes 25-sep* se imparten DOS sesiones
+seguidas, la *S06* (lección 5) y la *S07* (laboratorio, en el aula del
+decanato). En contrapartida, la *S08* pasa al *jueves 1-oct* y el *viernes
+2-oct queda sin clase*. Es el único día del curso con dos sesiones; por eso
+dos filas de la tabla-calendario de =index.org= comparten fecha, y ambas
+llevan un aviso de ``sesión doble'' para que no se lea como errata. El resto
+del calendario no se mueve: la S09 sigue el jueves 8-oct.
+
 *Aulas de laboratorio (curso 2026-2027)*: el aula habitual es la del
 *decanato*. Excepción: los laboratorios del *30-oct* (ses. 16)
 y del *6-nov* (ses. 18) se imparten en el *aula 1*. Los días 13-nov y 27-nov
 solo había disponible un aula para 2/3 del grupo, y por eso ambos están
 ocupados por sesiones teóricas, que no necesitan aula de informática: esa
 restricción es la que motivó intercambiar el laboratorio de $F$ con la lección
-de colinealidad.
+de colinealidad. /Efecto secundario en la web, corregido en sept. 2026/: como
+=index.org= agrupa las sesiones por tema y no por fecha, ese intercambio hace
+que la S21 (19-nov, laboratorio de $F$, Tema III) aparezca en la página ANTES
+que la S20 (13-nov, colinealidad, Tema IV), de modo que al bajar por el
+documento las fechas parecen retroceder. Las fechas son correctas —así se
+verificó al detectarlo—; lo que faltaba era decírselo al lector. Ambos bloques
+llevan ahora una nota de calendario que lo explica. No reordenar los bloques:
+la agrupación temática es deliberada.
 
 *Importante*: esta reestructuración NO altera ningún número de lección. El
 orden de las sesiones de tipo Teoría no cambia ($t$ → $F$ → colinealidad →
@@ -1338,9 +1369,18 @@ el número de sesión de §7.0 prevalece.
   - /Práctica B (=S04-Prct-B-boston=)/: importar datos desde internet. Carga del Boston Housing original (=data/boston.csv=), que sí contiene =chas=. Actividades: descargar CSV, importar (//~Archivo -> Abrir datos -> Importar -> texto/CSV~//), declarar sección cruzada, examinar =chas= (media = proporción de unos), comparar con =hprice2=.
 - /Datos/: ver fuente canónica §8.
 - */Verificación (2026-09-18)/*: los dos guiones se ejecutan con =gretlcli=
-  2022c sin error y sin dejar residuos (antes, la práctica A escribía un
-  =gpttmp01.plt= porque usaba =freq price= y =boxplot price= sin las opciones
-  de §5.4; corregido). Aritmética de la práctica B comprobada contra
+  2022c sin error y sin dejar residuos.
+- */Salida y figuras (revisión de 2026-09-18, tarde)/*: hasta esta revisión, las
+  dos prácticas de la sesión 4 eran las ÚNICAS del corpus sin un solo =outfile= y
+  sin ninguna figura: el PDF y el HTML no mostraban ni un número ni un gráfico
+  producido por Gretl, pese a que las respuestas citan la media ($22\,512$), la
+  mediana ($21\,200$) y la asimetría ($1{,}11$) de =price=. Además, sus comandos
+  gráficos usaban =display= y abrían dos ventanas en cada =make=. Ahora: =summary=
+  se captura con =outfile= y se incrusta con =#+include:=; el histograma y el
+  diagrama de caja se escriben a PNG y se muestran en el documento; y los bloques
+  visibles conservan la forma que el alumno teclea en su sesión interactiva. Que
+  la sesión 4 solo persiga familiarizarse con Gretl no justifica que el alumno que
+  repase en casa no vea nada de lo que en clase vio en pantalla. Aritmética de la práctica B comprobada contra
   =data/boston.csv=: $n=506$, 35 zonas junto al río, $35/506=0{,}069170$,
   $\sigma^2_{\texttt{chas}}=p(1-p)=0{,}064385$ (exacto solo con el divisor $n$
   del curso), y =medv= $=22{,}5328$ miles de \$ frente a =price= $=22\,512$ \$,
@@ -1420,6 +1460,13 @@ el número de sesión de §7.0 prevalece.
 - /Convención de numeración/: todas las referencias cruzadas visibles para el
   alumno en este fichero usan numeración de lecciones ("lección 3", "lección
   2"), no de sesiones.
+- */Revisión de coherencia figura-texto (2026-09-18)/*: las figuras de esta
+  sesión rotulaban sus dos vectores como $\boldsymbol{v}$ (rojo) y $\boldsymbol{x}$
+  (verde), mientras el álgebra de la lección usa $\boldsymbol{y}$ y $\boldsymbol{x}$.
+  Se han reetiquetado los fuentes tikz ($\boldsymbol{v}\to\boldsymbol{y}$ en
+  =img/S05-Lecc04/figuras-S05-Lecc04.org=) y los pies y descripciones del fichero.
+  Se conservan los usos /genéricos/ de $\boldsymbol{v}$ (``la media de un vector
+  $\boldsymbol{v}$''), que no describen ninguna figura.
 
 ** 7.7 Ficha — Sesión 6 (Varianza vía Pitágoras)
 - /Fichero/: =S06-Lecc05.org=.
@@ -1521,6 +1568,18 @@ el número de sesión de §7.0 prevalece.
   anuncio explícito de la lección 6 (regresión lineal simple) como
   proyección sobre $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$, con
   $R^2=\cos^2\theta$ como cierre.
+- */Revisión de coherencia figura-texto (2026-09-18)/*: (i) misma reetiquetación
+  $\boldsymbol{v}\to\boldsymbol{y}$ que en la sesión 5, aquí sobre
+  =img/S06-Lecc05/figuras-S06-Lecc05.org= (figuras =Correlacion= y =Correlacion2=),
+  con sus pies; (ii) la transparencia ``Varianza y Pitágoras'' y sus apuntes estaban
+  escritos con $\boldsymbol{x}$ mientras la figura a la que remiten está rotulada con
+  $\boldsymbol{y}$ —y los apuntes llegaban a afirmar ``el vector dibujado es
+  $\boldsymbol{x}=(1,5)$''—: toda la sección pasa a $\boldsymbol{y}$, que es la letra
+  que la lección usa desde su apertura; (iii) las dos remisiones a ``la figura de la
+  primera transparencia'' son ahora enlaces internos al título de esa sección;
+  (iv) la fila ``Diferencia $\boldsymbol{v}-\boldsymbol{\mathop{\overline{v}}}$'' de la
+  tabla del ejemplo numérico pasa a ``Vector en desviaciones'', sin letra suelta y
+  en la terminología de §4.2.1.
 
 ** 7.8 Ficha — Sesión 7 (Lab Gretl: descriptivos)
 - */Reproducibilidad verificada (2026-09-18)/*: los tres guiones
@@ -1605,6 +1664,18 @@ el número de sesión de §7.0 prevalece.
   sin más: forma aleatoria + reescalado determinista para fijar momentos.
 - /Datasets de esta sesión, completos/: A (real, hprice2, correlación como
   coseno), B (simulado, verificación de identidades), C (curado algorítmicamente, momentos no bastan — ESCRITO).
+- */Cobertura ampliada (2026-09-18)/*: la práctica B verificaba Pitágoras, la
+  ortogonalidad del vector en desviaciones, la covarianza como producto escalar y
+  $\rho=\cos\theta$, pero dejaba fuera dos resultados centrales de las lecciones
+  3 y 5. Se han añadido, con el idioma habitual (bloque visible + bloque tangleado
+  con =outfile= + =#+include:=): (i) al final de la Actividad 2, la comprobación de
+  que /con $n=2$ la correlación es siempre $\pm1$/ —dos sorteos independientes dan
+  $+1$ y $-1$, y ninguna otra cosa es posible—, que es el hecho de la lección 5 en
+  el que se apoyarán los grados de libertad de la lección 12; (ii) al final de la
+  Actividad 3, /Cauchy--Schwarz/ ($|\langle x_c,y_c\rangle|\le\|x_c\|\|y_c\|$, que
+  es lo que legitima llamar ``coseno'' al cociente y de donde sale $|\rho|\le1$) y la
+  /desigualdad triangular/, ambas con desigualdad estricta porque los vectores no
+  están alineados. Verificado ejecutando el guion.
 
 ** 7.9 Ficha — Sesión 8 (Regresión simple como ajuste geométrico)
 - /Fichero/: =S08-Lecc06.org= (ESCRITA).

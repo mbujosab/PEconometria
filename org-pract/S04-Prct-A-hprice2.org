@@ -108,15 +108,17 @@ Trabajamos con datos /reales/ (y no simulados) porque queremos enfrentarnos desd
 
 /Objetivo/
 
-1. Abrir Gretl y cargar el dataset =hprice2=.
-2. Mostrar los datos y editar los atributos de las variables.
-3. Obtener estadísticos descriptivos.
-4. Generar histogramas y diagramas de caja.
-5. Empezar a leer cada variable como un /vector de $\mathbb{R}^n$/.
+Tras cargar los datos, cada actividad persigue un objetivo:
+
+1. /Actividad 1/: mostrar los datos y empezar a leer cada variable como un /vector de $\mathbb{R}^n$/.
+2. /Actividad 2/: editar los atributos de las variables.
+3. /Actividad 3/: obtener estadísticos descriptivos.
+4. /Actividad 4/: generar un histograma.
+5. /Actividad 5/: generar un diagrama de caja.
 
 Comencemos cargando los datos:
 
-//~Archivo --> Abrir datos --> Archivo de muestra~// y en la pestaña //~Wooldridge~// seleccione =hprice2=.
+//~Archivo -> Abrir archivo de datos -> Archivo de muestra~// y, en la pestaña //~Wooldridge~//, seleccione =hprice2=.
 
 #+latex: {\vspace{0pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -206,11 +208,21 @@ Queremos resumir numéricamente varias variables a la vez.
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
     #+NAME: Estadisticos descriptivos
-    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
+    #+begin_src gretl :eval no
 summary price rooms nox
     #+end_src
 
   #+latex: }
+
+#+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no :exports none :noweb yes
+outfile --quiet estadisticos.txt
+    <<Estadisticos descriptivos>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S04-Prct-A-hprice2/estadisticos.txt example
+#+latex: }
 
 Obtendrá, para cada variable, la /media/, la /mediana/, el /mínimo/, el /máximo/, la /desviación típica/, etc.
 
@@ -227,10 +239,29 @@ Para ver la /distribución/ de una variable:
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
     #+NAME: Histograma de price
-    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
+    #+begin_src gretl :eval no
 freq price --plot=display
     #+end_src
   #+latex: }
+
+#+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no :exports none
+freq price --plot="histograma_price.png"
+#+end_src
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.62\textwidth]{./S04-Prct-A-hprice2/histograma_price.png}
+\caption{Distribución de frecuencias de \texttt{price}.}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="text-align:center;">
+    <img src="./S04-Prct-A-hprice2/histograma_price.png" style="max-width:62%; height:auto;"/>
+    <figcaption>Distribución de frecuencias de <code>price</code>.</figcaption>
+</figure>
+#+END_EXPORT
 
 Observe la forma de la distribución de =price=: ¿es simétrica?, ¿se extiende la distribución hacia la derecha (cola larga de precios altos)? Repita el histograma para =rooms= y compare.
 
@@ -242,10 +273,29 @@ El /diagrama de caja/ (boxplot) resume la distribución mediante la mediana, los
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
     #+NAME: Boxplot de price
-    #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
+    #+begin_src gretl :eval no
 boxplot price --output=display
     #+end_src
   #+latex: }
+
+#+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no :exports none
+boxplot price --output="boxplot_price.png"
+#+end_src
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{./S04-Prct-A-hprice2/boxplot_price.png}
+\caption{Diagrama de caja de \texttt{price}.}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="text-align:center;">
+    <img src="./S04-Prct-A-hprice2/boxplot_price.png" style="max-width:45%; height:auto;"/>
+    <figcaption>Diagrama de caja de <code>price</code>.</figcaption>
+</figure>
+#+END_EXPORT
 
 Los puntos por encima del ``bigote'' superior son zonas con precios anormalmente altos. /No los eliminamos/: simplemente los observamos. Más adelante (laboratorio integrador) hablaremos de /observaciones influyentes/.
 
@@ -278,11 +328,11 @@ Los puntos por encima del ``bigote'' superior son zonas con precios anormalmente
 
 * Respuestas
 
-*1. Precio medio vs. mediana.* Con datos reales de vivienda es habitual que la media sea /mayor/ que la mediana: unas pocas zonas con precios muy altos "tiran" de la media hacia arriba, mientras que la mediana —al ser un estadístico de orden, no de suma— apenas se ve afectada por esos valores extremos. Con estos datos ocurre exactamente eso: la media es $22\,512$ dólares y la mediana $21\,200$. Es la asimetría positiva que confirma el histograma de la Actividad 4.
+1. /Precio medio frente a mediana./ Con datos reales de vivienda es habitual que la media sea /mayor/ que la mediana: unas pocas zonas con precios muy altos "tiran" de la media hacia arriba, mientras que la mediana —al ser un estadístico de orden, no de suma— apenas se ve afectada por esos valores extremos. Con estos datos ocurre exactamente eso: la media es $22\,512$ dólares y la mediana $21\,200$. Es la asimetría positiva que confirma el histograma de la Actividad 4.
 
-*2. Histograma de =price=: ¿simetría o asimetría?* Muestra asimetría /positiva/ (cola larga hacia la derecha; el coeficiente de asimetría que da Gretl es $1{,}11$): la mayoría de las zonas tienen precios moderados, y unas pocas zonas "de lujo" alargan la cola derecha. Esto anticipa exactamente el motivo por el que, en la lección 15 (formas funcionales), se transforma =price= con logaritmos: el logaritmo "comprime" esa cola larga y acerca la distribución a la simetría, lo cual suele mejorar el ajuste lineal.
+2. /Histograma de =price=: ¿simetría o asimetría?/ Muestra asimetría /positiva/ (cola larga hacia la derecha; el coeficiente de asimetría que da Gretl es $1{,}11$): la mayoría de las zonas tienen precios moderados, y unas pocas zonas "de lujo" alargan la cola derecha. Esto anticipa exactamente el motivo por el que, en la lección 15 (formas funcionales), se transforma =price= con logaritmos: el logaritmo "comprime" esa cola larga y acerca la distribución a la simetría, lo cual suele mejorar el ajuste lineal.
 
-*3. ¿En qué $\mathbb{R}^n$ vive =price=? ¿Y =rooms=?* Ambas viven en $\mathbb{R}^{506}$: el espacio lo determina el número de observaciones ($n=506$ zonas), no el "tipo" de variable. =price= y =rooms= son dos vectores distintos dentro del /mismo/ espacio $\mathbb{R}^{506}$, lo cual es precisamente lo que permite compararlos, sumarlos, proyectarlos o medir el ángulo entre ellos (lecciones 4 y 5).
+3. /¿En qué $\mathbb{R}^n$ vive =price=? ¿Y =rooms=?/ Ambas viven en $\mathbb{R}^{506}$: el espacio lo determina el número de observaciones ($n=506$ zonas), no el "tipo" de variable. =price= y =rooms= son dos vectores distintos dentro del /mismo/ espacio $\mathbb{R}^{506}$, lo cual es precisamente lo que permite compararlos, sumarlos, proyectarlos o medir el ángulo entre ellos (lecciones 4 y 5).
 
-*4. ¿Por qué datos reales y no simulados aquí?* Porque el objetivo de esta primera práctica es /tomar contacto/ con la irregularidad genuina de la realidad económica (asimetría, escalas, posibles atípicos) desde el principio. Los datos simulados se reservan para cuando necesitemos /verificar/ una propiedad teórica de la que conocemos de antemano la "verdad" (por ejemplo, insesgadez de un estimador, o —como en la práctica de verificación geométrica— las identidades de las lecciones 4-5).
+4. /¿Por qué datos reales y no simulados aquí?/ Porque el objetivo de esta primera práctica es /tomar contacto/ con la irregularidad genuina de la realidad económica (asimetría, escalas, posibles atípicos) desde el principio. Los datos simulados se reservan para cuando necesitemos /verificar/ una propiedad teórica de la que conocemos de antemano la "verdad" (por ejemplo, insesgadez de un estimador, o —como en la práctica de verificación geométrica— las identidades de las lecciones 4-5).
 

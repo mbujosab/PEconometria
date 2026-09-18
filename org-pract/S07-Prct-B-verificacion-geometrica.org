@@ -262,6 +262,41 @@ end outfile
 #+include: ./S07-Prct-B-verificacion-geometrica/dosSeriesn50conloop.txt example
 #+latex: }
 
+*** Un caso extremo: con $n=2$ la correlación es siempre $\pm1$
+
+La lección 5 demostró un hecho que conviene ver con los propios ojos. En $\mathbb{R}^2$, el complemento ortogonal $\mathcal{L}(\boldsymbol{1})^\perp$ es una simple /recta/; y dos vectores cualesquiera situados sobre una recta están forzosamente alineados. Por tanto, con solo dos observaciones los vectores en desviaciones siempre están alineados y la correlación vale $\pm1$, /sean cuales sean los datos/.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Correlacion con n=2
+#+begin_src gretl :eval no
+nulldata 2 --preserve
+set seed 777
+series a = normal()
+series b = normal()
+printf "Primer sorteo  (n=2): corr(a,b) = %+.10f\n", corr(a,b)
+
+set seed 778
+series a = normal()
+series b = normal()
+printf "Segundo sorteo (n=2): corr(a,b) = %+.10f\n", corr(a,b)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet correlacionN2.txt
+    <<Correlacion con n=2>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/correlacionN2.txt example
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Los dos sorteos son independientes y dan datos completamente distintos, pero la correlación sale $\pm1$ en ambos. No es casualidad ni redondeo: con $n=2$ no hay ninguna otra posibilidad. La consecuencia práctica es importante: una correlación de $1$ calculada con dos observaciones no informa de nada. Para observar correlaciones intermedias hacen falta al menos tres datos, que es la razón por la que las figuras de la lección 5 están dibujadas en $\mathbb{R}^3$./
+#+latex: }
+
 * Actividad 3 - Dos vectores con relación conocida (puente a la regresión)
 
 Construimos ahora $\boldsymbol{x}$ y $\boldsymbol{y}$ /a propósito/, de forma que conocemos exactamente cómo se relacionan: $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$, con $\boldsymbol{u}$ un término de ruido generado con independencia de $\boldsymbol{x}$ y, por tanto, prácticamente incorrelado con él.
@@ -341,9 +376,40 @@ end outfile
 /Aquí conocemos la ``verdad'': $\boldsymbol{y}$ se construyó con pendiente 3 respecto a $\boldsymbol{x}$. En las dos próximas lecciones veremos cómo/ recuperar /esa pendiente a partir solo de los datos observados, sin conocerla de antemano: la lección 6 plantea el problema y la lección 7 lo resuelve (estimación MCO)./
 #+latex: }
 
+*** Cauchy--Schwarz y la desigualdad triangular
+
+La lección 3 demostró dos desigualdades que hasta ahora no habíamos comprobado con datos. Las dos se leen directamente sobre los vectores en desviaciones que acabamos de construir.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Cauchy-Schwarz y triangular
+#+begin_src gretl :eval no
+scalar norma_suma = sqrt(sum(((x - mean(x)) + (y - mean(y)))^2))
+
+printf "Cauchy-Schwarz:  |<x_c,y_c>| = %.4f  <=  ||x_c||*||y_c|| = %.4f\n", \
+       abs(x_c_dot_y_c), norma_x * norma_y
+printf "Triangular:      ||x_c+y_c|| = %.4f  <=  ||x_c||+||y_c|| = %.4f\n", \
+       norma_suma, norma_x + norma_y
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S07-Prct-B-verificacion-geometrica.inp :eval no :exports none :noweb yes
+outfile --quiet desigualdades.txt
+    <<Cauchy-Schwarz y triangular>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S07-Prct-B-verificacion-geometrica/desigualdades.txt example
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/La primera desigualdad es la que sostiene todo lo demás: dividiendo ambos lados por $\|x_c\|\|y_c\|$ se obtiene $|\rho|\leq1$, es decir, que el coseno que hemos calculado nunca puede salirse del intervalo $[-1,1]$. Sin Cauchy--Schwarz, llamar ``coseno'' a ese cociente en $\mathbb{R}^n$ no estaría justificado. Nótese además que ambas desigualdades son estrictas aquí, porque $\boldsymbol{x}$ e $\boldsymbol{y}$ no están alineados; la igualdad solo se alcanza cuando uno es múltiplo del otro —justo el caso que acaba de ver con $n=2$—./
+#+latex: }
+
 * Actividad 4 - Síntesis
 
-Estas identidades —ortogonalidad, Pitágoras, covarianza como producto escalar, correlación como coseno— son /teoremas/ de la geometría de $\mathbb{R}^n$ (lecciones 3, 4 y 5), no propiedades empíricas de un dataset concreto. Por eso se cumplen igual con datos reales (práctica A) que con datos simulados de cualquier distribución y cualquier tamaño (aquí). La próxima sesión da un paso más: en lugar de /verificar/ identidades que ya conocemos, empezaremos a /usarlas/ para construir un estimador (MCO), camino que se completa en la lección 7.
+Estas identidades y desigualdades —ortogonalidad, Pitágoras, covarianza como producto escalar, correlación como coseno, Cauchy--Schwarz y la desigualdad triangular— son /teoremas/ de la geometría de $\mathbb{R}^n$ (lecciones 3, 4 y 5), no propiedades empíricas de un dataset concreto. Por eso se cumplen igual con datos reales (práctica A) que con datos simulados de cualquier distribución y cualquier tamaño (aquí). La próxima sesión da un paso más: en lugar de /verificar/ identidades que ya conocemos, empezaremos a /usarlas/ para construir un estimador (MCO), camino que se completa en la lección 7.
 
 * Actividad 5 (OPCIONAL, según el tiempo disponible y las preguntas) - ¿Y si repetimos esto cientos de veces?
 
