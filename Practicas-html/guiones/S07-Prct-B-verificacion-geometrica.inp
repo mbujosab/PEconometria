@@ -74,6 +74,19 @@ outfile --quiet dosSeriesn50conloop.txt
     endloop
 end outfile
 
+outfile --quiet correlacionN2.txt
+    nulldata 2 --preserve
+    set seed 777
+    series a = normal()
+    series b = normal()
+    printf "Primer sorteo  (n=2): corr(a,b) = %+.10f\n", corr(a,b)
+    
+    set seed 778
+    series a = normal()
+    series b = normal()
+    printf "Segundo sorteo (n=2): corr(a,b) = %+.10f\n", corr(a,b)
+end outfile
+
 nulldata 100 --preserve
 set seed 11223
 
@@ -103,6 +116,15 @@ outfile --quiet correlacioncomocosenoxy.txt
     
     printf "cos(theta) \"a mano\" = %.6f\n", coseno
     printf "corr(x,y) de Gretl  = %.6f\n", corr(x,y)
+end outfile
+
+outfile --quiet desigualdades.txt
+    scalar norma_suma = sqrt(sum(((x - mean(x)) + (y - mean(y)))^2))
+    
+    printf "Cauchy-Schwarz:  |<x_c,y_c>| = %.4f  <=  ||x_c||*||y_c|| = %.4f\n", \
+           abs(x_c_dot_y_c), norma_x * norma_y
+    printf "Triangular:      ||x_c+y_c|| = %.4f  <=  ||x_c||+||y_c|| = %.4f\n", \
+           norma_suma, norma_x + norma_y
 end outfile
 
 outfile --quiet loopopcionalderepeticionmasiva.txt
