@@ -974,6 +974,19 @@ En lugar de "apuntes teóricos", un /guion de laboratorio/ paso a paso:
 - /Menús de Gretl/: =//~Archivo -> Abrir datos~//= (cursiva + verbatim). /Opción destacada/ (la que se selecciona): =*/~Estadísticos descriptivos~/*=.
 - /Carga de dataset de muestra Wooldridge/: pestaña //~Wooldridge~// (no //~Gretl~//).
 - /Bloques =gretl= de comandos en línea/: precedidos de la coletilla en gris =#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black} /o bien teclee en línea de comandos/:= y cerrados con =#+latex: }=.
+  - */Aviso: esa pareja de llaves es frágil dentro de una lista/* (aprendido
+    rompiendo la compilación de =S04-Prct-A= el 2026-09-18). Cuando la
+    coletilla abre el grupo dentro de un ítem =- ...=, el =#+latex: }= de
+    cierre tiene que seguir perteneciendo al mismo ítem. En org, *dos líneas
+    en blanco seguidas cierran la lista*: si quedan dos entre el =#+end_src= y
+    el =#+latex: }=, el cierre se emite ya fuera, después del
+    =\end{itemize}=, y xelatex aborta con =! Missing } inserted= seguido de
+    =! Too many }'s=. Regla práctica: *una sola línea en blanco* entre el
+    =#+end_src= y el =#+latex: }=, y el =#+latex: }= indentado al nivel del
+    ítem. Cuidado especialmente al borrar líneas intermedias —un =#+RESULTS:=
+    residual, por ejemplo—: aunque no aporten nada visible, pueden ser lo
+    único que mantiene viva la lista. Comprobación tras editar:
+    =grep -Pzo '#\+end_src\n\n\n\s+#\+latex: \}' fichero.org= debe dar cero.
 
 ** 5.4 Notación y comandos gráficos confirmados
 - /Comandos gráficos/: =freq price --plot=display=, =boxplot price --output=display=.
@@ -996,7 +1009,12 @@ Secciones en este orden:
 - /Bloque =emacs-lisp== de configuración minted (§A.1, ingrediente 2),
   cabecera =:exports none :tangle no :results silent :eval yes=.
 - =#+LATEX: \maketitle=, =\blfootnote= con licencia CC BY-SA 4.0.
-- =#+begin_abstract ... #+end_abstract= con objetivos.
+- /Sección inicial/ =* Descripción de la práctica=: qué se hace y por qué, con
+  qué datos (§8), cerrada por un bloque =/Objetivo/= con la lista numerada de
+  objetivos. */Corregido al revisar la sesión 4/*: esta línea pedía antes un
+  =#+begin_abstract ... #+end_abstract= que NO usa ninguna práctica del corpus
+  (cero apariciones en =S04-Prct-A/B= y en =S07-Prct-A/B/C=); todas emplean
+  esta sección. Manda el corpus.
 - /Cabecera de ejecución/ (§5.2): bloque =sh= =#+name: execute-gretl-practice=
   con =#+PROPERTY:= y variable =practica=; más los DOS bloques iniciales
   =gretl :tangle ... :exports none :eval no= (copyright GPL v3; y
@@ -1319,6 +1337,14 @@ el número de sesión de §7.0 prevalece.
   - /Práctica A (=S04-Prct-A-hprice2=)/: interfaz de Gretl, carga del dataset de muestra =hprice2= (pestaña //~Wooldridge~//), estadísticos descriptivos, histograma (=freq price --plot=display=) y diagrama de caja (=boxplot price --output=display=). Sin actividad sobre =chas= (=hprice2= no la contiene).
   - /Práctica B (=S04-Prct-B-boston=)/: importar datos desde internet. Carga del Boston Housing original (=data/boston.csv=), que sí contiene =chas=. Actividades: descargar CSV, importar (//~Archivo -> Abrir datos -> Importar -> texto/CSV~//), declarar sección cruzada, examinar =chas= (media = proporción de unos), comparar con =hprice2=.
 - /Datos/: ver fuente canónica §8.
+- */Verificación (2026-09-18)/*: los dos guiones se ejecutan con =gretlcli=
+  2022c sin error y sin dejar residuos (antes, la práctica A escribía un
+  =gpttmp01.plt= porque usaba =freq price= y =boxplot price= sin las opciones
+  de §5.4; corregido). Aritmética de la práctica B comprobada contra
+  =data/boston.csv=: $n=506$, 35 zonas junto al río, $35/506=0{,}069170$,
+  $\sigma^2_{\texttt{chas}}=p(1-p)=0{,}064385$ (exacto solo con el divisor $n$
+  del curso), y =medv= $=22{,}5328$ miles de \$ frente a =price= $=22\,512$ \$,
+  coherente con el factor 1000. No repetir estas comprobaciones.
 - /Nombres de columnas del CSV/ (minúsculas): =crim,zn,indus,chas,nox,rm,age,dis,rad,tax,ptratio,b,lstat,medv=. =medv= = valor mediano en miles de dólares; =chas= = dummy del río Charles.
 - /Semilla geométrica/: la pregunta 5 de la Práctica B presenta =chas= como vector de $\mathbb{R}^{506}$ y pregunta por su relación con $\boldsymbol{1}$. Conecta con la interpretación de dummies y con $\mu_{\boldsymbol{x}}$ como proyección.
 - /Promesa abierta/: queda pendiente la /Práctica de dispersión + correlación/ (ficha §7.5), que sembrará $r=\cos\theta$ con vectores centrados (anticipo de la sesión 7).

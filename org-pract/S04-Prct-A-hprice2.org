@@ -100,7 +100,7 @@ set workdir "@directory"
 
 
 
-* Primer contacto con Gretl: el dataset =hprice2=
+* Descripción de la práctica
 
 Esta es nuestra /primera práctica/ con [[https://gretl.sourceforge.net/es.html][Gretl]]. No haremos todavía ninguna regresión: el objetivo de hoy es /tomar contacto con datos reales/ y con la interfaz del programa. Usaremos el conjunto =hprice2=, sobre precios de la vivienda en 506 zonas del área de Boston (Harrison & Rubinfeld, 1978), que será nuestro /dataset recurrente/ durante todo el curso: lo reencontraremos al estudiar formas funcionales con logaritmos (el precio admite transformación logarítmica). En la siguiente práctica trabajaremos con una versión ampliada de estos datos que incluye además una variable dicotómica o dummy (=chas=, proximidad al río Charles).
 
@@ -142,8 +142,6 @@ Visualice los valores de los precios de la vivienda:
 print -o price
     #+end_src
 
-    #+RESULTS: Mostramos los valores de los datos en columna
-
   #+latex: }
 
 #+latex: \vspace{-3pt}   
@@ -171,8 +169,6 @@ Las variables traen ya cierta información, pero podemos enriquecerla con descri
     #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
 setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
     #+end_src
-
-    #+RESULTS: Editamos atributos de price
 
   #+latex: }
 
@@ -214,14 +210,12 @@ Queremos resumir numéricamente varias variables a la vez.
 summary price rooms nox
     #+end_src
 
-    #+RESULTS: Estadisticos descriptivos
-
   #+latex: }
 
 Obtendrá, para cada variable, la /media/, la /mediana/, el /mínimo/, el /máximo/, la /desviación típica/, etc.
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-/Semilla geométrica (que germinará en la práctica de correlaciones): la/ media /de una variable no es un número cualquiera; veremos que es el resultado de/ proyectar /el vector $\boldsymbol{x}$ sobre la dirección del vector de unos $\boldsymbol{1}$. Y la/ desviación típica /medirá, la distancia de ese vector respecto de su proyección; es decir, la /norma/ del vector de desviaciones $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$. Hoy solo leemos los números; pronto les daremos interpretación geométrica./
+/Semilla geométrica (que germinará en la práctica de correlaciones): la/ media /de una variable no es un número cualquiera; veremos que es el resultado de/ proyectar /el vector $\boldsymbol{x}$ sobre la dirección del vector de unos $\boldsymbol{1}$. Y la/ desviación típica /medirá la distancia de ese vector respecto de su proyección; es decir, la /norma/ del vector en desviaciones $\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}$, donde $\mu_{\boldsymbol{x}}$ es la media de $\boldsymbol{x}$ (notación que fijaremos en la lección 4). Hoy solo leemos los números; pronto les daremos interpretación geométrica./
 #+latex: }
 
 * Actividad 4 - Histograma
@@ -234,7 +228,7 @@ Para ver la /distribución/ de una variable:
   /o bien teclee en línea de comandos/:
     #+NAME: Histograma de price
     #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
-freq price 
+freq price --plot=display
     #+end_src
   #+latex: }
 
@@ -249,7 +243,7 @@ El /diagrama de caja/ (boxplot) resume la distribución mediante la mediana, los
   /o bien teclee en línea de comandos/:
     #+NAME: Boxplot de price
     #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
-boxplot price 
+boxplot price --output=display
     #+end_src
   #+latex: }
 
@@ -272,9 +266,9 @@ Los puntos por encima del ``bigote'' superior son zonas con precios anormalmente
 - Harrison, D. and Rubinfeld, D.L. (1978), [[https://lawcat.berkeley.edu/record/1111234/files/fulltext.pdf]["Hedonic Housing Prices and the Demand for Clean Air"]], Journal of Environmental Economics and Management 5, 81-102.  
 
 
-# +LATEX: \clearpage
+#+LATEX: \clearpage
 
-*** Código completo de la práctica
+* Código completo de la práctica
 
 #+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S04-Prct-A-hprice2.inp}
 
@@ -284,9 +278,9 @@ Los puntos por encima del ``bigote'' superior son zonas con precios anormalmente
 
 * Respuestas
 
-*1. Precio medio vs. mediana.* Con datos reales de vivienda es habitual que la media sea /mayor/ que la mediana: unas pocas zonas con precios muy altos "tiran" de la media hacia arriba, mientras que la mediana —al ser un estadístico de orden, no de suma— apenas se ve afectada por esos valores extremos. Esto es justamente la asimetría positiva que se confirma en la Actividad 4 (histograma). (El valor numérico exacto lo da el =summary= de Gretl al ejecutar el guion; aquí importa el patrón, no la cifra.)
+*1. Precio medio vs. mediana.* Con datos reales de vivienda es habitual que la media sea /mayor/ que la mediana: unas pocas zonas con precios muy altos "tiran" de la media hacia arriba, mientras que la mediana —al ser un estadístico de orden, no de suma— apenas se ve afectada por esos valores extremos. Con estos datos ocurre exactamente eso: la media es $22\,512$ dólares y la mediana $21\,200$. Es la asimetría positiva que confirma el histograma de la Actividad 4.
 
-*2. Histograma de =price=: ¿simetría o asimetría?* Sugiere asimetría /positiva/ (cola larga hacia la derecha): la mayoría de las zonas tienen precios moderados, y unas pocas zonas "de lujo" alargan la cola derecha. Esto anticipa exactamente el motivo por el que, en la lección 15 (formas funcionales), se transforma =price= con logaritmos: el logaritmo "comprime" esa cola larga y acerca la distribución a la simetría, lo cual suele mejorar el ajuste lineal.
+*2. Histograma de =price=: ¿simetría o asimetría?* Muestra asimetría /positiva/ (cola larga hacia la derecha; el coeficiente de asimetría que da Gretl es $1{,}11$): la mayoría de las zonas tienen precios moderados, y unas pocas zonas "de lujo" alargan la cola derecha. Esto anticipa exactamente el motivo por el que, en la lección 15 (formas funcionales), se transforma =price= con logaritmos: el logaritmo "comprime" esa cola larga y acerca la distribución a la simetría, lo cual suele mejorar el ajuste lineal.
 
 *3. ¿En qué $\mathbb{R}^n$ vive =price=? ¿Y =rooms=?* Ambas viven en $\mathbb{R}^{506}$: el espacio lo determina el número de observaciones ($n=506$ zonas), no el "tipo" de variable. =price= y =rooms= son dos vectores distintos dentro del /mismo/ espacio $\mathbb{R}^{506}$, lo cual es precisamente lo que permite compararlos, sumarlos, proyectarlos o medir el ángulo entre ellos (lecciones 4 y 5).
 
