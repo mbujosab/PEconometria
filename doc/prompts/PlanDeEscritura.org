@@ -101,6 +101,21 @@ Este es un /manual operativo/, no un registro histórico. Informa de qué hay, q
      "\boldsymbol" inmediatamente antes de "\mathop"): cualquier coincidencia
      indica un acento sobre un vector sin el envoltorio "\boldsymbol{...}"
      exigido por §4.2.1.
+   - "\cdot\mathit" (con o sin espacios entre medias): *cero coincidencias
+     admisibles*. Desde la revisión del 2026-09-18, el producto de un escalar
+     por la variable aleatoria constante se escribe por yuxtaposición y con
+     espacio fino —$\beta_1\,\mathit1$, $\sigma^2\,\mathit1$,
+     $\boldsymbol\beta\,\mathit1$—, nunca con punto (§4.2.1). Comprobación en
+     una línea:
+     =grep -o '\\cdot *\\mathit' org-lessons/*.org org-pract/*.org=
+   - /Escalar pegado a =\mathit= SIN el espacio fino/: patrón
+     =([A-Za-z0-9})\]])\\mathit= descartando los casos en que lo que precede es
+     =\perp= o =\mid= (ahí no hay producto, sino una relación o una barra de
+     condicionamiento). Es el patrón dual del anterior: aquel caza el punto que
+     sobra, este el espacio fino que falta. Ambos deben dar cero. Precedente:
+     al suprimir el punto quedaron conviviendo en la lección 9
+     $\beta_1\mathit{1}$ (sin espacio) y $\beta_2\,\mathit1$ (con él), es decir,
+     la misma inconsistencia desplazada.
    - "=0" o "=\mathit 0" / "=1" o "=\mathit 1" en fórmulas con variables
      aleatorias: buscar, dentro del mismo bloque o sección, todas las
      apariciones de un mismo resultado que involucre la variable aleatoria
@@ -329,12 +344,24 @@ de la barra (arriba) aplicada a un vector que ya tiene su propio acento.
       convenio se está midiendo, y por eso el subíndice es la pieza
       irrenunciable; el punto, que no lleva subíndice, trabaja en contra de ese
       objetivo. Decisión tomada al revisar las lecciones 1-3.
-    - /Estado del corpus/: las lecciones 2, 3, 4 y 5 ya están reescritas
-      conforme a esta regla (el punto sobrevive solo al presentar el producto
-      escalar usual en =S02= y en el recordatorio de apertura de =S03=).
-      Quedan *8* usos del punto, repartidos entre =S08= (2), =S09= (3) y
-      =S13= (3), y ninguno en las prácticas. Revisarlos la próxima vez que se
-      toque cada fichero; no abrir ficheros solo por esto.
+    - /Estado del corpus (pasada terminada el 2026-09-18)/: *todo el corpus
+      cumple ya la regla*. El producto punto entre vectores sobrevive solo en
+      tres sitios, los tres deliberados:
+      1. =S02=, al presentar el producto escalar usual (transparencia y sus
+         apuntes): la ligazón con la literatura que la regla contempla.
+      2. =S03=, en el recordatorio de apertura de la lección 2: la misma
+         ligazón, una vez por sesión.
+      3. =S13=, transparencias de notación matricial: allí el punto *es el
+         recurso didáctico*. La transparencia declara la equivalencia en nota
+         al pie (``trabajamos con el producto euclídeo, también conocido como
+         producto punto, $\langle\_,\,\_\rangle_e=\_ \cdot \_$'') y la
+         siguiente enseña justamente a prescindir del punto y los paréntesis
+         para llegar a $\boldsymbol{v}\boldsymbol{\mathsf{X}}_{|j}$. No
+         tocarlo: quitarlo destruiría el paso pedagógico.
+      /Nota sobre un recuento anterior/: una versión previa de esta línea decía
+      ``quedan 8 usos en S08, S09 y S13''. Era incorrecto: la búsqueda exigía
+      =\boldsymbol{x}= con llaves y no admitía paréntesis como operando, de modo
+      que S08 tenía 0 y S12 se contó de menos.
   - /Producto escalar estadístico/ (anticipado ya en =S02=, con fórmula completa,
     al motivar por qué $\|\boldsymbol{1}\|_e=\sqrt n$ depende de $n$; adoptado de
     forma sistemática, con plena justificación y demostración, en =S05=):
@@ -428,7 +455,7 @@ momento en que efectivamente se trabaje con ese caso particular.
     yuxtaposición produce una hilera ilegible de verticales:
     =|\mu_{\boldsymbol{x}}|\cdot\|\boldsymbol{1}\|_s=,
     =|\lambda|\cdot\|\boldsymbol{v}\|_s=.
-  - Excepción ya fijada y no reabierta: $\boldsymbol\beta\cdot\mathit1$ en el
+  - Excepción ya fijada y no reabierta: $\boldsymbol\beta\cdot\,\mathit1$ en el
     caso vectorial de la regla de hierro de la variable aleatoria constante
     (véase más abajo), donde el punto se mantiene a propósito.
   /Motivo/: liberar al símbolo =\cdot= de todo trabajo accesorio, ahora que el
@@ -572,26 +599,39 @@ $\mu_{\boldsymbol{x}\boldsymbol{y}}$ sin el $\odot$ explícito.
 - /Regla de hierro de la variable aleatoria constante/: NUNCA se suma un escalar
   a una variable aleatoria directamente. Es una norma innegociable para mantener
   el paralelismo dimensional con $\mathbb{R}^n$. Todo escalar $c$ que deba
-  combinarse con una v.a. se escribe $c\cdot\mathit{1}$ (v.a. constante),
-  nunca "c" a secas. Ejemplo correcto: $Y=\beta_1\mathit{1}+\beta_2X+U$
+  combinarse con una v.a. se escribe $c\cdot\,\mathit{1}$ (v.a. constante),
+  nunca "c" a secas. Ejemplo correcto: $Y=\beta_1\,\mathit{1}+\beta_2X+U$
   (nunca $Y=\beta_1+\beta_2X+U$). Esta regla se mantendrá estrictamente al
   escribir el modelo poblacional de regresión múltiple en la sesión 13
-  ($Y = \beta_1\mathit{1} + \beta_2X_2 + \dots + \beta_kX_k + U$).
-  - /Caso vectorial: $\boldsymbol\beta\cdot\mathit1$ (decisión tomada, no
-    reabrir)/. Cuando la regla se aplica a un /vector/ de parámetros —p. ej.
-    al enunciar la insesgadez en forma matricial,
-    $E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\cdot\mathit1$—
-    se mantiene el punto, y $\boldsymbol\beta\cdot\mathit1$ denota el vector
-    cuyas componentes son las variables aleatorias constantes
-    $\beta_1\mathit1,\ldots,\beta_k\mathit1$. Se consideró suprimir el punto
-    para evitar la colisión visual con el producto escalar euclídeo
-    $\boldsymbol{x}\cdot\boldsymbol{y}$ (que devuelve un número), y se decidió
-    /mantenerlo/: sin él la expresión se lee peor, y la colisión es solo
-    aparente, porque aquí ninguno de los dos factores es un vector de
-    $\mathbb{R}^n$. Contrapartida obligatoria: la primera vez que aparezca en
-    una sesión, los apuntes desarrollados deben explicitar qué denota (como
-    hace S15 en "¿Y con más regresores?"); la transparencia puede usarlo sin
-    glosa. Precedente: S15 (lección 11).
+  ($Y = \beta_1\,\mathit{1} + \beta_2X_2 + \dots + \beta_kX_k + U$).
+  - */Nunca con punto: el escalar se yuxtapone a la variable aleatoria
+    constante/* (decisión revisada el 2026-09-18; sustituye a la anterior, que
+    mandaba mantener el punto en el caso vectorial). Todo producto de un
+    escalar por $\mathit1$ o $\mathit0$ se escribe por yuxtaposición, *siempre*
+    con el espacio fino =\,= entre ambos (uniforme y sin excepciones, para que
+    la regla se pueda comprobar mecánicamente):
+    $\beta_1\,\mathit1$, $\beta_2\,\mathit1$, $\sigma^2\,\mathit1$,
+    $W_i\,\mathit0$, $n\,\mathit1$ y, en el caso /vectorial/,
+    $E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\,\mathit1$.
+    - /Motivo del cambio/. El punto se había puesto para subrayar que ahí hay
+      una variable aleatoria y no un número, pero no es el punto quien
+      transmite eso: quien lo transmite es $\mathit1$, la unidad en itálica,
+      que esta misma sección obliga a definir en su primera aparición. La
+      prueba es que el caso escalar de la propia regla de hierro se enuncia
+      aquí mismo sin punto —$Y=\beta_1\,\mathit{1}+\beta_2X+U$—, de modo que la
+      misma regla venía escribiéndose de dos maneras (en la lección 9
+      convivían 11 apariciones con punto y 13 sin él). El único problema real
+      del caso vectorial era tipográfico: $\boldsymbol\beta\,\mathit1$ puede
+      leerse como $\boldsymbol\beta_1$; y eso lo resuelve el espacio fino sin
+      necesidad de un operador que colisione con el producto escalar euclídeo.
+    - /Aplicado/: 75 ocurrencias sustituidas en S12 (11), S13 (2), S15 (45),
+      S17 (6) y las prácticas S16-Prct-A (2), S16-Prct-B (1) y S16-Prct-C (8).
+    - Contrapartida obligatoria (sin cambios): la primera vez que
+      $\boldsymbol\beta\,\mathit1$ aparezca en una sesión, los apuntes
+      desarrollados deben explicitar que denota el vector cuyas componentes son
+      las variables aleatorias constantes $\beta_1\,\mathit1,\ldots,\beta_k\,\mathit1$
+      (como hace S15 en "¿Y con más regresores?"); la transparencia puede
+      usarlo sin glosa. Precedente: S15 (lección 11).
 - /Numeración conjunta de regresores/variables y coeficientes (la constante no lleva subíndice)/: en este curso, el regresor/variable aleatoria constante ($\boldsymbol{1}$ en la muestra, $\mathit{1}$ en la población) NUNCA lleva subíndice, y su coeficiente es siempre $\beta_1$/$\hat\beta_1$. El resto de regresores se numeran a partir de 2: $\boldsymbol{x}_2,\boldsymbol{x}_3,\ldots,\boldsymbol{x}_k$ (muestra) o $X_2,X_3,\ldots,X_k$ (población), de modo que el subíndice de cada regresor coincide siempre, sin desfase, con el de su coeficiente: $\hat\beta_j$ multiplica a $\boldsymbol{x}_j$ (o a $\boldsymbol{1}$ si $j=1$). En consecuencia, $k$ denota de forma uniforme en todo el curso el número TOTAL de regresores —la constante cuenta como uno más—, que coincide con el número de columnas de $\boldsymbol{\mathsf X}$ y con el número de componentes de $\boldsymbol{\mathop{\widehat{\beta}}}$. Así, la regresión simple (lecciones 6-9) es el caso $k=2$ (regresores $\boldsymbol 1,\boldsymbol x_2$; coeficientes $\hat\beta_1,\hat\beta_2$), y la regresión múltiple general (lección 10) tiene $k-1$ regresores no constantes ($\boldsymbol x_2,\ldots,\boldsymbol x_k$) más la constante. Como caso límite, $k=1$ (ningún regresor no constante, solo $\boldsymbol{1}$) recupera exactamente la proyección de las lecciones 4-5 ($\hat\beta_1=\mu_{\boldsymbol{y}}$); esta observación unificadora se hace explícita, como nota a pie de página, en el cierre de la lección 10. /Nota sobre el arranque de la indexación (aclaración de alcance, no instrucción retroactiva)/: aunque
 conceptualmente la regresión simple es el caso $k=2$ con regresor $\boldsymbol{x}_2$, las
 lecciones 6 a 9 (S08-S12: regresión simple y la sesión-puente) usan
@@ -709,7 +749,7 @@ retroactivamente a un único regresor $\boldsymbol{x}$.
     (vector de $\mathbb{R}^n$) con la variable aleatoria constante $\mathit{1}$ 
     (función sobre $\Omega$). Especial vigilancia al redactar la sesión 15 
     (insesgadez y varianza): al plantear el modelo poblacional verdadero, debe 
-    usarse estrictamente $\mathit{1}$ (p. ej. $Y_i = \beta_1\mathit{1} + \beta_2X_i + U_i$), 
+    usarse estrictamente $\mathit{1}$ (p. ej. $Y_i = \beta_1\,\mathit{1} + \beta_2X_i + U_i$), 
     reservando $\boldsymbol{1}$ exclusivamente para la matriz de datos observados $\boldsymbol{\mathsf{X}}$.
 
 */Nomenclatura del modelo poblacional (regresando, regresores, perturbación)/*:
@@ -1889,7 +1929,7 @@ el número de sesión de §7.0 prevalece.
   ecuaciones normales poblacionales generalizadas a $k$ regresores (ses.
   13); el propio concepto de insesgadez, solo enunciable una vez definido
   $E[\cdot\mid X]$ (ses. 15, prerrequisito conceptual); homocedasticidad
-  $Var[U\mid X]=\sigma^2\cdot\mathit1$ como pilar de la inferencia $t$ (ses. 17).
+  $Var[U\mid X]=\sigma^2\cdot\,\mathit1$ como pilar de la inferencia $t$ (ses. 17).
 - /Corrección posterior a la escritura/: se añade explícitamente un cuarto
   supuesto del MCRL ("regresores linealmente independientes", $\mathrm{Var}(X)\neq0$), en la transparencia "El Modelo Clásico de Regresión Lineal
   (MCRL)" y sus apuntes desarrollados. Motivo: la sesión 13 necesitaba este
@@ -1903,13 +1943,13 @@ el número de sesión de §7.0 prevalece.
   (9): la adición es un bullet dentro de una transparencia ya existente.
 - /DECISIÓN TOMADA — el MCRL de este curso tiene TRES supuestos, no cuatro ni
   cinco (no reabrir)/. Numeración canónica, idéntica en todo el curso:
-  - *1* /Linealidad/: $E[Y\mid X]=\beta_1\mathit1+\beta_2X$ (con $k$
+  - *1* /Linealidad/: $E[Y\mid X]=\beta_1\,\mathit1+\beta_2X$ (con $k$
     regresores, que $E[Y\mid X_2,\dots,X_k]$ caiga en el subespacio que
     generan). Es el ÚNICO supuesto sustantivo: todo lo que puede fallar
     está aquí.
   - *2* /Independencia lineal de los regresores/: $\mathrm{Var}(X)\neq0$ en
     el caso simple; no colinealidad exacta con $k$ regresores.
-  - *3* /Homocedasticidad/: $Var[U\mid X]=\sigma^2\cdot\mathit1$. Va el
+  - *3* /Homocedasticidad/: $Var[U\mid X]=\sigma^2\cdot\,\mathit1$. Va el
     último porque es el último en /usarse/ (no interviene en la insesgadez,
     solo en la varianza y, después, en la inferencia).
 
@@ -2008,8 +2048,8 @@ el número de sesión de §7.0 prevalece.
   ortogonales (usando el Pitágoras generalizado y la fórmula de $\hat\beta_j$
   de la transparencia anterior).
 - /Generalización del modelo poblacional/ (transparencia 11, "El modelo
-  poblacional también se generaliza"): extiende $Y=\beta_1\mathit1+\beta_2X+U$
-  (lección 9) a $Y=\beta_1\mathit1+\beta_2X_2+\cdots+\beta_kX_k+U$, con los
+  poblacional también se generaliza"): extiende $Y=\beta_1\,\mathit1+\beta_2X+U$
+  (lección 9) a $Y=\beta_1\,\mathit1+\beta_2X_2+\cdots+\beta_kX_k+U$, con los
   MISMOS tres supuestos (linealidad, independencia lineal, homocedasticidad),
   más el corolario gratuito de la exogeneidad estricta. La independencia
   lineal es el foco de esta transparencia. Ejemplo nuevo de
@@ -2363,7 +2403,7 @@ el número de sesión de §7.0 prevalece.
      histograma de $\hat\beta_2$ colapsa en un pico sobre $\beta_2$. Cierra
      el hilo de la "casualidad de diseño" que arranca en el ejemplo de
      juguete de la lección 7, pasa por S07-Prct-B y S11-Prct-A, y que la
-     propia lección 11 comenta al presentar $\hat\beta_2=\beta_2\cdot\mathit1+\sum_iW_iU_i$.
+     propia lección 11 comenta al presentar $\hat\beta_2=\beta_2\cdot\,\mathit1+\sum_iW_iU_i$.
 - /Alcance/: $k=2$ en las prácticas A y B (fiel a lo que la lección 11
   demuestra); $k=3$ con matrices SOLO en el apéndice de A, presentado
   explícitamente como verificación numérica de la aserción que la lección 11
@@ -2921,11 +2961,11 @@ donde "sembrada/cobrada" sigue bastando).
 | Cuasivarianza de los residuos $\mathrm{SRC}/(n-k)$ (y, análogamente, $\mathrm{STC}/(n-1)$) como estimador insesgado, motivada en prosa sin justificar el motivo exacto del divisor                                                                                                                           | la práctica que sigue a la lección 10 (Apéndice de $\bar R^2$, Ses. 14)                                                                                                                                                                                        | *15* (intuición geométrica del divisor $n-k$ como dimensión de $\mathcal L(\boldsymbol{\mathsf X})^\perp$; insesgadez de $\mathfrak s^2$ ENUNCIADA sin demostrar; se acuña $\mathfrak s^2$ y el tercer producto escalar $\langle\cdot,\cdot\rangle_{n-k}$)                                                                                                                                                                                          |
 | Uso de =loop= como "caja negra" (repetición masiva sin explicar mecánica), opcional                                                                                                                                                                                                                          | Ses. 7 (S07-Prct-B, Actividad 5, OPCIONAL)                                                                                                                                                                                                                     | *16* (mecánica completa del =loop=, Monte Carlo de insesgadez y varianza de $\hat\beta_2$, verificando empíricamente la lección 11); 19                                                                                                                                                                                                                                                                                                             |
 | Insesgadez y varianza de $\hat\beta_2$ NO requieren normalidad de la perturbación (la demostración de la lección 11 solo usa linealidad, exogeneidad estricta y homocedasticidad); la /forma/ de su distribución, en cambio, SÍ la requerirá | Ses. 16 (Práctica C: Monte Carlo con perturbaciones uniforme y $\chi^2$ centrada, que reproducen igual de bien ambas propiedades) | *17* (al enunciar la distribución de $\hat\beta_2$ y tener que añadir un supuesto sobre la distribución de $U$: el contraste con la sesión 16 hace ver /por qué/ ese supuesto es nuevo y no estaba antes) |
-| Supuesto de Homocedasticidad ($Var[U\mid X]=\sigma^2\cdot\mathit1$ constante)                                                                                                                                                                                                                                | Ses. 12 ("El puente")                                                                                                                                                                                                                                          | 15 (reutilización estructural: reduce $Var[\hat\beta_2\mid\boldsymbol X]$ a $\sigma^2\sum_iW_i^2$); *17* (base de contrastes $t$ e IC)                                                                                                                                                                                                                                                                                                              |
+| Supuesto de Homocedasticidad ($Var[U\mid X]=\sigma^2\cdot\,\mathit1$ constante)                                                                                                                                                                                                                                | Ses. 12 ("El puente")                                                                                                                                                                                                                                          | 15 (reutilización estructural: reduce $Var[\hat\beta_2\mid\boldsymbol X]$ a $\sigma^2\sum_iW_i^2$); *17* (base de contrastes $t$ e IC)                                                                                                                                                                                                                                                                                                              |
 | $\mathfrak{s}^2 = \mathrm{SRC}/(n-k)$ como estimador insesgado de la varianza de la perturbación $\sigma^2$ (y el motivo estadístico del divisor $n-k$)                                                                                                                                                      | Ses. 15                                                                                                                                                                                                                                                        | *17* (ingrediente esencial para el cálculo del error estándar); 18 (cálculo práctico y evaluación en Lab)                                                                                                                                                                                                                                                                                                                                           |
 | Para hacer inferencia (IC y contrastes de hipótesis) no basta con la media y la varianza de $\hat\beta_2$: se necesita conocer la /forma/ de su distribución de probabilidad                                                                                                                                 | Ses. 15                                                                                                                                                                                                                                                        | *17* (distribución de $\hat\beta$, error estándar, IC y contrastes $t$); 18 (aplicación empírica en Lab)                                                                                                                                                                                                                                                                                                                                            |
 | Distinción entre pasos algebraicos (válidos para cualquier valor, sin condicionar) y pasos probabilísticos (que sí requieren condicionar en $\boldsymbol X$ vía esperanza condicional) al construir un estimador a partir de una fórmula muestral                                                            | Ses. 15 (principio metodológico explícito, motivado por evitar la reaplicación ilegítima de $\langle\cdot,\cdot\rangle_s$ sobre "vectores de variables aleatorias")                                                                                            | Advertencia a vigilar en *17* (distribución de $\hat\beta_2$) y en cualquier sesión que generalice un resultado muestral a su versión poblacional/estimador                                                                                                                                                                                                                                                                                         |
-| Lema ``sacar de la esperanza condicionada las funciones de la variable condicionante'': $E[c(\boldsymbol X)\cdot Z\mid\boldsymbol X]=c(\boldsymbol X)\cdot E[Z\mid\boldsymbol X]$, demostrado desde la caracterización pertenencia + ortogonalidad de $E[\cdot\mid\boldsymbol X]$. En S15 no se usa una vez, sino CUATRO (insesgadez; $E[W_iU_i\mid\boldsymbol X]=\mathit0$; varianza de un sumando; covarianza cruzada): es la herramienta de trabajo de toda la sesión, no un paso auxiliar                             | Ses. 15 (herramienta, demostrada allí)                                                                                                                                                                                                                         | previsible reutilización estructural en /17/ (distribución de $\hat\beta_2$, error estándar)                                                                                                                                                                                                                                                                                                                                                        |
+| Lema ``sacar de la esperanza condicionada las funciones de la variable condicionante'': $E[c(\boldsymbol X)Z\mid\boldsymbol X]=c(\boldsymbol X)E[Z\mid\boldsymbol X]$, demostrado desde la caracterización pertenencia + ortogonalidad de $E[\cdot\mid\boldsymbol X]$. En S15 no se usa una vez, sino CUATRO (insesgadez; $E[W_iU_i\mid\boldsymbol X]=\mathit0$; varianza de un sumando; covarianza cruzada): es la herramienta de trabajo de toda la sesión, no un paso auxiliar                             | Ses. 15 (herramienta, demostrada allí)                                                                                                                                                                                                                         | previsible reutilización estructural en /17/ (distribución de $\hat\beta_2$, error estándar)                                                                                                                                                                                                                                                                                                                                                        |
 | Estadísticos por sustitución: $\overline X=\frac1n\sum_iX_i$ y $S^2=\frac1n\sum_i(X_i-\overline X)^2$ (fórmulas de las lecciones 4-5 evaluadas sobre la muestra aleatoria; variables aleatorias, no números)                                                                                                 | Ses. 15                                                                                                                                                                                                                                                        | *17* (error estándar de $\hat\beta_2$ vía $\mathfrak s^2/(nS^2)$); 18 (cálculo en Lab)                                                                                                                                                                                                                                                                                                                                                              |
 | El estadístico $t$ como razón entre los dos catetos del triángulo de la lección 8: $\vert t\vert=\sqrt{n-k}\cdot\sqrt{\mathrm{SEC}/\mathrm{SRC}}$, o equivalentemente $t^2=(n-k)R^2/(1-R^2)$ (exacto con $k=2$) | Ses. 17 (lectura geométrica del contraste $t$, demostrada allí: §9.2) | *19* (el $F$ de significación conjunta es el MISMO cociente de catetos con dos divisores, $\mathrm{SEC}/(k-1)$ frente a $\mathrm{SRC}/(n-k)$; y $F=t^2$ en regresión simple, de modo que la figura =TrianguloContraste= se reutiliza sin cambios) |
 | Colinealidad (vectores alineados, \(\cos\theta=\pm1\))                                                                                                                                                                                                                                                       | Ses. 3                                                                                                                                                                                                                                                         | 8 (mención breve del caso degenerado \(\boldsymbol{x}\) múltiplo de \(\boldsymbol{1}\)); 13 (refuerzo); *20*                                                                                                                                                                                                                                                                                                                                        |

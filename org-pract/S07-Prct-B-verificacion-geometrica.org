@@ -92,7 +92,7 @@ En las lecciones 4 y 5 demostramos una serie de identidades: el vector en desvia
 
 /Objetivo/
 
-1. Verificar, con datos generados por nosotros, las identidades geométricas de las lecciones 4-6.
+1. Verificar, con datos generados por nosotros, las identidades geométricas de las lecciones 3, 4 y 5.
 2. Comprobar que estas identidades no dependen del tamaño muestral ni de la distribución subyacente.
 3. Construir explícitamente un caso con una relación lineal conocida entre dos vectores, anticipando el modelo de regresión simple (lección 6).
 
@@ -135,7 +135,7 @@ end outfile
 
 *** Pitágoras (fórmula de cálculo de la varianza)
 
-Recuerde la identidad de la lección 5: $\mu_{\boldsymbol{y}^2}=\mu_{\boldsymbol{y}}^2+\sigma_{\boldsymbol{y}}^2$, donde $\sigma_{\boldsymbol{y}}^2$ es la varianza /poblacional/, es decir, con divisor $1/n$ (producto escalar estadístico, lección 5).
+Recuerde la identidad de la lección 5: $\mu_{\boldsymbol{y}^2}=\mu_{\boldsymbol{y}}^2+\sigma_{\boldsymbol{y}}^2$, donde $\sigma_{\boldsymbol{y}}^2$ es la varianza tal como la define la lección 5: con divisor $1/n$, el del producto escalar estadístico.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -190,7 +190,7 @@ end outfile
 
 * Actividad 2 - ¿Depende del tamaño o de la distribución?
 
-Repetimos las mismas comprobaciones (ortogonalidad y Pitágoras) con dos series de $n=50$: una con forma simétrica (normal) y otra con forma marcadamente asimétrica ($\chi^2$ con 2 grados de libertad, igual que la Serie B de la práctica C de esta misma sesión). Lo hacemos primero ``a mano'', serie a serie, para que quede completamente explícito qué se calcula en cada caso.
+Repetimos las mismas comprobaciones (ortogonalidad y Pitágoras) con dos series de $n=50$: una con forma simétrica (normal) y otra con forma marcadamente asimétrica ($\chi^2$ con 2 grados de libertad, igual que la Serie B de la práctica C de esta misma sesión). Obsérvese que con esto cambian /las dos cosas/ respecto a la Actividad 1: allí el tamaño era $n=6$, aquí es $n=50$ y en la Actividad 3 será $n=100$; entre las tres actividades se recorren, pues, tres tamaños muestrales muy distintos además de tres formas distintas. Lo hacemos primero ``a mano'', serie a serie, para que quede completamente explícito qué se calcula en cada caso.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -236,7 +236,7 @@ end outfile
 
 *** Una variante más compacta (opcional): el mismo cálculo con =loop=
 
-Repetir a mano el mismo bloque de código para cada serie es razonable con dos series, pero se volvería tedioso con veinte. Gretl ofrece el comando =loop= precisamente para automatizar este tipo de repeticiones. Al igual que ocurrirá en la Actividad 5, no pretendemos aquí explicar la mecánica de los bucles (=loop=) de Gretl —eso se hará con detalle en la sesión de propiedades de MCO (lección 9) y en futuras prácticas sobre inferencia (contrastes $t$ y $F$)—; aquí lo presentamos simplemente como una ``caja negra'' que aplica, serie a serie, exactamente el mismo cálculo que acabamos de hacer a mano. La ventaja se aprecia enseguida: con muy poco código adicional podríamos repetir esta misma comprobación sobre diez, veinte o cien series distintas, sin copiar el bloque una y otra vez.
+Repetir a mano el mismo bloque de código para cada serie es razonable con dos series, pero se volvería tedioso con veinte. Gretl ofrece el comando =loop= precisamente para automatizar este tipo de repeticiones. Al igual que ocurrirá en la Actividad 5, no pretendemos aquí explicar la mecánica de los bucles (=loop=) de Gretl —eso se hará con detalle en el laboratorio que sigue a la lección 11 (propiedades de MCO) y en futuras prácticas sobre inferencia (contrastes $t$ y $F$)—; aquí lo presentamos simplemente como una ``caja negra'' que aplica, serie a serie, exactamente el mismo cálculo que acabamos de hacer a mano. La ventaja se aprecia enseguida: con muy poco código adicional podríamos repetir esta misma comprobación sobre diez, veinte o cien series distintas, sin copiar el bloque una y otra vez.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos (variante con =loop=, mismo resultado que arriba)/:
@@ -264,7 +264,7 @@ end outfile
 
 * Actividad 3 - Dos vectores con relación conocida (puente a la regresión)
 
-Construimos ahora $\boldsymbol{x}$ y $\boldsymbol{y}$ /a propósito/, de forma que conocemos exactamente cómo se relacionan: $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$, con $\boldsymbol{u}$ un término de ruido independiente de $\boldsymbol{x}$.
+Construimos ahora $\boldsymbol{x}$ y $\boldsymbol{y}$ /a propósito/, de forma que conocemos exactamente cómo se relacionan: $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$, con $\boldsymbol{u}$ un término de ruido generado con independencia de $\boldsymbol{x}$ y, por tanto, prácticamente incorrelado con él.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -277,6 +277,10 @@ series x = uniform(0, 10)
 series u = normal(0, 2)
 series y = 2 + 3*x + u
 #+end_src
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Atención/: $\boldsymbol{u}$ es el vector con el que /hemos construido/ $\boldsymbol{y}$ —lo conocemos porque lo hemos fabricado nosotros—, no algo que pueda leerse en los datos. Cuando en la lección 6 aparezca el vector de error de un ajuste, será un objeto distinto: lo que queda al restar a $\boldsymbol{y}$ su ajuste, calculado a partir de $\boldsymbol{x}$ e $\boldsymbol{y}$ y nada más. Conviene no confundirlos; volveremos sobre ello cuando tengamos el segundo.
 #+latex: }
 
 *** Covarianza como producto escalar de vectores centrados
@@ -334,17 +338,17 @@ end outfile
 
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-/Aquí conocemos la ``verdad'': $\boldsymbol{y}$ se construyó con pendiente 3 respecto a $\boldsymbol{x}$. En la próxima sesión veremos cómo/ recuperar /esa pendiente a partir solo de los datos observados, sin conocerla de antemano (estimación MCO)./
+/Aquí conocemos la ``verdad'': $\boldsymbol{y}$ se construyó con pendiente 3 respecto a $\boldsymbol{x}$. En las dos próximas lecciones veremos cómo/ recuperar /esa pendiente a partir solo de los datos observados, sin conocerla de antemano: la lección 6 plantea el problema y la lección 7 lo resuelve (estimación MCO)./
 #+latex: }
 
 * Actividad 4 - Síntesis
 
-Estas identidades —ortogonalidad, Pitágoras, covarianza como producto escalar, correlación como coseno— son /teoremas/ de la geometría de $\mathbb{R}^n$ (lecciones 4-6), no propiedades empíricas de un dataset concreto. Por eso se cumplen igual con datos reales (práctica A) que con datos simulados de cualquier distribución y cualquier tamaño (aquí). La próxima sesión da un paso más: en lugar de /verificar/ identidades que ya conocemos, las /usaremos/ para construir un estimador (MCO).
+Estas identidades —ortogonalidad, Pitágoras, covarianza como producto escalar, correlación como coseno— son /teoremas/ de la geometría de $\mathbb{R}^n$ (lecciones 3, 4 y 5), no propiedades empíricas de un dataset concreto. Por eso se cumplen igual con datos reales (práctica A) que con datos simulados de cualquier distribución y cualquier tamaño (aquí). La próxima sesión da un paso más: en lugar de /verificar/ identidades que ya conocemos, empezaremos a /usarlas/ para construir un estimador (MCO), camino que se completa en la lección 7.
 
 * Actividad 5 (OPCIONAL, según el tiempo disponible y las preguntas) - ¿Y si repetimos esto cientos de veces?
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-/Esta actividad es opcional: es probable que no dé tiempo a cubrirla en clase. Está reservada para si surge la pregunta natural: ``¿esto se cumple siempre, o ha sido casualidad de esta muestra concreta?'' No se pretende aquí explicar la mecánica de los bucles (=loop=) de Gretl --eso se hará con detalle en la sesión de propiedades de MCO (lección 9) y en las prácticas sobre inferencia (contrastes $t$ y $F$)--; aquí se presenta como una ``caja negra'' que repite la verificación cientos de veces con una muestra nueva en cada repetición./
+/Esta actividad es opcional: es probable que no dé tiempo a cubrirla en clase. Está reservada para si surge la pregunta natural: ``¿esto se cumple siempre, o ha sido casualidad de esta muestra concreta?'' No se pretende aquí explicar la mecánica de los bucles (=loop=) de Gretl --eso se hará con detalle en el laboratorio que sigue a la lección 11 (propiedades de MCO) y en las prácticas sobre inferencia (contrastes $t$ y $F$)--; aquí se presenta como una ``caja negra'' que repite la verificación cientos de veces con una muestra nueva en cada repetición./
 #+latex: }
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
@@ -412,13 +416,13 @@ end outfile
 1. ¿Por qué el resultado de la Actividad 2 no depende de si la distribución es simétrica o muy asimétrica?
 2. En la Actividad 1, ¿por qué la identidad de Pitágoras deja de cumplirse exactamente al dividir por $(n-1)$ en vez de por $n$? ¿Es esto una contradicción con la invarianza de la correlación vista en la práctica A?
 3. En la Actividad 3, ¿qué relación hay entre el signo de la pendiente conocida (3, positiva) y el signo de la correlación obtenida?
-4. ¿Qué diferencia hay entre ``verificar'' una identidad (lo que hacemos en esta práctica) y ``demostrarla'' (lo que se hizo en las lecciones 4-6)?
+4. ¿Qué diferencia hay entre ``verificar'' una identidad (lo que hacemos en esta práctica) y ``demostrarla'' (lo que se hizo en las lecciones 3, 4 y 5)?
 5. (Si se trabajó la Actividad 5) Tras 500 repeticiones con muestras distintas cada vez, ¿por qué la desviación máxima observada sigue siendo del mismo orden de magnitud que en una sola muestra, en vez de ir creciendo con el número de repeticiones?
 
 *** Para profundizar
 
 - Véanse las lecciones 3, 4 y 5 para las demostraciones completas de lo que aquí se verifica numéricamente.
-- Cottrell, A. y Lucchetti, R. (2023). /Gretl User's Guide/. Funciones de generación aleatoria (=normal=, =uniform=), =set seed=, y estructura básica del comando =loop= (consulta puntual; su uso sistemático se explica en la lección 9).
+- Cottrell, A. y Lucchetti, R. (2023). /Gretl User's Guide/. Funciones de generación aleatoria (=normal=, =uniform=), =set seed=, y estructura básica del comando =loop= (consulta puntual; su uso sistemático se explica en el laboratorio que sigue a la lección 11).
 
 #+LATEX: \clearpage
 
@@ -436,8 +440,8 @@ end outfile
 
 2. ¿Por qué Pitágoras deja de cumplirse exactamente al dividir por $(n-1)$? ¿Contradice la invarianza de $\rho$? No hay contradicción: son cosas distintas. La correlación es un /cociente/ (covarianza entre producto de dos ``normas''), y en un cociente cualquier factor común al numerador y al denominador se cancela —por eso da igual $n$, $n-1$, o ningún divisor—. La identidad de Pitágoras, en cambio, es una /igualdad entre magnitudes absolutas/ ($\mu_{\boldsymbol{y}^2}$ por un lado, $\mu_{\boldsymbol{y}}^2+\sigma_{\boldsymbol{y}}^2$ por otro): aquí el divisor no se cancela, porque solo aparece en un término ($\sigma_{\boldsymbol{y}}^2$) y no en el otro ($\mu_{\boldsymbol{y}^2}$, que no lleva divisor de varianza). La demostración de la lección 5 reutiliza el hecho $\|\boldsymbol{1}\|_s=1$ —establecido en la lección 4—, que solo es cierto con el producto escalar estadístico (divisor $1/n$); con $(n-1)$ esa pieza deja de encajar exactamente, y la identidad solo se cumple de forma aproximada (cada vez mejor cuanto mayor sea $n$, porque $n/(n-1)\to1$).
 
-3. Relación entre el signo de la pendiente conocida (3, positiva) y el signo de la correlación obtenida. Deben coincidir: si $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$ con $\boldsymbol{u}$ independiente de $\boldsymbol{x}$, entonces $\sigma_{\boldsymbol{x}\boldsymbol{y}}=3\,\sigma_{\boldsymbol{x}}^2+\sigma_{\boldsymbol{x}\boldsymbol{u}}$, y como $\boldsymbol{u}$ es independiente de $\boldsymbol{x}$ su covarianza con $\boldsymbol{x}$ es (aproximadamente) cero; queda $\sigma_{\boldsymbol{x}\boldsymbol{y}}\approx3\,\sigma_{\boldsymbol{x}}^2>0$. Como la varianza es siempre positiva, el signo de la covarianza —y por tanto de $\rho$, que es esa covarianza reescalada por normas positivas— es el signo de la pendiente, aquí positivo.
+3. Relación entre el signo de la pendiente conocida (3, positiva) y el signo de la correlación obtenida. Deben coincidir: si $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$ con $\boldsymbol{u}$ independiente de $\boldsymbol{x}$, entonces $\sigma_{\boldsymbol{x}\boldsymbol{y}}=3\,\sigma_{\boldsymbol{x}}^2+\sigma_{\boldsymbol{x}\boldsymbol{u}}$, y como $\boldsymbol{u}$ se generó con independencia de $\boldsymbol{x}$, su covarianza con $\boldsymbol{x}$ es (aproximadamente) cero; queda $\sigma_{\boldsymbol{x}\boldsymbol{y}}\approx3\,\sigma_{\boldsymbol{x}}^2>0$. Como la varianza es siempre positiva, el signo de la covarianza —y por tanto de $\rho$, que es esa covarianza reescalada por normas positivas— es el signo de la pendiente, aquí positivo.
 
-4. Diferencia entre ``verificar'' y ``demostrar'' una identidad. Demostrar es un argumento /general/, válido para cualquier vector de $\mathbb{R}^n$, basado únicamente en las propiedades del producto escalar y la norma (lecciones 4-6): una vez hecho, sabemos que la identidad se cumple /siempre/, sin excepción. Verificar es comprobar numéricamente que la identidad se cumple en un /caso concreto/ (un vector particular, real o simulado): por sí sola, una verificación aislada no prueba nada en general —podría ser casualidad de esos datos concretos—, pero sirve para (a) ganar confianza intuitiva, (b) detectar errores de cálculo o de comprensión, y (c) mostrar que la demostración abstracta efectivamente ``funciona'' en la práctica.
+4. Diferencia entre ``verificar'' y ``demostrar'' una identidad. Demostrar es un argumento /general/, válido para cualquier vector de $\mathbb{R}^n$, basado únicamente en las propiedades del producto escalar y la norma (lecciones 3, 4 y 5): una vez hecho, sabemos que la identidad se cumple /siempre/, sin excepción. Verificar es comprobar numéricamente que la identidad se cumple en un /caso concreto/ (un vector particular, real o simulado): por sí sola, una verificación aislada no prueba nada en general —podría ser casualidad de esos datos concretos—, pero sirve para (a) ganar confianza intuitiva, (b) detectar errores de cálculo o de comprensión, y (c) mostrar que la demostración abstracta efectivamente ``funciona'' en la práctica.
 
-5. (Actividad 5, opcional) Tras 500 repeticiones, ¿por qué la desviación máxima no crece con el número de repeticiones? Porque cada repetición es una comprobación /independiente/ de la misma identidad algebraica exacta, no una acumulación de error: en cada una de las 500 muestras nuevas, la ortogonalidad y Pitágoras se cumplen (salvo error de redondeo de la máquina, siempre del mismo orden diminuto, $10^{-10}$ o menor). No hay ningún mecanismo por el que los errores de una repetición se ``sumen'' a los de la siguiente —son 500 verificaciones /numéricas/ independientes de un teorema, no un proceso acumulativo—. Esto contrasta con lo que veremos en la lección 9: allí el =loop= no verificará una identidad exacta, sino que estimará una /distribución/ (la de $\hat\beta_1$ entre todas muestras), y ahí sí el número de repeticiones importa, porque cuantas más repeticiones, mejor se aproxima esa distribución empírica a la teórica.
+5. (Actividad 5, opcional) Tras 500 repeticiones, ¿por qué la desviación máxima no crece con el número de repeticiones? Porque cada repetición es una comprobación /independiente/ de la misma identidad algebraica exacta, no una acumulación de error: en cada una de las 500 muestras nuevas, la ortogonalidad y Pitágoras se cumplen (salvo error de redondeo de la máquina, siempre del mismo orden diminuto, $10^{-10}$ o menor). No hay ningún mecanismo por el que los errores de una repetición se ``sumen'' a los de la siguiente —son 500 verificaciones /numéricas/ independientes de un teorema, no un proceso acumulativo—. Esto contrasta con lo que veremos en el laboratorio que sigue a la lección 11: allí el =loop= no verificará una identidad exacta, sino que estimará una /distribución/ (la de $\hat\beta_2$ entre todas las muestras), y ahí sí el número de repeticiones importa, porque cuantas más repeticiones, mejor se aproxima esa distribución empírica a la teórica.
