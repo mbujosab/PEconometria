@@ -193,6 +193,37 @@ end outfile
 #+include: ./S11-Prct-A-mco-simulado/stcSecSrcR2.txt example
 #+latex: }
 
+*** El ajuste preserva la media, y la recta pasa por el punto de las medias
+
+Fíjese en que, al calcular SEC, hemos escrito =sum((yhat - mu_y)^2)= usando la media de $\boldsymbol{y}$, cuando lo que pide la definición es la media de $\boldsymbol{\mathop{\widehat{y}}}$. No es un descuido: la lección 7 demostró que ambas coinciden. Comprobémoslo, junto con las otras dos consecuencias de la primera condición de ortogonalidad:
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Medias y punto de las medias
+#+begin_src gretl :eval no
+scalar mu_x    = mean(x)
+scalar mu_yhat = mean(yhat)
+
+printf "mu_y = %.10f     mu_yhat = %.10f   (el ajuste preserva la media)\n", mu_y, mu_yhat
+printf "beta1 + beta2*mu_x = %.10f          (la recta pasa por el punto de las medias)\n", $coeff(const) + $coeff(x)*mu_x
+printf "Diferencia maxima |(yhat-mu_yhat) - beta2*(x-mu_x)| = %.10f\n", max(abs((yhat-mu_yhat) - $coeff(x)*(x-mu_x)))
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-A-mco-simulado.inp :eval no :exports none :noweb yes
+outfile --quiet mediasYpuntoDeLasMedias.txt
+    <<Medias y punto de las medias>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-A-mco-simulado/mediasYpuntoDeLasMedias.txt example
+#+latex: }
+
+#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
+/Las tres líneas son la misma condición de ortogonalidad vista de tres maneras. La primera:/ $\mu_{\boldsymbol{y}}=\mu_{\boldsymbol{\mathop{\widehat{y}}}}$ /—que es lo que legitima la fórmula de SEC que acabamos de usar—. La segunda: evaluada en $x=\mu_{\boldsymbol{x}}$, la recta ajustada devuelve exactamente $\mu_{\boldsymbol{y}}$. La tercera es la identidad que la lección 7 pidió guardar para la lección 8:/ $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}=\hat\beta_2(\boldsymbol{x}-\boldsymbol{\mathop{\overline{x}}})$ /—no dos vectores de la misma longitud, sino literalmente el mismo vector, componente a componente—./
+#+latex: }
+
 * Actividad 4 - La pendiente como correlación reescalada
 
 Recordando la lección 7 ($\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$) y la lección 8 ($R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ en regresión simple):
@@ -202,11 +233,11 @@ Recordando la lección 7 ($\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sig
 #+NAME: Pendiente como correlacion
 #+begin_src gretl :eval no
 scalar rho_xy = corr(x,y)
-scalar beta1_formula = rho_xy * sd(y)/sd(x)
+scalar beta2_formula = rho_xy * sd(y)/sd(x)
 
 printf "rho_xy                       = %.6f\n", rho_xy
-printf "beta1 (formula rho*sy/sx)    = %.6f\n", beta1_formula
-printf "beta1 ($coeff(x) de Gretl)   = %.6f\n", $coeff(x)
+printf "beta2 (formula rho*sy/sx)    = %.6f\n", beta2_formula
+printf "beta2 ($coeff(x) de Gretl)   = %.6f\n", $coeff(x)
 printf "rho_xy^2                     = %.6f\n", rho_xy^2
 printf "R2 ($rsq de Gretl)           = %.6f\n", $rsq
 #+end_src
@@ -248,8 +279,8 @@ series ehat2 = $uhat
 #+begin_src gretl :eval no
 printf "Suma de residuos    sum(ehat2)     = %.10f    (debe ser 0, exactamente)\n", sum(ehat2)
 printf "Suma de x2*residuos sum(x2*ehat2)  = %.10f    (debe ser 0, exactamente)\n", sum(x2*ehat2)
-printf "beta1 estimado                     = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
-printf "beta0 estimado                     = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
+printf "beta2 estimado (pendiente)         = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
+printf "beta1 estimado (constante)         = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
 #+end_src
 #+latex: }
 
