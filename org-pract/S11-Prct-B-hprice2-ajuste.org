@@ -97,6 +97,7 @@ Retomamos =hprice2= (ya usado en las prácticas de correlación) y sus tres vari
 3. Calcular $R^2$ ``a mano'' (STC/SEC/SRC) y compararlo con el que reporta Gretl y con $\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
 4. Comparar la bondad de ajuste de los dos modelos y relacionarla con el ángulo $\theta$ de la lección 8.
 5. Visualizar ambos ajustes mediante diagramas de dispersión con la recta ajustada.
+6. Intercambiar los papeles de las dos variables y comprobar que el $R^2$ no cambia —la advertencia de la lección 8—, aunque la recta sí.
 
 * Actividad 1 - Reapertura de hprice2 y etiquetas
 
@@ -116,12 +117,26 @@ setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols price rooms
-#+begin_src gretl :tangle ./guiones/S11-Prct-B-hprice2-ajuste.inp :eval no
+#+begin_src gretl :eval no
 ols price const rooms
 #+end_src
 #+latex: }
 
 - GUI equivalente: //~Modelo -> Mínimos cuadrados ordinarios~//, con =price= como dependiente y =const=, =rooms= como regresores.
+
+#+begin_src gretl :tangle guiones/S11-Prct-B-hprice2-ajuste.inp :eval no :exports none :noweb yes
+outfile --quiet olsPriceRooms.txt
+    <<Ols price rooms>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-B-hprice2-ajuste/olsPriceRooms.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La pendiente es $9\,119{,}55$: en el ajuste, a una habitación más le corresponden unos $9\,120$ dólares más de precio mediano. La constante, $-34\,796$, no tiene lectura por sí sola (sería el precio de una vivienda con cero habitaciones, fuera del rango de los datos). Y $R^2=0{,}484$: el ajuste explica algo menos de la mitad de la variación de =price=. Como en la práctica anterior, ignore de momento las columnas =Desv. típica=, =Estadístico t= y =valor p=.
 
 /Interpretación (con cuidado)/: el coeficiente de =rooms= se lee como ``por cada habitación adicional, el precio mediano cambia, en promedio, en esa cantidad de dólares, /manteniendo el resto igual/ (aquí, sin ningún otro regresor)''. Evite decir que ``una habitación adicional /causa/'' ese cambio: como se discutió en la lección 8, la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ es puramente algebraica y no certifica, por sí sola, ninguna relación causal ni su dirección.
 
@@ -130,12 +145,26 @@ ols price const rooms
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols price nox
-#+begin_src gretl :tangle ./guiones/S11-Prct-B-hprice2-ajuste.inp :eval no
+#+begin_src gretl :eval no
 ols price const nox
 #+end_src
 #+latex: }
 
 /Antes de mirar el resultado/: ¿qué signo espera para el coeficiente de =nox=? Contraste su expectativa con lo obtenido.
+
+#+begin_src gretl :tangle guiones/S11-Prct-B-hprice2-ajuste.inp :eval no :exports none :noweb yes
+outfile --quiet olsPriceNox.txt
+    <<Ols price nox>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-B-hprice2-ajuste/olsPriceNox.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La pendiente es negativa, $-3\,386{,}85$: a una unidad más de contaminación le corresponden unos $3\,400$ dólares menos de precio mediano, como cabía esperar. El $R^2$, $0{,}182$, es bastante menor que el de =rooms=: la contaminación, por sí sola, explica menos de una quinta parte de la variación de los precios. Compare ambos $R^2$ con las correlaciones de la práctica de correlación: $0{,}6958^2=0{,}484$ y $(-0{,}4260)^2=0{,}182$.
 
 * Actividad 4 - Verificación de las dos condiciones de ortogonalidad
 
@@ -171,7 +200,7 @@ end outfile
 #+latex: }
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-(/Los valores no serán exactamente cero por errores de redondeo en coma flotante, pero deben ser insignificantes./)
+(/Los valores no serán cero por errores de redondeo en coma flotante, pero deben ser insignificantes./)
 #+latex: }
 
 * Actividad 5 - Bondad de ajuste: STC, SEC, SRC y $R^2$ en ambos modelos
@@ -280,7 +309,44 @@ gnuplot price nox   --output="price_nox_fit.png"
 
 Compare cómo de ``ceñidos'' están los puntos que rodean cada recta con el $R^2$ obtenido en la Actividad 5. Recuerde (lección 8) que $R^2=\cos^2\theta$, con $\theta$ el ángulo entre los vectores en desviaciones de los datos y del ajuste: cuanto más ceñida la nube a la recta, más pequeño ese ángulo.
 
-* Actividad 7 - Síntesis comparativa
+* Actividad 7 - Intercambiar los papeles: el $R^2$ no distingue causa de efecto
+
+La lección 8 advirtió que, si regresamos la superficie sobre el precio en lugar del precio sobre la superficie, el $R^2$ /no cambia/. Comprobémoslo con =price= y =rooms=: estimamos las dos regresiones, la habitual y la ``del revés''.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Intercambiar papeles
+#+begin_src gretl :eval no
+ols price const rooms --quiet
+scalar b_pr  = $coeff(rooms)
+scalar r2_pr = $rsq
+
+ols rooms const price --quiet             # los papeles, intercambiados
+scalar b_rp  = $coeff(price)
+scalar r2_rp = $rsq
+
+printf "R2 de price~rooms = %.6f      R2 de rooms~price = %.6f\n", r2_pr, r2_rp
+printf "pendiente de price~rooms = %.4f     pendiente de rooms~price = %.8f\n", b_pr, b_rp
+printf "inversa de la primera pendiente = %.8f   (no es la segunda)\n", 1/b_pr
+printf "producto de las dos pendientes  = %.6f   (= R2 = rho^2)\n", b_pr*b_rp
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-B-hprice2-ajuste.inp :eval no :exports none :noweb yes
+outfile --quiet intercambiarPapeles.txt
+    <<Intercambiar papeles>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-B-hprice2-ajuste/intercambiarPapeles.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Los dos $R^2$ son el mismo número: en regresión simple $R^2=\rho_{\boldsymbol x\boldsymbol y}^2$, y la correlación no sabe cuál variable hace de $x$ y cuál de $y$. El ajuste, en cambio, sí cambia: la pendiente de =rooms~price= no es la inversa de la de =price~rooms= (las dos rectas son distintas; solo coinciden si $\rho=\pm1$). El producto de las dos pendientes es $\frac{\sigma_{\boldsymbol x\boldsymbol y}}{\sigma_{\boldsymbol x}^2}\cdot\frac{\sigma_{\boldsymbol x\boldsymbol y}}{\sigma_{\boldsymbol y}^2}=\rho_{\boldsymbol x\boldsymbol y}^2$, que es otra vez el $R^2$. La moraleja es la de la lección 8: el $R^2$ mide cuánto se alinean dos vectores en desviaciones, y esa alineación es simétrica; de ella no se sigue ninguna dirección causal.
+
+* Actividad 8 - Síntesis comparativa
 
 | Modelo      | $\hat\beta_1$ | $\hat\beta_2$ | $R^2$ |
 |-------------+---------------+---------------+-------|
@@ -294,8 +360,9 @@ Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta m
 1. ¿Por qué no podemos afirmar, a partir del modelo price~rooms, que ``añadir una habitación causa'' un aumento de precio?
 2. Compare los dos modelos: ¿cuál tiene mayor $R^2$? ¿Qué relación tiene esto con los valores de correlación ya calculados en la práctica de correlación?
 3. En los diagramas de dispersión con la recta ajustada, ¿qué modelo muestra una nube de puntos más ``pegada'' a la recta? ¿Cómo se traduce esto en términos del ángulo $\theta$ de la lección 8?
-4. ¿Por qué la suma de los residuos no es exactamente cero en la salida de Gretl, sino un número muy pequeño (del orden de $10^{-8}$ o menor)?
+4. ¿Por qué la suma de los residuos no es cero en la salida de Gretl, sino un número muy pequeño (del orden de $10^{-8}$ o menor)?
 5. Si estimáramos =price= en función de =rooms= y =nox= /simultáneamente/ (dos regresores a la vez), ¿por qué NO cabría esperar que el $R^2$ de ese modelo fuera simplemente la suma de los $R^2$ de los dos modelos simples de hoy?
+6. En la Actividad 7 las dos regresiones tienen el mismo $R^2$ pero distinta recta. ¿Por qué las dos pendientes no son inversas una de otra? ¿Cuándo lo serían?
 
 /Para profundizar/:
 
@@ -314,12 +381,14 @@ Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta m
 
 * Respuestas
 
-1. ¿Por qué no podemos afirmar causalidad a partir de price~rooms? Porque la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y el propio ajuste MCO son consecuencias /puramente geométricas/ de la ortogonalidad del residuo: se cumplen exactamente igual para cualquier par de vectores $\boldsymbol{x},\boldsymbol{y}$, tengan o no una relación causal real entre sí (recuerde, de la lección 8, el ejemplo del queso y las muertes por enredarse en sábanas). Afirmar causalidad exige una teoría económica previa que justifique la dirección de la relación, algo que la sola regresión no proporciona.
+1. ¿Por qué no podemos afirmar causalidad a partir de price~rooms? Porque la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y el propio ajuste MCO son consecuencias /puramente geométricas/ de la ortogonalidad del residuo: se cumplen igual para cualquier par de vectores $\boldsymbol{x},\boldsymbol{y}$, tengan o no una relación causal real entre sí (recuerde, de la lección 8, el ejemplo del queso y las muertes por enredarse en sábanas). Afirmar causalidad exige una teoría económica previa que justifique la dirección de la relación, algo que la sola regresión no proporciona.
 
-2. Comparación de $R^2$ entre los dos modelos. El modelo con mayor $|\rho_{\boldsymbol{x}\boldsymbol{y}}|$ (en valor absoluto) entre la variable y el regresor tendrá, necesariamente, mayor $R^2$, porque en regresión simple $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ exactamente (lección 8). Por tanto, el orden de los $R^2$ de hoy debe coincidir exactamente con el orden, en valor absoluto, de las correlaciones $\rho_{\text{price,rooms}}$ y $\rho_{\text{price,nox}}$ ya calculadas en la práctica de correlación.
+2. Comparación de $R^2$ entre los dos modelos. El modelo con mayor $|\rho_{\boldsymbol{x}\boldsymbol{y}}|$ (en valor absoluto) entre la variable y el regresor tendrá, necesariamente, mayor $R^2$, porque en regresión simple $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ exactamente (lección 8). Por tanto, el orden de los $R^2$ de hoy debe coincidir con el orden, en valor absoluto, de las correlaciones $\rho_{\text{price,rooms}}$ y $\rho_{\text{price,nox}}$ ya calculadas en la práctica de correlación.
 
 3. Nube más pegada a la recta y ángulo $\theta$. El modelo con mayor $R^2$ es el que tiene la nube de puntos más ceñida a la recta ajustada, porque $R^2=\cos^2\theta$: cuanto menor el ángulo $\theta$ entre los vectores en desviaciones de los datos y del ajuste, más cerca de 1 está $\cos^2\theta$, y más ``alineados'' (en el sentido geométrico de la lección 8) están esos dos vectores —lo que visualmente se traduce en una nube más estrecha alrededor de la recta.
 
-4. Suma de residuos no exactamente cero. Por errores de redondeo en aritmética de coma flotante: los ordenadores no representan los números reales con precisión infinita, así que operaciones que algebraicamente deberían dar cero (como $\sum\hat e_i$) arrastran un pequeñísimo error de cálculo, típicamente del orden de $10^{-8}$ o menor. Esto no contradice la identidad teórica $\sum\hat e_i=0$: es exactamente la misma situación que ya se comprobó en la práctica de verificación geométrica (con datos simulados).
+4. Suma de residuos no cero. Por errores de redondeo en aritmética de coma flotante: los ordenadores no representan los números reales con precisión infinita, así que operaciones que algebraicamente deberían dar cero (como $\sum\hat e_i$) arrastran un pequeñísimo error de cálculo, típicamente del orden de $10^{-8}$ o menor. Esto no contradice la identidad teórica $\sum\hat e_i=0$: es la misma situación que ya se comprobó en la práctica de verificación geométrica (con datos simulados).
 
 5. $R^2$ de un modelo con dos regresores no es la suma de los $R^2$ simples. Porque, como se explicó al cierre de la lección 8, cuando hay más de un regresor no constante el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\boldsymbol{x}_3)$ centrado tiene dimensión 2, no 1: los vectores en desviaciones de =rooms= y =nox= ya no están alineados en la misma recta, así que el ajuste conjunto $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ ya no es, en general, la suma de las contribuciones ``aisladas'' de cada regresor. Además, =rooms= y =nox= pueden estar correlacionadas entre sí, de modo que parte de lo que ``explica'' cada una por separado se solapa. Este fenómeno se estudiará con detalle en la regresión múltiple, más adelante en el curso.
+
+6. /Dos rectas, un $R^2$./ La pendiente de =price~rooms= es $\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol x}^2$ y la de =rooms~price= es $\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol y}^2$: cada una proyecta un vector distinto sobre un plano distinto, y no hay razón para que una sea la inversa de la otra. Su producto vale $\rho_{\boldsymbol x\boldsymbol y}^2$, así que solo serían inversas ($b_{pr}\,b_{rp}=1$) si $\rho=\pm1$, es decir, si los puntos estuvieran exactamente sobre una recta. Como el $R^2$ es $\rho^2$, no cambia al intercambiar los papeles; la recta sí, porque minimiza distancias /verticales/, y ``vertical'' depende de qué variable pongamos en el eje de ordenadas.

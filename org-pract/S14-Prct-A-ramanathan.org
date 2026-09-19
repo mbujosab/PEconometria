@@ -97,6 +97,7 @@ Empezamos el bloque de regresión múltiple (lección 10) con el conjunto de dat
 3. Ampliar el modelo con un tercer regresor y observar cómo cambia (o no) la lectura de los anteriores.
 4. Observar, sin todavía formalizarlo, que el $R^2$ no baja al añadir regresores (se formalizará, con el $R^2$ ajustado, en la práctica siguiente).
 5. Practicar la lectura de una salida de regresión múltiple sin dejarse arrastrar a conclusiones causales injustificadas.
+6. Ver cuánto se mueve el ajuste al quitar una sola vivienda, y que no todas pesan igual: el primer indicio de que una estimación tiene una /dispersión/, que la lección 11 cuantificará.
 
 * Actividad 1 - Carga y exploración de los datos
 
@@ -155,7 +156,7 @@ Un conjunto de datos tan pequeño no es representativo de ningún mercado real, 
 Antes de añadir regresores, recordamos el punto de partida: la regresión simple ya vista en la lección 6.
 
 #+latex: {\vspace{0pt} \footnotesize \color{gray!70!black}
-/o bien teclee en linea de comandos/:
+/en línea de comandos/:
 #+NAME: Ols price sqft simple
 #+begin_src gretl :eval no 
 ols price const sqft
@@ -216,20 +217,42 @@ Estimamos ahora =price= en función únicamente de =bedrms=, y a continuación e
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols bedrms solo y acompanado
-#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+#+begin_src gretl :eval no
 ols price const bedrms
 ols price const sqft bedrms
 #+end_src
 #+latex: }
 
-/Lo que debe observar/: compare el coeficiente de =bedrms= en ambas regresiones. En la lección 10 vimos que cada $\hat\beta_j$, en un modelo con varios regresores, mide un /efecto parcial/: ``el efecto promedio en =price= ante un dormitorio más, /manteniendo fija la superficie/''. Eso es una pregunta distinta de ``el efecto promedio en =price= ante un dormitorio más, sin ninguna información adicional'' (lo que mide el coeficiente del modelo simple). No tienen por qué coincidir, ni siquiera en signo: dos viviendas con la misma superficie pero distinto número de dormitorios reparten ese mismo espacio en habitaciones más pequeñas o más grandes, lo cual puede pesar en el precio de forma diferente a como pesa ``más dormitorios sin más información sobre otras características de la vivienda'' (pues muchos dormitorios solo caben en viviendas grandes, por lo que posiblemente en la muestra habrá una correlación positiva entre el número de habitaciones y superficie... verifíquelo).
+#+begin_src gretl :tangle guiones/S14-Prct-A-ramanathan.inp :eval no :exports none :noweb yes
+outfile --quiet olsBedrms.txt
+    <<Ols bedrms solo y acompanado>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-A-ramanathan/olsBedrms.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Compare el coeficiente de =bedrms= en ambas regresiones: solo, vale $+56{,}2$ (mil dólares por dormitorio) con un $R^2$ de apenas $0{,}10$; junto a =sqft=, pasa a $-23{,}9$, y el $R^2$ sube a $0{,}83$, casi el mismo que tenía =sqft= sola. En la lección 10 vimos que cada $\hat\beta_j$, en un modelo con varios regresores, mide un /efecto parcial/: ``el efecto promedio en =price= ante un dormitorio más, /manteniendo fija la superficie/''. Eso es una pregunta distinta de ``el efecto promedio en =price= ante un dormitorio más, sin ninguna información adicional'' (lo que mide el coeficiente del modelo simple). No tienen por qué coincidir, ni siquiera en signo: dos viviendas con la misma superficie pero distinto número de dormitorios reparten ese mismo espacio en habitaciones más pequeñas o más grandes, lo cual puede pesar en el precio de forma diferente a como pesa ``más dormitorios sin más información sobre otras características de la vivienda'' (pues muchos dormitorios solo caben en viviendas grandes, por lo que posiblemente en la muestra habrá una correlación positiva entre el número de habitaciones y superficie... verifíquelo).
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Chequeo de la correlación entre sqft y bedrms
-#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+#+begin_src gretl :eval no
 corr sqft bedrms
 #+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-A-ramanathan.inp :eval no :exports none :noweb yes
+outfile --quiet corrSqftBedrms.txt
+    <<Chequeo de la correlación entre sqft y bedrms>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-A-ramanathan/corrSqftBedrms.txt example
 #+latex: }
 
 
@@ -240,26 +263,46 @@ Ampliamos el modelo con otro regresor adicional: el número de cuartos de baño.
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols con baths
-#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+#+begin_src gretl :eval no
 ols price const sqft bedrms baths
 #+end_src
 #+latex: }
 
-Compare de nuevo el coeficiente de =bedrms= (y ahora también el de =sqft=) con los obtenidos en la Actividad 3. ¿Cambian mucho al incorporar =baths=? ¿Qué signo tiene el coeficiente de =baths=, y le parece razonable? Si no le parece razonable ¿Cuál podría ser el motivo por el que el resultado obtenido es distinto de lo que usted esperaba?
+#+begin_src gretl :tangle guiones/S14-Prct-A-ramanathan.inp :eval no :exports none :noweb yes
+outfile --quiet olsBaths.txt
+    <<Ols con baths>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-A-ramanathan/olsBaths.txt example
+#+latex: }
+
+Compare de nuevo el coeficiente de =bedrms= (y ahora también el de =sqft=) con los obtenidos en la Actividad 3: apenas se mueven ($-23{,}9\to-21{,}6$ y $0{,}148\to0{,}155$). ¿Qué signo tiene el coeficiente de =baths=, $-12{,}2$, y le parece razonable? Si no le parece razonable ¿Cuál podría ser el motivo por el que el resultado obtenido es distinto de lo que usted esperaba?
 
 Observe la matriz de correlaciones entre =sqft=, =bedrms= y =baths=:
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Chequeo de la correlación entre baths y bedrms
-#+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+#+begin_src gretl :eval no
 corr sqft bedrms baths
 #+end_src
 #+latex: }
 
-A la luz de los resultados, ¿Qué signo esperaría ver para =baths= en la regresión lineal simple =ols price const baths=? *Verifique su intuición estimando el modelo*. 
+#+begin_src gretl :tangle guiones/S14-Prct-A-ramanathan.inp :eval no :exports none :noweb yes
+outfile --quiet corrTres.txt
+    <<Chequeo de la correlación entre baths y bedrms>>
+end outfile
+#+end_src
 
-¿Cree que el valor estimado para =baths= debe a la valoración de los baños en el mercado inmobiliario? ¿O a que realmente se está midiendo inadvertidamente otra cosa?
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-A-ramanathan/corrTres.txt example
+#+latex: }
+
+A la luz de los resultados, ¿qué signo esperaría ver para =baths= en la regresión lineal simple =ols price const baths=? *Verifique su intuición estimando el modelo*. 
+
+¿Cree que el valor estimado para =baths= se debe a la valoración de los baños en el mercado inmobiliario? ¿O a que realmente se está midiendo inadvertidamente otra cosa?
 
 
 * Actividad 5 - Síntesis: cuatro modelos, una tabla
@@ -307,7 +350,7 @@ Observe el $R^2$ a medida que se añaden regresores: nunca /baja/. Esto no es ca
 
 * Actividad 6 - ¿Cuánto depende el ajuste de las viviendas que nos han tocado?
 
-Hasta aquí hemos cambiado el /modelo/ y hemos visto moverse los coeficientes. Ahora vamos a hacer justo lo contrario: dejar el modelo quieto y cambiar los /datos/. Concretamente, vamos a quitar una vivienda de las catorce y reestimar exactamente la misma regresión.
+Hasta aquí hemos cambiado el /modelo/ y hemos visto moverse los coeficientes. Ahora vamos a hacer justo lo contrario: dejar el modelo quieto y cambiar los /datos/. Concretamente, vamos a quitar una vivienda de las catorce y reestimar la misma regresión.
 
 La pregunta es sencilla y conviene planteársela antes de ejecutar nada: /si una sola de estas catorce casas hubiera sido distinta —o sencillamente no estuviera en nuestra lista—, ¿cambiaría mucho la recta que hemos ajustado?/
 
@@ -387,17 +430,17 @@ Las tres viviendas que hemos ido quitando se comportan de tres maneras muy disti
 - /La obs. 14/ es la más grande (3000 pies cuadrados, el máximo): también está en el borde. Pero su residuo es $-53{,}60$, y quitarla mueve la pendiente de $0{,}1388$ a $0{,}1593$ y la constante de $52{,}351$ a $18{,}962$.
 - /La obs. 12/ (2600 pies cuadrados) /no/ está en ningún extremo. Y aun así, con un residuo de $+91{,}90$, quitarla mueve la pendiente a $0{,}1209$ y la constante a $78{,}380$.
 
-De donde se siguen dos conclusiones que conviene no confundir:
+De donde se siguen tres conclusiones que conviene no confundir:
 
 1. /No hemos cambiado el modelo/. La especificación es idéntica en las cuatro filas; lo único que cambia es qué viviendas entran en el cálculo. Todo el movimiento que vea procede exclusivamente de la muestra.
 2. /No todas las observaciones pesan igual, y la posición no lo explica sola/. Estar en un extremo del rango de superficies no basta para tirar de la recta (la obs. 1 está en el extremo y no tira de nada), y no estar en un extremo no protege (la obs. 12 está en el interior y es de las que más mueven el ajuste). Lo que hace falta son /las dos cosas a la vez/: estar lejos del centro en el eje del regresor, /y además/ quedar lejos de la recta. Volveremos sobre esta idea —con nombre propio, /apalancamiento/ e /influencia/, y con una medida concreta— en el laboratorio integrador que cierra el curso.
 3. /Con $n=14$ esto es muy visible; con $n=506$ lo sería mucho menos/. La fragilidad que acaba de observar no es un defecto de MCO: es lo que ocurre cuando se dispone de pocos datos.
 
-Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que el ajuste /se mueve/ cuando cambian los datos, pero no tenemos todavía ninguna forma de decir /cuánto/ se mueve, ni de anticiparlo antes de mirar. Para eso hace falta hablar de la variabilidad del estimador, y eso exige un aparato que aún no tenemos. Es exactamente lo que hará la lección 11: dar una fórmula —no una impresión— para la dispersión de $\hat\beta_2$, y mostrar que en ella aparecen, precisamente, el número de observaciones y cuán dispersas están las superficies de las viviendas.
+Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que el ajuste /se mueve/ cuando cambian los datos, pero no tenemos todavía ninguna forma de decir /cuánto/ se mueve, ni de anticiparlo antes de mirar. Para eso hace falta hablar de la variabilidad del estimador, y eso exige un aparato que aún no tenemos. Es lo que hará la lección 11: dar una fórmula —no una impresión— para la dispersión de $\hat\beta_2$, y mostrar que en ella aparecen el número de observaciones y cuán dispersas están las superficies de las viviendas.
 
 * Preguntas de interpretación para la clase
 
-1. ¿Por qué el coeficiente de =bedrms= puede cambiar de signo (o de magnitud) al pasar del modelo simple al modelo con =sqft= incluido, si en ambos casos usamos exactamente los mismos 14 datos?
+1. ¿Por qué el coeficiente de =bedrms= puede cambiar de signo (o de magnitud) al pasar del modelo simple al modelo con =sqft= incluido, si en ambos casos usamos los mismos 14 datos?
 2. ¿Tiene sentido interpretar el coeficiente de =sqft= en el modelo =price~sqft+bedrms+baths= como ``el efecto de un pie cuadrado más, manteniendo todo lo demás igual''? ¿Y como ``lo que causa'' ese cambio de precio?
 3. Con solo 14 observaciones, ¿qué cautela adicional debería tener a la hora de generalizar cualquier conclusión de esta práctica a ``el mercado de la vivienda'' en general?
 4. ¿Por qué el $R^2$ no puede bajar nunca al añadir un regresor, sea cual sea ese regresor (incluso uno completamente irrelevante)?
@@ -429,7 +472,7 @@ Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que
 
 4. ¿Por qué el $R^2$ nunca baja al añadir un regresor? Porque MCO elige siempre los coeficientes que minimizan la suma de residuos al cuadrado (SRC) dentro del subespacio disponible; al añadir un regresor, ese subespacio se amplía (contiene, como caso particular, la solución que ya teníamos antes de incluir el regresor nuevo), así que el mínimo de SRC en el subespacio ampliado nunca puede ser más grande que el mínimo anterior. Como $R^2=1-\mathrm{SRC}/\mathrm{STC}$ y STC no cambia, $R^2$ no puede bajar. Esto es válido incluso si el regresor añadido no tiene ninguna relación real con la variable dependiente —una propiedad puramente mecánica, no una señal de que el nuevo regresor "importe". Si hubiéramos añadido como regresor adicional el número de hermanos del arquitecto que diseñó cada una de las casas, el $R^2$ probablemente aumentaría; lo que es seguro es que no disminuiría.
 
-5. Explicar la diferencia sin jerga técnica. Una posible formulación: ``si comparo, sin más, viviendas con distinto número de habitaciones, estoy comparando peras con manzanas, porque esas viviendas probablemente también difieren en su tamaño; en cambio, si comparo únicamente viviendas del mismo tamaño pero con distinto número de habitaciones, estoy aislando el efecto de repartir ese mismo espacio de una forma u otra''. Esa segunda comparación es, precisamente, lo que mide el coeficiente en el modelo con varios regresores a la vez.
+5. Explicar la diferencia sin jerga técnica. Una posible formulación: ``si comparo, sin más, viviendas con distinto número de habitaciones, estoy comparando peras con manzanas, porque esas viviendas probablemente también difieren en su tamaño; en cambio, si comparo únicamente viviendas del mismo tamaño pero con distinto número de habitaciones, estoy aislando el efecto de repartir ese mismo espacio de una forma u otra''. Esa segunda comparación es lo que mide el coeficiente en el modelo con varios regresores a la vez.
    
 #+LATEX: \clearpage
 

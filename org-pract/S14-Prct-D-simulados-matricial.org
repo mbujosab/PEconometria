@@ -97,6 +97,7 @@ Cerramos la sesión de regresión múltiple volviendo, por primera vez con Gretl
 3. Verificar $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}$, en sus dos lecturas (matriz por vector y vector por matriz).
 4. Construir un caso de /familia ortogonal/ (regresores mutuamente ortogonales) y comprobar que cada $\hat\beta_j$ se puede calcular de forma aislada, sin resolver ningún sistema.
 5. Verificar, en ese mismo caso, que $R^2=\rho_{\boldsymbol{z}_2\boldsymbol{y}}^2+\rho_{\boldsymbol{z}_3\boldsymbol{y}}^2$.
+6. Ver qué hace Gretl ante la situación contraria, la /colinealidad exacta/: dos regresores que son la misma variable en dos unidades.
 
 * Actividad 1 - Datos simulados: un caso general, no ortogonal
 
@@ -193,7 +194,7 @@ end outfile
 #+latex: }
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-/Recuerde la advertencia de la lección 10: esta fórmula con inversa EXISTE, y es exactamente lo que Gretl calcula ``por dentro'' al ejecutar/ =ols=; /pero el camino conceptual del curso nunca ha sido, ni será, invertir una matriz: es siempre la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\), que verificamos en la siguiente actividad./
+/Recuerde la advertencia de la lección 10: esta fórmula con inversa EXISTE, y es lo que Gretl calcula ``por dentro'' al ejecutar/ =ols=; /pero el camino conceptual del curso nunca ha sido, ni será, invertir una matriz: es siempre la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\), que verificamos en la siguiente actividad./
 #+latex: }
 
 * Actividad 3 - Las dos lecturas de la ortogonalidad: $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}$ y $\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}$
@@ -311,7 +312,7 @@ end outfile
 
 La salida tiene dos bloques, y hay que leerlos como las dos mitades de un mismo experimento. Recuerde que /lo único/ que los separa es la correlación entre los regresores: mismo $n$, mismos $\beta$, misma perturbación.
 
-/En el bloque de abajo (ortogonal)/, las dos columnas coinciden en las tres filas. Cada coeficiente se puede calcular aislado, ignorando por completo al otro regresor, y sale el mismo número que da el modelo conjunto. Y $R^2$ coincide con $\rho^2_{\boldsymbol{z}_2\boldsymbol{y}}+\rho^2_{\boldsymbol{z}_3\boldsymbol{y}}$. Es exactamente lo que predice la lección 10.
+/En el bloque de abajo (ortogonal)/, las dos columnas coinciden en las tres filas. Cada coeficiente se puede calcular aislado, ignorando por completo al otro regresor, y sale el mismo número que da el modelo conjunto. Y $R^2$ coincide con $\rho^2_{\boldsymbol{z}_2\boldsymbol{y}}+\rho^2_{\boldsymbol{z}_3\boldsymbol{y}}$. Es lo que predice la lección 10.
 
 /En el bloque de arriba (general)/, ninguna de las tres filas coincide, y conviene mirarlas una a una:
 
@@ -321,7 +322,41 @@ La salida tiene dos bloques, y hay que leerlos como las dos mitades de un mismo 
 
 Este segundo bloque es el que da sentido al primero. La transparencia ``Familia ortogonal'' no describe una simplificación cómoda que uno pueda usar siempre con un poco de cuidado: describe un caso /excepcional/, y fuera de él la fórmula no se degrada suavemente, sino que puede llegar a invertir una conclusión económica. Que en la Actividad 1 los regresores estuvieran correlacionados sólo a $0{,}50$ —una correlación nada extrema para datos reales— basta para producir un cambio de signo.
 
-* Actividad 6 - Síntesis
+* Actividad 6 - El caso contrario: colinealidad exacta
+
+La lección 10 puso un ejemplo de regresores /linealmente dependientes/: la temperatura de un mismo día en grados Celsius y en Fahrenheit, $F=32+1{,}8\,C$. Cada una varía; juntas no aportan dos direcciones, sino una. Fabriquemos ese caso con los datos de la Actividad 1, tomando =x2= como si fuera una temperatura en Celsius.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Colinealidad exacta
+#+begin_src gretl :eval no
+series C = x2                     # "temperatura" en Celsius
+series F = 32 + 1.8*C             # la misma temperatura, en Fahrenheit
+printf "corr(C, F) = %.10f\n", corr(C, F)
+
+list Xcol = const C F
+matrix Xc = { Xcol }
+printf "determinante de X'X con C y F = %g   (una matriz invertible tiene determinante distinto de cero)\n", det(Xc'Xc)
+
+ols y const C F
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-D-simulados-matricial.inp :eval no :exports none :noweb yes
+outfile --quiet colinealidadExacta.txt
+    <<Colinealidad exacta>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-D-simulados-matricial/colinealidadExacta.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La correlación entre =C= y =F= es exactamente $1$: son el mismo vector en desviaciones, salvo escala. El determinante de $\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}$ es nulo (o del orden del error de redondeo): la matriz no es invertible, y las ecuaciones normales tienen infinitas soluciones, como advertía la lección 10. Gretl no se detiene: detecta la dependencia, /elimina/ uno de los dos regresores y lo dice en la salida. Es la respuesta razonable —el ajuste $\boldsymbol{\mathop{\widehat y}}$ es único aunque los coeficientes no lo sean—, pero conviene saber que ha ocurrido: el coeficiente de =C= que queda ya no es ``el efecto de C manteniendo F fija'', porque fijar =F= es fijar =C=. En la lección 14 veremos el caso menos limpio y más frecuente: regresores /casi/ alineados, que Gretl no elimina y que hacen inestables los coeficientes.
+
+* Actividad 7 - Síntesis
 
 Hoy hemos verificado con Gretl la maquinaria matricial completa de la lección 10: (i) que $\boldsymbol{\mathop{\widehat{\beta}}}=(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}$ coincide con lo que calcula =ols=, y que $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}$ (que es lo mismo que $\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol{0}$); (ii) que con regresores mutuamente ortogonales cada coeficiente puede aislarse sin resolver ningún sistema, y $R^2$ se descompone como suma de correlaciones al cuadrado.
 
@@ -329,11 +364,12 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 
 * Preguntas de interpretación para la clase
 
-1. En la Actividad 2, ¿por qué la diferencia entre =beta_matricial= y =beta_ols= no es exactamente cero, sino un número muy pequeño?
+1. En la Actividad 2, ¿por qué la diferencia entre =beta_matricial= y =beta_ols= no es cero, sino un número muy pequeño?
 2. ¿Por qué necesitamos que =x2= y =x3= estén correlacionados en la Actividad 1 para que el ejercicio tenga sentido pedagógico? ¿Qué habría pasado si, por descuido, hubieran resultado casi ortogonales?
 3. En la Actividad 4, ¿por qué es importante que $\boldsymbol{z}_2$ y $\boldsymbol{z}_3$ tengan media /exactamente/ cero, y no solo estén incorrelados?
 4. En la Actividad 5, el cálculo ``aislado'' $\hat\beta_2$ (=cov(x2,y)/var(x2)=) sobre los datos de la Actividad 1 (=x2=, =x3=, correlacionados) no coincide con el coeficiente de =x2= en el modelo conjunto =ols y const x2 x3=, y el de =x3= ni siquiera tiene el mismo signo. ¿Por qué?
 5. ¿Diría que el uso de la inversa $(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}$ en esta práctica contradice la advertencia de la lección 10 de que el curso ``nunca la usa como vía de razonamiento''? ¿Qué diferencia hay entre usarla para /verificar/ una fórmula ya conocida y usarla como /método/ para resolver MCO?
+6. En la Actividad 6, ¿por qué el ajuste $\boldsymbol{\mathop{\widehat y}}$ es único aunque los coeficientes no lo sean? ¿Qué subespacio generan $\boldsymbol 1$, $\boldsymbol C$ y $\boldsymbol F$?
 
 /Para profundizar/:
 
@@ -352,7 +388,7 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 
 * Respuestas
 
-1. ¿Por qué la diferencia no es exactamente cero? Por errores de redondeo en aritmética de coma flotante, exactamente la misma razón por la que $\sum\hat e_i$ no era exactamente cero en las prácticas anteriores. Invertir una matriz $3\times3$ y multiplicarla por otro vector implica varias operaciones aritméticas encadenadas, cada una con su pequeñísimo error de precisión; el resultado final coincide con el de =ols= hasta un margen del orden de $10^{-10}$ o menor, que es indistinguible de cero a efectos prácticos.
+1. ¿Por qué la diferencia no es cero? Por errores de redondeo en aritmética de coma flotante, la misma razón por la que $\sum\hat e_i$ no era cero en las prácticas anteriores. Invertir una matriz $3\times3$ y multiplicarla por otro vector implica varias operaciones aritméticas encadenadas, cada una con su pequeñísimo error de precisión; el resultado final coincide con el de =ols= hasta un margen del orden de $10^{-10}$ o menor, que es indistinguible de cero a efectos prácticos.
 
 2. ¿Por qué necesitamos correlación entre =x2= y =x3=? Porque el objetivo pedagógico de la Actividad 1 es mostrar el caso /general/ de la regresión múltiple, en el que resolver el sistema completo (o, equivalentemente, usar la matriz inversa) es imprescindible. Si =x2= y =x3= hubieran resultado casi ortogonales por accidente, el ejercicio se habría parecido demasiado al caso especial de la Actividad 4, y no habría quedado clara la diferencia entre ``hay que resolver el sistema'' (caso general) y ``cada coeficiente se calcula aislado'' (familia ortogonal): precisamente el contraste que se explota, con toda intención, entre las Actividades 1-3 y las Actividades 4-5.
 
@@ -361,3 +397,5 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 4. ¿Coincide el cálculo aislado con los datos de la Actividad 1? No, y ya no hace falta creerlo: la Actividad 5 lo calcula. La fórmula aislada $\hat\beta_2=\sigma_{\boldsymbol{x}_2\boldsymbol{y}}/\sigma^2_{\boldsymbol{x}_2}$ solo reproduce el coeficiente del modelo conjunto cuando los regresores son mutuamente ortogonales. Con =x2= y =x3= correlacionados, el cálculo aislado ignora la información compartida entre ambos y ``atribuye'' a uno parte de lo que corresponde al otro: $\hat\beta_2$ pasa de $2{,}11$ a $1{,}68$, y $\hat\beta_3$ —esto es lo llamativo— pasa de $-0{,}98$ a $+0{,}22$, cambiando de signo. Es el mismo fenómeno que se observó en la práctica de Ramanathan con =sqft= y =bedrms=, aquí con un mundo del que conocemos los coeficientes verdaderos y podemos por tanto ver quién acierta: el modelo conjunto ($-0{,}98$ frente a $\beta_3=-1$).
 
 5. ¿Contradice esta práctica la advertencia de la lección 10 sobre la inversa? No, y la distinción es importante. La advertencia de la lección 10 es que el curso nunca usa la inversa como /vía de razonamiento/ para justificar por qué MCO funciona, ni como herramienta habitual de cálculo: el argumento conceptual sigue siendo, siempre, la condición de ortogonalidad $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}$. Aquí hemos usado la inversa una única vez, con un propósito muy distinto: /verificar numéricamente/ que una fórmula ya demostrada por otro camino (las ecuaciones normales, obtenidas de la ortogonalidad) da, en efecto, el mismo resultado que =ols=. Usarla como comprobación puntual de una fórmula ya justificada no es lo mismo que apoyarse en ella para /explicar/ por qué MCO funciona.
+
+6. /Ajuste único, coeficientes no./ $\boldsymbol F=32\,\boldsymbol 1+1{,}8\,\boldsymbol C$ es combinación lineal de $\boldsymbol 1$ y $\boldsymbol C$, así que $\mathcal L(\boldsymbol 1,\boldsymbol C,\boldsymbol F)=\mathcal L(\boldsymbol 1,\boldsymbol C)$: un plano, no un subespacio de dimensión tres. La proyección de $\boldsymbol y$ sobre ese plano es única (es el punto más cercano), pero se puede escribir de infinitas maneras como combinación de tres generadores que solo aportan dos direcciones. Gretl elige una de esas maneras eliminando =F=; cualquier otra daría el mismo $\boldsymbol{\mathop{\widehat y}}$, los mismos residuos y el mismo $R^2$.

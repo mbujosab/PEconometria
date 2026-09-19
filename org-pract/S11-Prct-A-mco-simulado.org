@@ -99,6 +99,7 @@ En las lecciones 7 y 8 obtuvimos, con lápiz y papel, las fórmulas de $\hat\bet
 3. Verificar $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y $R^2$ (lección 8), comparando el cálculo manual con el que reporta Gretl.
 4. Verificar $\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$ y $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
 5. Distinguir, con una muestra simulada más grande, qué se cumple /siempre/ (ortogonalidad) de qué es solo una /aproximación/ (recuperar el coeficiente generador).
+6. Ver qué se pierde si se ajusta la recta /sin constante/: la primera condición de ortogonalidad desaparece, y con ella todo lo que la lección 7 dedujo de ella.
 
 * Actividad 1 - El ejemplo de la lección 7, ahora con Gretl
 
@@ -124,7 +125,7 @@ Ahora pedimos la regresión:
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols ejemplo n5
-#+begin_src gretl :tangle ./guiones/S11-Prct-A-mco-simulado.inp :eval no
+#+begin_src gretl :eval no
 ols y const x
 #+end_src
 #+latex: }
@@ -132,6 +133,20 @@ ols y const x
 - GUI equivalente: //~Modelo -> Mínimos cuadrados ordinarios~//, seleccionando =y= como variable dependiente y =const=, =x= como regresores.
 
 /Antes de ejecutar/: ¿qué valores espera obtener para el coeficiente de =const= y para el de =x=? (Repase, si hace falta, el cálculo manual de la lección 7.)
+
+#+begin_src gretl :tangle guiones/S11-Prct-A-mco-simulado.inp :eval no :exports none :noweb yes
+outfile --quiet olsEjemploN5.txt
+    <<Ols ejemplo n5>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-A-mco-simulado/olsEjemploN5.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Los coeficientes son exactamente $2$ y $3$, los mismos que calculamos a mano en la lección 7: Gretl no hace otra cosa que resolver las dos condiciones de ortogonalidad. Fíjese en =R-cuadrado=, $0{,}9$, y en =Suma de cuad. residuos=, $10$: son el $R^2$ y la $\mathrm{SRC}$ de la lección 8 con estos mismos datos. El resto de la tabla (columnas =Desv. típica=, =Estadístico t= y =valor p=, y las líneas del pie) lo dejamos para más adelante.
 
 * Actividad 2 - Residuos y las dos condiciones de ortogonalidad
 
@@ -298,7 +313,42 @@ end outfile
 /Compare: la ortogonalidad (primeras dos líneas) se cumple exactamente, sea cual sea la muestra --es álgebra pura, consecuencia de cómo se define MCO--. En cambio, $\hat\beta_1,\hat\beta_2$ solo se/ aproximan /a los valores 2 y 3 que usamos para generar los datos --son una estimación, no una identidad--./
 #+latex: }
 
-* Actividad 6 - Síntesis
+* Actividad 6 - ¿Y si quitamos la constante?
+
+La lección 7 sostuvo que sin constante no puede hablarse de regresión. Comprobemos qué se pierde, con la muestra de la Actividad 5: pedimos a Gretl la recta que pasa por el origen (solo el regresor =x2=, sin =const=).
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Sin constante
+#+begin_src gretl :eval no
+ols y2 const x2 --quiet
+scalar b2_con = $coeff(x2)
+scalar mu_yhat_con = mean($yhat)
+
+ols y2 x2                                   # sin constante
+series ehat_sc = $uhat
+printf "\nsuma de residuos                sum(ehat)    = %.4f   (ya NO es cero)\n", sum(ehat_sc)
+printf "suma de x2*residuos             sum(x2*ehat) = %.10f  (esta sigue siendo cero)\n", sum(x2*ehat_sc)
+printf "media de y2 = %.4f   media del ajuste sin constante = %.4f   (con constante: %.4f)\n", mean(y2), mean($yhat), mu_yhat_con
+printf "pendiente sin constante = %.4f   (con constante: %.4f;  generador: 3)\n", $coeff(x2), b2_con
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-A-mco-simulado.inp :eval no :exports none :noweb yes
+outfile --quiet sinConstante.txt
+    <<Sin constante>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-A-mco-simulado/sinConstante.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Sin la constante solo queda una condición de ortogonalidad, la del regresor: $\sum x_i\hat e_i$ sigue siendo cero, pero $\sum\hat e_i$ vale $24{,}9$. Con ello se pierde todo lo que la lección 7 dedujo de la primera condición: el ajuste ya no tiene la media de los datos ($16{,}01$ frente a $16{,}42$), la recta ya no pasa por el punto de las medias, y la pendiente sube de $3{,}06$ a $3{,}36$: obligada a pasar por el origen, la recta se inclina para compensar la constante que le falta. Fíjese también en que Gretl ya no imprime un =R-cuadrado=, sino dos: sin constante no existe la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ de la lección 8, y el programa ofrece dos sustitutos (``no centrado'' y ``centrado'') que no son comparables con el $R^2$ de los modelos con constante.
+
+* Actividad 7 - Síntesis
 
 Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en las lecciones 7 y 8: (i) las fórmulas de $\hat\beta_1,\hat\beta_2$; (ii) las dos condiciones de ortogonalidad que, por construcción de MCO, se cumplen /siempre/ (no dependen de si el ejemplo está ``diseñado'' o no); (iii) $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$. Y hemos visto la diferencia esencial entre una /identidad algebraica/ (ortogonalidad: exacta siempre) y una /estimación/ (recuperar el coeficiente generador: solo aproximada, y solo exacta en el ejemplo ``con truco'' de la lección 7).
 
@@ -306,9 +356,10 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en l
 
 1. En la Actividad 1, ¿por qué Gretl reproduce exactamente $\hat\beta_1=2,\hat\beta_2=3$, y no una aproximación?
 2. ¿Por qué la ortogonalidad ($\sum\hat e_i=0$, $\sum x_i\hat e_i=0$) se cumple exactamente en la Actividad 5, mientras que $\hat\beta_2$ solo se aproxima a 3?
-3. ¿Qué diferencia hay entre el vector generador $\boldsymbol{u}$ y el vector de residuos $\boldsymbol{\mathop{\widehat{e}}}$? ¿En qué caso particular, de los vistos hoy, coinciden exactamente?
+3. ¿Qué diferencia hay entre el vector generador $\boldsymbol{u}$ y el vector de residuos $\boldsymbol{\mathop{\widehat{e}}}$? ¿En qué caso particular, de los vistos hoy, coinciden?
 4. ¿Por qué el signo de $\hat\beta_2$ coincide siempre con el signo de $\rho_{\boldsymbol{x}\boldsymbol{y}}$?
 5. Si en la Actividad 5 usáramos $n=600$ en lugar de $n=60$ (manteniendo el mismo proceso generador), ¿qué esperaría que ocurriera con la cercanía entre $\hat\beta_2$ y 3?
+6. En la Actividad 6, ¿por qué $\sum x_i\hat e_i$ sigue siendo cero y $\sum\hat e_i$ no? ¿Qué subespacio es ahora el de los regresores?
 
 /Para profundizar/:
 
@@ -317,7 +368,7 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en l
 
 #+LATEX: \clearpage
 
-- Código completo de la práctica
+* Código completo de la práctica
 
 #+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S11-Prct-A-mco-simulado.inp}
 
@@ -327,7 +378,7 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en l
 
 * Respuestas
 
-1. ¿Por qué Gretl reproduce exactamente $\hat\beta_1=2,\hat\beta_2=3$? Porque =ols= no hace más que resolver, internamente, exactamente las mismas dos condiciones de ortogonalidad que resolvimos a mano en la lección 7. Como este ejemplo se construyó a propósito con un vector $\boldsymbol{u}$ cuya covarianza muestral con $\boldsymbol{x}$ es exactamente cero (y de media cero), el sistema de ortogonalidad recupera exactamente los coeficientes generadores 2 y 3, puesto que el vector de residuos es necesariamente igual a $\boldsymbol{u}$ —no es una propiedad general de MCO, sino consecuencia del diseño deliberado del ejemplo.
+1. ¿Por qué Gretl reproduce exactamente $\hat\beta_1=2,\hat\beta_2=3$? Porque =ols= no hace más que resolver, internamente, las mismas dos condiciones de ortogonalidad que resolvimos a mano en la lección 7. Como este ejemplo se construyó a propósito con un vector $\boldsymbol{u}$ cuya covarianza muestral con $\boldsymbol{x}$ es cero (y de media cero), el sistema de ortogonalidad recupera exactamente los coeficientes generadores 2 y 3, puesto que el vector de residuos es necesariamente igual a $\boldsymbol{u}$ —no es una propiedad general de MCO, sino consecuencia del diseño deliberado del ejemplo.
 
 2. ¿Por qué la ortogonalidad es exacta y $\hat\beta_2$ solo se aproxima? Porque la ortogonalidad ($\sum\hat e_i=0$, $\sum x_i\hat e_i=0$) es una consecuencia /algebraica/ de cómo MCO define $\hat\beta_1,\hat\beta_2$ (las dos condiciones que se imponen para construirlos): se cumple exactamente para /cualquier/ conjunto de datos, sin excepción. En cambio, que $\hat\beta_2$ coincida con el valor 3 usado para generar los datos es una cuestión distinta: depende de que la perturbación $u_2$ sea ortogonal a los regresores, es decir, de media nula y que tenga, para esa muestra concreta, covarianza exactamente nula con $x_2$ —algo que ocurre por diseño en la Actividad 1, pero que una perturbación genuinamente aleatoria (Actividad 5) solo cumple /aproximadamente/, con un error que depende de la muestra concreta.
 
@@ -336,3 +387,5 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en l
 4. Signo de $\hat\beta_2$ y de $\rho_{\boldsymbol{x}\boldsymbol{y}}$. Porque $\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$ (lección 7), y tanto $\sigma_{\boldsymbol{y}}$ como $\sigma_{\boldsymbol{x}}$ son siempre no negativas (son normas). Por tanto, el cociente $\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$ nunca cambia el signo: el signo de $\hat\beta_2$ es siempre el mismo que el de $\rho_{\boldsymbol{x}\boldsymbol{y}}$.
 
 5. Con $n=600$ en lugar de $n=60$. Cabe esperar que $\hat\beta_2$ se acerque /todavía más/ a 3: con muestras más grandes, la covarianza muestral entre la perturbación $u_2$ y el regresor $x_2$ tiende a acercarse a cero (si, como es el caso, $u_2$ se generó independientemente de $x_2$), de modo que el ``desajuste'' entre $\hat\beta_2$ y el valor generador 3 tiende a reducirse. Esta es una primera intuición, sin demostrar todavía, de la propiedad de /consistencia/ de un estimador, que se estudiará con más detalle más adelante en el curso.
+
+6. /Sin constante./ Al quitar $\boldsymbol 1$, el subespacio sobre el que se proyecta es la recta $\mathcal L(\boldsymbol x)$, con un solo generador; el residuo es ortogonal a ese único generador —de ahí $\sum x_i\hat e_i=0$— pero nada le obliga a ser ortogonal a $\boldsymbol 1$, que ya no está en el subespacio. Por eso los residuos no suman cero, el ajuste no preserva la media y la recta no pasa por el punto de las medias: todas esas propiedades eran consecuencias de la primera condición de ortogonalidad, y esa condición ha desaparecido.

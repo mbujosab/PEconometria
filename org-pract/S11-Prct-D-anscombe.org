@@ -1,0 +1,270 @@
+#+Title: Sesión 11 (D) --- El cuarteto de Anscombe: cuatro rectas iguales, cuatro nubes distintas
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L11-D-anscombe
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S11-Prct-D-anscombe"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S11-Prct-D-anscombe.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S11-Prct-D-anscombe.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S11-Prct-D-anscombe.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+/Material adicional/ de la sesión, fuera del guion troncal: dura media hora y puede hacerse por su cuenta.
+
+En el laboratorio que siguió a la lección 5 vimos cuatro empresas con el mismo salario medio y la misma desviación típica y estructuras salariales muy distintas: los momentos no bastan para describir /una/ variable. Hoy repetimos la lección con /dos/ variables y su recta de regresión. El estadístico Francis Anscombe construyó en 1973 cuatro conjuntos de once puntos $(x,y)$ que comparten, cifra por cifra, todo lo que una tabla de regresión resume: medias, varianzas, correlación, recta ajustada y $R^2$. Y sin embargo, dibujados, no se parecen en nada.
+
+/Objetivos/
+
+1. Estimar la misma regresión simple sobre cuatro conjuntos de datos y comprobar que las cuatro tablas de resultados son idénticas.
+2. Dibujar los cuatro diagramas de dispersión y ver que solo uno de ellos es lo que la tabla sugiere.
+3. Sacar la conclusión: la tabla de una regresión —coeficientes, $R^2$, sumas de cuadrados— no dice qué forma tiene la nube de puntos; sin el gráfico, no se sabe qué se ha ajustado.
+
+* Actividad 1 - Los cuatro conjuntos de datos
+
+Los cuatro comparten el mismo $\boldsymbol x$ salvo el último, en el que diez observaciones tienen el mismo valor.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Datos Anscombe
+#+begin_src gretl :eval no
+nulldata 11
+setobs 1 1 --cross-section
+
+series x1 = {10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5}'
+series y1 = {8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68}'
+series x2 = x1
+series y2 = {9.14, 8.14, 8.74, 8.77, 9.26, 8.10, 6.13, 3.10, 9.13, 7.26, 4.74}'
+series x3 = x1
+series y3 = {7.46, 6.77, 12.74, 7.11, 7.81, 8.84, 6.08, 5.39, 8.15, 6.42, 5.73}'
+series x4 = {8, 8, 8, 8, 8, 8, 8, 19, 8, 8, 8}'
+series y4 = {6.58, 5.76, 7.71, 8.84, 8.47, 7.04, 5.25, 12.50, 5.56, 7.91, 6.89}'
+
+summary x1 y1 x2 y2 x3 y3 x4 y4 --simple
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-D-anscombe.inp :eval no :exports none :noweb yes
+outfile --quiet datos.txt
+    <<Datos Anscombe>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-D-anscombe/datos.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Las cuatro parejas tienen la misma media de $x$ ($9{,}0$), la misma media de $y$ ($7{,}50$) y las mismas desviaciones típicas (hasta el segundo decimal). Con lo visto en el laboratorio que siguió a la lección 5, esto ya debería ponerle en guardia.
+
+* Actividad 2 - Cuatro regresiones
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Cuatro regresiones
+#+begin_src gretl :eval no
+printf "conjunto   beta1     beta2     rho(x,y)    R2       SRC\n"
+loop i=1..4 --quiet
+    ols y$i const x$i --quiet
+    printf "   %d     %7.3f   %7.4f   %8.4f   %7.4f   %7.3f\n", i, $coeff(const), $coeff(x$i), corr(x$i, y$i), $rsq, $ess
+endloop
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-D-anscombe.inp :eval no :exports none :noweb yes
+outfile --quiet regresiones.txt
+    <<Cuatro regresiones>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S11-Prct-D-anscombe/regresiones.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Las cuatro filas son la misma: recta $\hat y=3+0{,}5x$, correlación $0{,}82$, $R^2=0{,}67$, la misma suma de cuadrados de los residuos. Si solo tuviera estas tablas, diría que ha ajustado cuatro veces el mismo modelo a cuatro muestras equivalentes. El =loop= que hemos usado repite el mismo bloque para =i= de 1 a 4; su mecánica se explica en el laboratorio que sigue a la lección 11, aquí basta con leerlo.
+
+* Actividad 3 - Cuatro diagramas de dispersión
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos (o, para cada pareja, marque =y= y =x=, botón derecho, /Gráfico X-Y/)/:
+#+NAME: Cuatro dispersiones
+#+begin_src gretl :eval no
+gnuplot y1 x1 --output=display
+gnuplot y2 x2 --output=display
+gnuplot y3 x3 --output=display
+gnuplot y4 x4 --output=display
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S11-Prct-D-anscombe.inp :eval no :exports none
+gnuplot y1 x1 --output="@workdir/anscombe1.png"
+gnuplot y2 x2 --output="@workdir/anscombe2.png"
+gnuplot y3 x3 --output="@workdir/anscombe3.png"
+gnuplot y4 x4 --output="@workdir/anscombe4.png"
+#+end_src
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}\includegraphics[width=\textwidth]{./S11-Prct-D-anscombe/anscombe1.png}\end{minipage}%
+\begin{minipage}{0.48\textwidth}\includegraphics[width=\textwidth]{./S11-Prct-D-anscombe/anscombe2.png}\end{minipage}\\
+\begin{minipage}{0.48\textwidth}\includegraphics[width=\textwidth]{./S11-Prct-D-anscombe/anscombe3.png}\end{minipage}%
+\begin{minipage}{0.48\textwidth}\includegraphics[width=\textwidth]{./S11-Prct-D-anscombe/anscombe4.png}\end{minipage}
+\caption{Los cuatro conjuntos de Anscombe, con la recta ajustada (la misma en los cuatro).}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+    <img src="./S11-Prct-D-anscombe/anscombe1.png" style="max-width:45%; height:auto;"/>
+    <img src="./S11-Prct-D-anscombe/anscombe2.png" style="max-width:45%; height:auto;"/>
+    <img src="./S11-Prct-D-anscombe/anscombe3.png" style="max-width:45%; height:auto;"/>
+    <img src="./S11-Prct-D-anscombe/anscombe4.png" style="max-width:45%; height:auto;"/>
+    <figcaption>Los cuatro conjuntos de Anscombe, con la recta ajustada (la misma en los cuatro).</figcaption>
+</figure>
+#+END_EXPORT
+
+*** Lo que debe observar
+
+Solo el primer conjunto es lo que la tabla sugiere: una nube alargada alrededor de la recta, con dispersión parecida en todo el rango. El segundo es una curva perfecta, sin ruido: la relación existe, pero no es lineal, y la recta la describe mal. El tercero es una recta exacta con una sola observación fuera de sitio, que tira de la pendiente. Y el cuarto no tiene relación alguna: diez puntos con el mismo $x$ y uno solo, muy alejado, que decide por sí mismo la recta entera. Cuatro situaciones distintas, cuatro conclusiones distintas, la misma tabla.
+
+* Actividad 4 - Síntesis
+
+Todo lo que una regresión simple imprime —$\hat\beta_1$, $\hat\beta_2$, $R^2$, $\mathrm{STC}$, $\mathrm{SEC}$, $\mathrm{SRC}$— se calcula con cinco números: dos medias, dos varianzas y una covarianza. Dos conjuntos de datos que compartan esos cinco números tendrán la misma tabla, tengan la forma que tengan. Es la versión bivariante de lo que vimos con los salarios de las cuatro empresas, y la razón práctica de la advertencia de la lección 8: un $R^2$ no certifica que el modelo sea sensato. El diagrama de dispersión no es un adorno del informe; es la única forma de saber qué se ha ajustado.
+
+* Preguntas de interpretación para la clase
+
+1. ¿Por qué basta con que dos conjuntos compartan medias, varianzas y covarianza para que su tabla de regresión sea idéntica? Enumere qué cantidades de la tabla dependen de cada uno de esos cinco números.
+2. En el segundo conjunto no hay ruido: los puntos están exactamente sobre una parábola. ¿Por qué el $R^2$ no vale $1$?
+3. En el cuarto conjunto, ¿qué ocurriría con la recta si se quitara la observación con $x=19$? ¿Y con el $R^2$?
+4. ¿Cuál de los cuatro conjuntos ilustra la situación de la Actividad 6 del laboratorio que sigue a la lección 10 (una vivienda que tira del ajuste)?
+
+/Para profundizar/:
+
+- Anscombe, F. J. (1973). ``Graphs in Statistical Analysis''. /The American Statistician/, 27(1), 17-21.
+- Lección 8 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html][lección 8]]), sección ``Una advertencia: el nombre /suma explicada/ es engañoso''.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S11-Prct-D-anscombe.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S11-Prct-D-anscombe.inp][S11-Prct-D-anscombe.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /Cinco números./ $\hat\beta_2=\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol x}^2$ (lección 7) depende de la covarianza y de la varianza de $x$; $\hat\beta_1=\mu_{\boldsymbol y}-\hat\beta_2\mu_{\boldsymbol x}$ añade las dos medias; $R^2=\rho^2=\sigma_{\boldsymbol x\boldsymbol y}^2/(\sigma_{\boldsymbol x}^2\sigma_{\boldsymbol y}^2)$ (lección 8) usa la covarianza y las dos varianzas; $\mathrm{STC}=n\sigma_{\boldsymbol y}^2$ y $\mathrm{SRC}=(1-R^2)\,\mathrm{STC}$. Nada de la tabla mira a los datos uno a uno: todo pasa por esos cinco resúmenes, y dos nubes que los compartan son indistinguibles para la regresión.
+
+2. /Parábola sin ruido./ Porque $R^2$ mide cuánto se acerca $\boldsymbol y$ al /plano/ $\mathcal L(\boldsymbol 1,\boldsymbol x)$, es decir, a la mejor /recta/. Una parábola no está en ese plano: la distancia de $\boldsymbol y$ a la recta ajustada no es cero aunque la relación entre $x$ e $y$ sea exacta. El residuo mide lo que la recta no captura, y aquí no captura la curvatura. Es un caso de modelo mal especificado, no de datos ruidosos; la lección 9 lo llamaría un fallo del primer supuesto.
+
+3. /Quitar el punto de $x=19$./ Los diez puntos restantes tienen todos $x=8$: el regresor en desviaciones es el vector nulo, $\sigma_{\boldsymbol x}^2=0$, y la pendiente no está definida (Gretl se negaría a estimar). Esa única observación no ``influye'' en la recta: la /es/. El $R^2$ tampoco existe sin ella. Es la versión extrema de la Actividad 6 del laboratorio que sigue a la lección 10.
+
+4. /El cuarto./ Allí una vivienda lejos del centro del rango y lejos de la recta movía el ajuste de forma visible; aquí una sola observación está tan lejos de las demás en el eje de $x$ que determina por completo la recta. El tercer conjunto ilustra lo contrario: un punto lejos de la recta pero dentro del rango de $x$, que tira de la pendiente sin llegar a decidirla.
+
+* COMMENT Banco de preguntas de reserva
+
+** Pregunta R1 — Qué comparten los cuatro conjuntos
+Los cuatro conjuntos de Anscombe tienen la misma tabla de regresión porque comparten:
+a) Los mismos once valores de $y$, en distinto orden.
+b) Las medias, las varianzas y la covarianza de $x$ e $y$.
+c) La misma forma de la nube de puntos.
+d) El mismo número de observaciones, y eso basta.
+/Respuesta correcta: b./
+/Evalúa/: que la tabla de una regresión simple es función de cinco resúmenes numéricos.
+
+** Pregunta R2 — Qué no dice el $R^2$
+Un $R^2$ de $0{,}67$ en una regresión simple:
+a) Garantiza que la relación es lineal.
+b) Garantiza que no hay observaciones atípicas.
+c) Dice cuánto se alinea $\boldsymbol y$ en desviaciones con el regresor en desviaciones, y nada sobre la forma de la nube.
+d) Indica que dos tercios de las observaciones están sobre la recta.
+/Respuesta correcta: c./
+/Evalúa/: la lectura geométrica del $R^2$ de la lección 8 y sus límites.

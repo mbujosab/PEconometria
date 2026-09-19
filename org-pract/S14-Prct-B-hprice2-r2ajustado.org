@@ -118,7 +118,7 @@ summary price rooms nox stratio
 /Recuerde de la práctica anterior que/ =rooms= /y/ =nox= /ya se usaron por separado en dos regresiones simples: retomamos aquí esos mismos coeficientes como punto de comparación./
 #+latex: }
 
-* Actividad 2 - De dos regresores a tres: price~rooms+nox
+* Actividad 2 - Dos regresores no constantes a la vez: price~rooms+nox
 
 Estimamos el modelo con ambos regresores a la vez, y recordamos (reestimándolas aquí mismo, para tener los números a mano) las dos regresiones simples correspondientes.
 
@@ -167,22 +167,26 @@ Añadimos el ratio alumnos/profesor de la zona, una variable que cabe esperar re
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols con stratio
-#+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no
+#+begin_src gretl :eval no
 ols price const rooms nox stratio
 #+end_src
 #+latex: }
 
-/Antes de mirar el resultado/: ¿qué signo espera para el coeficiente de =stratio=? Contraste su expectativa con lo obtenido, y compare de nuevo los coeficientes de =rooms= y =nox= con los de la Actividad 2: ¿cambian mucho al incorporar =stratio=?
+/Antes de mirar el resultado/: ¿qué signo espera para el coeficiente de =stratio=?
 
-# #+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
-# outfile --quiet Ols_multiple_con_stratio.txt
-#     <<Ols con stratio>>
-# end outfile
-# #+end_src
-# 
-# #+latex: {\footnotesize
-# #+include: ./S14-Prct-B-hprice2-r2ajustado/Ols_multiple_con_stratio.txt example
-# #+latex: }
+#+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
+outfile --quiet Ols_multiple_con_stratio.txt
+    <<Ols con stratio>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-B-hprice2-r2ajustado/Ols_multiple_con_stratio.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El coeficiente de =stratio= es $-1\,167$: un alumno más por profesor en la zona se asocia, manteniendo fijas habitaciones y contaminación, con unos $1\,200$ dólares menos de precio mediano. Compare de nuevo los coeficientes de =rooms= y =nox= con los de la Actividad 2: =rooms= baja de $8\,179$ a $7\,001$ y =nox= de $-1\,885$ a $-1\,693$. Vuelven a moverse, porque =stratio= está correlacionada con ambos; cada coeficiente responde a la pregunta ``manteniendo fijos /los demás regresores del modelo/'', y esa lista acaba de cambiar.
 
 
 * Actividad 4 - $R^2$ nunca disminuye: los cuatro modelos a la vez
@@ -273,7 +277,7 @@ Lea la salida en dos pasos, porque contiene los dos comportamientos posibles.
 
 Ahí está, con datos reales, la diferencia entre los dos índices. =radial= mejora el ajuste —toda variable lo hace, aunque sea por casualidad—, pero lo mejora /tan poco/ que no compensa el grado de libertad que consume. $R^2$ es incapaz de detectarlo; $\bar R^2$ sí, y responde bajando.
 
-Conviene subrayar que esto no convierte a $\bar R^2$ en un criterio infalible para elegir modelos: solo lo hace menos ingenuo que $R^2$. La práctica siguiente está dedicada, precisamente, a enseñar hasta dónde llega esa mejora.
+Conviene subrayar que esto no convierte a $\bar R^2$ en un criterio infalible para elegir modelos: solo lo hace menos ingenuo que $R^2$. La práctica siguiente está dedicada a enseñar hasta dónde llega esa mejora.
 
 El apéndice siguiente explica de dónde sale exactamente la fórmula de $\bar R^2$ y por qué tiene esa propiedad.
 
@@ -356,7 +360,7 @@ end outfile
 
 2. Interpretación del signo de =stratio=. Un coeficiente negativo es coherente con la intuición: zonas con una proporción más alta de alumnos por profesor (colegios más masificados, en principio de peor calidad percibida) tienden a tener viviendas más baratas, manteniendo fijas las habitaciones y la contaminación. Como siempre, esta es una lectura /ceteris paribus/, no necesariamente causal: podría haber otros factores (nivel de renta de la zona, inversión pública) que expliquen tanto el ratio alumnos/profesor como el precio.
 
-3. Por qué $R^2$ no baja nunca y $\bar R^2$ sí puede bajar (sin fórmula). Añadir un regresor nunca puede empeorar el mejor ajuste posible: MCO siempre puede, como mínimo, ``ignorar'' el regresor nuevo (darle coeficiente cero) y quedarse exactamente igual que antes; en la práctica, suele aprovechar algo de esa dirección extra para reducir un poco más los residuos. Por eso $R^2$ nunca baja. Pero $\bar R^2$ además ``cobra un precio'' por cada regresor añadido —descuenta un grado de libertad (diferencia entre $n$ y $k$)—, así que si el regresor nuevo casi no reduce los residuos, ese ``precio'' puede pesar más que la mejora conseguida, y $\bar R^2$ se reduce.
+3. Por qué $R^2$ no baja nunca y $\bar R^2$ sí puede bajar (sin fórmula). Añadir un regresor nunca puede empeorar el mejor ajuste posible: MCO siempre puede, como mínimo, ``ignorar'' el regresor nuevo (darle coeficiente cero) y quedarse igual que antes; en la práctica, suele aprovechar algo de esa dirección extra para reducir un poco más los residuos. Por eso $R^2$ nunca baja. Pero $\bar R^2$ además ``cobra un precio'' por cada regresor añadido —descuenta un grado de libertad (diferencia entre $n$ y $k$)—, así que si el regresor nuevo casi no reduce los residuos, ese ``precio'' puede pesar más que la mejora conseguida, y $\bar R^2$ se reduce.
 
 4. Si $\bar R^2$ hubiera bajado al añadir =stratio=. Eso indicaría que la reducción de residuos lograda por =stratio= es tan pequeña que no compensa el ``coste'' de estimar un parámetro adicional: una señal de que el aumento de complejidad del modelo, en términos de parsimonia, no compensa la pobre aportación de ese regresor en el ajuste del modelo.
 

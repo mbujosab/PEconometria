@@ -46,18 +46,18 @@ Redefinimos aquí (fichero independiente) las piezas algebraicas ya usadas en lo
 
 #+BEGIN_SRC jupyter-python :results silent
 def ajuste_mco_simple(y, x):
-    """Ajuste MCO de la regresión simple y = beta0 + beta1*x (lección 7)."""
+    """Ajuste MCO de la regresión simple y = beta2*1 + beta2*x (lección 7)."""
     y = np.asarray(y, dtype=float)
     x = np.asarray(x, dtype=float)
     mu_x = x.mean()
     mu_y = y.mean()
     sigma_x2 = np.mean((x - mu_x) ** 2)
     sigma_xy = np.mean((x - mu_x) * (y - mu_y))
-    beta1 = sigma_xy / sigma_x2
-    beta0 = mu_y - beta1 * mu_x
-    yhat = beta0 + beta1 * x
+    beta2 = sigma_xy / sigma_x2
+    beta1 = mu_y - beta2 * mu_x
+    yhat = beta1 + beta2 * x
     ehat = y - yhat
-    return yhat, ehat, beta0, beta1
+    return yhat, ehat, beta1, beta2
 
 def vector_de_medias(v):
     v = np.asarray(v, dtype=float)
@@ -169,14 +169,14 @@ def agrega_segmento(fig, p0, p1, color='gray', width=3, dash='dot'):
 
 *** La figura del triángulo rectángulo
 
-Dibujamos, dentro de $\mathcal{L}(\boldsymbol{1})^\perp$, la hipotenusa $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ (verde), el cateto $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ (violeta) y el otro cateto, $\boldsymbol{\mathop{\widehat{e}}}$ (gris), como el segmento que va de la punta del cateto violeta a la punta de la hipotenusa —exactamente la descomposición $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}=(\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}})+\boldsymbol{\mathop{\widehat{e}}}$ de la lección 8—. Añadimos también, en azul, la propia recta $\mathcal{L}(\boldsymbol{1})$ —perpendicular a este plano— como referencia de orientación: si giras esta figura hasta que $\mathcal{L}(\boldsymbol{1})$ apunte hacia ti, y comparas con la Parte 2 del Cuaderno 2 en la misma orientación, comprobarás que ambas escenas coinciden.
+Dibujamos, dentro de $\mathcal{L}(\boldsymbol{1})^\perp$, la hipotenusa $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$ (verde), el cateto $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ (violeta) y el otro cateto, $\boldsymbol{\mathop{\widehat{e}}}$ (gris), como el segmento que va de la punta del cateto violeta a la punta de la hipotenusa —exactamente la descomposición $\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}=(\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}})+\boldsymbol{\mathop{\widehat{e}}}$ de la lección 8—. Añadimos también, en azul, la propia recta $\mathcal{L}(\boldsymbol{1})$ —perpendicular a este plano— como referencia de orientación: si gira esta figura hasta que $\mathcal{L}(\boldsymbol{1})$ apunte hacia usted, y compara con la Parte 2 del Cuaderno 2 en la misma orientación, comprobará que ambas escenas coinciden.
 
 #+BEGIN_SRC jupyter-python :results silent
 def figura_triangulo_R3(x, y, rango=4, titulo=""):
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
     n = len(x)
-    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+    yhat, ehat, beta1, beta2 = ajuste_mco_simple(y, x)
     ey, mu_y = vector_en_desviaciones(y)
     eyhat, mu_yhat = vector_en_desviaciones(yhat)
 
@@ -184,7 +184,6 @@ def figura_triangulo_R3(x, y, rango=4, titulo=""):
     recta_L1(fig, rango=rango)
     plano_ortogonal(fig, rango=rango)
 
-    plano_ortogonal(fig, rango=rango)
     agrega_vector(fig, ey, color='yellowgreen', nombre='y - y_barra (hipotenusa)')
     agrega_vector(fig, eyhat, color='darkviolet', nombre='yhat - y_barra (cateto)')
     agrega_segmento(fig, eyhat, ey, color='dimgray', width=4)
@@ -205,13 +204,13 @@ def figura_triangulo_R3(x, y, rango=4, titulo=""):
 def diagrama_dispersion(x, y, mostrar_residuos=False, titulo=""):
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
-    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+    yhat, ehat, beta1, beta2 = ajuste_mco_simple(y, x)
 
     fig, ax = plt.subplots(figsize=(5, 4))
     ax.scatter(x, y, color='seagreen', zorder=3, label='datos (x_i, y_i)')
     xs = np.linspace(x.min() - 0.5, x.max() + 0.5, 50)
-    ax.plot(xs, beta0 + beta1 * xs, color='crimson',
-            label=f"yhat = {beta0:.2f} + {beta1:.2f}*x")
+    ax.plot(xs, beta1 + beta2 * xs, color='crimson',
+            label=f"yhat = {beta1:.2f} + {beta2:.2f}*x")
     if mostrar_residuos:
         for xi, yi, yhi in zip(x, y, yhat):
             ax.plot([xi, xi], [yi, yhi], color='gray',
@@ -248,7 +247,7 @@ diagrama_dispersion(x, y, mostrar_residuos=True,
 *** Comprobación numérica: Pitágoras y $R^2=\cos^2\theta=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$
 
 #+BEGIN_SRC jupyter-python
-yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+yhat, ehat, beta1, beta2 = ajuste_mco_simple(y, x)
 ey, _ = vector_en_desviaciones(y)
 eyhat, _ = vector_en_desviaciones(yhat)
 
@@ -272,7 +271,7 @@ print(f"rho_xy^2                   = {rho_xy**2:.4f}")
 
 *** Actividad
 
-Repite ambas celdas con los ejemplos =fuerte= y =debil=. Observa cómo, al pasar de =fuerte= a =debil=, el ángulo $\theta$ se abre hacia $90^o$ y $R^2$ se acerca a $0$ —los “casos extremos” de la lección 8—, y comprueba en cada caso que $R^2=\cos^2\theta=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ sigue cumpliéndose.
+Repita ambas celdas con los ejemplos =fuerte= y =debil=. Observe cómo, al pasar de =fuerte= a =debil=, el ángulo $\theta$ se abre hacia $90^o$ y $R^2$ se acerca a $0$ —los “casos extremos” de la lección 8—, y compruebe en cada caso que $R^2=\cos^2\theta=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ sigue cumpliéndose.
 
 * Parte 2: STC, SEC y SRC como áreas de cuadrados
 
@@ -295,7 +294,7 @@ def _cuadrado(ax, x0, y0, y1, color):
 def cuadrados_ajuste(x, y, titulo_general=""):
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
-    yhat, ehat, beta0, beta1 = ajuste_mco_simple(y, x)
+    yhat, ehat, beta1, beta2 = ajuste_mco_simple(y, x)
     mu_y = y.mean()
     xs = np.linspace(x.min() - 0.5, x.max() + 0.5, 50)
 
@@ -311,7 +310,7 @@ def cuadrados_ajuste(x, y, titulo_general=""):
 
     ax = axes[1]
     ax.scatter(x, y, color='seagreen', zorder=3)
-    ax.plot(xs, beta0 + beta1 * xs, color='crimson', zorder=2)
+    ax.plot(xs, beta1 + beta2 * xs, color='crimson', zorder=2)
     for xi, yi, yhi in zip(x, y, yhat):
         _cuadrado(ax, xi, yhi, yi, 'gray')
     ax.set_title("SRC = suma ehat_i^2")
@@ -320,7 +319,7 @@ def cuadrados_ajuste(x, y, titulo_general=""):
     ax = axes[2]
     ax.scatter(x, yhat, color='crimson', zorder=3)
     ax.axhline(mu_y, color='blue', linewidth=1)
-    ax.plot(xs, beta0 + beta1 * xs, color='crimson', alpha=0.3, zorder=1)
+    ax.plot(xs, beta1 + beta2 * xs, color='crimson', alpha=0.3, zorder=1)
     for xi, yhi in zip(x, yhat):
         _cuadrado(ax, xi, mu_y, yhi, 'darkviolet')
     ax.set_title("SEC = suma (yhat_i - mu_y)^2")
@@ -344,7 +343,7 @@ cuadrados_ajuste(x, y, titulo_general="STC, SEC y SRC como areas de cuadrados")
 
 *** Actividad
 
-Repite con el ejemplo =debil=: los cuadrados del panel central (SRC) deberían crecer notablemente respecto a los del panel de la izquierda (STC), reflejando un $R^2$ bajo. Comprueba que la igualdad numérica $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ se sigue cumpliendo exactamente.
+Repita con el ejemplo =debil=: los cuadrados del panel central (SRC) deberían crecer notablemente respecto a los del panel de la izquierda (STC), reflejando un $R^2$ bajo. Compruebe que la igualdad numérica $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ se sigue cumpliendo exactamente.
 
 * Parte 3: ajuste exacto no es lo mismo que buen ajuste
 
@@ -352,26 +351,26 @@ Retomamos el caso (b) de la Parte 3 del Notebook 2: allí, $\boldsymbol{u}$ era 
 
 #+BEGIN_SRC jupyter-python
 x = np.array([1., 2., 3.])
-beta0, beta1 = 2., 3.
+beta1, beta2 = 2., 3.
 uno = np.ones_like(x)
 u_cero = np.zeros(3)
 u_perp = 2 * np.cross(uno, x)   # el mismo u_b del Notebook 2
 
 for nombre, u in [("u = 0 (sin perturbacion)", u_cero),
                   ("u ortogonal al plano (perturbacion 'con truco')", u_perp)]:
-    y = beta0 * uno + beta1 * x + u
-    yhat, ehat, beta0_hat, beta1_hat = ajuste_mco_simple(y, x)
+    y = beta1 * uno + beta2 * x + u
+    yhat, ehat, beta1_hat, beta2_hat = ajuste_mco_simple(y, x)
     ey, _ = vector_en_desviaciones(y)
     eyhat, _ = vector_en_desviaciones(yhat)
     R2 = np.mean(eyhat ** 2) / np.mean(ey ** 2) if np.mean(ey ** 2) > 0 else float('nan')
     print(nombre)
-    print(f"   beta0_hat = {beta0_hat:.4f}   beta1_hat = {beta1_hat:.4f}   R^2 = {R2:.4f}\n")
+    print(f"   beta1_hat = {beta1_hat:.4f}   beta2_hat = {beta2_hat:.4f}   R^2 = {R2:.4f}\n")
 #+END_SRC
 
 Con $\boldsymbol{u}=\boldsymbol{0}$, $R^2=1$ (ajuste perfecto, hipotenusa y cateto coinciden). Con $\boldsymbol{u}$ ortogonal al plano pero /no/ nulo, $\hat\beta_1,\hat\beta_2$ siguen siendo exactamente $2$ y $3$ —MCO “acierta” con los coeficientes generadores—, pero $R^2<1$: hay un residuo real, $\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{u}$, y el ajuste, aunque tiene los coeficientes correctos, no reproduce los datos exactamente ($\boldsymbol{\mathop{\widehat{y}}}\ne\boldsymbol{y}$).
 
 #+BEGIN_SRC jupyter-python
-y_perp = beta0 * uno + beta1 * x + u_perp
+y_perp = beta1 * uno + beta2 * x + u_perp
 fig_perp = figura_triangulo_R3(x, y_perp, rango=6,
     titulo="u ortogonal al plano, pero no nulo: coeficientes exactos, R^2 < 1")
 fig_perp.show()
@@ -379,14 +378,14 @@ fig_perp.show()
 
 *** Actividad
 
-Multiplica =u_perp= por un factor mayor (por ejemplo, =5 * np.cross(uno, x)=) y repite la comparación. Comprueba que $\hat\beta_1,\hat\beta_2$ siguen siendo exactamente $2$ y $3$ —porque la dirección de $\boldsymbol{u}$ no ha cambiado, solo su tamaño—, mientras que $R^2$ disminuye a medida que $\boldsymbol{u}$ crece. Relaciona esta observación con la transparencia “Interpretando $R^2$: casos extremos” de la lección 8.
+Multiplique =u_perp= por un factor mayor (por ejemplo, =5 * np.cross(uno, x)=) y repita la comparación. Compruebe que $\hat\beta_1,\hat\beta_2$ siguen siendo exactamente $2$ y $3$ —porque la dirección de $\boldsymbol{u}$ no ha cambiado, solo su tamaño—, mientras que $R^2$ disminuye a medida que $\boldsymbol{u}$ crece. Relacione esta observación con la transparencia “Interpretando $R^2$: casos extremos” de la lección 8.
 
 /Recuerde/: un $R^2$ bajo no implica que el modelo deba ser descartado. Aun con un $R^2$ bajo podemos estar calculando adecuadamente el valor de los parámetros.
 
 * Para seguir explorando
 
 - El diccionario =ejemplos= (heredado del Notebook 2) sirve igual aquí: cualquier par $(\boldsymbol{x},\boldsymbol{y})$ con $\boldsymbol{x}$ no constante puede usarse en =figura_triangulo_R3=, =diagrama_dispersion= y =cuadrados_ajuste=.
-- =cuadrados_ajuste= funciona con cualquier ejemplo; pruébalo con los cinco vectores $\boldsymbol{u}$ de la Parte 3 del Notebook 2 para ver, de un vistazo, cómo cambian las tres áreas.
+- =cuadrados_ajuste= funciona con cualquier ejemplo; pruébelo con los cinco vectores $\boldsymbol{u}$ de la Parte 3 del Notebook 2 para ver, de un vistazo, cómo cambian las tres áreas.
 - La sesión de laboratorio que sigue a la lección 8 comprobará estas mismas identidades ($\sum\hat e_i=0$, $\sum x_i\hat e_i=0$, $R^2$) con datos reales.
 - La lección 9 (“El puente”) retoma la advertencia de la Parte 3 del Notebook 2 —qué le exigimos a $\boldsymbol{u}$— para plantear, ya en el espacio de variables aleatorias, la condición $E[\boldsymbol{U}\mid\boldsymbol{X}]=\boldsymbol{0}$.
 
