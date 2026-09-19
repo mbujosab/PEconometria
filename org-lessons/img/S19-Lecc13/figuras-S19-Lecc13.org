@@ -1,0 +1,147 @@
+#+title: Código de las figuras de la lección 13
+#+author: Marcos Bujosa Brun
+
+#+latex_header: \usepackage{nacal}
+#+LATEX_HEADER: \usepackage{polyglossia}
+#+LATEX_HEADER: \setmainlanguage{spanish}
+
+\maketitle
+
+* Nota sobre estas figuras
+
+La lección 13 reutiliza sin cambios la figura =TrianguloContraste_ancho= de
+la lección 12 (=img/S17-Lecc12/=): el contraste $F$ de significación
+conjunta compara los mismos dos catetos que el $t$, cada uno dividido por
+su dimensión.
+
+Aquí solo se añade UNA figura, =TrianguloAnidado=, para el contraste de
+$q$ restricciones lineales. Es el mismo triángulo rectángulo —misma
+geometría, mismos colores, misma vista de frente— con los vértices
+reetiquetados: el papel que en la lección 8 hacía el vector de medias
+$\boldsymbol{\mathop{\overline{y}}}$ lo hace ahora el ajuste /restringido/
+$\boldsymbol{\mathop{\widehat{y}}}_r$. La hipotenusa es el residuo del
+modelo restringido, $\boldsymbol y-\boldsymbol{\mathop{\widehat{y}}}_r$
+(longitud $\sqrt{\mathrm{SRC}_r}$); el cateto horizontal es lo que las $q$
+direcciones liberadas añaden al ajuste,
+$\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\widehat{y}}}_r$
+(longitud $\sqrt{\mathrm{SRC}_r-\mathrm{SRC}}$); el cateto vertical es el
+residuo del modelo completo (longitud $\sqrt{\mathrm{SRC}}$). Cuando el
+modelo restringido es solo la constante,
+$\boldsymbol{\mathop{\widehat{y}}}_r=\boldsymbol{\mathop{\overline{y}}}$ y
+esta figura se convierte en la de la lección 12.
+
+Se suprime el regresor medido bajo el eje (en la lección 12 lo había porque
+con $k=2$ el cateto explicado es un múltiplo del regresor; con $q$
+direcciones no hay un regresor único al que atribuirlo). Se mantiene el
+mismo recuadro y proporción que =TrianguloContraste_ancho= (2900 px de
+ancho) para que en pantalla ocupen el mismo alto.
+
+* Figuras con fuente tikz
+
+** El triángulo anidado
+
+#+NAME: TrianguloAnidado
+#+BEGIN_SRC latex :noweb no-export :tangle tex/TrianguloAnidado.tex :results discard :exports code :eval no
+<<Preambulo comun>>
+
+\begin{document}
+  <<Colores>>
+  <<Colores de la regresion>>
+
+  % misma geometría que TrianguloContraste (lección 12):
+  % theta = 35 grados, hipotenusa de longitud 4
+  \begin{tikzpicture}
+    [scale=1.15,
+     axis/.style={-,gray,very thin},
+     vector/.style={-{Stealth[length=3mm, width=2mm]},very thick},
+     guide/.style={dashed,thin,gray}]
+
+    \coordinate (O)  at (0    , 0    );  % ajuste restringido
+    \coordinate (A)  at (3.277, 0    );  % ajuste completo
+    \coordinate (B)  at (3.277, 2.294);  % datos
+    \coordinate (Fin) at (3.55 , 0    );
+
+    % el eje horizontal: las q direcciones que la hipótesis nula suprime
+    \draw[axis] (-0.55,0) -- (Fin);
+    \node[anchor=north east,gray,yshift=-0.5mm,align=right] at (-0.55,0)
+      {\small $q$ direcciones liberadas};
+
+    % el ángulo
+    \draw pic[-,draw=black,angle radius=26,\Verde,fill=\VerdeClaro!30] {angle = A--O--B};
+    \node[\Verde!60!black,anchor=west,inner sep=1pt] at (17.5:0.95) {$\theta_r$};
+
+    % ángulo recto entre el cateto añadido y el residuo
+    \tkzMarkRightAngle[size=.28,gray,very thin,fill=lightgray!70,opacity=0.5](B,A,O)
+
+    % una guía bajo el eje que recuerda que el origen es el ajuste restringido
+    \draw[guide] (O) -- (0,-0.72);
+    \node[gray,anchor=north,font=\small] at (0,-0.72)
+      {$\boldsymbol{\mathop{\widehat{y}}}_r$ (ajuste con las $q$ restricciones)};
+
+    % los tres lados del triángulo
+    \draw[vector,\Ajuste] (O) -- (A);
+    \node[\Ajuste,anchor=north west,xshift=1.5mm,yshift=-3.5mm] at (A)
+      {$\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\widehat{y}}}_r$};
+    \draw[vector,\Residuo] (A) -- (B)
+      node[anchor=west,xshift=0.8mm]{$\boldsymbol{\mathop{\widehat{e}}}$};
+    \draw[vector,\Datos] (O) -- (B)
+      node[anchor=south east,xshift=-0.5mm,yshift=0.5mm]
+      {$\boldsymbol{y}-\boldsymbol{\mathop{\widehat{y}}}_r$};
+
+    % las longitudes de los tres lados
+    \node[\Ajuste,anchor=north,yshift=-0.8mm] at (1.85,0) {$\sqrt{\mathrm{SRC}_r-\mathrm{SRC}}$};
+    \node[\Residuo!70!black,anchor=east,xshift=-0.8mm] at (3.277,1.147) {$\sqrt{\mathrm{SRC}}$};
+    \node[\Datos!80!black,anchor=south east,xshift=-1mm,yshift=1mm] at (1.64,1.147) {$\sqrt{\mathrm{SRC}_r}$};
+
+  \end{tikzpicture}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .6\textwidth :caption \caption{El contraste $F$ de $q$ restricciones como razón entre los dos catetos del triángulo anidado}
+[[file:./TrianguloAnidado.png]]
+
+*** Ajuste de la figura
+
+#+BEGIN_SRC bash :build yes
+convert TrianguloAnidado.png -gravity center -background white -extent 2900x TrianguloAnidado_ancho.png
+#+END_SRC
+
+* Trozos de código
+
+#+NAME: Preambulo comun
+#+BEGIN_SRC tex :noweb no-export :results discard :export code :eval no
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+\usepackage{tikz}
+\usetikzlibrary{matrix,decorations.pathreplacing}
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+#+END_SRC
+
+#+NAME: Colores
+#+BEGIN_SRC tex :noweb no-export :results discard :export code :eval no
+\def\Rojo{red!50!black}
+\def\RojoOscuro{red!20!black}
+\def\RojoClaro{red!90!black}
+\def\Verde{green!50!black}
+\def\VerdeOscuro{green!30!black}
+\def\VerdeClaro{green!50!gray}
+\def\Azul{blue!50!black}
+\def\AzulOscuro{blue!35!black}
+\def\AzulClaro{blue!60!gray}
+#+END_SRC
+
+Los colores de los tres vectores son los de las lecciones 8 y 12, para que
+el alumno reconozca el mismo triángulo.
+
+#+NAME: Colores de la regresion
+#+BEGIN_SRC tex :noweb no-export :results discard :export code :eval no
+\def\Datos{green!40!gray}
+\def\Ajuste{blue!50!red}
+\def\Residuo{black!25!gray}
+\def\Regresor{blue!75!white}
+#+END_SRC

@@ -1107,7 +1107,7 @@ Cada sesión teórica se entrega en /tres bloques/, en este orden:
      medida sale corta). Una transparencia cabe si ese borde inferior queda por
      debajo de 700. Nota: el =scrollHeight= de la sección puede superar 700 en
      2-4 px sin que se corte nada; es el margen inferior del último párrafo.
-   - */Marcado que rompe la exportación en silencio (dos casos ya vividos)/*:
+   - */Marcado que rompe la exportación en silencio (tres casos ya vividos)/*:
      (i) una línea de ecuación =\[ ... \]= que /empiece/ por el carácter tubo se
      interpreta como fila de tabla (ver ficha §7.18); (ii) un fragmento
      =@@latex:...@@= al principio de un párrafo de apuntes hace que ox-ipynb
@@ -1119,7 +1119,15 @@ Cada sesión teórica se entrega en /tres bloques/, en este orden:
      transparencia de 700 (y que, además, dejaba un hueco vacío en el HTML,
      donde =@@latex:@@= no produce nada). Regla: no usar =@@latex:@@= dentro de
      los apuntes; para remitir a una figura, nombrarla por el título de su
-     transparencia.
+     transparencia; (iii) un marcador de
+     énfasis o verbatim cerrado justo antes de un guion largo —``sin
+     =stratio=—, y su suma...''— NO se cierra (Org no admite ``—'' tras el
+     marcador), sigue hasta el siguiente =\== del párrafo, que puede estar
+     dentro de una fórmula, y exporta como verbatim todo lo intermedio sin
+     ningún error; el mismo mecanismo hace que =$R$-squared= no se reconozca
+     como fórmula (guion tras el =$= de cierre). Detección mecánica: el =.tex=
+     no debe contener ningún =\$= escapado (=grep -c '\\\$' fichero.tex= da
+     cero) ni =\texttt{...=...}= con un =\== dentro (ver ficha §7.20).
    - */Qué recorta de verdad una transparencia (medido, no supuesto)/*: (a)
      menos líneas de texto —una línea ronda los 44 px—; (b) menos /bloques/:
      cada fragmento es una celda con su propio margen, así que fundir dos
@@ -3108,14 +3116,129 @@ el número de sesión de §7.0 prevalece.
   insignias PDF/HTML/guion; progreso 18 de 26 (69 %).
 
 ** 7.20 Ficha — Sesión 19 (Contraste $F$)
-- /Contenido/: significación conjunta, restricciones lineales.
-- /Hereda de la ses. 17/: el $F$ de significación conjunta es el MISMO cociente
-  de catetos que el $t$, con dos divisores distintos:
-  $F=\dfrac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}$, y $F=t^2$ en regresión
-  simple. La figura =TrianguloContraste= de =img/S17-Lecc12/= se reutiliza tal
-  cual: una sola figura financia las dos lecciones. Aplíquese aquí también el
-  principio 14 de §9.1 (peso propio para la interpretación).
-- /Recorte/: puede limitarse al $F$ de significación conjunta, omitiendo restricciones lineales generales (§9.3).
+- /Fichero/: =S19-Lecc13.org= (ESCRITA, sept. 2026; lección 13). Entrega: 10
+  transparencias con sus apuntes desarrollados + 12 preguntas con respuestas.
+  Título definitivo: ``Lección 13. El contraste $F$: significación conjunta''
+  (se acortó al ajustar la portada a pantalla; las restricciones lineales
+  siguen dentro, transparencias 6 y 7). Verificada compilando
+  =make org-lessons/S19-Lecc13.pdf= (16 páginas), =.html= y =.slides.html=; las
+  once pantallas caben (medidas con =doc/tools/medir-transparencias.py=: entre
+  496 y 670 px sobre los 700 disponibles).
+- /Contenido/: significación conjunta y restricciones lineales generales, con
+  peso propio para la interpretación (principio 14 de §9.1): la geometría va
+  en las transparencias 3, 4 y 6; la lectura, en la 5, 7, 8 y 9.
+- /Idea rectora (aprobada al diseñar la sesión)/: el $F$ es la razón entre los
+  dos catetos del triángulo de la lección 8, /cada cateto dividido por la
+  dimensión del subespacio donde vive/: $k-1$ para el explicado (regresores en
+  desviaciones, lección 10) y $n-k$ para el residuo (lección 11), de modo que
+  el denominador es exactamente $\mathfrak s^2$. Lectura honesta de por qué
+  sirve: bajo $H_0$ el ruido isótropo reparte su longitud al cuadrado por
+  igual entre dimensiones, numerador y denominador estiman ambos $\sigma^2$ y
+  $F\approx1$ (enunciado, no demostrado; comprobado por Monte Carlo al
+  diseñar: con $n=506$, $k=4$, $\mathrm{E}(\mathrm{SEC})/3=0{,}986$ y
+  $\mathrm{E}(\mathrm{SRC})/502=1{,}000$ para $\sigma^2=1$).
+- /Estructura de las 10 transparencias/: 1) de dónde venimos: los $t$ son
+  individuales; el $F$ del pie de la tabla del laboratorio anterior; gancho
+  con la tabla real =price ~ rooms + nox + lnox= (dos $t$ nulos); 2) la
+  hipótesis conjunta y por qué no bastan $k-1$ contrastes $t$ (contenido:
+  cada $t$ juzga con los demás dentro; probabilidad: $k-1$ veredictos al 5 %
+  no son uno al 5 %); 3) el estadístico $F$, isotropía, distribución
+  $F_{k-1,n-k}$ enunciada, región crítica de una cola; 4) lectura geométrica
+  con =TrianguloContraste_ancho= de S17 reutilizada tal cual,
+  $F=\frac{n-k}{k-1}\frac{R^2}{1-R^2}$, $F=t^2$ y $F_c=t_c^2$ con $k=2$,
+  ejemplo de la lección 8 ($F=27$, $F_c(1,3)=10{,}13=3{,}18^2$); 5) el $F$ en
+  una tabla de Gretl: =price ~ rooms + nox + stratio= (modelo de S14-Prct-B),
+  reconstruido a mano; 6) restricciones lineales como modelos anidados, con la
+  figura nueva =TrianguloAnidado= y la única demostración de la sesión
+  (Pitágoras anidado); 7) tres restricciones sobre =hprice2= con =restrict= /
+  menú =Contrastes -> Restricciones lineales= (cobro de la semilla de
+  S18-Prct-A); 8) conjunto $\neq$ individual: resolución del gancho
+  (=nox=/=lnox=, $\rho=0{,}994$), siembra explícita de la lección 14; 9) qué
+  dice y qué no dice el $F$: tabla $n$/$R^2$ con $k=4$, el $F$ automático
+  contrasta la hipótesis menos interesante, las doce viviendas, no
+  causalidad; 10) recapitulación y guiño doble (lección 14 y laboratorio del
+  $F$, sin número).
+- /Números verificados con Gretl 2022c y scipy (no repetir)/: =price ~ rooms +
+  nox + stratio=: $R^2=0{,}6005$, $\mathrm{SRC}=1{,}711\cdot10^{10}$,
+  $\mathrm{SEC}=2{,}572\cdot10^{10}$, $\mathfrak s=5837{,}8$,
+  $F(3,502)=251{,}5$, $F_c=2{,}62$ (5 %) y $3{,}82$ (1 %), $t$ de =stratio=
+  $-9{,}063$; restricciones: =nox=stratio=0= da $F(2,502)=73{,}1$
+  ($\mathrm{SRC}_r-\mathrm{SRC}=4{,}985\cdot10^9$, $F_c=3{,}01$);
+  =stratio=0= da $F=82{,}13=t^2$; =b[nox]=b[stratio]= da $F=3{,}56$,
+  $p=0{,}060$ (modelo restringido: =price ~ rooms + (nox+stratio)=,
+  $\mathrm{SRC}_r=1{,}723\cdot10^{10}$). Par =nox=/=lnox=: solos, $t=-7{,}43$
+  y $-7{,}51$; juntos, $t=0{,}18$ ($p=0{,}854$) y $-1{,}05$ ($p=0{,}295$),
+  $F(2,502)=28{,}2$, $\rho_{\text{nox,lnox}}=0{,}994$. Doce viviendas
+  (=set seed 20261107=, =smpl 12 --random=, la misma submuestra que S18-A):
+  $F(3,8)=9{,}55$, $F_c=4{,}07$, $t$ de =stratio= $-0{,}10$. Tabla con $k=4$:
+  ($n=6$, $R^2=0{,}90$) $F=6{,}00<19{,}16$; ($n=10$, $0{,}90$)
+  $F=18{,}0>4{,}76$; ($n=1003$, $0{,}01$) $F=3{,}36>2{,}61$. Ángulo crítico
+  con $n=506$, $k=4$: $82{,}9^\circ$.
+- /Decisiones de diseño/: (i) las restricciones generales entran (el
+  recorte de §9.3, punto 2, sigue disponible: las transparencias 6 y 7 son
+  las recortables) porque S18-A sembró =restrict= y el laboratorio de la
+  sesión 21 lo aplicará; se presentan por la vía $\mathrm{SRC}_r-\mathrm{SRC}$
+  (pura geometría), no por la forma matricial $R\boldsymbol\beta=\boldsymbol r$,
+  que no se nombra; (ii) datos: =hprice2= con el modelo de la práctica de la
+  lección 10 más el par =nox=/=lnox= (se descartó =rooms+nox+crime=, que no
+  enlazaba con nada previo); (iii) se demuestra el Pitágoras anidado
+  ($\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\perp\boldsymbol{\mathop{\widehat e}}$
+  porque ambos ajustes están en $\mathcal L(\boldsymbol{\mathsf X})$), la forma
+  en $R^2$ y $F=t^2$; se enuncian la distribución $F_{q,n-k}$ y el reparto
+  isótropo de la longitud al cuadrado (§9.2); (iv) la palabra ``potencia'' no
+  aparece; (v) el $F$ de una igualdad de coeficientes se explica como cambio
+  de subespacio (los dos regresores se funden en su suma), no como ``quitar
+  regresores''; su vía alternativa como $t$ con la covarianza de fuera de la
+  diagonal (lección 11) va solo en nota al pie.
+- /Notación nueva/: ajuste restringido $\boldsymbol{\mathop{\widehat y}}_r$ y
+  $\mathrm{SRC}_r$ (subíndice $r$ de ``restringido''), definidos en la
+  transparencia 6 y sus apuntes; $q$ para el número de restricciones. El
+  número $k-1$ se presenta como dimensión del otro cateto, no como un cuarto
+  producto escalar (nota al pie de los apuntes de la transparencia 3).
+- /Figura/: =img/S19-Lecc13/figuras-S19-Lecc13.org= contiene una sola figura,
+  =TrianguloAnidado= (+ =_ancho=, 2900x1058): el triángulo de S17 con los
+  vértices reetiquetados ($\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r$,
+  $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r$,
+  $\boldsymbol{\mathop{\widehat e}}$; longitudes $\sqrt{\mathrm{SRC}_r}$,
+  $\sqrt{\mathrm{SRC}_r-\mathrm{SRC}}$, $\sqrt{\mathrm{SRC}}$), mismos colores
+  y misma geometría ($\theta=35^\circ$, hipotenusa 4), sin el regresor medido
+  bajo el eje (con $q$ direcciones no hay un regresor único). La otra figura
+  de la lección es =img/S17-Lecc12/TrianguloContraste_ancho.png=, reutilizada
+  sin cambios (transparencia 4).
+- /Ajuste al formato de transparencia/: la primera medición dio 841 px en la
+  portada y 710/728/747 en las transparencias 5, 6 y 10. Se corrigió
+  acortando el título, dejando el abstract en un párrafo más la cita,
+  fundiendo fragmentos (5 y 10), sustituyendo =\dfrac= por =\frac= en la tabla
+  de la recapitulación y llevando la frase ``conjunta: $q=k-1$'' dentro de la
+  ecuación de la 6.
+- /Trampa de marcado descubierta al escribir (registrada en §6)/: un marcador
+  =verbatim= cerrado justo antes de un guion largo (``sin =stratio=—, y su
+  suma...'') no se cierra: Org no admite el guion largo tras el marcador,
+  busca el siguiente =\== del párrafo —que estaba dentro de una fórmula— y
+  exporta como verbatim todo lo que hay en medio, destrozando la fórmula en
+  silencio (sin error de compilación). Se detecta buscando =\$= escapados en
+  el =.tex= (=grep -c '\\\$' S19-Lecc13.tex= debe dar cero). Lo mismo
+  ocurre con =$R$-squared= dentro de comillas: el guion tras el =$= de cierre
+  no se admite; escribir =\(R\)-squared=.
+- /Semillas cobradas/ (ver §10): la identidad $t^2=(n-k)\mathrm{SEC}/\mathrm{SRC}$
+  (ses. 17: cobro principal, generalizada a $F$); =restrict= (ses. 18: cobro
+  principal); ``$t$ individuales bajos con relación conjunta'' (ses. 17,
+  aviso de ``Significación estadística $\neq$ relevancia económica'': cobro
+  principal en la transparencia 8); ``$R^2$ nunca empeora al añadir
+  regresores'' (ses. 10, cobrada en 14: reutilización estructural,
+  $\mathrm{SRC}_r\geq\mathrm{SRC}$); $\mathfrak s^2$ y el divisor $n-k$ como
+  dimensión (ses. 15: reutilización estructural en el denominador); la
+  dimensión $k-1$ del subespacio de regresores en desviaciones (ses. 13:
+  reutilización estructural en el numerador).
+- /Semillas que planta/ (ver §10): el caso =nox=/=lnox= con
+  $\rho=0{,}994$ como ejemplo canónico de colinealidad, y la promesa de que la
+  lección 14 pondrá números a $\Vert\tilde{\boldsymbol x}_j\Vert_e$ vía una
+  regresión auxiliar y de ahí el VIF (cobro en 20); el laboratorio del $F$:
+  =restrict= con varias restricciones y distribución del $F$ bajo $H_0$
+  simulada con =loop= (cobro en 21); la restricción $\beta_2+\beta_3=1$
+  (rendimientos constantes a escala) mencionada como ejemplo de hipótesis
+  lineal ``que veremos al hablar de la función de producción'' (cobro en 23,
+  Cobb–Douglas).
 
 ** 7.21 Ficha — Sesión 20 (Colinealidad)
 - /Anclaje/: colinealidad = regresores casi alineados ($\cos\theta\to\pm1$) ⇒ proyección inestable. VIF.
@@ -3276,6 +3399,12 @@ Para redactar, basta con §7 (fichas), §10 (semillas) y §4–§6 (formato). Co
   $\mathrm{SEC}=\hat\beta_2^2\Vert\boldsymbol x-\boldsymbol{\mathop{\overline x}}\Vert^2$
   en $t=\hat\beta_2/\mathrm{ee}(\hat\beta_2)$. No necesita ninguna herramienta
   nueva: es la lección 8 más la lección 11.
+- Pitágoras anidado (sesión 19): $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\perp\boldsymbol{\mathop{\widehat e}}$
+  porque ambos ajustes están en $\mathcal L(\boldsymbol{\mathsf X})$ y el residuo
+  es ortogonal a todo él, luego
+  $\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2$;
+  y las identidades $F=\frac{n-k}{k-1}\frac{R^2}{1-R^2}$ y $F=t^2$ (con $k=2$).
+  Es la lección 8 más la lección 10.
 
 /Se usa como herramienta/ (notación, no maquinaria): producto escalar, transposición de /matrices/, producto matriz–vector y vector–matriz (doble lectura) y, solo en la sesión 13, producto matriz–matriz al 
 servicio de $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$.
@@ -3289,6 +3418,12 @@ servicio de $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$.
   distribución del /ángulo/: se ENUNCIA en la sesión 17 (una frase), porque es
   lo único que explica por qué el valor crítico depende de $n-k$; no se
   demuestra ni se estira.
+- La distribución $F_{q,\,n-k}$ del estadístico $F$ bajo $H_0$, y el hecho que
+  la motiva —que un ruido isótropo reparte su longitud al cuadrado por igual
+  entre dimensiones, de modo que bajo $H_0$ $\mathrm{E}(\mathrm{SEC})=(k-1)\sigma^2$
+  y $\mathrm{E}(\mathrm{SRC})=(n-k)\sigma^2$—: se ENUNCIAN en la sesión 19, con la
+  misma honestidad que la $t$ en la 17. La relación $t^2_\nu=F_{1,\nu}$ va en
+  nota al pie.
 - Insesgadez y varianza en regresión múltiple: enunciadas, no demostradas.
 
 /Pospuesto/: familia ortogonal y Pitágoras generalizado, hasta que aparezcan en regresión múltiple (sesión 13).
@@ -3408,12 +3543,12 @@ donde "sembrada/cobrada" sigue bastando).
 | Familia ortogonal y Pitágoras generalizado (POSPUESTOS parcialmente)                                                                                                                                                                                                                                         | Ses. 13 (transparencia "Familia ortogonal"). NO se siembra en la lección 3 — comprobado al revisarla: su teorema de Pitágoras es solo para DOS vectores y no menciona familias ortogonales ni ninguna generalización. | mencionada en 13 ("Familia ortogonal"); *verificación numérica completa en 14* (Práctica D: caso de dos regresores mutuamente ortogonales, coeficientes aislados y \(R^2=\sum\rho^2\) confirmados con datos simulados). El desarrollo teórico general con \(k>2\) regresores y verificación cruzada de todas las ortogonalidades sigue sin fecha fija.                                                                                              |
 | Inversa \((\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\): existe, no se usa                                                                                                                                                                                                                    | Ses. 13                                                                                                                                                                                                                                                        | *reforzada en 14* (Práctica D: se calcula explícitamente, una única vez, como verificación numérica puntual —no como método—, con advertencia explícita en el guion sobre esta distinción)                                                                                                                                                                                                                                                          |
 | Operador selector y sus reglas de precedencia sobre el producto                                                                                                                                                                                                                                              | Ses. 13                                                                                                                                                                                                                                                        | reforzada conceptualmente en *14* (Práctica D: construcción explícita de \(\boldsymbol{\mathsf X}\), \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\), y verificación de \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathop{\widehat e}}=\boldsymbol{\mathop{\widehat e}}\boldsymbol{\mathsf X}\)), aunque el guion usa la sintaxis nativa de matrices de Gretl y no la notación de selector (con la barra vertical en el subíndice) en sí misma |
-| "\(R^2\) nunca empeora al añadir regresores" (propiedad mecánica; motivación directa del \(R^2\) ajustado)                                                                                                                                                                                                   | Ses. 10                                                                                                                                                                                                                                                        | *cobrada en 14* (Práctica B, cobro principal con derivación completa de \(\bar R^2\); reforzada en Práctica C con el contraejemplo peso-edad)                                                                                                                                                                                                                                                                                                       |
+| "\(R^2\) nunca empeora al añadir regresores" (propiedad mecánica; motivación directa del \(R^2\) ajustado)                                                                                                                                                                                                   | Ses. 10                                                                                                                                                                                                                                                        | *cobrada en 14* (Práctica B, cobro principal con derivación completa de \(\bar R^2\); reforzada en Práctica C con el contraejemplo peso-edad); 19 (reutilización estructural: $\mathrm{SRC}_r\geq\mathrm{SRC}$ para todo modelo restringido, y el $F$ pregunta si la subida supera al ruido)                                                                                                                                                                                                                                                                                                       |
 | Ejemplo peso-edad-edad²-edad³ (polinomios crecientes, $R^2$ y $\bar R^2$ crecientes, extrapolación absurda)                                                                                                                                                                                                  | Material de referencia §11.3 (Lec03); mencionado y aparcado en 10                                                                                                                                                                                              | *14* (S14-Prct-C, ESCRITA: grado 1/2/3, extrapolación a edades 15-17 con peso decreciente; cobra además la distinción regresor/variable explicativa de la sesión 8)                                                                                                                                                                                                                                                                                 |
 | Concepto de "efecto parcial"/interpretación /ceteris paribus/ de \(\hat\beta_j\) en regresión múltiple                                                                                                                                                                                                       | Ses. 13                                                                                                                                                                                                                                                        | *14* (Práctica A: Ramanathan, cambio de coeficiente de =bedrms= al controlar por =sqft=; reforzado en Práctica B, =hprice2=)                                                                                                                                                                                                                                                                                                                        |
 | Ley de las esperanzas iteradas, $\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)$, obtenida como consecuencia de $Z-E[Z\mid\boldsymbol X]\perp\mathit1$ (no como teorema externo)                                                                                                                    | Ses. 12 (caso particular $\mathrm{E}\big(Y-E[Y\mid\mathit1]\big)=0$; la mención explícita del ``Teorema de las esperanzas iteradas'' quedó comentada en el fichero final)                                                                                       | *15* (enunciada y demostrada en ``Insesgadez''); previsible reutilización estructural en 17                                                                                                                                                                                                                                                                                                                                                          |
-| Cuasivarianza de los residuos $\mathrm{SRC}/(n-k)$ (y, análogamente, $\mathrm{STC}/(n-1)$) como estimador insesgado, motivada en prosa sin justificar el motivo exacto del divisor                                                                                                                           | la práctica que sigue a la lección 10 (Apéndice de $\bar R^2$, Ses. 14)                                                                                                                                                                                        | *15* (intuición geométrica del divisor $n-k$ como dimensión de $\mathcal L(\boldsymbol{\mathsf X})^\perp$; insesgadez de $\mathfrak s^2$ ENUNCIADA sin demostrar; se acuña $\mathfrak s^2$ y el tercer producto escalar $\langle\cdot,\cdot\rangle_{n-k}$)                                                                                                                                                                                          |
-| Uso de =loop= como "caja negra" (repetición masiva sin explicar mecánica), opcional                                                                                                                                                                                                                          | Ses. 7 (S07-Prct-B, Actividad 5, OPCIONAL)                                                                                                                                                                                                                     | *16* (mecánica completa del =loop=, Monte Carlo de insesgadez y varianza de $\hat\beta_2$, verificando empíricamente la lección 11); 19                                                                                                                                                                                                                                                                                                             |
+| Cuasivarianza de los residuos $\mathrm{SRC}/(n-k)$ (y, análogamente, $\mathrm{STC}/(n-1)$) como estimador insesgado, motivada en prosa sin justificar el motivo exacto del divisor                                                                                                                           | la práctica que sigue a la lección 10 (Apéndice de $\bar R^2$, Ses. 14)                                                                                                                                                                                        | *15* (intuición geométrica del divisor $n-k$ como dimensión de $\mathcal L(\boldsymbol{\mathsf X})^\perp$; insesgadez de $\mathfrak s^2$ ENUNCIADA sin demostrar; se acuña $\mathfrak s^2$ y el tercer producto escalar $\langle\cdot,\cdot\rangle_{n-k}$); 19 (reutilización estructural: $\mathfrak s^2$ es el denominador del $F$, y $k-1$ se presenta como la dimensión del otro cateto, no como un cuarto producto escalar)                                                                                                                                                                                          |
+| Uso de =loop= como "caja negra" (repetición masiva sin explicar mecánica), opcional                                                                                                                                                                                                                          | Ses. 7 (S07-Prct-B, Actividad 5, OPCIONAL)                                                                                                                                                                                                                     | *16* (mecánica completa del =loop=, Monte Carlo de insesgadez y varianza de $\hat\beta_2$, verificando empíricamente la lección 11); 21 (distribución del $F$ bajo $H_0$ simulada; antes de la reordenación 19→21 esta celda decía ``19'')                                                                                                                                                                                                                                                                                                             |
 | Insesgadez y varianza de $\hat\beta_2$ NO requieren normalidad de la perturbación (la demostración de la lección 11 solo usa linealidad, exogeneidad estricta y homocedasticidad); la /forma/ de su distribución, en cambio, SÍ la requerirá | Ses. 16 (Práctica C: Monte Carlo con perturbaciones uniforme y $\chi^2$ centrada, que reproducen igual de bien ambas propiedades) | *17* (al enunciar la distribución de $\hat\beta_2$ y tener que añadir un supuesto sobre la distribución de $U$: el contraste con la sesión 16 hace ver /por qué/ ese supuesto es nuevo y no estaba antes); 18 (S18-Prct-C, apéndice: con $\chi^2(1)$ y $n=12$ la cobertura del IC se desvía del 95 %, con $n=120$ ya no) |
 | Supuesto de Homocedasticidad ($Var[U\mid X]=\sigma^2\cdot\,\mathit1$ constante)                                                                                                                                                                                                                                | Ses. 12 ("El puente")                                                                                                                                                                                                                                          | 15 (reutilización estructural: reduce $Var[\hat\beta_2\mid\boldsymbol X]$ a $\sigma^2\sum_iW_i^2$); *17* (base de contrastes $t$ e IC)                                                                                                                                                                                                                                                                                                              |
 | $\mathfrak{s}^2 = \mathrm{SRC}/(n-k)$ como estimador insesgado de la varianza de la perturbación $\sigma^2$ (y el motivo estadístico del divisor $n-k$)                                                                                                                                                      | Ses. 15                                                                                                                                                                                                                                                        | *17* (ingrediente esencial para el cálculo del error estándar); 18 (cálculo práctico y evaluación en Lab)                                                                                                                                                                                                                                                                                                                                           |
@@ -3422,11 +3557,13 @@ donde "sembrada/cobrada" sigue bastando).
 | Lema ``sacar de la esperanza condicionada las funciones de la variable condicionante'': $E[c(\boldsymbol X)Z\mid\boldsymbol X]=c(\boldsymbol X)E[Z\mid\boldsymbol X]$, demostrado desde la caracterización pertenencia + ortogonalidad de $E[\cdot\mid\boldsymbol X]$. En S15 no se usa una vez, sino CUATRO (insesgadez; $E[W_iU_i\mid\boldsymbol X]=\mathit0$; varianza de un sumando; covarianza cruzada): es la herramienta de trabajo de toda la sesión, no un paso auxiliar                             | Ses. 15 (herramienta, demostrada allí)                                                                                                                                                                                                                         | previsible reutilización estructural en /17/ (distribución de $\hat\beta_2$, error estándar)                                                                                                                                                                                                                                                                                                                                                        |
 | Estadísticos por sustitución: $\overline X=\frac1n\sum_iX_i$ y $S^2=\frac1n\sum_i(X_i-\overline X)^2$ (fórmulas de las lecciones 4-5 evaluadas sobre la muestra aleatoria; variables aleatorias, no números)                                                                                                 | Ses. 15                                                                                                                                                                                                                                                        | *17* (error estándar de $\hat\beta_2$ vía $\mathfrak s^2/(nS^2)$); 18 (cálculo en Lab)                                                                                                                                                                                                                                                                                                                                                              |
 | El intervalo de confianza como afirmación sobre el /procedimiento/ (el 95 % de las muestras dan un intervalo que contiene a $\beta_2$), no sobre el intervalo concreto; y el precio de estimar $\sigma$ (valor crítico de la $t_{n-k}$, no $1{,}96$) | Ses. 17 (apuntes de ``El intervalo de confianza'' y ``Por qué el valor crítico depende de $n-k$'') | *18* (S18-Prct-C: cobertura empírica $0{,}952$ con $R=4000$, figura del baile de los intervalos, y cobertura $0{,}919$ al usar $1{,}96$ con $n-k=10$) |
-| El estadístico $t$ como razón entre los dos catetos del triángulo de la lección 8: $\vert t\vert=\sqrt{n-k}\cdot\sqrt{\mathrm{SEC}/\mathrm{SRC}}$, o equivalentemente $t^2=(n-k)R^2/(1-R^2)$ (exacto con $k=2$) | Ses. 17 (lectura geométrica del contraste $t$, demostrada allí: §9.2) | *19* (el $F$ de significación conjunta es el MISMO cociente de catetos con dos divisores, $\mathrm{SEC}/(k-1)$ frente a $\mathrm{SRC}/(n-k)$; y $F=t^2$ en regresión simple, de modo que la figura =TrianguloContraste= se reutiliza sin cambios); 18 (refuerzo numérico: S18-Prct-A verifica $t^2=F(1,504)$ sobre =hprice2= y con =restrict=; S18-Prct-C ejecuta el factor $\sqrt{n-k}$ con $n=12$ frente a $n=120$) |
-| =restrict= / menú =Contrastes -> Restricciones lineales= como mecánica del contraste $F$ (con $b[2]=0$ devuelve $F=t^2$) | Ses. 18 (S18-Prct-A, Actividad 3, solo como comprobación numérica de $F=t^2$) | *19* (contraste $F$ de restricciones lineales); 21 (Lab: aplicación con varias restricciones) |
+| El estadístico $t$ como razón entre los dos catetos del triángulo de la lección 8: $\vert t\vert=\sqrt{n-k}\cdot\sqrt{\mathrm{SEC}/\mathrm{SRC}}$, o equivalentemente $t^2=(n-k)R^2/(1-R^2)$ (exacto con $k=2$) | Ses. 17 (lectura geométrica del contraste $t$, demostrada allí: §9.2) | *19* (COBRADA: el $F$ de significación conjunta es el MISMO cociente de catetos con cada uno dividido por su dimensión, $\mathrm{SEC}/(k-1)$ frente a $\mathrm{SRC}/(n-k)$, luego $F=\frac{n-k}{k-1}\frac{R^2}{1-R^2}$; con $k=2$, $F=t^2$ y $F_c=t_c^2$, verificado con el ejemplo de la lección 8; la figura =TrianguloContraste_ancho= se reutiliza sin cambios en la transparencia 4); 18 (refuerzo numérico: S18-Prct-A verifica $t^2=F(1,504)$ sobre =hprice2= y con =restrict=; S18-Prct-C ejecuta el factor $\sqrt{n-k}$ con $n=12$ frente a $n=120$) |
+| =restrict= / menú =Contrastes -> Restricciones lineales= como mecánica del contraste $F$ (con $b[2]=0$ devuelve $F=t^2$) | Ses. 18 (S18-Prct-A, Actividad 3, solo como comprobación numérica de $F=t^2$) | *19* (COBRADA: transparencia ``Tres restricciones sobre =hprice2=''; tres =restrict= sobre =price ~ rooms + nox + stratio=, incluida una igualdad de coeficientes cuyo modelo restringido funde dos regresores en su suma); 21 (Lab: aplicación con varias restricciones y comprobación de que el $F$ de Gretl es el cociente de sumas de cuadrados) |
+| ``Puede que ningún $t$ individual sea significativo y los regresores en conjunto sí'' (aviso de lectura, síntoma de colinealidad) | Ses. 17 (transparencia ``Significación estadística $\neq$ relevancia económica'', cuarto aviso de sus apuntes) | *19* (gancho de la transparencia 1 y resolución en ``Conjunto $\neq$ individual'': =price ~ rooms + nox + lnox=, $t$ de $0{,}18$ y $-1{,}05$ con $F(2,502)=28{,}2$; lectura: a cada regresor le queda poca longitud propia; la conclusión correcta es ``no se puede separar'', no ``sobran los dos''); 20 (mecanismo con números: VIF) |
+| Pitágoras anidado: $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\perp\boldsymbol{\mathop{\widehat e}}$ y $\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2$ (la identidad de la lección 8 con el ajuste restringido en el papel del vector de medias); el $F$ de $q$ restricciones como cociente de sumas de cuadrados | Ses. 19 (demostrado en ``Restricciones lineales: modelos anidados''; figura =TrianguloAnidado=) | *21* (Lab: estimar los dos modelos y comprobar estimación a estimación que el $F$ de =restrict= es ese cociente; distribución del $F$ bajo $H_0$ con =loop=); 23 (restricción $\beta_2+\beta_3=1$ en Cobb–Douglas, anunciada en 19 como ``rendimientos constantes a escala'') |
 | Colinealidad (vectores alineados, \(\cos\theta=\pm1\))                                                                                                                                                                                                                                                       | Ses. 3                                                                                                                                                                                                                                                         | 8 (mención breve del caso degenerado \(\boldsymbol{x}\) múltiplo de \(\boldsymbol{1}\)); 13 (refuerzo); *20*                                                                                                                                                                                                                                                                                                                                        |
 | Distinción terminológica "colinealidad exacta" ($\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}$ no invertible, sistema sin solución única) vs. "colinealidad de grado" (regresores casi alineados, solución única pero inestable)                                                                        | Ses. 13                                                                                                                                                                                                                                                        | *20*                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| $\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert$: el error estándar de un coeficiente es el ruido estimado dividido por la longitud /propia/ del regresor —lo que le queda tras descontar lo que comparte con los demás— | Ses. 17 (enunciada en una frase del guiño final, sin demostrar y sin nombrar Frisch–Waugh; ver §9.3, punto 4) | *20* (colinealidad: cuanto más alineado está $\boldsymbol x_j$ con los demás, más corto es $\tilde{\boldsymbol x}_j$ y mayor el error estándar; el VIF es $1/(1-R_j^2)$) |
+| $\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert$: el error estándar de un coeficiente es el ruido estimado dividido por la longitud /propia/ del regresor —lo que le queda tras descontar lo que comparte con los demás— | Ses. 17 (enunciada en una frase del guiño final, sin demostrar y sin nombrar Frisch–Waugh; ver §9.3, punto 4); 19 (usada cualitativamente para explicar el caso =nox=/=lnox=, y prometido en el guiño que la lección 14 la calculará con una regresión auxiliar de $\boldsymbol x_j$ sobre los demás) | *20* (colinealidad: cuanto más alineado está $\boldsymbol x_j$ con los demás, más corto es $\tilde{\boldsymbol x}_j$ y mayor el error estándar; el VIF es $1/(1-R_j^2)$; ejemplo canónico ya en la mesa: =nox=/=lnox= con $\rho=0{,}994$) |
 | =chas= como vector de \(\mathbb{R}^{506}\) y relación con \(\boldsymbol{1}\)                                                                                                                                                                                                                                 | Ses. 4                                                                                                                                                                                                                                                         | *24*                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | Sensibilidad del ajuste a qué observaciones concretas se tienen: al eliminar viviendas de una muestra de 14, los coeficientes se mueven apreciablemente (intuición de variabilidad muestral ANTES de disponer de ninguna probabilidad) | Ses. 14 (S14-Prct-A, actividad con =smpl= y =modeltab= sobre el dataset de Ramanathan) | 15 (la fórmula $\sigma^2/\sum_i(x_i-\mu_{\boldsymbol x})^2$ cuantifica esa intuición); 16 (el Monte Carlo la hace visible con histogramas); *26* (palanca y distancia de Cook, en el laboratorio integrador) |
 | Lo esencial para la validez del ajuste MCO no es que $\boldsymbol1$ sea una columna de $\boldsymbol{\mathsf X}$, sino que $\boldsymbol1\in\mathcal L(\text{columnas de }\boldsymbol{\mathsf X})$ (ej.: dos indicadoras de sexo que suman $\boldsymbol1$)                                                     | Ses. 13 (apuntes de ``La matriz de datos y el operador selector'', con remisión explícita a las dummies); registrado también en §4.2.1                                                                                                                          | /24/ (variables dummy: $k$ indicadoras excluyentes sin columna constante explícita)                                                                                                                                                                                                                                                                                                                                                                 |

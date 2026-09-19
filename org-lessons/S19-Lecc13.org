@@ -1,0 +1,739 @@
+#    -*- mode: org -*-
+
+#+TITLE: Lección 13. El contraste $F$: significación conjunta
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+
+#+include: 00preambulo_lecciones.txt
+
+#+BEGIN_SRC emacs-lisp :exports none :results silent
+(use-package ox-ipynb
+  :load-path (lambda () (expand-file-name "ox-ipynb" scimax-dir)))
+(use-package htmlize)
+#+END_SRC
+
+#+LATEX: \maketitle
+
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+#+begin_abstract
+Hoy juzgamos varios coeficientes a la vez: ¿aportan algo /en conjunto/ estos regresores?, ¿cumplen esta relación? El estadístico $F$ es la razón entre los dos catetos del triángulo de la lección 8, cada uno dividido por la dimensión del subespacio donde vive. La segunda mitad se dedica a leerlo.
+
+/``Varios coeficientes, una hipótesis: hace falta un estadístico que mire varias direcciones a la vez.''/
+#+end_abstract
+
+- ([[https://mbujosab.github.io/PEconometria/Transparencias/S19-Lecc13.slides.html][slides]]) --- ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html][html]]) --- ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf][pdf]])
+
+
+* De dónde venimos: los contrastes $t$ son individuales
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+La lección 12 juzga /un/ coeficiente cada vez, $t=\hat\beta_j/\mathrm{ee}(\hat\beta_j)$, y demostró (con $k=2$) que $t^2=(n-k)\,\mathrm{SEC}/\mathrm{SRC}$. En el laboratorio anterior, al pie de la tabla de =price= sobre =rooms=, apareció un $F(1,504)=472{,}95$ igual a $t^2$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Un caso real (=hprice2=; =price= sobre =rooms=, =nox= y su logaritmo =lnox=):
+
+#+ATTR_LATEX: :align |l|r|r|r|r|
+| Regresor | Coeficiente | Desv. típica | Estadístico $t$ | Valor $p$ |
+|----------+-------------+--------------+-----------------+-----------|
+| =rooms=  |    8161,84 |       418,34 |           19,51 | $10^{-63}$ |
+| =nox=    |     404,19 |      2198,85 |            0,18 | 0,854     |
+| =lnox=   |  -13262,2  |     12655,7  |           -1,05 | 0,295     |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+¿Sobran =nox= y =lnox=? Cada $t$, por separado, dice que sí. Los dos a la vez, /no/. Hoy: el $F$ por derecho propio, y la resolución de este caso al final.
+#+end_center
+
+
+*** De dónde venimos: los contrastes $t$ son individuales
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Todo el aparato de la lección 12 —error estándar, intervalo de confianza, contraste $t$— se pronuncia sobre /un/ coeficiente cada vez. Es lo natural cuando la pregunta es ``¿interviene este regresor?'', y es lo que hace la tabla de resultados fila a fila. Pero muchas preguntas económicas no son sobre un coeficiente, sino sobre varios a la vez: ¿aportan algo /en conjunto/ estos tres regresores?, ¿tienen el mismo efecto estas dos variables?, ¿son compatibles los datos con que la suma de dos coeficientes valga uno? Ninguna de ellas se responde con una fila de la tabla, y hoy construimos la herramienta que las responde a todas.
+
+Dos piezas de las sesiones anteriores hacen casi todo el trabajo. La primera es la identidad de la lección 12, $t^2=(n-k)\,\mathrm{SEC}/\mathrm{SRC}$, que decía que el contraste $t$ es la razón entre los dos catetos del triángulo de la lección 8, corregida por la dimensión. La segunda es una observación del laboratorio anterior: al pie de toda tabla de regresión Gretl imprime un número rotulado $F$, y en la regresión simple de =price= sobre =rooms= ese número —$472{,}95$— coincidía con $t^2$. Allí dijimos que el $F$ era ``el cociente entre la parte explicada y la parte residual, cada una dividida por su número de dimensiones'' y que la lección 13 lo convertiría en un contraste por derecho propio. Esa es la lección de hoy.
+
+La tabla de la transparencia es el caso que da sentido a todo lo demás, y conviene mirarlo despacio antes de saber resolverlo. Es una regresión con datos reales —las viviendas de =hprice2= de los laboratorios— del precio mediano sobre tres regresores: el número de habitaciones y /dos/ medidas de la contaminación del aire, la concentración de óxidos de nitrógeno =nox= y su logaritmo =lnox=. Los coeficientes de =nox= y =lnox= tienen ambos un valor $p$ muy alto: $0{,}854$ y $0{,}295$. Si uno lee la tabla como enseñó la lección 12, fila a fila, concluye que ninguno de los dos interviene y que ambos sobran. Y sin embargo, como veremos en la sección ``Conjunto $\neq$ individual'', si se quitan /los dos a la vez/ el ajuste empeora de forma inconfundible: la contaminación sí explica el precio. Lo que falla no es la tabla; es leer una pregunta sobre dos coeficientes con dos respuestas sobre uno.
+
+Una advertencia sobre el reparto de la sesión, como en la lección 12. Las cuatro primeras transparencias construyen el contraste $F$ de significación conjunta y lo leen en el triángulo; la sexta y la séptima lo generalizan a cualquier hipótesis lineal sobre los coeficientes; las tres últimas se dedican a interpretarlo, y son, otra vez, las de más rendimiento práctico.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, introducción a la sección 4.5 (por qué los contrastes $t$ individuales no responden a hipótesis sobre varios coeficientes).
+
+
+* La hipótesis conjunta
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+/Significación conjunta/: $H_0\!:\beta_2=\beta_3=\cdots=\beta_k=0$ (``ningún regresor aporta nada'') frente a $H_1\!:$ al menos uno es distinto de cero.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Geométricamente: bajo $H_0$ el modelo se reduce a la constante, el ajuste es el vector de medias, $\boldsymbol{\mathop{\widehat y}}=\boldsymbol{\mathop{\overline y}}$, y el cateto explicado es nulo. La pregunta es si el subespacio de los regresores acerca $\boldsymbol{\mathop{\widehat y}}$ a $\boldsymbol y$ /más de lo que el azar acercaría/.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+¿Por qué no $k-1$ contrastes $t$? Cada $t$ juzga a su regresor /con los demás dentro del modelo/; ``todos no significativos uno a uno'' no es ``todos nulos a la vez'' (la tabla de la apertura). Y $k-1$ veredictos al $5\,\%$ no forman un veredicto al $5\,\%$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+Una hipótesis sobre varios coeficientes pide un estadístico que mire varias direcciones a la vez.
+#+end_center
+
+
+*** La hipótesis conjunta
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La hipótesis nula más frecuente sobre varios coeficientes es la de /significación conjunta/: que todos los coeficientes de los regresores no constantes sean cero a la vez, $\beta_2=\cdots=\beta_k=0$. En términos del modelo poblacional de la lección 10, $Y=\beta_1\,\mathit1+\beta_2X_2+\cdots+\beta_kX_k+U$, dice que ninguno de los regresores interviene: $Y=\beta_1\,\mathit1+U$, y lo mejor que puede hacerse para predecir $Y$ es su media. La alternativa es la negación lógica: /al menos uno/ de esos coeficientes es distinto de cero. Nótese lo poco que pide $H_1$: no dice cuál ni cuántos, solo que no son todos nulos.
+
+La traducción geométrica es inmediata con el vocabulario de la lección 10. El ajuste $\boldsymbol{\mathop{\widehat y}}$ es la proyección de $\boldsymbol y$ sobre $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$, y el triángulo rectángulo de la lección 8 —hipotenusa $\boldsymbol y-\boldsymbol{\mathop{\overline y}}$, catetos $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}$ y $\boldsymbol{\mathop{\widehat e}}$— sigue existiendo sea cual sea $k$, como se comprobó allí. Si $H_0$ fuese cierta, el modelo poblacional no contendría ningún regresor y el ajuste que mejor lo reproduce sería el vector de medias: el cateto explicado $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}$ ``debería'' ser nulo. No lo será exactamente, claro: aunque los regresores no tengan nada que ver con $\boldsymbol y$, la proyección de un vector de ruido sobre el subespacio de los regresores en desviaciones nunca es exactamente cero, igual que en la lección 12 la proyección sobre un único regresor no lo era. La pregunta que el contraste tiene que responder es, por tanto, si el cateto explicado es /más largo de lo que el azar produciría/ cuando $H_0$ es cierta. Es la misma pregunta de la lección 12, con una diferencia: allí el cateto explicado vivía en una recta (la del regresor en desviaciones) y aquí vive en un subespacio de dimensión $k-1$ (el de los $k-1$ regresores en desviaciones, lección 10).
+
+Conviene detenerse en por qué no basta con mirar los $k-1$ contrastes $t$ de la tabla, porque es el error de lectura más frecuente y la tabla de la apertura lo exhibe. Hay dos razones distintas. La primera es de /contenido/: cada $t$ contrasta $H_0\!:\beta_j=0$ /manteniendo a los demás regresores en el modelo/. Es decir, el $t$ de =nox= pregunta si =nox= aporta algo /además de/ =rooms= y =lnox=, y el de =lnox= pregunta si aporta algo además de =rooms= y =nox=. Ambos pueden responder ``no'' —cada uno es prescindible si el otro se queda— sin que los dos sean prescindibles a la vez. ``Todos individualmente no significativos'' y ``todos nulos simultáneamente'' son afirmaciones distintas, y la segunda es la que $H_0$ formula. La segunda razón es de /probabilidad/: cada contraste $t$ al $5\,\%$ tiene, bajo su hipótesis nula, un $5\,\%$ de probabilidad de rechazar por azar; si se hacen $k-1$ y se rechaza $H_0$ conjunta en cuanto alguno rechace, la probabilidad de un rechazo espurio ya no es el $5\,\%$, sino mayor, y tanto mayor cuantos más regresores haya. Un contraste conjunto es un único contraste, con un único nivel, sobre la hipótesis que de verdad interesa.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, sección 4.5 (``Testing multiple linear restrictions'': el planteamiento de la hipótesis conjunta y por qué los $t$ individuales no la contrastan).
+
+
+* El estadístico $F$
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Los dos catetos de la lección 8, cada uno dividido por la dimensión del subespacio donde vive ($k-1$ para el explicado, $n-k$ para el residuo, lección 11):
+\[
+\boxed{\;F=\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}\;}
+\qquad\text{(el denominador es $\mathfrak s^2$).}
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Bajo $H_0$, y con el ruido isótropo de la lección 12, la longitud al cuadrado del ruido se reparte por igual entre las dimensiones: numerador y denominador estiman los dos $\sigma^2$, y $F\approx1$. Un $F$ mucho mayor que $1$ desmiente $H_0$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Enunciado, no demostrado: bajo $H_0$, $\;F\sim F_{k-1,\,n-k}$. Se rechaza al nivel $\alpha$ si $F>F_c$, con $F_c$ el valor que deja $\alpha$ en la /cola derecha/ (una sola cola: $F$ compara longitudes, no tiene signo). Valor $p$: $\mathrm{P}(F_{k-1,\,n-k}>F)$.
+
+
+*** El estadístico $F$
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La lección 12 dejó el estadístico $t$ escrito como $t^2=(n-k)\,\mathrm{SEC}/\mathrm{SRC}$, y en su recapitulación anunció que el cociente $\mathrm{SEC}/\mathrm{SRC}$ admitía ``una versión más general en la que cada una se divide por sus propios grados de libertad''. Esa versión es el estadístico $F$:
+\[
+F=\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}.
+\]
+Los dos divisores no son arbitrarios, y el curso ya conoce a los dos. El denominador, $\mathrm{SRC}/(n-k)$, es la cuasivarianza de los residuos $\mathfrak s^2$ de la lección 11: la suma de cuadrados del residuo dividida por la dimensión $n-k$ del subespacio $\mathcal L(\boldsymbol{\mathsf X})^\perp$ donde el residuo vive. El numerador hace lo mismo con el otro cateto: $\mathrm{SEC}=\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\Vert_e^2$ es la suma de cuadrados del cateto explicado, y $k-1$ es la dimensión del subespacio donde ese cateto vive —el de los regresores en desviaciones, que en la lección 10 vimos que tiene dimensión $k-1$ dentro de $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$—. Así que $F$ compara /longitud al cuadrado por dimensión/ en los dos catetos: cuánta longitud al cuadrado ``le toca'' a cada una de las $k-1$ direcciones del subespacio explicado, frente a cuánta le toca a cada una de las $n-k$ direcciones del residuo.[fn::Con este lenguaje, los tres divisores de la familia de productos escalares del curso —$1$, $n$ y $n-k$— se ven acompañados hoy por un cuarto número, $k-1$, que no da lugar a ningún producto escalar nuevo: es sencillamente la dimensión del otro cateto. Todas las dimensiones que aparecen en esta lección suman lo que deben: $(k-1)+(n-k)=n-1$, la dimensión de $\mathcal L(\boldsymbol 1)^\perp$ (lección 5), el plano de las desviaciones donde vive el triángulo entero.]
+
+¿Por qué es ese cociente, y no otro, el que sirve para contrastar $H_0$? La respuesta es la misma idea de isotropía que en la lección 12 explicaba por qué el valor crítico depende de $n-k$, y conviene enunciarla con cuidado, porque no vamos a demostrarla. Supongamos $H_0$ cierta. Entonces el modelo poblacional es $Y=\beta_1\,\mathit1+U$: el vector de datos en desviaciones, $\boldsymbol y-\boldsymbol{\mathop{\overline y}}$, no es más que el vector de perturbaciones centrado, y bajo los supuestos de la lección 12 (homocedasticidad, independencia, normalidad) ese vector es /isótropo/ dentro de $\mathcal L(\boldsymbol 1)^\perp$: no privilegia ninguna dirección. Un vector isótropo con varianza $\sigma^2$ por componente reparte su longitud al cuadrado /por igual/ entre las dimensiones. Proyectado sobre cualquier subespacio de dimensión $d$, la longitud al cuadrado de su proyección vale, en promedio, $d\sigma^2$.[fn::Es un resultado que puede demostrarse con las herramientas de la lección 11 y no lo haremos; su versión más elemental ya la conoce: la longitud al cuadrado de un vector de $n$ componentes independientes con varianza $\sigma^2$ y media cero vale $n\sigma^2$ en promedio, porque cada componente aporta $\sigma^2$. Proyectar sobre un subespacio de dimensión $d$ deja ``$d$ componentes'' de las $n$, y la isotropía garantiza que da igual cuáles.] Aplicado a los dos catetos: bajo $H_0$, la longitud al cuadrado del cateto explicado vale en promedio $(k-1)\sigma^2$ y la del residuo, $(n-k)\sigma^2$.[fn::Las palabras ``en promedio'' esconden el mismo abuso de notación de la lección 11: $\mathrm{SEC}$ y $\mathrm{SRC}$ son aquí las fórmulas de la lección 8 /evaluadas sobre la muestra aleatoria/ —variables aleatorias, no los números de una tabla—, y lo que se afirma es $\mathrm{E}(\mathrm{SEC})=(k-1)\sigma^2$ bajo $H_0$ y $\mathrm{E}(\mathrm{SRC})=(n-k)\sigma^2$. La segunda igualdad es, dicho de otro modo, la insesgadez de $\mathfrak s^2$ que la lección 11 enunció; y vale con o sin $H_0$, porque el residuo no cambia por que los regresores aporten algo o no.] Dividiendo cada una por su dimensión, /numerador y denominador de $F$ estiman ambos $\sigma^2$/, y su cociente debe rondar $1$. Si, en cambio, $H_0$ es falsa, el cateto explicado contiene además la parte de $\boldsymbol y$ que los regresores sí explican —una longitud que no es ruido y que no se reparte con el residuo—, el numerador crece y $F$ se hace grande. Un $F$ mucho mayor que $1$ es, por tanto, evidencia contra $H_0$; un $F$ cercano a $1$ (o menor) es compatible con ella.
+
+Para convertir esta idea en un contraste con nivel de significación hace falta saber /cuánto/ mayor que $1$ es ``mucho'', y eso exige la distribución de $F$ bajo $H_0$. Igual que en la lección 12 con la $t$ de Student, la enunciamos sin demostrar: bajo $H_0$ y los supuestos de la lección 12, el estadístico sigue una /distribución $F$ de Fisher–Snedecor con $k-1$ y $n-k$ grados de libertad/, $F_{k-1,\,n-k}$. Es una distribución que solo toma valores positivos, asimétrica, con la masa concentrada en torno a $1$ y una cola derecha larga. Su forma depende de los dos números de grados de libertad, que son, una vez más, las dos dimensiones del triángulo.[fn::Su prueba exige la distribución $\chi^2$ de cada suma de cuadrados y la independencia entre ambas, el mismo aparato que la lección 12 declinó desarrollar para la $t$. De hecho, la $t_{n-k}$ y la $F_{1,\,n-k}$ son la misma distribución mirada de dos maneras: si $T\sim t_{n-k}$, entonces $T^2\sim F_{1,\,n-k}$. Es la versión distribucional de $F=t^2$ que veremos en la transparencia siguiente.] La regla de decisión tiene una novedad respecto a la lección 12: la región crítica está en /una sola cola/. Se rechaza $H_0$ al nivel $\alpha$ si $F>F_c$, donde $F_c$ es el valor de la $F_{k-1,\,n-k}$ que deja probabilidad $\alpha$ a su derecha. No hay cola izquierda porque $F$ compara longitudes al cuadrado y no tiene signo: un $F$ pequeño dice que el cateto explicado es corto, que es precisamente lo que $H_0$ predice, y nunca puede ser evidencia contra ella. El valor $p$ es, como siempre, la probabilidad de un valor al menos tan grande como el observado si $H_0$ fuese cierta, $\mathrm{P}(F_{k-1,\,n-k}>F)$, y Gretl lo imprime al lado del $F$ al pie de cada tabla.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, sección 4.5 (el estadístico $F$ y su distribución bajo la hipótesis nula); apéndice B (distribuciones $\chi^2$, $t$ y $F$ y la relación $t^2_{\nu}=F_{1,\nu}$).
+
+
+* Lectura geométrica: la misma figura
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+#+attr_latex: :width \textwidth
+#+attr_html: :width 640px
+#+NAME: FiguraTrianguloF
+#+CAPTION: El triángulo de las lecciones 8 y 12, sin cambiar un trazo. En verde, el vector de datos en desviaciones (hipotenusa, longitud $\sqrt{\mathrm{STC}}$); en violeta, el ajuste en desviaciones (cateto explicado, longitud $\sqrt{\mathrm{SEC}}$), que con varios regresores ya no es múltiplo de ninguno de ellos y vive en un subespacio de dimensión $k-1$; en gris, el residuo (cateto residual, longitud $\sqrt{\mathrm{SRC}}$), en un subespacio de dimensión $n-k$. El ángulo $\theta$ es el de $R^2=\cos^2\theta$. El estadístico $F$ compara los dos catetos, cada uno dividido por su dimensión.
+file:img/S17-Lecc12/TrianguloContraste_ancho.png
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+\[
+F=\frac{n-k}{k-1}\cdot\frac{\mathrm{SEC}}{\mathrm{SRC}}=\frac{n-k}{k-1}\cdot\frac{R^2}{1-R^2}:
+\quad\text{función únicamente del ángulo $\theta$ y de dos dimensiones.}
+\]
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Con $k=2$: $F=(n-2)\,\mathrm{SEC}/\mathrm{SRC}=t^2$, y también $F_c=t_c^2$. El ejemplo de la lección 8 ($n=5$): $F=\dfrac{90/1}{10/3}=27=t^2$; el valor crítico $F_c(1,3)=10{,}13=3{,}18^2$.
+
+
+*** Lectura geométrica: la misma figura
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La figura es la de la lección 12, y no es una economía de medios: es que el objeto es el mismo. Con $k$ regresores el triángulo rectángulo de la lección 8 sigue existiendo —la lección 10 lo comprobó: $\boldsymbol{\mathop{\widehat e}}\perp\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}$ porque el residuo es ortogonal a todo el subespacio de los regresores y ese vector está en él—, y $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y $R^2=\cos^2\theta$ valen sin cambio. Lo único que cambia respecto a la lección 12 es una frase del pie de figura: el cateto explicado ya no es un múltiplo del regresor, porque ahora hay $k-1$ regresores en desviaciones y $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}$ es una combinación de todos ellos que, en general, no está alineada con ninguno (lección 10). Por eso la figura de la lección 12 medía el regresor bajo el eje y esta no: la recta horizontal representa aquí un subespacio de dimensión $k-1$, no una dirección.
+
+Escribamos $F$ en términos del triángulo. Sacando los divisores fuera,
+\[
+F=\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}=\frac{n-k}{k-1}\cdot\frac{\mathrm{SEC}}{\mathrm{SRC}},
+\]
+y como $\mathrm{SEC}/\mathrm{SRC}=R^2/(1-R^2)$ (lección 12, dividiendo numerador y denominador por $\mathrm{STC}$ y usando Pitágoras),
+\[
+F=\frac{n-k}{k-1}\cdot\frac{R^2}{1-R^2}.
+\]
+Es la misma estructura que la identidad de la lección 12 con un factor distinto: allí $t^2=(n-k)\,R^2/(1-R^2)$; aquí el $n-k$ se divide además por $k-1$. En los dos casos el estadístico es una función únicamente del ángulo $\theta$ —vía $R^2=\cos^2\theta$— y de dimensiones. Y en los dos casos vale la misma lectura: /el contraste no mide nada que el $R^2$ no midiera ya/; lo que añade es el factor que cuenta cuántas dimensiones respaldan ese ángulo. Un $R^2$ dado es tanto más sorprendente cuantas más observaciones haya ($n-k$ grande) y cuantos /menos/ regresores se hayan usado para conseguirlo ($k-1$ pequeño). Esta segunda parte es nueva respecto a la lección 12, y es la intuición que la práctica sobre el $R^2$ ajustado ya manejó: con más regresores es más fácil acercar $\boldsymbol{\mathop{\widehat y}}$ a $\boldsymbol y$ por puro azar, porque el subespacio sobre el que se proyecta es mayor, y el $F$ lo descuenta dividiendo por $k-1$.
+
+El caso $k=2$ cierra el círculo con la lección 12. Con un único regresor no constante, $k-1=1$ y la fórmula se reduce a $F=(n-2)\,\mathrm{SEC}/\mathrm{SRC}$, que es $t^2$. No solo el estadístico: también el valor crítico, porque la $F_{1,\,n-k}$ es la distribución del cuadrado de una $t_{n-k}$, de modo que $F_c=t_c^2$ y las dos reglas de decisión rechazan en los mismos casos. Es lo que el laboratorio anterior verificó sobre =hprice2= y con =restrict=, y lo que el ejemplo de juguete de la lección 8 permite comprobar con números redondos: $\mathrm{SEC}=90$, $\mathrm{SRC}=10$, $n=5$, luego $F=(90/1)/(10/3)=27$, el mismo $t^2=27$ de la lección 12; y el valor crítico al $5\,\%$ de la $F_{1,3}$ es $10{,}13$, el cuadrado del $3{,}18$ de la $t_3$. Se rechaza por las dos vías, y por el mismo margen.
+
+También la región crítica se lee igual que en la lección 12: rechazar cuando $F>F_c$ equivale a rechazar cuando el ángulo $\theta$ es menor que un ángulo crítico $\theta_c$ —un /cono/ alrededor del subespacio de los regresores en desviaciones—, y la abertura de ese cono depende de las dos dimensiones. Con los números de la transparencia siguiente ($n=506$, $k=4$), la abertura al $5\,\%$ es de $82{,}9^\circ$: casi todo el espacio, por la misma razón que en la lección 12 —en dimensión alta el azar solo produce ángulos próximos a $90^\circ$—.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, sección 4.5, apartado ``The \(R\)-squared form of the \(F\) statistic''.
+
+
+* El $F$ en una tabla de resultados
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+=hprice2=: =price= sobre =rooms=, =nox= y =stratio= (el modelo de la práctica que siguió a la lección 10).
+
+#+ATTR_LATEX: :align |l|r|r|r|
+| Regresor  | Coeficiente | Desv. típica | Estadístico $t$ |
+|-----------+-------------+--------------+-----------------|
+| constante |     9458,01 |      4371,41 |            2,16 |
+| =rooms=   |     7000,63 |       409,15 |           17,11 |
+| =nox=     |    -1693,33 |       236,25 |           -7,17 |
+| =stratio= |    -1166,96 |       128,76 |           -9,06 |
+
+$n=506$, $k=4$, $R^2=0{,}6005$, $\mathrm{SRC}=1{,}711\cdot10^{10}$, $\mathrm{SEC}=2{,}572\cdot10^{10}$, $\mathfrak s=5837{,}8$; al pie: $F(3,502)=251{,}5$, valor $p=1{,}3\cdot10^{-99}$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Reconstrucción: $\mathrm{SEC}/3=8{,}573\cdot10^{9}$ y $\mathrm{SRC}/502=3{,}408\cdot10^{7}=\mathfrak s^2$; cociente $251{,}5$, frente a $F_c(3,502)=2{,}62$ al $5\,\%$. /Dice/: los tres coeficientes no son cero a la vez. /No dice/: cuál importa, ni cuánto.
+
+
+*** El $F$ en una tabla de resultados
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Toda tabla de regresión de Gretl termina con dos líneas de resumen que, hasta hoy, habíamos leído solo en parte: el $R^2$ y la desviación típica de la regresión $\mathfrak s$ (lección 12), y a su lado un ``$F(k-1,\,n-k)$'' con su valor $p$. Ese $F$ es el estadístico de significación conjunta de esta lección: contrasta, automáticamente y para cualquier modelo que se estime, la hipótesis de que todos los coeficientes de los regresores no constantes son cero a la vez. Los dos números entre paréntesis son las dimensiones del triángulo.
+
+Tomemos el modelo de la práctica que siguió a la lección 10, el precio mediano de la vivienda sobre el número de habitaciones, la contaminación y la ratio alumnos/profesor del distrito. Con $n=506$ y $k=4$ (tres regresores más la constante), las dimensiones son $k-1=3$ y $n-k=502$. Todo lo que hace falta para reconstruir el $F$ está en la tabla o sale de ella con la lección 8: $\mathrm{SRC}$ lo imprime Gretl; $\mathrm{STC}$ se obtiene de $R^2=1-\mathrm{SRC}/\mathrm{STC}$, y $\mathrm{SEC}=\mathrm{STC}-\mathrm{SRC}=2{,}572\cdot10^{10}$. Dividiendo cada cateto por su dimensión, el numerador vale $8{,}573\cdot10^9$ y el denominador $3{,}408\cdot10^7$, que es $\mathfrak s^2=5837{,}8^2$, como debe. El cociente es $251{,}5$, el $F$ de la tabla. Por la otra vía, $\frac{502}{3}\cdot\frac{0{,}6005}{0{,}3995}=251{,}5$, el mismo número.
+
+La decisión no admite duda: el valor crítico de la $F_{3,502}$ al $5\,\%$ es $2{,}62$, y al $1\,\%$, $3{,}82$; el estadístico observado es cien veces mayor y el valor $p$ es del orden de $10^{-99}$. Se rechaza $H_0$: los datos no son compatibles con que =rooms=, =nox= y =stratio= tengan, a la vez, coeficiente nulo. Merece la pena leer también la magnitud: $F=251{,}5$ dice que, por dimensión, el cateto explicado tiene una longitud al cuadrado doscientas cincuenta veces mayor que la del residuo; si $H_0$ fuese cierta esa razón debería rondar $1$.
+
+Y ahora lo que el $F$ /no/ dice, que es tan importante como lo que dice y que la sección ``Qué dice y qué no dice el $F$'' desarrollará. Rechazar $H_0\!:\beta_2=\beta_3=\beta_4=0$ es rechazar que /los tres/ sean nulos a la vez; es compatible con que dos de ellos lo sean. El $F$ conjunto no señala a ningún regresor en particular, ni dice nada de la magnitud de los efectos: para eso están las columnas de la tabla y los intervalos de confianza de la lección 12. En este ejemplo los tres $t$ individuales son grandes y no hay conflicto; pero la tabla de la apertura muestra que puede haberlo, y en ese caso la lectura correcta exige entender qué mide cada estadístico.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, sección 4.5, apartado ``The $F$ statistic for overall significance of a regression''; y sección 4.6 (cómo se presentan los resultados, incluido el $F$).
+
+
+* Restricciones lineales: modelos anidados
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Una hipótesis lineal: $q$ ecuaciones sobre los $\beta$ (excluir, igualar, fijar). Imponerla es proyectar sobre un subespacio /menor/: ajuste restringido $\boldsymbol{\mathop{\widehat y}}_r$, con $\mathrm{SRC}_r\geq\mathrm{SRC}$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+attr_latex: :width \textwidth
+#+attr_html: :width 640px
+#+NAME: FiguraTrianguloAnidado
+#+CAPTION: El mismo triángulo con el ajuste restringido en el papel del vector de medias. En verde, el residuo del modelo restringido $\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r$ (hipotenusa, longitud $\sqrt{\mathrm{SRC}_r}$); en violeta, lo que las $q$ direcciones liberadas añaden al ajuste, $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r$ (cateto de longitud $\sqrt{\mathrm{SRC}_r-\mathrm{SRC}}$); en gris, el residuo del modelo completo (cateto de longitud $\sqrt{\mathrm{SRC}}$). El ángulo recto es la ortogonalidad $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\perp\boldsymbol{\mathop{\widehat e}}$, de la que sale Pitágoras: $\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2$. Con $\boldsymbol{\mathop{\widehat y}}_r=\boldsymbol{\mathop{\overline y}}$ es la figura anterior.
+file:img/S19-Lecc13/TrianguloAnidado_ancho.png
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+\[
+\boxed{\;F=\frac{(\mathrm{SRC}_r-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)}\;\sim\;F_{q,\,n-k}\ \text{ bajo }H_0\;}
+\qquad\text{(conjunta: $\boldsymbol{\mathop{\widehat y}}_r=\boldsymbol{\mathop{\overline y}}$, $q=k-1$).}
+\]
+
+
+*** Restricciones lineales: modelos anidados
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La significación conjunta es solo una de las hipótesis que pueden formularse sobre varios coeficientes, y no siempre la más interesante. Una /hipótesis lineal/ general es un sistema de $q$ ecuaciones lineales sobre los coeficientes del modelo poblacional. Tres ejemplos que reaparecerán con números en la transparencia siguiente: excluir dos regresores a la vez, $\beta_3=\beta_4=0$ ($q=2$); excluir uno solo, $\beta_4=0$ ($q=1$, el contraste $t$ de siempre); y una hipótesis que no excluye a nadie, sino que relaciona dos coeficientes, $\beta_3=\beta_4$ ($q=1$). Otras, igual de naturales en economía, fijan un valor —una elasticidad unitaria, $\beta_2=1$— o una suma —rendimientos constantes a escala, $\beta_2+\beta_3=1$, que veremos al hablar de la función de producción—.
+
+Lo que hace tratables a todas ellas con una única herramienta es una observación geométrica. Imponer $q$ restricciones lineales sobre los coeficientes equivale a exigir que el ajuste sea una combinación lineal de los regresores /de un tipo particular/. El conjunto de esas combinaciones es un subespacio /menor/ que $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$, contenido en él, con $q$ dimensiones menos.[fn::Con $\beta_3=\beta_4=0$, el subespacio restringido es $\mathcal L(\boldsymbol 1,\boldsymbol x_2)$: hemos perdido dos generadores. Con $\beta_3=\beta_4$, es $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\boldsymbol x_3+\boldsymbol x_4)$: la combinación $\beta_3\boldsymbol x_3+\beta_4\boldsymbol x_4$ con $\beta_3=\beta_4$ es $\beta_3(\boldsymbol x_3+\boldsymbol x_4)$, así que los dos regresores se funden en uno y se pierde una dimensión. Las restricciones que fijan un valor, como $\beta_2=1$, dan un conjunto que no pasa por el origen (un subespacio /trasladado/ por $\boldsymbol x_2$); el argumento que sigue vale igual, porque lo único que usa es que los dos ajustes están en $\mathcal L(\boldsymbol{\mathsf X})$.] El /ajuste restringido/ $\boldsymbol{\mathop{\widehat y}}_r$ es la proyección de $\boldsymbol y$ sobre ese subespacio menor —lo que Gretl calcula al estimar, por ejemplo, el modelo sin =nox= ni =stratio= a la vez—, y su suma de cuadrados residual, \(\mathrm{SRC}_r=\Vert\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2\), es necesariamente mayor o igual que la del modelo completo: proyectar sobre un subespacio más pequeño nunca acerca más. Es la misma propiedad mecánica que la lección 8 anunció como ``$R^2$ nunca empeora al añadir regresores'' y que la práctica del $R^2$ ajustado hizo explícita: quitar regresores nunca reduce $\mathrm{SRC}$.
+
+La pregunta del contraste es, entonces, /cuánto/ ha subido $\mathrm{SRC}$ al imponer las restricciones. Si $H_0$ es cierta, el modelo restringido es el verdadero y la subida $\mathrm{SRC}_r-\mathrm{SRC}$ es solo la parte del ruido que las $q$ direcciones liberadas recogían por azar. Si $H_0$ es falsa, las restricciones le quitan al ajuste algo que sí explicaba $\boldsymbol y$, y la subida es grande. Para medirla hace falta el único resultado que hoy sí demostramos:
+
+#+begin_quote
+/Proposición (Pitágoras anidado)/. Los dos ajustes cumplen $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\perp\boldsymbol{\mathop{\widehat e}}$, y por tanto
+\[
+\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2.
+\]
+#+end_quote
+
+/Demostración/. El ajuste restringido $\boldsymbol{\mathop{\widehat y}}_r$ es una combinación lineal de los regresores (una de un tipo particular, pero combinación al fin), luego pertenece a $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$; y $\boldsymbol{\mathop{\widehat y}}$ también. Su diferencia está, por tanto, en ese subespacio, y el residuo del modelo completo es ortogonal a todo él (lección 10: $\boldsymbol{\mathop{\widehat e}}\boldsymbol{\mathsf X}=\boldsymbol 0$). Así que $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\perp\boldsymbol{\mathop{\widehat e}}$. Ahora escribimos el residuo restringido como suma de dos vectores ortogonales:
+\[
+\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r=(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r)+(\boldsymbol y-\boldsymbol{\mathop{\widehat y}})=(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r)+\boldsymbol{\mathop{\widehat e}}.
+\]
+Aplicando el teorema de Pitágoras de la lección 3, $\Vert\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2=\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2+\Vert\boldsymbol{\mathop{\widehat e}}\Vert_e^2$, que es la igualdad anunciada. $\blacksquare$
+
+Esta proposición es la de la lección 8 ($\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$) con el vector de medias sustituido por el ajuste restringido, y la figura de la transparencia es la de la lección 8 con esa sustitución: hipotenusa $\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r$, catetos $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r$ y $\boldsymbol{\mathop{\widehat e}}$. La subida de la suma de cuadrados residual es la longitud al cuadrado del cateto que las $q$ direcciones liberadas añaden al ajuste, y ese cateto vive en un subespacio de dimensión $q$. Con esto, el estadístico se construye igual que el de significación conjunta —cada cateto dividido por su dimensión—:
+\[
+F=\frac{(\mathrm{SRC}_r-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)}=\frac{\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2/q}{\mathfrak s^2},
+\]
+La misma isotropía de la sección ``El estadístico $F$'' hace que, bajo $H_0$, numerador y denominador estimen ambos $\sigma^2$. Su distribución bajo $H_0$, que enunciamos sin demostrar, es la $F_{q,\,n-k}$, y la regla es la de siempre: rechazar si $F>F_c$. La significación conjunta es el caso particular en que el subespacio restringido es $\mathcal L(\boldsymbol 1)$: entonces $\boldsymbol{\mathop{\widehat y}}_r=\boldsymbol{\mathop{\overline y}}$, $\mathrm{SRC}_r=\mathrm{STC}$, la subida es $\mathrm{SEC}$ y $q=k-1$. Todo lo dicho en las transparencias anteriores era, sin saberlo, este caso.
+
+Es útil retener el nombre que suele darse a esta construcción: los dos modelos están /anidados/, el restringido dentro del completo, y el $F$ compara el ajuste del pequeño con el del grande. Cualquier par de modelos anidados —cualquier hipótesis lineal— se contrasta con la misma receta: estimar los dos, leer las dos sumas de cuadrados residuales, contar $q$ y $n-k$.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, sección 4.5 (``Testing exclusion restrictions'' y ``Testing general linear restrictions''); y sección 4.4 (contraste de una única combinación lineal de coeficientes, el caso $q=1$).
+
+
+* Tres restricciones sobre =hprice2=
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Modelo completo: =price= sobre =rooms=, =nox= y =stratio= ($\mathrm{SRC}=1{,}711\cdot10^{10}$, $n-k=502$, $\mathfrak s^2=3{,}408\cdot10^{7}$). En Gretl: menú //~Contrastes -> Restricciones lineales~// o el comando =restrict= del laboratorio anterior.
+
+#+ATTR_LATEX: :align |l|c|r|r|r|l|
+| $H_0$                                       | $q$ | $\mathrm{SRC}_r-\mathrm{SRC}$ | $F$    | $F_c$ al $5\,\%$ | Veredicto                   |
+|---------------------------------------------+-----+-------------------------------+--------+------------------+-----------------------------|
+| $\beta_{\text{nox}}=\beta_{\text{stratio}}=0$ |   2 | $4{,}985\cdot10^{9}$          | 73,1   | 3,01             | se rechaza ($p=10^{-28}$)   |
+| $\beta_{\text{stratio}}=0$                  |   1 | $2{,}799\cdot10^{9}$          | 82,1   | 3,86             | se rechaza; $82{,}1=(-9{,}06)^2$ |
+| $\beta_{\text{nox}}=\beta_{\text{stratio}}$ |   1 | $1{,}213\cdot10^{8}$          | 3,56   | 3,86             | no se rechaza ($p=0{,}060$) |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+La segunda fila es el contraste $t$ de la tabla, al cuadrado. La tercera /no/ es de exclusión: el modelo restringido regresa =price= sobre =rooms= y la /suma/ =nox= $+$ =stratio= —otro subespacio, no menos regresores—.
+
+
+*** Tres restricciones sobre =hprice2=
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Los tres contrastes de la tabla se hacen sobre el mismo modelo completo de la sección ``El $F$ en una tabla de resultados'', de modo que el denominador es siempre el mismo: $\mathrm{SRC}/(n-k)=\mathfrak s^2=3{,}408\cdot10^7$. Lo que cambia de fila a fila es el numerador, es decir, el modelo restringido que se compara.
+
+/Primera fila: dos exclusiones a la vez/, $H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}=0$. El modelo restringido es la regresión simple de =price= sobre =rooms= que arrastramos desde el laboratorio que siguió a la lección 8, con $\mathrm{SRC}_r=2{,}209\cdot10^{10}$. La subida al quitar los dos regresores es $4{,}985\cdot10^9$, que repartida entre $q=2$ dimensiones y dividida por $\mathfrak s^2$ da $F=73{,}1$, frente a un valor crítico $F_c(2,502)=3{,}01$. Se rechaza sin discusión: la contaminación y la ratio alumnos/profesor añaden, juntas, mucho más de lo que dos direcciones de puro azar añadirían. Es la respuesta a la pregunta ``¿sobran estas dos variables?'', que ningún $t$ individual formula.
+
+/Segunda fila: una exclusión/, $H_0\!:\beta_{\text{stratio}}=0$. Ahora el modelo restringido es =price= sobre =rooms= y =nox=, con $\mathrm{SRC}_r=1{,}991\cdot10^{10}$; la subida es $2{,}799\cdot10^9$, $q=1$, y $F=82{,}1$. Compárese con la tabla de la sección ``El $F$ en una tabla de resultados'': el $t$ de =stratio= era $-9{,}06$, y $(-9{,}06)^2=82{,}1$. Es la identidad $F=t^2$ con $q=1$, ahora en un modelo con varios regresores: el contraste $t$ de un coeficiente es el contraste $F$ de una única restricción de exclusión, y el valor crítico $F_c(1,502)=3{,}86$ es el cuadrado del $t_c=1{,}96$ de la lección 12. Gretl lo confirma si se le pide la restricción con =restrict= o desde el menú: devuelve un $F(1,502)$ idéntico al $t^2$, con el mismo valor $p$.
+
+/Tercera fila: una igualdad/, $H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}$ (``una unidad más de contaminación cuesta lo mismo que un alumno más por profesor''). Esta hipótesis no excluye a nadie, y por eso conviene detenerse en cuál es su modelo restringido. Bajo $H_0$, la combinación $\beta_{\text{nox}}\boldsymbol x_{\text{nox}}+\beta_{\text{stratio}}\boldsymbol x_{\text{stratio}}$ se convierte en $\beta_{\text{nox}}(\boldsymbol x_{\text{nox}}+\boldsymbol x_{\text{stratio}})$: los dos regresores se funden en uno, la suma, y el modelo restringido es la regresión de =price= sobre =rooms= y =nox= $+$ =stratio=. Su $\mathrm{SRC}_r$ es $1{,}723\cdot10^{10}$, apenas por encima del completo: la subida es $1{,}213\cdot10^8$ y $F=3{,}56$, ligeramente por debajo del valor crítico $3{,}86$. No se rechaza al $5\,\%$, con un valor $p$ de $0{,}060$ que conviene informar tal cual: los datos son /compatibles/ con que los dos efectos sean iguales, aunque por poco, y la lección 12 ya advirtió que ``no rechazar'' no es ``aceptar''. Lo instructivo de esta fila es que muestra que imponer una restricción es cambiar de subespacio, no necesariamente recortar regresores: el subespacio $\mathcal L(\boldsymbol 1,\boldsymbol x_{\text{rooms}},\boldsymbol x_{\text{nox}}+\boldsymbol x_{\text{stratio}})$ tiene una dimensión menos que el completo, pero no se obtiene quitando ninguna columna de $\boldsymbol{\mathsf X}$.[fn::Con la fórmula matricial de la lección 11 para la varianza de $\boldsymbol{\mathop{\widehat{\beta}}}$, este contraste puede hacerse también como un $t$: el estadístico es $(\hat\beta_{\text{nox}}-\hat\beta_{\text{stratio}})$ dividido por el error estándar de esa diferencia, que involucra la covarianza $Cov[\hat\beta_{\text{nox}},\hat\beta_{\text{stratio}}\mid\boldsymbol X]$ de fuera de la diagonal. Su cuadrado es el $F$ de la tabla; la vía de las sumas de cuadrados evita tener que calcular esa covarianza.]
+
+En Gretl, las tres filas se obtienen sin estimar a mano el modelo restringido: en la ventana del modelo completo, el menú //~Contrastes -> Restricciones lineales~// (o el bloque =restrict= que el laboratorio anterior usó con =b[2]=0=) acepta cualquier sistema de ecuaciones lineales sobre los coeficientes y devuelve el $F$ con sus dos grados de libertad y su valor $p$. Un laboratorio posterior lo aplicará con varias restricciones a la vez y comprobará, estimando los dos modelos, que el $F$ que imprime es el cociente de sumas de cuadrados de esta lección.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, sección 4.4 (contrastar $\beta_j=\beta_h$ como un $t$ con la covarianza de los estimadores, y por qué la vía del modelo restringido es más cómoda); manual de Gretl, comando =restrict=.
+
+
+* Conjunto $\neq$ individual: el caso de la apertura
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+#+ATTR_LATEX: :align |l|r|r|r|r|
+| Modelo (=price= sobre =rooms= y …) | $t$ de =nox= | $t$ de =lnox= | $R^2$  | $F$ de excluir ambos |
+|------------------------------------+--------------+---------------+--------+----------------------|
+| … =nox=                            |        -7,43 |               | 0,5352 |                      |
+| … =lnox=                           |              |         -7,51 | 0,5361 |                      |
+| … =nox= y =lnox=                   |         0,18 |         -1,05 | 0,5362 | $F(2,502)=28{,}2$ ($F_c=3{,}01$) |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+$\rho_{\text{nox},\text{lnox}}=0{,}994$: los dos regresores apuntan casi en la misma dirección. Cada uno solo es muy significativo; juntos, el ajuste no puede repartir el efecto entre ellos: a cada uno le queda muy poca longitud /propia/ (lección 12), su error estándar se dispara y su $t$ se hunde. Pero el subespacio que generan /juntos/ sí acerca $\boldsymbol{\mathop{\widehat y}}$ a $\boldsymbol y$, y el $F$ lo ve.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+Un $F$ conjunto alto con $t$ individuales nulos es la firma de la /colinealidad/ (lección 14). La conclusión correcta no es ``sobran los dos'', sino ``no se puede separar cuál de los dos''.
+#+end_center
+
+
+*** Conjunto $\neq$ individual: el caso de la apertura
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Volvamos a la tabla con la que abrimos la sesión, ahora con la herramienta para leerla. Las tres filas de la transparencia son tres regresiones del precio mediano de la vivienda: sobre =rooms= y la concentración de óxidos de nitrógeno =nox=; sobre =rooms= y el logaritmo de esa concentración, =lnox=; y sobre =rooms= y las dos medidas a la vez. Las dos primeras dicen lo mismo con claridad: la contaminación reduce el precio, con un $t$ de $-7{,}4$ o $-7{,}5$ y un $R^2$ de $0{,}535$ o $0{,}536$. Da casi igual medirla en niveles o en logaritmos, y es fácil ver por qué: la correlación entre =nox= y =lnox= es $0{,}994$; en el lenguaje de la lección 5, sus vectores en desviaciones forman un ángulo de unos $6^\circ$, prácticamente la misma dirección.
+
+La tercera fila es la que desconcierta si se lee fila a fila. Con las dos medidas en el modelo, el $t$ de =nox= cae a $0{,}18$ y el de =lnox= a $-1{,}05$; los valores $p$ son $0{,}854$ y $0{,}295$, y la lectura ingenua de la lección 12 concluiría que ninguna de las dos interviene. Pero el $R^2$ apenas ha cambiado —$0{,}5362$— y, sobre todo, el $F$ de excluir las dos a la vez vale $28{,}2$ frente a un crítico de $3{,}01$: quitar la contaminación del modelo, en cualquiera de sus dos formas, empeora el ajuste de manera inconfundible. Las dos variables /juntas/ son claramente significativas; /cada una/, en presencia de la otra, no lo es.
+
+No hay contradicción, y la lección 12 ya dio la clave en su recapitulación: con varios regresores, el error estándar de $\hat\beta_j$ es $\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$, donde $\tilde{\boldsymbol x}_j$ es lo que le queda de /propio/ al regresor $j$ tras descontar lo que comparte con los demás. Cuando =nox= y =lnox= están los dos en el modelo, casi todo lo que tiene cada uno lo comparte con el otro. La parte propia de cada uno es un vector cortísimo, el error estándar de cada coeficiente se dispara y el $t$ se hunde: compárense las desviaciones típicas de la tabla de la apertura, $2198{,}85$ y $12655{,}7$, con los $236$ que tenía =nox= sola en la sección ``El $F$ en una tabla de resultados''. El contraste $t$ de =nox= pregunta si =nox= aporta algo /que =lnox= no aporte ya/, y la respuesta honesta es que casi nada; y lo mismo al revés. Pero esa es una pregunta sobre la /dirección propia/ de cada regresor, no sobre el subespacio que generan entre los dos. Ese subespacio —un plano dentro de $\mathcal L(\boldsymbol 1)^\perp$— sí contiene una dirección en la que $\boldsymbol y$ se proyecta con fuerza, y el $F$ de excluir ambas mide eso: cuánto se alarga el residuo si se suprime el plano entero. Por eso el $F$ es enorme mientras los dos $t$ son nulos.
+
+Esta situación tiene nombre, /colinealidad/, y le dedicaremos la lección 14. Lo que conviene retener hoy es la lectura correcta de la tabla, porque el error contrario es muy frecuente en informes y artículos: ante dos regresores con $t$ pequeños, eliminar los dos ``porque no son significativos''. El contraste conjunto dice que eso es un error: lo que los datos no permiten es /separar/ el efecto de uno del efecto del otro, no negar que haya efecto. La respuesta razonable es quedarse con uno de los dos —cualquiera de las dos primeras filas es un modelo excelente— o, si la pregunta económica exige distinguirlos, reconocer que estos datos no lo permiten. Es la misma moraleja de la lección 12 con un solo regresor —para medir un efecto hace falta que la variable varíe— trasladada a varios: para medir el efecto de cada uno hace falta que cada uno varíe /por su cuenta/.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, sección 4.5, apartado ``Relationship between $F$ and $t$ statistics'' (el ejemplo en que ningún $t$ es significativo y el $F$ sí lo es); y cap. 3, sección 3.4, apartado sobre multicolinealidad.
+
+
+* Qué dice y qué no dice el $F$
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+$F=\frac{n-k}{k-1}\cdot\frac{R^2}{1-R^2}$ mezcla, como el $t$, /fuerza de la relación/ (el ángulo) con /cantidad de evidencia/ (las dimensiones). Con $k=4$:
+
+#+ATTR_LATEX: :align |r|r|r|r|l|
+|    $n$ | $R^2$ | $\theta$       |    $F$ | Veredicto al $5\,\%$          |
+|--------+-------+----------------+--------+-------------------------------|
+|      6 |  0,90 | $18{,}4^\circ$ |   6,00 | no significativo ($F_c=19{,}16$) |
+|     10 |  0,90 | $18{,}4^\circ$ |  18,00 | significativo ($F_c=4{,}76$)  |
+|   1003 |  0,01 | $84{,}3^\circ$ |   3,36 | significativo ($F_c=2{,}61$)  |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+El $F$ del pie de la tabla contrasta la hipótesis /menos/ interesante (que nada explique nada) y con muestras grandes se rechaza casi siempre. Los $F$ que informan nacen de una pregunta: ¿sobran estas dos variables?, ¿tienen el mismo efecto?, ¿es la elasticidad unitaria?
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Doce viviendas: $F(3,8)=9{,}55>4{,}07$, significativo… con =stratio= a $t=-0{,}10$ e intervalos enormes. Un $F$ no dice cuál regresor ni cuánto: mire los coeficientes y sus intervalos. Y nada de esto establece causalidad.
+
+
+*** Qué dice y qué no dice el $F$
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Todo lo que la lección 12 dijo sobre la lectura del $t$ vale para el $F$, y la forma $F=\frac{n-k}{k-1}\cdot\frac{R^2}{1-R^2}$ lo hace evidente sin necesidad de moraleja: el estadístico es el producto de un factor que mide la fuerza de la relación en la muestra —el ángulo, el $R^2$— y otro que solo cuenta dimensiones. La tabla de la transparencia repite, con $k=4$, el experimento de la lección 12. Las dos primeras filas tienen el mismo $R^2$ de $0{,}90$, el mismo ángulo de $18{,}4^\circ$, y veredictos opuestos: con $n=6$ hay solo $n-k=2$ dimensiones para el residuo, el valor crítico de la $F_{3,2}$ es $19{,}16$ y un $F$ de $6$ no basta; con $n=10$ el crítico baja a $4{,}76$ y $F=18$ rechaza con holgura. La tercera fila hace el camino inverso: un $R^2$ del $1\,\%$ —un ángulo de $84^\circ$, casi ortogonalidad— resulta conjuntamente significativo con mil observaciones. Compárese con la tabla análoga de la lección 12: con $k=2$ bastaban $n=5$ para que $R^2=0{,}90$ fuese significativo; con $k=4$ hacen falta más, porque el mismo $R^2$ conseguido con tres regresores en vez de uno es menos sorprendente —hay más direcciones sobre las que el azar puede proyectar—. Es el descuento por $k-1$ del numerador, y es la misma idea que motivó el $R^2$ ajustado.
+
+Hay una segunda advertencia, propia del $F$ y que la lección 12 no necesitaba. El $F$ que Gretl imprime al pie de cada tabla contrasta la significación conjunta de /todos/ los regresores: la hipótesis de que ninguno de ellos tenga nada que ver con el regresando. En la práctica es la hipótesis menos interesante que cabe formular, porque nadie estima un modelo con regresores elegidos al azar; y con muestras grandes se rechaza casi sin excepción, como muestra la tercera fila de la tabla. Que ese $F$ sea enorme no es una virtud del modelo, y que sea pequeño en una muestra grande es una señal muy seria. Los contrastes $F$ que de verdad informan son los de la transparencia ``Tres restricciones sobre =hprice2='': nacen de una pregunta concreta —¿sobran estas dos variables?, ¿tienen el mismo efecto?, ¿vale uno la elasticidad?, ¿son constantes los rendimientos a escala?— y su respuesta cambia algo. El $F$ automático conviene mirarlo una vez y no volver sobre él.
+
+La tercera advertencia es la que el laboratorio anterior ilustró con doce viviendas para el $t$, y que vale igual para el $F$. Con la misma submuestra aleatoria de doce viviendas y el modelo de =rooms=, =nox= y =stratio=, el $F(3,8)$ de significación conjunta vale $9{,}55$ frente a un crítico de $4{,}07$: se rechaza $H_0$, los tres regresores no son nulos a la vez. Y sin embargo el $t$ de =stratio= es $-0{,}10$, el de =nox= apenas $-2{,}6$ y los intervalos de confianza de los tres coeficientes son enormes. El $F$ significativo dice que /algo/ del subespacio de los regresores explica el precio; no dice qué, ni cuánto, ni con qué precisión. Como en la lección 12, lo que informa es el coeficiente en las unidades del problema y su intervalo, y un $F$ —como un $t$— solo dice si la evidencia contra una hipótesis es distinguible del azar. Un $F$ no significativo tampoco es la prueba de que las restricciones sean ciertas: es la ausencia de evidencia en su contra, y con pocas observaciones esa ausencia es barata.
+
+Y, como siempre, nada de esto establece causalidad. Un $F$ conjunto significativo dice que la proyección de $\boldsymbol y$ sobre el subespacio de los regresores es más larga de lo que el azar produciría; de si alguno de esos regresores /causa/ el regresando no dice nada, por las mismas razones de las lecciones 8, 9 y 12. Las correlaciones espurias producen $F$ enormes con la misma facilidad que $t$ enormes.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, sección 4.2f (significación económica frente a estadística, que se aplica sin cambios al $F$) y sección 4.5, apartado sobre el valor $p$ del contraste $F$.
+
+
+* Recapitulación y guiño a las sesiones siguientes
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+#+ATTR_LATEX: :align |p{3.6cm}|p{5.4cm}|p{5.2cm}|
+| Pieza                          | Fórmula                                                                                    | Lectura geométrica                                                      |
+|--------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------|
+| $F$ de significación conjunta  | $\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}=\frac{n-k}{k-1}\frac{R^2}{1-R^2}$            | razón de catetos, cada uno por su dimensión                             |
+| $F$ de $q$ restricciones       | $\frac{(\mathrm{SRC}_r-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)}$                                | el mismo triángulo, con $\boldsymbol{\mathop{\widehat y}}_r$ en el papel de $\boldsymbol{\mathop{\overline y}}$ |
+| Caso $q=1$                     | $F=t^2$, $F_c=t_c^2$                                                                       | el contraste $t$ es un $F$ de una restricción                           |
+| Grados de libertad             | $k-1$ (o $q$) y $n-k$                                                                      | dimensiones de los dos catetos                                          |
+| Región crítica                 | $F>F_c$ (una cola)                                                                         | cono alrededor del subespacio de los regresores                         |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Un único ingrediente nuevo: dividir cada cateto por su dimensión. Demostrado: Pitágoras anidado y $F=t^2$. Enunciado: la distribución $F_{q,\,n-k}$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+/Lección 14/: colinealidad. La longitud propia $\Vert\tilde{\boldsymbol x}_j\Vert_e$ de cada regresor y el /factor de inflación de la varianza/ explican con números el caso de =nox= y =lnox=. /En un laboratorio posterior/: =restrict= con varias restricciones a la vez, y la distribución del $F$ bajo $H_0$ con datos simulados.
+
+
+*** Recapitulación y guiño a las sesiones siguientes
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El balance de la sesión es, otra vez, mucho resultado con muy poco ingrediente nuevo. Todo el aparato —el triángulo, las sumas de cuadrados, el $R^2$, la cuasivarianza $\mathfrak s^2$, la isotropía del ruido bajo normalidad— estaba ya sobre la mesa desde las lecciones 8, 11 y 12. Lo único que hoy hemos añadido es una idea: comparar los dos catetos /por dimensión/, dividiendo cada suma de cuadrados por el número de direcciones del subespacio donde vive. Con ella, el contraste $t$ de la lección 12 resulta ser el caso de una sola dirección, y el contraste de cualquier hipótesis lineal sobre los coeficientes —excluir, igualar, fijar— se reduce a una única receta: estimar el modelo con y sin la hipótesis, leer las dos sumas de cuadrados residuales y contar dimensiones.
+
+La tabla resume las piezas. Conviene subrayar, como en la lección 12, lo que se ha demostrado y lo que no. Se ha demostrado, con material del propio curso, el Pitágoras anidado —que la subida de la suma de cuadrados residual al imponer restricciones es la longitud al cuadrado de un cateto ortogonal al residuo— y las identidades $F=\frac{n-k}{k-1}\frac{R^2}{1-R^2}$ y $F=t^2$. Se ha enunciado sin demostrar, igual que la $t$ de Student en la lección 12, la distribución $F_{q,\,n-k}$ del estadístico bajo $H_0$, y la afirmación que la sostiene: que un ruido isótropo reparte su longitud al cuadrado por igual entre las dimensiones. La parte geométrica es rigurosa; la parte probabilística, enunciada.
+
+Quedan dos hilos abiertos. El primero es el caso de =nox= y =lnox=, que hoy hemos sabido /leer/ pero no /medir/. La lección 12 enunció que con varios regresores $\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$, con $\tilde{\boldsymbol x}_j$ la parte propia del regresor $j$; hoy hemos visto qué pasa cuando esa parte propia es casi nula: el $t$ individual se hunde mientras el conjunto sigue siendo significativo. La lección 14 pondrá números a $\Vert\tilde{\boldsymbol x}_j\Vert_e$, mostrará que se calcula con una regresión auxiliar de $\boldsymbol x_j$ sobre los demás regresores, y de ahí saldrá el /factor de inflación de la varianza/, la medida habitual de cuánto encarece la colinealidad cada error estándar. El segundo hilo es de laboratorio. En una práctica posterior se aplicará =restrict= con varias restricciones simultáneas sobre datos reales, comprobando estimación a estimación que el $F$ de Gretl es el cociente de sumas de cuadrados de hoy. Y se simulará, con el =loop= del laboratorio que siguió a la lección 11, la distribución del $F$ bajo una $H_0$ cierta: los histogramas mostrarán que ronda $1$ y que la cola derecha es la que Gretl tabula.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 4, sección 4.5 (resumen del contraste $F$); cap. 3, sección 3.4, apartado ``Multicollinearity'' (con el que arranca la lección siguiente).
+
+
+* Preguntas de repaso (sesión 19)                                  :htmlonly:
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Te propongo 12 preguntas.
+Las marco con un nivel orientativo: [B] básica, [M] media, [D] discriminadora.
+
+*** Comentario
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Las preguntas más valiosas pedagógicamente son la 3 (fija la idea que vertebra la sesión: bajo $H_0$ los dos catetos, divididos por su dimensión, estiman lo mismo, y por eso $F$ ronda $1$), la 6 (exige el argumento geométrico exacto del Pitágoras anidado, no la fórmula memorizada) y la 8 (la lectura correcta de $t$ individuales nulos con $F$ conjunto alto, que es el error de interpretación más frecuente de toda la regresión múltiple y el enlace con la lección 14). La 7 conviene comentarla en clase, porque desmonta la idea de que ``restringir'' es siempre ``quitar regresores''. La 12 mantiene, como en las lecciones anteriores, la honestidad sobre qué está demostrado y qué solo enunciado.
+
+*** Pregunta 1 [B] — Qué contrasta el $F$ del pie de la tabla
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El estadístico $F(k-1,\,n-k)$ que Gretl imprime al pie de toda tabla de regresión contrasta la hipótesis de que:
+
+1) El coeficiente de la constante es cero.
+2) Todos los coeficientes de los regresores no constantes son cero a la vez.
+3) Al menos uno de los coeficientes es cero.
+4) El $R^2$ es igual a uno.
+
+*** Pregunta 2 [B] — Los dos divisores
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+En $F=\dfrac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}$, los números $k-1$ y $n-k$ son:
+
+1) El número de regresores y el número de observaciones.
+2) Las dimensiones de los subespacios donde viven, respectivamente, el cateto explicado (los regresores en desviaciones) y el residuo.
+3) Dos constantes de normalización sin significado geométrico, elegidas para que $F$ esté entre $0$ y $1$.
+4) El número de restricciones y el número de coeficientes.
+
+*** Pregunta 3 [M] — Por qué $F$ ronda $1$ bajo $H_0$
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Si $H_0\!:\beta_2=\cdots=\beta_k=0$ es cierta, ¿por qué cabe esperar que el estadístico $F$ esté cerca de $1$?
+
+1) Porque bajo $H_0$ el cateto explicado es exactamente nulo y $\mathrm{SEC}=0$.
+2) Porque bajo $H_0$ el vector de datos en desviaciones es ruido isótropo, que reparte su longitud al cuadrado por igual entre las dimensiones: $\mathrm{SEC}/(k-1)$ y $\mathrm{SRC}/(n-k)$ estiman ambos $\sigma^2$.
+3) Porque $F$ es siempre igual a $R^2/(1-R^2)$ y bajo $H_0$ el $R^2$ vale $0{,}5$.
+4) Porque la distribución $F$ es simétrica alrededor de $1$.
+
+*** Pregunta 4 [M] — El caso $k=2$
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+En la regresión simple ($k=2$), la relación entre el $F$ de significación conjunta y el $t$ del regresor es:
+
+1) $F=t$, y las dos reglas de decisión son distintas.
+2) $F=t^2$ y $F_c=t_c^2$: los dos contrastes rechazan en los mismos casos.
+3) $F=t^2$ pero $F_c=t_c$, así que el $F$ es más exigente.
+4) No hay relación: $F$ depende de $R^2$ y $t$ no.
+
+*** Pregunta 5 [M] — Por qué la región crítica tiene una sola cola
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El contraste $F$ rechaza $H_0$ solo cuando $F$ es /grande/, nunca cuando es pequeño. La razón es que:
+
+1) La distribución $F$ no tiene cola izquierda.
+2) Un $F$ pequeño indica que las restricciones son falsas, pero eso no se puede contrastar.
+3) $F$ compara longitudes al cuadrado y no tiene signo: un cateto explicado corto es lo que $H_0$ predice, así que un $F$ pequeño nunca es evidencia contra ella.
+4) Por convención: se podría usar igualmente la cola izquierda.
+
+*** Pregunta 6 [D] — Pitágoras anidado
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+¿Por qué se cumple $\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2$ para cualquier hipótesis lineal?
+
+1) Porque los dos ajustes $\boldsymbol{\mathop{\widehat y}}$ y $\boldsymbol{\mathop{\widehat y}}_r$ pertenecen al subespacio de los regresores, luego su diferencia también, y el residuo $\boldsymbol{\mathop{\widehat e}}$ es ortogonal a todo ese subespacio: $\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r$ es la suma de dos vectores ortogonales.
+2) Porque el residuo restringido $\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r$ es ortogonal a $\boldsymbol{\mathop{\widehat e}}$.
+3) Porque $\mathrm{SRC}_r\geq\mathrm{SRC}$ siempre, y la diferencia entre dos sumas de cuadrados es una suma de cuadrados.
+4) Solo se cumple cuando las restricciones son de exclusión.
+
+*** Pregunta 7 [M] — Qué modelo impone $\beta_3=\beta_4$
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Para contrastar $H_0\!:\beta_3=\beta_4$ en el modelo con regresores $\boldsymbol 1,\boldsymbol x_2,\boldsymbol x_3,\boldsymbol x_4$, el modelo restringido es:
+
+1) El que excluye $\boldsymbol x_3$ y $\boldsymbol x_4$.
+2) El que excluye solo $\boldsymbol x_4$.
+3) La regresión sobre $\boldsymbol 1$, $\boldsymbol x_2$ y la suma $\boldsymbol x_3+\boldsymbol x_4$: los dos regresores se funden en uno y se pierde una dimensión, sin quitar ninguna columna.
+4) No existe: una igualdad entre coeficientes no se puede contrastar con un $F$.
+
+*** Pregunta 8 [D] — $t$ individuales nulos, $F$ conjunto alto
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+En un modelo, dos regresores tienen valores $p$ individuales de $0{,}85$ y $0{,}30$, pero el $F$ de excluirlos a la vez tiene un valor $p$ de $10^{-12}$. La lectura correcta es:
+
+1) Los dos regresores sobran: se eliminan ambos y se reestima.
+2) Hay un error de cálculo, porque un $F$ conjunto no puede ser significativo si ningún $t$ lo es.
+3) Los dos regresores apuntan casi en la misma dirección: juntos explican el regresando, pero a cada uno le queda tan poca longitud propia que no se puede separar el efecto de uno del efecto del otro. Es colinealidad, y no autoriza a eliminar los dos.
+4) El $F$ es más fiable que el $t$, luego los dos regresores son individualmente significativos.
+
+*** Pregunta 9 [B] — Lo que el $F$ no dice
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Se rechaza $H_0\!:\beta_2=\beta_3=\beta_4=0$ con un $F$ muy grande. ¿Qué puede concluirse?
+
+1) Que los tres coeficientes son distintos de cero.
+2) Que los tres coeficientes son grandes en términos económicos.
+3) Que los datos no son compatibles con que los tres sean cero /a la vez/; cuáles importan y cuánto hay que leerlo en los coeficientes y sus intervalos.
+4) Que el modelo es correcto y los regresores causan el regresando.
+
+*** Pregunta 10 [D] — Mismo $R^2$, veredicto opuesto
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Dos regresiones con $k=4$ tienen el mismo $R^2=0{,}90$; la primera con $n=6$ no es conjuntamente significativa y la segunda con $n=10$ sí. ¿Cómo se explica?
+
+1) Con $n=6$ el $R^2$ está mal calculado.
+2) $F=\frac{n-k}{k-1}\frac{R^2}{1-R^2}$ mezcla el ángulo con las dimensiones: el mismo ángulo respaldado por $n-k=2$ dimensiones residuales es fácil de obtener por azar (con tres regresores y seis puntos casi cualquier cosa se ajusta), y con $n-k=6$ ya no.
+3) La distribución $F$ solo es válida para $n\geq10$.
+4) Con $n=6$ el modelo tiene más grados de libertad y por eso es más exigente.
+
+*** Pregunta 11 [M] — Cuando las restricciones no cuestan nada
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Al imponer $q$ restricciones se obtiene $\mathrm{SRC}_r$ exactamente igual a $\mathrm{SRC}$. Entonces:
+
+1) $F=0$: el ajuste sin restringir ya cumplía las restricciones, $\boldsymbol{\mathop{\widehat y}}_r=\boldsymbol{\mathop{\widehat y}}$, y no hay ninguna evidencia contra $H_0$.
+2) $F$ no está definido y el contraste no se puede hacer.
+3) $F=1$: exactamente lo que $H_0$ predice.
+4) Las restricciones son falsas, porque no han cambiado nada.
+
+*** Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+De los siguientes resultados de la sesión, ¿cuál se ha /demostrado/ y cuál se ha /enunciado sin demostrar/?
+
+1) Se ha demostrado que $F\sim F_{q,\,n-k}$ bajo $H_0$, y se ha enunciado sin demostrar que $\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2$.
+2) Se ha demostrado el Pitágoras anidado y las identidades $F=\frac{n-k}{k-1}\frac{R^2}{1-R^2}$ y $F=t^2$ (con la geometría de las lecciones 8, 10 y 12), y se han enunciado sin demostrar la distribución $F_{q,\,n-k}$ y que el ruido isótropo reparte su longitud al cuadrado por igual entre dimensiones.
+3) Se ha demostrado todo, incluida la distribución del estadístico.
+4) No se ha demostrado nada: la sesión entera se apoya en resultados externos.
+
+
+* Respuestas                                                       :htmlonly:
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :END:
+
+**** Pregunta 1 [B] — Qué contrasta el $F$ del pie de la tabla
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: la formulación exacta de la hipótesis de significación conjunta. La opción 3 confunde $H_0$ con su negación parcial; la 1 olvida que la constante nunca entra en ese contraste.
+
+**** Pregunta 2 [B] — Los dos divisores
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: la lectura geométrica de los grados de libertad como dimensiones, que es lo que da sentido a ``longitud al cuadrado por dimensión''. La opción 3 es falsa además porque $F$ no está acotado por $1$.
+
+**** Pregunta 3 [M] — Por qué $F$ ronda $1$ bajo $H_0$
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: la idea central de la sesión. La opción 1 es el error más instructivo: bajo $H_0$ el cateto explicado no es nulo, es la proyección del ruido sobre $k-1$ direcciones, y por eso mide en promedio $(k-1)\sigma^2$ y no $0$.
+
+**** Pregunta 4 [M] — El caso $k=2$
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: la coherencia entre las dos lecciones: no solo los estadísticos coinciden ($F=t^2$), también las distribuciones ($F_{1,\nu}$ es la de una $t_\nu$ al cuadrado) y por tanto los valores críticos y las decisiones.
+
+**** Pregunta 5 [M] — Por qué la región crítica tiene una sola cola
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 3./
+/Evalúa/: que la forma de la región crítica se deduce de lo que mide el estadístico, no de una convención. Discrimina porque la opción 1 es una descripción correcta de la distribución que no explica nada.
+
+**** Pregunta 6 [D] — Pitágoras anidado
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 1./
+/Evalúa/: el único resultado demostrado en la sesión, y el paso exacto en que se usa la ortogonalidad de la lección 10. La opción 2 afirma una ortogonalidad falsa (el residuo restringido es la /hipotenusa/, no un cateto), el mismo error que la pregunta 4 de la lección 8 cazaba con el vector de medias.
+
+**** Pregunta 7 [M] — Qué modelo impone $\beta_3=\beta_4$
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 3./
+/Evalúa/: que imponer una restricción es cambiar de subespacio, no necesariamente eliminar regresores. Es la fila tercera del ejemplo de =hprice2=, y la construcción que el laboratorio del contraste $F$ pedirá hacer a mano.
+
+**** Pregunta 8 [D] — $t$ individuales nulos, $F$ conjunto alto
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 3./
+/Evalúa/: la lectura correcta del caso de la apertura, con su mecanismo (longitud propia casi nula) y su consecuencia práctica (no eliminar los dos). La opción 1 es el error habitual en informes; la 2 revela no haber entendido que $t$ y $F$ responden a preguntas distintas.
+
+**** Pregunta 9 [B] — Lo que el $F$ no dice
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 3./
+/Evalúa/: la lógica de la negación de una hipótesis conjunta (rechazar ``todos nulos'' no es afirmar ``ninguno nulo'') y el reenvío a los coeficientes e intervalos, como en la lección 12.
+
+**** Pregunta 10 [D] — Mismo $R^2$, veredicto opuesto
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: la descomposición del $F$ en fuerza de la relación y cantidad de evidencia, con el matiz nuevo de esta lección respecto a la 12: el descuento por el número de regresores $k-1$. La opción 4 invierte el papel de los grados de libertad.
+
+**** Pregunta 11 [M] — Cuando las restricciones no cuestan nada
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 1./
+/Evalúa/: la lectura del numerador como longitud del cateto añadido: si es cero, los dos ajustes coinciden y las restricciones se cumplían ya exactamente en la muestra. La opción 3 confunde ``lo que $H_0$ predice en promedio'' con lo que ocurre en una muestra concreta.
+
+**** Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: honestidad sobre el alcance de la sesión, con el mismo criterio que las lecciones 11 y 12: lo geométrico se demuestra con material del curso; lo distribucional se enuncia.
+
+
+* COMMENT ipynb y slides                                           :noexport:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(require 'ox-ipynb)
+(ox-ipynb-export-org-file-to-ipynb-file "S19-Lecc13.org")
+#+END_SRC
+
+#+BEGIN_SRC sh :results silent
+#jupyter nbconvert --config ../mycfg-GitHubPages.py --to slides --reveal-prefix "https://unpkg.com/reveal.js@5.2.1" --execute --embed-images S19-Lecc13.ipynb
+#+END_SRC
+
+#+BEGIN_SRC sh :results silent
+#jupyter nbconvert S19-Lecc13.ipynb --to slides --embed-images
+#+END_SRC
