@@ -1,0 +1,48 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+outfile --quiet datos.txt
+    nulldata 11
+    setobs 1 1 --cross-section
+    
+    series x1 = {10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5}'
+    series y1 = {8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68}'
+    series x2 = x1
+    series y2 = {9.14, 8.14, 8.74, 8.77, 9.26, 8.10, 6.13, 3.10, 9.13, 7.26, 4.74}'
+    series x3 = x1
+    series y3 = {7.46, 6.77, 12.74, 7.11, 7.81, 8.84, 6.08, 5.39, 8.15, 6.42, 5.73}'
+    series x4 = {8, 8, 8, 8, 8, 8, 8, 19, 8, 8, 8}'
+    series y4 = {6.58, 5.76, 7.71, 8.84, 8.47, 7.04, 5.25, 12.50, 5.56, 7.91, 6.89}'
+    
+    summary x1 y1 x2 y2 x3 y3 x4 y4 --simple
+end outfile
+
+outfile --quiet regresiones.txt
+    printf "conjunto   beta1     beta2     rho(x,y)    R2       SRC\n"
+    loop i=1..4 --quiet
+        ols y$i const x$i --quiet
+        printf "   %d     %7.3f   %7.4f   %8.4f   %7.4f   %7.3f\n", i, $coeff(const), $coeff(x$i), corr(x$i, y$i), $rsq, $ess
+    endloop
+end outfile
+
+gnuplot y1 x1 --output="@workdir/anscombe1.png"
+gnuplot y2 x2 --output="@workdir/anscombe2.png"
+gnuplot y3 x3 --output="@workdir/anscombe3.png"
+gnuplot y4 x4 --output="@workdir/anscombe4.png"

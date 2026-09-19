@@ -25,7 +25,9 @@ series x = mx
 series u = mu
 series y = 2 + 3*x + u
 
-ols y const x
+outfile --quiet olsEjemploN5.txt
+    ols y const x
+end outfile
 
 outfile --quiet residuosYortogonalidad.txt
     series ehat = $uhat
@@ -84,4 +86,17 @@ outfile --quiet verificacionMuestraGrande.txt
     printf "Suma de x2*residuos sum(x2*ehat2)  = %.10f    (debe ser 0, exactamente)\n", sum(x2*ehat2)
     printf "beta2 estimado (pendiente)         = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
     printf "beta1 estimado (constante)         = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
+end outfile
+
+outfile --quiet sinConstante.txt
+    ols y2 const x2 --quiet
+    scalar b2_con = $coeff(x2)
+    scalar mu_yhat_con = mean($yhat)
+    
+    ols y2 x2                                   # sin constante
+    series ehat_sc = $uhat
+    printf "\nsuma de residuos                sum(ehat)    = %.4f   (ya NO es cero)\n", sum(ehat_sc)
+    printf "suma de x2*residuos             sum(x2*ehat) = %.10f  (esta sigue siendo cero)\n", sum(x2*ehat_sc)
+    printf "media de y2 = %.4f   media del ajuste sin constante = %.4f   (con constante: %.4f)\n", mean(y2), mean($yhat), mu_yhat_con
+    printf "pendiente sin constante = %.4f   (con constante: %.4f;  generador: 3)\n", $coeff(x2), b2_con
 end outfile

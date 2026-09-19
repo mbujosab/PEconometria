@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-18 vie 23:21 -->
+<!-- 2026-09-19 sáb 09:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 11 (A) &#x2014; MCO con Gretl: el ejemplo de la lección 7 y verificación con datos simulados</title>
@@ -286,29 +286,47 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgcb1ffdb">Descripción de la práctica</a></li>
-<li><a href="#org5dcd93e">Actividad 1 - El ejemplo de la lección 7, ahora con Gretl</a></li>
-<li><a href="#orgc8aec19">Actividad 2 - Residuos y las dos condiciones de ortogonalidad</a></li>
-<li><a href="#orgd9728f0">Actividad 3 - Bondad de ajuste: STC = SEC + SRC y \(R^2\)</a>
+<li><a href="#orgb5d1430">Descripción de la práctica</a></li>
+<li><a href="#orgf3c067e">Actividad 1 - El ejemplo de la lección 7, ahora con Gretl</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org32cd993">El ajuste preserva la media, y la recta pasa por el punto de las medias</a></li>
+<li><a href="#org1af4b92">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org9f6e68a">Actividad 4 - La pendiente como correlación reescalada</a></li>
-<li><a href="#org9e7403a">Actividad 5 - ¿Y si la muestra es más grande y el residuo no está ``hecho a medida''?</a></li>
-<li><a href="#orgab8b8e6">Actividad 6 - Síntesis</a></li>
-<li><a href="#org3f72336">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orgf77e4b1">Respuestas</a></li>
+<li><a href="#orgb909653">Actividad 2 - Residuos y las dos condiciones de ortogonalidad</a></li>
+<li><a href="#orgb6bfacc">Actividad 3 - Bondad de ajuste: STC = SEC + SRC y \(R^2\)</a>
+<ul>
+<li>
+<ul>
+<li><a href="#orgab3144b">El ajuste preserva la media, y la recta pasa por el punto de las medias</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org37aaa24">Actividad 4 - La pendiente como correlación reescalada</a></li>
+<li><a href="#org9f25791">Actividad 5 - ¿Y si la muestra es más grande y el residuo no está ``hecho a medida''?</a></li>
+<li><a href="#org0f4b2b2">Actividad 6 - ¿Y si quitamos la constante?</a>
+<ul>
+<li>
+<ul>
+<li><a href="#org50460f4">Lo que debe observar</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgb6b45c9">Actividad 7 - Síntesis</a></li>
+<li><a href="#org676aea1">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org5bc85c2">Código completo de la práctica</a></li>
+<li><a href="#orgb2a8f5d">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgcb1ffdb" class="outline-2">
-<h2 id="orgcb1ffdb">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-orgcb1ffdb">
+<div id="outline-container-orgb5d1430" class="outline-2">
+<h2 id="orgb5d1430">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orgb5d1430">
 <p>
 En las lecciones 7 y 8 obtuvimos, con lápiz y papel, las fórmulas de \(\hat\beta_1\) y \(\hat\beta_2\) (a partir de dos condiciones de ortogonalidad) y la descomposición \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) con su cociente \(R^2\). Hoy usamos por primera vez el comando <code>ols</code> de Gretl para comprobar que reproduce exactamente esos cálculos: primero con el mismo ejemplo pequeño (\(n=5\)) ya resuelto a mano en la lección 7, y después con una muestra simulada más grande, para distinguir qué es una <i>identidad algebraica</i> (se cumple siempre) de qué es una <i>estimación</i> (no coincide, pero se aproxima al valor verdadero que generó los datos).
 </p>
@@ -327,12 +345,13 @@ En las lecciones 7 y 8 obtuvimos, con lápiz y papel, las fórmulas de \(\hat\be
 <li>Verificar \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y \(R^2\) (lección 8), comparando el cálculo manual con el que reporta Gretl.</li>
 <li>Verificar \(\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) y \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\).</li>
 <li>Distinguir, con una muestra simulada más grande, qué se cumple <i>siempre</i> (ortogonalidad) de qué es solo una <i>aproximación</i> (recuperar el coeficiente generador).</li>
+<li>Ver qué se pierde si se ajusta la recta <i>sin constante</i>: la primera condición de ortogonalidad desaparece, y con ella todo lo que la lección 7 dedujo de ella.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org5dcd93e" class="outline-2">
-<h2 id="org5dcd93e">Actividad 1 - El ejemplo de la lección 7, ahora con Gretl</h2>
-<div class="outline-text-2" id="text-org5dcd93e">
+<div id="outline-container-orgf3c067e" class="outline-2">
+<h2 id="orgf3c067e">Actividad 1 - El ejemplo de la lección 7, ahora con Gretl</h2>
+<div class="outline-text-2" id="text-orgf3c067e">
 <p>
 Recuperamos exactamente el ejemplo de la lección 7: \(\boldsymbol{x}=(1,2,3,4,5)\), \(\boldsymbol{u}=(1,-2,0,2,-1)\), \(\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}\).
 </p>
@@ -341,7 +360,7 @@ Recuperamos exactamente el ejemplo de la lección 7: \(\boldsymbol{x}=(1,2,3,4,5
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orga168d8d">nulldata 5 --preserve
+<pre class="src src-gretl" id="org2812d85">nulldata 5 --preserve
 setobs 1 1 --cross-section
 
 matrix mx = {1;2;3;4;5}
@@ -359,7 +378,7 @@ Ahora pedimos la regresión:
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org1e2dfca">ols y const x
+<pre class="src src-gretl" id="org50eecda">ols y const x
 </pre>
 </div>
 <ul class="org-ul">
@@ -369,11 +388,36 @@ Ahora pedimos la regresión:
 <p>
 <i>Antes de ejecutar</i>: ¿qué valores espera obtener para el coeficiente de <code>const</code> y para el de <code>x</code>? (Repase, si hace falta, el cálculo manual de la lección 7.)
 </p>
+
+<pre class="example" id="org4b3919a">
+Modelo 1: MCO, usando las observaciones 1-5
+Variable dependiente: y
+
+             coeficiente   Desv. típica   Estadístico t   valor p
+  ---------------------------------------------------------------
+  const        2,00000       1,91485          1,044       0,3730 
+  x            3,00000       0,577350         5,196       0,0138  **
+
+Media de la vble. dep.  11,00000   D.T. de la vble. dep.   5,000000
+Suma de cuad. residuos  10,000000   D.T. de la regresión    1,825742
+R-cuadrado              0,900000   R-cuadrado corregido    0,866667
+F(1, 3)                 27,00000   Valor p (de F)          0,013847
+Log-verosimilitud      -8,827561   Criterio de Akaike      21,65512
+Criterio de Schwarz     20,87400   Crit. de Hannan-Quinn   19,55866
+</pre>
+</div>
+<div id="outline-container-org1af4b92" class="outline-4">
+<h4 id="org1af4b92">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org1af4b92">
+<p>
+Los coeficientes son exactamente \(2\) y \(3\), los mismos que calculamos a mano en la lección 7: Gretl no hace otra cosa que resolver las dos condiciones de ortogonalidad. Fíjese en <code>R-cuadrado</code>, \(0{,}9\), y en <code>Suma de cuad. residuos</code>, \(10\): son el \(R^2\) y la \(\mathrm{SRC}\) de la lección 8 con estos mismos datos. El resto de la tabla (columnas <code>Desv. típica</code>, <code>Estadístico t</code> y <code>valor p</code>, y las líneas del pie) lo dejamos para más adelante.
+</p>
 </div>
 </div>
-<div id="outline-container-orgc8aec19" class="outline-2">
-<h2 id="orgc8aec19">Actividad 2 - Residuos y las dos condiciones de ortogonalidad</h2>
-<div class="outline-text-2" id="text-orgc8aec19">
+</div>
+<div id="outline-container-orgb909653" class="outline-2">
+<h2 id="orgb909653">Actividad 2 - Residuos y las dos condiciones de ortogonalidad</h2>
+<div class="outline-text-2" id="text-orgb909653">
 <p>
 Gretl guarda, tras cada regresión, el vector de residuos en el accesor <code>$uhat</code> y el vector ajustado en <code>$yhat</code>.
 </p>
@@ -382,7 +426,7 @@ Gretl guarda, tras cada regresión, el vector de residuos en el accesor <code>$u
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgbf65f94">series ehat = $uhat
+<pre class="src src-gretl" id="org5a4df26">series ehat = $uhat
 series yhat = $yhat
 
 print x u ehat --byobs
@@ -392,7 +436,7 @@ printf "Suma de x*residuos           sum(x*ehat) = %.10f\n", sum(x*ehat)
 printf "Diferencia maxima |ehat-u|              = %.10f\n", max(abs(ehat-u))
 </pre>
 </div>
-<pre class="example" id="org46028b7">
+<pre class="example" id="org275e7d0">
              x            u         ehat
 
 1            1            1            1
@@ -411,14 +455,14 @@ Diferencia maxima |ehat-u|              = 0,0000000000
 </p>
 </div>
 </div>
-<div id="outline-container-orgd9728f0" class="outline-2">
-<h2 id="orgd9728f0">Actividad 3 - Bondad de ajuste: STC = SEC + SRC y \(R^2\)</h2>
-<div class="outline-text-2" id="text-orgd9728f0">
+<div id="outline-container-orgb6bfacc" class="outline-2">
+<h2 id="orgb6bfacc">Actividad 3 - Bondad de ajuste: STC = SEC + SRC y \(R^2\)</h2>
+<div class="outline-text-2" id="text-orgb6bfacc">
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org2e0205f">scalar mu_y = mean(y)
+<pre class="src src-gretl" id="org35091f5">scalar mu_y = mean(y)
 scalar STC  = sum((y - mu_y)^2)
 scalar SEC  = sum((yhat - mu_y)^2)
 scalar SRC  = sum(ehat^2)
@@ -428,15 +472,15 @@ printf "R2 (a mano)         = %.6f\n", SEC/STC
 printf "R2 de Gretl ($rsq)  = %.6f\n", $rsq
 </pre>
 </div>
-<pre class="example" id="orgad15dac">
+<pre class="example" id="org55b89a2">
 STC = 100,0000   SEC = 90,0000   SRC = 10,0000   (SEC+SRC = 100,0000)
 R2 (a mano)         = 0,900000
 R2 de Gretl ($rsq)  = 0,900000
 </pre>
 </div>
-<div id="outline-container-org32cd993" class="outline-4">
-<h4 id="org32cd993">El ajuste preserva la media, y la recta pasa por el punto de las medias</h4>
-<div class="outline-text-4" id="text-org32cd993">
+<div id="outline-container-orgab3144b" class="outline-4">
+<h4 id="orgab3144b">El ajuste preserva la media, y la recta pasa por el punto de las medias</h4>
+<div class="outline-text-4" id="text-orgab3144b">
 <p>
 Fíjese en que, al calcular SEC, hemos escrito <code>sum((yhat - mu_y)^2)</code> usando la media de \(\boldsymbol{y}\), cuando lo que pide la definición es la media de \(\boldsymbol{\mathop{\widehat{y}}}\). No es un descuido: la lección 7 demostró que ambas coinciden. Comprobémoslo, junto con las otras dos consecuencias de la primera condición de ortogonalidad:
 </p>
@@ -445,7 +489,7 @@ Fíjese en que, al calcular SEC, hemos escrito <code>sum((yhat - mu_y)^2)</code>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orge0c2b97">scalar mu_x    = mean(x)
+<pre class="src src-gretl" id="org7f45348">scalar mu_x    = mean(x)
 scalar mu_yhat = mean(yhat)
 
 printf "mu_y = %.10f     mu_yhat = %.10f   (el ajuste preserva la media)\n", mu_y, mu_yhat
@@ -453,7 +497,7 @@ printf "beta1 + beta2*mu_x = %.10f          (la recta pasa por el punto de las m
 printf "Diferencia maxima |(yhat-mu_yhat) - beta2*(x-mu_x)| = %.10f\n", max(abs((yhat-mu_yhat) - $coeff(x)*(x-mu_x)))
 </pre>
 </div>
-<pre class="example" id="org1bf9380">
+<pre class="example" id="orgc69fd9b">
 mu_y = 11,0000000000     mu_yhat = 11,0000000000   (el ajuste preserva la media)
 beta1 + beta2*mu_x = 11,0000000000          (la recta pasa por el punto de las medias)
 Diferencia maxima |(yhat-mu_yhat) - beta2*(x-mu_x)| = 0,0000000000
@@ -464,9 +508,9 @@ Diferencia maxima |(yhat-mu_yhat) - beta2*(x-mu_x)| = 0,0000000000
 </div>
 </div>
 </div>
-<div id="outline-container-org9f6e68a" class="outline-2">
-<h2 id="org9f6e68a">Actividad 4 - La pendiente como correlación reescalada</h2>
-<div class="outline-text-2" id="text-org9f6e68a">
+<div id="outline-container-org37aaa24" class="outline-2">
+<h2 id="org37aaa24">Actividad 4 - La pendiente como correlación reescalada</h2>
+<div class="outline-text-2" id="text-org37aaa24">
 <p>
 Recordando la lección 7 (\(\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\)) y la lección 8 (\(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\) en regresión simple):
 </p>
@@ -475,7 +519,7 @@ Recordando la lección 7 (\(\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\si
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org075a247">scalar rho_xy = corr(x,y)
+<pre class="src src-gretl" id="org5bc0670">scalar rho_xy = corr(x,y)
 scalar beta2_formula = rho_xy * sd(y)/sd(x)
 
 printf "rho_xy                       = %.6f\n", rho_xy
@@ -485,7 +529,7 @@ printf "rho_xy^2                     = %.6f\n", rho_xy^2
 printf "R2 ($rsq de Gretl)           = %.6f\n", $rsq
 </pre>
 </div>
-<pre class="example" id="orgaa4d7b0">
+<pre class="example" id="org95ffbce">
 rho_xy                       = 0,948683
 beta2 (formula rho*sy/sx)    = 3,000000
 beta2 ($coeff(x) de Gretl)   = 3,000000
@@ -494,9 +538,9 @@ R2 ($rsq de Gretl)           = 0,900000
 </pre>
 </div>
 </div>
-<div id="outline-container-org9e7403a" class="outline-2">
-<h2 id="org9e7403a">Actividad 5 - ¿Y si la muestra es más grande y el residuo no está ``hecho a medida''?</h2>
-<div class="outline-text-2" id="text-org9e7403a">
+<div id="outline-container-org9f25791" class="outline-2">
+<h2 id="org9f25791">Actividad 5 - ¿Y si la muestra es más grande y el residuo no está ``hecho a medida''?</h2>
+<div class="outline-text-2" id="text-org9f25791">
 <p>
 Generamos una muestra nueva, mayor (\(n=60\)), con una perturbación genuinamente aleatoria (no diseñada para ser ortogonal a \(\boldsymbol{x}\)).
 </p>
@@ -505,7 +549,7 @@ Generamos una muestra nueva, mayor (\(n=60\)), con una perturbación genuinament
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgaed8d40">nulldata 60 --preserve
+<pre class="src src-gretl" id="org246abcf">nulldata 60 --preserve
 set seed 24680
 
 series x2 = uniform(0, 10)
@@ -520,13 +564,13 @@ series ehat2 = $uhat
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org2c4d2e2">printf "Suma de residuos    sum(ehat2)     = %.10f    (debe ser 0, exactamente)\n", sum(ehat2)
+<pre class="src src-gretl" id="org6970ece">printf "Suma de residuos    sum(ehat2)     = %.10f    (debe ser 0, exactamente)\n", sum(ehat2)
 printf "Suma de x2*residuos sum(x2*ehat2)  = %.10f    (debe ser 0, exactamente)\n", sum(x2*ehat2)
 printf "beta2 estimado (pendiente)         = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
 printf "beta1 estimado (constante)         = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
 </pre>
 </div>
-<pre class="example" id="org99d3a78">
+<pre class="example" id="orgfd98abf">
 Suma de residuos    sum(ehat2)     = 0,0000000000    (debe ser 0, exactamente)
 Suma de x2*residuos sum(x2*ehat2)  = -0,0000000000    (debe ser 0, exactamente)
 beta2 estimado (pendiente)         = 3,0601    (valor generador = 3, pero NO se recupera exacto)
@@ -537,23 +581,78 @@ beta1 estimado (constante)         = 1,8220    (valor generador = 2, pero NO se 
 </p>
 </div>
 </div>
-<div id="outline-container-orgab8b8e6" class="outline-2">
-<h2 id="orgab8b8e6">Actividad 6 - Síntesis</h2>
-<div class="outline-text-2" id="text-orgab8b8e6">
+<div id="outline-container-org0f4b2b2" class="outline-2">
+<h2 id="org0f4b2b2">Actividad 6 - ¿Y si quitamos la constante?</h2>
+<div class="outline-text-2" id="text-org0f4b2b2">
+<p>
+La lección 7 sostuvo que sin constante no puede hablarse de regresión. Comprobemos qué se pierde, con la muestra de la Actividad 5: pedimos a Gretl la recta que pasa por el origen (solo el regresor <code>x2</code>, sin <code>const</code>).
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="org0a5cdf7">ols y2 const x2 --quiet
+scalar b2_con = $coeff(x2)
+scalar mu_yhat_con = mean($yhat)
+
+ols y2 x2                                   # sin constante
+series ehat_sc = $uhat
+printf "\nsuma de residuos                sum(ehat)    = %.4f   (ya NO es cero)\n", sum(ehat_sc)
+printf "suma de x2*residuos             sum(x2*ehat) = %.10f  (esta sigue siendo cero)\n", sum(x2*ehat_sc)
+printf "media de y2 = %.4f   media del ajuste sin constante = %.4f   (con constante: %.4f)\n", mean(y2), mean($yhat), mu_yhat_con
+printf "pendiente sin constante = %.4f   (con constante: %.4f;  generador: 3)\n", $coeff(x2), b2_con
+</pre>
+</div>
+<pre class="example" id="orgb5b1f2e">
+Modelo 2: MCO, usando las observaciones 1-60
+Variable dependiente: y2
+
+             coeficiente   Desv. típica   Estadístico t   valor p 
+  ----------------------------------------------------------------
+  x2           3,35500      0,0523912         64,04       3,13e-56 ***
+
+Media de la vble. dep.  16,42120   D.T. de la vble. dep.   8,246837
+Suma de cuad. residuos  286,3910   D.T. de la regresión    2,203199
+R-cuadrado no centrado  0,985817   R-cuadrado centrado     0,928627
+F(1, 59)                4100,788   Valor p (de F)          3,13e-56
+Log-verosimilitud      -132,0267   Criterio de Akaike      266,0534
+Criterio de Schwarz     268,1478   Crit. de Hannan-Quinn   266,8726
+
+
+suma de residuos                sum(ehat)    = 24,8978   (ya NO es cero)
+suma de x2*residuos             sum(x2*ehat) = -0,0000000000  (esta sigue siendo cero)
+media de y2 = 16,4212   media del ajuste sin constante = 16,0062   (con constante: 16,4212)
+pendiente sin constante = 3,3550   (con constante: 3,0601;  generador: 3)
+</pre>
+</div>
+<div id="outline-container-org50460f4" class="outline-4">
+<h4 id="org50460f4">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org50460f4">
+<p>
+Sin la constante solo queda una condición de ortogonalidad, la del regresor: \(\sum x_i\hat e_i\) sigue siendo cero, pero \(\sum\hat e_i\) vale \(24{,}9\). Con ello se pierde todo lo que la lección 7 dedujo de la primera condición: el ajuste ya no tiene la media de los datos (\(16{,}01\) frente a \(16{,}42\)), la recta ya no pasa por el punto de las medias, y la pendiente sube de \(3{,}06\) a \(3{,}36\): obligada a pasar por el origen, la recta se inclina para compensar la constante que le falta. Fíjese también en que Gretl ya no imprime un <code>R-cuadrado</code>, sino dos: sin constante no existe la descomposición \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) de la lección 8, y el programa ofrece dos sustitutos (``no centrado'' y ``centrado'') que no son comparables con el \(R^2\) de los modelos con constante.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb6b45c9" class="outline-2">
+<h2 id="orgb6b45c9">Actividad 7 - Síntesis</h2>
+<div class="outline-text-2" id="text-orgb6b45c9">
 <p>
 Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en las lecciones 7 y 8: (i) las fórmulas de \(\hat\beta_1,\hat\beta_2\); (ii) las dos condiciones de ortogonalidad que, por construcción de MCO, se cumplen <i>siempre</i> (no dependen de si el ejemplo está ``diseñado'' o no); (iii) \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\). Y hemos visto la diferencia esencial entre una <i>identidad algebraica</i> (ortogonalidad: exacta siempre) y una <i>estimación</i> (recuperar el coeficiente generador: solo aproximada, y solo exacta en el ejemplo ``con truco'' de la lección 7).
 </p>
 </div>
 </div>
-<div id="outline-container-org3f72336" class="outline-2">
-<h2 id="org3f72336">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org3f72336">
+<div id="outline-container-org676aea1" class="outline-2">
+<h2 id="org676aea1">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org676aea1">
 <ol class="org-ol">
 <li>En la Actividad 1, ¿por qué Gretl reproduce exactamente \(\hat\beta_1=2,\hat\beta_2=3\), y no una aproximación?</li>
 <li>¿Por qué la ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) se cumple exactamente en la Actividad 5, mientras que \(\hat\beta_2\) solo se aproxima a 3?</li>
-<li>¿Qué diferencia hay entre el vector generador \(\boldsymbol{u}\) y el vector de residuos \(\boldsymbol{\mathop{\widehat{e}}}\)? ¿En qué caso particular, de los vistos hoy, coinciden exactamente?</li>
+<li>¿Qué diferencia hay entre el vector generador \(\boldsymbol{u}\) y el vector de residuos \(\boldsymbol{\mathop{\widehat{e}}}\)? ¿En qué caso particular, de los vistos hoy, coinciden?</li>
 <li>¿Por qué el signo de \(\hat\beta_2\) coincide siempre con el signo de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\)?</li>
 <li>Si en la Actividad 5 usáramos \(n=600\) en lugar de \(n=60\) (manteniendo el mismo proceso generador), ¿qué esperaría que ocurriera con la cercanía entre \(\hat\beta_2\) y 3?</li>
+<li>En la Actividad 6, ¿por qué \(\sum x_i\hat e_i\) sigue siendo cero y \(\sum\hat e_i\) no? ¿Qué subespacio es ahora el de los regresores?</li>
 </ol>
 
 <p>
@@ -564,11 +663,11 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en l
 <li>Véanse las lecciones 7 y 8 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html">lección 7</a>, <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html">lección 8</a>) para las demostraciones completas de lo que hoy verificamos con Gretl.</li>
 <li>Cottrell, A. y Lucchetti, R. (2023). <i>Gretl User's Guide</i>. Sección sobre el comando <code>ols</code> y los accesores tras la estimación (<code>$uhat</code>, <code>$yhat</code>, <code>$coeff</code>, <code>$rsq</code>).</li>
 </ul>
-
-<ul class="org-ul">
-<li>Código completo de la práctica</li>
-</ul>
-
+</div>
+</div>
+<div id="outline-container-org5bc85c2" class="outline-2">
+<h2 id="org5bc85c2">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org5bc85c2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -586,11 +685,11 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en l
 </table>
 </div>
 </div>
-<div id="outline-container-orgf77e4b1" class="outline-2">
-<h2 id="orgf77e4b1">Respuestas</h2>
-<div class="outline-text-2" id="text-orgf77e4b1">
+<div id="outline-container-orgb2a8f5d" class="outline-2">
+<h2 id="orgb2a8f5d">Respuestas</h2>
+<div class="outline-text-2" id="text-orgb2a8f5d">
 <ol class="org-ol">
-<li>¿Por qué Gretl reproduce exactamente \(\hat\beta_1=2,\hat\beta_2=3\)? Porque <code>ols</code> no hace más que resolver, internamente, exactamente las mismas dos condiciones de ortogonalidad que resolvimos a mano en la lección 7. Como este ejemplo se construyó a propósito con un vector \(\boldsymbol{u}\) cuya covarianza muestral con \(\boldsymbol{x}\) es exactamente cero (y de media cero), el sistema de ortogonalidad recupera exactamente los coeficientes generadores 2 y 3, puesto que el vector de residuos es necesariamente igual a \(\boldsymbol{u}\) —no es una propiedad general de MCO, sino consecuencia del diseño deliberado del ejemplo.</li>
+<li>¿Por qué Gretl reproduce exactamente \(\hat\beta_1=2,\hat\beta_2=3\)? Porque <code>ols</code> no hace más que resolver, internamente, las mismas dos condiciones de ortogonalidad que resolvimos a mano en la lección 7. Como este ejemplo se construyó a propósito con un vector \(\boldsymbol{u}\) cuya covarianza muestral con \(\boldsymbol{x}\) es cero (y de media cero), el sistema de ortogonalidad recupera exactamente los coeficientes generadores 2 y 3, puesto que el vector de residuos es necesariamente igual a \(\boldsymbol{u}\) —no es una propiedad general de MCO, sino consecuencia del diseño deliberado del ejemplo.</li>
 
 <li>¿Por qué la ortogonalidad es exacta y \(\hat\beta_2\) solo se aproxima? Porque la ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) es una consecuencia <i>algebraica</i> de cómo MCO define \(\hat\beta_1,\hat\beta_2\) (las dos condiciones que se imponen para construirlos): se cumple exactamente para <i>cualquier</i> conjunto de datos, sin excepción. En cambio, que \(\hat\beta_2\) coincida con el valor 3 usado para generar los datos es una cuestión distinta: depende de que la perturbación \(u_2\) sea ortogonal a los regresores, es decir, de media nula y que tenga, para esa muestra concreta, covarianza exactamente nula con \(x_2\) —algo que ocurre por diseño en la Actividad 1, pero que una perturbación genuinamente aleatoria (Actividad 5) solo cumple <i>aproximadamente</i>, con un error que depende de la muestra concreta.</li>
 
@@ -599,13 +698,15 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en l
 <li>Signo de \(\hat\beta_2\) y de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\). Porque \(\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) (lección 7), y tanto \(\sigma_{\boldsymbol{y}}\) como \(\sigma_{\boldsymbol{x}}\) son siempre no negativas (son normas). Por tanto, el cociente \(\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) nunca cambia el signo: el signo de \(\hat\beta_2\) es siempre el mismo que el de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\).</li>
 
 <li>Con \(n=600\) en lugar de \(n=60\). Cabe esperar que \(\hat\beta_2\) se acerque <i>todavía más</i> a 3: con muestras más grandes, la covarianza muestral entre la perturbación \(u_2\) y el regresor \(x_2\) tiende a acercarse a cero (si, como es el caso, \(u_2\) se generó independientemente de \(x_2\)), de modo que el ``desajuste'' entre \(\hat\beta_2\) y el valor generador 3 tiende a reducirse. Esta es una primera intuición, sin demostrar todavía, de la propiedad de <i>consistencia</i> de un estimador, que se estudiará con más detalle más adelante en el curso.</li>
+
+<li><i>Sin constante.</i> Al quitar \(\boldsymbol 1\), el subespacio sobre el que se proyecta es la recta \(\mathcal L(\boldsymbol x)\), con un solo generador; el residuo es ortogonal a ese único generador —de ahí \(\sum x_i\hat e_i=0\)— pero nada le obliga a ser ortogonal a \(\boldsymbol 1\), que ya no está en el subespacio. Por eso los residuos no suman cero, el ajuste no preserva la media y la recta no pasa por el punto de las medias: todas esas propiedades eran consecuencias de la primera condición de ortogonalidad, y esa condición ha desaparecido.</li>
 </ol>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-18 vie 23:21</p>
+<p class="date">Created: 2026-09-19 sáb 09:48</p>
 </div>
 </body>
 </html>

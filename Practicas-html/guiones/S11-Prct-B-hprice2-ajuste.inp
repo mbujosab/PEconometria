@@ -21,9 +21,13 @@ setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
 setinfo rooms -d "Número medio de habitaciones" -n "Habitaciones"
 setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
 
-ols price const rooms
+outfile --quiet olsPriceRooms.txt
+    ols price const rooms
+end outfile
 
-ols price const nox
+outfile --quiet olsPriceNox.txt
+    ols price const nox
+end outfile
 
 outfile --quiet ortogonalidadAmbosModelos.txt
     ols price const rooms --quiet
@@ -69,3 +73,18 @@ end outfile
 
 gnuplot price rooms --output="price_rooms_fit.png"
 gnuplot price nox   --output="price_nox_fit.png"
+
+outfile --quiet intercambiarPapeles.txt
+    ols price const rooms --quiet
+    scalar b_pr  = $coeff(rooms)
+    scalar r2_pr = $rsq
+    
+    ols rooms const price --quiet             # los papeles, intercambiados
+    scalar b_rp  = $coeff(price)
+    scalar r2_rp = $rsq
+    
+    printf "R2 de price~rooms = %.6f      R2 de rooms~price = %.6f\n", r2_pr, r2_rp
+    printf "pendiente de price~rooms = %.4f     pendiente de rooms~price = %.8f\n", b_pr, b_rp
+    printf "inversa de la primera pendiente = %.8f   (no es la segunda)\n", 1/b_pr
+    printf "producto de las dos pendientes  = %.6f   (= R2 = rho^2)\n", b_pr*b_rp
+end outfile

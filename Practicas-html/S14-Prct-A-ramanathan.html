@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-18 vie 23:22 -->
+<!-- 2026-09-19 sáb 09:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 14 (A) &#x2014; Regresión múltiple con Gretl: precios de vivienda (Ramanathan)</title>
@@ -286,31 +286,39 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org2f886dc">Descripción de la práctica</a></li>
-<li><a href="#org9d367b3">Actividad 1 - Carga y exploración de los datos</a></li>
-<li><a href="#org12aabe0">Actividad 2 - Recordatorio: la regresión simple <code>price~sqft</code></a></li>
-<li><a href="#org3aa1d01">Actividad 3 - Más regresiones: con <code>bedrms</code>, y con <code>sqft</code> + <code>bedrms</code></a></li>
-<li><a href="#org073759b">Actividad 4 - Añadimos <code>baths</code></a></li>
-<li><a href="#org4a299bb">Actividad 5 - Síntesis: cuatro modelos, una tabla</a></li>
-<li><a href="#orgd7a6aa3">Actividad 6 - ¿Cuánto depende el ajuste de las viviendas que nos han tocado?</a>
+<li><a href="#orgb1a882f">Descripción de la práctica</a></li>
+<li><a href="#org444f14d">Actividad 1 - Carga y exploración de los datos</a></li>
+<li><a href="#org4b3a027">Actividad 2 - Recordatorio: la regresión simple <code>price~sqft</code></a></li>
+<li><a href="#org57d16be">Actividad 3 - Más regresiones: con <code>bedrms</code>, y con <code>sqft</code> + <code>bedrms</code></a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgd5dffb0">Estimamos el mismo modelo quitando, cada vez, una sola vivienda</a></li>
-<li><a href="#orgad71633">Lo que debe observar</a></li>
+<li><a href="#org2a9a67e">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org5d213fc">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orgf3e244e">Código completo de la práctica</a></li>
-<li><a href="#org4740178">Respuestas</a></li>
+<li><a href="#orga8a5fb1">Actividad 4 - Añadimos <code>baths</code></a></li>
+<li><a href="#orgad43bd0">Actividad 5 - Síntesis: cuatro modelos, una tabla</a></li>
+<li><a href="#orgfc60f40">Actividad 6 - ¿Cuánto depende el ajuste de las viviendas que nos han tocado?</a>
+<ul>
+<li>
+<ul>
+<li><a href="#org1296f80">Estimamos el mismo modelo quitando, cada vez, una sola vivienda</a></li>
+<li><a href="#org638aaa1">Lo que debe observar</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org22fd8ef">Preguntas de interpretación para la clase</a></li>
+<li><a href="#orgbf1ca98">Código completo de la práctica</a></li>
+<li><a href="#org9f1fd5d">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org2f886dc" class="outline-2">
-<h2 id="org2f886dc">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org2f886dc">
+<div id="outline-container-orgb1a882f" class="outline-2">
+<h2 id="orgb1a882f">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orgb1a882f">
 <p>
 Empezamos el bloque de regresión múltiple (lección 10) con el conjunto de datos reales más pequeño y manejable de todo el curso: 14 viviendas unifamiliares de University City (San Diego, California), tomado de Ramanathan (2002). Es un dataset de sección cruzada tan reducido que, si quisiera, podría casi reproducir a mano alguno de los cálculos; pero lo usaremos únicamente para lo que de verdad importa hoy: <i>aprender a leer</i> una regresión con más de un regresor, e interpretar sus parámetros.
 </p>
@@ -325,12 +333,13 @@ Empezamos el bloque de regresión múltiple (lección 10) con el conjunto de dat
 <li>Ampliar el modelo con un tercer regresor y observar cómo cambia (o no) la lectura de los anteriores.</li>
 <li>Observar, sin todavía formalizarlo, que el \(R^2\) no baja al añadir regresores (se formalizará, con el \(R^2\) ajustado, en la práctica siguiente).</li>
 <li>Practicar la lectura de una salida de regresión múltiple sin dejarse arrastrar a conclusiones causales injustificadas.</li>
+<li>Ver cuánto se mueve el ajuste al quitar una sola vivienda, y que no todas pesan igual: el primer indicio de que una estimación tiene una <i>dispersión</i>, que la lección 11 cuantificará.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org9d367b3" class="outline-2">
-<h2 id="org9d367b3">Actividad 1 - Carga y exploración de los datos</h2>
-<div class="outline-text-2" id="text-org9d367b3">
+<div id="outline-container-org444f14d" class="outline-2">
+<h2 id="org444f14d">Actividad 1 - Carga y exploración de los datos</h2>
+<div class="outline-text-2" id="text-org444f14d">
 <ul class="org-ul">
 <li><p>
 GUI: <i><i><code>Archivo -&gt; Abrir archivo de datos -&gt; Archivo de muestra</code></i></i>, pestaña <i><i><code>Ramanathan</code></i></i>, fichero <code>data4-1</code> (Prices of single-family homes).
@@ -340,7 +349,7 @@ GUI: <i><i><code>Archivo -&gt; Abrir archivo de datos -&gt; Archivo de muestra</
 <i>o bien teclee en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgddf4df9">open data4-1.gdt --quiet
+<pre class="src src-gretl" id="orgbda00f1">open data4-1.gdt --quiet
 </pre>
 </div></li>
 </ul>
@@ -354,7 +363,7 @@ Además, siempre conviene echar un vistazo a los estadísticos descriptivos prin
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org22567c1">setinfo price -d "Precio de la vivienda (miles de dólares)" -n "Precio (miles $)"
+<pre class="src src-gretl" id="org43cf5b1">setinfo price -d "Precio de la vivienda (miles de dólares)" -n "Precio (miles $)"
 setinfo sqft   -d "Superficie habitable (pies cuadrados)" -n "Superficie (sqft)"
 setinfo bedrms -d "Número de dormitorios" -n "Dormitorios"
 setinfo baths  -d "Número de cuartos de baño" -n "Baños"
@@ -366,10 +375,10 @@ summary price sqft bedrms baths --simple
 Son solo 14 observaciones: puede inspeccionarlas todas de un vistazo con
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orge29ac00">print price sqft bedrms baths --byobs
+<pre class="src src-gretl" id="org3e827dc">print price sqft bedrms baths --byobs
 </pre>
 </div>
-<pre class="example" id="org0f9891f">
+<pre class="example" id="org1c6a107">
           price         sqft       bedrms        baths
 
  1        199,9         1065            3         1,75
@@ -392,21 +401,21 @@ Un conjunto de datos tan pequeño no es representativo de ningún mercado real, 
 </p>
 </div>
 </div>
-<div id="outline-container-org12aabe0" class="outline-2">
-<h2 id="org12aabe0">Actividad 2 - Recordatorio: la regresión simple <code>price~sqft</code></h2>
-<div class="outline-text-2" id="text-org12aabe0">
+<div id="outline-container-org4b3a027" class="outline-2">
+<h2 id="org4b3a027">Actividad 2 - Recordatorio: la regresión simple <code>price~sqft</code></h2>
+<div class="outline-text-2" id="text-org4b3a027">
 <p>
 Antes de añadir regresores, recordamos el punto de partida: la regresión simple ya vista en la lección 6.
 </p>
 
 <p>
-<i>o bien teclee en linea de comandos</i>:
+<i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org218a9ba">ols price const sqft
+<pre class="src src-gretl" id="org860b54e">ols price const sqft
 </pre>
 </div>
-<pre class="example" id="orgad0180c">
+<pre class="example" id="orgdfe3938">
 Modelo 1: MCO, usando las observaciones 1-14
 Variable dependiente: price
 
@@ -440,7 +449,7 @@ Veamos la recta de regresión correspondiente al ajuste MCO que hemos logrado:
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org79b43e6">gnuplot price sqft --output="price_sqft_simple.png"
+<pre class="src src-gretl" id="org765db89">gnuplot price sqft --output="price_sqft_simple.png"
 </pre>
 </div>
 <figure style="display: flex; justify-content: center; gap: 10px;">
@@ -453,9 +462,9 @@ Anote el valor de \(\hat\beta_2\) (coeficiente de <code>sqft</code>) y de \(R^2\
 </p>
 </div>
 </div>
-<div id="outline-container-org3aa1d01" class="outline-2">
-<h2 id="org3aa1d01">Actividad 3 - Más regresiones: con <code>bedrms</code>, y con <code>sqft</code> + <code>bedrms</code></h2>
-<div class="outline-text-2" id="text-org3aa1d01">
+<div id="outline-container-org57d16be" class="outline-2">
+<h2 id="org57d16be">Actividad 3 - Más regresiones: con <code>bedrms</code>, y con <code>sqft</code> + <code>bedrms</code></h2>
+<div class="outline-text-2" id="text-org57d16be">
 <p>
 Estimamos ahora <code>price</code> en función únicamente de <code>bedrms</code>, y a continuación en función de <code>sqft</code> <i>y</i> <code>bedrms</code> a la vez.
 </p>
@@ -468,26 +477,69 @@ Estimamos ahora <code>price</code> en función únicamente de <code>bedrms</code
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org09ea25e">ols price const bedrms
+<pre class="src src-gretl" id="org2730177">ols price const bedrms
 ols price const sqft bedrms
 </pre>
 </div>
+<pre class="example" id="orga9bc68c">
+Modelo 2: MCO, usando las observaciones 1-14
+Variable dependiente: price
+
+             coeficiente   Desv. típica   Estadístico t   valor p
+  ---------------------------------------------------------------
+  const       112,853        179,123         0,6300       0,5405 
+  bedrms       56,1756        48,7511        1,152        0,2716 
+
+Media de la vble. dep.  317,4929   D.T. de la vble. dep.   88,49816
+Suma de cuad. residuos  91671,71   D.T. de la regresión    87,40314
+R-cuadrado              0,099625   R-cuadrado corregido    0,024594
+F(1, 12)                1,327777   Valor p (de F)          0,271640
+Log-verosimilitud      -81,37352   Criterio de Akaike      166,7470
+Criterio de Schwarz     168,0252   Crit. de Hannan-Quinn   166,6287
+
+
+Modelo 3: MCO, usando las observaciones 1-14
+Variable dependiente: price
+
+             coeficiente   Desv. típica   Estadístico t   valor p 
+  ----------------------------------------------------------------
+  const      121,179        80,1778           1,511       0,1589  
+  sqft         0,148314      0,0212080        6,993       2,29e-05 ***
+  bedrms     -23,9106       24,6419          -0,9703      0,3527  
+
+Media de la vble. dep.  317,4929   D.T. de la vble. dep.   88,49816
+Suma de cuad. residuos  16832,79   D.T. de la regresión    39,11846
+R-cuadrado              0,834673   R-cuadrado corregido    0,804613
+F(2, 11)                27,76736   Valor p (de F)          0,000050
+Log-verosimilitud      -69,50933   Criterio de Akaike      145,0187
+Criterio de Schwarz     146,9358   Crit. de Hannan-Quinn   144,8412
+</pre>
+</div>
+<div id="outline-container-org2a9a67e" class="outline-4">
+<h4 id="org2a9a67e">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org2a9a67e">
 <p>
-<i>Lo que debe observar</i>: compare el coeficiente de <code>bedrms</code> en ambas regresiones. En la lección 10 vimos que cada \(\hat\beta_j\), en un modelo con varios regresores, mide un <i>efecto parcial</i>: ``el efecto promedio en <code>price</code> ante un dormitorio más, <i>manteniendo fija la superficie</i>''. Eso es una pregunta distinta de ``el efecto promedio en <code>price</code> ante un dormitorio más, sin ninguna información adicional'' (lo que mide el coeficiente del modelo simple). No tienen por qué coincidir, ni siquiera en signo: dos viviendas con la misma superficie pero distinto número de dormitorios reparten ese mismo espacio en habitaciones más pequeñas o más grandes, lo cual puede pesar en el precio de forma diferente a como pesa ``más dormitorios sin más información sobre otras características de la vivienda'' (pues muchos dormitorios solo caben en viviendas grandes, por lo que posiblemente en la muestra habrá una correlación positiva entre el número de habitaciones y superficie&#x2026; verifíquelo).
+Compare el coeficiente de <code>bedrms</code> en ambas regresiones: solo, vale \(+56{,}2\) (mil dólares por dormitorio) con un \(R^2\) de apenas \(0{,}10\); junto a <code>sqft</code>, pasa a \(-23{,}9\), y el \(R^2\) sube a \(0{,}83\), casi el mismo que tenía <code>sqft</code> sola. En la lección 10 vimos que cada \(\hat\beta_j\), en un modelo con varios regresores, mide un <i>efecto parcial</i>: ``el efecto promedio en <code>price</code> ante un dormitorio más, <i>manteniendo fija la superficie</i>''. Eso es una pregunta distinta de ``el efecto promedio en <code>price</code> ante un dormitorio más, sin ninguna información adicional'' (lo que mide el coeficiente del modelo simple). No tienen por qué coincidir, ni siquiera en signo: dos viviendas con la misma superficie pero distinto número de dormitorios reparten ese mismo espacio en habitaciones más pequeñas o más grandes, lo cual puede pesar en el precio de forma diferente a como pesa ``más dormitorios sin más información sobre otras características de la vivienda'' (pues muchos dormitorios solo caben en viviendas grandes, por lo que posiblemente en la muestra habrá una correlación positiva entre el número de habitaciones y superficie&#x2026; verifíquelo).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orge088c9e">corr sqft bedrms
+<pre class="src src-gretl" id="org7d4ccc5">corr sqft bedrms
+</pre>
+</div>
+<pre class="example" id="orga608429">
+corr(sqft, bedrms) = 0,46473046
+Bajo la hipótesis nula de no correlación:
+ t(12) = 1,81814, con valor p a dos colas 0,0941
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org073759b" class="outline-2">
-<h2 id="org073759b">Actividad 4 - Añadimos <code>baths</code></h2>
-<div class="outline-text-2" id="text-org073759b">
+<div id="outline-container-orga8a5fb1" class="outline-2">
+<h2 id="orga8a5fb1">Actividad 4 - Añadimos <code>baths</code></h2>
+<div class="outline-text-2" id="text-orga8a5fb1">
 <p>
 Ampliamos el modelo con otro regresor adicional: el número de cuartos de baño.
 </p>
@@ -496,11 +548,31 @@ Ampliamos el modelo con otro regresor adicional: el número de cuartos de baño.
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org50aec6a">ols price const sqft bedrms baths
+<pre class="src src-gretl" id="org904b283">ols price const sqft bedrms baths
 </pre>
 </div>
+<pre class="example" id="orgec6c4a5">
+Modelo 4: MCO, usando las observaciones 1-14
+Variable dependiente: price
+
+             coeficiente   Desv. típica   Estadístico t   valor p
+  ---------------------------------------------------------------
+  const      129,062        88,3033           1,462       0,1746 
+  sqft         0,154800      0,0319404        4,847       0,0007  ***
+  bedrms     -21,5875       27,0293          -0,7987      0,4430 
+  baths      -12,1928       43,2500          -0,2819      0,7838 
+
+Media de la vble. dep.  317,4929   D.T. de la vble. dep.   88,49816
+Suma de cuad. residuos  16700,07   D.T. de la regresión    40,86572
+R-cuadrado              0,835976   R-cuadrado corregido    0,786769
+F(3, 10)                16,98894   Valor p (de F)          0,000299
+Log-verosimilitud      -69,45391   Criterio de Akaike      146,9078
+Criterio de Schwarz     149,4641   Crit. de Hannan-Quinn   146,6712
+
+Sin considerar la constante, el valor p más alto fue el de la variable 4 (baths)
+</pre>
 <p>
-Compare de nuevo el coeficiente de <code>bedrms</code> (y ahora también el de <code>sqft</code>) con los obtenidos en la Actividad 3. ¿Cambian mucho al incorporar <code>baths</code>? ¿Qué signo tiene el coeficiente de <code>baths</code>, y le parece razonable? Si no le parece razonable ¿Cuál podría ser el motivo por el que el resultado obtenido es distinto de lo que usted esperaba?
+Compare de nuevo el coeficiente de <code>bedrms</code> (y ahora también el de <code>sqft</code>) con los obtenidos en la Actividad 3: apenas se mueven (\(-23{,}9\to-21{,}6\) y \(0{,}148\to0{,}155\)). ¿Qué signo tiene el coeficiente de <code>baths</code>, \(-12{,}2\), y le parece razonable? Si no le parece razonable ¿Cuál podría ser el motivo por el que el resultado obtenido es distinto de lo que usted esperaba?
 </p>
 
 <p>
@@ -511,21 +583,30 @@ Observe la matriz de correlaciones entre <code>sqft</code>, <code>bedrms</code> 
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orge6f365c">corr sqft bedrms baths
+<pre class="src src-gretl" id="org25fb98f">corr sqft bedrms baths
 </pre>
 </div>
+<pre class="example" id="org5a6348f">
+Coeficientes de correlación, usando las observaciones 1 - 14
+Valor crítico al 5% (a dos colas) = 0,5324 para n = 14
+
+          sqft        bedrms         baths
+        1,0000        0,4647        0,7873  sqft
+                      1,0000        0,5323  bedrms
+                                    1,0000  baths
+</pre>
 <p>
-A la luz de los resultados, ¿Qué signo esperaría ver para <code>baths</code> en la regresión lineal simple <code>ols price const baths</code>? <b>Verifique su intuición estimando el modelo</b>. 
+A la luz de los resultados, ¿qué signo esperaría ver para <code>baths</code> en la regresión lineal simple <code>ols price const baths</code>? <b>Verifique su intuición estimando el modelo</b>. 
 </p>
 
 <p>
-¿Cree que el valor estimado para <code>baths</code> debe a la valoración de los baños en el mercado inmobiliario? ¿O a que realmente se está midiendo inadvertidamente otra cosa?
+¿Cree que el valor estimado para <code>baths</code> se debe a la valoración de los baños en el mercado inmobiliario? ¿O a que realmente se está midiendo inadvertidamente otra cosa?
 </p>
 </div>
 </div>
-<div id="outline-container-org4a299bb" class="outline-2">
-<h2 id="org4a299bb">Actividad 5 - Síntesis: cuatro modelos, una tabla</h2>
-<div class="outline-text-2" id="text-org4a299bb">
+<div id="outline-container-orgad43bd0" class="outline-2">
+<h2 id="orgad43bd0">Actividad 5 - Síntesis: cuatro modelos, una tabla</h2>
+<div class="outline-text-2" id="text-orgad43bd0">
 <p>
 Complete la tabla con los resultados de las cuatro regresiones estimadas en esta práctica.
 </p>
@@ -592,7 +673,7 @@ Complete la tabla con los resultados de las cuatro regresiones estimadas en esta
 <i>en línea de comandos, para obtener los cuatro \(R^2\) de golpe</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgb98a17d">ols price const sqft --quiet
+<pre class="src src-gretl" id="org683e73d">ols price const sqft --quiet
 scalar r2_1 = $rsq
 ols price const bedrms --quiet
 scalar r2_2 = $rsq
@@ -607,7 +688,7 @@ printf "R2 price~sqft+bedrms        = %.4f\n", r2_3
 printf "R2 price~sqft+bedrms+baths  = %.4f\n", r2_4
 </pre>
 </div>
-<pre class="example" id="orgd3533df">
+<pre class="example" id="orga741323">
 R2 price~sqft               = 0,8205
 R2 price~bedrms             = 0,0996
 R2 price~sqft+bedrms        = 0,8347
@@ -618,11 +699,11 @@ Observe el \(R^2\) a medida que se añaden regresores: nunca <i>baja</i>. Esto n
 </p>
 </div>
 </div>
-<div id="outline-container-orgd7a6aa3" class="outline-2">
-<h2 id="orgd7a6aa3">Actividad 6 - ¿Cuánto depende el ajuste de las viviendas que nos han tocado?</h2>
-<div class="outline-text-2" id="text-orgd7a6aa3">
+<div id="outline-container-orgfc60f40" class="outline-2">
+<h2 id="orgfc60f40">Actividad 6 - ¿Cuánto depende el ajuste de las viviendas que nos han tocado?</h2>
+<div class="outline-text-2" id="text-orgfc60f40">
 <p>
-Hasta aquí hemos cambiado el <i>modelo</i> y hemos visto moverse los coeficientes. Ahora vamos a hacer justo lo contrario: dejar el modelo quieto y cambiar los <i>datos</i>. Concretamente, vamos a quitar una vivienda de las catorce y reestimar exactamente la misma regresión.
+Hasta aquí hemos cambiado el <i>modelo</i> y hemos visto moverse los coeficientes. Ahora vamos a hacer justo lo contrario: dejar el modelo quieto y cambiar los <i>datos</i>. Concretamente, vamos a quitar una vivienda de las catorce y reestimar la misma regresión.
 </p>
 
 <p>
@@ -633,9 +714,9 @@ La pregunta es sencilla y conviene planteársela antes de ejecutar nada: <i>si u
 Gretl permite restringir la muestra con <code>smpl</code>. Desde la interfaz gráfica, lo natural es ir acumulando los ajustes en la <i>tabla de modelos</i> (menú <i><i><code>Archivo -&gt; Tabla de modelos</code></i></i>, o el comando <code>modeltab add</code>); en un guion que se ejecuta por lotes, en cambio, resulta más cómodo guardar los coeficientes en escalares e imprimirlos juntos al final. Eso es lo que hace el código siguiente.
 </p>
 </div>
-<div id="outline-container-orgd5dffb0" class="outline-4">
-<h4 id="orgd5dffb0">Estimamos el mismo modelo quitando, cada vez, una sola vivienda</h4>
-<div class="outline-text-4" id="text-orgd5dffb0">
+<div id="outline-container-org1296f80" class="outline-4">
+<h4 id="org1296f80">Estimamos el mismo modelo quitando, cada vez, una sola vivienda</h4>
+<div class="outline-text-4" id="text-org1296f80">
 <p>
 Quitaremos siempre <i>una</i> vivienda, y elegiremos tres que se diferencian en dos
 rasgos distintos: dónde están dentro del rango de superficies, y a qué
@@ -648,7 +729,7 @@ contenido de la actividad.
 <i>o bien teclee en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org7fea452">smpl full                       # las 14 viviendas
+<pre class="src src-gretl" id="orgf3223b6">smpl full                       # las 14 viviendas
 ols price const sqft --quiet
 scalar a_todas = $coeff(const)
 scalar b_todas = $coeff(sqft)
@@ -680,7 +761,7 @@ smpl full                       # recuperamos siempre la muestra completa
 <i>y ahora los comparamos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org8fca163">printf "media de sqft en las 14 viviendas = %.1f\n\n", media_sqft
+<pre class="src src-gretl" id="org17596dd">printf "media de sqft en las 14 viviendas = %.1f\n\n", media_sqft
 printf "se quita         sqft   residuo    constante   pendiente\n"
 printf "-----------------------------------------------------------\n"
 printf "nadie (n=14)        -         -   %10.3f  %10.4f\n", a_todas, b_todas
@@ -689,7 +770,7 @@ printf "obs 12 (n=13)    %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[12], resid[12], 
 printf "obs 14 (n=13)    %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[14], resid[14], a_s14, b_s14
 </pre>
 </div>
-<pre class="example" id="org84ff046">
+<pre class="example" id="org05ce3aa">
 media de sqft en las 14 viviendas = 1910,9
 
 se quita         sqft   residuo    constante   pendiente
@@ -701,9 +782,9 @@ obs 14 (n=13)     3000    -53,60       18,962      0,1593
 </pre>
 </div>
 </div>
-<div id="outline-container-orgad71633" class="outline-4">
-<h4 id="orgad71633">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgad71633">
+<div id="outline-container-org638aaa1" class="outline-4">
+<h4 id="org638aaa1">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org638aaa1">
 <p>
 Las tres viviendas que hemos ido quitando se comportan de tres maneras muy distintas, y esa es justamente la lección:
 </p>
@@ -715,7 +796,7 @@ Las tres viviendas que hemos ido quitando se comportan de tres maneras muy disti
 </ul>
 
 <p>
-De donde se siguen dos conclusiones que conviene no confundir:
+De donde se siguen tres conclusiones que conviene no confundir:
 </p>
 
 <ol class="org-ol">
@@ -725,16 +806,16 @@ De donde se siguen dos conclusiones que conviene no confundir:
 </ol>
 
 <p>
-Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que el ajuste <i>se mueve</i> cuando cambian los datos, pero no tenemos todavía ninguna forma de decir <i>cuánto</i> se mueve, ni de anticiparlo antes de mirar. Para eso hace falta hablar de la variabilidad del estimador, y eso exige un aparato que aún no tenemos. Es exactamente lo que hará la lección 11: dar una fórmula —no una impresión— para la dispersión de \(\hat\beta_2\), y mostrar que en ella aparecen, precisamente, el número de observaciones y cuán dispersas están las superficies de las viviendas.
+Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que el ajuste <i>se mueve</i> cuando cambian los datos, pero no tenemos todavía ninguna forma de decir <i>cuánto</i> se mueve, ni de anticiparlo antes de mirar. Para eso hace falta hablar de la variabilidad del estimador, y eso exige un aparato que aún no tenemos. Es lo que hará la lección 11: dar una fórmula —no una impresión— para la dispersión de \(\hat\beta_2\), y mostrar que en ella aparecen el número de observaciones y cuán dispersas están las superficies de las viviendas.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org5d213fc" class="outline-2">
-<h2 id="org5d213fc">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org5d213fc">
+<div id="outline-container-org22fd8ef" class="outline-2">
+<h2 id="org22fd8ef">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org22fd8ef">
 <ol class="org-ol">
-<li>¿Por qué el coeficiente de <code>bedrms</code> puede cambiar de signo (o de magnitud) al pasar del modelo simple al modelo con <code>sqft</code> incluido, si en ambos casos usamos exactamente los mismos 14 datos?</li>
+<li>¿Por qué el coeficiente de <code>bedrms</code> puede cambiar de signo (o de magnitud) al pasar del modelo simple al modelo con <code>sqft</code> incluido, si en ambos casos usamos los mismos 14 datos?</li>
 <li>¿Tiene sentido interpretar el coeficiente de <code>sqft</code> en el modelo <code>price~sqft+bedrms+baths</code> como ``el efecto de un pie cuadrado más, manteniendo todo lo demás igual''? ¿Y como ``lo que causa'' ese cambio de precio?</li>
 <li>Con solo 14 observaciones, ¿qué cautela adicional debería tener a la hora de generalizar cualquier conclusión de esta práctica a ``el mercado de la vivienda'' en general?</li>
 <li>¿Por qué el \(R^2\) no puede bajar nunca al añadir un regresor, sea cual sea ese regresor (incluso uno completamente irrelevante)?</li>
@@ -752,9 +833,9 @@ Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que
 </ul>
 </div>
 </div>
-<div id="outline-container-orgf3e244e" class="outline-2">
-<h2 id="orgf3e244e">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-orgf3e244e">
+<div id="outline-container-orgbf1ca98" class="outline-2">
+<h2 id="orgbf1ca98">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-orgbf1ca98">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -772,9 +853,9 @@ Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que
 </table>
 </div>
 </div>
-<div id="outline-container-org4740178" class="outline-2">
-<h2 id="org4740178">Respuestas</h2>
-<div class="outline-text-2" id="text-org4740178">
+<div id="outline-container-org9f1fd5d" class="outline-2">
+<h2 id="org9f1fd5d">Respuestas</h2>
+<div class="outline-text-2" id="text-org9f1fd5d">
 <ol class="org-ol">
 <li>¿Por qué puede cambiar el coeficiente de <code>bedrms</code>? Porque en el modelo simple, el coeficiente de <code>bedrms</code> recoge <i>todo</i> lo que varía con el número de dormitorios, incluida la superficie (las casas con más dormitorios suelen tener también más superficie): está, en cierto sentido, ``contaminado'' por esa variable omitida. En el modelo múltiple, al incluir <code>sqft</code> como regresor, el coeficiente de <code>bedrms</code> mide únicamente lo que aporta un dormitorio adicional <i>una vez fijada la superficie</i> —dos viviendas de igual tamaño, pero con distinto reparto en habitaciones—. No es sorprendente que ambos números difieran, incluso en signo: están respondiendo a preguntas distintas, aunque provengan de los mismos datos.</li>
 
@@ -784,14 +865,14 @@ Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que
 
 <li>¿Por qué el \(R^2\) nunca baja al añadir un regresor? Porque MCO elige siempre los coeficientes que minimizan la suma de residuos al cuadrado (SRC) dentro del subespacio disponible; al añadir un regresor, ese subespacio se amplía (contiene, como caso particular, la solución que ya teníamos antes de incluir el regresor nuevo), así que el mínimo de SRC en el subespacio ampliado nunca puede ser más grande que el mínimo anterior. Como \(R^2=1-\mathrm{SRC}/\mathrm{STC}\) y STC no cambia, \(R^2\) no puede bajar. Esto es válido incluso si el regresor añadido no tiene ninguna relación real con la variable dependiente —una propiedad puramente mecánica, no una señal de que el nuevo regresor "importe". Si hubiéramos añadido como regresor adicional el número de hermanos del arquitecto que diseñó cada una de las casas, el \(R^2\) probablemente aumentaría; lo que es seguro es que no disminuiría.</li>
 
-<li>Explicar la diferencia sin jerga técnica. Una posible formulación: ``si comparo, sin más, viviendas con distinto número de habitaciones, estoy comparando peras con manzanas, porque esas viviendas probablemente también difieren en su tamaño; en cambio, si comparo únicamente viviendas del mismo tamaño pero con distinto número de habitaciones, estoy aislando el efecto de repartir ese mismo espacio de una forma u otra''. Esa segunda comparación es, precisamente, lo que mide el coeficiente en el modelo con varios regresores a la vez.</li>
+<li>Explicar la diferencia sin jerga técnica. Una posible formulación: ``si comparo, sin más, viviendas con distinto número de habitaciones, estoy comparando peras con manzanas, porque esas viviendas probablemente también difieren en su tamaño; en cambio, si comparo únicamente viviendas del mismo tamaño pero con distinto número de habitaciones, estoy aislando el efecto de repartir ese mismo espacio de una forma u otra''. Esa segunda comparación es lo que mide el coeficiente en el modelo con varios regresores a la vez.</li>
 </ol>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-18 vie 23:22</p>
+<p class="date">Created: 2026-09-19 sáb 09:48</p>
 </div>
 </body>
 </html>

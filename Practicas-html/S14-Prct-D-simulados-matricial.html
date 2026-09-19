@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-18 vie 23:22 -->
+<!-- 2026-09-19 sáb 09:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 14 (D) &#x2014; La matriz de regresores en la práctica: verificación con datos simulados</title>
@@ -286,30 +286,39 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgf1d5394">Descripción de la práctica</a></li>
-<li><a href="#org87d5ea2">Actividad 1 - Datos simulados: un caso general, no ortogonal</a></li>
-<li><a href="#org1253d5e">Actividad 2 - La matriz de regresores y las ecuaciones normales</a></li>
-<li><a href="#org45f446d">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</a></li>
-<li><a href="#org3eadce3">Actividad 4 - Familia ortogonal: el mismo experimento, cambiando una sola cosa</a></li>
-<li><a href="#org094d17e">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</a>
+<li><a href="#org118b11b">Descripción de la práctica</a></li>
+<li><a href="#org6d205fc">Actividad 1 - Datos simulados: un caso general, no ortogonal</a></li>
+<li><a href="#orgbc2b3ab">Actividad 2 - La matriz de regresores y las ecuaciones normales</a></li>
+<li><a href="#org5fc3abe">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</a></li>
+<li><a href="#orgf5d6883">Actividad 4 - Familia ortogonal: el mismo experimento, cambiando una sola cosa</a></li>
+<li><a href="#org6961468">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgbfe2792">Lo que debe observar</a></li>
+<li><a href="#orgf309bc5">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orge0d4ec9">Actividad 6 - Síntesis</a></li>
-<li><a href="#org7b0d801">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org20fe9da">Código completo de la práctica</a></li>
-<li><a href="#org80a681f">Respuestas</a></li>
+<li><a href="#orgf0e3945">Actividad 6 - El caso contrario: colinealidad exacta</a>
+<ul>
+<li>
+<ul>
+<li><a href="#orgbde985b">Lo que debe observar</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org437d89b">Actividad 7 - Síntesis</a></li>
+<li><a href="#orgfed95c7">Preguntas de interpretación para la clase</a></li>
+<li><a href="#orgff6b3c5">Código completo de la práctica</a></li>
+<li><a href="#orgcf4369d">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgf1d5394" class="outline-2">
-<h2 id="orgf1d5394">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-orgf1d5394">
+<div id="outline-container-org118b11b" class="outline-2">
+<h2 id="org118b11b">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org118b11b">
 <p>
 Cerramos la sesión de regresión múltiple volviendo, por primera vez con Gretl, sobre la notación matricial de la lección 10: la matriz de datos \(\boldsymbol{\mathsf{X}}\), las ecuaciones normales \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}\), y la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\). Trabajamos con datos <i>simulados</i> porque ahora no queremos <i>interpretar</i> ningún fenómeno económico; queremos <i>verificar</i> que la maquinaria algebraica de la lección 10 funciona exactamente como se demostró: primero en un caso general, y después en el caso especial de regresores mutuamente ortogonales (``familia ortogonal''), donde cada coeficiente se puede calcular de forma aislada.
 </p>
@@ -324,12 +333,13 @@ Cerramos la sesión de regresión múltiple volviendo, por primera vez con Gretl
 <li>Verificar \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\), en sus dos lecturas (matriz por vector y vector por matriz).</li>
 <li>Construir un caso de <i>familia ortogonal</i> (regresores mutuamente ortogonales) y comprobar que cada \(\hat\beta_j\) se puede calcular de forma aislada, sin resolver ningún sistema.</li>
 <li>Verificar, en ese mismo caso, que \(R^2=\rho_{\boldsymbol{z}_2\boldsymbol{y}}^2+\rho_{\boldsymbol{z}_3\boldsymbol{y}}^2\).</li>
+<li>Ver qué hace Gretl ante la situación contraria, la <i>colinealidad exacta</i>: dos regresores que son la misma variable en dos unidades.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org87d5ea2" class="outline-2">
-<h2 id="org87d5ea2">Actividad 1 - Datos simulados: un caso general, no ortogonal</h2>
-<div class="outline-text-2" id="text-org87d5ea2">
+<div id="outline-container-org6d205fc" class="outline-2">
+<h2 id="org6d205fc">Actividad 1 - Datos simulados: un caso general, no ortogonal</h2>
+<div class="outline-text-2" id="text-org6d205fc">
 <p>
 Generamos \(n=40\) observaciones con dos regresores no constantes, \(x_2\) y \(x_3\), deliberadamente <i>correlacionados entre sí</i> (para no caer, sin darnos cuenta, en el caso especial de la Actividad 4).
 </p>
@@ -338,7 +348,7 @@ Generamos \(n=40\) observaciones con dos regresores no constantes, \(x_2\) y \(x
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgb863c72">nulldata 40 --preserve
+<pre class="src src-gretl" id="org5b0a615">nulldata 40 --preserve
 set seed 97531
 
 series x2 = uniform(0,10)
@@ -358,9 +368,9 @@ printf "Correlacion entre x2 y x3 = %.4f  (no son ortogonales)\n", corr(x2,x3)
 </p>
 </div>
 </div>
-<div id="outline-container-org1253d5e" class="outline-2">
-<h2 id="org1253d5e">Actividad 2 - La matriz de regresores y las ecuaciones normales</h2>
-<div class="outline-text-2" id="text-org1253d5e">
+<div id="outline-container-orgbc2b3ab" class="outline-2">
+<h2 id="orgbc2b3ab">Actividad 2 - La matriz de regresores y las ecuaciones normales</h2>
+<div class="outline-text-2" id="text-orgbc2b3ab">
 <p>
 Construimos explícitamente la matriz de datos \(\boldsymbol{\mathsf{X}}=[\boldsymbol{1};\;\boldsymbol{x}_2;\;\boldsymbol{x}_3]\) (lección 10) con el comando <code>matrix</code> de Gretl, a partir de una lista de series.
 </p>
@@ -369,7 +379,7 @@ Construimos explícitamente la matriz de datos \(\boldsymbol{\mathsf{X}}=[\bolds
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org132a306">list Xlist = const x2 x3
+<pre class="src src-gretl" id="org8784a31">list Xlist = const x2 x3
 matrix X = { Xlist }
 list ylist = y
 matrix Y = { ylist }
@@ -383,7 +393,7 @@ printf "\nVector X'y (3x1):\n"
 print XtY
 </pre>
 </div>
-<pre class="example" id="org8dd7be5">
+<pre class="example" id="orgff48cb1">
 Matriz X'X (3x3):
 XtX (3 x 3)
 
@@ -411,7 +421,7 @@ Ahora resolvemos las ecuaciones normales <i>usando la inversa</i> —tal como ap
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgda49232">matrix beta_matricial = invpd(XtX)*XtY
+<pre class="src src-gretl" id="org057fe72">matrix beta_matricial = invpd(XtX)*XtY
 printf "beta calculado como (X'X)^(-1) X'y:\n"
 print beta_matricial
 
@@ -425,7 +435,7 @@ printf "\nDiferencia (debe ser practicamente cero):\n"
 print diferencia
 </pre>
 </div>
-<pre class="example" id="org5f1a01b">
+<pre class="example" id="org9983e4c">
 beta calculado como (X'X)^(-1) X'y:
 beta_matricial (3 x 1)
 
@@ -450,13 +460,13 @@ diferencia (3 x 1)
  -1,3323e-15 
 </pre>
 <p>
-<i>Recuerde la advertencia de la lección 10: esta fórmula con inversa EXISTE, y es exactamente lo que Gretl calcula ``por dentro'' al ejecutar</i> <code>ols</code>; <i>pero el camino conceptual del curso nunca ha sido, ni será, invertir una matriz: es siempre la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\), que verificamos en la siguiente actividad.</i>
+<i>Recuerde la advertencia de la lección 10: esta fórmula con inversa EXISTE, y es lo que Gretl calcula ``por dentro'' al ejecutar</i> <code>ols</code>; <i>pero el camino conceptual del curso nunca ha sido, ni será, invertir una matriz: es siempre la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\), que verificamos en la siguiente actividad.</i>
 </p>
 </div>
 </div>
-<div id="outline-container-org45f446d" class="outline-2">
-<h2 id="org45f446d">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</h2>
-<div class="outline-text-2" id="text-org45f446d">
+<div id="outline-container-org5fc3abe" class="outline-2">
+<h2 id="org5fc3abe">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</h2>
+<div class="outline-text-2" id="text-org5fc3abe">
 <p>
 Recuperamos el vector de residuos de la última regresión y verificamos que es ortogonal a las tres columnas de \(\boldsymbol{\mathsf{X}}\) simultáneamente, en sus dos lecturas equivalentes (lección 10, ``Transposición'').
 </p>
@@ -465,7 +475,7 @@ Recuperamos el vector de residuos de la última regresión y verificamos que es 
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf6f1e2f">series ehat = $uhat
+<pre class="src src-gretl" id="orge33228c">series ehat = $uhat
 list elist = ehat
 matrix E = { elist }
 
@@ -478,7 +488,7 @@ printf "\ne*X (Gretl lo presenta como fila 1x3; mismos tres numeros):\n"
 print eX
 </pre>
 </div>
-<pre class="example" id="orgf556d8b">
+<pre class="example" id="orgeca50a1">
 X'e (columna 3x1, debe ser (aprox.) el vector nulo):
 XtE (3 x 1)
 
@@ -501,9 +511,9 @@ Una advertencia sobre lo que ve en pantalla, para que no deshaga lo aprendido en
 </p>
 </div>
 </div>
-<div id="outline-container-org3eadce3" class="outline-2">
-<h2 id="org3eadce3">Actividad 4 - Familia ortogonal: el mismo experimento, cambiando una sola cosa</h2>
-<div class="outline-text-2" id="text-org3eadce3">
+<div id="outline-container-orgf5d6883" class="outline-2">
+<h2 id="orgf5d6883">Actividad 4 - Familia ortogonal: el mismo experimento, cambiando una sola cosa</h2>
+<div class="outline-text-2" id="text-orgf5d6883">
 <p>
 Vamos a construir ahora el caso especial de la transparencia ``Familia ortogonal''. Y vamos a construirlo con un cuidado que conviene explicitar, porque de él depende que la comparación signifique algo.
 </p>
@@ -520,7 +530,7 @@ Para conseguirlo no hace falta ningún truco nuevo, solo la proyección ortogona
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orge307bbe">series z2 = x2 - mean(x2)        # centrado: media nula
+<pre class="src src-gretl" id="orgd81225f">series z2 = x2 - mean(x2)        # centrado: media nula
 ols x3 const z2 --quiet
 series z3 = $uhat                # residuos: ortogonales a 1 y a z2 por construccion
 
@@ -532,7 +542,7 @@ printf "suma(z2*z3)  = %.10f   (debe ser 0: ortogonalidad mutua)\n", sum(z2*z3)
 printf "corr(z2,z3)  = %.10f   (era 0,5046 entre x2 y x3)\n", corr(z2,z3)
 </pre>
 </div>
-<pre class="example" id="orga459d3e">
+<pre class="example" id="org852738c">
 media(z2)    = 0,0000000000   (debe ser 0)
 media(z3)    = -0,0000000000   (debe ser 0)
 suma(z2*z3)  = 0,0000000000   (debe ser 0: ortogonalidad mutua)
@@ -543,9 +553,9 @@ corr(z2,z3)  = 0,0000000000   (era 0,5046 entre x2 y x3)
 </p>
 </div>
 </div>
-<div id="outline-container-org094d17e" class="outline-2">
-<h2 id="org094d17e">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</h2>
-<div class="outline-text-2" id="text-org094d17e">
+<div id="outline-container-org6961468" class="outline-2">
+<h2 id="org6961468">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</h2>
+<div class="outline-text-2" id="text-org6961468">
 <p>
 Recordando la transparencia ``Familia ortogonal'' de la lección 10: si los regresores son mutuamente ortogonales, cada \(\hat\beta_j\) puede calcularse <i>de forma aislada</i>, sin resolver ningún sistema, con la misma fórmula de Cauchy–Schwarz de la lección 3; y además \(R^2\) se descompone como suma de correlaciones al cuadrado.
 </p>
@@ -558,7 +568,7 @@ Vamos a comprobarlo, pero haciendo <i>las dos cuentas en los dos escenarios</i>:
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org84dca78">printf "================ CASO GENERAL (Actividad 1) ================\n"
+<pre class="src src-gretl" id="org560c8f2">printf "================ CASO GENERAL (Actividad 1) ================\n"
 printf "correlacion entre los regresores = %.4f\n\n", corr(x2,x3)
 ols y const x2 x3 --quiet
 printf "beta2:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(x2), cov(x2,y)/var(x2)
@@ -573,7 +583,7 @@ printf "beta3:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(z3),
 printf "R2    : conjunto = %10.6f     suma de rho^2     = %10.6f\n", $rsq, corr(z2,yo)^2 + corr(z3,yo)^2
 </pre>
 </div>
-<pre class="example" id="orge45eece">
+<pre class="example" id="orgb8c3ff2">
 ================ CASO GENERAL (Actividad 1) ================
 correlacion entre los regresores = 0,5046
 
@@ -589,15 +599,15 @@ beta3:  conjunto =  -0,980779     aislado (cov/var) =  -0,980779
 R2    : conjunto =   0,835808     suma de rho^2     =   0,835808
 </pre>
 </div>
-<div id="outline-container-orgbfe2792" class="outline-4">
-<h4 id="orgbfe2792">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgbfe2792">
+<div id="outline-container-orgf309bc5" class="outline-4">
+<h4 id="orgf309bc5">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgf309bc5">
 <p>
 La salida tiene dos bloques, y hay que leerlos como las dos mitades de un mismo experimento. Recuerde que <i>lo único</i> que los separa es la correlación entre los regresores: mismo \(n\), mismos \(\beta\), misma perturbación.
 </p>
 
 <p>
-<i>En el bloque de abajo (ortogonal)</i>, las dos columnas coinciden en las tres filas. Cada coeficiente se puede calcular aislado, ignorando por completo al otro regresor, y sale el mismo número que da el modelo conjunto. Y \(R^2\) coincide con \(\rho^2_{\boldsymbol{z}_2\boldsymbol{y}}+\rho^2_{\boldsymbol{z}_3\boldsymbol{y}}\). Es exactamente lo que predice la lección 10.
+<i>En el bloque de abajo (ortogonal)</i>, las dos columnas coinciden en las tres filas. Cada coeficiente se puede calcular aislado, ignorando por completo al otro regresor, y sale el mismo número que da el modelo conjunto. Y \(R^2\) coincide con \(\rho^2_{\boldsymbol{z}_2\boldsymbol{y}}+\rho^2_{\boldsymbol{z}_3\boldsymbol{y}}\). Es lo que predice la lección 10.
 </p>
 
 <p>
@@ -616,9 +626,61 @@ Este segundo bloque es el que da sentido al primero. La transparencia ``Familia 
 </div>
 </div>
 </div>
-<div id="outline-container-orge0d4ec9" class="outline-2">
-<h2 id="orge0d4ec9">Actividad 6 - Síntesis</h2>
-<div class="outline-text-2" id="text-orge0d4ec9">
+<div id="outline-container-orgf0e3945" class="outline-2">
+<h2 id="orgf0e3945">Actividad 6 - El caso contrario: colinealidad exacta</h2>
+<div class="outline-text-2" id="text-orgf0e3945">
+<p>
+La lección 10 puso un ejemplo de regresores <i>linealmente dependientes</i>: la temperatura de un mismo día en grados Celsius y en Fahrenheit, \(F=32+1{,}8\,C\). Cada una varía; juntas no aportan dos direcciones, sino una. Fabriquemos ese caso con los datos de la Actividad 1, tomando <code>x2</code> como si fuera una temperatura en Celsius.
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="org6344709">series C = x2                     # "temperatura" en Celsius
+series F = 32 + 1.8*C             # la misma temperatura, en Fahrenheit
+printf "corr(C, F) = %.10f\n", corr(C, F)
+
+list Xcol = const C F
+matrix Xc = { Xcol }
+printf "determinante de X'X con C y F = %g   (una matriz invertible tiene determinante distinto de cero)\n", det(Xc'Xc)
+
+ols y const C F
+</pre>
+</div>
+<pre class="example" id="org8d2be15">
+corr(C, F) = 1,0000000000
+determinante de X'X con C y F = 0   (una matriz invertible tiene determinante distinto de cero)
+
+Modelo 1: MCO, usando las observaciones 1-40
+Variable dependiente: y
+Omitidas debido a colinealidad exacta: F
+
+             coeficiente   Desv. típica   Estadístico t   valor p 
+  ----------------------------------------------------------------
+  const        3,72826       1,15050          3,241       0,0025   ***
+  C            1,67527       0,202541         8,271       5,04e-10 ***
+
+Media de la vble. dep.  11,81341   D.T. de la vble. dep.   6,338798
+Suma de cuad. residuos  559,5827   D.T. de la regresión    3,837429
+R-cuadrado              0,642903   R-cuadrado corregido    0,633506
+F(1, 38)                68,41377   Valor p (de F)          5,04e-10
+Log-verosimilitud      -109,5238   Criterio de Akaike      223,0476
+Criterio de Schwarz     226,4253   Crit. de Hannan-Quinn   224,2688
+</pre>
+</div>
+<div id="outline-container-orgbde985b" class="outline-4">
+<h4 id="orgbde985b">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgbde985b">
+<p>
+La correlación entre <code>C</code> y <code>F</code> es exactamente \(1\): son el mismo vector en desviaciones, salvo escala. El determinante de \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) es nulo (o del orden del error de redondeo): la matriz no es invertible, y las ecuaciones normales tienen infinitas soluciones, como advertía la lección 10. Gretl no se detiene: detecta la dependencia, <i>elimina</i> uno de los dos regresores y lo dice en la salida. Es la respuesta razonable —el ajuste \(\boldsymbol{\mathop{\widehat y}}\) es único aunque los coeficientes no lo sean—, pero conviene saber que ha ocurrido: el coeficiente de <code>C</code> que queda ya no es ``el efecto de C manteniendo F fija'', porque fijar <code>F</code> es fijar <code>C</code>. En la lección 14 veremos el caso menos limpio y más frecuente: regresores <i>casi</i> alineados, que Gretl no elimina y que hacen inestables los coeficientes.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org437d89b" class="outline-2">
+<h2 id="org437d89b">Actividad 7 - Síntesis</h2>
+<div class="outline-text-2" id="text-org437d89b">
 <p>
 Hoy hemos verificado con Gretl la maquinaria matricial completa de la lección 10: (i) que \(\boldsymbol{\mathop{\widehat{\beta}}}=(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}\) coincide con lo que calcula <code>ols</code>, y que \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\) (que es lo mismo que \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol{0}\)); (ii) que con regresores mutuamente ortogonales cada coeficiente puede aislarse sin resolver ningún sistema, y \(R^2\) se descompone como suma de correlaciones al cuadrado.
 </p>
@@ -628,15 +690,16 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 </p>
 </div>
 </div>
-<div id="outline-container-org7b0d801" class="outline-2">
-<h2 id="org7b0d801">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org7b0d801">
+<div id="outline-container-orgfed95c7" class="outline-2">
+<h2 id="orgfed95c7">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-orgfed95c7">
 <ol class="org-ol">
-<li>En la Actividad 2, ¿por qué la diferencia entre <code>beta_matricial</code> y <code>beta_ols</code> no es exactamente cero, sino un número muy pequeño?</li>
+<li>En la Actividad 2, ¿por qué la diferencia entre <code>beta_matricial</code> y <code>beta_ols</code> no es cero, sino un número muy pequeño?</li>
 <li>¿Por qué necesitamos que <code>x2</code> y <code>x3</code> estén correlacionados en la Actividad 1 para que el ejercicio tenga sentido pedagógico? ¿Qué habría pasado si, por descuido, hubieran resultado casi ortogonales?</li>
 <li>En la Actividad 4, ¿por qué es importante que \(\boldsymbol{z}_2\) y \(\boldsymbol{z}_3\) tengan media <i>exactamente</i> cero, y no solo estén incorrelados?</li>
 <li>En la Actividad 5, el cálculo ``aislado'' \(\hat\beta_2\) (<code>cov(x2,y)/var(x2)</code>) sobre los datos de la Actividad 1 (<code>x2</code>, <code>x3</code>, correlacionados) no coincide con el coeficiente de <code>x2</code> en el modelo conjunto <code>ols y const x2 x3</code>, y el de <code>x3</code> ni siquiera tiene el mismo signo. ¿Por qué?</li>
 <li>¿Diría que el uso de la inversa \((\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\) en esta práctica contradice la advertencia de la lección 10 de que el curso ``nunca la usa como vía de razonamiento''? ¿Qué diferencia hay entre usarla para <i>verificar</i> una fórmula ya conocida y usarla como <i>método</i> para resolver MCO?</li>
+<li>En la Actividad 6, ¿por qué el ajuste \(\boldsymbol{\mathop{\widehat y}}\) es único aunque los coeficientes no lo sean? ¿Qué subespacio generan \(\boldsymbol 1\), \(\boldsymbol C\) y \(\boldsymbol F\)?</li>
 </ol>
 
 <p>
@@ -649,9 +712,9 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 </ul>
 </div>
 </div>
-<div id="outline-container-org20fe9da" class="outline-2">
-<h2 id="org20fe9da">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org20fe9da">
+<div id="outline-container-orgff6b3c5" class="outline-2">
+<h2 id="orgff6b3c5">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-orgff6b3c5">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -669,11 +732,11 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 </table>
 </div>
 </div>
-<div id="outline-container-org80a681f" class="outline-2">
-<h2 id="org80a681f">Respuestas</h2>
-<div class="outline-text-2" id="text-org80a681f">
+<div id="outline-container-orgcf4369d" class="outline-2">
+<h2 id="orgcf4369d">Respuestas</h2>
+<div class="outline-text-2" id="text-orgcf4369d">
 <ol class="org-ol">
-<li>¿Por qué la diferencia no es exactamente cero? Por errores de redondeo en aritmética de coma flotante, exactamente la misma razón por la que \(\sum\hat e_i\) no era exactamente cero en las prácticas anteriores. Invertir una matriz \(3\times3\) y multiplicarla por otro vector implica varias operaciones aritméticas encadenadas, cada una con su pequeñísimo error de precisión; el resultado final coincide con el de <code>ols</code> hasta un margen del orden de \(10^{-10}\) o menor, que es indistinguible de cero a efectos prácticos.</li>
+<li>¿Por qué la diferencia no es cero? Por errores de redondeo en aritmética de coma flotante, la misma razón por la que \(\sum\hat e_i\) no era cero en las prácticas anteriores. Invertir una matriz \(3\times3\) y multiplicarla por otro vector implica varias operaciones aritméticas encadenadas, cada una con su pequeñísimo error de precisión; el resultado final coincide con el de <code>ols</code> hasta un margen del orden de \(10^{-10}\) o menor, que es indistinguible de cero a efectos prácticos.</li>
 
 <li>¿Por qué necesitamos correlación entre <code>x2</code> y <code>x3</code>? Porque el objetivo pedagógico de la Actividad 1 es mostrar el caso <i>general</i> de la regresión múltiple, en el que resolver el sistema completo (o, equivalentemente, usar la matriz inversa) es imprescindible. Si <code>x2</code> y <code>x3</code> hubieran resultado casi ortogonales por accidente, el ejercicio se habría parecido demasiado al caso especial de la Actividad 4, y no habría quedado clara la diferencia entre ``hay que resolver el sistema'' (caso general) y ``cada coeficiente se calcula aislado'' (familia ortogonal): precisamente el contraste que se explota, con toda intención, entre las Actividades 1-3 y las Actividades 4-5.</li>
 
@@ -682,13 +745,15 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 <li>¿Coincide el cálculo aislado con los datos de la Actividad 1? No, y ya no hace falta creerlo: la Actividad 5 lo calcula. La fórmula aislada \(\hat\beta_2=\sigma_{\boldsymbol{x}_2\boldsymbol{y}}/\sigma^2_{\boldsymbol{x}_2}\) solo reproduce el coeficiente del modelo conjunto cuando los regresores son mutuamente ortogonales. Con <code>x2</code> y <code>x3</code> correlacionados, el cálculo aislado ignora la información compartida entre ambos y ``atribuye'' a uno parte de lo que corresponde al otro: \(\hat\beta_2\) pasa de \(2{,}11\) a \(1{,}68\), y \(\hat\beta_3\) —esto es lo llamativo— pasa de \(-0{,}98\) a \(+0{,}22\), cambiando de signo. Es el mismo fenómeno que se observó en la práctica de Ramanathan con <code>sqft</code> y <code>bedrms</code>, aquí con un mundo del que conocemos los coeficientes verdaderos y podemos por tanto ver quién acierta: el modelo conjunto (\(-0{,}98\) frente a \(\beta_3=-1\)).</li>
 
 <li>¿Contradice esta práctica la advertencia de la lección 10 sobre la inversa? No, y la distinción es importante. La advertencia de la lección 10 es que el curso nunca usa la inversa como <i>vía de razonamiento</i> para justificar por qué MCO funciona, ni como herramienta habitual de cálculo: el argumento conceptual sigue siendo, siempre, la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\). Aquí hemos usado la inversa una única vez, con un propósito muy distinto: <i>verificar numéricamente</i> que una fórmula ya demostrada por otro camino (las ecuaciones normales, obtenidas de la ortogonalidad) da, en efecto, el mismo resultado que <code>ols</code>. Usarla como comprobación puntual de una fórmula ya justificada no es lo mismo que apoyarse en ella para <i>explicar</i> por qué MCO funciona.</li>
+
+<li><i>Ajuste único, coeficientes no.</i> \(\boldsymbol F=32\,\boldsymbol 1+1{,}8\,\boldsymbol C\) es combinación lineal de \(\boldsymbol 1\) y \(\boldsymbol C\), así que \(\mathcal L(\boldsymbol 1,\boldsymbol C,\boldsymbol F)=\mathcal L(\boldsymbol 1,\boldsymbol C)\): un plano, no un subespacio de dimensión tres. La proyección de \(\boldsymbol y\) sobre ese plano es única (es el punto más cercano), pero se puede escribir de infinitas maneras como combinación de tres generadores que solo aportan dos direcciones. Gretl elige una de esas maneras eliminando <code>F</code>; cualquier otra daría el mismo \(\boldsymbol{\mathop{\widehat y}}\), los mismos residuos y el mismo \(R^2\).</li>
 </ol>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-18 vie 23:22</p>
+<p class="date">Created: 2026-09-19 sáb 09:48</p>
 </div>
 </body>
 </html>

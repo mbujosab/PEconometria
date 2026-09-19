@@ -1,0 +1,136 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+nulldata 12
+setobs 1 1 --cross-section
+series x  = 22.5 + 5*(index - 1)              # el regresor disperso de la leccion 12
+scalar b1 = 10
+scalar b2 = 0.5
+scalar sig = 1.1
+scalar R  = 4000
+scalar tc = critical(t, 10, 0.025)            # valor critico de la t_10 al 5%
+scalar zc = 1.96                              # el de la normal, para la Actividad 2
+
+set seed 20261113
+loop R --progressive --quiet
+    series u  = normal(0, sig)
+    series y  = b1 + b2*x + u
+    ols y const x --quiet
+    scalar b2hat  = $coeff(x)
+    scalar ee     = $stderr(x)
+    scalar cL     = b2hat - tc*ee                # extremos del IC al 95%
+    scalar cR     = b2hat + tc*ee
+    scalar dentro = (cL <= b2 && b2 <= cR)       # 1 si el IC contiene al verdadero beta_2
+    scalar tstat  = (b2hat - b2)/ee              # t para la H0 CIERTA beta_2 = 0,5
+    scalar dentroZ = (b2hat - zc*ee <= b2 && b2 <= b2hat + zc*ee)   # con 1,96 en vez de t_c
+    store "@workdir/replicasIC.gdt" b2hat ee cL cR dentro tstat dentroZ
+endloop
+open "@workdir/replicasIC.gdt" --quiet
+scalar tc = critical(t, 10, 0.025)
+scalar zc = 1.96
+outfile --quiet cobertura.txt
+    printf "Replicas                                   : %d\n", $nobs
+    printf "Intervalos que contienen al verdadero b2   : %.4f   (objetivo: 0,95)\n", mean(dentro)
+    printf "Rechazos de la H0 cierta al 5%%             : %.4f   (objetivo: 0,05)\n", mean(abs(tstat) > tc)
+end outfile
+
+smpl 1 100
+series B2 = 0.5
+gnuplot cL cR B2 --time-series --with-lines --output="@workdir/baile.png"
+outfile --quiet baile.txt
+    printf "Intervalos que fallan entre los 100 primeros: %d\n", 100 - sum(dentro)
+end outfile
+smpl full
+
+outfile --quiet precioSigma.txt
+    printf "Cobertura del intervalo con t_c = %.3f : %.4f\n", tc, mean(dentro)
+    printf "Cobertura del intervalo con 1,96       : %.4f\n", mean(dentroZ)
+    printf "\nCuantiles empiricos del estadistico t bajo la H0 cierta:\n"
+    printf "   2,5%%  -> %.3f      (la t_10 predice %.3f; la normal, %.3f)\n", quantile(tstat, 0.025), -tc, -zc
+    printf "  97,5%%  -> %.3f      (la t_10 predice  %.3f; la normal,  %.3f)\n", quantile(tstat, 0.975), tc, zc
+    printf "Fraccion de |t| > 1,96                 : %.4f   (con 1,96 se rechazaria la H0 cierta mas del 5%%)\n", mean(abs(tstat) > zc)
+end outfile
+freq tstat --plot="@workdir/histT.png"
+
+nulldata 120 --preserve
+setobs 1 1 --cross-section
+series x = 22.5 + 5*((index - 1) % 12)       # el mismo patron, diez veces
+scalar b1 = 10                               # los parametros del mundo, de nuevo
+scalar b2 = 0.5
+scalar sig = 1.1
+scalar R = 4000
+scalar c_falsa = 0.47
+outfile --quiet deteccion.txt
+    smpl 1 12                                    # una sola vuelta del patron: n = 12
+    scalar tc = critical(t, $nobs - 2, 0.025)
+    set seed 20261113
+    scalar rech = 0
+    scalar cov = 0
+    loop R --quiet
+        series u = normal(0, sig)
+        series y = b1 + b2*x + u
+        ols y const x --quiet
+        rech += (abs(($coeff(x) - c_falsa)/$stderr(x)) > tc)
+        cov  += ($coeff(x) - tc*$stderr(x) <= b2 && b2 <= $coeff(x) + tc*$stderr(x))
+    endloop
+    printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura del IC = %.3f\n", $nobs, tc, rech/R, cov/R
+    smpl full                                    # las diez vueltas: n = 120
+    scalar tc = critical(t, $nobs - 2, 0.025)
+    set seed 20261113
+    scalar rech = 0
+    scalar cov = 0
+    loop R --quiet
+        series u = normal(0, sig)
+        series y = b1 + b2*x + u
+        ols y const x --quiet
+        rech += (abs(($coeff(x) - c_falsa)/$stderr(x)) > tc)
+        cov  += ($coeff(x) - tc*$stderr(x) <= b2 && b2 <= $coeff(x) + tc*$stderr(x))
+    endloop
+    printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura del IC = %.3f\n", $nobs, tc, rech/R, cov/R
+end outfile
+
+outfile --quiet apendice.txt
+    smpl 1 12
+    scalar tc = critical(t, $nobs - 2, 0.025)
+    set seed 20261113
+    scalar cov = 0
+    scalar rech0 = 0
+    loop R --quiet
+        series u = (randgen(X, 1) - 1)/sqrt(2) * sig     # chi2(1) centrada, con desviacion tipica sig
+        series y = b1 + b2*x + u
+        ols y const x --quiet
+        cov   += ($coeff(x) - tc*$stderr(x) <= b2 && b2 <= $coeff(x) + tc*$stderr(x))
+        rech0 += (abs(($coeff(x) - b2)/$stderr(x)) > tc)
+    endloop
+    printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 cierta = %.4f\n", $nobs, cov/R, rech0/R
+    smpl full
+    scalar tc = critical(t, $nobs - 2, 0.025)
+    set seed 20261113
+    scalar cov = 0
+    scalar rech0 = 0
+    loop R --quiet
+        series u = (randgen(X, 1) - 1)/sqrt(2) * sig
+        series y = b1 + b2*x + u
+        ols y const x --quiet
+        cov   += ($coeff(x) - tc*$stderr(x) <= b2 && b2 <= $coeff(x) + tc*$stderr(x))
+        rech0 += (abs(($coeff(x) - b2)/$stderr(x)) > tc)
+    endloop
+    printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 cierta = %.4f\n", $nobs, cov/R, rech0/R
+end outfile

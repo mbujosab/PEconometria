@@ -102,3 +102,15 @@ outfile --quiet familiaOrtogonalComparacion.txt
     printf "beta3:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(z3), cov(z3,yo)/var(z3)
     printf "R2    : conjunto = %10.6f     suma de rho^2     = %10.6f\n", $rsq, corr(z2,yo)^2 + corr(z3,yo)^2
 end outfile
+
+outfile --quiet colinealidadExacta.txt
+    series C = x2                     # "temperatura" en Celsius
+    series F = 32 + 1.8*C             # la misma temperatura, en Fahrenheit
+    printf "corr(C, F) = %.10f\n", corr(C, F)
+    
+    list Xcol = const C F
+    matrix Xc = { Xcol }
+    printf "determinante de X'X con C y F = %g   (una matriz invertible tiene determinante distinto de cero)\n", det(Xc'Xc)
+    
+    ols y const C F
+end outfile
