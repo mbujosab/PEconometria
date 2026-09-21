@@ -1,4 +1,4 @@
-!/usr/bin/env bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 # --- Ubicación fija: este script vive siempre en la raíz de "main" ---
@@ -50,8 +50,16 @@ cp -r css/index.css "$DEST"/css/
 
 # Figuras: tanto el HTML como los slides referencian img/<subcarpeta>/*.png
 # con ruta relativa a org-lessons/. Sin esto no se ve ninguna figura.
-cp -r org-lessons/img "$DEST"/Lecciones-html/
-cp -r org-lessons/img "$DEST"/Transparencias/
+#
+# SOLO los PNG, que es lo unico que referencian. Copiar el arbol img/ entero
+# publicaba ademas 532 ficheros de compilacion de LaTeX (.tex .log .fls
+# .fdb_latexmk .aux), los Makefile, build.el, compila_figuras.sh y hasta los
+# ~undo-tree~ de Emacs, duplicados en Lecciones-html/ y en Transparencias/:
+# mas de mil URLs rastreables sin contenido frente a las 32 del sitemap.
+for destino in "$DEST"/Lecciones-html "$DEST"/Transparencias; do
+    ( cd org-lessons && find img -type f -name '*.png' \
+          -exec cp --parents {} "$destino"/ \; )
+done
 
 find org-pract -maxdepth 1 -name '*.html'        -exec cp {} "$DEST"/Practicas-html/ \;
 find org-pract -maxdepth 1 -name '*.pdf'         -exec cp {} "$DEST"/Practicas-pdf/ \;
@@ -62,7 +70,12 @@ find org-pract/guiones -maxdepth 1 -name '*.inp' -exec cp {} "$DEST"/Practicas-h
 # "guiones" no es una de ellas (ya se copia aparte, arriba).
 for d in org-pract/*/; do
     nombre=$(basename "$d")
-    [ "$nombre" = "guiones" ] && continue
+    # "guiones" ya se copia aparte, arriba. "CursoAntiguo" son los .org de la
+    # edicion anterior de la asignatura: nada los enlaza y son contenido
+    # duplicado y obsoleto. Para volver a publicarlos, quitelo de este case.
+    case "$nombre" in
+        guiones|CursoAntiguo) continue ;;
+    esac
     cp -r "$d" "$DEST"/Practicas-html/
 done
 
@@ -74,6 +87,11 @@ for carpeta in Transparencias Lecciones-html Lecciones-pdf \
     tree -H '.' --noreport --charset utf-8 \
          -T "$carpeta" -o "$DEST/$carpeta/index.html" \
          "$DEST/$carpeta"
+    # Son listados de directorio, no contenido, y Google llega a ellos porque
+    # el README del repositorio los enlaza. Que no entren en el indice, pero
+    # que siga los enlaces hacia las lecciones y las practicas.
+    sed -i '0,/<head>/s||<head>\n <meta name="robots" content="noindex,follow">|' \
+        "$DEST/$carpeta/index.html"
 done
 
 cp index.html "$DEST"/
@@ -89,17 +107,41 @@ touch "$DEST"/.nojekyll
 # practicas; no incluye los PDF ni las transparencias, que son otra
 # presentacion del mismo contenido y solo servirian para diluirlo.
 BASE="https://mbujosab.github.io/PEconometria"
-HOY=$(date +%F)
+
+# Fecha del ultimo cambio real de una pagina: la del ultimo commit de su .org
+# de origen y, si todavia no esta en git, su fecha de modificacion. Antes se
+# estampaba $(date +%F) en las 32 URLs, con lo que cada despliegue declaraba
+# que el curso entero habia cambiado hoy; un sitemap que miente asi se gana
+# que Google deje de hacerle caso.
+fecha_fuente() {
+    local origen=$1
+    local fecha=""
+    if [ -e "$origen" ]; then
+        if git -C "$REPO_ROOT" diff --quiet -- "$origen" 2>/dev/null; then
+            # Limpio respecto a git: manda la fecha del ultimo commit.
+            fecha=$(git -C "$REPO_ROOT" log -1 --format=%cs -- "$origen" 2>/dev/null || true)
+        fi
+        # Editado y sin commitear (o todavia sin seguimiento): su mtime.
+        [ -n "$fecha" ] || fecha=$(date -r "$origen" +%F)
+    fi
+    [ -n "$fecha" ] || fecha=$(date +%F)
+    printf '%s' "$fecha"
+}
 {
     echo '<?xml version="1.0" encoding="UTF-8"?>'
     echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-    printf '  <url><loc>%s/</loc><lastmod>%s</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>\n' "$BASE" "$HOY"
-    for carpeta in Lecciones-html Practicas-html; do
+    printf '  <url><loc>%s/</loc><lastmod>%s</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>\n' \
+           "$BASE" "$(fecha_fuente index.org)"
+    for par in Lecciones-html:org-lessons Practicas-html:org-pract; do
+        carpeta=${par%%:*}
+        fuente=${par##*:}
         find "$DEST/$carpeta" -maxdepth 1 -name '*.html' ! -name 'index.html' \
              | LC_ALL=C sort \
              | while read -r f; do
+            nombre=$(basename "$f")
             printf '  <url><loc>%s/%s/%s</loc><lastmod>%s</lastmod><priority>0.8</priority></url>\n' \
-                   "$BASE" "$carpeta" "$(basename "$f")" "$HOY"
+                   "$BASE" "$carpeta" "$nombre" \
+                   "$(fecha_fuente "$fuente/${nombre%.html}.org")"
         done
     done
     echo '</urlset>'
