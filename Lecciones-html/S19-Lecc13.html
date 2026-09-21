@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-20 dom 22:22 -->
+<!-- 2026-09-19 sáb 12:01 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Lección 11. ¿Es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador? Insesgadez y varianza</title>
+<title>Lección 13. El contraste $F$: significación conjunta</title>
 <meta name="author" content="Marcos Bujosa" />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
@@ -246,731 +246,710 @@ $(function() {    $('.note').before("<p class='admonition-title note'>Note</p>")
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Lección 11. ¿Es \(\boldsymbol{\mathop{\widehat{\beta}}}\) un buen estimador? Insesgadez y varianza</h1>
+<h1 class="title">Lección 13. El contraste \(F\): significación conjunta</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org310671f">1. De dónde venimos: una pregunta pendiente</a></li>
-<li><a href="#org607f042">2. El marco: muestra aleatoria</a></li>
-<li><a href="#org1f45166">3. \(\hat\beta_2\): la misma fórmula, aplicada a variables aleatorias</a></li>
-<li><a href="#org5f753b1">4. Dos propiedades de los pesos</a></li>
-<li><a href="#orged8429c">5. Sustituyendo el modelo poblacional</a></li>
-<li><a href="#orgbb4638d">6. Insesgadez: \(\mathrm{E}(\hat\beta_2)=\beta_2\)</a></li>
-<li><a href="#orgbb31598">7. Varianza: cuán dispersas están las estimaciones</a></li>
-<li><a href="#orgc0925a6">8. MCO es BLUE; estimando \(\sigma^2\)</a></li>
-<li><a href="#org6c8e8c8">9. ¿Y con más regresores?</a></li>
-<li><a href="#org2aee7c0">10. Recapitulación y guiño a la sesión siguiente</a></li>
-<li><a href="#org6c5f7fb">11. Preguntas de repaso (sesión 15)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
-<li><a href="#orge6fc2af">12. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#org710581a">1. De dónde venimos: los contrastes \(t\) son individuales</a></li>
+<li><a href="#orga62b87f">2. La hipótesis conjunta</a></li>
+<li><a href="#orgd5a5528">3. El estadístico \(F\)</a></li>
+<li><a href="#orge6d5d91">4. Lectura geométrica: la misma figura</a></li>
+<li><a href="#org390cff6">5. El \(F\) en una tabla de resultados</a></li>
+<li><a href="#orgfa95af0">6. Restricciones lineales: modelos anidados</a></li>
+<li><a href="#org0fed453">7. Tres restricciones sobre <code>hprice2</code></a></li>
+<li><a href="#org8a1d84f">8. Conjunto \(\neq\) individual: el caso de la apertura</a></li>
+<li><a href="#org469a346">9. Qué dice y qué no dice el \(F\)</a></li>
+<li><a href="#org17c27ff">10. Recapitulación y guiño a las sesiones siguientes</a></li>
+<li><a href="#org15309c0">11. Preguntas de repaso (sesión 19)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#org2cd3389">12. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
 </ul>
 </div>
 </div>
-<div class="abstract" id="orgb42ded9">
+<div class="abstract" id="org65964c5">
 <p>
-¿Es \(\boldsymbol{\mathop{\widehat{\beta}}}\) un buen estimador de \(\boldsymbol\beta\)? Para el modelo lineal simple: \(\hat\beta_2\) es insesgado y calculamos su varianza, <i>reutilizando</i> la fórmula de la lección 7 sobre variables aleatorias.
+Hoy juzgamos varios coeficientes a la vez: ¿aportan algo <i>en conjunto</i> estos regresores?, ¿cumplen esta relación? El estadístico \(F\) es la razón entre los dos catetos del triángulo de la lección 8, cada uno dividido por la dimensión del subespacio donde vive. La segunda mitad se dedica a leerlo.
 </p>
 
 <p>
-<i>``¿Es bueno un estimador? ¿Está bien centrado? ¿Cuánto se dispersa?''</i>
+<i>``Varios coeficientes, una hipótesis: hace falta un estadístico que mire varias direcciones a la vez.''</i>
 </p>
 
 </div>
 
 <ul class="org-ul">
-<li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S15-Lecc11.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S15-Lecc11.pdf">pdf</a>)</li>
+<li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S19-Lecc13.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf">pdf</a>)</li>
 </ul>
-<div id="outline-container-org310671f" class="outline-2">
-<h2 id="org310671f"><span class="section-number-2">1.</span> De dónde venimos: una pregunta pendiente</h2>
+<div id="outline-container-org710581a" class="outline-2">
+<h2 id="org710581a"><span class="section-number-2">1.</span> De dónde venimos: los contrastes \(t\) son individuales</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-Recordemos cómo cerraba la lección 10: <i>``¿es \(\boldsymbol{\mathop{\widehat{\beta}}}\) un buen estimador del verdadero \(\boldsymbol\beta\)?''</i>
-</p>
-
-
-<p>
-\(\hat\beta_1,\hat\beta_2\) —calculados primero con argumentos geométricos sobre los vectores de datos— se reinterpretaron después como <i>estimadores</i> de \(\beta_1,\beta_2\) por el método de los momentos.
+La lección 12 juzga <i>un</i> coeficiente cada vez, \(t=\hat\beta_j/\mathrm{ee}(\hat\beta_j)\), y demostró (con \(k=2\)) que \(t^2=(n-k)\,\mathrm{SEC}/\mathrm{SRC}\). En el laboratorio anterior, al pie de la tabla de <code>price</code> sobre <code>rooms</code>, apareció un \(F(1,504)=472{,}95\) igual a \(t^2\).
 </p>
 
 <p>
-Hoy, para el modelo lineal simple —constante \(\mathit1\) más un regresor <i>no constante</i> \(X\)—, demostraremos dos propiedades de \(\hat\beta_2\):
-</p>
-<ol class="org-ol">
-<li><i>Insesgadez</i>: \(\mathrm{E}(\hat\beta_2)=\beta_2\).</li>
-<li><i>Varianza</i>: una fórmula exacta de \(Var[\hat\beta_2\mid\boldsymbol X]\).</li>
-</ol>
-
-<p>
-Nos centramos en \(\hat\beta_2\) (la pendiente, de mayor interés económico); los mismos argumentos, sobre la fórmula \(\hat\beta_1\), permiten probar la insesgadez de \(\hat\beta_1\) —no las desarrollamos aquí para no ser repetitivos.
+Un caso real (<code>hprice2</code>; <code>price</code> sobre <code>rooms</code>, <code>nox</code> y su logaritmo <code>lnox</code>):
 </p>
 
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Regresor</th>
+<th scope="col" class="org-left">Coeficiente</th>
+<th scope="col" class="org-left">Desv. típica</th>
+<th scope="col" class="org-left">Estadístico \(t\)</th>
+<th scope="col" class="org-left">Valor \(p\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>rooms</code></td>
+<td class="org-left">8161,84</td>
+<td class="org-left">418,34</td>
+<td class="org-left">19,51</td>
+<td class="org-left">\(10^{-63}\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>nox</code></td>
+<td class="org-left">404,19</td>
+<td class="org-left">2198,85</td>
+<td class="org-left">0,18</td>
+<td class="org-left">0,854</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>lnox</code></td>
+<td class="org-left">-13262,2</td>
+<td class="org-left">12655,7</td>
+<td class="org-left">-1,05</td>
+<td class="org-left">0,295</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-center">
 <p>
-Ningún ingrediente geométrico nuevo: la fórmula de \(\hat\beta_2\) que obtuvimos por geometría, la reutilizamos hoy tal cual —evaluada sobre variables aleatorias en lugar de sobre datos: <i>una fórmula aritmética vieja, aplicada sobre un objeto nuevo</i>.
+¿Sobran <code>nox</code> y <code>lnox</code>? Cada \(t\), por separado, dice que sí. Los dos a la vez, <i>no</i>. Hoy: el \(F\) por derecho propio, y la resolución de este caso al final.
 </p>
 </div>
-<div id="outline-container-org5d95d67" class="outline-4">
-<h4 id="org5d95d67">De dónde venimos: una pregunta pendiente</h4>
-<div class="outline-text-4" id="text-org5d95d67">
+</div>
+<div id="outline-container-org3fb469b" class="outline-4">
+<h4 id="org3fb469b">De dónde venimos: los contrastes \(t\) son individuales</h4>
+<div class="outline-text-4" id="text-org3fb469b">
 <p>
-Esta sesión cierra un hilo que llevamos arrastrando desde hace varias lecciones. En la lección 9 (``El puente'') dimos sentido, por primera vez, a la pregunta ``¿\(\hat\beta_2\) estima bien al verdadero \(\beta_2\) poblacional?'', al construir el modelo poblacional \(Y=\beta_1\,\mathit1+\beta_2X+U\) y reinterpretar las fórmulas de la lección 7 como estimadores por el método de los momentos. En la lección 10 (regresión múltiple) esa misma pregunta se generalizó a \(k\) regresores, pero se dejó explícitamente sin respuesta —una sola frase en la recapitulación, sin fórmula ni supuestos generalizados—, precisamente para retomarla hoy con calma, en el caso más sencillo posible: \(k=2\), es decir, <i>dos</i> regresores en total —la constante \(\mathit1\) y un único regresor no constante \(X\).
+Todo el aparato de la lección 12 —error estándar, intervalo de confianza, contraste \(t\)— se pronuncia sobre <i>un</i> coeficiente cada vez. Es lo natural cuando la pregunta es ``¿interviene este regresor?'', y es lo que hace la tabla de resultados fila a fila. Pero muchas preguntas económicas no son sobre un coeficiente, sino sobre varios a la vez: ¿aportan algo <i>en conjunto</i> estos tres regresores?, ¿tienen el mismo efecto estas dos variables?, ¿son compatibles los datos con que la suma de dos coeficientes valga uno? Ninguna de ellas se responde con una fila de la tabla, y hoy construimos la herramienta que las responde a todas.
 </p>
 
 <p>
-La estrategia de esta sesión no introduce ninguna geometría nueva. Vamos a reutilizar, tal cual, la fórmula de \(\hat\beta_2\) que obtuvimos en la lección 7 mediante la ``vía alternativa'' (proyección sobre generadores ortogonales, vía Cauchy–Schwarz). Esa fórmula, una vez concluido el cálculo geométrico, quedó escrita como una expresión puramente aritmética: una suma de productos dividida por una suma de cuadrados. Precisamente por ser aritmética —y ya no geométrica—, podemos evaluarla en cualquier conjunto de argumentos siempre que las operaciones estén bien definidas. Hoy alimentaremos la fórmula, en lugar de con datos fijos \(x_1,\ldots,x_n,y_1,\ldots,y_n\), con las variables aleatorias de una muestra \(X_1,\ldots,X_n,Y_1,\ldots,Y_n\). El resultado de esa sustitución ya no es un número: es una nueva variable aleatoria, el <i>estimador</i> \(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\).
+Dos piezas de las sesiones anteriores hacen casi todo el trabajo. La primera es la identidad de la lección 12, \(t^2=(n-k)\,\mathrm{SEC}/\mathrm{SRC}\), que decía que el contraste \(t\) es la razón entre los dos catetos del triángulo de la lección 8, corregida por la dimensión. La segunda es una observación del laboratorio anterior: al pie de toda tabla de regresión Gretl imprime un número rotulado \(F\), y en la regresión simple de <code>price</code> sobre <code>rooms</code> ese número —\(472{,}95\)— coincidía con \(t^2\). Allí dijimos que el \(F\) era ``el cociente entre la parte explicada y la parte residual, cada una dividida por su número de dimensiones'' y que la lección 13 lo convertiría en un contraste por derecho propio. Esa es la lección de hoy.
 </p>
 
 <p>
-Conviene ser honestos, desde el principio, sobre qué NO vamos a hacer. No vamos a definir un nuevo producto escalar \(\langle\cdot,\cdot\rangle\) sobre ``vectores cuyas componentes son variables aleatorias'', ni vamos a apelar de nuevo a Cauchy–Schwarz para justificar la fórmula de \(\hat\beta_2\): la lección de hoy no se basa en ese tipo de argumentos geométricos. Lo único que hacemos hoy es sustituir números por variables aleatorias dentro de una fórmula ya obtenida —una operación mucho más modesta que una nueva demostración geométrica, y que no exige comprobar ninguna propiedad de producto escalar—. Es la diferencia entre demostrar un teorema y usar de otra manera y en otro contexto la fórmula que el teorema produjo: hoy solo hacemos lo segundo.
+La tabla de la transparencia es el caso que da sentido a todo lo demás, y conviene mirarlo despacio antes de saber resolverlo. Es una regresión con datos reales —las viviendas de <code>hprice2</code> de los laboratorios— del precio mediano sobre tres regresores: el número de habitaciones y <i>dos</i> medidas de la contaminación del aire, la concentración de óxidos de nitrógeno <code>nox</code> y su logaritmo <code>lnox</code>. Los coeficientes de <code>nox</code> y <code>lnox</code> tienen ambos un valor \(p\) muy alto: \(0{,}854\) y \(0{,}295\). Si uno lee la tabla como enseñó la lección 12, fila a fila, concluye que ninguno de los dos interviene y que ambos sobran. Y sin embargo, como veremos en la sección ``Conjunto \(\neq\) individual'', si se quitan <i>los dos a la vez</i> el ajuste empeora de forma inconfundible: la contaminación sí explica el precio. Lo que falla no es la tabla; es leer una pregunta sobre dos coeficientes con dos respuestas sobre uno.
 </p>
 
 <p>
-Conviene también ser explícitos, desde el principio, sobre el alcance de esta sesión: demostramos insesgadez y la expresión de la varianza <i>solo</i> para \(\hat\beta_2\) en la regresión con dos regresores (modelo lineal simple). La generalización a \(k\) regresores existe (y la citaremos, sin demostrarla, al final de la sesión), pero requiere álgebra matricial que para este curso he preferido no desarrollar.<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> Lo que sí haremos, como cierre, es comprobar que la fórmula general, evaluada en el caso particular \(k=2\), coincide con lo que aquí probamos sin matrices.
+Una advertencia sobre el reparto de la sesión, como en la lección 12. Las cuatro primeras transparencias construyen el contraste \(F\) de significación conjunta y lo leen en el triángulo; la sexta y la séptima lo generalizan a cualquier hipótesis lineal sobre los coeficientes; las tres últimas se dedican a interpretarlo, y son, otra vez, las de más rendimiento práctico.
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, secciones 2.4-2.5: insesgadez y varianza de los estimadores MCO en regresión simple (Teoremas 2.1 y 2.2).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, introducción a la sección 4.5 (por qué los contrastes \(t\) individuales no responden a hipótesis sobre varios coeficientes).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org607f042" class="outline-2">
-<h2 id="org607f042"><span class="section-number-2">2.</span> El marco: muestra aleatoria</h2>
+<div id="outline-container-orga62b87f" class="outline-2">
+<h2 id="orga62b87f"><span class="section-number-2">2.</span> La hipótesis conjunta</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-Recordemos (lección 9): los \(n\) datos son \(n\) copias <span class="underline">idénticas e independientes</span> de \(Y\); hoy, del par \((X,U)\).
+<i>Significación conjunta</i>: \(H_0\!:\beta_2=\beta_3=\cdots=\beta_k=0\) (``ningún regresor aporta nada'') frente a \(H_1\!:\) al menos uno es distinto de cero.
 </p>
 
 <p>
-\(\boldsymbol X\): la <i>versión aleatoria</i> de \(\boldsymbol{\mathsf X}=[\boldsymbol 1;\;\boldsymbol x]\), con columnas \(\mathit 1\) (\(n\) copias) y \(X_1,\ldots,X_n\). Análogamente \(\boldsymbol Y=(Y_1,\ldots,Y_n)\) y \(\boldsymbol U=(U_1,\ldots,U_n)\).
-Para cada \(i\): \(\;Y_i=\beta_1\,\mathit1+\beta_2X_i+U_i\), con los tres supuestos de la lección 9, condicionando ahora en \(\boldsymbol X\).
+Geométricamente: bajo \(H_0\) el modelo se reduce a la constante, el ajuste es el vector de medias, \(\boldsymbol{\mathop{\widehat y}}=\boldsymbol{\mathop{\overline y}}\), y el cateto explicado es nulo. La pregunta es si el subespacio de los regresores acerca \(\boldsymbol{\mathop{\widehat y}}\) a \(\boldsymbol y\) <i>más de lo que el azar acercaría</i>.
 </p>
 
 <p>
-<i>Lo nuevo</i> es el <b>muestreo aleatorio</b>: las \(n\) copias \((X_i,U_i)\) son independientes entre sí. Dos consecuencias:
+¿Por qué no \(k-1\) contrastes \(t\)? Cada \(t\) juzga a su regresor <i>con los demás dentro del modelo</i>; ``todos no significativos uno a uno'' no es ``todos nulos a la vez'' (la tabla de la apertura). Y \(k-1\) veredictos al \(5\,\%\) no forman un veredicto al \(5\,\%\).
 </p>
-
-<ul class="org-ul">
-<li>\(E[U_i\mid\boldsymbol X]=\mathit0\): \(U_i\perp\) funciones de \(X_i\) (<i>por definición</i>) y de las demás copias (<i>por independencia</i>).</li>
-</ul>
-
-<ul class="org-ul">
-<li>Perturbaciones de observaciones distintas, incorreladas: \(Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0\) \(\;(i\neq j)\).</li>
-</ul>
-
 
 <div class="org-center">
 <p>
-Condicionar en \(\boldsymbol X\): la esperanza condicional de la lección 9, sobre las \(n\) copias a la vez.
+Una hipótesis sobre varios coeficientes pide un estadístico que mire varias direcciones a la vez.
 </p>
 </div>
 </div>
-<div id="outline-container-orga943251" class="outline-4">
-<h4 id="orga943251">El marco: muestra aleatoria</h4>
-<div class="outline-text-4" id="text-orga943251">
+<div id="outline-container-orgaeaab10" class="outline-4">
+<h4 id="orgaeaab10">La hipótesis conjunta</h4>
+<div class="outline-text-4" id="text-orgaeaab10">
 <p>
-La lección 9 introdujo, de pasada, una frase que hoy se convierte en el ingrediente central de la sesión: ``asumiremos que nuestros \(n\) datos son el resultado de observar la realización de \(n\) copias idénticas e independientes de esa variable \(Y\)''. Allí esa frase servía únicamente para enunciar que interpretamos cada dato \(y_i\) como la realización de una variable aleatoria. Hoy la trataremos con más profundidad, porque para hablar de la <i>distribución</i> de \(\hat\beta_2\) —de cuánto varía de una muestra a otra— necesitamos imaginar que la muestra de datos podría haber sido distinta.
+La hipótesis nula más frecuente sobre varios coeficientes es la de <i>significación conjunta</i>: que todos los coeficientes de los regresores no constantes sean cero a la vez, \(\beta_2=\cdots=\beta_k=0\). En términos del modelo poblacional de la lección 10, \(Y=\beta_1\,\mathit1+\beta_2X_2+\cdots+\beta_kX_k+U\), dice que ninguno de los regresores interviene: \(Y=\beta_1\,\mathit1+U\), y lo mejor que puede hacerse para predecir \(Y\) es su media. La alternativa es la negación lógica: <i>al menos uno</i> de esos coeficientes es distinto de cero. Nótese lo poco que pide \(H_1\): no dice cuál ni cuántos, solo que no son todos nulos.
 </p>
 
 <p>
-Formalicemos esa idea. Desde la lección 4 venimos usando \(\boldsymbol x=(x_1,\ldots,x_n)\) para el vector de datos observados (y, desde la lección 6, para el vector de datos observados de un <i>regresor</i>), y en la lección 10 agrupamos los regresores observados en la matriz de datos \(\boldsymbol{\mathsf X}\) (en el modelo lineal simple, \(\boldsymbol{\mathsf X}=[\boldsymbol1;\;\boldsymbol x]\), dos columnas). Hoy introducimos su análogo aleatorio: la matriz<sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup> \(\boldsymbol X\). Este es el objeto sobre el que condicionaremos todos los momentos a lo largo de la sesión. Cada columna de \(\boldsymbol X\) corresponderá al muestreo de uno de los regresores poblacionales. En el modelo lineal simple son \(\mathit 1\) y \(X\); por tanto, la segunda columna de \(\boldsymbol X\) está formada por las \(n\) variables aleatorias \(X_1,\ldots,X_n\): cada una es una copia idéntica e independiente de la variable poblacional \(X\) de la lección 9.<sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup> Es la misma relación dato/variable aleatoria que venimos usando desde la lección 9 (entre \(y_i\) e \(Y\)), aplicada componente a componente a los \(n\) elementos de la muestra correspondiente a cada columna.
+La traducción geométrica es inmediata con el vocabulario de la lección 10. El ajuste \(\boldsymbol{\mathop{\widehat y}}\) es la proyección de \(\boldsymbol y\) sobre \(\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)\), y el triángulo rectángulo de la lección 8 —hipotenusa \(\boldsymbol y-\boldsymbol{\mathop{\overline y}}\), catetos \(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\) y \(\boldsymbol{\mathop{\widehat e}}\)— sigue existiendo sea cual sea \(k\), como se comprobó allí. Si \(H_0\) fuese cierta, el modelo poblacional no contendría ningún regresor y el ajuste que mejor lo reproduce sería el vector de medias: el cateto explicado \(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\) ``debería'' ser nulo. No lo será exactamente, claro: aunque los regresores no tengan nada que ver con \(\boldsymbol y\), la proyección de un vector de ruido sobre el subespacio de los regresores en desviaciones nunca es exactamente cero, igual que en la lección 12 la proyección sobre un único regresor no lo era. La pregunta que el contraste tiene que responder es, por tanto, si el cateto explicado es <i>más largo de lo que el azar produciría</i> cuando \(H_0\) es cierta. Es la misma pregunta de la lección 12, con una diferencia: allí el cateto explicado vivía en una recta (la del regresor en desviaciones) y aquí vive en un subespacio de dimensión \(k-1\) (el de los \(k-1\) regresores en desviaciones, lección 10).
 </p>
 
 <p>
-<i>Una precisión de uso</i>. Durante casi toda la sesión no necesitaremos ninguna operación matricial con \(\boldsymbol X\): bastarán sumatorios sobre las \(X_i\), y ``condicionar en \(\boldsymbol X\)'' significará siempre proyectar sobre el espacio de funciones cuyo argumento son, simultáneamente, todas las variables aleatorias presentes en \(\boldsymbol X\). La estructura de matriz de \(\boldsymbol X\) reaparecerá puntualmente al justificar el divisor \(n-k\) (sección ``MCO es BLUE; estimando \(\sigma^2\)'', donde hablaremos de las columnas de \(\boldsymbol{\mathsf X}\)) y, con más de 2 columnas, en la generalización final a \(k\) regresores. Es decir: el símbolo \(\boldsymbol X\) significa lo mismo al principio y al final de la sesión; lo único que cambia es cuántas columnas tiene.
+Conviene detenerse en por qué no basta con mirar los \(k-1\) contrastes \(t\) de la tabla, porque es el error de lectura más frecuente y la tabla de la apertura lo exhibe. Hay dos razones distintas. La primera es de <i>contenido</i>: cada \(t\) contrasta \(H_0\!:\beta_j=0\) <i>manteniendo a los demás regresores en el modelo</i>. Es decir, el \(t\) de <code>nox</code> pregunta si <code>nox</code> aporta algo <i>además de</i> <code>rooms</code> y <code>lnox</code>, y el de <code>lnox</code> pregunta si aporta algo además de <code>rooms</code> y <code>nox</code>. Ambos pueden responder ``no'' —cada uno es prescindible si el otro se queda— sin que los dos sean prescindibles a la vez. ``Todos individualmente no significativos'' y ``todos nulos simultáneamente'' son afirmaciones distintas, y la segunda es la que \(H_0\) formula. La segunda razón es de <i>probabilidad</i>: cada contraste \(t\) al \(5\,\%\) tiene, bajo su hipótesis nula, un \(5\,\%\) de probabilidad de rechazar por azar; si se hacen \(k-1\) y se rechaza \(H_0\) conjunta en cuanto alguno rechace, la probabilidad de un rechazo espurio ya no es el \(5\,\%\), sino mayor, y tanto mayor cuantos más regresores haya. Un contraste conjunto es un único contraste, con un único nivel, sobre la hipótesis que de verdad interesa.
 </p>
 
 <p>
-Para cada observación \(i\), el modelo poblacional de la lección 9 se aplica sin ningún cambio, con subíndice \(i\) añadido:
-\[
-Y_i=\beta_1\,\mathit1+\beta_2X_i+U_i, \qquad i=1,\ldots,n,
-\]
-con los tres supuestos del Modelo Clásico de Regresión Lineal aplicados a cada par \((X_i,U_i)\): linealidad, independencia lineal (\(\mathrm{Var}(X)\neq0\)) y homocedasticidad \(Var[U_i\mid\boldsymbol X]=\sigma^2\,\mathit1\); más la exogeneidad estricta \(E[U_i\mid\boldsymbol X]=\mathit0\), que en la lección 9 obteníamos gratis.<sup><a id="fnr.4" class="footref" href="#fn.4" role="doc-backlink">4</a></sup>
-</p>
-
-<p>
-Sobre el supuesto \(\mathrm{Var}(X)\neq0\) conviene una precisión, porque es fácil que el símbolo ``\(X\)'' despiste una vez que ya solo hablamos de \(X_1,\ldots,X_n\). La letra \(X\), sin subíndice, sigue denotando —como en la lección 9— la variable poblacional de la que \(X_1,\ldots,X_n\) son copias. El supuesto \(\mathrm{Var}(X)\neq0\) se enuncia sobre esa variable poblacional, y se aplica a cada copia \(X_i\) porque, al ser copias idénticas, cada \(X_i\) tiene la misma distribución que \(X\) (y, en particular, la misma varianza).
-</p>
-
-<p>
-Fíjese que la exogeneidad estricta tampoco es introducida aquí como un supuesto adicional, aunque hoy descansa sobre dos propiedades del modelo (en lugar de solo una): en primer lugar, la definición de \(U_i\) da \(U_i\perp\) funciones de \(X_i\); y, en segundo lugar, el muestreo aleatorio da \(U_i\perp\) funciones de las demás copias \(X_j\) con \(j\ne i\). Esta es la primera consecuencia que le sacamos al muestreo aleatorio; la segunda viene a continuación. 
-</p>
-
-<p>
-La segunda consecuencia del muestreo aleatorio es aún más directa: si \((X_i,U_i)\) y \((X_j,U_j)\) son independientes para \(i\neq j\), entonces, en particular, \(U_i\) y \(U_j\) son independientes, y dos variables independientes tienen covarianza cero:<sup><a id="fnr.5" class="footref" href="#fn.5" role="doc-backlink">5</a></sup>
-\[
-Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0 \qquad (i\neq j).
-\]
-No se trata, por tanto, de un supuesto añadido <i>ex novo</i>: es la traducción, en términos de covarianzas, de algo que ya habíamos dado por sentado desde la lección 9 al hablar de copias ``idénticas e independientes'' (lo que su curso de estadística del cuatrimestre anterior llamaba, seguramente, <i>muestreo aleatorio simple</i>). Hoy es la primera vez que necesitamos esta consecuencia de forma explícita, porque es la primera vez que trabajamos con <i>varias</i> perturbaciones \(U_1,\ldots,U_n\) simultáneamente, en lugar de con una sola \(U\) genérica.
-</p>
-
-<p>
-Por último, nótese que, al enunciar el supuesto de homocedasticidad, la varianza de cada \(U_i\) se condiciona a <i>toda</i> la matriz \(\boldsymbol X\); esta condición es más fuerte que condicionar solo sobre \(X_i\). Es la condición que hace falta para todo lo que sigue (ni es un corolario de la definición de \(U_i\) ni tampoco del muestreo aleatorio simple) y la estamos <i>imponiendo</i> directamente en esa forma más fuerte .
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.5, supuesto SLR.2 (muestreo aleatorio).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, sección 4.5 (``Testing multiple linear restrictions'': el planteamiento de la hipótesis conjunta y por qué los \(t\) individuales no la contrastan).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org1f45166" class="outline-2">
-<h2 id="org1f45166"><span class="section-number-2">3.</span> \(\hat\beta_2\): la misma fórmula, aplicada a variables aleatorias</h2>
+<div id="outline-container-orgd5a5528" class="outline-2">
+<h2 id="orgd5a5528"><span class="section-number-2">3.</span> El estadístico \(F\)</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-<i>Estimación vs. estimador</i> (distinción hoy imprescindible):
-</p>
-<ul class="org-ul">
-<li>\(\hat\beta_2(\boldsymbol x,\boldsymbol y)\), la <i>estimación</i>: un número.</li>
-<li>\(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\), el <i>estimador</i>: una variable aleatoria, la MISMA fórmula sobre la muestra aleatoria.</li>
-</ul>
-
-<p>
-Recordando la ``vía alternativa'' (lección 7):
+Los dos catetos de la lección 8, cada uno dividido por la dimensión del subespacio donde vive (\(k-1\) para el explicado, \(n-k\) para el residuo, lección 11):
 \[
-\hat\beta_2(\boldsymbol x,\boldsymbol y)=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}=\sum_i w_i y_i; \quad\text{donde } w_i=\frac{(x_i-\mu_{\boldsymbol x})}{\sum_j(x_j-\mu_{\boldsymbol x})^2}.
+\boxed{\;F=\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}\;}
+\qquad\text{(el denominador es $\mathfrak s^2$).}
 \]
 </p>
 
 <p>
-Sustituimos \(x_i,y_i\) por \(X_i,Y_i\):
+Bajo \(H_0\), y con el ruido isótropo de la lección 12, la longitud al cuadrado del ruido se reparte por igual entre las dimensiones: numerador y denominador estiman los dos \(\sigma^2\), y \(F\approx1\). Un \(F\) mucho mayor que \(1\) desmiente \(H_0\).
 </p>
 
 <p>
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\frac{\sum_i(X_i-\overline{X})Y_i}{\sum_j(X_j-\overline{X})^2}=\sum_i {W_i}Y_i; \quad\text{donde } W_i = \frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}.
-\]
-donde \(\overline{X}=\frac1n\sum_iX_i\) es la <i>media muestral</i>; y \(\sum_i (X_i - \overline{X}) = \mathit 0\).
+Enunciado, no demostrado: bajo \(H_0\), \(\;F\sim F_{k-1,\,n-k}\). Se rechaza al nivel \(\alpha\) si \(F>F_c\), con \(F_c\) el valor que deja \(\alpha\) en la <i>cola derecha</i> (una sola cola: \(F\) compara longitudes, no tiene signo). Valor \(p\): \(\mathrm{P}(F_{k-1,\,n-k}>F)\).
 </p>
 </div>
-<div id="outline-container-org1661f58" class="outline-4">
-<h4 id="org1661f58">\(\hat\beta_2\): la misma fórmula, aplicada a variables aleatorias</h4>
-<div class="outline-text-4" id="text-org1661f58">
+<div id="outline-container-org619413c" class="outline-4">
+<h4 id="org619413c">El estadístico \(F\)</h4>
+<div class="outline-text-4" id="text-org619413c">
 <p>
-Antes de seguir, conviene fijar una distinción que hasta ahora el curso no había requerido. Cuando escribimos \(\hat\beta_2=\sigma_{\boldsymbol{x}\boldsymbol{y}}/\sigma_{\boldsymbol{x}}^2=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}\) (lección 7) y evaluamos esa fórmula empleando dos vectores de datos concretos \(\boldsymbol x\) e \(\boldsymbol y\), obtenemos un <i>número</i> —la <i>estimación</i> \(\hat\beta_2\) de \(\beta_2\). Pero esa fórmula con sumatorios, aplicada a dos muestras \(\boldsymbol X\) y \(\boldsymbol Y\) resulta ser una <i>función de variables aleatorias</i>; es decir, ella misma es una variable aleatoria<sup><a id="fnr.6" class="footref" href="#fn.6" role="doc-backlink">6</a></sup>: en tal caso es el <i>estimador</i> \(\hat\beta_2\) de \(\beta_2\).<sup><a id="fnr.7" class="footref" href="#fn.7" role="doc-backlink">7</a></sup>
-</p>
-
-<p>
-Detengámonos, con todo el cuidado que merece, en qué significa exactamente ``sustituir datos por variables aleatorias en una fórmula''. Una fórmula como \(\mu_{\boldsymbol x}=f(x_1,\ldots,x_n)=\frac1n\sum_ix_i\) es, matemáticamente, una función que toma \(n\) números y devuelve un solo número: <i>la media</i>. Pero nada impide evaluar esa MISMA fórmula con otro tipo de argumento (si la operación sigue estando bien definida): si en lugar de \(n\) números le damos \(n\) variables aleatorias \(X_1,\ldots,X_n\), el resultado \(f(X_1,\ldots,X_n)=\frac1n\sum_iX_i\) ya no es un número, ahora es una variable aleatoria. A esta nueva variable aleatoria la llamamos <i>estimador de la media</i> o sencillamente <i>media muestral</i>, y la denotamos con \({\overline{X}}\). Su definición emplea la MISMA fórmula aritmética que en la lección 4 usamos para definir la media de un vector de datos, pero ahora la fórmula es aplicada a las \(n\) variables aleatorias de la muestra (de ahí el nombre de <i>media muestral</i>).
-</p>
-
-<p>
-Dicha observación —sencilla pero sustancial— guiará el desarrollo de la presente sesión. Conviene enunciarla explícitamente para evitar atribuirle una complejidad que no tiene: nos limitamos a definir nuevas variables aleatorias mediante la aplicación de fórmulas preexistentes (desarrolladas en su momento en \(\mathbb{R}^n\)) a las variables aleatorias de una muestra. Dichas variables aleatorias se conocen como <i>estadísticos</i> o <i>estadísticos muestrales</i>.
-</p>
-
-<p>
-Con esto aclarado, retomamos la fórmula de la ``vía alternativa'' de la lección 7. Allí, cambiando a los generadores ortogonales  \(\boldsymbol 1\) y \(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\), obtuvimos, para dos vectores de datos \(\boldsymbol x\) e \(\boldsymbol y\),
+La lección 12 dejó el estadístico \(t\) escrito como \(t^2=(n-k)\,\mathrm{SEC}/\mathrm{SRC}\), y en su recapitulación anunció que el cociente \(\mathrm{SEC}/\mathrm{SRC}\) admitía ``una versión más general en la que cada una se divide por sus propios grados de libertad''. Esa versión es el estadístico \(F\):
 \[
-\hat\beta_2(\boldsymbol x,\boldsymbol y)=\frac{\langle\boldsymbol y,(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1)\rangle_s}{\langle(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1),(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1)\rangle_s}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}.
+F=\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}.
 \]
-El lado izquierdo de esta igualdad (\(\langle\cdot,\cdot\rangle_s\)) es geometría: un cociente de dos productos escalares, con todo su significado y papel en la proyección ortogonal. El lado derecho, en cambio, ya no necesita esa maquinaria para ser evaluado: es una simple expresión aritmética (los factores \(1/n\) de cada producto escalar se cancelan al dividir, así que ni siquiera hace falta llevar la cuenta del divisor). Hoy nos quedamos con esta expresión aritmética —prescindiendo de la geometría subyacente— y sustituimos directamente las observaciones \(x_i, y_i\) por las variables aleatorias \(X_i, Y_i\); y reescribimos la expresión como una suma ponderada:<sup><a id="fnr.8" class="footref" href="#fn.8" role="doc-backlink">8</a></sup>
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\frac{\sum_i(X_i-\overline{X})Y_i}{\sum_j(X_j-\overline{X})^2}=\sum_{i=1}^n\underbrace{\left(\frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}\right)}_{W_i}Y_i
-=\sum_{i=1}^n {W_i}Y_i.
-\]
-Escribimos los pesos aleatorios \(W_i\) con mayúscula por ser estadísticos (i.e., variables aleatorias).
+Los dos divisores no son arbitrarios, y el curso ya conoce a los dos. El denominador, \(\mathrm{SRC}/(n-k)\), es la cuasivarianza de los residuos \(\mathfrak s^2\) de la lección 11: la suma de cuadrados del residuo dividida por la dimensión \(n-k\) del subespacio \(\mathcal L(\boldsymbol{\mathsf X})^\perp\) donde el residuo vive. El numerador hace lo mismo con el otro cateto: \(\mathrm{SEC}=\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\Vert_e^2\) es la suma de cuadrados del cateto explicado, y \(k-1\) es la dimensión del subespacio donde ese cateto vive —el de los regresores en desviaciones, que en la lección 10 vimos que tiene dimensión \(k-1\) dentro de \(\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)\)—. Así que \(F\) compara <i>longitud al cuadrado por dimensión</i> en los dos catetos: cuánta longitud al cuadrado ``le toca'' a cada una de las \(k-1\) direcciones del subespacio explicado, frente a cuánta le toca a cada una de las \(n-k\) direcciones del residuo.<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>
 </p>
 
 <p>
-Respecto a la media muestral, fijémonos que como \(\overline{X}=\frac1n\sum_iX_i\), entonces \(\sum_i X_i=n\overline{X}\) y que \(\sum_{i=1}^n \overline{X}=\underbrace{\overline{X}+\dots+\overline{X}}_{n\text{ veces}}=n\overline{X}\); así
-\[
-\sum_i (X_i - \overline{X}) = \sum_i X_i - \sum_i \overline{X} = n\overline{X} - n\overline{X} = \mathit 0.
-\]
-Usaremos esta propiedad de la <i>media muestral</i> en la siguiente transparencia.
+¿Por qué es ese cociente, y no otro, el que sirve para contrastar \(H_0\)? La respuesta es la misma idea de isotropía que en la lección 12 explicaba por qué el valor crítico depende de \(n-k\), y conviene enunciarla con cuidado, porque no vamos a demostrarla. Supongamos \(H_0\) cierta. Entonces el modelo poblacional es \(Y=\beta_1\,\mathit1+U\): el vector de datos en desviaciones, \(\boldsymbol y-\boldsymbol{\mathop{\overline y}}\), no es más que el vector de perturbaciones centrado, y bajo los supuestos de la lección 12 (homocedasticidad, independencia, normalidad) ese vector es <i>isótropo</i> dentro de \(\mathcal L(\boldsymbol 1)^\perp\): no privilegia ninguna dirección. Un vector isótropo con varianza \(\sigma^2\) por componente reparte su longitud al cuadrado <i>por igual</i> entre las dimensiones. Proyectado sobre cualquier subespacio de dimensión \(d\), la longitud al cuadrado de su proyección vale, en promedio, \(d\sigma^2\).<sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup> Aplicado a los dos catetos: bajo \(H_0\), la longitud al cuadrado del cateto explicado vale en promedio \((k-1)\sigma^2\) y la del residuo, \((n-k)\sigma^2\).<sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup> Dividiendo cada una por su dimensión, <i>numerador y denominador de \(F\) estiman ambos \(\sigma^2\)</i>, y su cociente debe rondar \(1\). Si, en cambio, \(H_0\) es falsa, el cateto explicado contiene además la parte de \(\boldsymbol y\) que los regresores sí explican —una longitud que no es ruido y que no se reparte con el residuo—, el numerador crece y \(F\) se hace grande. Un \(F\) mucho mayor que \(1\) es, por tanto, evidencia contra \(H_0\); un \(F\) cercano a \(1\) (o menor) es compatible con ella.
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.4 (donde \(\hat\beta_2\) se escribe, con la misma idea, como \(\sum w_iy_i\) mediante sumatorios).
+Para convertir esta idea en un contraste con nivel de significación hace falta saber <i>cuánto</i> mayor que \(1\) es ``mucho'', y eso exige la distribución de \(F\) bajo \(H_0\). Igual que en la lección 12 con la \(t\) de Student, la enunciamos sin demostrar: bajo \(H_0\) y los supuestos de la lección 12, el estadístico sigue una <i>distribución \(F\) de Fisher–Snedecor con \(k-1\) y \(n-k\) grados de libertad</i>, \(F_{k-1,\,n-k}\). Es una distribución que solo toma valores positivos, asimétrica, con la masa concentrada en torno a \(1\) y una cola derecha larga. Su forma depende de los dos números de grados de libertad, que son, una vez más, las dos dimensiones del triángulo.<sup><a id="fnr.4" class="footref" href="#fn.4" role="doc-backlink">4</a></sup> La regla de decisión tiene una novedad respecto a la lección 12: la región crítica está en <i>una sola cola</i>. Se rechaza \(H_0\) al nivel \(\alpha\) si \(F>F_c\), donde \(F_c\) es el valor de la \(F_{k-1,\,n-k}\) que deja probabilidad \(\alpha\) a su derecha. No hay cola izquierda porque \(F\) compara longitudes al cuadrado y no tiene signo: un \(F\) pequeño dice que el cateto explicado es corto, que es precisamente lo que \(H_0\) predice, y nunca puede ser evidencia contra ella. El valor \(p\) es, como siempre, la probabilidad de un valor al menos tan grande como el observado si \(H_0\) fuese cierta, \(\mathrm{P}(F_{k-1,\,n-k}>F)\), y Gretl lo imprime al lado del \(F\) al pie de cada tabla.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, sección 4.5 (el estadístico \(F\) y su distribución bajo la hipótesis nula); apéndice B (distribuciones \(\chi^2\), \(t\) y \(F\) y la relación \(t^2_{\nu}=F_{1,\nu}\)).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org5f753b1" class="outline-2">
-<h2 id="org5f753b1"><span class="section-number-2">4.</span> Dos propiedades de los pesos</h2>
+<div id="outline-container-orge6d5d91" class="outline-2">
+<h2 id="orge6d5d91"><span class="section-number-2">4.</span> Lectura geométrica: la misma figura</h2>
 <div class="outline-text-2" id="text-4">
-<p>
-Dos identidades algebraicas sobre los pesos. Ninguna es nueva.
+
+<div id="org45196d8" class="figure">
+<p><img src="img/S17-Lecc12/TrianguloContraste_ancho.png" alt="TrianguloContraste_ancho.png" width="640px" />
 </p>
+<p><span class="figure-number">Figura 1: </span>El triángulo de las lecciones 8 y 12, sin cambiar un trazo. En verde, el vector de datos en desviaciones (hipotenusa, longitud \(\sqrt{\mathrm{STC}}\)); en violeta, el ajuste en desviaciones (cateto explicado, longitud \(\sqrt{\mathrm{SEC}}\)), que con varios regresores ya no es múltiplo de ninguno de ellos y vive en un subespacio de dimensión \(k-1\); en gris, el residuo (cateto residual, longitud \(\sqrt{\mathrm{SRC}}\)), en un subespacio de dimensión \(n-k\). El ángulo \(\theta\) es el de \(R^2=\cos^2\theta\). El estadístico \(F\) compara los dos catetos, cada uno dividido por su dimensión.</p>
+</div>
 
 <p>
-Ambas valen para <i>cualquier</i> lista de números y, por tanto, siguen siendo ciertas al sustituir \(x_i\) por \(X_i\): son hechos aritméticos, no probabilísticos:
-</p>
-<ul class="org-ul">
-<li>la primera es la condición \(\sum_i(X_i-\overline{X})=\mathit0\) de la transparencia anterior (la misma cuenta que en la lección 4 daba media cero al vector en desviaciones);</li>
-</ul>
-<p>
 \[
-\sum_iW_i=\mathit 0;
+F=\frac{n-k}{k-1}\cdot\frac{\mathrm{SEC}}{\mathrm{SRC}}=\frac{n-k}{k-1}\cdot\frac{R^2}{1-R^2}:
+\quad\text{función únicamente del ángulo $\theta$ y de dos dimensiones.}
 \]
 </p>
 
-<ul class="org-ul">
-<li>la segunda es la razón por la que, en la ``vía alternativa'' de la lección 7, el coeficiente de \(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1\) resultaba ser exactamente \(\hat\beta_2\).</li>
-</ul>
 <p>
+Con \(k=2\): \(F=(n-2)\,\mathrm{SEC}/\mathrm{SRC}=t^2\), y también \(F_c=t_c^2\). El ejemplo de la lección 8 (\(n=5\)): \(F=\dfrac{90/1}{10/3}=27=t^2\); el valor crítico \(F_c(1,3)=10{,}13=3{,}18^2\).
+</p>
+</div>
+<div id="outline-container-org23822c3" class="outline-4">
+<h4 id="org23822c3">Lectura geométrica: la misma figura</h4>
+<div class="outline-text-4" id="text-org23822c3">
+<p>
+La figura es la de la lección 12, y no es una economía de medios: es que el objeto es el mismo. Con \(k\) regresores el triángulo rectángulo de la lección 8 sigue existiendo —la lección 10 lo comprobó: \(\boldsymbol{\mathop{\widehat e}}\perp\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\) porque el residuo es ortogonal a todo el subespacio de los regresores y ese vector está en él—, y \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y \(R^2=\cos^2\theta\) valen sin cambio. Lo único que cambia respecto a la lección 12 es una frase del pie de figura: el cateto explicado ya no es un múltiplo del regresor, porque ahora hay \(k-1\) regresores en desviaciones y \(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\) es una combinación de todos ellos que, en general, no está alineada con ninguno (lección 10). Por eso la figura de la lección 12 medía el regresor bajo el eje y esta no: la recta horizontal representa aquí un subespacio de dimensión \(k-1\), no una dirección.
+</p>
+
+<p>
+Escribamos \(F\) en términos del triángulo. Sacando los divisores fuera,
 \[
-\sum_iW_iX_i=\mathit 1 \qquad\Big(\text{pues } \textstyle\frac{\sum_i(X_i-{\overline{X}})X_i}{\sum_j(X_j-{\overline{X}})^2}=\frac{\sum_i(X_i-{\overline{X}})^2}{\sum_j(X_j-{\overline{X}})^2}\Big).
+F=\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}=\frac{n-k}{k-1}\cdot\frac{\mathrm{SEC}}{\mathrm{SRC}},
 \]
-</p>
-</div>
-<div id="outline-container-orgfe83abf" class="outline-4">
-<h4 id="orgfe83abf">Dos propiedades de los pesos</h4>
-<div class="outline-text-4" id="text-orgfe83abf">
-<p>
-Antes de sustituir el modelo poblacional en \(\hat\beta_2=\sum_iW_iY_i\), necesitamos dos propiedades de los pesos \(W_i\) que, en realidad, ya conocemos aunque nunca las hayamos escrito con este nombre. La primera es, literalmente, \(\langle\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1,\boldsymbol1\rangle_s=0\) (lección 4: el vector en desviaciones tiene media cero), dividida por el denominador común de los \(W_i\). La segunda es lo que, en la ``vía alternativa'' de la lección 7, hacía que al proyectar \(\boldsymbol y\) sobre \(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1\) el coeficiente obtenido fuera la pendiente \(\hat\beta_2\) (allí no aislamos unos ``pesos''; nos limitamos a escribir la fórmula como cociente de productos escalares).
-</p>
-
-<p>
-Conviene subrayar, antes de nada, un punto que puede pasar desapercibido y que es clave para no reintroducir la confusión entre estimador y estimación de la transparencia anterior: estas dos propiedades NO son afirmaciones probabilísticas. Son identidades <i>algebraicas</i>, del mismo tipo que ``\(2+3=5\)'': se cumplen para cualquier elección de \(n\) números \(x_1,\ldots,x_n\) —iguales o distintos entre sí, positivos o negativos, no importa—, porque se deducen únicamente de la propia definición de \(\overline{X}\) y \(W_i\), nunca de ninguna propiedad estadística de esos números. Por eso, cuando sustituimos \(x_i\) por la variable aleatoria \(X_i\), la identidad sigue siendo cierta sin necesidad de ningún argumento adicional (salvo, quizá, en el caso extremo de que todos los \(X_i\) coincidieran, en cuyo caso \(\sum_j(X_j-{\overline{X}})^2=\mathit 0\) y \(W_i\) ni siquiera estaría definido).<sup><a id="fnr.9" class="footref" href="#fn.9" role="doc-backlink">9</a></sup>
-</p>
-
-<p>
-<i>Primera propiedad</i>: \(\sum_iW_i=\mathit 0\). Como \(W_i=\frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}\) y el denominador es común a todos los términos, \(\sum_iW_i=\frac{\sum_i(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}\); y donde el numerador sabemos que es nulo: \(\sum_i(X_i-\overline{X})=\mathit 0\).
-</p>
-
-<p>
-<i>Segunda propiedad</i>: \(\sum_iW_iX_i=\mathit 1\). Usando de nuevo que \(\sum_i(X_i-{\overline{X}})=\mathit 0\)
+y como \(\mathrm{SEC}/\mathrm{SRC}=R^2/(1-R^2)\) (lección 12, dividiendo numerador y denominador por \(\mathrm{STC}\) y usando Pitágoras),
 \[
-\sum_i(X_i-{\overline{X}})X_i=\sum_i(X_i-{\overline{X}})(X_i-\overline{X}+\overline{X})=\sum_i (X_i-{\overline{X}})(X_i-\overline{X})+\overline{X}\underbrace{\sum_i(X_i-{\overline{X}})}_{=\mathit 0};
+F=\frac{n-k}{k-1}\cdot\frac{R^2}{1-R^2}.
 \]
-y donde hemos sacado factor común \(\overline{X}\) en el sumatorio \(\sum_i(X_i-{\overline{X}})\overline{X}\) para comprobar que es cero.
-</p>
-
-
-<p>
-Por tanto \(\sum_iW_iX_i=\frac{\sum_i(X_i-{\overline{X}})X_i}{\sum_j(X_j-{\overline{X}})^2}=\frac{\sum_i(X_i-{\overline{X}})^2}{\sum_j(X_j-{\overline{X}})^2}=\mathit 1\).
+Es la misma estructura que la identidad de la lección 12 con un factor distinto: allí \(t^2=(n-k)\,R^2/(1-R^2)\); aquí el \(n-k\) se divide además por \(k-1\). En los dos casos el estadístico es una función únicamente del ángulo \(\theta\) —vía \(R^2=\cos^2\theta\)— y de dimensiones. Y en los dos casos vale la misma lectura: <i>el contraste no mide nada que el \(R^2\) no midiera ya</i>; lo que añade es el factor que cuenta cuántas dimensiones respaldan ese ángulo. Un \(R^2\) dado es tanto más sorprendente cuantas más observaciones haya (\(n-k\) grande) y cuantos <i>menos</i> regresores se hayan usado para conseguirlo (\(k-1\) pequeño). Esta segunda parte es nueva respecto a la lección 12, y es la intuición que la práctica sobre el \(R^2\) ajustado ya manejó: con más regresores es más fácil acercar \(\boldsymbol{\mathop{\widehat y}}\) a \(\boldsymbol y\) por puro azar, porque el subespacio sobre el que se proyecta es mayor, y el \(F\) lo descuenta dividiendo por \(k-1\).
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.4 (donde estas dos propiedades se verifican mediante sumatorios, sin distinguir explícitamente su estatus puramente algebraico).
+El caso \(k=2\) cierra el círculo con la lección 12. Con un único regresor no constante, \(k-1=1\) y la fórmula se reduce a \(F=(n-2)\,\mathrm{SEC}/\mathrm{SRC}\), que es \(t^2\). No solo el estadístico: también el valor crítico, porque la \(F_{1,\,n-k}\) es la distribución del cuadrado de una \(t_{n-k}\), de modo que \(F_c=t_c^2\) y las dos reglas de decisión rechazan en los mismos casos. Es lo que el laboratorio anterior verificó sobre <code>hprice2</code> y con <code>restrict</code>, y lo que el ejemplo de juguete de la lección 8 permite comprobar con números redondos: \(\mathrm{SEC}=90\), \(\mathrm{SRC}=10\), \(n=5\), luego \(F=(90/1)/(10/3)=27\), el mismo \(t^2=27\) de la lección 12; y el valor crítico al \(5\,\%\) de la \(F_{1,3}\) es \(10{,}13\), el cuadrado del \(3{,}18\) de la \(t_3\). Se rechaza por las dos vías, y por el mismo margen.
+</p>
+
+<p>
+También la región crítica se lee igual que en la lección 12: rechazar cuando \(F>F_c\) equivale a rechazar cuando el ángulo \(\theta\) es menor que un ángulo crítico \(\theta_c\) —un <i>cono</i> alrededor del subespacio de los regresores en desviaciones—, y la abertura de ese cono depende de las dos dimensiones. Con los números de la transparencia siguiente (\(n=506\), \(k=4\)), la abertura al \(5\,\%\) es de \(82{,}9^\circ\): casi todo el espacio, por la misma razón que en la lección 12 —en dimensión alta el azar solo produce ángulos próximos a \(90^\circ\)—.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, sección 4.5, apartado ``The \(R\)-squared form of the \(F\) statistic''.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orged8429c" class="outline-2">
-<h2 id="orged8429c"><span class="section-number-2">5.</span> Sustituyendo el modelo poblacional</h2>
+<div id="outline-container-org390cff6" class="outline-2">
+<h2 id="org390cff6"><span class="section-number-2">5.</span> El \(F\) en una tabla de resultados</h2>
 <div class="outline-text-2" id="text-5">
 <p>
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\sum_iW_iY_i=\sum_iW_i(\beta_1\,\mathit1+\beta_2X_i+U_i)
-\]
+<code>hprice2</code>: <code>price</code> sobre <code>rooms</code>, <code>nox</code> y <code>stratio</code> (el modelo de la práctica que siguió a la lección 10).
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Regresor</th>
+<th scope="col" class="org-left">Coeficiente</th>
+<th scope="col" class="org-left">Desv. típica</th>
+<th scope="col" class="org-left">Estadístico \(t\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">constante</td>
+<td class="org-left">9458,01</td>
+<td class="org-left">4371,41</td>
+<td class="org-left">2,16</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>rooms</code></td>
+<td class="org-left">7000,63</td>
+<td class="org-left">409,15</td>
+<td class="org-left">17,11</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>nox</code></td>
+<td class="org-left">-1693,33</td>
+<td class="org-left">236,25</td>
+<td class="org-left">-7,17</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>stratio</code></td>
+<td class="org-left">-1166,96</td>
+<td class="org-left">128,76</td>
+<td class="org-left">-9,06</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+\(n=506\), \(k=4\), \(R^2=0{,}6005\), \(\mathrm{SRC}=1{,}711\cdot10^{10}\), \(\mathrm{SEC}=2{,}572\cdot10^{10}\), \(\mathfrak s=5837{,}8\); al pie: \(F(3,502)=251{,}5\), valor \(p=1{,}3\cdot10^{-99}\).
 </p>
 
 <p>
-\[
-=\beta_1\underbrace{\sum_iW_i}_{=\mathit0}+\beta_2\underbrace{\sum_iW_iX_i}_{=\mathit1}+\sum_iW_iU_i
-\]
-</p>
-
-<p>
-\[
-\boxed{\;\hat\beta_2(\boldsymbol X,\boldsymbol U)=\beta_2\,\mathit{1}+\sum_{i=1}^nW_iU_i\;}
-\]
-(escrito ahora en función de \(\boldsymbol U\), pues \(\boldsymbol Y\) ha sido sustituida).
-</p>
-
-<p>
-Mediante manipulación algebraica (sustitución y las dos identidades de la transparencia anterior): <i>el estimador es el parámetro verdadero MÁS una ``suma ponderada'' de las perturbaciones</i>. Todo lo que sigue sale de estudiar ese segundo término.
+Reconstrucción: \(\mathrm{SEC}/3=8{,}573\cdot10^{9}\) y \(\mathrm{SRC}/502=3{,}408\cdot10^{7}=\mathfrak s^2\); cociente \(251{,}5\), frente a \(F_c(3,502)=2{,}62\) al \(5\,\%\). <i>Dice</i>: los tres coeficientes no son cero a la vez. <i>No dice</i>: cuál importa, ni cuánto.
 </p>
 </div>
-<div id="outline-container-org54a7a45" class="outline-4">
-<h4 id="org54a7a45">Sustituyendo el modelo poblacional</h4>
-<div class="outline-text-4" id="text-org54a7a45">
+<div id="outline-container-orgf23fd25" class="outline-4">
+<h4 id="orgf23fd25">El \(F\) en una tabla de resultados</h4>
+<div class="outline-text-4" id="text-orgf23fd25">
 <p>
-Con las dos propiedades de la transparencia anterior —propiedades puramente algebraicas, válidas para cualquier valor que tomen \(X_1,\ldots,X_n\)—, el cálculo es puramente mecánico. Partimos de \(\hat\beta_2=\sum_iW_iY_i\) (sección ``\(\hat\beta_2\): la misma fórmula, aplicada a variables aleatorias'') y sustituimos el modelo poblacional \(Y_i=\beta_1\,\mathit1+\beta_2X_i+U_i\) (sección ``El marco: muestra aleatoria'') en cada sumando:
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol U)=\sum_iW_i(\beta_1\,\mathit1+\beta_2X_i+U_i)=\beta_1\sum_iW_i+\beta_2\sum_iW_iX_i+\sum_iW_iU_i.
-\]
-El primer término se anula (\(\sum_iW_i=\mathit 0\)); el segundo se reduce exactamente a \(\beta_2\,\mathit1\) (\(\sum_iW_iX_i=\mathit 1\)):
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol U)=\beta_2\,\mathit1+\sum_{i=1}^nW_iU_i.
-\]
+Toda tabla de regresión de Gretl termina con dos líneas de resumen que, hasta hoy, habíamos leído solo en parte: el \(R^2\) y la desviación típica de la regresión \(\mathfrak s\) (lección 12), y a su lado un ``\(F(k-1,\,n-k)\)'' con su valor \(p\). Ese \(F\) es el estadístico de significación conjunta de esta lección: contrasta, automáticamente y para cualquier modelo que se estime, la hipótesis de que todos los coeficientes de los regresores no constantes son cero a la vez. Los dos números entre paréntesis son las dimensiones del triángulo.
 </p>
 
 <p>
-Esta identidad es el corazón algebraico de toda la sesión, y merece leerse con detenimiento: dice que el estimador \(\hat\beta_2\) es la variable aleatoria constante \(\beta_2\,\mathit1\) (donde \(\beta_2\) es el verdadero parámetro poblacional) <i>más</i> una ``suma ponderada'' de las perturbaciones \(U_1,\ldots,U_n\) —con los pesos \(W_i\) que ya conocemos—. Todo lo que necesitamos demostrar sobre \(\hat\beta_2\) (que su valor esperado sea \(\beta_2\), y que su dispersión sea tal o cual) se reduce, a partir de aquí, a estudiar el comportamiento de esa suma ponderada \(\sum_iW_iU_i\). Y como los \(W_i\), según acabamos de comprobar, son —al margen de toda probabilidad— sencillamente funciones de \(X_1,\ldots,X_n\), al condicionar en \(\boldsymbol X\) podremos <i>sacarlos fuera</i> de la esperanza y de la varianza condicionales. Conviene ser preciso sobre qué autoriza ese paso, porque es tentador decir que ``condicionar en \(\boldsymbol X\) convierte los \(W_i\) en números'': no es así. Los \(W_i\) siguen siendo variables aleatorias —funciones de \(\omega\)— antes y después de condicionar; lo que ocurre es que son funciones <i>de aquello sobre lo que se condiciona</i>, y el Lema de la sección siguiente demuestra que tales factores salen fuera del operador \(E[\,\cdot\mid\boldsymbol X]\). El resultado <i>se parece</i> al de una combinación lineal con coeficientes fijos, pero la justificación no es esa: es el Lema, que a su vez sale de la caracterización geométrica de la esperanza condicional (lección 9).
+Tomemos el modelo de la práctica que siguió a la lección 10, el precio mediano de la vivienda sobre el número de habitaciones, la contaminación y la ratio alumnos/profesor del distrito. Con \(n=506\) y \(k=4\) (tres regresores más la constante), las dimensiones son \(k-1=3\) y \(n-k=502\). Todo lo que hace falta para reconstruir el \(F\) está en la tabla o sale de ella con la lección 8: \(\mathrm{SRC}\) lo imprime Gretl; \(\mathrm{STC}\) se obtiene de \(R^2=1-\mathrm{SRC}/\mathrm{STC}\), y \(\mathrm{SEC}=\mathrm{STC}-\mathrm{SRC}=2{,}572\cdot10^{10}\). Dividiendo cada cateto por su dimensión, el numerador vale \(8{,}573\cdot10^9\) y el denominador \(3{,}408\cdot10^7\), que es \(\mathfrak s^2=5837{,}8^2\), como debe. El cociente es \(251{,}5\), el \(F\) de la tabla. Por la otra vía, \(\frac{502}{3}\cdot\frac{0{,}6005}{0{,}3995}=251{,}5\), el mismo número.
 </p>
 
 <p>
-Merece la pena notar, de pasada, la coherencia con el ejemplo numérico de la lección 7: allí, con \(\boldsymbol u=(1,-2,0,2,-1)\) diseñado deliberadamente con \(\sum w_iu_i=0\) (covarianza muestral nula con el regresor), obtuvimos la <i>estimación</i> \(\hat\beta_2=\beta_2\) exactamente. La fórmula de hoy explica <i>por qué</i> ese resultado era una casualidad de diseño y no lo esperable en general: \(\hat\beta_2=\beta_2\,\mathit1+\sum_iW_iU_i\), y solo cuando esa suma se anula por construcción (como en aquel ejemplo, ya con datos y no con variables aleatorias) coinciden estimador y parámetro. En una muestra genuinamente aleatoria, \(\sum_iW_iU_i\) no será cero, sino una variable aleatoria con su propia media y su propia dispersión —que es lo que estudiamos en las dos transparencias siguientes.
+La decisión no admite duda: el valor crítico de la \(F_{3,502}\) al \(5\,\%\) es \(2{,}62\), y al \(1\,\%\), \(3{,}82\); el estadístico observado es cien veces mayor y el valor \(p\) es del orden de \(10^{-99}\). Se rechaza \(H_0\): los datos no son compatibles con que <code>rooms</code>, <code>nox</code> y <code>stratio</code> tengan, a la vez, coeficiente nulo. Merece la pena leer también la magnitud: \(F=251{,}5\) dice que, por dimensión, el cateto explicado tiene una longitud al cuadrado doscientas cincuenta veces mayor que la del residuo; si \(H_0\) fuese cierta esa razón debería rondar \(1\).
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, ecuación (2.35) y comentario adyacente.
+Y ahora lo que el \(F\) <i>no</i> dice, que es tan importante como lo que dice y que la sección ``Qué dice y qué no dice el \(F\)'' desarrollará. Rechazar \(H_0\!:\beta_2=\beta_3=\beta_4=0\) es rechazar que <i>los tres</i> sean nulos a la vez; es compatible con que dos de ellos lo sean. El \(F\) conjunto no señala a ningún regresor en particular, ni dice nada de la magnitud de los efectos: para eso están las columnas de la tabla y los intervalos de confianza de la lección 12. En este ejemplo los tres \(t\) individuales son grandes y no hay conflicto; pero la tabla de la apertura muestra que puede haberlo, y en ese caso la lectura correcta exige entender qué mide cada estadístico.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, sección 4.5, apartado ``The \(F\) statistic for overall significance of a regression''; y sección 4.6 (cómo se presentan los resultados, incluido el \(F\)).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgbb4638d" class="outline-2">
-<h2 id="orgbb4638d"><span class="section-number-2">6.</span> Insesgadez: \(\mathrm{E}(\hat\beta_2)=\beta_2\)</h2>
+<div id="outline-container-orgfa95af0" class="outline-2">
+<h2 id="orgfa95af0"><span class="section-number-2">6.</span> Restricciones lineales: modelos anidados</h2>
 <div class="outline-text-2" id="text-6">
 <p>
-Cambiemos de pregunta: 
-</p>
-<ul class="org-ul">
-<li>de ``¿Cuánto vale la <span class="underline">estimación</span> \(\hat\beta_2\) con los datos disponibles \(\boldsymbol x\) e \(\boldsymbol y\)?''</li>
-<li>a ``¿cuánto vale el <span class="underline">estimador</span> \(\hat\beta_2\), en promedio, sobre todas las muestras posibles?'' (su proyección sobre \(\mathit1\), lección 9).</li>
-</ul>
-
-<blockquote>
-<p>
-<i>Lema</i> (demostrado en los apuntes): si \(c(\boldsymbol X)\) es una función de \(\boldsymbol X\),
-\[
-E\big[c(\boldsymbol X)Z\mid\boldsymbol X\big]=c(\boldsymbol X)E[Z\mid\boldsymbol X].
-\]
-</p>
-</blockquote>
-<p>
-\(\mbox{ }\)
+Una hipótesis lineal: \(q\) ecuaciones sobre los \(\beta\) (excluir, igualar, fijar). Imponerla es proyectar sobre un subespacio <i>menor</i>: ajuste restringido \(\boldsymbol{\mathop{\widehat y}}_r\), con \(\mathrm{SRC}_r\geq\mathrm{SRC}\).
 </p>
 
-<p>
-Aplicándolo con \(c(\boldsymbol X)=W_i\) (pues cada \(W_i\) es función de \(\boldsymbol X\), sección anterior):
-\[
-E[\hat\beta_2\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iW_i\,E[U_i\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iW_i\,\mathit0=\beta_2\,\mathit1.
-\]
-</p>
 
-<blockquote>
-<p>
-<i>Ley de las esperanzas iteradas</i>: Como \(E[Z\mid\boldsymbol X]\) es la proyección ortogonal de \(Z\) sobre el espacio de las funciones de \(\boldsymbol X\) (y \(\mathit1\) es una de ellas), entonces \(Z-E[Z\mid\boldsymbol X]\perp\mathit1\). Por tanto, \[\mathrm{E}(Z)=\mathrm{E}\big(E[Z\mid\boldsymbol X]\big).\]
+<div id="orgdb57f91" class="figure">
+<p><img src="img/S19-Lecc13/TrianguloAnidado_ancho.png" alt="TrianguloAnidado_ancho.png" width="640px" />
 </p>
-</blockquote>
-<p>
-\(\mbox{ }\)
-</p>
+<p><span class="figure-number">Figura 2: </span>El mismo triángulo con el ajuste restringido en el papel del vector de medias. En verde, el residuo del modelo restringido \(\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\) (hipotenusa, longitud \(\sqrt{\mathrm{SRC}_r}\)); en violeta, lo que las \(q\) direcciones liberadas añaden al ajuste, \(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\) (cateto de longitud \(\sqrt{\mathrm{SRC}_r-\mathrm{SRC}}\)); en gris, el residuo del modelo completo (cateto de longitud \(\sqrt{\mathrm{SRC}}\)). El ángulo recto es la ortogonalidad \(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\perp\boldsymbol{\mathop{\widehat e}}\), de la que sale Pitágoras: \(\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2\). Con \(\boldsymbol{\mathop{\widehat y}}_r=\boldsymbol{\mathop{\overline y}}\) es la figura anterior.</p>
+</div>
 
 <p>
 \[
-\boxed{\;\mathrm{E}(\hat\beta_2)=\mathrm{E}\big(E[\hat\beta_2\mid\boldsymbol X]\big)=\beta_2.\;}
+\boxed{\;F=\frac{(\mathrm{SRC}_r-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)}\;\sim\;F_{q,\,n-k}\ \text{ bajo }H_0\;}
+\qquad\text{(conjunta: $\boldsymbol{\mathop{\widehat y}}_r=\boldsymbol{\mathop{\overline y}}$, $q=k-1$).}
 \]
-</p>
-
-<div class="org-center">
-<p>
-\(\hat\beta_2\) no acierta en cada muestra — pero no se equivoca <i>sistemáticamente</i> en ninguna dirección.
 </p>
 </div>
-</div>
-<div id="outline-container-org4854466" class="outline-4">
-<h4 id="org4854466">Insesgadez: \(\mathrm{E}(\hat\beta_2)=\beta_2\)</h4>
-<div class="outline-text-4" id="text-org4854466">
+<div id="outline-container-org6bbbb01" class="outline-4">
+<h4 id="org6bbbb01">Restricciones lineales: modelos anidados</h4>
+<div class="outline-text-4" id="text-org6bbbb01">
 <p>
-Partimos de \(\hat\beta_2=\beta_2\,\mathit1+\sum_iW_iU_i\) (transparencia anterior) y tomamos esperanza condicionada a \(\boldsymbol X\) —el primer paso de la sesión que de verdad usa probabilidad—.
+La significación conjunta es solo una de las hipótesis que pueden formularse sobre varios coeficientes, y no siempre la más interesante. Una <i>hipótesis lineal</i> general es un sistema de \(q\) ecuaciones lineales sobre los coeficientes del modelo poblacional. Tres ejemplos que reaparecerán con números en la transparencia siguiente: excluir dos regresores a la vez, \(\beta_3=\beta_4=0\) (\(q=2\)); excluir uno solo, \(\beta_4=0\) (\(q=1\), el contraste \(t\) de siempre); y una hipótesis que no excluye a nadie, sino que relaciona dos coeficientes, \(\beta_3=\beta_4\) (\(q=1\)). Otras, igual de naturales en economía, fijan un valor —una elasticidad unitaria, \(\beta_2=1\)— o una suma —rendimientos constantes a escala, \(\beta_2+\beta_3=1\), que veremos al hablar de la función de producción—.
 </p>
 
 <p>
-Antes de seguir, conviene explicitar algo que en la lección 9 quedó implícito en la propia definición de \(E[Z\mid\boldsymbol X]\) como la función de \(\boldsymbol X\) que minimiza la distancia \(\|Z-g(\boldsymbol X)\|_P\). Exactamente igual que en \(\mathbb R^n\) (lección 4 para una recta, y lección 6 al pasar a un plano: minimizar la distancia de un vector a un subespacio equivale a que el residuo sea ortogonal a <i>todo</i> el subespacio —a cada uno de sus generadores—), esa minimización es equivalente a esta caracterización, que usaremos repetidamente de aquí en adelante:
+Lo que hace tratables a todas ellas con una única herramienta es una observación geométrica. Imponer \(q\) restricciones lineales sobre los coeficientes equivale a exigir que el ajuste sea una combinación lineal de los regresores <i>de un tipo particular</i>. El conjunto de esas combinaciones es un subespacio <i>menor</i> que \(\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)\), contenido en él, con \(q\) dimensiones menos.<sup><a id="fnr.5" class="footref" href="#fn.5" role="doc-backlink">5</a></sup> El <i>ajuste restringido</i> \(\boldsymbol{\mathop{\widehat y}}_r\) es la proyección de \(\boldsymbol y\) sobre ese subespacio menor —lo que Gretl calcula al estimar, por ejemplo, el modelo sin <code>nox</code> ni <code>stratio</code> a la vez—, y su suma de cuadrados residual, \(\mathrm{SRC}_r=\Vert\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2\), es necesariamente mayor o igual que la del modelo completo: proyectar sobre un subespacio más pequeño nunca acerca más. Es la misma propiedad mecánica que la lección 8 anunció como ``\(R^2\) nunca empeora al añadir regresores'' y que la práctica del \(R^2\) ajustado hizo explícita: quitar regresores nunca reduce \(\mathrm{SRC}\).
 </p>
 
-<blockquote>
 <p>
-<i>Caracterización de \(E[Z\mid\boldsymbol X]\)</i>. Es la única variable aleatoria (salvo, como advertimos en la lección 9, en un conjunto de sucesos de probabilidad nula) que cumple, a la vez:
-</p>
-<ol class="org-ol">
-<li><i>Pertenencia</i>: es una función de \(\boldsymbol X\).</li>
-<li><i>Ortogonalidad del residuo</i>: \(\mathrm{E}\Big((Z-E[Z\mid\boldsymbol X])h(\boldsymbol X)\Big)=0\) para <i>toda</i> función \(h(\boldsymbol X)\).</li>
-</ol>
-</blockquote>
-
-<p>
-De esta caracterización salen, con el mismo tipo de comprobación (verificar que el candidato pertenece al espacio y que el residuo es ortogonal), dos propiedades que usaremos continuamente sin volver a citarlas: \(E[\,\cdot\mid\boldsymbol X]\) es <i>lineal</i>, \(E[aZ+bW\mid\boldsymbol X]=a\,E[Z\mid\boldsymbol X]+b\,E[W\mid\boldsymbol X]\), y <i>deja fijas</i> las funciones de \(\boldsymbol X\), \(E[g(\boldsymbol X)\mid\boldsymbol X]=g(\boldsymbol X)\) —en particular, \(E[\beta_2\,\mathit1\mid\boldsymbol X]=\beta_2\,\mathit1\)—. Y con esta misma caracterización podemos demostrar el siguiente lema:
+La pregunta del contraste es, entonces, <i>cuánto</i> ha subido \(\mathrm{SRC}\) al imponer las restricciones. Si \(H_0\) es cierta, el modelo restringido es el verdadero y la subida \(\mathrm{SRC}_r-\mathrm{SRC}\) es solo la parte del ruido que las \(q\) direcciones liberadas recogían por azar. Si \(H_0\) es falsa, las restricciones le quitan al ajuste algo que sí explicaba \(\boldsymbol y\), y la subida es grande. Para medirla hace falta el único resultado que hoy sí demostramos:
 </p>
 
 <blockquote>
 <p>
-<i>Lema (sacar fuera de la esperanza condicionada las funciones de variables sobre las que se condiciona)</i>. Si \(c(\boldsymbol X)\) es una función de la lista de variables aleatorias \(\boldsymbol X\),
+<i>Proposición (Pitágoras anidado)</i>. Los dos ajustes cumplen \(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\perp\boldsymbol{\mathop{\widehat e}}\), y por tanto
 \[
-E[c(\boldsymbol X)Z\mid\boldsymbol X]=c(\boldsymbol X)E[Z\mid\boldsymbol X].
+\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2.
 \]
 </p>
 </blockquote>
 
 <p>
-<i>Demostración</i>. Comprobamos que el candidato \(c(\boldsymbol X)E[Z\mid\boldsymbol X]\) cumple las DOS propiedades que caracterizan a \(E[c(\boldsymbol X)Z\mid\boldsymbol X]\):
-</p>
-
-<ul class="org-ul">
-<li><i>Pertenencia</i>: el producto \(c(\boldsymbol X)E[Z\mid\boldsymbol X]\) es función de \(\boldsymbol X\) (producto de funciones de \(\boldsymbol X\)).</li>
-<li><i>Ortogonalidad</i>: para cualquier \(h(\boldsymbol X)\),</li>
-</ul>
-<p>
+<i>Demostración</i>. El ajuste restringido \(\boldsymbol{\mathop{\widehat y}}_r\) es una combinación lineal de los regresores (una de un tipo particular, pero combinación al fin), luego pertenece a \(\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)\); y \(\boldsymbol{\mathop{\widehat y}}\) también. Su diferencia está, por tanto, en ese subespacio, y el residuo del modelo completo es ortogonal a todo él (lección 10: \(\boldsymbol{\mathop{\widehat e}}\boldsymbol{\mathsf X}=\boldsymbol 0\)). Así que \(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\perp\boldsymbol{\mathop{\widehat e}}\). Ahora escribimos el residuo restringido como suma de dos vectores ortogonales:
 \[
-\mathrm{E}\Big(\big(c(\boldsymbol X)Z - c(\boldsymbol X)E[Z\mid \boldsymbol{X}]\big)\,h(\boldsymbol{X})\Big)
-= \mathrm{E}\Big(\big(Z - E[Z\mid \boldsymbol{X}]\big)\,\underbrace{c(\boldsymbol X)h(\boldsymbol{X})}_{\text{función de }\boldsymbol X}\Big)=0
+\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r=(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r)+(\boldsymbol y-\boldsymbol{\mathop{\widehat y}})=(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r)+\boldsymbol{\mathop{\widehat e}}.
 \]
-porque \(c(\boldsymbol X)h(\boldsymbol X)\) es, ella misma, función de \(\boldsymbol X\), y ya sabemos que \(Z-E[Z\mid\boldsymbol X]\) es ortogonal a <i>cualquiera</i> de ellas.
+Aplicando el teorema de Pitágoras de la lección 3, \(\Vert\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2=\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2+\Vert\boldsymbol{\mathop{\widehat e}}\Vert_e^2\), que es la igualdad anunciada. \(\blacksquare\)
 </p>
 
 <p>
-Como \(c(\boldsymbol X)E[Z\mid\boldsymbol X]\) cumple las dos propiedades que caracterizan a \(E[c(\boldsymbol X)Z\mid\boldsymbol X]\), concluimos \(E\big[c(\boldsymbol X)Z\mid\boldsymbol X\big]=c(\boldsymbol X)E[Z\mid\boldsymbol X]\). \(\blacksquare\)
-</p>
-
-<p>
-Aplicamos el lema con \(c(\boldsymbol X)=W_i\) y con \(Z=U_i\):
+Esta proposición es la de la lección 8 (\(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\)) con el vector de medias sustituido por el ajuste restringido, y la figura de la transparencia es la de la lección 8 con esa sustitución: hipotenusa \(\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\), catetos \(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\) y \(\boldsymbol{\mathop{\widehat e}}\). La subida de la suma de cuadrados residual es la longitud al cuadrado del cateto que las \(q\) direcciones liberadas añaden al ajuste, y ese cateto vive en un subespacio de dimensión \(q\). Con esto, el estadístico se construye igual que el de significación conjunta —cada cateto dividido por su dimensión—:
 \[
-E[\hat\beta_2\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iE[W_iU_i\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iW_i\,E[U_i\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iW_i\,\mathit0=\beta_2\,\mathit1,
+F=\frac{(\mathrm{SRC}_r-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)}=\frac{\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2/q}{\mathfrak s^2},
 \]
-donde hemos usado la exogeneidad estricta \(E[U_i\mid\boldsymbol X]=\mathit0\) de la sección ``El marco: muestra aleatoria''.
+La misma isotropía de la sección ``El estadístico \(F\)'' hace que, bajo \(H_0\), numerador y denominador estimen ambos \(\sigma^2\). Su distribución bajo \(H_0\), que enunciamos sin demostrar, es la \(F_{q,\,n-k}\), y la regla es la de siempre: rechazar si \(F>F_c\). La significación conjunta es el caso particular en que el subespacio restringido es \(\mathcal L(\boldsymbol 1)\): entonces \(\boldsymbol{\mathop{\widehat y}}_r=\boldsymbol{\mathop{\overline y}}\), \(\mathrm{SRC}_r=\mathrm{STC}\), la subida es \(\mathrm{SEC}\) y \(q=k-1\). Todo lo dicho en las transparencias anteriores era, sin saberlo, este caso.
 </p>
 
 <p>
-Falta un último paso, pasar de la esperanza condicional a la esperanza incondicional: queremos encontrar \(\mathrm{E}(\hat\beta_2)\), no \(E[\hat\beta_2\mid\boldsymbol X]\). Aquí es donde entra la Ley de las Esperanzas Iteradas, que —como puede comprobarse— es, en realidad, la <i>misma</i> idea que ya usamos en la lección 9 para deducir \(\mathrm{E}(U)=0\) a partir de \(U\perp\mathit1\). En general: la función constante \(\mathit1\) es, trivialmente, una función de \(\boldsymbol X\); aplicando la ortogonalidad del residuo (recordada más arriba) con \(h(\boldsymbol X)=\mathit1\), obtenemos \(Z-E[Z\mid\boldsymbol X]\perp\mathit1\) para <i>cualquier</i> \(Z\)
-\[
-\mathrm{E}\Big(\big(Z-E[Z\mid\boldsymbol X]\big)\,\mathit 1 \Big)=0 \iff \mathrm{E}(Z)-\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=0,
-\]
-es decir, \(\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)\) —sin ninguna restricción sobre \(Z\)—. Esta es la Ley de las Esperanzas Iteradas, una consecuencia inmediata de nuestra propia definición geométrica de esperanza condicional.
+Es útil retener el nombre que suele darse a esta construcción: los dos modelos están <i>anidados</i>, el restringido dentro del completo, y el \(F\) compara el ajuste del pequeño con el del grande. Cualquier par de modelos anidados —cualquier hipótesis lineal— se contrasta con la misma receta: estimar los dos, leer las dos sumas de cuadrados residuales, contar \(q\) y \(n-k\).
 </p>
 
 <p>
-Aplicándola a \(Z=\hat\beta_2\), y usando que \(E[\hat\beta_2\mid\boldsymbol X]=\beta_2\,\mathit1\) es constante:
-\[
-\mathrm{E}(\hat\beta_2)=\mathrm{E}\big(E[\hat\beta_2\mid\boldsymbol X]\big)=\mathrm{E}(\beta_2\,\mathit1)=\beta_2.
-\]
-\(\hat\beta_2\) es, por tanto, un <i>estimador insesgado</i> de \(\beta_2\): en promedio, sobre todas las muestras posibles que podríamos haber observado, ni sobreestima ni subestima el verdadero parámetro poblacional.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, Teorema 2.1 (insesgadez de \(\hat\beta_1,\hat\beta_2\)).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, sección 4.5 (``Testing exclusion restrictions'' y ``Testing general linear restrictions''); y sección 4.4 (contraste de una única combinación lineal de coeficientes, el caso \(q=1\)).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgbb31598" class="outline-2">
-<h2 id="orgbb31598"><span class="section-number-2">7.</span> Varianza: cuán dispersas están las estimaciones</h2>
+<div id="outline-container-org0fed453" class="outline-2">
+<h2 id="org0fed453"><span class="section-number-2">7.</span> Tres restricciones sobre <code>hprice2</code></h2>
 <div class="outline-text-2" id="text-7">
 <p>
-Desarrollando el cuadrado (apuntes) y aplicando el <i>Lema</i> anterior:
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=Var\Big[\textstyle\sum_iW_iU_i\,\Big|\,\boldsymbol X\Big]=\sum_iW_i^2\,Var[U_i\mid\boldsymbol X]+\sum_{i\neq j}W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X]
-\]
+Modelo completo: <code>price</code> sobre <code>rooms</code>, <code>nox</code> y <code>stratio</code> (\(\mathrm{SRC}=1{,}711\cdot10^{10}\), \(n-k=502\), \(\mathfrak s^2=3{,}408\cdot10^{7}\)). En Gretl: menú <i><i><code>Contrastes -&gt; Restricciones lineales</code></i></i> o el comando <code>restrict</code> del laboratorio anterior.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">\(H_0\)</th>
+<th scope="col" class="org-right">\(q\)</th>
+<th scope="col" class="org-left">\(\mathrm{SRC}_r-\mathrm{SRC}\)</th>
+<th scope="col" class="org-left">\(F\)</th>
+<th scope="col" class="org-left">\(F_c\) al \(5\,\%\)</th>
+<th scope="col" class="org-left">Veredicto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">\(\beta_{\text{nox}}=\beta_{\text{stratio}}=0\)</td>
+<td class="org-right">2</td>
+<td class="org-left">\(4{,}985\cdot10^{9}\)</td>
+<td class="org-left">73,1</td>
+<td class="org-left">3,01</td>
+<td class="org-left">se rechaza (\(p=10^{-28}\))</td>
+</tr>
+
+<tr>
+<td class="org-left">\(\beta_{\text{stratio}}=0\)</td>
+<td class="org-right">1</td>
+<td class="org-left">\(2{,}799\cdot10^{9}\)</td>
+<td class="org-left">82,1</td>
+<td class="org-left">3,86</td>
+<td class="org-left">se rechaza; \(82{,}1=(-9{,}06)^2\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(\beta_{\text{nox}}=\beta_{\text{stratio}}\)</td>
+<td class="org-right">1</td>
+<td class="org-left">\(1{,}213\cdot10^{8}\)</td>
+<td class="org-left">3,56</td>
+<td class="org-left">3,86</td>
+<td class="org-left">no se rechaza (\(p=0{,}060\))</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+La segunda fila es el contraste \(t\) de la tabla, al cuadrado. La tercera <i>no</i> es de exclusión: el modelo restringido regresa <code>price</code> sobre <code>rooms</code> y la <i>suma</i> <code>nox</code> \(+\) <code>stratio</code> —otro subespacio, no menos regresores—.
+</p>
+</div>
+<div id="outline-container-orgc0f0775" class="outline-4">
+<h4 id="orgc0f0775">Tres restricciones sobre <code>hprice2</code></h4>
+<div class="outline-text-4" id="text-orgc0f0775">
+<p>
+Los tres contrastes de la tabla se hacen sobre el mismo modelo completo de la sección ``El \(F\) en una tabla de resultados'', de modo que el denominador es siempre el mismo: \(\mathrm{SRC}/(n-k)=\mathfrak s^2=3{,}408\cdot10^7\). Lo que cambia de fila a fila es el numerador, es decir, el modelo restringido que se compara.
 </p>
 
 <p>
-Homocedasticidad + \(Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0\) (``El marco'') \(\;\Longrightarrow\;\)
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2\sum_iW_i^2.
-\]
+<i>Primera fila: dos exclusiones a la vez</i>, \(H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}=0\). El modelo restringido es la regresión simple de <code>price</code> sobre <code>rooms</code> que arrastramos desde el laboratorio que siguió a la lección 8, con \(\mathrm{SRC}_r=2{,}209\cdot10^{10}\). La subida al quitar los dos regresores es \(4{,}985\cdot10^9\), que repartida entre \(q=2\) dimensiones y dividida por \(\mathfrak s^2\) da \(F=73{,}1\), frente a un valor crítico \(F_c(2,502)=3{,}01\). Se rechaza sin discusión: la contaminación y la ratio alumnos/profesor añaden, juntas, mucho más de lo que dos direcciones de puro azar añadirían. Es la respuesta a la pregunta ``¿sobran estas dos variables?'', que ningún \(t\) individual formula.
 </p>
 
 <p>
-\[
-\boxed{\;Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-{\overline{X}})^2}=\frac{\sigma^2}{n\,S^2}.\;}
-\]
-donde \(S^2=\frac1n\sum_i(X_i-\overline{X})^2\) es la <i>varianza muestral</i> del regresor (divisor \(n\), como en la lección 5).
+<i>Segunda fila: una exclusión</i>, \(H_0\!:\beta_{\text{stratio}}=0\). Ahora el modelo restringido es <code>price</code> sobre <code>rooms</code> y <code>nox</code>, con \(\mathrm{SRC}_r=1{,}991\cdot10^{10}\); la subida es \(2{,}799\cdot10^9\), \(q=1\), y \(F=82{,}1\). Compárese con la tabla de la sección ``El \(F\) en una tabla de resultados'': el \(t\) de <code>stratio</code> era \(-9{,}06\), y \((-9{,}06)^2=82{,}1\). Es la identidad \(F=t^2\) con \(q=1\), ahora en un modelo con varios regresores: el contraste \(t\) de un coeficiente es el contraste \(F\) de una única restricción de exclusión, y el valor crítico \(F_c(1,502)=3{,}86\) es el cuadrado del \(t_c=1{,}96\) de la lección 12. Gretl lo confirma si se le pide la restricción con <code>restrict</code> o desde el menú: devuelve un \(F(1,502)\) idéntico al \(t^2\), con el mismo valor \(p\).
+</p>
+
+<p>
+<i>Tercera fila: una igualdad</i>, \(H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}\) (``una unidad más de contaminación cuesta lo mismo que un alumno más por profesor''). Esta hipótesis no excluye a nadie, y por eso conviene detenerse en cuál es su modelo restringido. Bajo \(H_0\), la combinación \(\beta_{\text{nox}}\boldsymbol x_{\text{nox}}+\beta_{\text{stratio}}\boldsymbol x_{\text{stratio}}\) se convierte en \(\beta_{\text{nox}}(\boldsymbol x_{\text{nox}}+\boldsymbol x_{\text{stratio}})\): los dos regresores se funden en uno, la suma, y el modelo restringido es la regresión de <code>price</code> sobre <code>rooms</code> y <code>nox</code> \(+\) <code>stratio</code>. Su \(\mathrm{SRC}_r\) es \(1{,}723\cdot10^{10}\), apenas por encima del completo: la subida es \(1{,}213\cdot10^8\) y \(F=3{,}56\), ligeramente por debajo del valor crítico \(3{,}86\). No se rechaza al \(5\,\%\), con un valor \(p\) de \(0{,}060\) que conviene informar tal cual: los datos son <i>compatibles</i> con que los dos efectos sean iguales, aunque por poco, y la lección 12 ya advirtió que ``no rechazar'' no es ``aceptar''. Lo instructivo de esta fila es que muestra que imponer una restricción es cambiar de subespacio, no necesariamente recortar regresores: el subespacio \(\mathcal L(\boldsymbol 1,\boldsymbol x_{\text{rooms}},\boldsymbol x_{\text{nox}}+\boldsymbol x_{\text{stratio}})\) tiene una dimensión menos que el completo, pero no se obtiene quitando ninguna columna de \(\boldsymbol{\mathsf X}\).<sup><a id="fnr.6" class="footref" href="#fn.6" role="doc-backlink">6</a></sup>
+</p>
+
+<p>
+En Gretl, las tres filas se obtienen sin estimar a mano el modelo restringido: en la ventana del modelo completo, el menú <i><i><code>Contrastes -&gt; Restricciones lineales</code></i></i> (o el bloque <code>restrict</code> que el laboratorio anterior usó con <code>b[2]=0</code>) acepta cualquier sistema de ecuaciones lineales sobre los coeficientes y devuelve el \(F\) con sus dos grados de libertad y su valor \(p\). Un laboratorio posterior lo aplicará con varias restricciones a la vez y comprobará, estimando los dos modelos, que el \(F\) que imprime es el cociente de sumas de cuadrados de esta lección.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, sección 4.4 (contrastar \(\beta_j=\beta_h\) como un \(t\) con la covarianza de los estimadores, y por qué la vía del modelo restringido es más cómoda); manual de Gretl, comando <code>restrict</code>.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org8a1d84f" class="outline-2">
+<h2 id="org8a1d84f"><span class="section-number-2">8.</span> Conjunto \(\neq\) individual: el caso de la apertura</h2>
+<div class="outline-text-2" id="text-8">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Modelo (<code>price</code> sobre <code>rooms</code> y …)</th>
+<th scope="col" class="org-left">\(t\) de <code>nox</code></th>
+<th scope="col" class="org-left">\(t\) de <code>lnox</code></th>
+<th scope="col" class="org-left">\(R^2\)</th>
+<th scope="col" class="org-left">\(F\) de excluir ambos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">… <code>nox</code></td>
+<td class="org-left">-7,43</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">0,5352</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">… <code>lnox</code></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-7,51</td>
+<td class="org-left">0,5361</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">… <code>nox</code> y <code>lnox</code></td>
+<td class="org-left">0,18</td>
+<td class="org-left">-1,05</td>
+<td class="org-left">0,5362</td>
+<td class="org-left">\(F(2,502)=28{,}2\) (\(F_c=3{,}01\))</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+\(\rho_{\text{nox},\text{lnox}}=0{,}994\): los dos regresores apuntan casi en la misma dirección. Cada uno solo es muy significativo; juntos, el ajuste no puede repartir el efecto entre ellos: a cada uno le queda muy poca longitud <i>propia</i> (lección 12), su error estándar se dispara y su \(t\) se hunde. Pero el subespacio que generan <i>juntos</i> sí acerca \(\boldsymbol{\mathop{\widehat y}}\) a \(\boldsymbol y\), y el \(F\) lo ve.
 </p>
 
 <div class="org-center">
 <p>
-Más dispersión en \(X\), o más observaciones: más precisión. Más ruido (\(\sigma^2\)): menos precisión.
+Un \(F\) conjunto alto con \(t\) individuales nulos es la firma de la <i>colinealidad</i> (lección 14). La conclusión correcta no es ``sobran los dos'', sino ``no se puede separar cuál de los dos''.
 </p>
 </div>
-
-<p>
-<i>Versión interactiva</i>: <a href="https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?labpath=CuadernosElectronicos/S15-Notebook04.ipynb">cuaderno 4 en MyBinder</a> (muchas muestras, muchas rectas; el histograma de \(\hat\beta_2\) y el efecto de la dispersión de \(\boldsymbol x\)).
-</p>
 </div>
-<div id="outline-container-org3e57033" class="outline-4">
-<h4 id="org3e57033">Varianza: cuán dispersas están las estimaciones</h4>
-<div class="outline-text-4" id="text-org3e57033">
+<div id="outline-container-org226f0cc" class="outline-4">
+<h4 id="org226f0cc">Conjunto \(\neq\) individual: el caso de la apertura</h4>
+<div class="outline-text-4" id="text-org226f0cc">
 <p>
-La insesgadez nos dice que \(\hat\beta_2\) está bien ``centrado'' en \(\beta_2\). Pero un estimador insesgado puede, aun así, ser muy poco fiable en una muestra concreta si su dispersión es enorme. Necesitamos, por tanto, calcular \(Var[\hat\beta_2\mid\boldsymbol X]\).
+Volvamos a la tabla con la que abrimos la sesión, ahora con la herramienta para leerla. Las tres filas de la transparencia son tres regresiones del precio mediano de la vivienda: sobre <code>rooms</code> y la concentración de óxidos de nitrógeno <code>nox</code>; sobre <code>rooms</code> y el logaritmo de esa concentración, <code>lnox</code>; y sobre <code>rooms</code> y las dos medidas a la vez. Las dos primeras dicen lo mismo con claridad: la contaminación reduce el precio, con un \(t\) de \(-7{,}4\) o \(-7{,}5\) y un \(R^2\) de \(0{,}535\) o \(0{,}536\). Da casi igual medirla en niveles o en logaritmos, y es fácil ver por qué: la correlación entre <code>nox</code> y <code>lnox</code> es \(0{,}994\); en el lenguaje de la lección 5, sus vectores en desviaciones forman un ángulo de unos \(6^\circ\), prácticamente la misma dirección.
 </p>
 
 <p>
-Partimos de \(\hat\beta_2=\beta_2\,\mathit1+\sum_iW_iU_i\). Como \(\beta_2\,\mathit1\) es una variable aleatoria constante: \(Var[\hat\beta_2\mid\boldsymbol X]=Var\big[\sum_iW_iU_i\mid\boldsymbol X\big]\). Nos queda, por tanto, desarrollar la varianza de una suma de \(n\) sumandos. Lo haremos en dos pasos: primero calculamos la varianza y la covarianza de cada sumando por separado (aquí interviene el Lema), y después desarrollamos la suma completa.
-Calculemos primero, para un único sumando, \(Var[W_iU_i\mid\boldsymbol X]\). Ya vimos que \(E[W_iU_i\mid\boldsymbol X]=\mathit0\) (Lema, con \(c(\boldsymbol X)=W_i\)). Por tanto, la definición de varianza condicional (\(Var[Z\mid\boldsymbol X]=E[(Z-E[Z\mid\boldsymbol X])^2\mid\boldsymbol X]\)) se simplifica exactamente como en la lección 9 (\(Var[U\mid X]=E[U^2\mid X]\), porque también allí \(E[U\mid X]=\mathit0\)):
-\[
-Var[W_iU_i\mid\boldsymbol X]=E[(W_iU_i)^2\mid\boldsymbol X]=E[W_i^2U_i^2\mid\boldsymbol X]=W_i^2\,E[U_i^2\mid\boldsymbol X]=W_i^2\,Var[U_i\mid\boldsymbol X],
-\]
-donde la penúltima igualdad es, de nuevo, el Lema (con \(c(\boldsymbol X)=W_i^2\), sobre \(Z=U_i^2\)), y la última vuelve a usar que \(E[U_i\mid\boldsymbol X]=\mathit0\).
+La tercera fila es la que desconcierta si se lee fila a fila. Con las dos medidas en el modelo, el \(t\) de <code>nox</code> cae a \(0{,}18\) y el de <code>lnox</code> a \(-1{,}05\); los valores \(p\) son \(0{,}854\) y \(0{,}295\), y la lectura ingenua de la lección 12 concluiría que ninguna de las dos interviene. Pero el \(R^2\) apenas ha cambiado —\(0{,}5362\)— y, sobre todo, el \(F\) de excluir las dos a la vez vale \(28{,}2\) frente a un crítico de \(3{,}01\): quitar la contaminación del modelo, en cualquiera de sus dos formas, empeora el ajuste de manera inconfundible. Las dos variables <i>juntas</i> son claramente significativas; <i>cada una</i>, en presencia de la otra, no lo es.
 </p>
 
 <p>
-Por el mismo argumento, para \(i\neq j\) (usando la covarianza condicional definida en ``El marco: muestra aleatoria'', \(Cov[Z,W\mid\boldsymbol X]=E[(Z-E[Z\mid\boldsymbol X])(W-E[W\mid\boldsymbol X])\mid\boldsymbol X]\), análoga a la varianza):
-\[
-Cov[W_iU_i,W_jU_j\mid\boldsymbol X]=E[W_iU_iW_jU_j\mid\boldsymbol X]=W_iW_j\,E[U_iU_j\mid\boldsymbol X]=W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X],
-\]
-usando el Lema con \(c(\boldsymbol X)=W_iW_j\).
+No hay contradicción, y la lección 12 ya dio la clave en su recapitulación: con varios regresores, el error estándar de \(\hat\beta_j\) es \(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\), donde \(\tilde{\boldsymbol x}_j\) es lo que le queda de <i>propio</i> al regresor \(j\) tras descontar lo que comparte con los demás. Cuando <code>nox</code> y <code>lnox</code> están los dos en el modelo, casi todo lo que tiene cada uno lo comparte con el otro. La parte propia de cada uno es un vector cortísimo, el error estándar de cada coeficiente se dispara y el \(t\) se hunde: compárense las desviaciones típicas de la tabla de la apertura, \(2198{,}85\) y \(12655{,}7\), con los \(236\) que tenía <code>nox</code> sola en la sección ``El \(F\) en una tabla de resultados''. El contraste \(t\) de <code>nox</code> pregunta si <code>nox</code> aporta algo <i>que <code>lnox</code> no aporte ya</i>, y la respuesta honesta es que casi nada; y lo mismo al revés. Pero esa es una pregunta sobre la <i>dirección propia</i> de cada regresor, no sobre el subespacio que generan entre los dos. Ese subespacio —un plano dentro de \(\mathcal L(\boldsymbol 1)^\perp\)— sí contiene una dirección en la que \(\boldsymbol y\) se proyecta con fuerza, y el \(F\) de excluir ambas mide eso: cuánto se alarga el residuo si se suprime el plano entero. Por eso el \(F\) es enorme mientras los dos \(t\) son nulos.
 </p>
 
 <p>
-Con estas dos piezas ya podemos desarrollar la suma entera. Abreviando \(Z_i=W_iU_i\) —de modo que \(E[Z_i\mid\boldsymbol X]=\mathit0\) para todo \(i\), como acabamos de comprobar—, la definición de varianza condicional da
-\[
-Var\Big[\sum_iZ_i\,\Big|\,\boldsymbol X\Big]=E\Big[\Big(\sum_iZ_i\Big)^2\,\Big|\,\boldsymbol X\Big]=E\Big[\sum_i\sum_jZ_iZ_j\,\Big|\,\boldsymbol X\Big]=\sum_i\sum_jE[Z_iZ_j\mid\boldsymbol X],
-\]
-donde solo hemos desarrollado el cuadrado de la suma y usado después la linealidad de la esperanza <i>condicional</i> (recordada junto al Lema, en la sección ``Insesgadez''), aplicada ahora a una suma de \(n^2\) términos. Basta ya con separar los términos de la diagonal (\(i=j\)) del resto: como todas las \(Z_i\) tienen esperanza condicional nula, \(E[Z_iZ_j\mid\boldsymbol X]\) es \(Var[Z_i\mid\boldsymbol X]\) cuando \(i=j\), y \(Cov[Z_i,Z_j\mid\boldsymbol X]\) cuando \(i\neq j\). Sustituyendo en ambos casos las dos piezas calculadas más arriba:
-\[
-Var\Big[\sum_iW_iU_i\,\Big|\,\boldsymbol X\Big]=\sum_iW_i^2\,Var[U_i\mid\boldsymbol X]+\sum_{i\neq j}W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X].
-\]
+Esta situación tiene nombre, <i>colinealidad</i>, y le dedicaremos la lección 14. Lo que conviene retener hoy es la lectura correcta de la tabla, porque el error contrario es muy frecuente en informes y artículos: ante dos regresores con \(t\) pequeños, eliminar los dos ``porque no son significativos''. El contraste conjunto dice que eso es un error: lo que los datos no permiten es <i>separar</i> el efecto de uno del efecto del otro, no negar que haya efecto. La respuesta razonable es quedarse con uno de los dos —cualquiera de las dos primeras filas es un modelo excelente— o, si la pregunta económica exige distinguirlos, reconocer que estos datos no lo permiten. Es la misma moraleja de la lección 12 con un solo regresor —para medir un efecto hace falta que la variable varíe— trasladada a varios: para medir el efecto de cada uno hace falta que cada uno varíe <i>por su cuenta</i>.
 </p>
 
 <p>
-Ahora entran en juego, por fin, la homocedasticidad (\(Var[U_i\mid\boldsymbol X]=\sigma^2\,\mathit 1\) para todo \(i\), supuesto de la lección 9) y la ausencia de covarianza cruzada (\(Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0\) para \(i\neq j\), consecuencia del muestreo aleatorio, sección ``El marco: muestra aleatoria''). Con ambas, la doble suma se reduce a
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2\sum_iW_i^2.
-\]
-</p>
-
-<p>
-Calculemos \(\sum_iW_i^2\). Como \(W_i=\frac{X_i-{\overline{X}}}{\sum_j(X_j-{\overline{X}})^2}\):
-\[
-\sum_iW_i^2=\sum_i\left(\frac{X_i-{\overline{X}}}{\sum_j(X_j-{\overline{X}})^2}\right)^2=\frac{\sum_i(X_i-{\overline{X}})^2}{\left(\sum_j(X_j-{\overline{X}})^2\right)^2}=\frac{1}{\sum_j(X_j-{\overline{X}})^2}.
-\]
-Sustituyendo:
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-{\overline{X}})^2}.
-\]
-</p>
-
-<p>
-Esta expresión admite una segunda lectura, útil para su interpretación. Como \(\sum_i(X_i-{\overline{X}})^2=n\cdot\frac1n\sum_i(X_i-{\overline{X}})^2=n\,S^2\) (la varianza muestral del regresor, con la convención estadística del curso, \(S^2=\frac1n\sum_i(X_i-{\overline{X}})^2\)), podemos escribir, equivalentemente,
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{n\,S^2}.
-\]
-Esta segunda forma hace explícitos los tres ingredientes que determinan la precisión de \(\hat\beta_2\). (i) Cuanto mayor sea \(\sigma^2\) (más ruido en la perturbación), menor será la precisión. (ii) Cuanto mayor sea \(n\) (más observaciones), mayor será la precisión. (iii) Cuanto mayor sea \(S^2\) (más dispersión en los valores del regresor), mayor será la precisión: una muestra donde \(X\) apenas varía da muy poca información sobre la pendiente que relaciona \(X\) con \(Y\).<sup><a id="fnr.10" class="footref" href="#fn.10" role="doc-backlink">10</a></sup>
-</p>
-
-<p>
-Nótese, por último, que este resultado es <i>condicional</i> a \(\boldsymbol X\): distintas muestras, con distintos valores del regresor, tendrían distinta precisión. Si quisiéramos la varianza <i>incondicional</i> \(\mathrm{Var}(\hat\beta_2)\), tendríamos que aplicar la <i>ley de la varianza total</i>, que no es sino la identidad pitagórica de la lección 9 (allí enunciada para \(Y\), condicionando en \(X\)), aplicada ahora a \(Z=\hat\beta_2\) condicionando en \(\boldsymbol X\). Para cualquier variable aleatoria \(Z\) con varianza finita, \(E[Z\mid\boldsymbol X]\) es la proyección ortogonal de \(Z\) sobre las funciones de \(\boldsymbol X\), así que \(Z=E[Z\mid\boldsymbol X]+\big(Z-E[Z\mid\boldsymbol X]\big)\) descompone \(Z\) en dos partes ortogonales entre sí. Aplicando Pitágoras a esa descomposición, y la ley de las esperanzas iteradas para escribir \(\mathrm{E}\big((Z-E[Z\mid\boldsymbol X])^2\big)\) como \(\mathrm{E}\big(Var[Z\mid\boldsymbol X]\big)\), se obtiene
-\[
-\mathrm{Var}(\hat\beta_2)=\mathrm{E}\big(Var[\hat\beta_2\mid\boldsymbol X]\big)+\mathrm{Var}\big(E[\hat\beta_2\mid\boldsymbol X]\big),
-\]
-donde el segundo sumando es cero (pues \(E[\hat\beta_2\mid\boldsymbol X]=\beta_2\,\mathit1\) es constante, sección ``Insesgadez'', y la varianza de una constante es cero). Pero el primer sumando, \(\mathrm{E}\big(\sigma^2/(nS^2)\big)\), es la esperanza de un <i>cociente</i>, y no se simplifica en general (la esperanza de \(1/S^2\) no es \(1/\mathrm{E}(S^2)\)). Por eso, en la práctica —y en el resto de este curso—, trabajaremos siempre con la fórmula <i>condicional</i> recién obtenida, evaluada en la muestra efectivamente observada: es, de hecho, exactamente lo que hace cualquier programa estadístico al reportar el error estándar de un coeficiente.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, Teorema 2.2 (varianza de \(\hat\beta_1,\hat\beta_2\) bajo los supuestos SLR.1-SLR.5).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, sección 4.5, apartado ``Relationship between \(F\) and \(t\) statistics'' (el ejemplo en que ningún \(t\) es significativo y el \(F\) sí lo es); y cap. 3, sección 3.4, apartado sobre multicolinealidad.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgc0925a6" class="outline-2">
-<h2 id="orgc0925a6"><span class="section-number-2">8.</span> MCO es BLUE; estimando \(\sigma^2\)</h2>
-<div class="outline-text-2" id="text-8">
-<p>
-Sin demostrarlo (Gauss–Markov): de entre todos los estimadores <i>lineales e insesgados</i> de \(\beta_2\), \(\hat\beta_2\) tiene la menor varianza — MCO es <i>BLUE</i> (<i>Best Linear Unbiased Estimator</i>).
-</p>
-
-<p>
-\(\sigma^2\) (desconocido) se estima con la <i>cuasivarianza de los residuos</i>, un <i>tercer</i> producto escalar, tras el euclídeo y el estadístico:
-\[
-\langle\cdot,\cdot\rangle_{n-k}=\frac1{n-k}\langle\cdot,\cdot\rangle_{e}, \qquad \mathfrak{s}^2=\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{\mathop{\widehat{e}}}\rangle_{n-k}=\frac{\mathrm{SRC}}{n-k}.
-\]
-</p>
-
-<p>
-Tres divisores, tres motivos distintos: \(1\) (geometría pura, sin más), \(n\) (para que \(\|\boldsymbol1\|_s=1\), lección 4), \(n-k\) (para que \(\mathfrak s^2\) sea un estimador insesgado de \(\sigma^2\)).
-</p>
-</div>
-<div id="outline-container-org96870f0" class="outline-4">
-<h4 id="org96870f0">MCO es BLUE; estimando \(\sigma^2\)</h4>
-<div class="outline-text-4" id="text-org96870f0">
-<p>
-Con insesgadez y varianza ya establecidas, cerramos con dos observaciones importantes que, por su naturaleza, no vamos a demostrar en este curso, pero que conviene conocer con precisión.
-</p>
-
-<p>
-La primera es el <i>Teorema de Gauss–Markov</i>: bajo los tres supuestos del Modelo Clásico de Regresión Lineal (y el muestreo aleatorio de esta sesión), \(\hat\beta_2\) no es solo insesgado; es, además, el estimador de <i>menor varianza</i> entre todos los estimadores <i>lineales</i> e <i>insesgados</i>. Lineal quiere decir de la forma \(\sum_iC_iY_i\), donde \(Y_1,\ldots,Y_n\) son las variables aleatorias de la muestra (no los datos observados \(y_1,\ldots,y_n\)) y los pesos \(C_i\) no dependen de \(\boldsymbol Y\) (van con mayúscula porque, igual que los \(W_i\), pueden ser funciones de \(\boldsymbol X\)). Este resultado se resume con el acrónimo <i>BLUE</i> (<i>Best Linear Unbiased Estimator</i>, ``el mejor estimador lineal insesgado''). No lo demostraremos: la demostración general requiere comparar \(\hat\beta_2\) con un estimador lineal insesgado arbitrario, con maquinaria matricial que este curso no desarrolla. Pero merece una mención explícita, porque es la justificación teórica última de por qué, entre todas las rectas que podríamos ajustar de otras maneras, elegimos la de mínimos cuadrados.
-</p>
-
-<p>
-La segunda observación es más práctica: la fórmula \(Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-{\overline{X}})^2\) depende de \(\sigma^2\), la varianza de la perturbación poblacional, que no conocemos. Para usarla en la práctica (algo que haremos en la próxima sesión teórica, al construir errores estándar) necesitamos estimar \(\sigma^2\) a partir de los residuos \(\boldsymbol{\mathop{\widehat e}}\). Estos residuos observados se interpretan aquí como la realización, sobre nuestra muestra concreta, del vector aleatorio de residuos \(\boldsymbol{\mathop{\widehat{E}}}\), cuyas componentes son \(\hat E_i=Y_i-\hat\beta_1\,\mathit1-\hat\beta_2X_i\); es el mismo paso de variable aleatoria a dato que hemos dado varias veces en esta sesión. Esas componentes aproximan, sin ser idénticas a ellas, a las perturbaciones \(U_i\) del modelo poblacional.<sup><a id="fnr.11" class="footref" href="#fn.11" role="doc-backlink">11</a></sup>
-</p>
-
-<p>
-La estimación natural sería \(\langle\boldsymbol{\mathop{\widehat e}},\boldsymbol{\mathop{\widehat e}}\rangle_s=\mathrm{SRC}/n\) —la varianza de los residuos, con nuestra convención estadística habitual—. Pero puede demostrarse (no lo haremos aquí) que el estimador subyacente a esta fórmula —es decir, la misma fórmula, evaluada sobre la muestra aleatoria \(\boldsymbol{\mathop{\widehat{E}}}\) en lugar de sobre los datos observados \(\boldsymbol{\mathop{\widehat e}}\)— es <i>sesgado</i>: subestima \(\sigma^2\) en promedio.<sup><a id="fnr.12" class="footref" href="#fn.12" role="doc-backlink">12</a></sup> La razón de este sesgo es geométrica, y ya la conocemos en parte: por construcción (ecuaciones normales, lección 10), los residuos \(\boldsymbol{\mathop{\widehat e}}\) no son un vector arbitrario de \(\mathbb R^n\), sino que viven siempre en el subespacio ortogonal a las columnas de \(\boldsymbol{\mathsf X}\). Como ese subespacio de regresores tiene dimensión \(k\) (hay \(k\) regresores, incluida la constante), su complemento ortogonal tiene dimensión \(n-k\) —la misma cuenta informal de dimensión que empleamos ya en la lección 4 para \(\mathcal L(\boldsymbol1)^\perp\), de dimensión \(n-1\), el caso particular \(k=1\)—. Dicho de otro modo: aunque \(\boldsymbol{\mathop{\widehat e}}\) tiene \(n\) componentes, solo \(n-k\) de ellas son realmente ``libres''; las \(k\) restantes quedan fijadas por las \(k\) condiciones de ortogonalidad \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathop{\widehat e}}=\boldsymbol 0\). Dividir por \(n-k\), en vez de por \(n\), es la manera de tener en cuenta esta pérdida de \(k\) grados de libertad, y es lo que hace insesgado al estimador resultante. El estimador que sí resulta insesgado usa, por tanto, ese divisor distinto: \(n-k\) (el número de observaciones menos el número total de coeficientes estimados, incluida la constante) en vez de \(n\).<sup><a id="fnr.13" class="footref" href="#fn.13" role="doc-backlink">13</a></sup>
-</p>
-
-<p>
-Esto nos lleva, de forma natural, a introducir un <i>tercer</i> producto escalar en la familia que el curso ha ido construyendo desde la lección 2: junto al euclídeo \(\langle\cdot,\cdot\rangle_e\) (divisor \(1\)) y al estadístico \(\langle\cdot,\cdot\rangle_s=\langle\cdot,\cdot\rangle_n\) (divisor \(n\)), definimos
-\[
-\langle\boldsymbol v,\boldsymbol w\rangle_{n-k}=\frac{1}{n-k}\langle\boldsymbol v,\boldsymbol w\rangle_e.
-\]
-Sigue siendo, técnicamente, un producto escalar legítimo (multiplicar por una constante positiva no rompe simetría, linealidad ni positividad),<sup><a id="fnr.14" class="footref" href="#fn.14" role="doc-backlink">14</a></sup> y con él definimos la <i>cuasivarianza de los residuos</i>
-\[
-\mathfrak s^2=\langle\boldsymbol{\mathop{\widehat e}},\boldsymbol{\mathop{\widehat e}}\rangle_{n-k}=\frac{\mathrm{SRC}}{n-k},
-\]
-que sí es un estimador insesgado de \(\sigma^2\) (afirmación que no demostramos). Merece la pena subrayar que el motivo último de cada uno de los tres divisores es distinto. El divisor \(1\) no obedece a ningún motivo particular (es la geometría euclídea sin más). El divisor \(n\) se eligió, en la lección 4, para que \(\|\boldsymbol1\|_s=1\): un motivo puramente geométrico. El divisor \(n-k\) se elige aquí por un motivo <i>estadístico</i> —lograr insesgadez—, aunque, como acabamos de ver, admite también una lectura geométrica: es la dimensión del subespacio donde vive \(\boldsymbol{\mathop{\widehat e}}\). El símbolo \(\mathfrak s^2\) (con la ese gótica) se reserva para esta cantidad, para no confundirla con la varianza muestral \(S^2\) (introducida hoy) ni con la \(s^2\) de los manuales clásicos de estadística, que suele denotar esto mismo con otra convención tipográfica.
-</p>
-
-<p>
-La expresión \(n-k\) recibe, en la jerga habitual de la estadística, el nombre de <i>grados de libertad</i> del modelo: el número de observaciones menos el número de parámetros ya estimados. En esta sesión, con dos regresores en total, \(k=2\), así que \(\mathfrak s^2=\mathrm{SRC}/(n-2)\). Volveremos sobre los grados de libertad, con más detalle, en la próxima sesión teórica.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, Teorema 2.2 (parte final: BLUE) y cap. 3, sección 3.5 (Teorema de Gauss-Markov, versión general con \(k\) regresores).
-</p>
-<ul class="org-ul">
-<li>Wooldridge, J. M. (2020), cap. 3, sección 3.6 (estimación insesgada de \(\sigma^2\), grados de libertad).</li>
-</ul>
-</div>
-</div>
-</div>
-<div id="outline-container-org6c8e8c8" class="outline-2">
-<h2 id="org6c8e8c8"><span class="section-number-2">9.</span> ¿Y con más regresores?</h2>
+<div id="outline-container-org469a346" class="outline-2">
+<h2 id="org469a346"><span class="section-number-2">9.</span> Qué dice y qué no dice el \(F\)</h2>
 <div class="outline-text-2" id="text-9">
 <p>
-Sin demostrarlo (generalización matricial de lo probado hoy; recordando la notación de la lección 10 y su extensión aleatoria de ``El marco''):
-\[
-E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\,\mathit1,\qquad
-Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}.
-\]
+\(F=\frac{n-k}{k-1}\cdot\frac{R^2}{1-R^2}\) mezcla, como el \(t\), <i>fuerza de la relación</i> (el ángulo) con <i>cantidad de evidencia</i> (las dimensiones). Con \(k=4\):
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">\(n\)</th>
+<th scope="col" class="org-left">\(R^2\)</th>
+<th scope="col" class="org-left">\(\theta\)</th>
+<th scope="col" class="org-left">\(F\)</th>
+<th scope="col" class="org-left">Veredicto al \(5\,\%\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">6</td>
+<td class="org-left">0,90</td>
+<td class="org-left">\(18{,}4^\circ\)</td>
+<td class="org-left">6,00</td>
+<td class="org-left">no significativo (\(F_c=19{,}16\))</td>
+</tr>
+
+<tr>
+<td class="org-right">10</td>
+<td class="org-left">0,90</td>
+<td class="org-left">\(18{,}4^\circ\)</td>
+<td class="org-left">18,00</td>
+<td class="org-left">significativo (\(F_c=4{,}76\))</td>
+</tr>
+
+<tr>
+<td class="org-right">1003</td>
+<td class="org-left">0,01</td>
+<td class="org-left">\(84{,}3^\circ\)</td>
+<td class="org-left">3,36</td>
+<td class="org-left">significativo (\(F_c=2{,}61\))</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+El \(F\) del pie de la tabla contrasta la hipótesis <i>menos</i> interesante (que nada explique nada) y con muestras grandes se rechaza casi siempre. Los \(F\) que informan nacen de una pregunta: ¿sobran estas dos variables?, ¿tienen el mismo efecto?, ¿es la elasticidad unitaria?
 </p>
 
 <p>
-En la diagonal de esta matriz están \(Var[\hat\beta_1\mid\boldsymbol X],\ldots,Var[\hat\beta_k\mid\boldsymbol X]\); fuera de la diagonal, las covarianzas \(Cov[\hat\beta_i,\hat\beta_j\mid\boldsymbol X]\).
-</p>
-
-<p>
-Para \(k=2\), el elemento \((2,2)\) de esta fórmula matricial se reduce exactamente a lo que hoy hemos demostrado sin matrices (y los otros tres elementos dan, de propina, lo que no hemos calculado).
-</p>
-
-<p>
-Sustituyendo \(\boldsymbol X\) por la matriz de datos \(\boldsymbol{\mathsf X}\), y \(\sigma^2\) por su estimación \(\mathfrak s^2\) (transparencia anterior) —obtenemos la fórmula que calculan los programas estadísticos—:
-\[
-\mathfrak s^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}.
-\]
+Doce viviendas: \(F(3,8)=9{,}55>4{,}07\), significativo… con <code>stratio</code> a \(t=-0{,}10\) e intervalos enormes. Un \(F\) no dice cuál regresor ni cuánto: mire los coeficientes y sus intervalos. Y nada de esto establece causalidad.
 </p>
 </div>
-<div id="outline-container-org8184123" class="outline-4">
-<h4 id="org8184123">¿Y con más regresores?</h4>
-<div class="outline-text-4" id="text-org8184123">
+<div id="outline-container-orgb067827" class="outline-4">
+<h4 id="orgb067827">Qué dice y qué no dice el \(F\)</h4>
+<div class="outline-text-4" id="text-orgb067827">
 <p>
-Todo lo demostrado en esta sesión se ha limitado, deliberadamente, al caso con dos regresores: la constante \(\mathit1\) y un único regresor no constante \(X\). Con \(k\) regresores (lección 10), el resultado análogo existe, y su enunciado —sin demostración— es la generalización matricial natural de lo que hoy hemos probado:
-\[
-E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\,\mathit1,\qquad Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}.
-\]
-Aquí \(\boldsymbol X\) es la misma matriz aleatoria de regresores que fijamos al abrir la sesión, solo que ahora con \(k\) columnas en lugar de dos; \(\boldsymbol{\mathsf X}\) sigue denotando, como en la lección 10, la matriz de datos <i>observados</i>. La primera igualdad generaliza la insesgadez de la sección ``Insesgadez'': \(\boldsymbol\beta\,\mathit1\) denota el vector cuyas componentes son las variables aleatorias constantes \(\beta_1\,\mathit1,\ldots,\beta_k\,\mathit1\) —el análogo, para un vector de parámetros, de la constante \(\beta_2\,\mathit1\) que obtuvimos en la sección ``Insesgadez''—. La segunda generaliza la varianza de la sección ``Varianza'': es una matriz \(k\times k\) que ocupa el lugar que antes ocupaba el escalar \(1/\sum_i(X_i-{\overline{X}})^2\); en su diagonal contiene las varianzas \(Var[\hat\beta_1\mid\boldsymbol X],\ldots,Var[\hat\beta_k\mid\boldsymbol X]\) (con \(Var[\hat\beta_2\mid\boldsymbol X]\) como caso particular, ya conocido, en la posición \((2,2)\)), y fuera de la diagonal, las covarianzas \(Cov[\hat\beta_i,\hat\beta_j\mid\boldsymbol X]\) entre cada par de coeficientes.
+Todo lo que la lección 12 dijo sobre la lectura del \(t\) vale para el \(F\), y la forma \(F=\frac{n-k}{k-1}\cdot\frac{R^2}{1-R^2}\) lo hace evidente sin necesidad de moraleja: el estadístico es el producto de un factor que mide la fuerza de la relación en la muestra —el ángulo, el \(R^2\)— y otro que solo cuenta dimensiones. La tabla de la transparencia repite, con \(k=4\), el experimento de la lección 12. Las dos primeras filas tienen el mismo \(R^2\) de \(0{,}90\), el mismo ángulo de \(18{,}4^\circ\), y veredictos opuestos: con \(n=6\) hay solo \(n-k=2\) dimensiones para el residuo, el valor crítico de la \(F_{3,2}\) es \(19{,}16\) y un \(F\) de \(6\) no basta; con \(n=10\) el crítico baja a \(4{,}76\) y \(F=18\) rechaza con holgura. La tercera fila hace el camino inverso: un \(R^2\) del \(1\,\%\) —un ángulo de \(84^\circ\), casi ortogonalidad— resulta conjuntamente significativo con mil observaciones. Compárese con la tabla análoga de la lección 12: con \(k=2\) bastaban \(n=5\) para que \(R^2=0{,}90\) fuese significativo; con \(k=4\) hacen falta más, porque el mismo \(R^2\) conseguido con tres regresores en vez de uno es menos sorprendente —hay más direcciones sobre las que el azar puede proyectar—. Es el descuento por \(k-1\) del numerador, y es la misma idea que motivó el \(R^2\) ajustado.
 </p>
 
 <p>
-Al evaluar esta fórmula en una muestra ya observada, sustituimos la matriz aleatoria \(\boldsymbol X\) por la matriz de datos \(\boldsymbol{\mathsf X}\), con lo que queda por calcular \((\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}\). Multiplicada por \(\mathfrak s^2\) (la estimación de \(\sigma^2\) de la transparencia anterior, pues \(\sigma^2\) sigue siendo desconocido) da \(\mathfrak s^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}\): la fórmula que Gretl (y cualquier otro programa estadístico) usa internamente para calcular los errores estándar que veremos en la próxima sesión teórica.
+Hay una segunda advertencia, propia del \(F\) y que la lección 12 no necesitaba. El \(F\) que Gretl imprime al pie de cada tabla contrasta la significación conjunta de <i>todos</i> los regresores: la hipótesis de que ninguno de ellos tenga nada que ver con el regresando. En la práctica es la hipótesis menos interesante que cabe formular, porque nadie estima un modelo con regresores elegidos al azar; y con muestras grandes se rechaza casi sin excepción, como muestra la tercera fila de la tabla. Que ese \(F\) sea enorme no es una virtud del modelo, y que sea pequeño en una muestra grande es una señal muy seria. Los contrastes \(F\) que de verdad informan son los de la transparencia ``Tres restricciones sobre <code>hprice2</code>'': nacen de una pregunta concreta —¿sobran estas dos variables?, ¿tienen el mismo efecto?, ¿vale uno la elasticidad?, ¿son constantes los rendimientos a escala?— y su respuesta cambia algo. El \(F\) automático conviene mirarlo una vez y no volver sobre él.
 </p>
 
 <p>
-Es razonable preguntarse si esta fórmula, presentada aquí sin demostración, es compatible con lo que sí hemos demostrado hoy. La respuesta es sí, y podemos comprobarlo con un cálculo elemental. Para \(k=2\) (constante más un único regresor no constante), la matriz \(\boldsymbol{X}^\top\boldsymbol{X}\) (análogo aleatorio de la \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) de la lección 10) es
-\[
-\boldsymbol{X}^\top\boldsymbol{X}=\begin{pmatrix}n\,\mathit1 & n\overline{X}\\ n\overline{X} & \sum_iX_i^2\end{pmatrix}.
-\]
-Usando la fórmula general para invertir una matriz \(2\times2\), obtenemos<sup><a id="fnr.15" class="footref" href="#fn.15" role="doc-backlink">15</a></sup>
-\[
-(\boldsymbol{X}^\top\boldsymbol{X})^{-1}=\frac{1}{n\sum_i(X_i-\overline{X})^2}\begin{pmatrix}\sum_iX_i^2 & -n\overline{X}\\ -n\overline{X} & n\,\mathit1\end{pmatrix}.
-\]
-El elemento \((2,2)\) de esta matriz —el que corresponde a la varianza condicional del segundo coeficiente, \(\hat\beta_2\)— vale \(n\,\mathit1\big/\big(n\sum_i(X_i-\overline{X})^2\big)=\mathit1\big/\sum_i(X_i-\overline{X})^2\). Multiplicando por \(\sigma^2\):
-\[
-\sigma^2\big[(\boldsymbol{X}^\top\boldsymbol{X})^{-1}\big]_{22}=\frac{\sigma^2}{\sum_i(X_i-\overline{X})^2},
-\]
-exactamente la fórmula de la sección ``Varianza''. Y, de propina, la misma matriz nos da las otras dos cantidades que esta sesión no ha llegado a calcular —al habernos centrado, como anunciamos al abrir, en \(\hat\beta_2\)—: el elemento \((1,1)\), multiplicado por \(\sigma^2\), da \(Var[\hat\beta_1\mid\boldsymbol{X}]=\sigma^2\sum_iX_i^2\big/\big(n\sum_i(X_i-\overline{X})^2\big)\); y el elemento \((1,2)=(2,1)\), multiplicado por \(\sigma^2\), da \(Cov[\hat\beta_1,\hat\beta_2\mid\boldsymbol{X}]=-\sigma^2\overline{X}\big/\sum_i(X_i-\overline{X})^2\). La generalización matricial, aunque no la hayamos demostrado, es consistente con todo lo que sí hemos probado en esta sesión —y nos regala, sin coste adicional, dos fórmulas más que no habíamos calculado en la lección.
+La tercera advertencia es la que el laboratorio anterior ilustró con doce viviendas para el \(t\), y que vale igual para el \(F\). Con la misma submuestra aleatoria de doce viviendas y el modelo de <code>rooms</code>, <code>nox</code> y <code>stratio</code>, el \(F(3,8)\) de significación conjunta vale \(9{,}55\) frente a un crítico de \(4{,}07\): se rechaza \(H_0\), los tres regresores no son nulos a la vez. Y sin embargo el \(t\) de <code>stratio</code> es \(-0{,}10\), el de <code>nox</code> apenas \(-2{,}6\) y los intervalos de confianza de los tres coeficientes son enormes. El \(F\) significativo dice que <i>algo</i> del subespacio de los regresores explica el precio; no dice qué, ni cuánto, ni con qué precisión. Como en la lección 12, lo que informa es el coeficiente en las unidades del problema y su intervalo, y un \(F\) —como un \(t\)— solo dice si la evidencia contra una hipótesis es distinguible del azar. Un \(F\) no significativo tampoco es la prueba de que las restricciones sean ciertas: es la ausencia de evidencia en su contra, y con pocas observaciones esa ausencia es barata.
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), Apéndice E.2 (fórmulas matriciales de insesgadez y varianza para el modelo de regresión múltiple).
+Y, como siempre, nada de esto establece causalidad. Un \(F\) conjunto significativo dice que la proyección de \(\boldsymbol y\) sobre el subespacio de los regresores es más larga de lo que el azar produciría; de si alguno de esos regresores <i>causa</i> el regresando no dice nada, por las mismas razones de las lecciones 8, 9 y 12. Las correlaciones espurias producen \(F\) enormes con la misma facilidad que \(t\) enormes.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, sección 4.2f (significación económica frente a estadística, que se aplica sin cambios al \(F\)) y sección 4.5, apartado sobre el valor \(p\) del contraste \(F\).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org2aee7c0" class="outline-2">
-<h2 id="org2aee7c0"><span class="section-number-2">10.</span> Recapitulación y guiño a la sesión siguiente</h2>
+<div id="outline-container-org17c27ff" class="outline-2">
+<h2 id="org17c27ff"><span class="section-number-2">10.</span> Recapitulación y guiño a las sesiones siguientes</h2>
 <div class="outline-text-2" id="text-10">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -984,364 +963,368 @@ exactamente la fórmula de la sección ``Varianza''. Y, de propina, la misma mat
 </colgroup>
 <thead>
 <tr>
-<th scope="col" class="org-left">Propiedad</th>
-<th scope="col" class="org-left">Resultado (regresión simple, \(k=2\))</th>
-<th scope="col" class="org-left">Supuestos usados</th>
+<th scope="col" class="org-left">Pieza</th>
+<th scope="col" class="org-left">Fórmula</th>
+<th scope="col" class="org-left">Lectura geométrica</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="org-left">Insesgadez</td>
-<td class="org-left">\(\mathrm{E}(\hat\beta_2)=\beta_2\)</td>
-<td class="org-left">Linealidad + \(\mathrm{Var}(X)\neq0\) + muestreo aleatorio</td>
+<td class="org-left">\(F\) de significación conjunta</td>
+<td class="org-left">\(\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}=\frac{n-k}{k-1}\frac{R^2}{1-R^2}\)</td>
+<td class="org-left">razón de catetos, cada uno por su dimensión</td>
 </tr>
 
 <tr>
-<td class="org-left">Varianza</td>
-<td class="org-left">\(Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-{\overline{X}})^2}\)</td>
-<td class="org-left">+ Homocedasticidad (+ \(Cov[U_i,U_j\mid\boldsymbol X]=\mathit0\), del muestreo aleatorio)</td>
+<td class="org-left">\(F\) de \(q\) restricciones</td>
+<td class="org-left">\(\frac{(\mathrm{SRC}_r-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)}\)</td>
+<td class="org-left">el mismo triángulo, con \(\boldsymbol{\mathop{\widehat y}}_r\) en el papel de \(\boldsymbol{\mathop{\overline y}}\)</td>
 </tr>
 
 <tr>
-<td class="org-left">Eficiencia</td>
-<td class="org-left">MCO es BLUE (mejor entre los lineales e insesgados)</td>
-<td class="org-left">Los tres + muestreo aleatorio (Gauss–Markov, sin demostrar)</td>
+<td class="org-left">Caso \(q=1\)</td>
+<td class="org-left">\(F=t^2\), \(F_c=t_c^2\)</td>
+<td class="org-left">el contraste \(t\) es un \(F\) de una restricción</td>
+</tr>
+
+<tr>
+<td class="org-left">Grados de libertad</td>
+<td class="org-left">\(k-1\) (o \(q\)) y \(n-k\)</td>
+<td class="org-left">dimensiones de los dos catetos</td>
+</tr>
+
+<tr>
+<td class="org-left">Región crítica</td>
+<td class="org-left">\(F>F_c\) (una cola)</td>
+<td class="org-left">cono alrededor del subespacio de los regresores</td>
 </tr>
 </tbody>
 </table>
 
 <p>
-Casi nada nuevo: la vía alternativa (lección 7), la esperanza condicional y la independencia entre observaciones (lección 9). Lo único nuevo: evaluar la fórmula sobre variables aleatorias, no sobre datos; eso, y solo eso, convierte \(\hat\beta_2\) en un estimador.
+Un único ingrediente nuevo: dividir cada cateto por su dimensión. Demostrado: Pitágoras anidado y \(F=t^2\). Enunciado: la distribución \(F_{q,\,n-k}\).
 </p>
 
 <p>
-<i>Nota</i>: los mismos argumentos, sobre \(\hat\beta_1=\overline{Y}-\hat\beta_2{\overline{X}}\), prueban la insesgadez de \(\hat\beta_1\).
-</p>
-
-<p>
-<i>Lección 12</i>: ya conocemos la media y la varianza de \(\hat\beta_2\); para intervalos de confianza y contrastes hace falta algo más: la <i>forma</i> de su distribución.
+<i>Lección 14</i>: colinealidad. La longitud propia \(\Vert\tilde{\boldsymbol x}_j\Vert_e\) de cada regresor y el <i>factor de inflación de la varianza</i> explican con números el caso de <code>nox</code> y <code>lnox</code>. <i>En un laboratorio posterior</i>: <code>restrict</code> con varias restricciones a la vez, y la distribución del \(F\) bajo \(H_0\) con datos simulados.
 </p>
 </div>
-<div id="outline-container-org6a5bbca" class="outline-4">
-<h4 id="org6a5bbca">Recapitulación y guiño a la sesión siguiente</h4>
-<div class="outline-text-4" id="text-org6a5bbca">
+<div id="outline-container-orgc36b1b6" class="outline-4">
+<h4 id="orgc36b1b6">Recapitulación y guiño a las sesiones siguientes</h4>
+<div class="outline-text-4" id="text-orgc36b1b6">
 <p>
-El recorrido de esta sesión, visto en conjunto, es notablemente corto en ingredientes nuevos. Hemos demostrado dos propiedades —insesgadez y varianza de \(\hat\beta_2\)— con piezas que ya teníamos. La fórmula de la ``vía alternativa'' de la lección 7 nos dio \(\hat\beta_2\) como combinación lineal de los datos. La esperanza condicional de la lección 9 nos permitió tomar esperanzas y varianzas ``condicionando en \(\boldsymbol X\)''. Y la independencia entre observaciones anunciada en esa misma lección 9 (``copias idénticas e independientes'').
+El balance de la sesión es, otra vez, mucho resultado con muy poco ingrediente nuevo. Todo el aparato —el triángulo, las sumas de cuadrados, el \(R^2\), la cuasivarianza \(\mathfrak s^2\), la isotropía del ruido bajo normalidad— estaba ya sobre la mesa desde las lecciones 8, 11 y 12. Lo único que hoy hemos añadido es una idea: comparar los dos catetos <i>por dimensión</i>, dividiendo cada suma de cuadrados por el número de direcciones del subespacio donde vive. Con ella, el contraste \(t\) de la lección 12 resulta ser el caso de una sola dirección, y el contraste de cualquier hipótesis lineal sobre los coeficientes —excluir, igualar, fijar— se reduce a una única receta: estimar el modelo con y sin la hipótesis, leer las dos sumas de cuadrados residuales y contar dimensiones.
 </p>
 
 <p>
-Conviene decir con claridad qué es lo único genuinamente nuevo, porque es fácil confundirlo con algo más sofisticado: tomar una fórmula ARITMÉTICA ya obtenida —geométricamente, en la lección 7, sobre datos fijos— y evaluarla en variables aleatorias en lugar de en datos. Eso, sin más, es lo que convierte una estimación (un número, calculado a partir de una muestra concreta) en un estimador (una variable aleatoria, cuya distribución depende de qué muestra hubiéramos observado). No hemos definido ningún producto escalar nuevo sobre ``vectores de variables aleatorias'', ni hemos vuelto a demostrar Cauchy–Schwarz sobre un objeto distinto. Sencillamente, hemos sustituido números por variables aleatorias dentro de una fórmula que ya sabíamos cierta, y hemos reservado la maquinaria probabilística de la lección 9 (esperanza condicional, independencia) para el momento en que de verdad hacía falta: al tomar esperanzas y varianzas de esa suma ponderada.
+La tabla resume las piezas. Conviene subrayar, como en la lección 12, lo que se ha demostrado y lo que no. Se ha demostrado, con material del propio curso, el Pitágoras anidado —que la subida de la suma de cuadrados residual al imponer restricciones es la longitud al cuadrado de un cateto ortogonal al residuo— y las identidades \(F=\frac{n-k}{k-1}\frac{R^2}{1-R^2}\) y \(F=t^2\). Se ha enunciado sin demostrar, igual que la \(t\) de Student en la lección 12, la distribución \(F_{q,\,n-k}\) del estadístico bajo \(H_0\), y la afirmación que la sostiene: que un ruido isótropo reparte su longitud al cuadrado por igual entre las dimensiones. La parte geométrica es rigurosa; la parte probabilística, enunciada.
 </p>
 
 <p>
-La tabla resume las dos propiedades centrales, junto con los supuestos exactos que cada una requiere: la insesgadez solo necesita linealidad (más el muestreo aleatorio, que es lo que eleva la exogeneidad estricta al condicionamiento en toda la matriz \(\boldsymbol X\)); la varianza necesita, además, homocedasticidad y la ausencia de covarianza cruzada entre perturbaciones (también consecuencia del muestreo aleatorio). Esta jerarquía de supuestos —cada propiedad exige un subconjunto distinto de los tres supuestos del Modelo Clásico— es importante tenerla presente: en las próximas sesiones, cuando alguno de estos supuestos se ponga en duda (más adelante, al tratar la heterocedasticidad, por ejemplo), sabremos exactamente qué propiedad de \(\hat\beta_2\) queda en entredicho y cuál sigue intacta.
+Quedan dos hilos abiertos. El primero es el caso de <code>nox</code> y <code>lnox</code>, que hoy hemos sabido <i>leer</i> pero no <i>medir</i>. La lección 12 enunció que con varios regresores \(\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\), con \(\tilde{\boldsymbol x}_j\) la parte propia del regresor \(j\); hoy hemos visto qué pasa cuando esa parte propia es casi nula: el \(t\) individual se hunde mientras el conjunto sigue siendo significativo. La lección 14 pondrá números a \(\Vert\tilde{\boldsymbol x}_j\Vert_e\), mostrará que se calcula con una regresión auxiliar de \(\boldsymbol x_j\) sobre los demás regresores, y de ahí saldrá el <i>factor de inflación de la varianza</i>, la medida habitual de cuánto encarece la colinealidad cada error estándar. El segundo hilo es de laboratorio. En una práctica posterior se aplicará <code>restrict</code> con varias restricciones simultáneas sobre datos reales, comprobando estimación a estimación que el \(F\) de Gretl es el cociente de sumas de cuadrados de hoy. Y se simulará, con el <code>loop</code> del laboratorio que siguió a la lección 11, la distribución del \(F\) bajo una \(H_0\) cierta: los histogramas mostrarán que ronda \(1\) y que la cola derecha es la que Gretl tabula.
 </p>
 
 <p>
-Queda, sin embargo, una limitación importante que esta sesión no resuelve. Saber que \(\hat\beta_2\) está bien centrado en \(\beta_2\) (insesgadez) y saber cuánto se dispersa alrededor de ese centro (varianza) NO basta para responder preguntas del tipo ``¿es \(\hat\beta_2=0{,}5\) una estimación compatible con \(\beta_2=0\)?'' o ``¿en qué rango de valores podemos confiar razonablemente que está el verdadero \(\beta_2\)?''. Para responderlas —son los contrastes de hipótesis y los intervalos de confianza que ocuparán buena parte del resto del curso— no basta con la media y la varianza de \(\hat\beta_2\): hace falta conocer, además, la <i>forma</i> completa de su distribución. Esa es la tarea de la próxima sesión teórica: enunciar (sin demostrarla desde cero, apoyándonos en un supuesto adicional sobre la distribución de la perturbación \(U\)) la distribución de \(\hat\beta_2\), y a partir de ella construir el error estándar, el intervalo de confianza y el contraste \(t\).
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.6 (unidades de medida y forma funcional; transición natural hacia la inferencia del capítulo 4).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, sección 4.5 (resumen del contraste \(F\)); cap. 3, sección 3.4, apartado ``Multicollinearity'' (con el que arranca la lección siguiente).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org6c5f7fb" class="outline-2">
-<h2 id="org6c5f7fb"><span class="section-number-2">11.</span> Preguntas de repaso (sesión 15)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div id="outline-container-org15309c0" class="outline-2">
+<h2 id="org15309c0"><span class="section-number-2">11.</span> Preguntas de repaso (sesión 19)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
 <div class="outline-text-2" id="text-11">
 <p>
 Te propongo 12 preguntas.
 Las marco con un nivel orientativo: [B] básica, [M] media, [D] discriminadora.
 </p>
 </div>
-<div id="outline-container-org716d5c3" class="outline-4">
-<h4 id="org716d5c3">Comentario</h4>
-<div class="outline-text-4" id="text-org716d5c3">
+<div id="outline-container-org5da8623" class="outline-4">
+<h4 id="org5da8623">Comentario</h4>
+<div class="outline-text-4" id="text-org5da8623">
 <p>
-Las preguntas más valiosas pedagógicamente son la 7 (obliga a entender que la Ley de las Esperanzas Iteradas no es un teorema traído de fuera, sino una consecuencia inmediata de la propia definición geométrica de esperanza condicional de la lección 9) y la 9 (exige reconocer que la incorrelación entre perturbaciones no es un supuesto añadido, sino una consecuencia del muestreo aleatorio ya anunciado en esa misma lección). La 12 es la más discriminadora: distingue con precisión qué se ha demostrado hoy y qué se ha solo enunciado por analogía matricial. Conviene comentar en clase la 8, porque la lectura de la fórmula de la varianza (qué la hace grande o pequeña) es la que más se usará en las prácticas de laboratorio venideras.
+Las preguntas más valiosas pedagógicamente son la 3 (fija la idea que vertebra la sesión: bajo \(H_0\) los dos catetos, divididos por su dimensión, estiman lo mismo, y por eso \(F\) ronda \(1\)), la 6 (exige el argumento geométrico exacto del Pitágoras anidado, no la fórmula memorizada) y la 8 (la lectura correcta de \(t\) individuales nulos con \(F\) conjunto alto, que es el error de interpretación más frecuente de toda la regresión múltiple y el enlace con la lección 14). La 7 conviene comentarla en clase, porque desmonta la idea de que ``restringir'' es siempre ``quitar regresores''. La 12 mantiene, como en las lecciones anteriores, la honestidad sobre qué está demostrado y qué solo enunciado.
 </p>
 </div>
 </div>
-<div id="outline-container-org956834e" class="outline-4">
-<h4 id="org956834e">Pregunta 1 [B] — Estimador vs. estimación</h4>
-<div class="outline-text-4" id="text-org956834e">
+<div id="outline-container-org45a2c54" class="outline-4">
+<h4 id="org45a2c54">Pregunta 1 [B] — Qué contrasta el \(F\) del pie de la tabla</h4>
+<div class="outline-text-4" id="text-org45a2c54">
 <p>
-La distinción entre \(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\) y \(\hat\beta_2(\boldsymbol x,\boldsymbol y)\) es:
-</p>
-
-<ol class="org-ol">
-<li>Una diferencia sin importancia, ambas notaciones significan siempre lo mismo.</li>
-<li>\(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\) es el estimador (variable aleatoria); \(\hat\beta_2(\boldsymbol x,\boldsymbol y)\) es la estimación (un número).</li>
-<li>\(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\) es la estimación; \(\hat\beta_2(\boldsymbol x,\boldsymbol y)\) es el estimador.</li>
-<li>Solo tiene sentido hablar de \(\hat\beta_2(\boldsymbol x,\boldsymbol y)\); el estimador no existe como objeto matemático.</li>
-</ol>
-</div>
-</div>
-<div id="outline-container-org62a4780" class="outline-4">
-<h4 id="org62a4780">Pregunta 2 [B] — El supuesto de muestreo aleatorio</h4>
-<div class="outline-text-4" id="text-org62a4780">
-<p>
-La condición \(Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0\) para \(i\neq j\) es:
+El estadístico \(F(k-1,\,n-k)\) que Gretl imprime al pie de toda tabla de regresión contrasta la hipótesis de que:
 </p>
 
 <ol class="org-ol">
-<li>Un supuesto completamente nuevo, no relacionado con nada visto antes.</li>
-<li>Consecuencia de la homocedasticidad.</li>
-<li>Consecuencia de la independencia entre observaciones (``copias idénticas e independientes''), ya anunciada en la lección 9.</li>
-<li>Una consecuencia de la insesgadez de \(\hat\beta_2\).</li>
+<li>El coeficiente de la constante es cero.</li>
+<li>Todos los coeficientes de los regresores no constantes son cero a la vez.</li>
+<li>Al menos uno de los coeficientes es cero.</li>
+<li>El \(R^2\) es igual a uno.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org80fdbeb" class="outline-4">
-<h4 id="org80fdbeb">Pregunta 3 [M] — Origen de los pesos \(W_i\)</h4>
-<div class="outline-text-4" id="text-org80fdbeb">
+<div id="outline-container-org8d754a0" class="outline-4">
+<h4 id="org8d754a0">Pregunta 2 [B] — Los dos divisores</h4>
+<div class="outline-text-4" id="text-org8d754a0">
 <p>
-Los pesos \(W_i=(X_i-{\overline{X}})/\sum_j(X_j-{\overline{X}})^2\) que aparecen en \(\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\sum_iW_iY_i\) provienen de:
+En \(F=\dfrac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}\), los números \(k-1\) y \(n-k\) son:
 </p>
 
 <ol class="org-ol">
-<li>Una definición completamente nueva, exclusiva de esta sesión.</li>
-<li>Evaluar, sobre las variables aleatorias de la muestra, la MISMA fórmula aritmética que la ``vía alternativa'' de la lección 7 obtuvo geométricamente sobre datos fijos.</li>
-<li>El teorema de Gauss-Markov.</li>
-<li>La cuasivarianza de los residuos.</li>
+<li>El número de regresores y el número de observaciones.</li>
+<li>Las dimensiones de los subespacios donde viven, respectivamente, el cateto explicado (los regresores en desviaciones) y el residuo.</li>
+<li>Dos constantes de normalización sin significado geométrico, elegidas para que \(F\) esté entre \(0\) y \(1\).</li>
+<li>El número de restricciones y el número de coeficientes.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org27e4be0" class="outline-4">
-<h4 id="org27e4be0">Pregunta 4 [M] — Las dos propiedades de los pesos</h4>
-<div class="outline-text-4" id="text-org27e4be0">
+<div id="outline-container-orgcc50d37" class="outline-4">
+<h4 id="orgcc50d37">Pregunta 3 [M] — Por qué \(F\) ronda \(1\) bajo \(H_0\)</h4>
+<div class="outline-text-4" id="text-orgcc50d37">
 <p>
-La propiedad \(\sum_iW_i=\mathit 0\) se deduce de:
+Si \(H_0\!:\beta_2=\cdots=\beta_k=0\) es cierta, ¿por qué cabe esperar que el estadístico \(F\) esté cerca de \(1\)?
 </p>
 
 <ol class="org-ol">
-<li>La homocedasticidad de la perturbación.</li>
-<li>Que \(X_i-{\overline{X}}\) suma cero por pura aritmética —la misma cuenta que en la lección 4, aplicada ahora a \(n\) variables aleatorias en lugar de a \(n\) datos—.</li>
-<li>Que \(\hat\beta_2\) es insesgado.</li>
-<li>La independencia entre \(U_i\) y \(U_j\).</li>
+<li>Porque bajo \(H_0\) el cateto explicado es exactamente nulo y \(\mathrm{SEC}=0\).</li>
+<li>Porque bajo \(H_0\) el vector de datos en desviaciones es ruido isótropo, que reparte su longitud al cuadrado por igual entre las dimensiones: \(\mathrm{SEC}/(k-1)\) y \(\mathrm{SRC}/(n-k)\) estiman ambos \(\sigma^2\).</li>
+<li>Porque \(F\) es siempre igual a \(R^2/(1-R^2)\) y bajo \(H_0\) el \(R^2\) vale \(0{,}5\).</li>
+<li>Porque la distribución \(F\) es simétrica alrededor de \(1\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org46e902e" class="outline-4">
-<h4 id="org46e902e">Pregunta 5 [M] — El paso de sustitución</h4>
-<div class="outline-text-4" id="text-org46e902e">
+<div id="outline-container-org01bfa6b" class="outline-4">
+<h4 id="org01bfa6b">Pregunta 4 [M] — El caso \(k=2\)</h4>
+<div class="outline-text-4" id="text-org01bfa6b">
 <p>
-Al sustituir \(Y_i=\beta_1\,\mathit1+\beta_2X_i+U_i\) en \(\hat\beta_2=\sum_iW_iY_i\), el término con \(\beta_1\) desaparece porque:
+En la regresión simple (\(k=2\)), la relación entre el \(F\) de significación conjunta y el \(t\) del regresor es:
 </p>
 
 <ol class="org-ol">
-<li>\(\beta_1\) siempre vale cero.</li>
-<li>\(\sum_iW_i=\mathit 0\).</li>
-<li>\(\sum_iW_iX_i=\mathit 1\).</li>
-<li>\(W_i\) no depende de \(\beta_1\).</li>
+<li>\(F=t\), y las dos reglas de decisión son distintas.</li>
+<li>\(F=t^2\) y \(F_c=t_c^2\): los dos contrastes rechazan en los mismos casos.</li>
+<li>\(F=t^2\) pero \(F_c=t_c\), así que el \(F\) es más exigente.</li>
+<li>No hay relación: \(F\) depende de \(R^2\) y \(t\) no.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org881af2c" class="outline-4">
-<h4 id="org881af2c">Pregunta 6 [M] — ``Sacar lo que se conoce''</h4>
-<div class="outline-text-4" id="text-org881af2c">
+<div id="outline-container-org31ebbe2" class="outline-4">
+<h4 id="org31ebbe2">Pregunta 5 [M] — Por qué la región crítica tiene una sola cola</h4>
+<div class="outline-text-4" id="text-org31ebbe2">
 <p>
-La propiedad \(E[c(\boldsymbol X)Z\mid\boldsymbol X]=c(\boldsymbol X)E[Z\mid\boldsymbol X]\), usada para justificar que \(W_i\) ``sale'' de la esperanza condicionada, se demuestra:
+El contraste \(F\) rechaza \(H_0\) solo cuando \(F\) es <i>grande</i>, nunca cuando es pequeño. La razón es que:
 </p>
 
 <ol class="org-ol">
-<li>Citando un teorema de un curso de probabilidad más avanzado, no visto en esta asignatura.</li>
-<li>A partir de la propia definición de \(E[Z\mid\boldsymbol X]\) como proyección ortogonal sobre las funciones de \(\boldsymbol X\).</li>
-<li>Solo es válida si \(Z\) es independiente de \(\boldsymbol X\).</li>
-<li>Es una consecuencia de la homocedasticidad.</li>
+<li>La distribución \(F\) no tiene cola izquierda.</li>
+<li>Un \(F\) pequeño indica que las restricciones son falsas, pero eso no se puede contrastar.</li>
+<li>\(F\) compara longitudes al cuadrado y no tiene signo: un cateto explicado corto es lo que \(H_0\) predice, así que un \(F\) pequeño nunca es evidencia contra ella.</li>
+<li>Por convención: se podría usar igualmente la cola izquierda.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org64f2d69" class="outline-4">
-<h4 id="org64f2d69">Pregunta 7 [D] — Ley de las esperanzas iteradas</h4>
-<div class="outline-text-4" id="text-org64f2d69">
+<div id="outline-container-org6e5b5c9" class="outline-4">
+<h4 id="org6e5b5c9">Pregunta 6 [D] — Pitágoras anidado</h4>
+<div class="outline-text-4" id="text-org6e5b5c9">
 <p>
-La igualdad \(\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)\) se justifica en esta sesión porque:
+¿Por qué se cumple \(\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2\) para cualquier hipótesis lineal?
 </p>
 
 <ol class="org-ol">
-<li>Es un axioma que se acepta sin más.</li>
-<li>\(\mathit1\) es una función de \(\boldsymbol X\), y \(E[Z\mid\boldsymbol X]\) se define como la proyección de \(Z\) sobre todas las funciones de \(\boldsymbol X\); por tanto \(Z-E[Z\mid\boldsymbol X]\perp\mathit1\).</li>
-<li>Solo es cierta cuando \(Z=\hat\beta_2\).</li>
-<li>Es consecuencia de la homocedasticidad.</li>
+<li>Porque los dos ajustes \(\boldsymbol{\mathop{\widehat y}}\) y \(\boldsymbol{\mathop{\widehat y}}_r\) pertenecen al subespacio de los regresores, luego su diferencia también, y el residuo \(\boldsymbol{\mathop{\widehat e}}\) es ortogonal a todo ese subespacio: \(\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\) es la suma de dos vectores ortogonales.</li>
+<li>Porque el residuo restringido \(\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\) es ortogonal a \(\boldsymbol{\mathop{\widehat e}}\).</li>
+<li>Porque \(\mathrm{SRC}_r\geq\mathrm{SRC}\) siempre, y la diferencia entre dos sumas de cuadrados es una suma de cuadrados.</li>
+<li>Solo se cumple cuando las restricciones son de exclusión.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org52f6338" class="outline-4">
-<h4 id="org52f6338">Pregunta 8 [M] — Lectura de la fórmula de la varianza</h4>
-<div class="outline-text-4" id="text-org52f6338">
+<div id="outline-container-org106981c" class="outline-4">
+<h4 id="org106981c">Pregunta 7 [M] — Qué modelo impone \(\beta_3=\beta_4\)</h4>
+<div class="outline-text-4" id="text-org106981c">
 <p>
-Según \(Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/(nS^2)\), la precisión de \(\hat\beta_2\) (menor varianza) aumenta cuando:
+Para contrastar \(H_0\!:\beta_3=\beta_4\) en el modelo con regresores \(\boldsymbol 1,\boldsymbol x_2,\boldsymbol x_3,\boldsymbol x_4\), el modelo restringido es:
 </p>
 
 <ol class="org-ol">
-<li>\(\sigma^2\) aumenta.</li>
-<li>\(n\) disminuye.</li>
-<li>\(S^2\) (la varianza muestral del regresor) aumenta.</li>
-<li>\(\beta_2\) aumenta.</li>
+<li>El que excluye \(\boldsymbol x_3\) y \(\boldsymbol x_4\).</li>
+<li>El que excluye solo \(\boldsymbol x_4\).</li>
+<li>La regresión sobre \(\boldsymbol 1\), \(\boldsymbol x_2\) y la suma \(\boldsymbol x_3+\boldsymbol x_4\): los dos regresores se funden en uno y se pierde una dimensión, sin quitar ninguna columna.</li>
+<li>No existe: una igualdad entre coeficientes no se puede contrastar con un \(F\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgc07765e" class="outline-4">
-<h4 id="orgc07765e">Pregunta 9 [D] — Por qué hace falta la incorrelación entre perturbaciones</h4>
-<div class="outline-text-4" id="text-orgc07765e">
+<div id="outline-container-org08fcac4" class="outline-4">
+<h4 id="org08fcac4">Pregunta 8 [D] — \(t\) individuales nulos, \(F\) conjunto alto</h4>
+<div class="outline-text-4" id="text-org08fcac4">
 <p>
-Si \(Cov[U_i,U_j\mid\boldsymbol X]\neq0\) para algún \(i\neq j\), ¿qué parte de la derivación de esta sesión dejaría de ser válida?
+En un modelo, dos regresores tienen valores \(p\) individuales de \(0{,}85\) y \(0{,}30\), pero el \(F\) de excluirlos a la vez tiene un valor \(p\) de \(10^{-12}\). La lectura correcta es:
 </p>
 
 <ol class="org-ol">
-<li>La insesgadez de \(\hat\beta_2\).</li>
-<li>Nada; todo el desarrollo es independiente de este supuesto.</li>
-<li>La fórmula de la varianza, \(Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-{\overline{X}})^2\), que dejaría de reducirse a esa expresión tan simple.</li>
-<li>La propia definición de \(\hat\beta_2\) como combinación lineal de los datos.</li>
+<li>Los dos regresores sobran: se eliminan ambos y se reestima.</li>
+<li>Hay un error de cálculo, porque un \(F\) conjunto no puede ser significativo si ningún \(t\) lo es.</li>
+<li>Los dos regresores apuntan casi en la misma dirección: juntos explican el regresando, pero a cada uno le queda tan poca longitud propia que no se puede separar el efecto de uno del efecto del otro. Es colinealidad, y no autoriza a eliminar los dos.</li>
+<li>El \(F\) es más fiable que el \(t\), luego los dos regresores son individualmente significativos.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgba3c7ef" class="outline-4">
-<h4 id="orgba3c7ef">Pregunta 10 [M] — El tercer producto escalar</h4>
-<div class="outline-text-4" id="text-orgba3c7ef">
+<div id="outline-container-orgf921f85" class="outline-4">
+<h4 id="orgf921f85">Pregunta 9 [B] — Lo que el \(F\) no dice</h4>
+<div class="outline-text-4" id="text-orgf921f85">
 <p>
-El divisor \(n-k\) de \(\langle\cdot,\cdot\rangle_{n-k}\) se elige, a diferencia del divisor \(n\) de \(\langle\cdot,\cdot\rangle_s\), por un motivo:
+Se rechaza \(H_0\!:\beta_2=\beta_3=\beta_4=0\) con un \(F\) muy grande. ¿Qué puede concluirse?
 </p>
 
 <ol class="org-ol">
-<li>Geométrico, igual que el divisor \(n\) (para que \(\|\boldsymbol1\|_s=1\)).</li>
-<li>Estadístico: para que \(\mathfrak s^2=SRC/(n-k)\) sea un estimador insesgado de \(\sigma^2\).</li>
-<li>Arbitrario, sin ninguna justificación.</li>
-<li>Relacionado con el teorema de Gauss-Markov.</li>
+<li>Que los tres coeficientes son distintos de cero.</li>
+<li>Que los tres coeficientes son grandes en términos económicos.</li>
+<li>Que los datos no son compatibles con que los tres sean cero <i>a la vez</i>; cuáles importan y cuánto hay que leerlo en los coeficientes y sus intervalos.</li>
+<li>Que el modelo es correcto y los regresores causan el regresando.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org8c5f7b4" class="outline-4">
-<h4 id="org8c5f7b4">Pregunta 11 [B] — Gauss-Markov</h4>
-<div class="outline-text-4" id="text-org8c5f7b4">
+<div id="outline-container-org1393b88" class="outline-4">
+<h4 id="org1393b88">Pregunta 10 [D] — Mismo \(R^2\), veredicto opuesto</h4>
+<div class="outline-text-4" id="text-org1393b88">
 <p>
-Que MCO sea BLUE significa que:
+Dos regresiones con \(k=4\) tienen el mismo \(R^2=0{,}90\); la primera con \(n=6\) no es conjuntamente significativa y la segunda con \(n=10\) sí. ¿Cómo se explica?
 </p>
 
 <ol class="org-ol">
-<li>\(\hat\beta_2\) acierta siempre el verdadero valor de \(\beta_2\).</li>
-<li>\(\hat\beta_2\) tiene la menor varianza entre todos los estimadores lineales e insesgados de \(\beta_2\).</li>
-<li>\(\hat\beta_2\) es el único estimador insesgado posible.</li>
-<li>\(\hat\beta_2\) no depende de los supuestos del modelo clásico.</li>
+<li>Con \(n=6\) el \(R^2\) está mal calculado.</li>
+<li>\(F=\frac{n-k}{k-1}\frac{R^2}{1-R^2}\) mezcla el ángulo con las dimensiones: el mismo ángulo respaldado por \(n-k=2\) dimensiones residuales es fácil de obtener por azar (con tres regresores y seis puntos casi cualquier cosa se ajusta), y con \(n-k=6\) ya no.</li>
+<li>La distribución \(F\) solo es válida para \(n\geq10\).</li>
+<li>Con \(n=6\) el modelo tiene más grados de libertad y por eso es más exigente.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgd05588e" class="outline-4">
-<h4 id="orgd05588e">Pregunta 12 [D] — Qué está demostrado y qué no</h4>
-<div class="outline-text-4" id="text-orgd05588e">
+<div id="outline-container-org98c83dd" class="outline-4">
+<h4 id="org98c83dd">Pregunta 11 [M] — Cuando las restricciones no cuestan nada</h4>
+<div class="outline-text-4" id="text-org98c83dd">
 <p>
-Respecto a la generalización a \(k\) regresores (\(E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\,\mathit1\), \(Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}\)), esta sesión:
+Al imponer \(q\) restricciones se obtiene \(\mathrm{SRC}_r\) exactamente igual a \(\mathrm{SRC}\). Entonces:
 </p>
 
 <ol class="org-ol">
-<li>La demuestra íntegramente, generalizando paso a paso el argumento de los pesos \(W_i\).</li>
-<li>La presenta como aserción, sin demostrarla, y solo verifica —con un cálculo elemental de una inversa \(2\times2\)— que es consistente con lo demostrado para \(k=2\).</li>
-<li>No la menciona en absoluto.</li>
-<li>La demuestra solo para el caso \(k=3\).</li>
+<li>\(F=0\): el ajuste sin restringir ya cumplía las restricciones, \(\boldsymbol{\mathop{\widehat y}}_r=\boldsymbol{\mathop{\widehat y}}\), y no hay ninguna evidencia contra \(H_0\).</li>
+<li>\(F\) no está definido y el contraste no se puede hacer.</li>
+<li>\(F=1\): exactamente lo que \(H_0\) predice.</li>
+<li>Las restricciones son falsas, porque no han cambiado nada.</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org93ae41c" class="outline-4">
+<h4 id="org93ae41c">Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado</h4>
+<div class="outline-text-4" id="text-org93ae41c">
+<p>
+De los siguientes resultados de la sesión, ¿cuál se ha <i>demostrado</i> y cuál se ha <i>enunciado sin demostrar</i>?
+</p>
+
+<ol class="org-ol">
+<li>Se ha demostrado que \(F\sim F_{q,\,n-k}\) bajo \(H_0\), y se ha enunciado sin demostrar que \(\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2\).</li>
+<li>Se ha demostrado el Pitágoras anidado y las identidades \(F=\frac{n-k}{k-1}\frac{R^2}{1-R^2}\) y \(F=t^2\) (con la geometría de las lecciones 8, 10 y 12), y se han enunciado sin demostrar la distribución \(F_{q,\,n-k}\) y que el ruido isótropo reparte su longitud al cuadrado por igual entre dimensiones.</li>
+<li>Se ha demostrado todo, incluida la distribución del estadístico.</li>
+<li>No se ha demostrado nada: la sesión entera se apoya en resultados externos.</li>
 </ol>
 </div>
 </div>
 </div>
-<div id="outline-container-orge6fc2af" class="outline-2">
-<h2 id="orge6fc2af"><span class="section-number-2">12.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div id="outline-container-org2cd3389" class="outline-2">
+<h2 id="org2cd3389"><span class="section-number-2">12.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
 <div class="outline-text-2" id="text-12">
 </div>
 <ul class="org-ul">
-<li><a id="org4d7d1cf"></a>Pregunta 1 [B] — Estimador vs. estimación<br />
-<div class="outline-text-5" id="text-org4d7d1cf">
+<li><a id="org5d297a5"></a>Pregunta 1 [B] — Qué contrasta el \(F\) del pie de la tabla<br />
+<div class="outline-text-5" id="text-org5d297a5">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: retención de la distinción notacional introducida al abrir la sesión, necesaria para hablar con propiedad de la distribución de \(\hat\beta_2\).
+<i>Evalúa</i>: la formulación exacta de la hipótesis de significación conjunta. La opción 3 confunde \(H_0\) con su negación parcial; la 1 olvida que la constante nunca entra en ese contraste.
 </p>
 </div>
 </li>
-<li><a id="org7183a5d"></a>Pregunta 2 [B] — El supuesto de muestreo aleatorio<br />
-<div class="outline-text-5" id="text-org7183a5d">
+<li><a id="orgf7adde3"></a>Pregunta 2 [B] — Los dos divisores<br />
+<div class="outline-text-5" id="text-orgf7adde3">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la lectura geométrica de los grados de libertad como dimensiones, que es lo que da sentido a ``longitud al cuadrado por dimensión''. La opción 3 es falsa además porque \(F\) no está acotado por \(1\).
+</p>
+</div>
+</li>
+<li><a id="org1ef302a"></a>Pregunta 3 [M] — Por qué \(F\) ronda \(1\) bajo \(H_0\)<br />
+<div class="outline-text-5" id="text-org1ef302a">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la idea central de la sesión. La opción 1 es el error más instructivo: bajo \(H_0\) el cateto explicado no es nulo, es la proyección del ruido sobre \(k-1\) direcciones, y por eso mide en promedio \((k-1)\sigma^2\) y no \(0\).
+</p>
+</div>
+</li>
+<li><a id="org1ea65b2"></a>Pregunta 4 [M] — El caso \(k=2\)<br />
+<div class="outline-text-5" id="text-org1ea65b2">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la coherencia entre las dos lecciones: no solo los estadísticos coinciden (\(F=t^2\)), también las distribuciones (\(F_{1,\nu}\) es la de una \(t_\nu\) al cuadrado) y por tanto los valores críticos y las decisiones.
+</p>
+</div>
+</li>
+<li><a id="org8583374"></a>Pregunta 5 [M] — Por qué la región crítica tiene una sola cola<br />
+<div class="outline-text-5" id="text-org8583374">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: reconocimiento de que la incorrelación entre perturbaciones no es un supuesto añadido, sino consecuencia de algo ya sembrado en la lección 9.
+<i>Evalúa</i>: que la forma de la región crítica se deduce de lo que mide el estadístico, no de una convención. Discrimina porque la opción 1 es una descripción correcta de la distribución que no explica nada.
 </p>
 </div>
 </li>
-<li><a id="org0857dc5"></a>Pregunta 3 [M] — Origen de los pesos \(W_i\)<br />
-<div class="outline-text-5" id="text-org0857dc5">
+<li><a id="org3d1f66d"></a>Pregunta 6 [D] — Pitágoras anidado<br />
+<div class="outline-text-5" id="text-org3d1f66d">
 <p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión de que hoy no se repite ninguna demostración geométrica; se reutiliza, sobre variables aleatorias, la fórmula aritmética que la lección 7 ya obtuvo.
+<i>Respuesta correcta: 1.</i>
+<i>Evalúa</i>: el único resultado demostrado en la sesión, y el paso exacto en que se usa la ortogonalidad de la lección 10. La opción 2 afirma una ortogonalidad falsa (el residuo restringido es la <i>hipotenusa</i>, no un cateto), el mismo error que la pregunta 4 de la lección 8 cazaba con el vector de medias.
 </p>
 </div>
 </li>
-<li><a id="org5a6e0a7"></a>Pregunta 4 [M] — Las dos propiedades de los pesos<br />
-<div class="outline-text-5" id="text-org5a6e0a7">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: reconocimiento de que \(\sum_iW_i=\mathit 0\) es un hecho algebraico —la misma cuenta que ya vimos en la lección 4—, no una propiedad geométrica de un supuesto ``espacio de variables aleatorias-vector''.
-</p>
-</div>
-</li>
-<li><a id="orgc79e2f0"></a>Pregunta 5 [M] — El paso de sustitución<br />
-<div class="outline-text-5" id="text-orgc79e2f0">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: seguimiento del paso algebraico central de la sección ``Sustituyendo el modelo poblacional''.
-</p>
-</div>
-</li>
-<li><a id="org90e7483"></a>Pregunta 6 [M] — ``Sacar lo que se conoce''<br />
-<div class="outline-text-5" id="text-org90e7483">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión de que esta propiedad, aunque parezca ``de manual'', se deduce de nuestra propia definición geométrica de esperanza condicional.
-</p>
-</div>
-</li>
-<li><a id="org564d0de"></a>Pregunta 7 [D] — Ley de las esperanzas iteradas<br />
-<div class="outline-text-5" id="text-org564d0de">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión profunda de que la Ley de las Esperanzas Iteradas no es un teorema citado desde fuera, sino consecuencia inmediata de la definición de esperanza condicional como proyección (lección 9).
-</p>
-</div>
-</li>
-<li><a id="orgcf3ef37"></a>Pregunta 8 [M] — Lectura de la fórmula de la varianza<br />
-<div class="outline-text-5" id="text-orgcf3ef37">
+<li><a id="orge147f4a"></a>Pregunta 7 [M] — Qué modelo impone \(\beta_3=\beta_4\)<br />
+<div class="outline-text-5" id="text-orge147f4a">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: interpretación correcta de los tres ingredientes (\(\sigma^2\), \(n\), \(S^2\)) de la fórmula de la varianza, clave para las prácticas de laboratorio venideras.
+<i>Evalúa</i>: que imponer una restricción es cambiar de subespacio, no necesariamente eliminar regresores. Es la fila tercera del ejemplo de <code>hprice2</code>, y la construcción que el laboratorio del contraste \(F\) pedirá hacer a mano.
 </p>
 </div>
 </li>
-<li><a id="org8b735fa"></a>Pregunta 9 [D] — Por qué hace falta la incorrelación entre perturbaciones<br />
-<div class="outline-text-5" id="text-org8b735fa">
+<li><a id="org6d1784b"></a>Pregunta 8 [D] — \(t\) individuales nulos, \(F\) conjunto alto<br />
+<div class="outline-text-5" id="text-org6d1784b">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: identificación precisa de qué parte de la demostración depende de qué supuesto (la insesgadez sobrevive; la simplicidad de la fórmula de varianza, no).
+<i>Evalúa</i>: la lectura correcta del caso de la apertura, con su mecanismo (longitud propia casi nula) y su consecuencia práctica (no eliminar los dos). La opción 1 es el error habitual en informes; la 2 revela no haber entendido que \(t\) y \(F\) responden a preguntas distintas.
 </p>
 </div>
 </li>
-<li><a id="org7c755b4"></a>Pregunta 10 [M] — El tercer producto escalar<br />
-<div class="outline-text-5" id="text-org7c755b4">
+<li><a id="org93ed965"></a>Pregunta 9 [B] — Lo que el \(F\) no dice<br />
+<div class="outline-text-5" id="text-org93ed965">
 <p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: distinción honesta entre los motivos geométrico y estadístico de los tres divisores usados en el curso.
+<i>Respuesta correcta: 3.</i>
+<i>Evalúa</i>: la lógica de la negación de una hipótesis conjunta (rechazar ``todos nulos'' no es afirmar ``ninguno nulo'') y el reenvío a los coeficientes e intervalos, como en la lección 12.
 </p>
 </div>
 </li>
-<li><a id="org7de3c10"></a>Pregunta 11 [B] — Gauss-Markov<br />
-<div class="outline-text-5" id="text-org7de3c10">
+<li><a id="org4ce156e"></a>Pregunta 10 [D] — Mismo \(R^2\), veredicto opuesto<br />
+<div class="outline-text-5" id="text-org4ce156e">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión correcta, sin exageraciones, de qué garantiza (y qué no garantiza) el teorema de Gauss-Markov.
+<i>Evalúa</i>: la descomposición del \(F\) en fuerza de la relación y cantidad de evidencia, con el matiz nuevo de esta lección respecto a la 12: el descuento por el número de regresores \(k-1\). La opción 4 invierte el papel de los grados de libertad.
 </p>
 </div>
 </li>
-<li><a id="orga6e657a"></a>Pregunta 12 [D] — Qué está demostrado y qué no<br />
-<div class="outline-text-5" id="text-orga6e657a">
+<li><a id="org1125791"></a>Pregunta 11 [M] — Cuando las restricciones no cuestan nada<br />
+<div class="outline-text-5" id="text-org1125791">
+<p>
+<i>Respuesta correcta: 1.</i>
+<i>Evalúa</i>: la lectura del numerador como longitud del cateto añadido: si es cero, los dos ajustes coinciden y las restricciones se cumplían ya exactamente en la muestra. La opción 3 confunde ``lo que \(H_0\) predice en promedio'' con lo que ocurre en una muestra concreta.
+</p>
+</div>
+</li>
+<li><a id="org827bde8"></a>Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado<br />
+<div class="outline-text-5" id="text-org827bde8">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: el alcance exacto de la sesión: qué se demuestra con detalle (k=2) y qué se asevera por generalización, con una única verificación puntual.
+<i>Evalúa</i>: honestidad sobre el alcance de la sesión, con el mismo criterio que las lecciones 11 y 12: lo geométrico se demuestra con material del curso; lo distribucional se enuncia.
 </p>
 </div>
 </li>
@@ -1351,88 +1334,24 @@ Respecto a la generalización a \(k\) regresores (\(E[\boldsymbol{\mathop{\wideh
 <h2 class="footnotes">Notas al pie de p&aacute;gina: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">para no saturar al estudiante.</p></div></div>
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Con este lenguaje, los tres divisores de la familia de productos escalares del curso —\(1\), \(n\) y \(n-k\)— se ven acompañados hoy por un cuarto número, \(k-1\), que no da lugar a ningún producto escalar nuevo: es sencillamente la dimensión del otro cateto. Todas las dimensiones que aparecen en esta lección suman lo que deben: \((k-1)+(n-k)=n-1\), la dimensión de \(\mathcal L(\boldsymbol 1)^\perp\) (lección 5), el plano de las desviaciones donde vive el triángulo entero.</p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Denotada en negrita cursiva pero sin letra de palo seco (reservada para las matrices de datos observados).</p></div></div>
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Es un resultado que puede demostrarse con las herramientas de la lección 11 y no lo haremos; su versión más elemental ya la conoce: la longitud al cuadrado de un vector de \(n\) componentes independientes con varianza \(\sigma^2\) y media cero vale \(n\sigma^2\) en promedio, porque cada componente aporta \(\sigma^2\). Proyectar sobre un subespacio de dimensión \(d\) deja ``\(d\) componentes'' de las \(n\), y la isotropía garantiza que da igual cuáles.</p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Para decir que son copias idénticas basta con que tengan la misma función de distribución: \(F_{X_i}(x) = \operatorname{P}(X_i \leq x) \quad \text{para todo } i = 1, \dots, n\). Esto no las obliga a ser la misma función sobre \(\Omega\); al contrario: dos copias independientes suelen asignar valores distintos para un mismo suceso elemental. Lo que sí comparten, por tener la misma distribución, es el conjunto de valores que toman con probabilidad positiva —su imagen, salvo en sucesos de probabilidad nula, donde ninguna de las dos está sujeta a restricción alguna—. Por otro lado, la independencia entre variables aleatorias implica que su función de distribución de probabilidad conjunta equivale al producto de sus distribuciones individuales. Para el caso de \(n\) variables, esto se expresa como: \(F_{X_1, X_2, \dots, X_n}(x_1, x_2, \dots, x_n) = \prod_{i=1}^{n} F_{X_i}(x_i)\).</p></div></div>
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Las palabras ``en promedio'' esconden el mismo abuso de notación de la lección 11: \(\mathrm{SEC}\) y \(\mathrm{SRC}\) son aquí las fórmulas de la lección 8 <i>evaluadas sobre la muestra aleatoria</i> —variables aleatorias, no los números de una tabla—, y lo que se afirma es \(\mathrm{E}(\mathrm{SEC})=(k-1)\sigma^2\) bajo \(H_0\) y \(\mathrm{E}(\mathrm{SRC})=(n-k)\sigma^2\). La segunda igualdad es, dicho de otro modo, la insesgadez de \(\mathfrak s^2\) que la lección 11 enunció; y vale con o sin \(H_0\), porque el residuo no cambia por que los regresores aporten algo o no.</p></div></div>
 
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Ese ``gratis'' merece hoy una letra pequeña que en la lección 9 no hacía falta. Allí, \(U=Y-E[Y|X]\) era ortogonal <i>por construcción</i> a toda función de \(X\), y de ahí salía \(E[U\mid X]=\mathit0\) sin coste alguno. Hoy, sin embargo, no estamos condicionando en \(X_i\), sino en <i>toda</i> la matriz \(\boldsymbol X\), es decir, en las \(n\) copias a la vez. Y la definición de \(U_i\) solo garantiza, por sí sola, la ortogonalidad frente a las funciones de \(X_i\): nada dice, de entrada, sobre las funciones de \(X_j\) con \(j\neq i\). ¿Por qué vale entonces \(E[U_i\mid\boldsymbol X]=\mathit0\)? Por el muestreo aleatorio, y se puede ver con la misma geometría de siempre. Lo que hay que comprobar es que \(U_i\) es ortogonal a toda función de la matriz \(\boldsymbol X\). Empecemos por las funciones más sencillas: los productos \(a(X_i)b(X_{-i})\), donde \(X_{-i}\) abrevia ``las demás copias'', \(X_j\) con \(j\neq i\). Separemos \(b(X_{-i})\) en su parte constante y su parte centrada, exactamente como hicimos con los vectores de datos en la lección 4, escribiendo \(\mathrm{E}(b)\) por \(\mathrm{E}\big(b(X_{-i})\big)\):
-\[
-a(X_i)\,b(X_{-i}) \;=\; \underbrace{\mathrm{E}(b)\,a(X_i)}_{\text{función de }X_i}\;+\;a(X_i)\,\big(b(X_{-i})-\mathrm{E}(b)\,\mathit1\big).
-\]
-\(U_i\) es ortogonal al primer sumando por definición: es una función de \(X_i\). Y es ortogonal al segundo por la independencia. En efecto, \((X_i,U_i)\) es independiente de \(X_{-i}\), y la independencia se traduce, en nuestro lenguaje, en que <i>la parte centrada de cualquier función de \(X_{-i}\) es ortogonal a cualquier función de \((X_i,U_i)\)</i> —es el hecho, conocido del curso de probabilidad, de que variables independientes están incorreladas, aplicado aquí a \(U_i\,a(X_i)\) y a \(b(X_{-i})\)—:
-\[
-\big\langle U_i\,a(X_i),\;b(X_{-i})-\mathrm{E}(b)\,\mathit1\big\rangle_P=\mathrm{Cov}\big(U_i\,a(X_i),\,b(X_{-i})\big)=0.
-\]
-Así que \(U_i\) es ortogonal a todos los productos \(a(X_i)\,b(X_{-i})\) y, por linealidad del producto escalar, a sus combinaciones lineales. Lo único que admitimos sin demostración —es el paso que pertenece a un curso de probabilidad— es que con esas combinaciones se aproxima cualquier función de \(\boldsymbol X\). Con ello, \(U_i\) es ortogonal a toda función de \(\boldsymbol X\), que es lo que dice \(E[U_i\mid\boldsymbol X]=\mathit0\).</p></div></div>
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Su prueba exige la distribución \(\chi^2\) de cada suma de cuadrados y la independencia entre ambas, el mismo aparato que la lección 12 declinó desarrollar para la \(t\). De hecho, la \(t_{n-k}\) y la \(F_{1,\,n-k}\) son la misma distribución mirada de dos maneras: si \(T\sim t_{n-k}\), entonces \(T^2\sim F_{1,\,n-k}\). Es la versión distribucional de \(F=t^2\) que veremos en la transparencia siguiente.</p></div></div>
 
-<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5" role="doc-backlink">5</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara"><i>Notación</i>. Esta es la primera vez en el curso que aparece una covarianza <i>condicionada</i>. Sigue el mismo convenio que ya fijamos en la lección 9 para la esperanza y la varianza: \(\mathrm{Cov}(\cdot,\cdot)\), con paréntesis y en recta, es un <i>número</i> (la covarianza no condicionada); \(Cov[\cdot,\cdot\mid\cdot]\), con corchetes y en cursiva, es una <i>variable aleatoria</i> —una función de aquello sobre lo que se condiciona—. Su definición es la análoga de la varianza condicional: \(Cov[Z,W\mid\boldsymbol X]=E\big[(Z-E[Z\mid\boldsymbol X])(W-E[W\mid\boldsymbol X])\mid\boldsymbol X\big]\). La usaremos en serio al calcular la varianza de \(\hat\beta_2\).</p></div></div>
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5" role="doc-backlink">5</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Con \(\beta_3=\beta_4=0\), el subespacio restringido es \(\mathcal L(\boldsymbol 1,\boldsymbol x_2)\): hemos perdido dos generadores. Con \(\beta_3=\beta_4\), es \(\mathcal L(\boldsymbol 1,\boldsymbol x_2,\boldsymbol x_3+\boldsymbol x_4)\): la combinación \(\beta_3\boldsymbol x_3+\beta_4\boldsymbol x_4\) con \(\beta_3=\beta_4\) es \(\beta_3(\boldsymbol x_3+\boldsymbol x_4)\), así que los dos regresores se funden en uno y se pierde una dimensión. Las restricciones que fijan un valor, como \(\beta_2=1\), dan un conjunto que no pasa por el origen (un subespacio <i>trasladado</i> por \(\boldsymbol x_2\)); el argumento que sigue vale igual, porque lo único que usa es que los dos ajustes están en \(\mathcal L(\boldsymbol{\mathsf X})\).</p></div></div>
 
-<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6" role="doc-backlink">6</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Una función de \(\omega\in\Omega\), donde \(\Omega\) el espacio de sucesos.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.7" class="footnum" href="#fnr.7" role="doc-backlink">7</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">En la literatura estadística y econométrica es costumbre usar la misma notación para ambos objetos (la estimación y el estimador), pero recuerde que son muy distintos (un número el primero y una variable aleatoria el segundo).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.8" class="footnum" href="#fnr.8" role="doc-backlink">8</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">El nombre correcto de la operación debería ser <i>forma bilineal definida sobre el anillo de las variables aleatorias</i>. Pero ese nombre aquí no ayuda; dado el nivel matemático del curso. Tan solo advertir que el nombre de <i>suma ponderada</i> es abusivo, pues en la expresión \(\sum_{i=1}^n {W_i}Y_i\) no hay ``números'' que hagan de ponderaciones en la suma de las \(Y_i\); lo que aparece son las variables aleatorias \(W_i\), que son funciones (no números). Por el mismo motivo, tampoco es correcto el nombre de <i>combinación lineal</i> de las \(Y_i\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.9" class="footnum" href="#fnr.9" role="doc-backlink">9</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Merece una precisión, porque es fácil pasarse de frenada: el supuesto \(\mathrm{Var}(X)\neq0\) <i>no</i> basta para excluir ese caso extremo con probabilidad uno. Si \(X\) es continua, sí: el suceso ``las \(n\) copias toman el mismo valor'' tiene probabilidad nula. Pero si \(X\) es discreta no: con \(X\) de Bernoulli de parámetro \(1/2\), por ejemplo, \(\mathrm{Var}(X)=1/4\neq0\) y, sin embargo, la probabilidad de que las \(n\) copias coincidan vale \(2^{1-n}>0\). Lo correcto, en general, es decir que \(\mathrm{Var}(X)\neq0\) garantiza que esa probabilidad es <i>menor que uno</i> y que tiende a cero al crecer \(n\); y que todo lo que sigue se entiende condicionado a que la muestra observada no sea una de esas degeneradas —igual que un programa estadístico se niega a estimar la pendiente cuando el regresor no varía en la muestra—.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.10" class="footnum" href="#fnr.10" role="doc-backlink">10</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara"><i>Un apunte geométrico, antes de seguir</i>. La fórmula de \(W_i\) no es una
-construcción de esta lección: ya estaba latente en la propia
-definición de \(c_2\), el coeficiente que la ``vía alternativa'' de la lección 7
-nos dio como pendiente. Recordemos aquella fórmula:
-\[
-c_2 =
-\frac{\Big\langle\boldsymbol{y},\,(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\Big\rangle_s}{\|\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2} = 
-\hat\beta_2
-\]
-Si desarrollamos ambos productos escalares como sumas —cancelando el factor
-\(1/n\) entre numerador y denominador, la misma observación que
-hicimos al abrir esta sesión, al pasar de \(\langle\cdot,\cdot\rangle_s\) a la
-expresión con sumatorios—, obtenemos
-\[
-c_2=\frac{\frac1n\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\frac1n\sum_j(x_j-\mu_{\boldsymbol x})^2}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}=\sum_i\underbrace{\left(\frac{(x_i-\mu_{\boldsymbol x})}{\sum_j(x_j-\mu_{\boldsymbol x})^2}\right)}_{w_i}y_i.
-\]
-Es decir: los pesos \(w_i=(x_i-\mu_{\boldsymbol x})/\sum_j(x_j-\mu_{\boldsymbol x})^2\)
-—aquí evaluados sobre un vector de datos fijo \(\boldsymbol x\), no sobre la
-muestra aleatoria \(\boldsymbol X\)— no son más que \(c_2\) descompuesto
-sumando a sumando. No hay ninguna fórmula nueva: es el mismo cociente de
-productos escalares de la lección 3 (Cauchy–Schwarz), el que la lección 7 aplicó
-al generador \(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\), ahora simplemente
-mirada componente a componente.
-Esta reconexión nos regala, sin ningún cálculo adicional, la cantidad
-\(\sum_iw_i^2\) que acabamos de necesitar para la varianza. Como el denominador
-\(\sum_j(x_j-\mu_{\boldsymbol x})^2\) es común a todos los \(w_i\):
-\[
-\sum_iw_i^2=\sum_i\frac{(x_i-\mu_{\boldsymbol x})^2}{\left(\sum_j(x_j-\mu_{\boldsymbol x})^2\right)^2}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})^2}{\left(\sum_j(x_j-\mu_{\boldsymbol x})^2\right)^2}=\frac1{\sum_j(x_j-\mu_{\boldsymbol x})^2},
-\]
-la misma expresión de unas líneas más arriba —allí evaluado sobre la muestra aleatoria \(\boldsymbol X\); aquí, sobre
-el vector de datos \(\boldsymbol x\)—. Evaluada en la muestra observada, la varianza de \(\hat\beta_2\) es, pues,
-\(\sigma^2\) dividido entre el cuadrado de la longitud <i>euclídea</i> (lección 2,
-sin el factor \(1/n\)) del vector en desviaciones del regresor,
-\(\|\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\|_e^2\) —el mismo vector con
-el que, en la lección 7, calculamos la propia pendiente—. Cuanto más
-``largo'' sea ese vector en desviaciones, menor la varianza: la misma
-intuición de ``más dispersión, más precisión'' que ya leímos en la fórmula
-con \(S^2\), ahora vista como una propiedad exacta de la longitud de un vector
-concreto en \(\mathbb R^n\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.11" class="footnum" href="#fnr.11" role="doc-backlink">11</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Esta es la posición de Eros con la que abríamos la lección 9: ni conocemos \(U_i\) (eso sería la posición del dios), ni carecemos de toda información sobre ella (la posición del ignorante); \(\hat E_i\) es nuestro mejor sustituto calculable, construido para que, bajo los supuestos del modelo, su comportamiento medio reproduzca el de \(U_i\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.12" class="footnum" href="#fnr.12" role="doc-backlink">12</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Seguimos aquí, por simplicidad, la misma convención del resto de esta sección: escribimos las fórmulas con los datos observados \(\boldsymbol{\mathop{\widehat e}}\), aunque hablemos de propiedades —como el sesgo o la insesgadez— que, en sentido estricto, son propiedades del estimador (la variable aleatoria subyacente), no de un número concreto. Es el mismo tipo de abuso de notación, ya señalado al distinguir estimador de estimación, habitual en toda la literatura econométrica; introducir aquí toda la notación necesaria para evitarlo tendría un coste en claridad mayor que el beneficio.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.13" class="footnum" href="#fnr.13" role="doc-backlink">13</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Esta idea ya la usamos, sin justificarla del todo, en la práctica de laboratorio que sigue a la lección 10, al motivar por qué dividir por \(n-k\) (y no por \(n\)) produce estimadores insesgados. Precisemos ahora, con algo más de rigor, el motivo exacto de ese divisor.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.14" class="footnum" href="#fnr.14" role="doc-backlink">14</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">El subíndice \(n-k\) indica por qué número se divide. Con ese mismo criterio los tres productos escalares del curso admiten una notación unificada: \(\langle\cdot,\cdot\rangle_e=\langle\cdot,\cdot\rangle_1\) (se divide por \(1\)), \(\langle\cdot,\cdot\rangle_s=\langle\cdot,\cdot\rangle_n\) (por \(n\)) y \(\langle\cdot,\cdot\rangle_{n-k}\) (por \(n-k\)). Mantendremos los subíndices \(e\) y \(s\), ya habituales, pero conviene saber que la familia es una sola.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.15" class="footnum" href="#fnr.15" role="doc-backlink">15</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">\(\begin{pmatrix}a&b\\c&d\end{pmatrix}^{-1}=\dfrac{1}{ad-bc}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}\), con \(a=n\,\mathit1\), \(b=c=n\overline{X}\), \(d=\sum_iX_i^2\), y usando que \(ad-bc=n\sum_iX_i^2-n^2\overline{X}^2=n\sum_i(X_i-\overline{X})^2\) (la ``fórmula de cálculo'' de la varianza, lección 5, evaluada sobre \(\boldsymbol{X}\) y multiplicada por \(n\)).</p></div></div>
+<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6" role="doc-backlink">6</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Con la fórmula matricial de la lección 11 para la varianza de \(\boldsymbol{\mathop{\widehat{\beta}}}\), este contraste puede hacerse también como un \(t\): el estadístico es \((\hat\beta_{\text{nox}}-\hat\beta_{\text{stratio}})\) dividido por el error estándar de esa diferencia, que involucra la covarianza \(Cov[\hat\beta_{\text{nox}},\hat\beta_{\text{stratio}}\mid\boldsymbol X]\) de fuera de la diagonal. Su cuadrado es el \(F\) de la tabla; la vía de las sumas de cuadrados evita tener que calcular esa covarianza.</p></div></div>
 
 
 </div>
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-20 dom 22:22</p>
+<p class="date">Created: 2026-09-19 sáb 12:01</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
