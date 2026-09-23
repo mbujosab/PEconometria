@@ -1,0 +1,321 @@
+#+Title: Sesión 22 (A) --- Dos regresores cada vez más alineados: un experimento de Monte Carlo
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L22-Prct-A-colinealidad-montecarlo
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S22-Prct-A-colinealidad-montecarlo"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S22-Prct-A-colinealidad-montecarlo.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S22-Prct-A-colinealidad-montecarlo.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S22-Prct-A-colinealidad-montecarlo.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+La lección 14 dijo que el error estándar de $\hat\beta_j$ es $\mathfrak s$ dividido por la longitud de la parte propia del regresor, y que esa longitud se encoge con el ángulo entre el regresor y los demás: $\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j$. Con dos regresores no constantes, $\sin^2\theta=1-\rho^2$ y la varianza del estimador se multiplica por $\mathrm{VIF}=1/(1-\rho^2)$. Esta práctica lo comprueba repitiendo: construimos dos regresores con una correlación elegida, sorteamos la perturbación dos mil veces y miramos cuánto oscilan las estimaciones.
+
+El mundo artificial tiene $n=100$, $y=1+x_2+x_3+u$ con $u$ normal de desviación típica $1$, y cuatro versiones del par de regresores: $\rho=0$; $0{,}9$; $0{,}99$ y $0{,}999$. Los regresores están fijos dentro de cada experimento; lo único que cambia de una réplica a otra es $u$. Y hay un detalle de construcción que conviene saber desde el principio: $\boldsymbol x_3=\rho\boldsymbol z_1+\sqrt{1-\rho^2}\,\boldsymbol z_2$ con $\boldsymbol x_2=\boldsymbol z_1$, así que el subespacio generado por $\boldsymbol 1$, $\boldsymbol x_2$ y $\boldsymbol x_3$ es /el mismo/ para los cuatro valores de $\rho$. Lo que cambia es el ángulo entre los generadores, no el plano que generan.
+
+/Objetivos/
+
+1. Comprobar que la varianza empírica de $\hat\beta_2$ crece como el VIF, y que coincide con $\sigma^2/\Vert\tilde{\boldsymbol x}_2\Vert_e^2$.
+2. Ver que la $\mathrm{SRC}$ no cambia con $\rho$: el ajuste es el mismo punto, y solo cambian sus coordenadas.
+3. Ver que $\hat\beta_2$ y $\hat\beta_3$ oscilan /juntos y al revés/: covarianza negativa, y suma $\hat\beta_2+\hat\beta_3$ tan estable como lo era $\hat\beta_2$ sin colinealidad.
+4. Ver cómo un efecto verdadero deja de ser significativo cuando el regresor pierde parte propia.
+
+* Actividad 1 - Cuatro experimentos, una tabla
+
+Para cada $\rho$: genere los regresores, mida la parte propia de $\boldsymbol x_2$ con la regresión auxiliar, y repita $2\,000$ veces la estimación guardando $\hat\beta_2$, $\hat\beta_3$, la $\mathrm{SRC}$ y el $R^2$. Después resuma: varianza empírica de $\hat\beta_2$ frente a la teórica, covarianza, varianza de la suma, y fracción de réplicas en que el $t$ de $\boldsymbol x_2$ supera $t_c$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: MonteCarlo
+#+begin_src gretl :eval no
+nulldata 100
+scalar sig = 1
+scalar R   = 2000
+scalar rho = 0.99                                # y despues 0, 0.9 y 0.999
+set seed 2026
+series z1 = normal()
+series z2 = normal()
+series x2 = z1
+series x3 = rho*z1 + sqrt(1-rho^2)*z2
+ols x2 const x3 --quiet
+scalar varTeorica = sig^2/$ess                   # sigma^2 / ||parte propia de x2||^2
+matrix B = zeros(R, 2)
+set seed 20261120
+loop i=1..R --quiet
+    series u = normal(0, sig)
+    series y = 1 + x2 + x3 + u
+    ols y const x2 x3 --quiet
+    B[i,] = {$coeff(x2), $coeff(x3)}
+endloop
+matrix V = mcov(B)
+printf "var(b2) = %.4f  teorica = %.4f  cov(b2,b3) = %.4f\n", V[1,1], varTeorica, V[1,2]
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-A-colinealidad-montecarlo.inp :eval no :exports none
+nulldata 100
+scalar n   = $nobs
+scalar b1  = 1
+scalar b2  = 1
+scalar b3  = 1
+scalar sig = 1
+scalar R   = 2000
+scalar tc  = critical(t, n-3, 0.025)
+matrix rhos = {0, 0.9, 0.99, 0.999}
+outfile --quiet montecarlo.txt
+    printf "n = %d, beta = (1, 1, 1), sigma = 1, %d replicas por cada rho\n\n", n, R
+    printf "%7s %8s %8s %10s %10s %10s %10s %8s %8s %8s\n", "rho", "corr", "VIF", "var(b2)", "teorica", "cov(b2,b3)", "var(b2+b3)", "SRC", "R2", "%|t|>tc"
+    loop j=1..4 --quiet
+        scalar rho = rhos[j]
+        set seed 2026
+        series z1 = normal()
+        series z2 = normal()
+        series x2 = z1
+        series x3 = rho*z1 + sqrt(1-rho^2)*z2
+        ols x2 const x3 --quiet
+        scalar longPropia2 = sqrt($ess)                 # || parte propia de x2 ||
+        scalar varTeorica  = sig^2/longPropia2^2         # sigma^2 / ||x2 propia||^2
+        matrix B = zeros(R, 2)
+        matrix S = zeros(R, 2)
+        scalar signif = 0
+        set seed 20261120
+        loop i=1..R --quiet
+            series u = normal(0, sig)
+            series y = b1 + b2*x2 + b3*x3 + u
+            ols y const x2 x3 --quiet
+            B[i,] = {$coeff(x2), $coeff(x3)}
+            S[i,] = {$ess, $rsq}
+            signif += abs($coeff(x2)/$stderr(x2)) > tc
+        endloop
+        matrix V = mcov(B)
+        printf "%7.3f %8.4f %8.1f %10.4f %10.4f %10.4f %10.4f %8.2f %8.4f %8.3f\n", rho, corr(x2, x3), 1/(1-corr(x2,x3)^2), V[1,1], varTeorica, V[1,2], V[1,1]+V[2,2]+2*V[1,2], meanc(S[,1]), meanc(S[,2]), signif/R
+        if j == 1
+            matrix B0 = B
+        elif j == 3
+            matrix B99 = B
+        endif
+    endloop
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-A-colinealidad-montecarlo/montecarlo.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Lea la tabla por columnas. La varianza empírica de $\hat\beta_2$ coincide con $\sigma^2/\Vert\tilde{\boldsymbol x}_2\Vert_e^2$ en los cuatro casos, con la oscilación propia de dos mil réplicas: el enunciado de la lección 12 y la fórmula de la 14 funcionan. Y crece como el VIF: de $0{,}011$ con $\rho=0$ a $5{,}7$ con $\rho=0{,}999$, un factor $530$ que la columna del VIF anuncia.
+
+La $\mathrm{SRC}$ es la misma en las cuatro filas, con todos sus decimales. No es una coincidencia numérica: el subespacio es el mismo por construcción y las perturbaciones sorteadas también, así que el residuo es idéntico. El $R^2$ sí cambia, porque cambia $y$: con $\beta_2=\beta_3=1$, dos regresores alineados suman sus efectos y la señal es mayor. Lo que la colinealidad no toca es el ajuste; lo que destroza son las coordenadas.
+
+La covarianza entre $\hat\beta_2$ y $\hat\beta_3$ es negativa y casi igual a la varianza en valor absoluto: cuando uno sube, el otro baja lo mismo. Por eso la varianza de la suma se queda en $0{,}011$ para $\rho=0{,}9$, $0{,}99$ y $0{,}999$: la suma se mide con la precisión que $\hat\beta_2$ tenía sin colinealidad. Y la última columna dice lo que eso cuesta: un coeficiente que vale $1$, con ruido de desviación típica $1$ y cien datos, se detecta siempre con $\rho=0$ y solo el $7\%$ de las veces con $\rho=0{,}999$.
+
+* Actividad 2 - Los histogramas y la nube
+
+Compare la distribución de $\hat\beta_2$ con $\rho=0$ y con $\rho=0{,}99$, y dibuje $\hat\beta_3$ frente a $\hat\beta_2$ en el segundo caso.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/ (con las matrices =B0= y =B99= de la Actividad 1):
+#+NAME: Histogramas
+#+begin_src gretl :eval no
+nulldata R --preserve
+series b2_rho0  = B0[,1]
+series b2_rho99 = B99[,1]
+series b3_rho99 = B99[,2]
+freq b2_rho0 --plot="@workdir/histRho0.png"
+freq b2_rho99 --plot="@workdir/histRho99.png"
+gnuplot b3_rho99 b2_rho99 --output="@workdir/nubeRho99.png"
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-A-colinealidad-montecarlo.inp :eval no :exports none
+# Histogramas de b2 con rho = 0 y con rho = 0,99 (mismos ejes)
+nulldata R --preserve
+series b2_rho0  = B0[,1]
+series b2_rho99 = B99[,1]
+series b3_rho99 = B99[,2]
+series suma_rho99 = b2_rho99 + b3_rho99
+outfile --quiet histogramas.txt
+    printf "rho = 0     : b2 medio = %.4f   desv. tipica = %.4f   min = %.3f   max = %.3f\n", mean(b2_rho0), sd(b2_rho0), min(b2_rho0), max(b2_rho0)
+    printf "rho = 0,99  : b2 medio = %.4f   desv. tipica = %.4f   min = %.3f   max = %.3f\n", mean(b2_rho99), sd(b2_rho99), min(b2_rho99), max(b2_rho99)
+    printf "rho = 0,99  : b2 + b3 medio = %.4f   desv. tipica = %.4f\n", mean(suma_rho99), sd(suma_rho99)
+    printf "correlacion entre b2 y b3 con rho = 0,99: %.4f\n", corr(b2_rho99, b3_rho99)
+end outfile
+freq b2_rho0 --plot="@workdir/histRho0.png"
+freq b2_rho99 --plot="@workdir/histRho99.png"
+gnuplot b3_rho99 b2_rho99 --output="@workdir/nubeRho99.png"
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-A-colinealidad-montecarlo/histogramas.txt example
+#+latex: }
+
+#+attr_latex: :width 0.48\textwidth
+#+attr_html: :width 380px
+#+CAPTION: $\hat\beta_2$ en las $2\,000$ réplicas con $\rho=0$. El eje horizontal va de $0{,}66$ a $1{,}36$.
+[[file:./S22-Prct-A-colinealidad-montecarlo/histRho0.png]]
+
+#+attr_latex: :width 0.48\textwidth
+#+attr_html: :width 380px
+#+CAPTION: $\hat\beta_2$ en las $2\,000$ réplicas con $\rho=0{,}99$. El eje horizontal va de $-1{,}7$ a $3{,}3$: la misma forma, siete veces más ancha.
+[[file:./S22-Prct-A-colinealidad-montecarlo/histRho99.png]]
+
+#+attr_latex: :width 0.7\textwidth
+#+attr_html: :width 550px
+#+CAPTION: $\hat\beta_3$ frente a $\hat\beta_2$ con $\rho=0{,}99$. Las $2\,000$ réplicas se alinean sobre la recta $\hat\beta_3=2-\hat\beta_2$: lo que una coordenada gana lo pierde la otra, y la suma apenas se mueve.
+[[file:./S22-Prct-A-colinealidad-montecarlo/nubeRho99.png]]
+
+*** Lo que debe observar
+
+Fíjese en los ejes antes que en las barras. Los dos histogramas tienen la misma forma y el mismo centro, $1$: el estimador sigue siendo insesgado. Lo que cambia es la escala: con $\rho=0{,}99$ la desviación típica es $0{,}75$ en lugar de $0{,}10$, el factor $\sqrt{\mathrm{VIF}}\approx7$ de la lección 14, y hay réplicas en que $\hat\beta_2$ sale negativo, con un verdadero valor de $1$.
+
+La nube es la figura de la lección 14 vista dos mil veces: los pares $(\hat\beta_2,\hat\beta_3)$ no se dispersan en todas direcciones, sino a lo largo de una recta de pendiente $-1$, con correlación $-0{,}99$. Cada muestra reparte el efecto total, $2$, entre dos regresores que casi no se distinguen, y el reparto es casi arbitrario; la suma no. Con datos reales solo se dispone de una réplica: un punto de esa nube, sin saber cuál.
+
+* Preguntas de interpretación para la clase
+
+1. ¿Por qué la $\mathrm{SRC}$ es exactamente la misma en las cuatro filas de la tabla, y por qué el $R^2$ no lo es? ¿Habría pasado lo mismo si $\boldsymbol x_3$ se hubiera generado de forma independiente para cada $\rho$?
+2. Con $\rho=0$ la varianza de $\hat\beta_2+\hat\beta_3$ es $0{,}023$, el doble que con $\rho=0{,}99$. ¿Es que la colinealidad /mejora/ la estimación de la suma? Razónelo con la parte propia del regresor $\boldsymbol x_2+\boldsymbol x_3$.
+3. En la última columna, el efecto verdadero de $\boldsymbol x_2$ solo se detecta el $26\%$ de las veces con $\rho=0{,}99$. Un investigador con una sola muestra obtiene $t=0{,}9$ y concluye que $\boldsymbol x_2$ no influye. ¿Qué diría usted, y qué pediría ver?
+4. La nube de la Actividad 2 está centrada en $(1,1)$. Si el investigador de la pregunta anterior obtiene $(\hat\beta_2,\hat\beta_3)=(-0{,}5;\,2{,}5)$, ¿son esos valores ``incorrectos''? ¿Qué es lo que sí está bien estimado en esa muestra?
+5. ¿Qué habría que cambiar en el experimento para que, con $\rho=0{,}99$, el $t$ de $\boldsymbol x_2$ volviera a superar $t_c$ en casi todas las réplicas? Diga dos cosas distintas y compare su coste.
+
+* Para profundizar
+
+- Lección 14 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S20-Lecc14.html][lección 14]]), en especial ``La parte propia de un regresor'' y ``Por qué oscilan los coeficientes''.
+- Lección 11 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html][lección 11]]), la covarianza entre $\hat\beta_1$ y $\hat\beta_2$ con $k=2$.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 3, sección 3.4, ``Multicollinearity''.
+- Manual de Gretl: funciones =mcov=, =corr= y =sd=; matrices en bucles.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S22-Prct-A-colinealidad-montecarlo.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S22-Prct-A-colinealidad-montecarlo.inp][S22-Prct-A-colinealidad-montecarlo.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /La $\mathrm{SRC}$ idéntica./ El residuo es $\boldsymbol y$ menos su proyección sobre el subespacio de los regresores, y ese subespacio es el mismo para los cuatro $\rho$, porque $\boldsymbol x_3$ es siempre una combinación de $\boldsymbol z_1$ y $\boldsymbol z_2$ y $\boldsymbol x_2=\boldsymbol z_1$. Como además la perturbación sorteada es la misma (la semilla se fija antes de cada bucle), y $\boldsymbol y$ es $\boldsymbol u$ más un vector del subespacio, el residuo es el residuo de $\boldsymbol u$, idéntico en las cuatro filas. El $R^2$ cambia porque cambia la longitud de $\boldsymbol{\mathop{\widehat y}}$: con los dos efectos positivos, alinear los regresores hace que se sumen. Con un $\boldsymbol x_3$ generado por separado para cada $\rho$, los subespacios serían distintos y la $\mathrm{SRC}$ variaría un poco, sin que eso cambiara la conclusión: el ajuste es casi el mismo; las coordenadas, no.
+
+2. /La suma se estima mejor con colinealidad./ Sí, y no es una paradoja. El coeficiente de la suma es la coordenada del regresor $\boldsymbol x_2+\boldsymbol x_3$ en la base $\{\boldsymbol x_2+\boldsymbol x_3,\ \boldsymbol x_3\}$, y su parte propia es lo que $\boldsymbol x_2+\boldsymbol x_3$ no comparte con $\boldsymbol x_3$. Cuando $\boldsymbol x_2$ y $\boldsymbol x_3$ están alineados, su suma es casi el doble de largo que cada uno y la varianza de $\hat\beta_2+\hat\beta_3$ es la de un solo coeficiente, $0{,}011$; cuando son ortogonales, la suma de dos estimadores independientes tiene el doble de varianza. La colinealidad no destruye información: la concentra en la dirección compartida y la quita de la dirección que separa a los dos regresores.
+
+3. /``$\boldsymbol x_2$ no influye''./ Que $t=0{,}9$ es lo que se obtiene tres de cada cuatro veces con $\rho=0{,}99$ /aunque el efecto sea $1$/, así que no rechazar dice muy poco. Pediría ver el intervalo de confianza, que será ancho e incluirá valores tan grandes como $2$, y el VIF, que dirá por cuánto se ha multiplicado el error estándar. Y pediría el $F$ de excluir $\boldsymbol x_2$ y $\boldsymbol x_3$ a la vez, que será enorme: la pareja sí influye, aunque no se pueda decir cuál.
+
+4. /Valores ``incorrectos''./ No: son una réplica posible, un punto de la nube, y el estimador que los produjo es insesgado y de varianza mínima entre los lineales. Lo que está mal es leerlos como el efecto separado de cada regresor, que la muestra no puede dar. Lo que sí está bien estimado es la suma, $2{,}0$, y con ella el ajuste: $\boldsymbol{\mathop{\widehat y}}$ es el mismo que el de cualquier otra réplica, con el mismo $\mathfrak s$ y el mismo $R^2$. La predicción de $y$ para una nueva observación en la que $x_2$ y $x_3$ vayan juntos, como en la muestra, es tan buena como sin colinealidad.
+
+5. /Qué cambiar./ Más observaciones: la parte propia crece como $\sqrt n$, y para recuperar el factor $7$ del error estándar haría falta multiplicar $n$ por $50$. O más variación propia: sortear $\boldsymbol x_3$ con menos correlación es lo que un diseño experimental puede hacer y los datos observados no; con $\rho=0{,}9$ bastaban cien observaciones. La segunda opción es mucho más barata cuando está disponible, y es lo que la lección 14 llamó ``muestras en las que los regresores varíen por separado''.
+
+* COMMENT Banco de preguntas de reserva
+
+** Pregunta R1 — Qué cambia con $\rho$
+Al aumentar la correlación entre dos regresores, manteniendo el subespacio que generan:
+a) Aumenta la $\mathrm{SRC}$ y baja el $R^2$.
+b) No cambia el ajuste; aumenta la varianza de cada coeficiente y la covarianza entre ellos se hace más negativa.
+c) Los estimadores dejan de ser insesgados.
+d) Baja $\mathfrak s$.
+/Respuesta correcta: b./
+/Evalúa/: qué afecta y qué no afecta la colinealidad.
+
+** Pregunta R2 — Factor de la varianza
+Si la correlación entre dos regresores es $0{,}99$, la varianza de cada coeficiente, respecto a la que tendría con $\rho=0$ y la misma longitud en desviaciones, se multiplica por:
+a) $0{,}99$.
+b) $1/(1-0{,}99)=100$.
+c) $1/(1-0{,}99^2)\approx50$.
+d) $\sqrt{50}\approx7$.
+/Respuesta correcta: c./
+/Evalúa/: la fórmula del VIF con $k=3$ y la distinción varianza/error estándar.
+
+** Pregunta R3 — La suma de los coeficientes
+Con dos regresores casi alineados, la suma $\hat\beta_2+\hat\beta_3$:
+a) Es tan imprecisa como cada sumando.
+b) Está bien estimada, porque mide la coordenada en la dirección que los dos regresores comparten.
+c) No se puede calcular.
+d) Es siempre igual a cero.
+/Respuesta correcta: b./
+/Evalúa/: la compensación entre coordenadas y qué combinación queda bien determinada.

@@ -1,0 +1,771 @@
+#+title:  Lección 8
+#+author: Marcos Bujosa
+#+STARTUP: show4levels
+#+LANGUAGE: es-es
+
+#+EXPORT_FILE_NAME: pub/Lecc08
+
+# +OPTIONS: toc:nil
+#+OPTIONS: tags:nil
+
+#+LATEX_CLASS: article
+
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+#+LATEX_HEADER: \usepackage[margin=0.5in]{geometry}
+#+LaTeX_HEADER: \usepackage[svgnames,x11names]{xcolor}
+#+LaTeX_HEADER: \hypersetup{linktoc = all, colorlinks = true, urlcolor = DodgerBlue4, citecolor = PaleGreen1, linkcolor = SpringGreen4}
+#+LaTeX_HEADER: \PassOptionsToPackage{hyphens}{url}
+#+LaTeX_HEADER: \usepackage{nacal}
+
+#+bibliography: ref.bib
+
+#+LaTeX_HEADER: \usepackage{framed}
+
+#+LaTeX_HEADER: \usepackage{listings}
+#+LaTeX_HEADER: \input{hansl.tex}
+#+LaTeX_HEADER: \lstnewenvironment{hansl-gretl}
+#+LaTeX_HEADER: {\lstset{language={hansl},basicstyle={\ttfamily\footnotesize},numbers,rame=single,breaklines=true}}
+#+LaTeX_HEADER: {}
+#+LaTeX_HEADER: \newcommand{\hansl}[1]{\lstset{language={hansl},basicstyle={\ttfamily\small}}\lstinline{#1}}
+# +LaTeX_HEADER: \lstset{backgroundcolor=\color{white},basicstyle=\ttfamily\footnotesize,breaklines=true, captionpos=b,commentstyle=\color{mygreen},escapeinside={\%*}{*)}, keywordstyle=\color{blue},stringstyle=\color{mymauve}, }
+# +LaTeX_HEADER: \lstset{backgroundcolor=\color{lightgray!20},basicstyle=\ttfamily\footnotesize,breaklines=true, }
+#+LaTeX_HEADER: \lstset{backgroundcolor=\color{lightgray!20}, }
+
+#+name: setup-listings
+#+begin_src emacs-lisp :exports none :results silent
+  (setq org-latex-listings 'listings)
+  (setq org-latex-custom-lang-environments
+  	;'((emacs-lisp "common-lispcode")))
+  	'((emacs-lisp "hansl-gretl")))
+  (setq org-latex-listings-options
+	'(("frame" "lines")
+	  ("basicstyle" "\\scriptsize")
+	  ("basicstyle" "\\ttfamily")
+	  ("numbers=none" "left")
+	  ("backgroundcolor=\\color{lightgray!20}")
+	  ("numberstyle" "\\tiny")))
+  (setq org-latex-to-pdf-process
+	'("pdflatex -interaction nonstopmode -output-directory %o %f"
+	"pdflatex -interaction nonstopmode -output-directory %o %f"
+	"pdflatex -interaction nonstopmode -output-directory %o %f"))
+  (org-add-link-type
+   "latex" nil
+   (lambda (path desc format)
+     (cond
+      ((eq format 'html)
+       (format "<span class=\"%s\">%s</span>" path desc))
+      ((eq format 'latex)
+       (format "\\%s{%s}" path desc)))))
+#+end_src
+
+
+# \lstnewenvironment{code}
+#     {\lstset{language=haskell,
+#     basicstyle=\small\ttfamily,
+#     numbers=left,
+#     numberstyle=\tiny\color{gray},
+#     backgroundcolor=\color{lightgray},
+#     firstnumber=auto
+#     }}
+#     {}
+
+#+bibliography: ref.bib
+
+# +latex: \clearpage
+
+#+LATEX: \clearpage
+
+* Intervalos y regiones de confianza
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/EjPvivienda4.inp
+   :END:
+
+| Guión: | [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/EjPvivienda4.inp][EjPvivienda4.inp]] |
+
+Cargue los datos de precios de casas ~data3-1.gdt~ del libro de
+Ramanthan.
+#+begin_src hansl 
+ open data3-1
+#+end_src
+    
++ Estime el modelo de siempre y guárdelo como icono.
+  #+begin_src hansl 
+   Modelo1 <- ols price const sqft --vcv
+  #+end_src
+
++ Observe la matriz de covarianzas entre los parámetros estimados del
+  modelo de regresión. Hay covarianza entre los estimadores, ¿con qué
+  signo?
+  
++ Calcule los intervalos de confianza de los parámetros beta
+  estimados: desde la ventana del modelo estimado siga los pasos
+  */~Análisis -> Intervalos de confianza para los coeficientes~/* o
+  bien directamente en un guión o la consola de Gretl aplique
+  directamente las expresiones vistas en clase:
+  #+begin_src hansl 
+   scalar ns = 0.05  # nivel de signifacion
+   
+   scalar i1 = $coeff(const) - critical(t, $df, ns/2) * $stderr(const)
+   scalar s1 = $coeff(const) + critical(t, $df, ns/2) * $stderr(const)
+   
+   scalar i2 = $coeff(sqft)  - critical(t, $df, ns/2) * $stderr(sqft)
+   scalar s2 = $coeff(sqft)  + critical(t, $df, ns/2) * $stderr(sqft)
+   
+   matrix IC = {i1, s1; i2, s2}
+   print IC
+  #+end_src
+      
++ Recuerde que los intervalos de confianza al 95% nos sirven para
+  contrastar hipótesis al 5% de significación. Piense qué valores
+  están en el umbral de ser rechazados según los intervalos obtenidos.
+      
++ Dado el signo de la covarianza entre los estimadores, ¿qué relación
+  cabe esperar entre ellos?
+      
++ Visualice la región de confianza de los parámetros: desde en la
+  ventana del modelo estimado siga los pasos */~Análisis -> Elipse de
+  confianza~/* y seleccione ambos regresores para ver la elipse de
+  confianza. ¿Confirma sus expectativas?
+      
++ Contrastemos algunas hipótesis compuestas. En particular, contraste
+  las distintas combinaciones de valores que están en el umbral de ser
+  hipótesis a rechazar individualmente (las correspondientes a las
+  esquinas del cuadrado que se ve en el gráfico del apartado
+  anterior). En la ventana del modelo */~Contrastes -> Restricciones
+  lineales~/* y se introducen las restriciones; o bien ejecute el
+  código de más abajo.
+
+  ¿Cuál es la conclusión respecto a la elipse de confianza en relación
+  a los contrastes de hipótesis de dos parámetros?
+  #+begin_src hansl 
+   restrict Modelo1
+    b[1] = i1
+    b[2] = s2
+   end restrict
+   
+   restrict Modelo1
+    b[1] = s1
+    b[2] = s2
+   end restrict
+   
+   restrict Modelo1
+    b[1] = i1
+    b[2] = i2
+   end restrict
+   
+   restrict Modelo1
+    b[1] = s1
+    b[2] = i2
+   end restrict
+   
+   /* notese que el contraste individual H0: b[2]=i2 esta en el limite de ser rechazado al 5% 
+      Pero si conjuntamente tambien se considera que b[1]=s1 entonces no se rechaza ni con un
+      13% de sigificacion */
+  #+end_src
+   
+#   scalar t2 = ($coeff(sqft)-i2)/$stderr(sqft)    # estadistico t
+#   scalar c2 = critical(t, $df, .025)             # valor crítico al 5% (dos colas)
+#   scalar p2 = 2*pvalue(t, $df, abs(t2))          # p-valor
+
+  
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+** Código completo de la práctica ~EjPvivienda4.inp~
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/EjPvivienda4.inp}
+#+LATEX: \clearpage
+
+
+* Experimento de Montecarlo para los intervalos de confianza
+   
+| Guión: | [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/samplinghouses5.inp][samplinghouses5.inp]] |
+
+Cargue los datos de precios de casas ~data3-1.gdt~ del libro de
+Ramanthan.  Este experimento de Montecarlo es una extensión a los ya
+realizados con estos mismos datos.
+
++ Defina la serie =x= con las superficies y la serie =y= con los
+  precios. Programe un bucle como las otras veces:
+  #+begin_src hansl :noweb tangle :tangle ./pub/scripts/samplinghouses5.inp
+   open data3-1
+   series x = sqft
+   series y = price
+   #set seed 3213798
+   loop 100 --progressive --quiet
+       <<Estimación MCO>>
+       <<Cálculo de los límites de los intervalos de confianza>>
+       <<Comprobación de si los parámetros pertenecen al intervalo>>
+       <<Estimación de la varianza de los errores>>
+       <<Muestra de resultados y guardado en disco>>
+   endloop
+  #+end_src
+
+La serie de cálculos son los siguientes (todos dentro del bucle).
+  
+1) El primer bloque de cálculos simula el modelo con nuevas
+   perturbaciones, lo estima por MCO y guarda los betas estimados y
+   sus errores estándar:
+   #+name: Estimación MCO
+   #+begin_src hansl 
+    series U  = randgen(n, 0, 39)
+    series ys = 52 + 0.14*x + U
+    ols ys const x
+    scalar b1 = $coeff(const)
+    scalar b2 = $coeff(x)
+    scalar s1 = $stderr(const)
+    scalar s2 = $stderr(x)
+   #+end_src
+   
+2) Luego calculamos los intervalos de confianza al 95\%
+   #+name: Cálculo de los límites de los intervalos de confianza
+   #+begin_src hansl 
+    scalar c1L = b1 - critical(t,$df,.025)*s1
+    scalar c1R = b1 + critical(t,$df,.025)*s1
+    scalar c2L = b2 - critical(t,$df,.025)*s2
+    scalar c2R = b2 + critical(t,$df,.025)*s2
+   #+end_src
+
+3) Verificamos si los verdaderos valores pertenecen al intervalo estimado
+   #+name: Comprobación de si los parámetros pertenecen al intervalo
+   #+begin_src hansl 
+    scalar p1 = (52  >c1L && 52  <c1R)
+    scalar p2 = (0.14>c2L && 0.14<c2R)
+   #+end_src
+
+4) Al finalizar todas las cuentas, queremos que Gretl nos muestre los
+   estadísticos de los parámetros estimados, y el porcentaje de veces
+   que el intervalo contuvo a los parámetros, y que guarde todo lo
+   calculado en el fichero de datos ~cicoeff.gdt~.
+   #+name: Muestra de resultados y guardado en disco
+   #+begin_src hansl 
+    print b1 b2 p1 p2 
+    store cicoeff.gdt b1 b2 c1L c1R c2L c2R 
+   #+end_src
+
+Por último abrimos el fichero ~cicoeff.gdt~. Generamos una serie =B1=
+constante e igual a valor del parámetro constante del modelo simulado ($52$)
+y otra =B2= igual a valor del parámetro de la pendiente del modelo
+simulado ($0.14$); y finalmente generamos unos gráficos que muestren los
+intervalos estimados en cada iteración y si incluyen o no al verdadero
+valor del parámetro correspondiente.
+#+begin_src hansl :noweb tangle :tangle ./pub/scripts/samplinghouses5.inp
+  open "cicoeff.gdt"
+  series B1 = 52
+  series B2 = 0.14
+  IntervaloConstante <- gnuplot c1L c1R B1 --time-series --with-lines --output="display"
+  IntervaloPendiente <- gnuplot c2L c2R B2 --time-series --with-lines --output="display"
+#+end_src
+
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+** Código completo de la práctica ~samplinghouses5.inp~
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/samplinghouses5.inp}
+#+LATEX: \clearpage
+
+
+* Precio de casas unifamiliares (constante más tres regresores)
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/Houses.inp
+   :END:
+
+   | Guión: | [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/Houses.inp][Houses.inp]] |
+
+   
+- Objetivos. :: Son tres:
+  - Asimilar la interpretación ``ceteris paribus'' de los coeficientes de un modelo de regresión.
+  - Eliminar variables no significativas de un modelo.
+  - Comparar el ajuste de dos modelos.
+    
+- Los datos :: son los del ejemplo de clase junto con dos variables
+  adicionales: número de dormitorios (=bedrms=) y cuartos de baño
+  (=baths=).
+
+- Para empezar :: cargue los datos de la base de datos de Gretl desde
+  la pestaña del manual de Ramanathan
+  #+begin_src hansl 
+   open data4-1
+  #+end_src
+
+** Tareas
+
++ Actividad 1 :: Piense cuáles son los signos esperados de los
+  parámetros del siguiente modelo
+   \begin{displaymath}
+      \VA{price}=
+      \beta_1\VAindUno+
+      \beta_2\VA{sqft}+
+      \beta_3\VA{bedrms}+
+      \beta_4\VA{baths}+
+      \per.
+    \end{displaymath}
+    donde \VA{price} es el precio de una vivienda, \VA{sqft} su
+  superficie, \VA{bedrms} es su número de dormitorios y \VA{baths} su
+  número de cuartos de baño.
+
++ Actividad 2 :: Con los datos de la muestra Ajuste dicho modelo de
+  regresión por MCO y guárdelo como un icono.
+  #+begin_src hansl 
+   Modelo1 <- ols price 0 sqft bedrms baths 
+  #+end_src
+
++ Actividad 3 :: ¿Confirman los resultados su previsión respecto a los
+  signos de los parámetros? 
+
+  # La interpretación de los coeficientes es ceteris paribus, es decir,
+  # manteniendo el resto de variables sin cambios. Así, $\beta_3$ es el
+  # efecto esperado de añadir una habitación manteniendo el mismo tamaño
+  # de casa.
+
++ Actividad 4 :: El modelo estimado sugiere que una casa de $1600$ pies al cuadrado,
+  con $3$ habitaciones y $2$ cuartos de baño tiene un precio esperado de
+  \begin{displaymath}
+    129.062 + 0.154800\times(1600) -21.5875\times(3) -12.1928\times(2) =  287.59 \; \text{miles de dólares.}
+  \end{displaymath}
+  
+  Según este modelo (y sabiendo que un pie cuadrado son $0.092m^2$)
+  /ampliar/ esta casa con una habitación adicional de unos $20$ metros
+  cuadrados (unos $220$ pies cuadrados más de casa) arrojaría un
+  precio esperado de ¿cuanto?
+  \begin{displaymath}
+     129.062 + 0.154800\times(1820) -21.5875\times(4) -12.1928\times(2) =  300.06;
+  \end{displaymath}
+  es decir, /ampliar/ esta casa con una habitación adicional de unos
+  $20$ metros cuadrados /eleva/ el precio en unos $13$ mil dolares.
+  ¿Contradice esto su idea inicial?
+  #+begin_src hansl
+   series yhat1 = $coeff(const)+$coeff(sqft)*1600+$coeff(bedrms)*3+$coeff(baths)*2
+   series yhat2 = $coeff(const)+$coeff(sqft)*(1600+220)+$coeff(bedrms)*(3+1)+$coeff(baths)*2
+  #+end_src
+
++ Actividad 5 :: Aunque, con la correcta interpretación de los
+  coeficientes, el resultado parece sensato, sólo una de las variables
+  es estadísticamente significativa.
+
+  - Esto quiere decir, que la estimación de los parámetros es muy
+    imprecisa. Sin embargo, el estadístico $\Festadistico$ indica que
+    el modelo es conjuntamente significativo (así que la previsión de
+    precios de la actividad anterior es fiable); pero no el efecto
+    individual de cada regresor.
+
+  - Observe además que hay un elevado grado de correlación entre los
+    regresores (en la ventana de iconos, ``pinche'' en
+    */~Correlaciones~/*) o ejecute los siguiente
+    #+begin_src hansl
+     corr sqft bedrms baths
+    #+end_src
+    Esto sugiere que pudiera surgir un problema de multicolinealidad.
+    Además, la interpretación caeteris paribus cuestiona la relevancia
+    de algunos los regresores. Todo ello apunta a la posible
+    conveniencia de excluir uno o más regresores del modelo inicial.
+
++ Actividad 6 :: Puesto que la variable menos significativa es
+  =baths=, ésta será la primera variable a omitir del modelo inicial:
+  - En la ventana del Modelo 1, ``pinche'' en */~Contrastes ->
+    omitir variables~/* y seleccione la variable =baths= (y pulse
+    */~Aceptar~/*). O bien ejecute el código
+    #+begin_src hansl
+     omit baths
+    #+end_src
+    Note como el coeficiente de determinación ha disminuido, pero el
+    corregido ha aumentado.
+
+  Aunque ha aumentado la significatividad de los coeficientes,
+  =bedrms= continua siendo no significativa. Así que la vamos a
+  omitir:
+  - En la ventana del Modelo 1, ``pinche'' en */~Contrastes ->
+    omitir variables~/* y seleccione la variable =bedrms= (y pulse
+    */~Aceptar~/*). O bien ejecute el código
+    #+begin_src hansl
+     omit bedrms
+    #+end_src
+    Note como de nuevo el coeficiente de determinación ha
+    disminuido, pero el corregido ha aumentado.
+
+  /La constante sigue sin ser significativa ¿debemos hacer como con
+  =baths= y =bedrms= y tratar de omitirla también?/
+
++ Actividad 7 :: Hemos excluido las variables =baths= y =bedrms= del
+  modelo original, debido a que individualmente son no significativas.
+
+  Pero pudiera ocurrir que conjuntamente si fueran
+  significativas. Vamos a verificar que conjuntamente tampoco son
+  significativas:
+  
+  - En la ventana del Modelo 1, ``pinche'' en */~Análisis -> Elipse de
+    confianza~/* y seleccione =baths= y =bedrms=.
+
+  - Compruebe que $(0,0)$ es un punto que pertenece a la elipse de
+    confianza, y que por tanto, la hipótesis nula $\beta_3=0,\;
+    \beta_4=0$ no se puede rechazar al nivel de confianza de la
+    elipse.
+    
+  - Omita de golpe las dos variables: En la ventana del Modelo 1,
+    ``pinche'' en */~Contrastes -> omitir variables~/* y seleccione
+    las variables =baths= y =bedrms= (y pulse */~Aceptar~/*)
+    #+begin_src hansl
+     ols price 0 sqft bedrms baths
+     Modelo2 <- omit baths bedrms
+    #+end_src
+
+  - Observe los resultados.
+
+
++ Actividad 8 :: Comparar las previsiones del modelo ampliado y el
+  reducido.
+
+  Vamos a comprobar que las predicciones no difieren demasiado entre
+  uno y otro modelo. Pero hay mayor precisión con el modelo reducido
+  (no multicolinealidad).
+
+  /Primero añadimos una observación adicional/ con los datos de
+  superficie, número de dormitorios y cuartos de baño del ejemplo
+  anterior.
+  - ``Pinche'' en */~Datos -> Añadir observaciones~/* y añada una observación
+
+  - Marque con el ratón las variables =sqft=,
+      =bedrms= y =baths=}, y con las tres variables
+      marcadas, pinche en */~Datos -> Editar valores~/*. Teclee $1820$
+      en la fila $15$ de la columna =sqft=, teclee $4$ en la fila
+      $15$ de la columna =bedrms= y $2$ en la fila $15$ de la columna
+      =baths=.
+
+  - Fije la muestra con las nuevas observaciones: ``pinche'' en
+    */~Muestra -> Establecer rango~/* y fíjelo para las observaciones
+    de 1 a 15.  O bien teclee en la  consola de comandos
+    #+begin_src hansl
+     dataset addobs 1
+     genr sqft[15] =1820
+     genr bedrms[15]=4
+     genr baths[15] =2
+    #+end_src
+
+  - Re-estime el primer modelo pero usando la muestra ampliada.
+    #+begin_src hansl
+     smpl 1 15
+     ols price const sqft bedrms baths
+    #+end_src
+
+    + En la ventana del modelo re-estimado ``pinche'' en */~Análisis
+      -> Predicciones~/*. Nos aseguramos de que el dominio de
+      predicción contiene la observación 15 y pulsamos */~Aceptar~/*.
+      #+begin_src hansl
+       fcast 15 15 --static
+       fcast --plot="display"
+      #+end_src
+
+    + Observe la previsión puntual y el intervalo de confianza
+
+  - Re-estime también el segundo modelo con la muestra ampliada
+    #+begin_src hansl
+     ols price const sqft
+    #+end_src
+
+    + En la ventana del modelo re-estimado ``pinche'' en */~Análisis
+      -> Predicciones~/*. Asegúrese de que el dominio de predicción
+      contiene la observación 15 y pulse */~Aceptar~/*.
+      #+begin_src hansl
+       fcast 15 15 --static
+       fcast --plot="display"
+      #+end_src
+
+  - Note cómo ambas previsiones puntuales están contenidas en
+    ambos intervalos, por lo que no son estadísticamente distintas.
+
+  - Pero fíjese en cómo la falta de precisión del primer modelo se
+    plasma en una mayor desviación típica, y en un intervalo de
+    confianza más amplio.
+
+# +LATEX: \clearpage
+# +latex: \vspace{10pt}
+# +latex: \noindent
+** Código completo de la práctica ~Houses.inp~
+# +latex: \vspace{10pt}
+\lstinputlisting{scripts/Houses.inp}
+#+LATEX: \clearpage
+
+
+* Los determinantes del número de viajeros de autobús
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/BusTravelers.inp
+   :END:
+
+| Guión: | [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/BusTravelers.inp][BusTravelers.inp]] |
+
+Aplicación 4.6 del libro de texto [cite:@Ramanathan:IEW-98]. Para más
+detalles consulte el citado manual.
+
+- Objetivo :: Especificación de un modelo de regresión.
+
+  En general, eliminar variables no significativas incrementa la
+  precisión de la estimación del resto de parámetros. Pero eliminar de
+  golpe todas las variables no significativas no es recomendable. Al
+  quitar algunas variables puede que otras se vuelvan
+  significativas. Un procedimiento más cauteloso es ir quitando
+  variables de una en una.
+
+  La significación estadística no es el único criterio, ni el más
+  conveniente, para tomar una decisión. Si hay razones teóricas para
+  mantener una variable debemos cuestionarnos seriamente el quitar
+  dicha variable por el mero hecho de que ésta resulte no
+  significativa estadísticamente.
+
+  Por otra parte, siempre debemos mantener el término constante.
+
+- Los datos y el modelo :: Ésta es una aplicación con datos reales que
+  relaciona el número de horas viajadas en autobús (en miles)
+  =Bustravl= (\VA{B}) en 40 ciudades de los Estados Unidos con las
+  siguientes variables explicativas:
+  + =Fare= = la tarifa del billete en dólares (\VA{F}).
+  + =Gasprice= =Precio del galón de gasolina en dólares (\VA{G}).
+  + =Income= = Renta percápita media de la ciudad en dólares (\VA{I}).
+  + =Pop= = Población de la ciudad en miles (\VA{P}).
+  + =Density= = Densidad de población de la ciudad (personas por milla
+    cuadrada) (\VA{D}).
+  + =Landarea= = Extensión del área urbana en millas cuadradas (\VA{L}).
+    
+  La especificación inicial del modelo es:
+  \begin{displaymath}
+    \VA{B}=
+    \beta_1\VAindUno+
+    \beta_2\VA{F}+
+    \beta_3\VA{G}+
+    \beta_4\VA{I}+
+    \beta_5\VA{P}+
+    \beta_6\VA{D}+
+    \beta_7\VA{L}+
+    \per.
+  \end{displaymath}
+  Se trata de decidir cuales de todas las variables disponibles es
+  razonable mantener en un modelo final.
+
+- Para empezar :: cargue los datos de la base de datos de Gretl desde
+  la pestaña del manual de Ramanathan.
+  #+begin_src hansl 
+   open data4-4
+  #+end_src
+
+** Tareas
+
++ Actividad 1 :: Piense cuáles son los signos esperados de los parámetros del modelo
+
++ Actividad 2 :: Observe los diagramas de dispersión entre la variable
+  dependiente y los regresores. Observe así mismo los estadísticos
+  descriptivos de las variables y la matriz de correlaciones. Hágalo
+  con los menus desplegables o ejecutando el siguiente código:
+  #+begin_src hansl 
+   summary BUSTRAVL FARE GASPRICE INCOME POP DENSITY LANDAREA --simple
+   corr BUSTRAVL FARE GASPRICE INCOME POP DENSITY LANDAREA --plot="display"  
+   fare_bustravl     <- gnuplot BUSTRAVL FARE     --output="display"
+   gasprice_bustravl <- gnuplot BUSTRAVL GASPRICE --output="display"
+   income_bustravl   <- gnuplot BUSTRAVL INCOME   --output="display"
+   pop_bustravl      <- gnuplot BUSTRAVL POP      --output="display"
+   density_bustravl  <- gnuplot BUSTRAVL DENSITY  --output="display"
+   landarea_bustravl <- gnuplot BUSTRAVL LANDAREA --output="display"
+  #+end_src
+
++ Actividad 3 :: Estime por MCO el modelo inicial completo y guárdelo como un icono
+  #+begin_src hansl 
+    ModeloInicial <- ols BUSTRAVL 0 FARE GASPRICE INCOME POP DENSITY LANDAREA
+    modeltab add
+  #+end_src
+  El nombre (en la línea anterior =ModeloInicial=) puede ser el que
+  usted elija, pero si tiene espacios en blanco debe escribirlo entre
+  comillas, por ejemplo ~"Modelo uno"~ ~<- ols Y 0 x1 x2~). Recuerde
+  además que Gretl entiende la variable =0= como el regresor
+  constante).
+    
+  Compare los resultados con sus expectativas iniciales.
+
+  - Observe qué variables son significativas y cuáles no. ¿Cuál es la
+    menos significativa?
+
+  - Observe también el coeficiente de determinación ajustado, así como
+    los criterios de información para la selección de modelos
+    ``Criterio de información de Akaike (AIC)'' y ``Criterio de
+    información Bayesiano de Schwarz (BIC)'' para compararlos con
+    otros alternativos más adelante.
+
++ Actividad 4 :: La variable con mayor /p/-valor (``la menos
+  significativa'') es el precio del combustible =GASPRICE=.
+  Realice una nueva regresión omitiendo esta variable.
+    
+  Puede hacerlo partiendo del modelo anterior, o definiendo un nuevo
+  modelo (le recomiendo la primera):
+
+  - Partiendo del modelo anterior podemos omitir la variable:
+
+    + Desde la ventana del modelo estimado ``pinche'' en */~contrastes
+      --> omitir variables~/* seleccione =GASPRICE=; o bien
+      ejecute[fn::el comando opuesto a ~omit~ es ~add~]
+      #+begin_src hansl 
+       omit GASPRICE
+      #+end_src
+
+    + Alternativamente podemos definir un nuevo modelo sin =GASPRICE=.
+      ``pinchando'' en */~Modelo --> Mínimos Cuadrados Ordinarios~/* y
+      seleccionando todos los regresores menos =GASPRICE=, o bien ejecutando
+      ~ols BUSTRAVL 0 FARE INCOME POP DENSITY LANDAREA~
+      
+    Analice los resultados:
+
+    + ¿Mejora la precisión de las estimaciones? ¿Qué variable es ahora
+      la menos significativa?
+
+    + Observe también el coeficiente de determinación ajustado, así
+      como los criterios de información para la selección de modelos
+      ``Criterio de información de Akaike (AIC)'' y ``Criterio de
+      información Bayesiano de Schwarz (BIC)''. ¿Le parece que ha
+      mejorado el modelo?
+
++ Actividad 5 :: El mayor /p/-valor corresponde ahora a =FARE=, pero
+  la teoría económica sugiere que el precio es una importante variable
+  a la hora de explicar la demanda de un bien o servicio. Por ello la
+  debemos mantener. La siguiente variable menos significativa (un
+  inaceptable /p/-valor del 50%) es la extensión de la ciudad
+  =LANDAREA=
+
+  Repita los pasos del punto anterior, pero omitiendo =LANDAREA=.
+  #+begin_src hansl 
+   omit LANDAREA
+  #+end_src
+
++ Actividad 6 :: La variable =FARE= continua teniendo un /p/-valor
+  excesivo (49%). Esto sugiere, que dadas las demás variables
+  explicativas, la tarifa del billete no afecta demasiado a la demanda
+  de este servicio; es decir, los viajeros no parecer ser muy
+  sensibles al precio del billete[fn::al menos para tarifas en torno a
+  las observadas en la muestra: alrededor de 0.8 dolares con una
+  tarifa mínima de 0.5$ y una máxima de 1.5$.]. Observe de nuevo el
+  diagrama de dispersión entre =FARE= y =BUSTRAVL= que siguiere este
+  comportamiento. Por tanto, veamos que pasa si finalmente omitimos la
+  variable =FARE= (si tenemos fundadas dudas sobre este comportamiento
+  de los consumidores, entonces /no deberíamos eliminar la variable/
+  =FARE= del modelo).
+
+  Repita los pasos omitiendo =FARE=.
+  #+begin_src hansl 
+   omit FARE 
+  #+end_src
+
++ Actividad 7 :: Las variables del modelo final son significativas y
+  los criterios de selección de modelos han mejorado, pero queda un
+  último paso.
+
+  Hemos ido ``quitando'' variables basándonos en los estadísticos
+  \Testadistico. Sabemos que esto es incorrecto puesto que
+  conjuntamente estas variables podrían ser significativas. Así pues,
+  debemos realizar un contraste de significación de las tres variables
+  conjuntamente; es decir, partiendo del modelo inicial debemos
+  contrastar
+  \begin{displaymath}
+    \Hnula:\ \beta_2=0,\quad \beta_3=0,\quad \beta_7=0.
+  \end{displaymath}
+
+  + /Partiendo del modelo inicial/ omita de golpe las variables
+    =FARE=, =GASPRICE= y =LANDAREA= para obtener un modelo
+    restringido. Seleccione con el ratón la ventana del primer modelo
+    y en */~omitir~/* y marque las tres variables, o bien ejecute el
+    código:
+    #+begin_src hansl 
+     ols BUSTRAVL 0 FARE GASPRICE INCOME POP DENSITY LANDAREA
+     ModeloFinal <- omit FARE GASPRICE LANDAREA
+     modeltab add
+    #+end_src
+    ¿Son conjuntamente significativas? ¿Mejora la precisión de las
+    estimaciones? ¿y los criterios de selección? ¿Son los signos de
+    los parámetros los esperados? A la luz de los resultados, viajar
+    en autobús ¿parece ser un bien normal, o un bien inferior?
+
++ Actividad 8 :: Toda la inferencia que hemos realizado se basa en la
+  hipótesis de normalidad de los residuos. Contraste si se puede
+  rechazar o no la hipótesis de normalidad en ambos modelos (el
+  inicial y el final). El contraste Jarque-Bera es el más frecuente en
+  Econometría.
+  - En la ventana de resultados de un modelo ``pinche'' en
+    */~contrastes --> Normalidad de los residuos~/*, o bien ejecute el
+    código:
+    #+begin_src hansl 
+     series e = $uhat
+     normtest --all e
+    #+end_src
+    Piense que los contrastes realizados en la anteriores actividades,
+    asumen la normalidad de las perturbaciones. Si esta hipótesis es
+    rechazada toda la inferencia de los contrates anteriores podría
+    quedar cuestionada.
+
+*** COMMENT Esto no sé por qué estaba en el guión
+#+begin_src hansl 
+INCOME-POP     <- gnuplot INCOME POP     --output="display" # diagramas de dispersion con GNUplot
+INCOME-DENSITY <- gnuplot INCOME DENSITY --output="display"
+#+end_src
+
+
+** Código completo de la práctica ~BusTravelers.inp~
+# +latex: \vspace{10pt}
+\lstinputlisting{scripts/BusTravelers.inp}
+#+LATEX: \clearpage
+
+
+
+* COMMENT Bus Travelers 2
+Repite BusTravelers pero con logaritmos... 
+
+#+begin_src hansl 
+open data4-4                                  # cargar datos
+logs BUSTRAVL FARE GASPRICE INCOME POP DENSITY LANDAREA  
+Modelo1 <- ols l_BUSTRAVL const l_FARE l_GASPRICE l_INCOME l_POP l_DENSITY l_LANDAREA 
+omit l_DENSITY 
+omit l_GASPRICE  
+omit l_FARE
+ols l_BUSTRAVL const l_FARE l_GASPRICE l_INCOME l_POP l_DENSITY l_LANDAREA 
+Modelo2 <- omit l_DENSITY l_GASPRICE l_FARE
+#+end_src
+
+* COMMENT Precio de casas unifamiliares 2
+
+Repite Houses pero con logaritmos... 
+
+#+begin_src hansl 
+
+#+end_src
+
+  #+begin_src hansl
+
+  #+end_src
+
+#+begin_src hansl 
+open data4-1                                  # cargar datos
+logs sqft bedrms baths
+
+Modelo1 <- ols price 0 l_sqft l_bedrms l_baths 
+
+omit l_baths
+omit l_bedrms
+
+Modelo2 <- add  l_bedrms
+
+dataset addobs 2
+genr l_sqft[15]  =log(3000*1.01)
+genr l_bedrms[15]=log(4)
+genr l_baths[15] =log(3)
+
+genr l_sqft[16]  =log(1065*1.01)
+genr l_bedrms[16]=log(3)
+genr l_baths[16] =log(1.75)
+
+smpl 1 16
+ols price 0 l_sqft l_bedrms 
+
+fcast 14 15 --static        # prediccion para la casa mayor y mayor mas un 1% de sup.
+
+fcast 1  1  --static        # prediccion para la casa menor
+fcast 16 16 --static        # prediccion para la casa menor mas un 1% de superficie
+#+end_src
+
+
+
+\bibliographystyle{plain}
+\bibliography{ref}

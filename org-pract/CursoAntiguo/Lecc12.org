@@ -1,0 +1,922 @@
+#+title:  Lección 12
+#+author: Marcos Bujosa
+#+STARTUP: show4levels
+#+LANGUAGE: es-es
+
+#+EXPORT_FILE_NAME: pub/Lecc12
+
+# +OPTIONS: toc:nil
+#+OPTIONS: tags:nil
+
+#+LATEX_CLASS: article
+
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+#+LATEX_HEADER: \usepackage[margin=0.5in]{geometry}
+#+LaTeX_HEADER: \usepackage[svgnames,x11names]{xcolor}
+#+LaTeX_HEADER: \hypersetup{linktoc = all, colorlinks = true, urlcolor = DodgerBlue4, citecolor = PaleGreen1, linkcolor = SpringGreen4}
+#+LaTeX_HEADER: \PassOptionsToPackage{hyphens}{url}
+#+LaTeX_HEADER: \usepackage{nacal}
+
+#+bibliography: ref.bib
+
+#+LaTeX_HEADER: \usepackage{framed}
+
+#+LaTeX_HEADER: \usepackage{listings}
+#+LaTeX_HEADER: \input{hansl.tex}
+#+LaTeX_HEADER: \lstnewenvironment{hansl-gretl}
+#+LaTeX_HEADER: {\lstset{language={hansl},basicstyle={\ttfamily\footnotesize},numbers,rame=single,breaklines=true}}
+#+LaTeX_HEADER: {}
+#+LaTeX_HEADER: \newcommand{\hansl}[1]{\lstset{language={hansl},basicstyle={\ttfamily\small}}\lstinline{#1}}
+# +LaTeX_HEADER: \lstset{backgroundcolor=\color{white},basicstyle=\ttfamily\footnotesize,breaklines=true, captionpos=b,commentstyle=\color{mygreen},escapeinside={\%*}{*)}, keywordstyle=\color{blue},stringstyle=\color{mymauve}, }
+# +LaTeX_HEADER: \lstset{backgroundcolor=\color{lightgray!20},basicstyle=\ttfamily\footnotesize,breaklines=true, }
+#+LaTeX_HEADER: \lstset{backgroundcolor=\color{lightgray!20}, }
+
+#+name: setup-listings
+#+begin_src emacs-lisp :exports none :results silent
+  (setq org-latex-listings 'listings)
+  (setq org-latex-custom-lang-environments
+  	;'((emacs-lisp "common-lispcode")))
+  	'((emacs-lisp "hansl-gretl")))
+  (setq org-latex-listings-options
+	'(("frame" "lines")
+	  ("basicstyle" "\\scriptsize")
+	  ("basicstyle" "\\ttfamily")
+	  ("numbers=none" "left")
+	  ("backgroundcolor=\\color{lightgray!20}")
+	  ("numberstyle" "\\tiny")))
+  (setq org-latex-to-pdf-process
+	'("pdflatex -interaction nonstopmode -output-directory %o %f"
+	"pdflatex -interaction nonstopmode -output-directory %o %f"
+	"pdflatex -interaction nonstopmode -output-directory %o %f"))
+  (org-add-link-type
+   "latex" nil
+   (lambda (path desc format)
+     (cond
+      ((eq format 'html)
+       (format "<span class=\"%s\">%s</span>" path desc))
+      ((eq format 'latex)
+       (format "\\%s{%s}" path desc)))))
+#+end_src
+
+
+# \lstnewenvironment{code}
+#     {\lstset{language=haskell,
+#     basicstyle=\small\ttfamily,
+#     numbers=left,
+#     numberstyle=\tiny\color{gray},
+#     backgroundcolor=\color{lightgray},
+#     firstnumber=auto
+#     }}
+#     {}
+
+#+bibliography: ref.bib
+
+# +latex: \clearpage
+
+#+LATEX: \clearpage
+
+#+macro: lugar [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/$1][$1]]
+
+#+macro: codigo \lstinputlisting{scripts/$1} 
+
+* Precio de casas unifamiliares (tasación de inmobiliarias y características de las viviendas)
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/Houses3.inp
+   :END:
+   
+| Guión: | {{{lugar(Houses3.inp)}}} |
+
+**** Objetivo
+- Identificar un problema de multicolinealidad de grado.
+- Estudiar alternativas para evitar dicho problema.
+  
+**** Para empezar
+Para realizar la práctica, primero cargue los datos de la base de
+datos de Gretl:
+
+*/~Archivo --> Abrir datos --> Archivo de muestra~/* y en la pestaña
+*/~Wooldrige~/* seleccione =hprice1=.
+
+#+latex: {\vspace{0pt} \color{gray!70!black}
+/o bien teclee en linea de comandos/:
+  #+begin_src hansl
+open hprice1
+  #+end_src  
+#+latex: }
+
+**** Los datos
+
+Ésta es una aplicación con datos reales de casas unifamiliares en EEUU:
+- \textsf{price}  = precio de venta (en miles de $).
+- \textsf{assess} = tasación de la inmobiliaria (en miles de $).
+- \textsf{bdrms}  = número de dormitorios.
+- \textsf{lotsize} = tamaño de la parcela en pies al cuadrado.
+- \textsf{sqrft}  = tamaño de la vivienda en pies al cuadrado.
+- \textsf{colonial} = 1 si es de estilo colonial. 0 en el resto de casos.
+  
+**** El modelo inicial
+Inicialmente intentaremos emplear todas las variables disponibles para
+explicar los precios:
+\begin{displaymath}
+  \scriptstyle
+  \Vect{\VA{price}}\ = \ \beta_1\VAindUno 
+  \ +\ \beta_2\Vect{\VA{assess}}
+  \ +\ \beta_3\Vect{\VA{bdrms}}
+  \ +\ \beta_4\Vect{\VA{lotsize}}
+  \ +\ \beta_5\Vect{\VA{sqrft}}
+  \ +\ \beta_6\Vect{\VA{colonial}}
+  \ +\ \Vect{\per}
+\end{displaymath}
+
+** Actividad 1
+Piense si alguna de las variables disponibles debería salir del
+modelo, por no ser relevante en la determinación del precio de la
+vivienda.
+** Actividad 2
+Piense cuáles son los signos esperados de los parámetros del modelo.
+
+** Actividad 3
+Ajuste por MCO el modelo:
+\begin{displaymath}
+  \scriptstyle
+  \Vect{price}\ = \
+       \Estmc{\beta_1}\Vect{1}
+  \ +\ \Estmc{\beta_2}\Vect{assess}
+  \ +\ \Estmc{\beta_3}\Vect{bdrms}
+  \ +\ \Estmc{\beta_4}\Vect{lotsize}
+  \ +\ \Estmc{\beta_5}\Vect{sqrft}
+  \ +\ \Estmc{\beta_6}\Vect{colonial}
+  \ +\ \res
+\end{displaymath}
+
+#+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+Modelo1     <- ols price 0 assess bdrms lotsize sqrft colonial
+  #+end_src  
+#+latex: }
+
+- ¿Qué variables son significativas en este modelo?  ¿Coincide esto con su previsión?
+- A la luz de esta primera regresión. ¿Las inmobiliarias infravaloran o sobrevaloran los inmuebles?
+
+** Actividad 4
+¡Sorprendentemente parece que las características del inmueble no son
+significativas para explicar el precio!
+
+¿Es conjuntamente significativo este modelo para ``explicar'' los
+precios? Observe el estadístico F.
+
+** Actividad 5
+Si hay una estrecha relación lineal entre regresores, es difícil
+discriminar el papel particular de cada uno. Esta incertidumbre se
+refleja en la varianza de los estimadores.
+
+Consecuentemente algunas variables, en teoría importantes, pueden
+resultar estadísticamente no significativas.
+
+Las inmobiliarias emplean las características del inmueble para
+arrojar una tasación. Así, es muy probable una estrecha relación entre
+las características y la tasación.
+
+- Observe los diagramas de dispersión de las variables de cada
+casa con su tasación
+
+*/~Ver --> Gráficos múltiples~/* y elija =assess= como variable del
+eje =y=, y el resto como variables del eje =X=.
+#+latex: {\vspace{0pt} \color{gray!70!black}
+/o bien teclee en linea de comandos/:
+  #+begin_src hansl
+Diagramas   <- scatters bdrms lotsize sqrft colonial ; assess --output="display"
+  #+end_src  
+#+latex: }
+
+** Actividad 6
+Analice la correlación entre =assess= y el resto de regresores.
+#+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+corr assess bdrms lotsize sqrft colonial
+  #+end_src  
+#+latex: }
+
+** Actividad 7
+
+- La colinealidad se debe a que la muestra no contiene información
+  suficiente para estimar con una precisión satisfactoria todos los
+  parámetros.
+  
+- Las soluciones directas a este problema consisten en
+  
+  + añadir información (en este caso no podemos)
+  + simplificar el modelo
+  + También es posible eliminar información redundante mediante
+    regresiones auxiliares 
+
+Mejor que analizar relaciones lineales entre pares (correlaciones) es
+estudiar si las características de la casa explican en un modelo
+lineal la valoración de las inmobiliarias. 
+- Ajuste por MCO el siguiente modelo
+  \begin{displaymath}
+    \Vect{assess}\ = \
+         \Estmc{\beta_1}\Vect{1} 
+    \ +\ \Estmc{\beta_2}\Vect{bdrms}
+    \ +\ \Estmc{\beta_3}\Vect{lotsize}
+    \ +\ \Estmc{\beta_4}\Vect{sqrft}
+    \ +\ \Estmc{\beta_5}\Vect{colonial}
+    \ +\ \res
+  \end{displaymath}
+
+#+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloAux   <- ols assess 0 bdrms lotsize sqrft colonial
+  #+end_src  
+#+latex: }
+  
+- Observe el coeficiente de determinación para comprobar hasta que
+  punto las características de las vivienda en su conjunto
+  ``explican'' la tasación de la inmobiliaria.
+  
+- ¿Qué variables son más significativas para explicar la tasación?
+
+** Actividad 8 - Eliminando información redundante
+
+1) Las inmobiliarias suelen tener conocimiento del estado de
+   conservación de la vivienda, su antigüedad, su situación,
+   orientación, calidades, estética, etc. Todas estas características
+   habrán sido tenidas en cuenta en las tasaciones, pero están
+   mezcladas con las otras características explícitamente incluidas en
+   el modelo. Ello explica que un 30% de la variabilidad de =assess=
+   no es explicada por el resto de regresores, pero si el 70%
+   restante.
+
+2) Los errores de ajuste por MCO son ortogonales a los
+   regresores. Así, los errores de la última regresión corresponden a
+   todos esos factores que han intervenido en la tasación, pero que
+   son ortogonales a los regresores del modelo.
+
+3) En el modelo principal, omitiendo =assess= pero incluyendo como
+   regresor los errores de esta última regresión, incorporamos
+   información sobre la tasación que es ortogonal al resto de
+   regresores
+
+Guarde los residuos de la ultima regresión: En la ventana de la
+regresión auxiliar, pinche en */~Guardar --> Residuos~/* y y ponga
+como nombre =OtrosFactores=.
+
+#+latex: {\vspace{0pt} \color{gray!70!black}
+/o bien teclee en linea de comandos/:
+  #+begin_src hansl
+OtrosFactTasac = $uhat
+  #+end_src  
+#+latex: }
+  
+- Ajuste por MCO el modelo:
+  \begin{displaymath}
+    \scriptstyle
+    \Vect{price}\ = \
+         \Estmc{\beta_1}\Vect{1} 
+    \ +\ \Estmc{\beta_2}\Vect{bdrms}
+    \ +\ \Estmc{\beta_3}\Vect{lotsize}
+    \ +\ \Estmc{\beta_4}\Vect{sqrft}
+    \ +\ \Estmc{\beta_5}\Vect{colonial}
+    \ +\ \Estmc{\beta_6}\Vect{OtrosFactores} \ +\ \res
+  \end{displaymath}
+
+#+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+Modelo2     <- ols price 0 bdrms lotsize sqrft colonial OtrosFactTasac
+  #+end_src  
+#+latex: }
+  
+
+- ¿Hay indicios de multicolinealidad?
+
+- Compare el ajuste de este modelo con el del modelo inicial.
+
+- Omita las variables no significativas al 1% para obtener un modelo final.
+
+#+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloFinal <- omit --auto=0.01
+  #+end_src  
+#+latex: }
+  
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/Houses3.inp}
+#+LATEX: \clearpage
+
+
+* Construcción de vivienda nueva
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanEX5-1.inp
+   :END:
+
+| Guión: | {{{lugar(RamanathanEX5-1.inp)}}} |
+
+Usando ~data4-3.gdt~ del libro de Ramanathan, con el nº de viviendas
+iniciadas (en miles) en los EEUU (=housing=), población (=pop=), PIB
+en miles de millones de dólares con base en el año 1982 (=gnp=) y tipo
+de interés del crédito hipotecario (=intrate=):
+#+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+open data4-3.gdt
+  #+end_src  
+#+latex: }
+
+- Estime el siguiente modelo ~ModeloA~ y añádalo a la tabla de modelos
+  \begin{displaymath}
+    housing_{n} = \alpha_1 + \alpha_2\cdot intrate_n +  \alpha_3 \cdot pop_n + otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloA <- ols housing 0 intrate pop
+modeltab add
+  #+end_src  
+  #+latex: }
+
+
+- Estime el siguiente modelo ~ModeloB~ y añádalo a la tabla de modelos
+  \begin{displaymath}
+    housing_{n} = \beta_1 + \beta_2\cdot intrate_n +  \beta_3 \cdot gnp_n + otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloB <- ols housing 0 intrate gnp
+modeltab add
+  #+end_src  
+  #+latex: }
+  
+- Estime el siguiente modelo ~ModeloC~ y añádalo a la tabla de modelos
+  \begin{displaymath}
+    housing_{n} = \gamma_1 + \gamma_2\cdot intrate_n +  \gamma_3 \cdot pop_n +  \gamma_4 \cdot gnp_n + otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloC <- ols housing 0 intrate pop gnp
+modeltab add
+  #+end_src  
+  #+latex: }
+
+- Compare los resultados.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+modeltab show
+  #+end_src  
+  #+latex: }
+
+- Realice un contraste de colinealidad entre regresores (~vif~).
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+vif
+  #+end_src  
+  #+latex: }
+
+- Contraste la significatividad conjunta de =gnp= y =pop en ~ModeloC~.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+omit pop gnp
+modeltab add
+scalar estadF  = $test
+scalar pvalorF = pvalue(F, 2, ModeloC.$df, estadF)
+  #+end_src  
+  #+latex: }
+
+- Compare los 4 modelos y mire las correlaciones entre los tres regresores.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+modeltab show
+corr intrate pop gnp
+  #+end_src  
+  #+latex: }
+
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanEX5-1.inp}
+#+LATEX: \clearpage
+
+
+* Construcción de vivienda nueva (transformación a datos per-cápita)
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanEX5-1v2.inp
+   :END:
+
+| Guión: | {{{lugar(RamanathanEX5-1v2.inp)}}} |
+
+Abra el conjunto de datos ~data4-3.gdt~ del libro de Ramanathan, con
+el nº de viviendas iniciadas (en miles) en los EEUU (=housing=),
+población (=pop=), PIB en miles de millones de dólares con base en el
+año 1982 (=gnp=) y tipo de interés del crédito hipotecario
+(=intrate=):
+#+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+open data4-3.gdt
+  #+end_src  
+#+latex: }
+
+- Estime de nuevo el siguiente modelo (que por la práctica anterior sabemos que tiene multicolinealidad)
+  \begin{displaymath}
+    housing_{n} = \gamma_1 + \gamma_2\cdot intrate_n +  \gamma_3 \cdot pop_n +  \gamma_4 \cdot gnp_n + otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloMCol <- ols housing 0 intrate pop gnp
+  #+end_src  
+  #+latex: }
+  
+- Defina la construcción de viviendas per-cápita
+  ( =housingPC = housing/pop= ) y la correspondiente producción
+  per-cápita ( =gnpPC= ); y estime el siguiente modelo
+  \begin{displaymath}
+    housingPC_{n} = \beta_1 + \beta_2\cdot intrate_n +  \beta_3 \cdot gnpPC_n + otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+series housingPC = housing/pop
+series gnpPC     = gnp/pop
+ModeloPC <- ols housingPC 0 intrate gnpPC 
+  #+end_src  
+  #+latex: }
+
+- Compare los resultados. Como estos dos modelos tienen distinto
+  regresando, no es posible incorporar ambos a una misma tabla de
+  modelos. Para compararlos abra las correspondientes ventanas de
+  estimación.
+
+- Mire las correlaciones entre los nuevos regresores y compárelas con las del antiguo modelo.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+corr gnp   intrate
+corr gnpPC intrate
+  #+end_src  
+  #+latex: }
+  
+- Realice un contraste de colinealidad ~vif~ entre regresores en ambos modelos.
+
+  (/la función ~vif~ se debe ejecutar justo después de estimar cada modelo/).
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ols housing   0 intrate gnp   pop
+vif
+
+ols housingPC 0 intrate gnpPC 
+vif
+  #+end_src  
+  #+latex: }
+
+#+LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanEX5-1v2.inp}
+#+LATEX: \clearpage
+
+
+* Gastos de mantenimiento de los automóviles
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanEX5-2.inp
+   :END:
+
+| Guión: | {{{lugar(RamanathanEX5-2.inp)}}} |
+
+(/La siguiente práctica reproduce el ejemplo 5.2 del libro de Ramanathan./)
+
+Abra el conjunto de datos ~data3-7.gdt~, del libro de Ramanathan,
+sobre costes de mantenimiento de coches Toyota (=cost=), así como la
+edad de cada coche en semanas (=age=) y en número de millas recorridas
+(=miles=).
+#+latex: {\vspace{0pt} \color{gray!70!black}
+#+begin_src hansl
+open data3-7.gdt
+#+end_src  
+#+latex: }
+
+- Mire las correlaciones entre los dos regresores.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+corr age miles
+  #+end_src  
+  #+latex: }
+  
+- Estime el siguiente modelo ~ModeloA~ y añádalo a la tabla de
+  modelos
+  \begin{displaymath}
+    cost_{n} = \alpha_1 + \alpha_2\cdot age_n +  otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloA <- ols cost 0 age
+modeltab add
+  #+end_src  
+  #+latex: }
+
+- Estime el siguiente modelo ~ModeloB~ y añádalo a la tabla de modelos
+  \begin{displaymath}
+    cost_{n} = \beta_1 +  \beta_2 \cdot miles_n + otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloB <- ols cost 0 miles
+modeltab add
+  #+end_src  
+  #+latex: }
+
+- Estime el siguiente modelo ~ModeloC~ y añádalo a la tabla de modelos
+  \begin{displaymath}
+    cost_{n} = \gamma_1 + \gamma_2\cdot age_n + \gamma_4 \cdot miles_n + otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloC <- ols cost 0 age miles
+modeltab add
+  #+end_src  
+  #+latex: }
+
+- Compare los resultados.
+
+  Fíjese que aunque =age= y =miles= son siempre significativas, el
+  efecto de los regresores cambia mucho en el último modelo respecto a
+  los resultados de los dos primeros modelos y, de hecho, el signo
+  para =miles= en el último modelo contradice al sentido común.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+modeltab show
+  #+end_src  
+  #+latex: }
+
+- Realice un contraste de colinealidad entre regresores. Dibuje un
+  diagrama de dispersión entre =miles= y =age=, y mire la correlación
+  entre ambas variables.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+vif
+scatters miles; age --output="display"
+rho = corr(miles, age)
+  #+end_src  
+  #+latex: }
+
+- Contraste la significatividad conjunta de =miles= y =age= en
+  ~ModeloC~.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+scalar estadF  = $Fstat
+scalar pvalorF = pvalue(F, 2, ModeloC.$df, estadF)
+  #+end_src  
+  #+latex: }
+
+- La serie de errores absolutos de predicción (APE) se calcula como
+  \begin{displaymath}
+    ape_n=100
+    \begin{vmatrix}
+      \frac{\resi{n}}{y_n}
+    \end{vmatrix}
+  \end{displaymath}
+  Calcule la serie de errores absolutos de predicción de cada modelo.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+# Error porcentual absoluto (ape)
+series apeA = 100*abs(ModeloA.$uhat)/cost
+series apeB = 100*abs(ModeloB.$uhat)/cost
+series apeC = 100*abs(ModeloC.$uhat)/cost
+  #+end_src  
+  #+latex: }
+
+- Calcule los errores absolutos de predicción medios (MAPE) de cada
+  modelo. ¿Qué modelo predice mejor?
+  
+  Los errores absolutos medios de predicción (MAPE) son:
+  + $mapeA =  227,75136$
+  + $mapeB =  278,19832$
+  + $mapeC =  48,240362$
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+# Error porcentual absoluto medio 
+scalar mapeA = mean(apeA)
+scalar mapeB = mean(apeB)
+scalar mapeC = mean(apeC)
+print mapeA mapeB mapeC
+  #+end_src  
+  #+latex: }
+
+#+LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanEX5-2.inp}
+#+LATEX: \clearpage
+
+
+* Gastos de mantenimiento de los automóviles (ortogonalización de regresores mediante regresiones auxiliares)
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanEX5-2v2.inp
+   :END:
+
+| Guión: | {{{lugar(RamanathanEX5-2v2.inp)}}} |
+
+Abra el conjunto de datos ~data3-7.gdt~, del libro de Ramanathan,
+sobre costes de mantenimiento de coches Toyota (=cost=), así como la
+edad de cada coche en semanas (=age=) y en número de millas recorridas
+(=miles=).
+#+latex: {\vspace{0pt} \color{gray!70!black}
+#+begin_src hansl
+open data3-7.gdt
+#+end_src  
+#+latex: }
+
+- Estime el siguiente modelo ~ModeloA~
+  \begin{displaymath}
+    cost_{n} = \alpha_1 + \alpha_2\cdot age_n +  otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloA      <- ols cost 0 age
+modeltab add
+  #+end_src  
+  #+latex: }
+
+- Realice una regresión auxiliar de =miles= sobre una constante y
+  =age=. Guarde los residuos con el nombre =uhatMiles=.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+AuxRegA      <- ols miles const age
+series uhatMiles = $uhat
+  #+end_src  
+  #+latex: }
+  
+  Piense qué interpretación tienen los residuos de esta regresión
+  auxiliar.
+
+  #+latex: {\color{gray!70!black} \small
+  \texttt{uhatMiles} es la parte de las millas recorridas que no se
+  puede aproximar por la edad del coche (algo así como un indicador de
+  la intensidad de uso del coche).
+  #+latex: }
+  
+- Verifique que no hay correlación entre los residuos de esta
+  regresión auxiliar (=uhatMiles=) y =age=. ¿Por qué?
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+corr uhatMiles age
+  #+end_src  
+  #+latex: }
+
+- Estime el siguiente modelo ~ModeloA_Raux~
+  \begin{displaymath}
+    cost_{n} = \alpha_1 + \alpha_2\cdot age_n +  \alpha_3\cdot uhatMiles_n + otros\ factores_n
+  \end{displaymath}
+  y compare los resultados con el ~ModeloA~. Realice un test de
+  colinealidad para el modelo ~ModeloA_Raux~. ¿Hay indicios de
+  colinealidad?
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloA_Raux <- ols cost 0 age uhatMiles
+modeltab add
+vif
+  #+end_src  
+  #+latex: }
+
+- Estime el siguiente modelo ~ModeloB~
+  \begin{displaymath}
+    cost_{n} = \beta_1 +  \beta_2 \cdot miles_n + otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloB      <- ols cost 0 miles
+modeltab add
+  #+end_src  
+  #+latex: }
+
+- Realice una regresión auxiliar de =age= sobre una constante y
+  =miles=. Guarde los residuos con el nombre =uhatAge=.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+AuxRegB      <- ols age 0 miles
+series uhatAge   = $uhat
+  #+end_src  
+  #+latex: }
+
+- Estime el siguiente modelo ~ModeloB_Raux~
+  \begin{displaymath}
+    cost_{n} = \beta_1 +  \beta_2 \cdot miles_n + \beta_3 \cdot uhatAge_n + otros\ factores_n 
+  \end{displaymath}
+  y compare los resultados con el ~ModeloB~. Realice un test de
+  colinealidad para el modelo ~ModeloB_Raux~. ¿Hay indicios de
+  colinealidad?
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloB_Raux <- ols cost 0 miles uhatAge
+modeltab add
+vif
+  #+end_src  
+  #+latex: }
+
+- Piense qué interpretación tiene el regresor =uhatAge= en esta
+  regresión.
+
+  #+latex: {\color{gray!90!black} \small
+  El regresor \texttt{uhatAge} reflejará la parte del coste de
+  mantenimiento debido al mero paso del tiempo (pues ya hemos
+  descontado el uso del coche). Es una medida por el deterioro de
+  coche por el simple paso del tiempo.
+  #+latex: }
+
+- Estime el siguiente modelo ~ModeloC~ 
+  \begin{displaymath}
+    cost_{n} = \gamma_1 + \gamma_2\cdot age_n + \gamma_4 \cdot miles_n + otros\ factores_n
+  \end{displaymath}
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloC      <- ols cost 0 age miles
+modeltab add
+  #+end_src  
+  #+latex: }
+
+- Compare los resultados de los cinco modelos.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+modeltab show
+  #+end_src  
+  #+latex: }
+
+- Piense qué signos serian los esperados para los coeficientes y
+  decida qué modelo prefiere.
+  
+  #+latex: {\color{gray!90!black} \small
+  En el cuarto modelo \texttt{ModeloB\_Raux} todos los regresores
+  (incluido \texttt{uhatAge}) tiene una interpretación natural;
+  además, en ese modelo los regresores son significativos y con los
+  signos esperados.
+        
+  Nótese que como tanto el \texttt{ModeloC} como los dos con
+  regresiones auxiliares emplean la misma información (las mismas
+  variables), los tres tiene estadísticos de selección de modelos
+  idénticos. El ajuste es igual de bueno en los tres casos, aunque la
+  interpretación de los coeficientes estimados difiere.
+  #+latex: }
+
+#+LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanEX5-2v2.inp}
+#+LATEX: \clearpage
+
+
+* Pobreza y sus determinantes (omisión de variables)
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanAp5-4.inp
+   :END:
+
+| Guión: | {{{lugar(RamanathanAp5-4.inp)}}}        |
+
+Abra el conjunto de datos ~data4-6.gdt~, del libro de Ramanathan,
+sobre el porcentaje de familias con una renta por debajo del nivel de
+pobreza (=povrate=) en los condados de California. Intentaremos
+explicar dicho porcentaje con las siguientes variables: =urb= es el
+porcentaje de población urbana; =famsize= es el número medio de
+personas por hogar, =unemp= es la tasa de desempleo, =highschl= es el
+porcentaje de población mayor de 25 que ha completado el ``high
+school'', =college= es el porcentaje de la población mayor de 25 que
+ha completado 4 o más años de ``college'', y =medinc= es la renta
+media familiar.
+#+latex: {\vspace{0pt} \color{gray!70!black}
+#+begin_src hansl
+open data4-6.gdt
+#+end_src  
+#+latex: }
+
+- Observe la correlación entre las variables explicativas
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+corr urb famsize unemp highschl college medinc
+  #+end_src  
+  #+latex: }
+
+- Estime el modelo ``ModeloA'' con todas las variables explicativas.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloA <- ols povrate const urb famsize unemp highschl college medinc
+  #+end_src  
+  #+latex: }
+
+- Observe los elevados /p/-valores de algunas variables. Observe
+  también el inesperado signo para =college=\dots ¿quizá es debido a
+  un problema de multicolinealidad?
+
+- Omita la variable menos significativa del modelo (la de mayor
+  /p/-valor). Observe que prácticamente no hay cambios en el
+  resultado.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloB <- omit unemp
+  #+end_src  
+  #+latex: }
+
+- Omita la siguiente variable menos significativa. Observe que ahora
+  todas las variables son significativas, pero se mantiene el signo
+  equivocado para la variable ``college''.  Esto sugiere la
+  posibilidad de multicolinealidad; realice el correspondiente
+  contraste =vif=.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloC <- omit urb
+vif
+  #+end_src  
+  #+latex: }
+
+- Aunque la variable de renta familiar media (=medinc=) es la más
+  significativa, cabe esperar que su efecto pueda ser aproximadamente
+  explicado por las variables =highschl= y =college=. Pruebe a excluir
+  dicha variable y compruebe que ahora el signo de =college= es
+  adecuado.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ModeloD <- omit medinc
+  #+end_src  
+  #+latex: }
+
+- Realice una regresión auxiliar de =medinc= sobre =famsize=, =unemp=,
+  =highschl= y =college= y compruebe que dichas variables explican
+  casi el 85% de la varianza de =medinc=. Quizá una solución es omitir
+  dicha variable desde el principio, para poder captar adecuadamente
+  el efecto de las demás variables.
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+Aux     <- ols medinc 0 famsize unemp highschl college
+  #+end_src  
+  #+latex: }
+
+- Estime un modelo con todas las variables explicativas excepto
+  =medinc=, y siga un procedimiento de eliminación secuencial de
+  variables no significativas. ¿Es satisfactorio el modelo final?
+  #+latex: {\vspace{0pt} \color{gray!70!black}
+  #+begin_src hansl
+ols povrate const urb famsize unemp highschl college
+Final   <- omit --auto
+  #+end_src  
+  #+latex: }
+
+
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanAp5-4.inp}
+#+LATEX: \clearpage
+
+
+
+
+
+
+* /en Lec12.tex hay más prácticas ocultas al final/                :noexport:
+* Cambio estructural en la participación de las mujeres en el mercado laboral :noexport:
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/RamanathanPS7-6.inp
+   :END:
+   
+| Guión: | {{{lugar(RamanathanPS7-6.inp)}}}        |
+
+(/La siguiente práctica reproduce la aplicación 7.6 del libro de
+Ramanathan./)
+
+*Posible cambio estructural en la participación de las mujeres en el
+mercado laboral*. Abra el conjunto de datos ~data7-4.gdt~, del libro
+de Ramanathan, con datos de 50 estados de EEUU sobre la participación
+de las mujeres en el mercado laboral. Los 50 primeros son del año 1980
+y los 50 últimos de 1990. La variable a explicar es =WLFP=, que es el
+\HLa{porcentaje de participación} de mujeres mayores de 16 años en el
+mercado laboral. =YF= es el salario mediano de las mujeres (en miles
+de dólares); =YM= es el salario mediano de los hombres (en miles de
+dólares); =EDUC= es el porcentaje, de entre las mujeres con 24 o más
+años, con el título de bachillerato; =UE= es la tasa de desempleo;
+=MR= es el porcentaje de mujeres mayores de 16 años que están casadas;
+=DR= es el porcentaje de mujeres divorciadas; =URB= es el porcentaje
+de población urbana; =WH= es e porcentaje de mujeres mayores de 16
+años que son de raza blanca.
+
+Por último, la variable ficticia =D90= vale 1 si el dato corresponde
+al año 1990 y 0 en caso contrario.
+
+#+latex: {\vspace{0pt} \color{gray!70!black}
+#+begin_src hansl
+open data7-4.gdt
+#+end_src  
+#+latex: }
+
+
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+*Código completo de la práctica*
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/RamanathanPS7-6}
+#+LATEX: \clearpage

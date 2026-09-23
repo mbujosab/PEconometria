@@ -36,6 +36,20 @@ direcciones no hay un regresor único al que atribuirlo). Se mantiene el
 mismo recuadro y proporción que =TrianguloContraste_ancho= (2900 px de
 ancho) para que en pantalla ocupen el mismo alto.
 
+La segunda figura, =ProyeccionAnidada= (añadida el 2026-09-22, para los
+apuntes de la misma transparencia), muestra lo que el triángulo no muestra:
+los dos subespacios. El plano es $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$;
+la recta dentro del plano es el subespacio restringido; $\boldsymbol y$ está
+fuera del plano; $\boldsymbol{\mathop{\widehat{y}}}$ es su pie sobre el plano y
+$\boldsymbol{\mathop{\widehat{y}}}_r$ su pie sobre la recta. Como
+$\boldsymbol y-\boldsymbol{\mathop{\widehat{y}}}$ es ortogonal a todo el plano,
+$\boldsymbol{\mathop{\widehat{y}}}_r$ es también la proyección de
+$\boldsymbol{\mathop{\widehat{y}}}$ sobre la recta (la proyección se hace en dos
+pasos), y el triángulo sombreado
+$\boldsymbol{\mathop{\widehat{y}}}_r,\boldsymbol{\mathop{\widehat{y}}},\boldsymbol y$
+es =TrianguloAnidado= visto desde fuera del plano. Vista en perspectiva con
+=tikz-3dplot=, como las figuras de la lección 8.
+
 * Figuras con fuente tikz
 
 ** El triángulo anidado
@@ -105,6 +119,133 @@ ancho) para que en pantalla ocupen el mismo alto.
 
 #+BEGIN_SRC bash :build yes
 convert TrianguloAnidado.png -gravity center -background white -extent 2900x TrianguloAnidado_ancho.png
+#+END_SRC
+
+** La proyección en dos pasos
+
+#+NAME: ProyeccionAnidada
+#+BEGIN_SRC latex :noweb no-export :tangle tex/ProyeccionAnidada.tex :results discard :exports code :eval no
+<<Preambulo comun>>
+
+\begin{document}
+  <<Colores>>
+  <<Colores de la regresion>>
+
+  \tdplotsetmaincoords{70}{110}
+  \begin{tikzpicture}
+    [scale=2.4, tdplot_main_coords,
+     vector/.style={-{Stealth[length=3mm, width=2mm]},very thick},
+     guide/.style={dashed,thin,gray}]
+
+    \coordinate (O)  at (0,0,0);        % origen
+    \coordinate (Yr) at (0,1.9,0);      % ajuste restringido: pie sobre la recta
+    \coordinate (Yh) at (1.2,1.9,0);    % ajuste completo: pie sobre el plano
+    \coordinate (Y)  at (1.2,1.9,1.1);  % datos
+
+    % el plano de los regresores
+    \fill[gray!10,draw=gray!50,very thin]
+      (-0.5,-0.6,0) -- (2.0,-0.6,0) -- (2.0,3.0,0) -- (-0.5,3.0,0) -- cycle;
+    \node[gray!70!black,anchor=west,font=\small] at (1.75,-0.35,0)
+      {$\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$};
+
+    % el subespacio restringido: una recta dentro del plano
+    \draw[\Regresor!80!black,thick] (0,-0.6,0) -- (0,3.0,0);
+    \node[\Regresor!80!black,anchor=south west,font=\small,align=left] at (0,2.45,0)
+      {subespacio\\restringido};
+
+    % el triángulo anidado, sombreado
+    \fill[\Ajuste!12] (Yr) -- (Yh) -- (Y) -- cycle;
+
+    % ángulos rectos: en el plano (recta perpendicular al cateto añadido) y en el triángulo
+    \tkzMarkRightAngle[size=.10,gray,very thin,fill=lightgray!70,opacity=0.6](O,Yr,Yh)
+    \tkzMarkRightAngle[size=.10,gray,very thin,fill=lightgray!70,opacity=0.6](Yr,Yh,Y)
+    % y - y_r es ortogonal al subespacio restringido (y_r es la proyección de y sobre la recta)
+    \tkzMarkRightAngle[size=.10,gray,very thin,fill=lightgray!70,opacity=0.6](O,Yr,Y)
+
+    % los tres lados del triángulo anidado
+    \draw[vector,\Ajuste] (Yr) -- (Yh)
+      node[midway,anchor=north west,xshift=0.5mm,yshift=-0.5mm]
+      {$\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\widehat{y}}}_r$};
+    \draw[vector,\Residuo] (Yh) -- (Y)
+      node[pos=0.72,anchor=east,xshift=-1mm]{$\boldsymbol{\mathop{\widehat{e}}}$};
+    \draw[vector,\Datos] (Yr) -- (Y)
+      node[midway,anchor=west,xshift=1.5mm]
+      {$\boldsymbol{y}-\boldsymbol{\mathop{\widehat{y}}}_r$};
+
+    % los tres vectores desde el origen
+    \draw[vector,green!50!black] (O) -- (Y) node[anchor=south]{$\boldsymbol{y}$};
+    \draw[vector,red!80!black]   (O) -- (Yh) node[anchor=north,yshift=-1mm]{$\boldsymbol{\mathop{\widehat{y}}}$};
+    \draw[vector,\Regresor]      (O) -- (Yr) node[anchor=south west,xshift=0.5mm,yshift=0.5mm]{$\boldsymbol{\mathop{\widehat{y}}}_r$};
+
+  \end{tikzpicture}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .6\textwidth :caption \caption{La estimación restringida como proyección sobre un subespacio menor, y la proyección en dos pasos}
+[[file:./ProyeccionAnidada.png]]
+
+
+** El triángulo del $F$ (sin el regresor)
+
+Es el =TrianguloContraste= de la lección 12 sin el vector azul del
+regresor bajo el eje y sin el rótulo $\hat\beta_2(\boldsymbol x-\boldsymbol{\mathop{\overline x}})$:
+con $k$ regresores el cateto explicado no es múltiplo de ninguno de ellos
+y el eje horizontal representa un subespacio de dimensión $k-1$.
+
+#+NAME: TrianguloF
+#+BEGIN_SRC latex :noweb no-export :tangle tex/TrianguloF.tex :results discard :exports code :eval no
+<<Preambulo comun>>
+
+\begin{document}
+  <<Colores>>
+  <<Colores de la regresion>>
+
+  % theta = 35 grados, hipotenusa de longitud 4 (misma geometria que en la leccion 12)
+  \begin{tikzpicture}
+    [scale=1.15,
+     axis/.style={-,gray,very thin},
+     vector/.style={-{Stealth[length=3mm, width=2mm]},very thick}]
+
+    \coordinate (O)  at (0    , 0    );
+    \coordinate (A)  at (3.277, 0    );
+    \coordinate (B)  at (3.277, 2.294);
+    \coordinate (Fin) at (3.55 , 0    );
+
+    % el subespacio de los regresores en desviaciones (dimension k-1)
+    \draw[axis] (-0.55,0) -- (Fin);
+    \node[anchor=north east,gray,yshift=-0.5mm,align=right,font=\small] at (-0.55,0)
+      {subespacio de los regresores\\ en desviaciones (dim.\ $k-1$)};
+
+    \draw pic[-,draw=black,angle radius=26,\Verde,fill=\VerdeClaro!30] {angle = A--O--B};
+    \node[\Verde!60!black,anchor=west,inner sep=1pt] at (17.5:0.95) {$\theta$};
+
+    \tkzMarkRightAngle[size=.28,gray,very thin,fill=lightgray!70,opacity=0.5](B,A,O)
+
+    \draw[vector,\Ajuste] (O) -- (A);
+    \node[\Ajuste,anchor=north west,xshift=1.5mm,yshift=-0.5mm] at (A)
+      {$\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$};
+    \draw[vector,\Residuo] (A) -- (B)
+      node[anchor=west,xshift=0.8mm]{$\boldsymbol{\mathop{\widehat{e}}}$};
+    \draw[vector,\Datos] (O) -- (B)
+      node[anchor=south east,xshift=-0.5mm,yshift=0.5mm]
+      {$\boldsymbol{y}-\boldsymbol{\mathop{\overline{y}}}$};
+
+    \node[\Ajuste,anchor=south,yshift=0.6mm] at (2.25,0) {$\sqrt{\mathrm{SEC}}$};
+    \node[\Residuo!70!black,anchor=east,xshift=-0.8mm] at (3.277,1.147) {$\sqrt{\mathrm{SRC}}$};
+    \node[\Datos!80!black,anchor=south east,xshift=-1mm,yshift=1mm] at (1.64,1.147) {$\sqrt{\mathrm{STC}}$};
+
+  \end{tikzpicture}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+[[file:./TrianguloF.png]]
+
+*** Ajuste de la figura
+
+#+BEGIN_SRC bash :build yes
+convert TrianguloF.png -gravity center -background white -extent 2900x TrianguloF_ancho.png
 #+END_SRC
 
 * Trozos de código

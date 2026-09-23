@@ -94,7 +94,7 @@ set verbose off
 
 Qué es condicionar en $\boldsymbol X$ ya está definido con precisión: la lección 9 presentó $E[Z\mid\boldsymbol X]$ como la proyección ortogonal de $Z$ sobre las funciones de $\boldsymbol X$, y la lección 11 trabajó con esa definición. Esta práctica busca otra cosa: la /consecuencia observable/ de condicionar, es decir, qué cambia en los números cuando se condiciona y cuando no. Quien practica la econometría lee errores estándar condicionales a diario, y rara vez ve qué distingue esa cifra de la que saldría sin condicionar.
 
-En la práctica anterior mantuvimos el regresor =rooms= fijo a lo largo de las 2000 réplicas, y solo dejamos cambiar la perturbación. Lo justificamos con una frase que conviene ahora tomarse en serio: /``eso es lo que significa condicionar en $\boldsymbol X$''/.
+En la práctica anterior mantuvimos el regresor =rooms= fijo a lo largo de las 2000 réplicas, y solo dejamos cambiar la perturbación. Lo justificamos con una frase: /``eso es lo que significa condicionar en $\boldsymbol X$''/.
 
 Esta práctica pone esa frase a prueba haciendo lo contrario. Vamos a repetir el mismo experimento de Montecarlo dos veces:
 
@@ -164,7 +164,7 @@ Recuerde que =Sxx= es la abreviatura que introdujimos en la práctica A para $\s
 
 Dos detalles del código merecen comentario. El primero es =smpl 12 --random=: elegimos las doce viviendas /al azar/, en lugar de tomar las doce primeras. Es importante, porque =hprice2= viene ordenado por distritos censales y las primeras viviendas se parecen mucho entre sí; tomarlas sin más nos daría una submuestra rara por un motivo ajeno a lo que queremos estudiar. El segundo es =set seed=, que fija /qué/ doce viviendas salen, para que el resultado sea reproducible.
 
-Compare ahora las dos últimas cifras: el Sxx de nuestras doce viviendas y el Sxx que cabría esperar de doce viviendas cualesquiera. Guarde esa comparación: será la clave de todo lo que sigue.
+Compare ahora las dos últimas cifras: el Sxx de nuestras doce viviendas y el Sxx que cabría esperar de doce viviendas cualesquiera. Esa comparación es la clave de todo lo que sigue.
 
 
 * Actividad 2 - Experimento A: el regresor se queda quieto
@@ -279,7 +279,7 @@ Tres hechos, en este orden:
 
 Mire la última línea de la salida: el recorrido de =Sxx_i= a lo largo de las réplicas del experimento B. Verá que ese número varía muchísimo de una réplica a otra, y compárelo con el Sxx fijo de nuestras doce viviendas observadas.
 
-Ahí está todo. En el experimento A la varianza de $\hat\beta_2$ es $\sigma^2$ dividido por /un número fijo/. En el experimento B es, en promedio, $\sigma^2$ multiplicado por el promedio de $1/\mathrm{Sxx}$ —y el promedio de un cociente no es el cociente de los promedios—. Si nuestras doce viviendas concretas resultan tener valores de =rooms= más apretados de lo habitual, su Sxx será menor que el típico y, en consecuencia, condicionar en ellas dará una varianza /mayor/ que la que resulta de promediar sobre todos los conjuntos posibles de doce viviendas. Si hubieran salido más dispersas, ocurriría lo contrario.
+Ahí está la explicación. En el experimento A la varianza de $\hat\beta_2$ es $\sigma^2$ dividido por /un número fijo/. En el experimento B es, en promedio, $\sigma^2$ multiplicado por el promedio de $1/\mathrm{Sxx}$ —y el promedio de un cociente no es el cociente de los promedios—. Si nuestras doce viviendas concretas resultan tener valores de =rooms= más apretados de lo habitual, su Sxx será menor que el típico y, en consecuencia, condicionar en ellas dará una varianza /mayor/ que la que resulta de promediar sobre todos los conjuntos posibles de doce viviendas. Si hubieran salido más dispersas, ocurriría lo contrario.
 
 Esta es la razón por la que la lección 11 se detuvo en la fórmula condicional y solo mencionó de pasada la incondicional: al intentar calcular $\mathrm{Var}(\hat\beta_2)$ aparecía $\mathrm{E}\big(\sigma^2/(nS^2)\big)$, la esperanza de un cociente, que no se simplifica.
 
@@ -355,19 +355,19 @@ end outfile
 
 Lo primero que conviene mirar no es el tamaño de la diferencia, sino su /signo/.
 
-Con doce viviendas, la varianza del experimento B salía *menor* que la del A. Con cuatrocientas sale *mayor*. Puede parecer que algo se ha estropeado, pero es justo lo contrario: es la confirmación más limpia del mecanismo que explicamos en la actividad anterior. Allí dijimos que todo dependía de si nuestra muestra concreta tenía un Sxx más pequeño o más grande que el típico, y añadimos: ``si hubieran salido más dispersas, ocurriría lo contrario''. Compruébelo en las salidas:
+Con doce viviendas, la varianza del experimento B salía *menor* que la del A. Con cuatrocientas sale *mayor*. No se ha estropeado nada: es la confirmación del mecanismo que explicamos en la actividad anterior. Allí dijimos que todo dependía de si nuestra muestra concreta tenía un Sxx más pequeño o más grande que el típico, y añadimos: ``si hubieran salido más dispersas, ocurriría lo contrario''. Compruébelo en las salidas:
 
 - /Doce viviendas/: Sxx observado $=3{,}27$ frente a un típico de $5{,}43$. Nuestra muestra estaba *apretada*, condicionar en ella daba una varianza mayor que el promedio, y por eso B quedaba por debajo de A.
 - /Cuatrocientas viviendas/: Sxx observado $=205{,}76$ frente a un típico de $196{,}96$. Ahora la muestra está, ligeramente, *más dispersa* de lo normal; condicionar en ella da una varianza menor que el promedio, y B queda por encima de A.
 
-El cambio de signo no es un accidente: es la predicción, cumplida. Y de paso desactiva una moraleja falsa que sería fácil sacar de la actividad anterior —``condicionar infla la varianza''—: condicionar no la infla ni la desinfla, la /ajusta a la muestra que tenemos/, y hacia qué lado la ajuste depende de cómo sea esa muestra.
+El cambio de signo es la predicción cumplida. Y desactiva una moraleja falsa que sería fácil sacar de la actividad anterior —``condicionar infla la varianza''—: condicionar no la infla ni la desinfla, la /ajusta a la muestra que tenemos/, y hacia qué lado la ajuste depende de cómo sea esa muestra.
 
 En cuanto al tamaño, la diferencia /se reduce mucho/ al pasar de doce a cuatrocientas observaciones, pero no llega a desaparecer. Conviene entender por qué, porque en esa distinción hay dos efectos superpuestos:
 
 1. /Nuestra muestra deja de ser excepcional/. Con doce viviendas, el Sxx que nos tocó podía quedar muy lejos del típico; con cuatrocientas, cualquier muestra tiene un Sxx bastante parecido al típico. Este efecto se desvanece al crecer $n$, pero despacio.
 2. /El promedio de un cociente no es el cociente de los promedios/. Aunque el Sxx medio coincidiera con el observado, promediar $\sigma^2/\mathrm{Sxx}$ sobre las réplicas no daría $\sigma^2$ dividido por el Sxx medio. Este segundo efecto también se atenúa con $n$, y más deprisa que el primero.
 
-Con $n=400$ el segundo efecto ya es prácticamente invisible, y todo lo que queda es el primero. Eso se puede comprobar con los números delante: el cociente de varianzas que observamos debería parecerse al cociente Sxx observado/típico, que la salida imprime, y en efecto se le parece.[fn::Aquí hemos subido el número de réplicas de 4.000 a 40.000, y merece la pena decir por qué: con 4.000 réplicas el ruido de Montecarlo sobre un cociente de varianzas es de un $3\%$ largo, del mismo orden que el efecto de un $4{,}5\%$ que queremos medir. Repitiendo el experimento con distintas semillas, el cociente oscilaba entre $1{,}00$ y $1{,}08$ —es decir, con algunas semillas el efecto /parecía/ desaparecer del todo—. Con 40.000 réplicas el cociente se estabiliza por encima de uno y el experimento ilustra lo que pretende ilustrar. El coste es de unos pocos segundos. Es, de paso, una lección sobre el propio método de Montecarlo: un experimento simulado tiene su propia precisión, y conviene asegurarse de que es mejor que el efecto que se quiere ver.]
+Con $n=400$ el segundo efecto ya es prácticamente invisible, y todo lo que queda es el primero. Eso se puede comprobar con los números delante: el cociente de varianzas que observamos debería parecerse al cociente Sxx observado/típico, que la salida imprime, y en efecto se le parece.[fn::Aquí hemos subido el número de réplicas de $4\,000$ a $40\,000$, y merece la pena decir por qué: con $4\,000$ réplicas el ruido de Montecarlo sobre un cociente de varianzas es de un $3\%$ largo, del mismo orden que el efecto de un $4{,}5\%$ que queremos medir. Repitiendo el experimento con distintas semillas, el cociente oscilaba entre $1{,}00$ y $1{,}08$ —es decir, con algunas semillas el efecto /parecía/ desaparecer del todo—. Con $40\,000$ réplicas el cociente se estabiliza por encima de uno y el experimento ilustra lo que pretende ilustrar. El coste es de unos pocos segundos. Es, de paso, una lección sobre el propio método de Montecarlo: un experimento simulado tiene su propia precisión, y conviene asegurarse de que es mejor que el efecto que se quiere ver.]
 
 La conclusión práctica es que con muestras grandes la distinción tiene poca consecuencia numérica. La conclusión conceptual, en cambio, no cambia en absoluto: siguen siendo dos preguntas distintas, y la que responde la fórmula de la lección 11 —y la que responde su programa estadístico— es siempre la condicional.
 

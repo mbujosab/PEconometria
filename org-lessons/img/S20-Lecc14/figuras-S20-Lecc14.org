@@ -1,0 +1,197 @@
+#+title: Código de las figuras de la lección 14
+#+author: Marcos Bujosa Brun
+
+#+latex_header: \usepackage{nacal}
+#+LATEX_HEADER: \usepackage{polyglossia}
+#+LATEX_HEADER: \setmainlanguage{spanish}
+
+\maketitle
+
+* Nota sobre estas figuras
+
+Dos figuras, las dos en el plano de las desviaciones $\mathcal L(\boldsymbol 1)^\perp$
+visto de frente, con los colores de las lecciones 8, 12 y 13: los regresores en
+azul, el residuo en gris, el ajuste en violeta.
+
+- =ParteP ropia= (+ =_fila=): tres paneles con dos regresores en desviaciones,
+  $\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1$ y
+  $\boldsymbol x_3-\mu_{\boldsymbol x_3}\boldsymbol 1$, que forman un ángulo
+  $\theta$ de $60^\circ$, $20^\circ$ y $6^\circ$. En cada panel, la proyección del
+  primero sobre la recta del segundo (línea de puntos) y su residuo
+  $\tilde{\boldsymbol x}_2$ (gris), la parte propia de $\boldsymbol x_2$. La
+  longitud del regresor es la misma en los tres paneles; la de la parte propia
+  es $\sin\theta$ veces esa longitud: $0{,}87$, $0{,}34$ y $0{,}10$.
+- =ParalelogramoAplastado= (+ =_fila=): dos paneles con el mismo ajuste
+  $\boldsymbol{\mathop{\widehat y}}$ escrito como
+  $\hat\beta_2\boldsymbol x_2+\hat\beta_3\boldsymbol x_3$ (regresores en
+  desviaciones, longitud $1$). A la izquierda los generadores forman $70^\circ$;
+  a la derecha, $10^\circ$. En cada panel, dos ajustes muy próximos,
+  $\boldsymbol{\mathop{\widehat y}}$ y $\boldsymbol{\mathop{\widehat y}}'$
+  (distan $0{,}07$), con sus dos descomposiciones. Con $70^\circ$ las
+  coordenadas apenas cambian ($0{,}87\to0{,}85$ y $0{,}37\to0{,}45$); con
+  $10^\circ$ cambian seis veces más que el ajuste y en sentidos opuestos
+  ($-0{,}99\to-1{,}38$ y $2{,}02\to2{,}42$). Es la inestabilidad de las
+  coordenadas con generadores casi alineados.
+
+Ambas se compilan como un único fichero con los paneles en fila (sin
+=convert=), y después se ensanchan (a 4400 y 3800 px) para que su proporción ancho/alto
+quede entre 4 y 4,4, como =AngulosContraste_fila= (4,3), y ocupen poco alto
+en pantalla.
+
+* Figuras con fuente tikz
+
+** La parte propia de un regresor
+
+#+NAME: ParteP ropia
+#+BEGIN_SRC latex :noweb no-export :tangle tex/PartePropia.tex :results discard :exports code :eval no
+<<Preambulo comun>>
+
+\begin{document}
+  <<Colores>>
+  <<Colores de la regresion>>
+
+  \newcommand{\panel}[2]{%
+  % #1 = angulo theta en grados; #2 = etiqueta de longitud de la parte propia
+  \begin{tikzpicture}
+    [scale=1.05,
+     axis/.style={-,gray,very thin},
+     vector/.style={-{Stealth[length=3mm, width=2mm]},very thick},
+     guide/.style={dotted,thin,gray}]
+    \coordinate (O) at (0,0);
+    \coordinate (X3) at (3.0,0);
+    \coordinate (X2) at ({3.0*cos(#1)},{3.0*sin(#1)});
+    \coordinate (P)  at ({3.0*cos(#1)},0);
+    % la recta del otro regresor
+    \draw[axis] (-0.3,0) -- (3.6,0);
+    % ángulo
+    \draw pic[-,draw=black,angle radius=18,\Regresor!70!black,fill=\Regresor!20] {angle = X3--O--X2};
+    \node[\Regresor!70!black,anchor=west,inner sep=1pt] at ({#1/2}:0.8) {$\theta$};
+    % proyección y ángulo recto
+    \draw[guide] (X2) -- (P);
+    \tkzMarkRightAngle[size=.16,gray,very thin,fill=lightgray!70,opacity=0.6](O,P,X2)
+    % los dos regresores en desviaciones
+    \draw[vector,\Regresor] (O) -- (X3)
+      node[anchor=north,yshift=-0.5mm]{$\boldsymbol x_3-\mu_{\boldsymbol x_3}\boldsymbol 1$};
+    \draw[vector,\Regresor!60!black] (O) -- (X2)
+      node[anchor=south west,xshift=-0.5mm]{$\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1$};
+    % la parte propia
+    \draw[vector,\Residuo] (P) -- (X2)
+      node[midway,anchor=west,xshift=1mm]{$\tilde{\boldsymbol x}_2$};
+    \node[gray!60!black,anchor=north,font=\small] at (1.5,-0.55) {$\Vert\tilde{\boldsymbol x}_2\Vert_e=#2\,\Vert\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\Vert_e$};
+    % caja invisible común para alinear los tres paneles
+    \path (-0.5,-1.0) rectangle (3.8,2.9);
+  \end{tikzpicture}}
+
+  \panel{60}{0{,}87}\hspace{4mm}\panel{20}{0{,}34}\hspace{4mm}\panel{6}{0{,}10}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .9\textwidth :caption \caption{La parte propia de un regresor se acorta cuando el ángulo con los demás se cierra}
+[[file:./PartePropia.png]]
+
+*** Ajuste de la figura
+
+#+BEGIN_SRC bash :build yes
+convert PartePropia.png -gravity center -background white -extent 4400x PartePropia_fila.png
+#+END_SRC
+
+** El paralelogramo aplastado
+
+#+NAME: ParalelogramoAplastado
+#+BEGIN_SRC latex :noweb no-export :tangle tex/ParalelogramoAplastado.tex :results discard :exports code :eval no
+<<Preambulo comun>>
+
+\begin{document}
+  <<Colores>>
+  <<Colores de la regresion>>
+
+  % #1 = angulo entre generadores; #2 = coef. numérico a de yhat; #3 = a' de yhat';
+  % #4 = texto de la descomposición de yhat; #5 = texto de la de yhat'; #6 = título
+  \newcommand{\panel}[6]{%
+  \begin{tikzpicture}
+    [scale=1.6,
+     axis/.style={-,gray,very thin},
+     vector/.style={-{Stealth[length=2.6mm, width=1.8mm]},very thick},
+     coord/.style={-{Stealth[length=2.2mm, width=1.5mm]},thick},
+     coordp/.style={-{Stealth[length=2.2mm, width=1.5mm]},thick,opacity=0.45}]
+    \coordinate (O)  at (0,0);
+    \coordinate (X2) at (1,0);
+    \coordinate (X3) at ({cos(#1)},{sin(#1)});
+    \coordinate (Y)  at (1.0,0.35);
+    \coordinate (Yp) at (1.0,0.42);
+    \coordinate (A)  at (#2,0);
+    \coordinate (Ap) at (#3,0);
+    % descomposición de yhat y de yhat': a x2 (horizontal) + b x3 (hasta el ajuste)
+    \draw[coord,\Regresor] (O) -- (A);
+    \draw[coord,\Regresor!60!black] (A) -- (Y);
+    \draw[coordp,\Regresor] (O) -- (Ap);
+    \draw[coordp,\Regresor!60!black] (Ap) -- (Yp);
+    % generadores (unitarios)
+    \draw[vector,\Regresor,dashed] (O) -- (X2) node[anchor=north west,xshift=-1mm]{$\boldsymbol x_2$};
+    \draw[vector,\Regresor!60!black,dashed] (O) -- (X3) node[anchor=east,xshift=-1mm]{$\boldsymbol x_3$};
+    % los dos ajustes
+    \fill[\Ajuste] (Y) circle (0.035) node[anchor=west,xshift=1mm]{$\boldsymbol{\mathop{\widehat y}}$};
+    \fill[\Ajuste!60] (Yp) circle (0.035) node[anchor=south west,xshift=0.5mm]{$\boldsymbol{\mathop{\widehat y}}'$};
+    % etiquetas
+    \node[anchor=north west,font=\small,align=left] at (-1.55,-0.15) {#4\\#5};
+    \node[anchor=south,font=\small,gray!60!black] at (0.0,1.35) {#6};
+    \path (-1.6,-0.9) rectangle (2.3,1.6);
+  \end{tikzpicture}}
+
+  \panel{70}{0.873}{0.847}
+    {$\boldsymbol{\mathop{\widehat y}}=0{,}87\,\boldsymbol x_2+0{,}37\,\boldsymbol x_3$}
+    {$\boldsymbol{\mathop{\widehat y}}'=0{,}85\,\boldsymbol x_2+0{,}45\,\boldsymbol x_3$}
+    {generadores a $70^\circ$}\hspace{6mm}%
+  \panel{10}{-0.985}{-1.382}
+    {$\boldsymbol{\mathop{\widehat y}}=-0{,}99\,\boldsymbol x_2+2{,}02\,\boldsymbol x_3$}
+    {$\boldsymbol{\mathop{\widehat y}}'=-1{,}38\,\boldsymbol x_2+2{,}42\,\boldsymbol x_3$}
+    {generadores a $10^\circ$}
+\end{document}
+#+END_SRC
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width .9\textwidth :caption \caption{El mismo desplazamiento del ajuste cambia poco las coordenadas con generadores separados y mucho con generadores casi alineados}
+[[file:./ParalelogramoAplastado.png]]
+
+*** Ajuste de la figura
+
+#+BEGIN_SRC bash :build yes
+convert ParalelogramoAplastado.png -gravity center -background white -extent 3800x ParalelogramoAplastado_fila.png
+#+END_SRC
+
+* Trozos de código
+
+#+NAME: Preambulo comun
+#+BEGIN_SRC tex :noweb no-export :results discard :export code :eval no
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage{nacal}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+\usepackage{tikz}
+\usetikzlibrary{matrix,decorations.pathreplacing}
+\usetikzlibrary{calc,angles,positioning,intersections,quotes,decorations.markings,arrows.meta}
+\usepackage{tkz-euclide}
+#+END_SRC
+
+#+NAME: Colores
+#+BEGIN_SRC tex :noweb no-export :results discard :export code :eval no
+\def\Rojo{red!50!black}
+\def\RojoOscuro{red!20!black}
+\def\RojoClaro{red!90!black}
+\def\Verde{green!50!black}
+\def\VerdeOscuro{green!30!black}
+\def\VerdeClaro{green!50!gray}
+\def\Azul{blue!50!black}
+\def\AzulOscuro{blue!35!black}
+\def\AzulClaro{blue!60!gray}
+#+END_SRC
+
+#+NAME: Colores de la regresion
+#+BEGIN_SRC tex :noweb no-export :results discard :export code :eval no
+\def\Datos{green!40!gray}
+\def\Ajuste{blue!50!red}
+\def\Residuo{black!25!gray}
+\def\Regresor{blue!75!white}
+#+END_SRC

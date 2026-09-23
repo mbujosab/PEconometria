@@ -1,0 +1,368 @@
+#+Title: Sesión 22 (C) --- Edad y kilómetros: colinealidad con coeficientes significativos
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L22-Prct-C-ramanathan-coches
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S22-Prct-C-ramanathan-coches"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S22-Prct-C-ramanathan-coches.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S22-Prct-C-ramanathan-coches.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S22-Prct-C-ramanathan-coches.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+El caso =nox= y =lnox= es la forma más visible de la colinealidad: dos $t$ nulos y un $F$ grande. Esta práctica muestra otra, más traicionera: dos regresores casi alineados cuyos coeficientes son /significativos/, uno de ellos con un signo que nadie esperaría. Aquí el VIF no avisa de un $t$ pequeño, sino de un coeficiente que no puede leerse como se lee normalmente.
+
+Los datos son =data3-7= de Ramanathan: cincuenta y siete coches con su coste acumulado de reparaciones (=cost=, en dólares), su edad (=age=, en semanas) y los kilómetros recorridos (=miles=, en miles de millas). Edad y kilómetros crecen juntos: un coche que lleva más tiempo ha recorrido más. La pregunta es qué pasa cuando se pide al modelo que separe el efecto de cada uno.
+
+/Objetivos/
+
+1. Comparar las dos regresiones simples con la regresión múltiple: los coeficientes cambian de tamaño y uno cambia de signo.
+2. Medir la colinealidad: correlación, partes propias y VIF, y comprobar de nuevo $\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$.
+3. Ver que un VIF de $142$ es compatible con dos $t$ grandes, y qué es lo que ese VIF sí está diciendo.
+4. Comprobar la inestabilidad de las coordenadas estimando en dos mitades de la muestra.
+
+* Actividad 1 - Los datos y las dos regresiones simples
+
+Abra =data3-7=, mire las variables y su correlación, y estime =cost= sobre =age= y =cost= sobre =miles= por separado.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Simples
+#+begin_src gretl :eval no
+open data3-7.gdt --quiet
+labels
+summary cost age miles --simple
+corr age miles
+ols cost const age
+ols cost const miles
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-C-ramanathan-coches.inp :eval no :exports none
+open data3-7.gdt --quiet
+outfile --quiet descripcion.txt
+    labels
+    summary cost age miles --simple
+    corr age miles
+end outfile
+outfile --quiet simples.txt
+    ols cost const age --quiet
+    printf "cost ~ age:    coef(age)   = %8.3f   ee = %7.3f   t = %6.2f   R2 = %.4f   s = %.1f\n", $coeff(age), $stderr(age), $coeff(age)/$stderr(age), $rsq, $sigma
+    ols cost const miles --quiet
+    printf "cost ~ miles:  coef(miles) = %8.3f   ee = %7.3f   t = %6.2f   R2 = %.4f   s = %.1f\n", $coeff(miles), $stderr(miles), $coeff(miles)/$stderr(miles), $rsq, $sigma
+end outfile
+gnuplot cost age --output="@workdir/costAge.png"
+gnuplot miles age --output="@workdir/milesAge.png"
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-C-ramanathan-coches/descripcion.txt example
+#+include: ./S22-Prct-C-ramanathan-coches/simples.txt example
+#+latex: }
+
+#+attr_latex: :width 0.6\textwidth
+#+attr_html: :width 480px
+#+CAPTION: =miles= frente a =age=: los cincuenta y siete coches están casi sobre una recta. La correlación es $0{,}9965$.
+[[file:./S22-Prct-C-ramanathan-coches/milesAge.png]]
+
+*** Lo que debe observar
+
+Las dos regresiones simples dicen lo esperable: cada semana de edad añade unos $7$ dólares de reparaciones; cada mil millas, unos $53$. Los dos coeficientes son positivos, con $t$ de $22$ y de $18$. Pero la figura muestra que las dos variables son casi la misma: la correlación es $0{,}9965$, un ángulo de $4{,}8^\circ$, y en esta muestra ``más viejo'' y ``más rodado'' son casi indistinguibles.
+
+* Actividad 2 - Las dos juntas
+
+Estime =cost= sobre =age= y =miles=, y pida los factores de inflación (//~Análisis -> Colinealidad~//).
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Conjunto
+#+begin_src gretl :eval no
+ols cost const age miles
+vif
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-C-ramanathan-coches.inp :eval no :exports none
+outfile --quiet conjunto.txt
+    ols cost const age miles
+    vif
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-C-ramanathan-coches/conjunto.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El coeficiente de =age= se ha multiplicado casi por cuatro, de $7{,}3$ a $28{,}0$, y el de =miles= ha cambiado de signo: de $+53$ a $-155$. Los dos son significativos, con $t$ de $10$ y de $-7{,}5$. El ajuste es mejor que el de cualquiera de las simples: $R^2=0{,}951$ y $\mathfrak s=260$ frente a $367$ y $437$. Y el VIF es $142$ para los dos regresores (con $k=3$ es el mismo para ambos, $1/(1-\rho^2)$): el error estándar de cada coeficiente es $\sqrt{142}=11{,}9$ veces el que tendría si el regresor estuviera solo.
+
+Léase el signo con cuidado. $-155$ no dice que rodar abarate las reparaciones. Dice que, /a igual edad/, un coche con más millas de las que corresponden a su edad tiene menos gasto acumulado; o, con la misma cuenta, que a igual kilometraje, un coche más viejo gasta mucho más. Los dos coeficientes describen el efecto de mover un regresor mientras el otro se queda quieto, y en esta muestra eso casi nunca ocurre. Compruébelo: $7{,}34\approx28{,}02-154{,}6\cdot0{,}134$, donde $0{,}134$ es la pendiente de =miles= sobre =age= de la figura. Es la identidad que la práctica B de la sesión 14 enunció para =rooms= y =nox=: la regresión simple mezcla los dos efectos en la proporción en que la muestra los mezcla.
+
+* Actividad 3 - Las partes propias y el error estándar
+
+Mida la parte propia de cada regresor con la regresión auxiliar y compruebe la fórmula del error estándar con =miles=.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: PartesPropias
+#+begin_src gretl :eval no
+ols miles const age --quiet
+scalar longPropiaMiles = sqrt($ess)
+ols cost const age miles --quiet
+printf "s/||parte propia de miles|| = %.3f    ee(miles) = %.3f\n", $sigma/longPropiaMiles, $stderr(miles)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-C-ramanathan-coches.inp :eval no :exports none
+outfile --quiet partesPropias.txt
+    ols age const miles --quiet
+    printf "parte propia de age   sobre miles: ||.|| = %8.3f    ||age en desviaciones||   = %8.3f    R2aux = %.4f\n", sqrt($ess), sqrt(sum((age-mean(age))^2)), $rsq
+    ols miles const age --quiet
+    scalar longPropiaMiles = sqrt($ess)
+    printf "parte propia de miles sobre age:   ||.|| = %8.3f    ||miles en desviaciones|| = %8.3f    R2aux = %.4f\n", longPropiaMiles, sqrt(sum((miles-mean(miles))^2)), $rsq
+    ols cost const age miles --quiet
+    printf "s = %.3f ;  s/||parte propia de miles|| = %.3f ;  ee(miles) de Gretl = %.3f\n", $sigma, $sigma/longPropiaMiles, $stderr(miles)
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-C-ramanathan-coches/partesPropias.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La parte propia de =miles= mide $12{,}5$ cuando el regresor en desviaciones mide $149$: queda el $8{,}4\%$ de su longitud, que es $\sqrt{1-0{,}9929}=\sin4{,}8^\circ$. Y $259{,}55/12{,}546=20{,}69$, el error estándar de la tabla. Lo mismo para =age=: $93{,}5$ de $1113$. Los dos regresores son largos, tienen mucha variación; lo que no tienen es variación /por separado/.
+
+* Actividad 4 - Contrastes: $t$ grandes con un VIF de $142$
+
+Compare los $t$ individuales, el $F$ conjunto y el $F$ de omitir cada regresor, y lea la correlación entre los dos estimadores.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Contrastes
+#+begin_src gretl :eval no
+ols cost const age miles --quiet
+restrict --quiet
+    b[miles] = 0
+end restrict
+printf "Omitir miles: F = %.2f\n", $test
+printf "correlacion entre los estimadores: %.4f\n", $vcv[2,3]/sqrt($vcv[2,2]*$vcv[3,3])
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-C-ramanathan-coches.inp :eval no :exports none
+ols cost const age miles --quiet
+scalar df = $df
+restrict --quiet
+    b[age] = 0
+end restrict
+scalar F_age = $test
+restrict --quiet
+    b[miles] = 0
+end restrict
+scalar F_miles = $test
+outfile --quiet contrastes.txt
+    scalar tc = critical(t, df, 0.025)
+    printf "Modelo completo: t(age) = %.2f   t(miles) = %.2f   t_c = %.3f\n", $coeff(age)/$stderr(age), $coeff(miles)/$stderr(miles), tc
+    printf "IC 95%% de age:   [%.2f ; %.2f]\n", $coeff(age) - tc*$stderr(age), $coeff(age) + tc*$stderr(age)
+    printf "IC 95%% de miles: [%.1f ; %.1f]\n", $coeff(miles) - tc*$stderr(miles), $coeff(miles) + tc*$stderr(miles)
+    printf "F de significacion conjunta (pie de tabla) = %.1f   F_c(2,%d) = %.3f\n", $Fstat, df, critical(F, 2, df, 0.05)
+    printf "Omitir age:   F(1,%d) = %.2f = t^2   valor p = %.2e\n", df, F_age, pvalue(F, 1, df, F_age)
+    printf "Omitir miles: F(1,%d) = %.2f = t^2   valor p = %.2e\n", df, F_miles, pvalue(F, 1, df, F_miles)
+    printf "correlacion entre los estimadores de age y miles: %.4f\n", $vcv[2,3]/sqrt($vcv[2,2]*$vcv[3,3])
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-C-ramanathan-coches/contrastes.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Con un VIF de $142$, los dos coeficientes son significativos y ninguno de los dos regresores se puede omitir: las partes propias son cortas, pero los coeficientes son tan grandes que sus $t$ superan de sobra el umbral. El VIF no es un veredicto sobre la significación; es la escala del error estándar. Aquí dice que el intervalo de =miles=, de $-196$ a $-113$, sería doce veces más estrecho si =miles= no compartiera casi todo con =age=. Y la correlación entre los dos estimadores, $-0{,}9965$, dice que si en otra muestra el coeficiente de =age= saliera menor, el de =miles= saldría menos negativo en la misma medida: la pareja está bien determinada; el reparto, no.
+
+* Actividad 5 - La misma regresión en dos mitades
+
+Estime el modelo con los coches $1$ a $28$ y con los coches $29$ a $57$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/ (o //~Muestra -> Establecer rango~//):
+#+NAME: Submuestras
+#+begin_src gretl :eval no
+smpl 1 28
+ols cost const age miles
+smpl 29 57
+ols cost const age miles
+smpl full
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-C-ramanathan-coches.inp :eval no :exports none
+outfile --quiet submuestras.txt
+    printf "La misma regresion en dos mitades de la muestra:\n"
+    smpl 1 28
+    ols cost const age miles --quiet
+    printf "obs 1-28 : coef(age) = %8.3f (ee %6.3f)   coef(miles) = %9.3f (ee %7.3f)   s = %.1f\n", $coeff(age), $stderr(age), $coeff(miles), $stderr(miles), $sigma
+    smpl 29 57
+    ols cost const age miles --quiet
+    printf "obs 29-57: coef(age) = %8.3f (ee %6.3f)   coef(miles) = %9.3f (ee %7.3f)   s = %.1f\n", $coeff(age), $stderr(age), $coeff(miles), $stderr(miles), $sigma
+    smpl full
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-C-ramanathan-coches/submuestras.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+En una mitad el coeficiente de =miles= es $-5$ y en la otra $-108$; el de =age=, $5$ y $24$. Con la mitad de los datos las partes propias son más cortas todavía, los errores estándar se disparan y las coordenadas van donde el azar de cada mitad las lleva. El fichero está ordenado por edad, así que las dos mitades son además coches jóvenes y coches viejos, y $\mathfrak s$ cambia de una a otra; eso añade una diferencia real a la oscilación. Pero la lección es la de la nube de la práctica A: con regresores alineados, los coeficientes individuales son lo primero que cambia de una muestra a otra.
+
+* Preguntas de interpretación para la clase
+
+1. En la Actividad 2, el coeficiente de =miles= pasa de $+53$ a $-155$ al añadir =age=. Explique con la parte propia por qué el coeficiente de la regresión múltiple no tiene por qué parecerse al de la simple.
+2. Compruebe la identidad $7{,}34\approx28{,}02-154{,}6\cdot0{,}134$ y diga qué representa cada uno de los tres números de la derecha.
+3. Con un VIF de $142$, ¿por qué los dos coeficientes son significativos? ¿Qué tendría que valer el coeficiente de =miles= para no serlo?
+4. Un taller quiere predecir el coste de reparaciones de un coche de $300$ semanas y $40$ mil millas, valores típicos de la muestra. ¿Le preocupa la colinealidad para esa predicción? ¿Y para un coche de $300$ semanas y $10$ mil millas?
+5. Si tuviera que informar del efecto de la edad sobre el coste, ¿qué modelo usaría y qué diría del coeficiente de =miles=?
+
+* Para profundizar
+
+- Lección 14 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S20-Lecc14.html][lección 14]]), ``Síntomas y diagnóstico'' y ``Qué es y qué no es''.
+- Lección 10 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html][lección 10]]), el coeficiente de regresión múltiple como coordenada, y la familia ortogonal como único caso en que coincide con el simple.
+- Ramanathan, R. (2002). /Introductory Econometrics with Applications/, 5.ª ed., ejemplo 5.2 y sección 5.4 sobre multicolinealidad.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 3, sección 3.4.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S22-Prct-C-ramanathan-coches.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S22-Prct-C-ramanathan-coches.inp][S22-Prct-C-ramanathan-coches.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /Por qué cambia tanto el coeficiente./ El coeficiente de =miles= en la regresión simple es la coordenada de $\boldsymbol{\mathop{\widehat y}}$ sobre =miles= en desviaciones, un vector de longitud $149$. En la múltiple es la coordenada de $\boldsymbol{\mathop{\widehat y}}$ en la base $\{\boldsymbol 1,\text{age},\text{miles}\}$, y una coordenada depende de toda la base: con generadores casi alineados, la lección 14 mostró que el mismo ajuste admite descomposiciones muy distintas. Además, la lección 14 enunció que ese coeficiente se mide con la /parte propia/ de =miles=, un vector de longitud $12{,}5$ casi ortogonal a =miles= en desviaciones. Los dos coeficientes responden a preguntas distintas y no hay razón para que se parezcan, ni en tamaño ni en signo. Coinciden solo cuando los regresores son ortogonales (lección 10, familia ortogonal).
+
+2. /La identidad./ $28{,}02$ es el coeficiente de =age= en la múltiple; $-154{,}6$ el de =miles=; $0{,}134$ es cuántas mil millas más tiene, en esta muestra, un coche una semana más viejo. La regresión simple de =cost= sobre =age= recoge el efecto directo de la edad más el efecto de las millas que la edad arrastra: $28{,}02+(-154{,}6)(0{,}134)=7{,}30$. La identidad es exacta salvo redondeo, y dice que el coeficiente de la simple no es ``el efecto de la edad'', sino el efecto de la edad /junto con todo lo que en la muestra se mueve con ella/.
+
+3. /Significativos con VIF $142$./ Porque el $t$ es el coeficiente entre su error estándar, y el VIF solo infla el denominador: $20{,}7$ en lugar de $1{,}74$. Con un coeficiente de $-155$ el cociente sigue siendo $-7{,}5$. Para no ser significativo, el coeficiente de =miles= tendría que ser menor que $2{,}005\cdot20{,}7\approx41$ en valor absoluto; sin la colinealidad, bastaría con que fuera menor que $3{,}5$. El VIF dice cuánta evidencia se ha perdido, no si queda suficiente.
+
+4. /Predicción./ Para el coche típico, no: $300$ semanas y $40$ mil millas está sobre la recta de la figura, y allí el ajuste es el mismo cualquiera que sea el reparto entre los dos coeficientes; la predicción usa $\boldsymbol{\mathop{\widehat y}}$, que la colinealidad no toca. Para el coche de $300$ semanas y $10$ mil millas, sí: está lejos de la recta, en una región donde no hay datos, y la predicción depende de la coordenada de =miles= por separado, $-155\cdot(10-40)=+4\,640$ dólares sobre el coche típico. Ese número descansa en la parte propia de =miles=, que mide $12{,}5$: es una extrapolación con un error estándar enorme.
+
+5. /Qué informar./ Depende de la pregunta, y hay que decir cuál se responde. Si se quiere el efecto de la edad sin separar lo que la edad arrastra, la regresión simple, $7{,}3$ dólares por semana, con su intervalo estrecho, y advertir que incluye el efecto del kilometraje. Si se quiere el efecto de la edad a kilometraje fijo, la múltiple, $28$ con intervalo de $22$ a $34$, y advertir que en la muestra casi no hay coches con la misma edad y distinto kilometraje, que el coeficiente de =miles= es negativo y difícil de interpretar por separado, y que el VIF es $142$. Lo que no se puede hacer es informar de $-155$ como ``el efecto de rodar mil millas''.
+
+* COMMENT Banco de preguntas de reserva
+
+** Pregunta R1 — VIF y significación
+Un VIF alto:
+a) Implica que el coeficiente no es significativo.
+b) Infla el error estándar; el coeficiente puede seguir siendo significativo si es grande.
+c) Reduce el $R^2$ del modelo.
+d) Solo ocurre con $k>3$.
+/Respuesta correcta: b./
+/Evalúa/: separar la escala del error estándar del veredicto del contraste.
+
+** Pregunta R2 — Regresión simple frente a múltiple
+El coeficiente de =miles= en =cost ~ miles= y en =cost ~ age + miles=:
+a) Deben coincidir si el modelo está bien especificado.
+b) Difieren porque el segundo es la coordenada sobre la parte propia de =miles=, ortogonal a =age=.
+c) Difieren solo si hay heterocedasticidad.
+d) Difieren porque cambia $n$.
+/Respuesta correcta: b./
+/Evalúa/: la lectura del coeficiente múltiple como proyección sobre la parte propia.
+
+** Pregunta R3 — Predicción con colinealidad
+Con regresores casi alineados, la predicción de $y$:
+a) Es imprecisa siempre.
+b) Es precisa para combinaciones de regresores parecidas a las de la muestra e imprecisa fuera de ellas.
+c) No se puede calcular.
+d) Es precisa solo si se elimina un regresor.
+/Respuesta correcta: b./
+/Evalúa/: que la colinealidad estropea las coordenadas, no el ajuste dentro del rango de los datos.

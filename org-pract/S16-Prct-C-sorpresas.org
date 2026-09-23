@@ -196,7 +196,7 @@ No debería sorprender: es lo que la lección 11 demostró. Merece la pena volve
 - Para la insesgadez se usó $E[U_i\mid\boldsymbol X]=\mathit 0$ (exogeneidad estricta) y el lema para sacar los $W_i$ fuera de la esperanza condicionada.
 - Para la varianza se usó, además, $Var[U_i\mid\boldsymbol X]=\sigma^2\,\mathit 1$ (homocedasticidad) y $Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0$ para $i\neq j$.
 
-En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su media condicional, su varianza condicional y la ausencia de covarianzas cruzadas. Y esas tres cosas las cumplen igual de bien una normal, una uniforme y una chi-cuadrado centrada. La demostración era, en este sentido, mucho más robusta de lo que a primera vista parece.
+En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su media condicional, su varianza condicional y la ausencia de covarianzas cruzadas. Y esas tres cosas las cumplen igual de bien una normal, una uniforme y una chi-cuadrado centrada. La demostración era más general de lo que parecía.
 
 
 * Actividad 2 - ¿Y la forma? Aquí sí cambia la historia
@@ -292,9 +292,9 @@ Los pesos $W_i$ son proporcionales a las /desviaciones/ del regresor respecto a 
 
 *** ¿De quién es la culpa: de la perturbación o del regresor?
 
-Llegados aquí conviene detenerse, porque hay dos sospechosos y todavía no hemos hecho nada para distinguirlos. Cuando el histograma salga torcido, ¿será por la distribución de la /perturbación/ o por la del /regresor/?
+Hay dos sospechosos y todavía no los hemos distinguido. Cuando el histograma salga torcido, ¿será por la distribución de la /perturbación/ o por la del /regresor/?
 
-Para separarlos hace falta cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y $\chi^2$ con un grado de libertad) con dos regresores: uno /equilibrado/ —las doce viviendas reales— y otro con una /observación dominante/, en el que once viviendas comparten el mismo valor y una se sale mucho del grupo.
+Para separarlos hace falta cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y $\chi^2$ con un grado de libertad) con dos regresores: uno /equilibrado/ —las mismas doce viviendas reales de antes— y otro con una /observación dominante/, en el que once viviendas comparten el mismo valor y una se sale mucho del grupo.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -306,7 +306,8 @@ scalar b1_true = $coeff(const)
 scalar b2_true = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 
-smpl 1 12
+set seed 160
+smpl 12 --random            # las mismas doce viviendas de antes
 series x_eq  = rooms        # regresor equilibrado: las doce viviendas
 series x_pal = 6            # regresor con una observacion dominante:
 x_pal[1]     = 14           #   once iguales y una que se sale
@@ -390,13 +391,13 @@ Lea la tabla por filas, que es donde está la respuesta:
 - /Fila de arriba (perturbación normal)/: la asimetría es prácticamente nula en las DOS columnas. Por muy extraño que sea el regresor, con perturbaciones normales $\hat\beta_2$ sale simétrico.
 - /Fila de abajo (perturbación $\chi^2$)/: la asimetría es pequeña con el regresor equilibrado y grande con el de observación dominante.
 
-De donde se sigue la respuesta a la pregunta del epígrafe, y conviene enunciarla sin ambigüedad:
+De ahí la respuesta a la pregunta del epígrafe:
 
 #+begin_center
 /La asimetría procede de la distribución de la perturbación. El regresor no la crea: solo decide si sobrevive./
 #+end_center
 
-Que el regresor no pueda crearla no es casualidad ni un accidente de estos números, y se ve directamente en la fórmula de la lección 11. En estos cuatro experimentos el regresor lo hemos /fijado nosotros/ —=x_eq= y =x_pal= se construyen una vez y no vuelven a tocarse dentro del bucle—, de modo que los pesos son números: son los $w_i$ de la lección 7, proporcionales a $(x_i-\mu_{\boldsymbol x})$. Y entonces
+Que el regresor no pueda crearla se ve en la fórmula de la lección 11. En estos cuatro experimentos el regresor lo hemos /fijado nosotros/ —=x_eq= y =x_pal= se construyen una vez y no vuelven a tocarse dentro del bucle—, de modo que los pesos son números: son los $w_i$ de la lección 7, proporcionales a $(x_i-\mu_{\boldsymbol x})$. Y entonces
 \[
 \hat\beta_2=\beta_2\,\mathit 1+\sum_iw_iU_i
 \]
@@ -480,13 +481,13 @@ end outfile
 
 Las dos mil estimaciones son /el mismo número/, y ese número es $\beta_2$. La varianza es cero. El histograma, si lo dibujara, sería una única barra.
 
-Vale la pena entender por qué, porque es inmediato a partir de la lección 11. Aquella lección estableció
+La explicación es inmediata a partir de la lección 11, que estableció
 \[
 \hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i,
 \]
 y los pesos $W_i$ son proporcionales a $(X_i-\overline{X})$. Ahora bien, una vez fijada la muestra concreta con la que trabajamos, esos pesos son números —los $w_i$ de la lección 7—. Si hemos construido $\boldsymbol u$ exactamente ortogonal al regresor centrado, entonces $\sum_iw_iu_i=0$ /en esa muestra/, no solo en promedio. El segundo sumando desaparece y lo que queda es $\beta_2$ exactamente. Cada vez. Por construcción.
 
-Y aquí está la moraleja, que conviene no malinterpretar:
+La moraleja:
 
 #+begin_center
 /La dispersión de $\hat\beta_2$ no procede de ningún defecto de MCO. Procede de que, en una muestra real, la perturbación no es ortogonal al regresor —solo lo es en promedio./
@@ -494,7 +495,7 @@ Y aquí está la moraleja, que conviene no malinterpretar:
 
 Dicho de otro modo: si viviéramos en un mundo en el que cada muestra cumpliese los supuestos de forma exacta, MCO sería un instrumento perfecto y no haría falta ninguna inferencia estadística. Toda la teoría que viene a continuación —errores estándar, intervalos, contrastes— existe porque ese mundo no es el nuestro. Este experimento lo hace visible fabricándolo artificialmente.
 
-Conviene además cerrar el círculo con la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ del ejemplo de juguete, que parecía una curiosidad, era exactamente esto. Advertimos entonces que recuperar $\hat\beta_2=3$ exactamente ``no era lo habitual''. Ahora sabemos decir con precisión qué lo hacía posible, y podemos reproducirlo a voluntad.
+Esto cierra el círculo con la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ del ejemplo de juguete, que parecía una curiosidad, era exactamente esto. Advertimos entonces que recuperar $\hat\beta_2=3$ exactamente ``no era lo habitual''. Ahora sabemos decir con precisión qué lo hacía posible, y podemos reproducirlo a voluntad.
 
 
 * Preguntas de interpretación para la clase

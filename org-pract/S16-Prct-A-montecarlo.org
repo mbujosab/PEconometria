@@ -98,7 +98,7 @@ Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-\overline{X})^2}.
 \]
 Son dos afirmaciones sobre /todas las muestras que podríamos haber observado/, y por eso resultan difíciles de creer con una sola muestra delante: por definición, de ese conjunto de muestras posibles solo vemos una.
 
-Esta práctica hace trampa —una trampa legítima y muy instructiva—: /fabrica/ ese conjunto de muestras posibles. Inventamos un mundo artificial en el que conocemos $\beta_1$, $\beta_2$ y $\sigma^2$ porque los hemos elegido nosotros; generamos cientos de muestras de ese mundo; estimamos $\hat\beta_2$ en cada una; y comparamos lo que sale con lo que la lección 11 predice. Es lo que se conoce como un /experimento de Montecarlo/.
+Esta práctica hace una trampa instructiva: /fabrica/ ese conjunto de muestras posibles. Inventamos un mundo artificial en el que conocemos $\beta_1$, $\beta_2$ y $\sigma^2$ porque los hemos elegido nosotros; generamos cientos de muestras de ese mundo; estimamos $\hat\beta_2$ en cada una; y comparamos lo que sale con lo que la lección 11 predice. Es lo que se conoce como un /experimento de Montecarlo/.
 
 /Objetivos/
 
@@ -171,7 +171,7 @@ La usamos aquí porque en un guion resulta más legible que cualquiera de las do
 
 *** Tres observaciones sobre lo que acabamos de hacer
 
-- =rooms= /no se toca/. El vector de datos del regresor se queda exactamente como está, con sus 506 valores observados. Es el $\boldsymbol x$ de la lección 11, y permanecerá fijo durante todo el experimento. Esto es lo que significa ``condicionar en $\boldsymbol X$''; en la práctica siguiente veremos qué pasa si dejamos de hacerlo.
+- =rooms= /no se toca/. El vector de datos del regresor se queda exactamente como está, con sus 506 valores observados. Es el $\boldsymbol x$ de la lección 11, y permanecerá fijo durante todo el experimento. Es la versión experimental de condicionar en $\boldsymbol X$: fijar los regresores y dejar variar solo la perturbación; en la práctica siguiente veremos qué pasa si dejamos de hacerlo.
 - $\sigma$ se toma como la raíz de $\mathrm{SRC}/(n-k)$, es decir, de la cuasivarianza de los residuos $\mathfrak s^2$ que definimos en la lección 11. Aquí no la usamos como /estimación/ de nada: la usamos como el valor /verdadero/ de nuestro mundo inventado.
 - =var_teo= es la predicción de la lección 11. Anótela: es el número contra el que vamos a contrastar todo lo que sigue.
 
@@ -277,7 +277,7 @@ end outfile
 #+include: ./S16-Prct-A-montecarlo/bucle.txt example
 #+latex: }
 
-Merece la pena detenerse un segundo en /qué cambia y qué no/ dentro del bucle. Cambia una sola cosa: la perturbación =u=, que se sortea de nuevo en cada vuelta. No cambian ni =rooms=, ni =b1_true=, ni =b2_true=, ni =sigma=. Estamos generando, literalmente, las muestras que ``podrían haber salido'' del mismo mundo con el mismo regresor.
+Fíjese en /qué cambia y qué no/ dentro del bucle. Cambia una sola cosa: la perturbación =u=, que se sortea de nuevo en cada vuelta. No cambian ni =rooms=, ni =b1_true=, ni =b2_true=, ni =sigma=. Estamos generando, literalmente, las muestras que ``podrían haber salido'' del mismo mundo con el mismo regresor.
 
 
 * Actividad 4 - ¿Se cumple la insesgadez? ¿Y la fórmula de la varianza?
@@ -305,7 +305,7 @@ open "@workdir/replicas.gdt" --quiet
 printf "=== LO QUE SALE DE %d REPLICAS SIMULADAS ===\n", $nobs
 printf "media de b2hat            = %.4f\n", mean(b2hat)
 printf "varianza de b2hat         = %.4f\n", sum((b2hat-mean(b2hat))^2)/$nobs
-printf "desviacion tipica         = %.4f\n", sd(b2hat)
+printf "desviacion tipica         = %.4f\n", sqrt(sum((b2hat-mean(b2hat))^2)/$nobs)
 #+end_src
 #+latex: }
 
@@ -420,7 +420,7 @@ end outfile
 #+include: ./S16-Prct-A-montecarlo/matrizVCV.txt example
 #+latex: }
 
-Compare las dos matrices elemento a elemento. El elemento $(2,2)$ es la varianza de $\hat\beta_2$ que ya habíamos comprobado en la Actividad 4; el $(1,1)$ es la de $\hat\beta_1$; y los de fuera de la diagonal son la covarianza entre ambos coeficientes —que, como señalaba la lección 11, es negativa: si la recta se inclina más, tiene que bajar el punto de corte para seguir pasando cerca de la nube de puntos.
+Compare las dos matrices elemento a elemento. El elemento $(2,2)$ es la varianza de $\hat\beta_2$ que ya habíamos comprobado en la Actividad 4; el $(1,1)$ es la de $\hat\beta_1$; y los de fuera de la diagonal son la covarianza entre ambos coeficientes, negativa porque la media de =rooms= es positiva (fórmula de la lección 11): si la recta se inclina más, tiene que bajar el punto de corte para seguir pasando cerca de la nube de puntos.
 
 
 * Preguntas de interpretación para la clase

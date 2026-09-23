@@ -1,0 +1,333 @@
+#+title:  Lección 7
+#+author: Marcos Bujosa
+#+STARTUP: show4levels
+#+LANGUAGE: es-es
+
+#+EXPORT_FILE_NAME: pub/Lecc07
+
+# +OPTIONS: toc:nil
+#+OPTIONS: tags:nil
+
+#+LATEX_CLASS: article
+
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+#+LATEX_HEADER: \usepackage[margin=0.5in]{geometry}
+#+LaTeX_HEADER: \usepackage[svgnames,x11names]{xcolor}
+#+LaTeX_HEADER: \hypersetup{linktoc = all, colorlinks = true, urlcolor = DodgerBlue4, citecolor = PaleGreen1, linkcolor = SpringGreen4}
+#+LaTeX_HEADER: \PassOptionsToPackage{hyphens}{url}
+#+LaTeX_HEADER: \usepackage{nacal}
+
+#+LaTeX_HEADER: \usepackage{framed}
+
+#+LaTeX_HEADER: \usepackage{listings}
+#+LaTeX_HEADER: \input{hansl.tex}
+#+LaTeX_HEADER: \lstnewenvironment{hansl-gretl}
+#+LaTeX_HEADER: {\lstset{language={hansl},basicstyle={\ttfamily\footnotesize},numbers,rame=single,breaklines=true}}
+#+LaTeX_HEADER: {}
+#+LaTeX_HEADER: \newcommand{\hansl}[1]{\lstset{language={hansl},basicstyle={\ttfamily\small}}\lstinline{#1}}
+# +LaTeX_HEADER: \lstset{backgroundcolor=\color{white},basicstyle=\ttfamily\footnotesize,breaklines=true, captionpos=b,commentstyle=\color{mygreen},escapeinside={\%*}{*)}, keywordstyle=\color{blue},stringstyle=\color{mymauve}, }
+# +LaTeX_HEADER: \lstset{backgroundcolor=\color{lightgray!20},basicstyle=\ttfamily\footnotesize,breaklines=true, }
+#+LaTeX_HEADER: \lstset{backgroundcolor=\color{lightgray!20}, }
+
+#+name: setup-listings
+#+begin_src emacs-lisp :exports none :results silent
+  (setq org-latex-listings 'listings)
+  (setq org-latex-custom-lang-environments
+  	;'((emacs-lisp "common-lispcode")))
+  	'((emacs-lisp "hansl-gretl")))
+  (setq org-latex-listings-options
+	'(("frame" "lines")
+	  ("basicstyle" "\\scriptsize")
+	  ("basicstyle" "\\ttfamily")
+	  ("numbers=none" "left")
+	  ("backgroundcolor=\\color{lightgray!20}")
+	  ("numberstyle" "\\tiny")))
+  (setq org-latex-to-pdf-process
+	'("pdflatex -interaction nonstopmode -output-directory %o %f"
+	"pdflatex -interaction nonstopmode -output-directory %o %f"
+	"pdflatex -interaction nonstopmode -output-directory %o %f"))
+  (org-add-link-type
+   "latex" nil
+   (lambda (path desc format)
+     (cond
+      ((eq format 'html)
+       (format "<span class=\"%s\">%s</span>" path desc))
+      ((eq format 'latex)
+       (format "\\%s{%s}" path desc)))))
+#+end_src
+
+# \lstnewenvironment{code}
+#     {\lstset{language=haskell,
+#     basicstyle=\small\ttfamily,
+#     numbers=left,
+#     numberstyle=\tiny\color{gray},
+#     backgroundcolor=\color{lightgray},
+#     firstnumber=auto
+#     }}
+#     {}
+
+#+bibliography: ref.bib
+
+# +latex: \clearpage
+
+#+LATEX: \clearpage
+
+* Contrastes de hipótesis simples
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/HtestingHouses.inp
+   :END:
+
+| Guión: | [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/HtestingHouses.inp][HtestingHouses.inp]] |
+
+- Nota 1 :: la función ~pvalue(t,gl,Valor)~ calcula la probabilidad a
+  la derecha de =Valor= (Por tanto, puede calcular la
+  probabilidad por la izquierda así:
+  | ~1-pvalue(t,gl,Valor)~, | o bien así: | ~pvalue(t,gl,-Valor)~ |
+
+- Nota 2 :: Es posible que necesite ejecutar todas las órdenes desde
+  la línea de comandos (es decir, sin menús ni ratón).
+
+Cargue los datos =data3-1.gdt= del libro de Ramanathan.
+#+begin_src hansl 
+open data3-1
+#+end_src
+
+1) Ajuste por MCO el precio en función de la superficie y guarde el
+   modelo como icono
+   #+begin_src hansl 
+    Modelo   <- ols price const sqft
+   #+end_src
+
+2) Efectúe los cálculos necesarios para obtener el estadístico $t$
+   para contrastar $\Hnula:\ \beta_2=0.1$ frente a $\Halt:\
+   \beta_2>0.1$ con una significación del 5%. Calcule el /p/-valor
+   del estadístico.
+   #+begin_src hansl 
+    # Hnula (b2=0.1)    Halt (b2>0.1)
+    scalar t1 = ($coeff(sqft)-0.1)/$stderr(sqft)
+    scalar c1 = critical(t,$df,.05)
+    scalar p1 = pvalue(t,$df,t1)    
+   #+end_src
+
+3) Efectúe los cálculos necesarios para obtener el estadístico $t$
+   para contrastar $\Hnula:\ \beta_2=0.15$ frente a $\Halt:\
+   \beta_2<0.15$ con una significación del 5%. Calcule el /p/-valor
+   del estadístico.
+   #+begin_src hansl 
+    # Hnula (b2=0.15) Halt (b2<0.15) 
+    scalar t2 = ($coeff(sqft)-0.15)/$stderr(sqft)
+    scalar c2 = -1*critical(t,$df,.05)          # alternativa A
+    scalar c2 =    critical(t,$df,.95)          # alternativa B
+    scalar p2 = 1-pvalue(t,$df, t2)             # Alternativa 1
+    scalar p2 =   pvalue(t,$df,-t2)             # Alternativa 2    
+   #+end_src
+
+4) Efectúe los cálculos necesarios para obtener el estadístico $t$
+   para contrastar $\Hnula:\ \beta_1=0$ frente a $\Halt:\ \beta_1<0$
+   con una significación del 5%. Calcule el /p/-valor del
+   estadístico.
+   #+begin_src hansl 
+    # Hnula (b1=0)    Halt (b1<0) 
+    scalar t3 = ($coeff(const)-0)/$stderr(const)
+    scalar c3 =   critical(t,$df,.95)
+    scalar p3 = 1-pvalue(t,$df,t3)
+   #+end_src
+
+5) Efectúe los cálculos necesarios para obtener el estadístico $t$
+   para contrastar $\Hnula:\ \beta_1=0$ frente a $\Halt:\ \beta_1>0$
+   con una significación del 5%. Calcule el /p/-valor del
+   estadístico.
+   #+begin_src hansl 
+    # Hnula (b1=0)    Halt (b1>0) 
+    scalar t3 = ($coeff(const)-0)/$stderr(const)
+    scalar c3 = critical(t,$df,.05)
+    scalar p3 = pvalue(t,$df,t3)
+   #+end_src
+
+6) Efectúe los cálculos necesarios para obtener el estadístico $t$
+   para contrastar $\Hnula:\ \beta_2=0.15$ frente a $\Halt:\
+   \beta_2\ne0.15$ con una significación del 5%. Calcule el /p/-valor
+   del estadístico.
+   #+begin_src hansl 
+    # Hnula (b2=0.15)  Halt (b1~=0.15) Bilateral
+    scalar t4 = ($coeff(sqft)-0.15)/$stderr(sqft)
+    scalar c4 = critical(t,$df,.025)
+    scalar p4 = 2*pvalue(t,$df,abs(t4))
+    scalar f4 = t4^2
+    scalar pf4 = pvalue(f,1,$df,f4)    
+   #+end_src
+
+7) Efectúe los cálculos necesarios para obtener el estadístico $t$
+   para contrastar $\Hnula:\ \beta_1+\beta_2=10$ frente a
+   \mbox{$\Halt:\ \beta_1+\beta_2\ne10$} con una significación del
+   5%. Calcule el /p/-valor del estadístico.
+   #+begin_src hansl 
+    # Hnula (b1+b2=10)  Halt (b1+b2~=10) Bilateral
+    scalar t5 = ($coeff(sqft)+$coeff(const)-10)/sqrt($vcv[1,1]+$vcv[2,2]+2*$vcv[1,2])
+    scalar c5 = critical(t,$df,.025)
+    scalar p5 = 2*pvalue(t,$df,abs(t5))
+    scalar f5 = t5^2
+    scalar pf5 = pvalue(f,1,$df,f5)
+   #+end_src
+
+8) Estos dos últimos contrastes son bilaterales. Los contrastes
+   bilaterales se pueden realizar fácilmente desde los menús de
+   Gretl. Compruebe que obtiene los mismos resultados abriendo la
+   ventana del modelo estimado y siguiendo los pasos */~Contrastes ->
+   Restricciones lineales~/* y tecleando en la ventana
+   | =b[1] + b[2] = 10= |
+   Y pulse */~Aceptar~/*. Observe que Gretl usa el contraste
+   $F$. Calcule el cuadrado del contraste $t$ y compruebe que da
+   exactamente el mismo resultado. 
+
+#+LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+** Código completo de la práctica ~HtestingHouses.inp~
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/HtestingHouses.inp}
+#+LATEX: \clearpage
+
+
+* /p/-valor, potencia del contraste y otras distribuciones para las perturbaciones
+   :PROPERTIES:
+   :header-args: :tangle ./pub/scripts/samplinghouses4.inp
+   :END:
+
+| Guión: | [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/samplinghouses4.inp][samplinghouses4.inp]] |
+
+Este ejercicio es una modificación del guión [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/samplinghouses1.inp][~samplinghouses1.inp~]] de
+la lección anterior.
+
+    
+- Nota 1 :: En este ejercicio todos los contrastes son bilaterales
+
+- Nota 2 ::  Le recomiendo abrir directamente el guión
+  [[https://github.com/mbujosab/Ectr/tree/master/Practicas/Gretl/scripts/samplinghouses4.inp][~samplinghouses4.inp~]] y modificar lo que sea necesario para realizar
+  cada apartado.
+
+Comencemos la práctica...
+  
+A) En lugar de almacenar los valores estimados para los parámetros,
+   este guión almacena los estadísticos $t$ para el contraste $\Hnula:
+   b_1=52$ frente a $\Halt: b_1\ne 52$, así como los /p/ valores de
+   dichos estadísticos. Nótese que la hipótesis nula es cierta en este
+   ejemplo simulado (¡esa es la ventaja de simular!).
+
+B) Recupere esos datos almacenados y compruebe qué porcentaje de veces
+   los /p/-valores son mayores que 0.05 (cuantas veces hubiéramos
+   rechazado $\Hnula$ pese a ser cierta con una significación del
+   5%. ¿Le sorprende el resultado?)
+
+C) Repita desde el principio el ejercicio, pero simulando
+   perturbaciones con una distribución muy alejada de la normal (por
+   ejemplo empleando una distribución $\chi^2$ con un grado de
+   libertad y restando 1 para que su esperanza sea nula: =gl=1= y
+   =series U = randgen(X, gl) - gl=. ¿Cambian mucho los resultados?
+
+D) Lo visto en el apartado anterior puede ser debido a que la muestra
+   es muy pequeña. Repita el ejercicio pero simulando superficies de
+   pisos.
+
+   + Comente la línea =open data3-1.gdt= y añada debajo =nulldata
+     150=.
+
+   + Comente =series x = sqft= y añada debajo =series x =
+     randgen(U,1000,3000)=.
+      
+   Es decir, simule (con distribución uniforme) tamaños de 150 pisos
+   con un rango igual al de la verdadera muestra (entre $1000$ y $3000$
+   pies cuadrados).
+
+   Repita el ejercicio, con los datos simulados: primero con
+   distribución normal, y luego con una distribución alejada de la
+   Normal.
+
+   + ¿Cambian los resultados?
+
+   + ¿Y si aumenta más aún el tamaño muestral? (por ejemplo =nulldata
+     500=
+
+E) *(Función potencia)* Vuelva a usar tamaños muestrales de 14 datos
+   (bien empleando los datos originales, o bien simulando 14
+   superficies), y simule perturbaciones con distribución normal.
+
+   Repita el ejercicio pero esta vez para contrastar hipótesis falsas,
+   por ejemplo $\Hnula: b_1=50$, ó $\Hnula: b_1=30$, ó $\Hnula:
+   b_1=100$ ó $\Hnula: b_1=0$.
+
+   + ¿Puede encontrar una pauta en los los resultados?
+
+   + ¿Sabe lo que es la potencia de un contraste?
+
+   + ¿Depende de algún modo el comportamiento del test respecto del
+     tamaño muestral? Por ejemplo, contraste $\Hnula: b_1=30$ con
+     muestras de $14$, $150$ y $500$ datos. ¿Qué observa?
+
+   + Si, siendo el verdadero parámetro $52$, contrasta al 5% la
+     hipótesis $\Hnula: b_1=51.7$ ¿Se rechaza con mucha frecuencia
+     \Hnula?
+
+F) En los apartados (A) y (D) (/donde contrastábamos una hipótesis
+  nula $\Hnula: b_1=52$ que era cierta/) hemos visto que los
+  resultados no parecían muy dependientes de la distribución de las
+  perturbaciones.
+
+  Emplee una muestra de tamaño $500$ y simule perturbaciones con
+  distribución $\chi^2$ con un grado de libertad (y reste los grados
+  de libertad para que su esperanza sea nula).
+
+  Contraste al 5% la falsa hipótesis $\Hnula: b_1=51.7$.
+
+  El porcentaje de rechazos cuando empleamos distribución normal era
+  approx. el 5%
+
+  + ¿qué pasa cuando simulamos una distribución muy alejada de la
+    normal? ($\chi^2_1$)
+  + ¿Y si aumenta el número de grados de libertad?
+  + Pruebe con distribuciones $\chi^2_{10}$, $\chi^2_{25}$,
+    $\chi^2_{50}$ y $\chi^2_{100}$.
+
+#+begin_src hansl :exports none
+open data3-1.gdt
+# nulldata 150
+
+series x = sqft
+# series x = randgen(U,1000,3000)
+
+# Generamos parte sistematica del modelo
+series ys = 52 + 0.14*x
+
+# Desviacion tipica de las perturbaciones
+scalar s  = 39
+scalar gl = 1
+loop 100000 --progressive --quiet
+    series U = randgen(n, 0, s)
+    #series U = randgen(X, gl) - gl
+    scalar m = mean(U)
+    series y = ys + U
+    
+    ols y const x
+    # Hnula (b1=52)
+    scalar t = ($coeff(const)-52)/$stderr(const)
+    scalar p = 2*pvalue(t,$df,abs(t))
+
+    print p m
+    store "@workdir\pvalue.gdt" p m
+endloop
+
+open "@workdir\pvalue.gdt"
+series ns = p<0.05
+summary ns
+freq ns --plot="display"
+#+end_src
+
+  
+# +LATEX: \clearpage
+#+latex: \vspace{10pt}
+#+latex: \noindent
+** Código completo de la práctica ~samplinghouses4.inp~
+#+latex: \vspace{10pt}
+\lstinputlisting{scripts/samplinghouses4.inp}
+#+LATEX: \clearpage
+

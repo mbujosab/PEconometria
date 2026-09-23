@@ -1,0 +1,413 @@
+#+Title: Sesión 21 (A) --- El contraste $F$ con datos reales: tres restricciones sobre =hprice2=
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L21-Prct-A-hprice2-restricciones
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S21-Prct-A-hprice2-restricciones"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+La lección 13 construyó el contraste $F$ comparando dos ajustes anidados: el del modelo completo y el del modelo que respeta $H_0$. La diferencia $\mathrm{SRC}_r-\mathrm{SRC}$ es lo que la restricción cuesta en longitud al cuadrado; dividida por el número de restricciones $q$ y por $\mathrm{SRC}/(n-k)$ da el $F$. Hoy hacemos esa cuenta con datos reales, restricción por restricción, y después dejamos que Gretl la haga con =restrict=.
+
+Retomamos =hprice2= con el modelo de la lección 13, =price ~ rooms + nox + stratio=, y sus tres restricciones: excluir =nox= y =stratio= a la vez, excluir solo =stratio=, e imponer que los coeficientes de =nox= y =stratio= sean iguales. La primera es un $F$ con $q=2$; la segunda, un $F$ con $q=1$, que debe coincidir con el cuadrado de un $t$; la tercera no es una exclusión, y obliga a construir el modelo restringido a mano.
+
+/Objetivos/
+
+1. Estimar el modelo completo y el restringido, y construir el $F$ con las dos $\mathrm{SRC}$, $q$ y $n-k$.
+2. Comprobar que =restrict= devuelve el mismo $F$ y leer su salida: el estadístico, el valor $p$ y las estimaciones restringidas.
+3. Ver que con $q=1$ el $F$ es el cuadrado del $t$, y el valor crítico $F_c$ el cuadrado de $t_c$.
+4. Imponer una igualdad entre dos coeficientes construyendo la suma de los regresores como regresor único.
+5. Reencontrar el caso =nox= y =lnox= de la lección 13, que la práctica B de la sesión 22 explicará.
+
+* Actividad 1 - El modelo completo
+
+Abra =hprice2= y estime =price= sobre =rooms=, =nox= y =stratio=: //~Modelo -> Mínimos cuadrados ordinarios~//. Anote la suma de cuadrados de los residuos y los grados de libertad, $n-k=506-4=502$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Completo
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet
+ols price const rooms nox stratio
+scalar n   = $nobs
+scalar k   = 4
+scalar SRC = $ess
+scalar s2  = SRC/(n-k)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :eval no :exports none
+open hprice2.gdt --quiet
+outfile --quiet completo.txt
+    ols price const rooms nox stratio
+    scalar n   = $nobs
+    scalar k   = 4
+    scalar SRC = $ess
+    scalar s2  = SRC/(n-k)
+    printf "\nSRC = %.4e    n-k = %d    s^2 = SRC/(n-k) = %.4e\n", SRC, n-k, s2
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-A-hprice2-restricciones/completo.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Los tres regresores tienen $t$ grandes; ninguna de las tres restricciones de hoy va a sorprender por su resultado, y esa es la intención: lo que interesa es la mecánica. El denominador del $F$, $\mathrm{SRC}/(n-k)$, es $\mathfrak s^2$, el cuadrado de la ``D.T. de la regresión'' de la tabla. Compruébelo: $5837{,}77^2=3{,}408\cdot10^7$.
+
+* Actividad 2 - Excluir dos regresores: el $F$ a mano y con =restrict=
+
+La hipótesis $H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}=0$ dice que el modelo es =price ~ rooms=. Estime ese modelo restringido, anote su $\mathrm{SRC}_r$ y construya el $F$ con $q=2$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: DosExclusiones
+#+begin_src gretl :eval no
+ols price const rooms --quiet
+scalar SRCr = $ess
+scalar q    = 2
+scalar F    = ((SRCr - SRC)/q)/s2
+printf "F = %.3f   F_c(2,502) = %.3f   valor p = %.3g\n", F, critical(F, q, n-k, 0.05), pvalue(F, q, n-k, F)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :eval no :exports none
+outfile --quiet dosExclusiones.txt
+    ols price const rooms --quiet
+    scalar SRCr = $ess
+    scalar q    = 2
+    scalar F    = ((SRCr - SRC)/q)/s2
+    printf "Modelo restringido (price ~ rooms):  SRC_r = %.4e\n", SRCr
+    printf "Subida de la SRC:                   SRC_r - SRC = %.4e\n", SRCr - SRC
+    printf "F = ((SRC_r - SRC)/%d)/(SRC/(n-k)) = %.3f\n", q, F
+    printf "F_c(%d,%d) al 5%% = %.3f    valor p = %.3g\n", q, n-k, critical(F, q, n-k, 0.05), pvalue(F, q, n-k, F)
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-A-hprice2-restricciones/dosExclusiones.txt example
+#+latex: }
+
+Ahora pida a Gretl el mismo contraste. Vuelva a estimar el modelo completo y, en la ventana del modelo, //~Contrastes -> Restricciones lineales~//; escriba las dos restricciones =b[nox] = 0= y =b[stratio] = 0=, una por línea.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: RestrictDos
+#+begin_src gretl :eval no
+ols price const rooms nox stratio --quiet
+restrict
+    b[nox] = 0
+    b[stratio] = 0
+end restrict
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :eval no :exports none
+ols price const rooms nox stratio --quiet
+outfile --quiet restrictDos.txt
+    restrict
+        b[nox] = 0
+        b[stratio] = 0
+    end restrict
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-A-hprice2-restricciones/restrictDos.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El $F$ de =restrict= es el que usted acaba de construir con las dos $\mathrm{SRC}$; la coincidencia es exacta porque son la misma cuenta. La salida añade las /estimaciones restringidas/: los coeficientes del modelo que respeta $H_0$. El de =rooms= no es el del modelo completo. Al quitar =nox= y =stratio=, la proyección de =price= cae sobre un subespacio más pequeño y la coordenada de =rooms= se recalcula: es la figura de la proyección en dos pasos de la lección 13, con $\boldsymbol{\mathop{\widehat y}}_r$ en el plano de $\boldsymbol 1$ y =rooms=.
+
+La ``desviación típica de la regresión'' del modelo restringido, $6620{,}9$, es mayor que la del completo, $5837{,}8$. Siempre lo es: el residuo restringido es más largo. Que la diferencia sea grande o pequeña respecto al ruido es lo que el $F$ decide.
+
+* Actividad 3 - Excluir un solo regresor: $F=t^2$
+
+Con $q=1$ la restricción $\beta_{\text{stratio}}=0$ se puede contrastar de dos maneras: con el $F$ de los dos ajustes anidados o con el $t$ de la tabla del modelo completo. La lección 13 dijo que son el mismo contraste. Compruébelo.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: UnaExclusion
+#+begin_src gretl :eval no
+ols price const rooms nox --quiet
+scalar SRCr1 = $ess
+scalar F1 = ((SRCr1 - SRC)/1)/s2
+ols price const rooms nox stratio --quiet
+scalar t_st = $coeff(stratio)/$stderr(stratio)
+printf "F = %.3f   t^2 = %.3f\n", F1, t_st^2
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :eval no :exports none
+outfile --quiet unaExclusion.txt
+    ols price const rooms nox --quiet
+    scalar SRCr1 = $ess
+    scalar F1 = ((SRCr1 - SRC)/1)/s2
+    ols price const rooms nox stratio --quiet
+    scalar t_st = $coeff(stratio)/$stderr(stratio)
+    printf "Modelo restringido (price ~ rooms + nox): SRC_r = %.4e\n", SRCr1
+    printf "F = (SRC_r - SRC)/(SRC/(n-k)) = %.3f\n", F1
+    printf "t de stratio en el modelo completo = %.3f ;  t^2 = %.3f\n", t_st, t_st^2
+    printf "F_c(1,%d) al 5%% = %.3f ;  t_c^2 = %.3f\n", n-k, critical(F, 1, n-k, 0.05), critical(t, n-k, 0.025)^2
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-A-hprice2-restricciones/unaExclusion.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+$F=t^2$ con todos los decimales, y $F_c(1,502)=t_c^2$: $3{,}860=1{,}965^2$. El $t$ bilateral al $5\%$ y el $F$ con $q=1$ al $5\%$ rechazan exactamente en los mismos casos. La diferencia es de lectura: el $t$ tiene signo y dice en qué dirección se aleja el coeficiente de cero; el $F$ solo mide cuánto sube la $\mathrm{SRC}$, y por eso sirve también cuando las restricciones son varias.
+
+* Actividad 4 - Una igualdad entre coeficientes
+
+La hipótesis $H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}$ no excluye ningún regresor, así que el modelo restringido no se obtiene borrando una variable. Si los dos coeficientes son iguales a un mismo $\beta$, entonces $\beta_{\text{nox}}\,\text{nox}+\beta_{\text{stratio}}\,\text{stratio}=\beta\,(\text{nox}+\text{stratio})$: el modelo restringido tiene como regresor la /suma/ =nox + stratio=. Constrúyala (//~Añadir -> Definir nueva variable~//), estime el modelo con =rooms= y la suma, y calcule el $F$ con $q=1$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Igualdad
+#+begin_src gretl :eval no
+series nox_mas_stratio = nox + stratio
+ols price const rooms nox_mas_stratio --quiet
+scalar SRCr2 = $ess
+scalar F2 = ((SRCr2 - SRC)/1)/s2
+printf "F = %.3f   F_c(1,502) = %.3f   valor p = %.4f\n", F2, critical(F, 1, n-k, 0.05), pvalue(F, 1, n-k, F2)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :eval no :exports none
+outfile --quiet igualdad.txt
+    series nox_mas_stratio = nox + stratio
+    ols price const rooms nox_mas_stratio --quiet
+    scalar SRCr2 = $ess
+    scalar F2 = ((SRCr2 - SRC)/1)/s2
+    printf "Modelo restringido (price ~ rooms + (nox + stratio)): SRC_r = %.4e\n", SRCr2
+    printf "Subida de la SRC = %.4e\n", SRCr2 - SRC
+    printf "F = %.3f    F_c(1,%d) al 5%% = %.3f    valor p = %.4f\n", F2, n-k, critical(F, 1, n-k, 0.05), pvalue(F, 1, n-k, F2)
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-A-hprice2-restricciones/igualdad.txt example
+#+latex: }
+
+Y de nuevo con =restrict=, escribiendo la restricción como =b[nox] - b[stratio] = 0=.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: RestrictIgualdad
+#+begin_src gretl :eval no
+ols price const rooms nox stratio --quiet
+restrict
+    b[nox] - b[stratio] = 0
+end restrict
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :eval no :exports none
+ols price const rooms nox stratio --quiet
+outfile --quiet restrictIgualdad.txt
+    restrict
+        b[nox] - b[stratio] = 0
+    end restrict
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-A-hprice2-restricciones/restrictIgualdad.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La $\mathrm{SRC}$ sube poco: $1{,}21\cdot10^8$ sobre $1{,}71\cdot10^{10}$, y el $F$ vale $3{,}56$, por debajo de $F_c=3{,}86$. Al $5\%$ la igualdad no se rechaza, con un valor $p$ de $0{,}060$: cerca del umbral, y la lección 12 ya dijo qué hacer con un valor $p$, que es leerlo, no solo compararlo.
+
+Las estimaciones restringidas de =restrict= muestran el mismo coeficiente para =nox= y =stratio=, $-1297{,}5$, que es el coeficiente de la suma en su modelo a mano: son el mismo ajuste. Y conviene decir qué significa esta igualdad: =nox= se mide en partes por cien millones y =stratio= en alumnos por profesor, así que ``una unidad de cada una cuesta lo mismo'' es una coincidencia de escalas, no una hipótesis económica. La restricción es un ejercicio de mecánica; en la lección 15 veremos restricciones con contenido, como la de rendimientos constantes a escala.
+
+* Actividad 5 - Apertura: el caso =nox= y =lnox=
+
+Sustituya =stratio= por =lnox=, el logaritmo de =nox=, y compare el $F$ de excluir las dos medidas de contaminación con los $t$ de cada una.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Apertura
+#+begin_src gretl :eval no
+ols price const rooms nox lnox
+restrict
+    b[nox] = 0
+    b[lnox] = 0
+end restrict
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :eval no :exports none
+outfile --quiet apertura.txt
+    ols price const rooms nox lnox --quiet
+    printf "price ~ rooms + nox + lnox:  t(nox) = %.2f   t(lnox) = %.2f   SRC = %.4e\n", $coeff(nox)/$stderr(nox), $coeff(lnox)/$stderr(lnox), $ess
+    scalar SRCc = $ess
+    scalar dfc  = $df
+    ols price const rooms --quiet
+    scalar Fap = (($ess - SRCc)/2)/(SRCc/dfc)
+    printf "F de excluir nox y lnox a la vez = %.2f   F_c(2,%d) = %.3f   valor p = %.3g\n", Fap, dfc, critical(F, 2, dfc, 0.05), pvalue(F, 2, dfc, Fap)
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-A-hprice2-restricciones/apertura.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Ningún $t$ llega a $1{,}05$ en valor absoluto; el $F$ de excluir las dos a la vez vale $28$. Uno a uno, ninguno de los dos regresores parece necesario; juntos, lo son sin discusión. No es una contradicción del contraste: es que las dos preguntas son distintas, y la lección 14 explicó por qué esta pareja las separa tanto. La práctica B de la sesión 22 le pondrá números.
+
+* Preguntas de interpretación para la clase
+
+1. En la Actividad 2, $\mathrm{SRC}_r-\mathrm{SRC}$ vale $4{,}99\cdot10^9$. ¿Qué longitud al cuadrado es esa, en la figura de la proyección en dos pasos de la lección 13? ¿Por qué no puede ser negativa?
+2. El coeficiente de =rooms= pasa de $7000{,}6$ en el modelo completo a $9119{,}6$ en el restringido de la Actividad 2. ¿Qué ha cambiado, si =rooms= es el mismo vector?
+3. En la Actividad 3 el $F$ y el $t^2$ coinciden. ¿Qué información tiene el $t$ que el $F$ no tiene? ¿Y en qué situación el $t$ no sirve y el $F$ sí?
+4. En la Actividad 4 el valor $p$ es $0{,}060$. Un compañero concluye ``queda demostrado que los dos coeficientes son iguales''. Diga dos razones por las que esa frase es incorrecta.
+5. Con la restricción de la Actividad 4, ¿cuánto vale el error estándar del coeficiente común, y por qué es menor que los errores estándar de =nox= y =stratio= en el modelo completo?
+
+* Para profundizar
+
+- Lección 13 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html][lección 13]]), en especial ``Restricciones lineales: modelos anidados'' (con la figura de la proyección en dos pasos) y ``Tres restricciones sobre =hprice2=''.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 4, sección 4.5 (contraste de restricciones lineales múltiples) y el ejemplo 4.9.
+- Manual de Gretl: comandos =restrict= y =omit=; accesores =$ess=, =$df=, =$test= y =$pvalue=.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S21-Prct-A-hprice2-restricciones.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S21-Prct-A-hprice2-restricciones.inp][S21-Prct-A-hprice2-restricciones.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /La subida de la $\mathrm{SRC}$./ Es $\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2$, el cuadrado de la distancia entre el ajuste completo y el restringido: el cateto que separa las dos proyecciones en la figura de la lección 13. Por Pitágoras anidado, $\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2$, y un cuadrado no es negativo: el residuo restringido nunca es más corto que el libre, porque se proyecta sobre un subespacio contenido en el otro.
+
+2. /El coeficiente de =rooms= cambia./ El vector =rooms= es el mismo, pero la coordenada de un vector en una base depende de toda la base. En el modelo completo, el coeficiente de =rooms= es la coordenada de $\boldsymbol{\mathop{\widehat y}}$ en la base $\{\boldsymbol 1,\text{rooms},\text{nox},\text{stratio}\}$; en el restringido, la de $\boldsymbol{\mathop{\widehat y}}_r$ en la base $\{\boldsymbol 1,\text{rooms}\}$. Son dos puntos distintos descritos en bases distintas. La lección 14 lo dijo con la parte propia: en el modelo completo, =rooms= se mide con lo que no comparte con =nox= y =stratio=.
+
+3. /Qué tiene el $t$ que no tiene el $F$./ El signo, y con él la dirección del efecto: $t=-9{,}06$ dice que =stratio= reduce el precio; $F=82{,}1$ solo dice que quitarla cuesta mucho. El $t$ no sirve cuando la hipótesis involucra más de un coeficiente a la vez, como en las Actividades 2 y 5: dos $t$ pequeños no equivalen a un $F$ pequeño, y la Actividad 5 lo muestra.
+
+4. /``Queda demostrado que son iguales''./ Primera razón: no rechazar no es demostrar; con estos datos la igualdad es compatible con la evidencia, igual que lo son muchas otras diferencias entre los dos coeficientes, y $p=0{,}060$ está a un pelo del umbral. Segunda razón: la igualdad que se contrasta es entre coeficientes de variables medidas en unidades sin relación, así que ni siquiera tiene contenido económico que demostrar. Un intervalo para $\beta_{\text{nox}}-\beta_{\text{stratio}}$ sería más honesto que el veredicto.
+
+5. /El error estándar del coeficiente común./ Es $108{,}9$ en la salida de =restrict=, frente a $236{,}3$ y $128{,}8$ en el modelo completo. Al fundir los dos regresores en uno, la parte propia de la suma es más larga que la de cada sumando: la dirección que =nox= y =stratio= compartían deja de restar longitud. Es el segundo remedio de la lección 14, imponer una restricción que la muestra no rechaza, visto en acción.
+
+* COMMENT Banco de preguntas de reserva
+
+** Pregunta R1 — Qué es $\mathrm{SRC}_r$
+La suma de cuadrados del modelo restringido, $\mathrm{SRC}_r$, es:
+a) La $\mathrm{SRC}$ del modelo completo dividida por $q$.
+b) La longitud al cuadrado del residuo al proyectar sobre el subespacio que respeta $H_0$; nunca es menor que $\mathrm{SRC}$.
+c) La longitud al cuadrado de $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r$.
+d) La $\mathrm{SRC}$ del modelo completo menos la del restringido.
+/Respuesta correcta: b./
+/Evalúa/: la lectura geométrica del ajuste restringido como proyección sobre un subespacio contenido en el original.
+
+** Pregunta R2 — $F$ y $t^2$
+Para una restricción sobre un solo coeficiente, el $F$ de =restrict= y el $t$ de la tabla cumplen:
+a) $F=t$.
+b) $F=t^2$, y el contraste al $5\%$ es el mismo con los dos.
+c) $F=t^2$, pero el $F$ es más exigente porque tiene dos grados de libertad.
+d) No hay relación fija entre ellos.
+/Respuesta correcta: b./
+/Evalúa/: la identidad $F=t^2$ con $q=1$ y la coincidencia de los valores críticos.
+
+** Pregunta R3 — Cómo se impone $\beta_2=\beta_3$
+Para estimar el modelo que respeta $\beta_2=\beta_3$ basta con:
+a) Eliminar $\boldsymbol x_3$ del modelo.
+b) Sustituir $\boldsymbol x_2$ y $\boldsymbol x_3$ por su suma como único regresor.
+c) Sustituir $\boldsymbol x_2$ y $\boldsymbol x_3$ por su diferencia.
+d) Estimar el modelo completo y promediar los dos coeficientes.
+/Respuesta correcta: b./
+/Evalúa/: la construcción del modelo restringido cuando la restricción no es una exclusión.

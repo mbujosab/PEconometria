@@ -1,0 +1,336 @@
+#+Title: Sesión 21 (B) --- Dos regresores que no son significativos: uno a uno y a la vez
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L21-Prct-B-ramanathan-conjunta
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S21-Prct-B-ramanathan-conjunta"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+Cuando un modelo tiene dos regresores con $t$ pequeños, la tentación es quitar los dos. La lección 13 avisó de que dos $t$ pequeños no son un $F$ pequeño: la pregunta ``¿sobra esta variable?'' y la pregunta ``¿sobran estas dos?'' son distintas, y solo la segunda se responde con el $F$ de $q=2$. Esta práctica hace las dos preguntas sobre unos datos pequeños y compara.
+
+Volvemos a =data4-1= de Ramanathan, el fichero de catorce viviendas de la práctica A de la sesión 14, con el modelo =price ~ sqft + bedrms + baths=: precio en miles de dólares, superficie en pies cuadrados, número de dormitorios y de baños. Con $n=14$ y $k=4$ quedan diez grados de libertad, y lo que estos datos no saben es mucho.
+
+/Objetivos/
+
+1. Leer los $t$ de =bedrms= y =baths= en el modelo completo y omitir los regresores de uno en uno.
+2. Contrastar la exclusión conjunta con el $F$ de $q=2$, a mano y con =restrict=, y compararla con las exclusiones una a una.
+3. Ver que el conjunto de pares $(\beta_{\text{bedrms}},\beta_{\text{baths}})$ que el $F$ no rechaza no es el rectángulo formado por los dos intervalos: contrastar las cuatro esquinas del rectángulo.
+4. Distinguir ``no se rechaza que sean cero'' de ``son cero''.
+
+* Actividad 1 - El modelo completo y los regresores uno a uno
+
+Abra =data4-1= y estime =price= sobre =sqft=, =bedrms= y =baths=. Después omita =baths=, y después también =bedrms=, anotando en cada paso el $t$ de lo que queda y la $\mathrm{SRC}$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Completo
+#+begin_src gretl :eval no
+open data4-1.gdt --quiet
+ols price const sqft bedrms baths
+ols price const sqft bedrms
+ols price const sqft
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :eval no :exports none
+open data4-1.gdt --quiet
+outfile --quiet completo.txt
+    ols price const sqft bedrms baths
+    scalar n = $nobs
+    scalar SRC = $ess
+    scalar s2 = SRC/$df
+    scalar df = $df
+    printf "\nn = %d   k = 4   n-k = %d\n", n, df
+    printf "t_c al 5%% (%d g.l.) = %.3f\n", df, critical(t, df, 0.025)
+end outfile
+outfile --quiet unaAuna.txt
+    ols price const sqft bedrms baths --quiet
+    scalar t_baths  = $coeff(baths)/$stderr(baths)
+    scalar t_bedrms = $coeff(bedrms)/$stderr(bedrms)
+    printf "Modelo completo: t(bedrms) = %.3f   t(baths) = %.3f   (t_c = %.3f)\n", t_bedrms, t_baths, critical(t, df, 0.025)
+    ols price const sqft bedrms --quiet
+    printf "Sin baths:       t(bedrms) = %.3f   (t_c = %.3f)   SRC = %.1f\n", $coeff(bedrms)/$stderr(bedrms), critical(t, $df, 0.025), $ess
+    ols price const sqft --quiet
+    printf "Sin baths ni bedrms:  SRC_r = %.1f   coef(sqft) = %.4f   ee = %.4f   t = %.2f\n", $ess, $coeff(sqft), $stderr(sqft), $coeff(sqft)/$stderr(sqft)
+    scalar SRCr = $ess
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-B-ramanathan-conjunta/completo.txt example
+#+include: ./S21-Prct-B-ramanathan-conjunta/unaAuna.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Los dos coeficientes son negativos y sus $t$ están lejos de $t_c=2{,}23$: con diez grados de libertad, ni los dormitorios ni los baños añaden nada medible a lo que ya dice la superficie. Al quitar =baths=, el $t$ de =bedrms= cambia de $-0{,}80$ a $-0{,}97$: cambia, porque la parte propia de =bedrms= ya no descuenta lo que compartía con =baths=, pero sigue sin acercarse al umbral.
+
+Fíjese también en =sqft=: su coeficiente pasa de $0{,}155$ a $0{,}139$ y su error estándar de $0{,}032$ a $0{,}019$. Cada vez que se quita un regresor, los que quedan se miden con una parte propia más larga.
+
+* Actividad 2 - La exclusión conjunta
+
+Estime el $F$ de $H_0\!:\beta_{\text{bedrms}}=\beta_{\text{baths}}=0$ con las dos $\mathrm{SRC}$ que ya tiene, y compruébelo con =restrict= (//~Contrastes -> Restricciones lineales~// en la ventana del modelo completo).
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Conjunta
+#+begin_src gretl :eval no
+scalar Fj = ((SRCr - SRC)/2)/s2
+printf "F(2,10) = %.3f   F_c = %.3f   valor p = %.4f\n", Fj, critical(F, 2, df, 0.05), pvalue(F, 2, df, Fj)
+ols price const sqft bedrms baths --quiet
+restrict
+    b[bedrms] = 0
+    b[baths] = 0
+end restrict
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :eval no :exports none
+outfile --quiet conjunta.txt
+    scalar Fj = ((SRCr - SRC)/2)/s2
+    printf "H0: beta_bedrms = beta_baths = 0\n"
+    printf "SRC completo = %.1f   SRC_r = %.1f   subida = %.1f\n", SRC, SRCr, SRCr - SRC
+    printf "F(2,%d) = %.3f   F_c al 5%% = %.3f   valor p = %.4f\n", df, Fj, critical(F, 2, df, 0.05), pvalue(F, 2, df, Fj)
+end outfile
+ols price const sqft bedrms baths --quiet
+outfile --quiet restrictConjunta.txt
+    restrict
+        b[bedrms] = 0
+        b[baths] = 0
+    end restrict
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-B-ramanathan-conjunta/conjunta.txt example
+#+include: ./S21-Prct-B-ramanathan-conjunta/restrictConjunta.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+$F=0{,}47$ con $F_c(2,10)=4{,}10$: quitar los dos regresores a la vez sube la $\mathrm{SRC}$ en $1573$, menos de la mitad de lo que vale una sola dimensión de ruido, $\mathfrak s^2=1670$. Aquí los dos veredictos coinciden: uno a uno, no significativos; a la vez, tampoco. No siempre es así, y la práctica A de esta sesión terminó con el caso contrario. La coincidencia de hoy no es la regla; es lo que ocurre cuando los dos regresores no comparten mucho entre sí.
+
+* Actividad 3 - El rectángulo y las esquinas
+
+Los intervalos al $95\%$ de =bedrms= y =baths= definen un rectángulo en el plano $(\beta_{\text{bedrms}},\beta_{\text{baths}})$. Cabe pensar que el $F$ no rechaza ningún par de valores dentro del rectángulo y rechaza todos los de fuera. Compruébelo en las cuatro esquinas: cada esquina es un par de valores que está, a la vez, en el borde de los dos intervalos.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Esquinas
+#+begin_src gretl :eval no
+ols price const sqft bedrms baths --quiet
+scalar tc = critical(t, $df, 0.025)
+scalar iL = $coeff(bedrms) - tc*$stderr(bedrms)
+scalar iR = $coeff(bedrms) + tc*$stderr(bedrms)
+scalar jL = $coeff(baths)  - tc*$stderr(baths)
+scalar jR = $coeff(baths)  + tc*$stderr(baths)
+restrict --quiet
+    b[bedrms] = iL
+    b[baths] = jL
+end restrict
+scalar F_LL = $test          # y lo mismo con las otras tres esquinas
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :eval no :exports none
+ols price const sqft bedrms baths --quiet
+scalar tc = critical(t, $df, 0.025)
+scalar iL = $coeff(bedrms) - tc*$stderr(bedrms)
+scalar iR = $coeff(bedrms) + tc*$stderr(bedrms)
+scalar jL = $coeff(baths)  - tc*$stderr(baths)
+scalar jR = $coeff(baths)  + tc*$stderr(baths)
+scalar corrEst = $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
+# el F de fijar a la vez los dos coeficientes en cada esquina del rectangulo
+restrict --quiet
+    b[bedrms] = iL
+    b[baths] = jL
+end restrict
+scalar F_LL = $test
+restrict --quiet
+    b[bedrms] = iL
+    b[baths] = jR
+end restrict
+scalar F_LR = $test
+restrict --quiet
+    b[bedrms] = iR
+    b[baths] = jL
+end restrict
+scalar F_RL = $test
+restrict --quiet
+    b[bedrms] = iR
+    b[baths] = jR
+end restrict
+scalar F_RR = $test
+outfile --quiet esquinas.txt
+    printf "IC 95%% bedrms: [%.2f ; %.2f]    IC 95%% baths: [%.2f ; %.2f]\n", iL, iR, jL, jR
+    printf "F_c(2,10) al 5%% = %.3f\n", critical(F, 2, 10, 0.05)
+    printf "Contraste conjunto de cada esquina del rectangulo:\n"
+    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iL, jL, F_LL, pvalue(F, 2, 10, F_LL)
+    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iL, jR, F_LR, pvalue(F, 2, 10, F_LR)
+    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jL, F_RL, pvalue(F, 2, 10, F_RL)
+    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jR, F_RR, pvalue(F, 2, 10, F_RR)
+    printf "Correlacion entre los estimadores de bedrms y baths (de la matriz de varianzas): %.3f\n", corrEst
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-B-ramanathan-conjunta/esquinas.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Dos esquinas se rechazan ($F=7{,}14>4{,}10$) y dos no ($F=3{,}80$). Las cuatro están en el borde de los dos intervalos, así que el rectángulo no es la región que el $F$ acepta. Esa región es el conjunto de pares $(c_2,c_3)$ para los que $H_0\!:\beta_{\text{bedrms}}=c_2,\ \beta_{\text{baths}}=c_3$ no se rechaza al $5\%$, y tiene forma de elipse centrada en las estimaciones: es el intervalo de confianza en dos dimensiones. Gretl la dibuja desde la ventana del modelo, //~Análisis -> Elipse de confianza~//, eligiendo los dos coeficientes.
+
+La elipse está inclinada porque los dos estimadores están correlados: $-0{,}31$, según la matriz de varianzas. Las esquinas rechazadas son las que dan a los dos coeficientes desvíos del mismo signo, y las aceptadas las de signos contrarios: la muestra cree más fácil que un coeficiente suba si el otro baja. Es lo que la lección 14 llamó compensación entre coordenadas, aquí en grado leve.
+
+* Preguntas de interpretación para la clase
+
+1. En la Actividad 1, el $t$ de =bedrms= pasa de $-0{,}80$ a $-0{,}97$ al quitar =baths=. ¿Qué dos cosas cambian en el cociente $t=\hat\beta/\mathrm{ee}$ cuando se elimina un regresor?
+2. La Actividad 2 da $F=0{,}47$. ¿Qué diría un $F$ menor que $1$ sobre la subida de la $\mathrm{SRC}$ comparada con el ruido de una dimensión?
+3. El intervalo de =bedrms= va de $-82$ a $39$ miles de dólares por dormitorio. ¿Es correcto decir que ``el número de dormitorios no influye en el precio''? ¿Qué es lo que estos datos sí permiten decir?
+4. En la Actividad 3, ¿qué relación hay entre la elipse y los dos intervalos? ¿Puede un par estar dentro de los dos intervalos y fuera de la elipse? ¿Y al revés?
+5. Si las catorce viviendas fueran ciento cuarenta con la misma dispersión y los mismos coeficientes, ¿qué le pasaría a la elipse y a los intervalos? ¿Y a la correlación entre los dos estimadores?
+
+* Para profundizar
+
+- Lección 13 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html][lección 13]]), secciones ``La hipótesis conjunta'' y ``Conjunto $\neq$ individual: el caso de la apertura''.
+- Lección 12 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html][lección 12]]), el intervalo de confianza como conjunto de valores que el contraste no rechaza.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 4, sección 4.5, en particular la discusión ``relación entre los contrastes $F$ y $t$''.
+- Manual de Gretl: comando =restrict=, accesores =$test=, =$pvalue= y =$vcv=.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S21-Prct-B-ramanathan-conjunta.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S21-Prct-B-ramanathan-conjunta.inp][S21-Prct-B-ramanathan-conjunta.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /Qué cambia en el $t$ al quitar un regresor./ Numerador y denominador. El coeficiente de =bedrms= es una coordenada, y cambia porque cambia la base: pasa de $-21{,}6$ a $-23{,}9$ al quitar =baths=. El error estándar es $\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$ y cambia por dos vías: la parte propia de =bedrms= se alarga al no descontar lo que compartía con =baths=, y $\mathfrak s$ se recalcula con un grado de libertad más: el error estándar baja de $27{,}0$ a $24{,}6$. El efecto neto es pequeño, porque =bedrms= y =baths= comparten poco.
+
+2. /Un $F$ menor que uno./ Por dimensión, la subida de la $\mathrm{SRC}$ al imponer $H_0$ es menor que lo que aporta una dimensión de ruido. Bajo $H_0$ cierta, el numerador y el denominador del $F$ estiman lo mismo, $\sigma^2$, y el $F$ oscila en torno a $1$ (la práctica C lo comprueba). Un $F$ de $0{,}47$ es de los que salen cuando $H_0$ es cierta, no de los que exigen explicación.
+
+3. /``No influye''./ No es correcto: el intervalo contiene valores tan distintos como $-80$ y $+30$ miles de dólares por dormitorio, y cualquiera de ellos es compatible con los datos. Lo que sí se puede decir es que, con la superficie ya en el modelo, catorce viviendas no permiten medir el efecto de un dormitorio adicional, y que ese efecto podría ser cero. No rechazar no es demostrar.
+
+4. /La elipse y los intervalos./ No son la misma región ni una es la sombra de la otra. Un par puede estar dentro de los dos intervalos y fuera de la elipse: las esquinas rechazadas de la Actividad 3. Y al revés: la elipse se extiende sobre cada eje hasta $\pm\sqrt{2F_c}\cdot\mathrm{ee}=\pm2{,}86\,\mathrm{ee}$, más allá del $\pm2{,}23\,\mathrm{ee}$ del intervalo, así que hay pares que el $F$ acepta aunque una de las coordenadas se salga de su intervalo, porque la otra compensa. El intervalo responde a una pregunta sobre un coeficiente; la elipse, a una pregunta sobre los dos a la vez.
+
+5. /Diez veces más viviendas./ Los regresores en desviaciones serían $\sqrt{10}$ veces más largos, los errores estándar $\sqrt{10}$ veces menores, y la elipse y los intervalos se encogerían en ese factor alrededor de las mismas estimaciones. La correlación entre los estimadores no cambiaría: depende del ángulo entre las partes propias de =bedrms= y =baths=, no de su longitud. La inclinación de la elipse es un rasgo de la muestra que el tamaño no corrige; la lección 14 lo dijo del VIF.
+
+* COMMENT Banco de preguntas de reserva
+
+** Pregunta R1 — Dos $t$ pequeños
+Si dos regresores tienen $t$ menores que $t_c$ en valor absoluto:
+a) El $F$ de excluirlos a la vez es necesariamente menor que $F_c$.
+b) El $F$ de excluirlos a la vez puede ser grande o pequeño; hay que calcularlo.
+c) El $F$ es la suma de los dos $t^2$.
+d) Los dos coeficientes son cero.
+/Respuesta correcta: b./
+/Evalúa/: la diferencia entre contrastes individuales y conjunto.
+
+** Pregunta R2 — La elipse de confianza
+La elipse de confianza al $95\%$ para $(\beta_2,\beta_3)$ es:
+a) El rectángulo formado por los dos intervalos al $95\%$.
+b) El conjunto de pares $(c_2,c_3)$ que el contraste $F$ conjunto no rechaza al $5\%$.
+c) El conjunto de pares que los dos contrastes $t$ no rechazan.
+d) Una región que siempre contiene al rectángulo.
+/Respuesta correcta: b./
+/Evalúa/: la definición de la región conjunta como inversión del contraste $F$.
+
+** Pregunta R3 — Elipse inclinada
+La elipse de confianza está inclinada cuando:
+a) Los dos regresores tienen distinta escala.
+b) Los dos estimadores están correlados, lo que ocurre cuando las partes propias de los regresores no son ortogonales.
+c) El $F$ es mayor que $F_c$.
+d) $n$ es pequeño.
+/Respuesta correcta: b./
+/Evalúa/: la relación entre la covarianza de los estimadores y la geometría de los regresores.

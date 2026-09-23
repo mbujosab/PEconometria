@@ -1,0 +1,378 @@
+#+Title: Sesión 21 (C) --- La distribución del $F$ cuando $H_0$ es cierta
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L21-Prct-C-distribucion-F
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S21-Prct-C-distribucion-F"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+La lección 13 dijo que, si $H_0$ es cierta y las perturbaciones son normales, el $F$ sigue una distribución $F$ de Fisher con $q$ y $n-k$ grados de libertad: numerador y denominador estiman los dos $\sigma^2$, así que el cociente oscila en torno a $1$, y el valor crítico deja un $5\%$ de probabilidad a su derecha. Esta práctica lo comprueba repitiendo, como la práctica C de la sesión 18 comprobó la cobertura del intervalo.
+
+El mundo artificial usa los regresores /reales/ de =hprice2= —=rooms=, =nox= y =stratio=— y una variable dependiente /simulada/ en la que ninguno de los tres interviene: $y=20\,000+u$, con $u$ normal de desviación típica $5\,000$. La hipótesis $H_0\!:\beta_{\text{rooms}}=\beta_{\text{nox}}=\beta_{\text{stratio}}=0$ es cierta por construcción. Después la hacemos falsa por poco y miramos cuántas veces el $F$ se da cuenta, con $n=20$ y con $n=506$.
+
+/Objetivos/
+
+1. Ver que bajo $H_0$ cierta el numerador y el denominador del $F$ tienen media $\sigma^2$, que el $F$ oscila en torno a $1$ con cola derecha, y que rechaza en (aproximadamente) el $5\%$ de las réplicas.
+2. Repetir con $n=20$ para ver que la distribución depende de $n-k$ y que usar el valor crítico equivocado cambia la frecuencia de rechazo.
+3. Con una $H_0$ falsa por poco, comparar la frecuencia de rechazo con $n=20$ y con $n=506$.
+
+* Actividad 1 - Dos mil réplicas bajo $H_0$ cierta, $n=506$
+
+Abra =hprice2=, fije la semilla y repita $2\,000$ veces: sortee las perturbaciones, construya $y$, estime el modelo con los tres regresores y guarde el $F$ del pie de la tabla junto con su numerador $\mathrm{SEC}/(k-1)$ y su denominador $\mathrm{SRC}/(n-k)$. Gretl no da la $\mathrm{SEC}$ directamente, pero $\mathrm{STC}=\mathrm{SRC}/(1-R^2)$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: BajoH0
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet
+scalar b1  = 20000
+scalar sig = 5000
+scalar R   = 2000
+set seed 20261119
+loop R --progressive --quiet
+    series u = normal(0, sig)
+    series y = b1 + u                       # H0 cierta: rooms, nox y stratio no intervienen
+    ols y const rooms nox stratio --quiet
+    scalar Fst   = $Fstat
+    scalar SRC   = $ess
+    scalar SEC   = $ess*$rsq/(1-$rsq)      # SEC = STC - SRC, con STC = SRC/(1-R^2)
+    scalar numer = SEC/3
+    scalar denom = SRC/502
+    store "@workdir/replicasF.gdt" Fst numer denom
+endloop
+open "@workdir/replicasF.gdt" --quiet
+printf "fraccion de F > F_c(3,502) = %.4f\n", mean(Fst > critical(F, 3, 502, 0.05))
+freq Fst --plot="@workdir/histF.png"
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none
+open hprice2.gdt --quiet
+scalar b1  = 20000
+scalar sig = 5000
+scalar R   = 2000
+scalar Fc506 = critical(F, 3, 502, 0.05)
+set seed 20261119
+loop R --progressive --quiet
+    series u = normal(0, sig)
+    series y = b1 + u                       # H0 cierta: rooms, nox y stratio no intervienen
+    ols y const rooms nox stratio --quiet
+    scalar Fst   = $Fstat
+    scalar SRC   = $ess
+    scalar SEC   = $ess*$rsq/(1-$rsq)      # SEC = STC - SRC, con STC = SRC/(1-R^2)
+    scalar numer = SEC/3
+    scalar denom = SRC/502
+    store "@workdir/replicasF.gdt" Fst numer denom
+endloop
+open "@workdir/replicasF.gdt" --quiet
+scalar sig = 5000
+scalar Fc506 = critical(F, 3, 502, 0.05)
+outfile --quiet bajoH0.txt
+    printf "H0 cierta, n = 506, k = 4, %d replicas, sigma^2 = %.3e\n", $nobs, sig^2
+    printf "media de SEC/(k-1) = %.4e\n", mean(numer)
+    printf "media de SRC/(n-k) = %.4e\n", mean(denom)
+    printf "media de F         = %.3f    mediana = %.3f\n", mean(Fst), median(Fst)
+    printf "fraccion de F > F_c(3,502) = %.3f = %.4f   (nominal 0,05)\n", Fc506, mean(Fst > Fc506)
+    printf "cuantil empirico 95%% de F  = %.3f   (F_c = %.3f)\n", quantile(Fst, 0.95), Fc506
+end outfile
+freq Fst --plot="@workdir/histF.png"
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-C-distribucion-F/bajoH0.txt example
+#+latex: }
+
+#+attr_latex: :width 0.7\textwidth
+#+attr_html: :width 550px
+#+CAPTION: Los $2\,000$ valores del $F$ bajo $H_0$ cierta con $n=506$. La masa está entre $0$ y $2$; la cola derecha llega más allá de $5$. El valor crítico $F_c(3,502)=2{,}62$ deja a su derecha el $5{,}5\%$ de las réplicas.
+[[file:./S21-Prct-C-distribucion-F/histF.png]]
+
+*** Lo que debe observar
+
+Las dos medias, la del numerador y la del denominador, están junto a $\sigma^2=2{,}5\cdot10^7$: bajo $H_0$ cierta las dos son estimaciones del mismo ruido, y esa es la razón de que el $F$ se mueva alrededor de $1$. La media del $F$ es $1{,}02$; la mediana, $0{,}81$: la distribución es asimétrica, con muchos valores pequeños y una cola larga a la derecha, y el histograma lo muestra. El $5{,}5\%$ de las réplicas supera $F_c$, frente al $5\%$ nominal; con $2\,000$ réplicas la frecuencia observada tiene su propia oscilación, igual que en la práctica C de la sesión 18.
+
+* Actividad 2 - Lo mismo con $n=20$
+
+Tome veinte viviendas al azar y repita. El valor crítico ya no es $F_c(3,502)$ sino $F_c(3,16)$, y esa diferencia importa.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: n20
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet
+set seed 20261119
+smpl 20 --random
+scalar Fc20 = critical(F, 3, 16, 0.05)
+set seed 20261119
+loop R --progressive --quiet
+    series u = normal(0, sig)
+    series y = b1 + u
+    ols y const rooms nox stratio --quiet
+    scalar F20 = $Fstat
+    store "@workdir/replicasF20.gdt" F20
+endloop
+open "@workdir/replicasF20.gdt" --quiet
+printf "fraccion de F > F_c(3,16)  = %.4f\n", mean(F20 > Fc20)
+printf "fraccion de F > F_c(3,502) = %.4f\n", mean(F20 > critical(F, 3, 502, 0.05))
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none
+# --- n = 20 ---
+open hprice2.gdt --quiet
+scalar b1  = 20000
+scalar sig = 5000
+scalar R   = 2000
+set seed 20261119
+smpl 20 --random
+scalar Fc20 = critical(F, 3, 16, 0.05)
+set seed 20261119
+loop R --progressive --quiet
+    series u = normal(0, sig)
+    series y = b1 + u
+    ols y const rooms nox stratio --quiet
+    scalar F20 = $Fstat
+    store "@workdir/replicasF20.gdt" F20
+endloop
+open "@workdir/replicasF20.gdt" --quiet
+scalar Fc20 = critical(F, 3, 16, 0.05)
+outfile --quiet n20.txt
+    printf "H0 cierta, n = 20 (n-k = 16), %d replicas\n", $nobs
+    printf "media de F = %.3f    mediana = %.3f    cuantil 95%% = %.3f   (F_c(3,16) = %.3f)\n", mean(F20), median(F20), quantile(F20, 0.95), Fc20
+    printf "fraccion de F > F_c(3,16) = %.4f   (nominal 0,05)\n", mean(F20 > Fc20)
+    printf "fraccion de F > F_c(3,502) = %.4f  <- si se usara el valor critico de n = 506\n", mean(F20 > critical(F, 3, 502, 0.05))
+end outfile
+freq F20 --plot="@workdir/histF20.png"
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-C-distribucion-F/n20.txt example
+#+latex: }
+
+#+attr_latex: :width 0.7\textwidth
+#+attr_html: :width 550px
+#+CAPTION: Los $2\,000$ valores del $F$ bajo $H_0$ cierta con $n=20$. La cola derecha es más pesada que con $n=506$: llega hasta $9$, y el $5\%$ superior empieza en $3{,}24$ en lugar de $2{,}62$.
+[[file:./S21-Prct-C-distribucion-F/histF20.png]]
+
+*** Lo que debe observar
+
+Con dieciséis grados de libertad en el denominador, el $F$ sigue oscilando en torno a $1$ pero se dispersa más: el denominador, $\mathrm{SRC}/16$, es una estimación de $\sigma^2$ mucho peor que $\mathrm{SRC}/502$, y cuando sale pequeño el cociente se dispara. Por eso $F_c(3,16)=3{,}24$ es mayor que $F_c(3,502)=2{,}62$. Con el valor crítico correcto se rechaza el $5{,}05\%$ de las veces; con el de $n=506$, el $8{,}75\%$: un contraste que dice ``$5\%$'' y rechaza casi el $9\%$ de las hipótesis ciertas. Es el mismo precio de estimar $\sigma$ que la práctica C de la sesión 18 midió con la $t$.
+
+* Actividad 3 - Una hipótesis falsa por poco, con $n=20$ y con $n=506$
+
+Haga que =nox= intervenga con un coeficiente pequeño frente al ruido, $\beta_{\text{nox}}=-800$ (=nox= recorre unas cinco unidades en la muestra, así que su efecto máximo es de unos $4\,000$ dólares, menos que la desviación típica de $u$), y mantenga los otros dos en cero. $H_0$ es ahora falsa. Cuente cuántas veces se rechaza con $n=20$ y con $n=506$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Deteccion
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet
+scalar bn = -800                         # efecto pequeno de nox; rooms y stratio siguen sin intervenir
+set seed 20261119
+smpl 20 --random
+scalar Fc = critical(F, 3, $nobs-4, 0.05)
+scalar rech = 0
+loop R --quiet
+    series u = normal(0, sig)
+    series y = b1 + bn*nox + u
+    ols y const rooms nox stratio --quiet
+    rech += ($Fstat > Fc)
+endloop
+printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rech/R
+smpl full                                # y lo mismo con n = 506
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none
+# --- H0 falsa por poco: n = 20 y n = 506 ---
+open hprice2.gdt --quiet
+scalar b1 = 20000
+scalar sig = 5000
+scalar R = 2000
+scalar bn = -800                         # efecto pequeno de nox; rooms y stratio siguen sin intervenir
+outfile --quiet deteccion.txt
+    set seed 20261119
+    smpl 20 --random
+    scalar Fc = critical(F, 3, $nobs-4, 0.05)
+    set seed 20261119
+    scalar rech = 0
+    loop R --quiet
+        series u = normal(0, sig)
+        series y = b1 + bn*nox + u
+        ols y const rooms nox stratio --quiet
+        rech += ($Fstat > Fc)
+    endloop
+    printf "H0 falsa (beta_nox = %d), n = %3d: rechazos = %.3f\n", bn, $nobs, rech/R
+    smpl full
+    scalar Fc = critical(F, 3, $nobs-4, 0.05)
+    set seed 20261119
+    scalar rech = 0
+    loop R --quiet
+        series u = normal(0, sig)
+        series y = b1 + bn*nox + u
+        ols y const rooms nox stratio --quiet
+        rech += ($Fstat > Fc)
+    endloop
+    printf "H0 falsa (beta_nox = %d), n = %3d: rechazos = %.3f\n", bn, $nobs, rech/R
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-C-distribucion-F/deteccion.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Con veinte viviendas, la hipótesis falsa se rechaza el $7{,}7\%$ de las veces: apenas por encima del $5\%$ con que se rechaza una hipótesis cierta. El contraste casi no distingue. Con quinientas seis, el $94{,}4\%$. El efecto es el mismo, $-800$ por unidad de =nox=; lo que cambia es la longitud de la parte propia de =nox=, que con $n=506$ es unas cinco veces mayor, y con ella la subida de la $\mathrm{SRC}$ que la restricción falsa provoca. El denominador, en cambio, sigue estimando $\sigma^2$. Un $F$ grande necesita un efecto, o muchos datos, o las dos cosas; con pocos datos, no rechazar dice poco.
+
+* Preguntas de interpretación para la clase
+
+1. En la Actividad 1, el numerador y el denominador tienen media $\sigma^2$ y aun así la mediana del $F$ es $0{,}81$, no $1$. ¿Cómo puede el cociente de dos cantidades de media $\sigma^2$ estar por debajo de $1$ más de la mitad de las veces?
+2. ¿Por qué bajo $H_0$ cierta $\mathrm{SEC}/(k-1)$ estima $\sigma^2$? Diga qué son los $k-1$ del denominador en la geometría de la lección 13.
+3. Si en la Actividad 2 se usara $F_c(3,502)$ con $n=20$, el contraste rechazaría casi el $9\%$ de las hipótesis ciertas. ¿Se equivocaría de más o de menos quien usara $F_c(3,16)$ con $n=506$?
+4. En la Actividad 3 la $\mathrm{SRC}$ del modelo restringido incluye lo que =nox= explica y no se le deja explicar. ¿Cuál de los dos términos del $F$ crece con $n$ y cuál no?
+5. Un investigador con $n=20$ obtiene $F=1{,}9$ y concluye que ``los tres regresores son irrelevantes''. Con los resultados de la Actividad 3, ¿qué le respondería?
+
+* Para profundizar
+
+- Lección 13 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html][lección 13]]), secciones ``El estadístico $F$'' y ``Lectura geométrica: la misma figura''.
+- Práctica C de la sesión 18, con la misma lógica aplicada al intervalo y al $t$.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 4, sección 4.5, y apéndice C.6 (contrastes y tamaño muestral).
+- Manual de Gretl: =loop= con la opción =--progressive= y comando =store=; funciones =critical=, =quantile= y =freq=.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S21-Prct-C-distribucion-F.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S21-Prct-C-distribucion-F.inp][S21-Prct-C-distribucion-F.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /Mediana menor que uno./ El cociente de dos variables no tiene por media el cociente de las medias, y la distribución del numerador es muy asimétrica: $\mathrm{SEC}/3$ es una suma de tres cuadrados, con muchos valores pequeños y pocos grandes que tiran de la media hacia arriba. Más de la mitad de las veces el numerador queda por debajo de su media, y el $F$ por debajo de $1$; las réplicas en que sale grande compensan en la media pero no en la mediana.
+
+2. /Por qué $\mathrm{SEC}/(k-1)$ estima $\sigma^2$./ Bajo $H_0$ cierta, $y$ es constante más ruido, y la parte de $\boldsymbol{\mathop{\widehat y}}$ que se aparta de $\boldsymbol{\mathop{\overline y}}$ es la sombra del ruido sobre las $k-1$ direcciones de los regresores no constantes. Por el reparto por igual de la lección 13, cada dimensión recibe en media $\sigma^2$ de longitud al cuadrado del ruido; $\mathrm{SEC}$ es la suma de $k-1$ de ellas, y dividida por $k-1$ estima $\sigma^2$. Los $k-1$ son las dimensiones del subespacio de los regresores una vez descontada la constante.
+
+3. /El error contrario./ De menos: $F_c(3,16)=3{,}24$ es mayor que el $2{,}62$ que corresponde a $n=506$, así que rechazaría menos del $5\%$ de las hipótesis ciertas. Un contraste más conservador de lo que anuncia. No es grave en la dirección del falso rechazo, pero paga con detección: dejaría pasar hipótesis falsas que el valor crítico correcto habría rechazado.
+
+4. /Qué crece con $n$./ El numerador. Con $H_0$ falsa, $\mathrm{SRC}_r-\mathrm{SRC}$ contiene la longitud al cuadrado de $\beta_{\text{nox}}\tilde{\boldsymbol x}_{\text{nox}}$, y la parte propia de =nox= se alarga con el número de observaciones; el ruido añade lo de siempre, del orden de $q\sigma^2$. El denominador estima $\sigma^2$ y no crece. Por eso el mismo efecto, invisible con $n=20$, se detecta con $n=506$: no porque el efecto sea mayor, sino porque la regla se ha alargado.
+
+5. /``Irrelevantes'' con $n=20$./ Que $F=1{,}9$ no rechaza, pero que con veinte observaciones un efecto del tamaño del de la Actividad 3 solo se rechaza el $8\%$ de las veces: no rechazar es casi lo esperable, haya o no efecto. Lo que puede decir es que los datos no permiten afirmar que los regresores intervengan, que es distinto de afirmar que no lo hacen. Los intervalos de los tres coeficientes dirán cuán grande podría ser lo que no se ha detectado.
+
+* COMMENT Banco de preguntas de reserva
+
+** Pregunta R1 — Qué estima el numerador del $F$
+Bajo $H_0$ cierta, $(\mathrm{SRC}_r-\mathrm{SRC})/q$:
+a) Tiende a cero.
+b) Estima $\sigma^2$, igual que $\mathrm{SRC}/(n-k)$.
+c) Estima $q\sigma^2$.
+d) Depende de las unidades de los regresores.
+/Respuesta correcta: b./
+/Evalúa/: el reparto por igual del ruido por dimensión y el origen de la distribución $F$.
+
+** Pregunta R2 — El valor crítico y $n-k$
+El valor crítico $F_c(q,n-k)$ al $5\%$:
+a) Crece con $n-k$.
+b) Decrece con $n-k$, porque el denominador estima cada vez mejor $\sigma^2$.
+c) No depende de $n-k$.
+d) Es siempre menor que $1$.
+/Respuesta correcta: b./
+/Evalúa/: la dependencia de la distribución respecto a los grados de libertad del denominador.
+
+** Pregunta R3 — No rechazar con pocos datos
+Con $n=20$ y una hipótesis falsa por poco, el $F$ no rechaza en la mayoría de las réplicas. Eso indica que:
+a) La hipótesis es cierta.
+b) El contraste tiene poca capacidad de detectar efectos pequeños con pocos datos; no rechazar no es evidencia a favor de $H_0$.
+c) El valor crítico está mal calculado.
+d) Hay que usar un nivel de significación mayor.
+/Respuesta correcta: b./
+/Evalúa/: la lectura correcta de un ``no rechazo'' con muestras pequeñas.

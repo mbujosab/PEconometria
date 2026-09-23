@@ -1,0 +1,350 @@
+#+Title: Sesión 22 (B) --- El caso =nox= y =lnox=: la parte propia, el VIF y el error estándar
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L22-Prct-B-hprice2-vif
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S22-Prct-B-hprice2-vif"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+La lección 13 dejó un caso sin explicar y la 14 lo explicó: en =price ~ rooms + nox + lnox= los dos $t$ de la contaminación son nulos y el $F$ de excluirlas juntas vale $28$. La explicación fue una longitud: la parte propia de =nox=, lo que queda de ella después de proyectarla sobre los demás regresores, mide $2{,}86$, cuando el regresor en desviaciones mide $26$. Esta práctica hace esa cuenta con Gretl, paso a paso, y comprueba que el error estándar de la tabla es exactamente $\mathfrak s$ dividido por esa longitud.
+
+Es la comprobación numérica del enunciado de la lección 12, $\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$, que allí no se demostró.
+
+/Objetivos/
+
+1. Obtener la parte propia de =nox= con la regresión auxiliar sobre =rooms= y =lnox=, y medir su longitud de dos maneras: como raíz de la $\mathrm{SRC}$ auxiliar y como $\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sqrt{1-R_j^2}$.
+2. Comprobar que $\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$ es el error estándar que imprime Gretl, con todos los decimales.
+3. Calcular el VIF a mano y con el comando =vif=, y leer su raíz como el factor por el que se ha multiplicado el error estándar.
+4. Repetir la cuenta sin =lnox= para ver de dónde sale el factor $8{,}7$ de la lección 14.
+5. Leer los intervalos de confianza de =nox= con y sin =lnox=, y la correlación entre los dos estimadores.
+
+* Actividad 1 - El modelo y la regresión auxiliar
+
+Abra =hprice2= y estime =price= sobre =rooms=, =nox= y =lnox=. Anote $\mathfrak s$ y el error estándar de =nox=. Después estime la regresión auxiliar: =nox= sobre la constante, =rooms= y =lnox=. Su $\mathrm{SRC}$ es la longitud al cuadrado de la parte propia de =nox=, y su $R^2$ es el $R_j^2$ de la lección 14.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Auxiliar
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet
+ols price const rooms nox lnox
+scalar s = $sigma
+scalar ee_nox = $stderr(nox)
+ols nox const rooms lnox
+scalar R2aux = $rsq
+scalar longPropia = sqrt($ess)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
+open hprice2.gdt --quiet
+outfile --quiet modelo.txt
+    ols price const rooms nox lnox
+    scalar s = $sigma
+    scalar ee_nox = $stderr(nox)
+end outfile
+outfile --quiet auxiliar.txt
+    ols nox const rooms lnox
+    scalar R2aux = $rsq
+    scalar longPropia = sqrt($ess)
+    printf "\nR2 de la regresion auxiliar        = %.4f\n", R2aux
+    printf "||parte propia de nox||  = sqrt(SRC) = %.4f\n", longPropia
+    printf "||nox en desviaciones||  = %.4f\n", sqrt(sum((nox - mean(nox))^2))
+    printf "sqrt(1 - R2aux)          = %.4f   (= seno del angulo)\n", sqrt(1 - R2aux)
+    printf "producto                 = %.4f\n", sqrt(sum((nox - mean(nox))^2))*sqrt(1 - R2aux)
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-B-hprice2-vif/modelo.txt example
+#+include: ./S22-Prct-B-hprice2-vif/auxiliar.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La regresión auxiliar tiene un $R^2$ de $0{,}9879$: =rooms= y =lnox= reproducen el $98{,}8\%$ de la variación de =nox=, casi todo por cuenta de =lnox= (mire los dos $t$). La parte propia mide $2{,}861$, y las dos maneras de calcularla coinciden: raíz de la $\mathrm{SRC}$ auxiliar, o longitud en desviaciones por $\sqrt{1-R_j^2}=0{,}110$, que es el seno del ángulo entre =nox= y el subespacio de los otros dos regresores, unos $6^\circ$.
+
+* Actividad 2 - El error estándar, reconstruido
+
+Divida $\mathfrak s$ entre la longitud de la parte propia y compare con la columna ``Desv. típica'' de la tabla. Calcule también el VIF y descomponga el error estándar en los dos factores de la lección 14.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: ErrorEstandar
+#+begin_src gretl :eval no
+printf "s / ||parte propia de nox||       = %.4f\n", s/longPropia
+printf "error estandar de nox segun Gretl = %.4f\n", ee_nox
+printf "VIF = %.3f   sqrt(VIF) = %.3f\n", 1/(1-R2aux), 1/sqrt(1-R2aux)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
+outfile --quiet errorEstandar.txt
+    printf "s del modelo completo               = %.4f\n", s
+    printf "s / ||parte propia de nox||         = %.4f\n", s/longPropia
+    printf "error estandar de nox segun Gretl   = %.4f\n", ee_nox
+    printf "VIF = 1/(1 - R2aux)                 = %.3f      sqrt(VIF) = %.3f\n", 1/(1-R2aux), 1/sqrt(1-R2aux)
+    printf "s / ||nox en desviaciones||         = %.3f      x sqrt(VIF) = %.3f\n", s/sqrt(sum((nox - mean(nox))^2)), s/sqrt(sum((nox - mean(nox))^2))/sqrt(1-R2aux)
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-B-hprice2-vif/errorEstandar.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+$6290{,}37/2{,}8608=2198{,}85$, el error estándar de la tabla con cuatro decimales. El enunciado de la lección 12 se cumple sobre datos reales. Y la descomposición: $241{,}6$ es el error estándar que =nox= tendría si no compartiera nada con los demás regresores, $\mathfrak s$ entre su longitud completa en desviaciones; multiplicado por $\sqrt{\mathrm{VIF}}=9{,}10$ da los $2198{,}85$. El VIF es $82{,}8$: la varianza se ha multiplicado por $83$, el error estándar por $9$.
+
+* Actividad 3 - El comando =vif=
+
+Vuelva al modelo completo y pida los factores de inflación: en la ventana del modelo, //~Análisis -> Colinealidad~//.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Vif
+#+begin_src gretl :eval no
+ols price const rooms nox lnox --quiet
+vif
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
+ols price const rooms nox lnox --quiet
+outfile --quiet vif.txt
+    vif
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-B-hprice2-vif/vif.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Gretl devuelve el $82{,}8$ de la Actividad 2 para =nox=, $82{,}9$ para =lnox= y $1{,}1$ para =rooms=: las dos medidas de contaminación se estorban entre sí y ninguna estorba a =rooms=. La nota al pie de la salida define el VIF como $1/(1-R_j^2)$ con el $R_j^2$ de la regresión auxiliar, que es lo que usted acaba de calcular, y da la regla del $10$. Léala como lo que es, una convención: $10$ significa error estándar multiplicado por $3{,}2$.
+
+* Actividad 4 - La misma cuenta sin =lnox=
+
+Estime =price ~ rooms + nox= y repita: parte propia de =nox= sobre =rooms=, $\mathfrak s$ dividido por ella, VIF.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: SinLnox
+#+begin_src gretl :eval no
+ols price const rooms nox
+scalar s_sin = $sigma
+ols nox const rooms --quiet
+printf "||parte propia de nox sobre rooms|| = %.3f    s/||.|| = %.2f\n", sqrt($ess), s_sin/sqrt($ess)
+ols price const rooms nox --quiet
+vif
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
+outfile --quiet sinLnox.txt
+    ols price const rooms nox --quiet
+    printf "price ~ rooms + nox:   coef(nox) = %.2f   ee(nox) = %.2f   t = %.2f   s = %.2f\n", $coeff(nox), $stderr(nox), $coeff(nox)/$stderr(nox), $sigma
+    scalar s_sin = $sigma
+    ols nox const rooms --quiet
+    printf "parte propia de nox sobre rooms:  ||.|| = %.3f    R2aux = %.4f    VIF = %.3f\n", sqrt($ess), $rsq, 1/(1-$rsq)
+    printf "s / ||parte propia|| = %.2f\n", s_sin/sqrt($ess)
+    ols price const rooms nox --quiet
+    vif
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-B-hprice2-vif/sinLnox.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Sin =lnox=, la parte propia de =nox= mide $24{,}81$, casi toda su longitud en desviaciones ($26{,}03$), porque =rooms= comparte poco con ella: $\mathrm{VIF}=1{,}1$. El error estándar es $253{,}57$, y $6290{,}99/24{,}809=253{,}57$ de nuevo. Entre los dos modelos, $\mathfrak s$ casi no cambia ($6291{,}0$ frente a $6290{,}4$) y el número de observaciones es el mismo. Lo único que ha cambiado es la longitud con la que =nox= se mide a sí misma: de $24{,}81$ a $2{,}86$, un factor $8{,}7$, y el error estándar sube en ese factor, de $253{,}6$ a $2198{,}9$.
+
+* Actividad 5 - Los intervalos y la correlación entre estimadores
+
+Construya el intervalo al $95\%$ de =nox= en los dos modelos, el de =lnox= en el completo, y lea en la matriz de varianzas de los estimadores (//~Análisis -> Matriz de covarianzas de los coeficientes~//) la correlación entre $\hat\beta_{\text{nox}}$ y $\hat\beta_{\text{lnox}}$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: Intervalos
+#+begin_src gretl :eval no
+ols price const rooms nox lnox --quiet
+scalar tc = critical(t, $df, 0.025)
+printf "IC 95%% de nox: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
+printf "correlacion entre los estimadores: %.4f\n", $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
+outfile --quiet intervalos.txt
+    ols price const rooms nox lnox --quiet
+    scalar tc = critical(t, $df, 0.025)
+    printf "IC 95%% de nox  con lnox en el modelo: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
+    printf "IC 95%% de lnox con nox  en el modelo: [%.1f ; %.1f]\n", $coeff(lnox) - tc*$stderr(lnox), $coeff(lnox) + tc*$stderr(lnox)
+    printf "correlacion entre los dos estimadores: %.4f\n", $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
+    ols price const rooms nox --quiet
+    printf "IC 95%% de nox  sin lnox: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-B-hprice2-vif/intervalos.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Con =lnox= en el modelo, el intervalo de =nox= va de $-3\,900$ a $+4\,700$ dólares por unidad de contaminación: los datos no saben ni el signo. Sin =lnox=, de $-2\,400$ a $-1\,400$: un efecto negativo bien medido. Y la correlación entre los dos estimadores es $-0{,}993$: es la nube de la práctica A con datos reales. Los coeficientes $404$ y $-13\,262$ de la tabla son un reparto casi arbitrario de un efecto que, tomado en conjunto, es el de siempre; con otra muestra de viviendas, el reparto sería otro y el ajuste casi el mismo.
+
+* Preguntas de interpretación para la clase
+
+1. En la Actividad 1, el $t$ de =rooms= en la regresión auxiliar es $0{,}07$. ¿Qué dice eso sobre la parte propia de =nox=, y por qué el VIF de =rooms= en el modelo de precios es $1{,}1$ y no $1$?
+2. La descomposición de la Actividad 2 escribe el error estándar como $241{,}6\cdot9{,}10$. ¿Cuál de los dos factores cambia si se duplican las observaciones manteniendo la misma correlación entre =nox= y =lnox=, y cómo?
+3. Un compañero dice: ``el VIF de =nox= es $82$, así que hay que quitar =nox= del modelo''. ¿Qué habría que preguntarle antes de aceptar la recomendación?
+4. Los intervalos de =nox= con y sin =lnox= no se solapan ni de lejos en su centro: $404$ frente a $-1\,885$. ¿Cuál de los dos estima ``el efecto de la contaminación''? ¿Miden lo mismo?
+5. Con la correlación $-0{,}993$ entre los dos estimadores, ¿qué combinación de $\beta_{\text{nox}}$ y $\beta_{\text{lnox}}$ estaría bien medida? Diga cómo la contrastaría.
+
+* Para profundizar
+
+- Lección 14 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S20-Lecc14.html][lección 14]]), ``Cuánto se acorta: el factor de inflación de la varianza'' y ``El caso =nox= y =lnox= con números''.
+- Lección 12 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html][lección 12]]), el enunciado del error estándar con $k$ regresores.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 3, sección 3.4, ecuación de $\mathrm{Var}(\hat\beta_j)$ y discusión del VIF.
+- Manual de Gretl: comando =vif=; accesores =$sigma=, =$stderr= y =$vcv=.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S22-Prct-B-hprice2-vif.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S22-Prct-B-hprice2-vif.inp][S22-Prct-B-hprice2-vif.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /El $t$ de =rooms= en la auxiliar./ Que =rooms= no aporta nada a la reproducción de =nox= una vez que está =lnox=: la parte propia de =nox= es, en la práctica, lo que =nox= no comparte con =lnox=. El VIF de =rooms= es $1{,}1$ y no $1$ porque =rooms= sí comparte algo con la pareja =nox= y =lnox= (barrios más contaminados tienen viviendas algo distintas): su $R_j^2$ es $0{,}09$. Es un VIF pequeño, y su raíz, $1{,}05$, dice que el error estándar de =rooms= apenas se ha inflado.
+
+2. /Duplicar las observaciones./ El primer factor: $\mathfrak s$ apenas cambia y la longitud de =nox= en desviaciones se multiplica por $\sqrt2$, así que $241{,}6$ pasa a unos $171$. El segundo, $\sqrt{\mathrm{VIF}}$, depende solo del ángulo, y con la misma correlación no se mueve. El error estándar baja a $2198{,}9/\sqrt2\approx1\,555$: mejor, pero sigue siendo nueve veces el que =nox= tendría sola. La lección 14 lo dijo: más datos alargan las partes propias sin cambiar el VIF.
+
+3. /``Hay que quitar =nox=''./ Para qué se quiere el coeficiente. Si la pregunta es el efecto de la contaminación sobre el precio, =nox= y =lnox= son la misma contaminación en dos escalas y quedarse con una es razonable: la lección 13 mostró que los dos modelos con una sola son excelentes, y no hay ninguna razón para preferir quitar =nox= a quitar =lnox=. Si la pregunta fuera distinguir un efecto lineal de uno logarítmico, estos datos no lo permiten, y quitar una de las dos no resuelve la pregunta: la esconde. El VIF mide un coste; no dicta el remedio.
+
+4. /Qué mide cada intervalo./ Cosas distintas. Sin =lnox=, $\beta_{\text{nox}}$ es el efecto de la contaminación con =rooms= fijo, y el intervalo lo mide bien. Con =lnox=, $\beta_{\text{nox}}$ es el efecto de =nox= /manteniendo fijo su propio logaritmo/, que en la muestra casi no ocurre: la parte propia mide $2{,}86$. El segundo coeficiente responde a una pregunta que los datos apenas contienen, y su intervalo lo dice con honestidad. Ninguno de los dos está mal; el segundo está mal /leído/ si se toma por el primero.
+
+5. /La combinación bien medida./ La que corresponde a mover =nox= y =lnox= juntas, como van en los datos: en torno a la media de =nox=, $\bar x\approx5{,}55$, un aumento de una unidad de =nox= aumenta =lnox= en aproximadamente $1/5{,}55=0{,}18$, así que la combinación $\beta_{\text{nox}}+0{,}18\,\beta_{\text{lnox}}$ es la que la muestra puede estimar; con $404$ y $-13\,262$ da unos $-1\,985$, cerca del $-1\,885$ del modelo sin =lnox=. Se contrasta con =restrict= escribiendo =b[nox] + 0.18*b[lnox] = c= para el valor $c$ que se quiera, o pidiendo su intervalo con la matriz de varianzas: la varianza de la combinación es $a^\top Va$ con $a=(0,0,1,0{,}18)$.
+
+* COMMENT Banco de preguntas de reserva
+
+** Pregunta R1 — La regresión auxiliar
+La $\mathrm{SRC}$ de la regresión de $\boldsymbol x_j$ sobre los demás regresores es:
+a) La longitud al cuadrado de la parte propia de $\boldsymbol x_j$.
+b) La longitud al cuadrado de $\boldsymbol x_j$ en desviaciones.
+c) El VIF de $\boldsymbol x_j$.
+d) La varianza de $\hat\beta_j$.
+/Respuesta correcta: a./
+/Evalúa/: la identificación de la parte propia con el residuo de la regresión auxiliar.
+
+** Pregunta R2 — Leer un VIF
+Un VIF de $25$ para un regresor significa que:
+a) Su coeficiente no es significativo.
+b) Su error estándar es cinco veces el que tendría si no compartiera nada con los demás regresores.
+c) Su varianza es cinco veces mayor.
+d) Hay que eliminarlo del modelo.
+/Respuesta correcta: b./
+/Evalúa/: la lectura del VIF a través de su raíz.
+
+** Pregunta R3 — Qué no cambia
+Al añadir =lnox= a =price ~ rooms + nox=:
+a) $\mathfrak s$ se multiplica por $8{,}7$.
+b) La parte propia de =nox= se divide por $8{,}7$ y $\mathfrak s$ casi no cambia.
+c) El $R^2$ cae mucho.
+d) El error estándar de =rooms= se multiplica por $9$.
+/Respuesta correcta: b./
+/Evalúa/: distinguir qué componente del error estándar responde a la colinealidad.
