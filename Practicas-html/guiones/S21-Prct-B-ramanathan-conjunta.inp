@@ -1,0 +1,94 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open data4-1.gdt --quiet
+outfile --quiet completo.txt
+    ols price const sqft bedrms baths
+    scalar n = $nobs
+    scalar SRC = $ess
+    scalar s2 = SRC/$df
+    scalar df = $df
+    printf "\nn = %d   k = 4   n-k = %d\n", n, df
+    printf "t_c al 5%% (%d g.l.) = %.3f\n", df, critical(t, df, 0.025)
+end outfile
+outfile --quiet unaAuna.txt
+    ols price const sqft bedrms baths --quiet
+    scalar t_baths  = $coeff(baths)/$stderr(baths)
+    scalar t_bedrms = $coeff(bedrms)/$stderr(bedrms)
+    printf "Modelo completo: t(bedrms) = %.3f   t(baths) = %.3f   (t_c = %.3f)\n", t_bedrms, t_baths, critical(t, df, 0.025)
+    ols price const sqft bedrms --quiet
+    printf "Sin baths:       t(bedrms) = %.3f   (t_c = %.3f)   SRC = %.1f\n", $coeff(bedrms)/$stderr(bedrms), critical(t, $df, 0.025), $ess
+    ols price const sqft --quiet
+    printf "Sin baths ni bedrms:  SRC_r = %.1f   coef(sqft) = %.4f   ee = %.4f   t = %.2f\n", $ess, $coeff(sqft), $stderr(sqft), $coeff(sqft)/$stderr(sqft)
+    scalar SRCr = $ess
+end outfile
+
+outfile --quiet conjunta.txt
+    scalar Fj = ((SRCr - SRC)/2)/s2
+    printf "H0: beta_bedrms = beta_baths = 0\n"
+    printf "SRC completo = %.1f   SRC_r = %.1f   subida = %.1f\n", SRC, SRCr, SRCr - SRC
+    printf "F(2,%d) = %.3f   F_c al 5%% = %.3f   valor p = %.4f\n", df, Fj, critical(F, 2, df, 0.05), pvalue(F, 2, df, Fj)
+end outfile
+ols price const sqft bedrms baths --quiet
+outfile --quiet restrictConjunta.txt
+    restrict
+        b[bedrms] = 0
+        b[baths] = 0
+    end restrict
+end outfile
+
+ols price const sqft bedrms baths --quiet
+scalar tc = critical(t, $df, 0.025)
+scalar iL = $coeff(bedrms) - tc*$stderr(bedrms)
+scalar iR = $coeff(bedrms) + tc*$stderr(bedrms)
+scalar jL = $coeff(baths)  - tc*$stderr(baths)
+scalar jR = $coeff(baths)  + tc*$stderr(baths)
+scalar corrEst = $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
+# el F de fijar a la vez los dos coeficientes en cada esquina del rectangulo
+restrict --quiet
+    b[bedrms] = iL
+    b[baths] = jL
+end restrict
+scalar F_LL = $test
+restrict --quiet
+    b[bedrms] = iL
+    b[baths] = jR
+end restrict
+scalar F_LR = $test
+restrict --quiet
+    b[bedrms] = iR
+    b[baths] = jL
+end restrict
+scalar F_RL = $test
+restrict --quiet
+    b[bedrms] = iR
+    b[baths] = jR
+end restrict
+scalar F_RR = $test
+outfile --quiet esquinas.txt
+    printf "IC 95%% bedrms: [%.2f ; %.2f]    IC 95%% baths: [%.2f ; %.2f]\n", iL, iR, jL, jR
+    printf "F_c(2,10) al 5%% = %.3f\n", critical(F, 2, 10, 0.05)
+    printf "Contraste conjunto de cada esquina del rectangulo:\n"
+    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iL, jL, F_LL, pvalue(F, 2, 10, F_LL)
+    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iL, jR, F_LR, pvalue(F, 2, 10, F_LR)
+    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jL, F_RL, pvalue(F, 2, 10, F_RL)
+    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jR, F_RR, pvalue(F, 2, 10, F_RR)
+    printf "Correlacion entre los estimadores de bedrms y baths (de la matriz de varianzas): %.3f\n", corrEst
+end outfile

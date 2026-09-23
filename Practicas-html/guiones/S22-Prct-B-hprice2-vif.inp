@@ -1,0 +1,70 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open hprice2.gdt --quiet
+outfile --quiet modelo.txt
+    ols price const rooms nox lnox
+    scalar s = $sigma
+    scalar ee_nox = $stderr(nox)
+end outfile
+outfile --quiet auxiliar.txt
+    ols nox const rooms lnox
+    scalar R2aux = $rsq
+    scalar longPropia = sqrt($ess)
+    printf "\nR2 de la regresion auxiliar        = %.4f\n", R2aux
+    printf "||parte propia de nox||  = sqrt(SRC) = %.4f\n", longPropia
+    printf "||nox en desviaciones||  = %.4f\n", sqrt(sum((nox - mean(nox))^2))
+    printf "sqrt(1 - R2aux)          = %.4f   (= seno del angulo)\n", sqrt(1 - R2aux)
+    printf "producto                 = %.4f\n", sqrt(sum((nox - mean(nox))^2))*sqrt(1 - R2aux)
+end outfile
+
+outfile --quiet errorEstandar.txt
+    printf "s del modelo completo               = %.4f\n", s
+    printf "s / ||parte propia de nox||         = %.4f\n", s/longPropia
+    printf "error estandar de nox segun Gretl   = %.4f\n", ee_nox
+    printf "VIF = 1/(1 - R2aux)                 = %.3f      sqrt(VIF) = %.3f\n", 1/(1-R2aux), 1/sqrt(1-R2aux)
+    printf "s / ||nox en desviaciones||         = %.3f      x sqrt(VIF) = %.3f\n", s/sqrt(sum((nox - mean(nox))^2)), s/sqrt(sum((nox - mean(nox))^2))/sqrt(1-R2aux)
+end outfile
+
+ols price const rooms nox lnox --quiet
+outfile --quiet vif.txt
+    vif
+end outfile
+
+outfile --quiet sinLnox.txt
+    ols price const rooms nox --quiet
+    printf "price ~ rooms + nox:   coef(nox) = %.2f   ee(nox) = %.2f   t = %.2f   s = %.2f\n", $coeff(nox), $stderr(nox), $coeff(nox)/$stderr(nox), $sigma
+    scalar s_sin = $sigma
+    ols nox const rooms --quiet
+    printf "parte propia de nox sobre rooms:  ||.|| = %.3f    R2aux = %.4f    VIF = %.3f\n", sqrt($ess), $rsq, 1/(1-$rsq)
+    printf "s / ||parte propia|| = %.2f\n", s_sin/sqrt($ess)
+    ols price const rooms nox --quiet
+    vif
+end outfile
+
+outfile --quiet intervalos.txt
+    ols price const rooms nox lnox --quiet
+    scalar tc = critical(t, $df, 0.025)
+    printf "IC 95%% de nox  con lnox en el modelo: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
+    printf "IC 95%% de lnox con nox  en el modelo: [%.1f ; %.1f]\n", $coeff(lnox) - tc*$stderr(lnox), $coeff(lnox) + tc*$stderr(lnox)
+    printf "correlacion entre los dos estimadores: %.4f\n", $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
+    ols price const rooms nox --quiet
+    printf "IC 95%% de nox  sin lnox: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
+end outfile

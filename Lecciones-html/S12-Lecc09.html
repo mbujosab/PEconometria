@@ -3,11 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-19 sáb 23:26 -->
+<!-- 2026-09-23 mié 21:24 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Lección 9. El puente: de los datos a las variables aleatorias</title>
 <meta name="author" content="Marcos Bujosa" />
+<meta name="description" content="Lección 9: el puente entre la geometría de los datos y las variables aleatorias. Esperanza condicional, perturbación y supuestos del modelo clásico de regresión." />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
   #content { max-width: 60em; margin: auto; }
@@ -251,21 +252,21 @@ $(function() {    $('.note').before("<p class='admonition-title note'>Note</p>")
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org978cdb4">1. El puente epistemológico: entre Eros y los datos</a></li>
-<li><a href="#org805cd93">2. Un vector es una función; y una variable aleatoria también</a></li>
-<li><a href="#orgfb9333f">3. El producto escalar de la probabilidad</a></li>
-<li><a href="#org7de3332">4. La esperanza: dos caras de la misma moneda</a></li>
-<li><a href="#org0cf8f76">5. Esperanza condicional: proyección sobre un espacio ENORME</a></li>
-<li><a href="#org8256674">6. El Modelo Clásico de Regresión Lineal (MCRL)</a></li>
-<li><a href="#orge05e91f">7. Cuidado: Esta descomposición ortogonal no implica causalidad</a></li>
-<li><a href="#org3974d5d">8. El salto: método de los momentos</a></li>
-<li><a href="#orgbc11ae4">9. Recapitulación y guiño a la lección siguiente</a></li>
-<li><a href="#org62cb19c">10. Preguntas de repaso (sesión 12)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
-<li><a href="#org1e0b8fe">11. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#orgb8ec926">1. El puente epistemológico: entre Eros y los datos</a></li>
+<li><a href="#org43c4603">2. Un vector es una función; y una variable aleatoria también</a></li>
+<li><a href="#org0712e52">3. El producto escalar de la probabilidad</a></li>
+<li><a href="#org9865d9b">4. La esperanza: dos caras de la misma moneda</a></li>
+<li><a href="#org2dbf846">5. Esperanza condicional: proyección sobre un espacio ENORME</a></li>
+<li><a href="#org4e339c5">6. El Modelo Clásico de Regresión Lineal (MCRL)</a></li>
+<li><a href="#orgb798990">7. Cuidado: Esta descomposición ortogonal no implica causalidad</a></li>
+<li><a href="#org7516c55">8. El salto: método de los momentos</a></li>
+<li><a href="#org9c6a652">9. Recapitulación y guiño a la lección siguiente</a></li>
+<li><a href="#org0710006">10. Preguntas de repaso (sesión 12)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#org3b1b1dd">11. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
 </ul>
 </div>
 </div>
-<div class="abstract" id="org6c05947">
+<div class="abstract" id="orgd9b4bb7">
 <p>
 ``Ninguno de los dioses filosofa ni desea hacerse sabio, porque ya lo es [&#x2026;] Tampoco los ignorantes filosofan ni desean hacerse sabios [&#x2026;] Eros está en el medio de la sabiduría y de la ignorancia.'' (Platón, <i>El Banquete</i>, 203e–204a)
 </p>
@@ -279,8 +280,8 @@ La econometría habita en ese mismo espacio intermedio: entre la ignorancia abso
 <ul class="org-ul">
 <li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S12-Lecc09.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S12-Lecc09.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S12-Lecc09.pdf">pdf</a>)</li>
 </ul>
-<div id="outline-container-org978cdb4" class="outline-2">
-<h2 id="org978cdb4"><span class="section-number-2">1.</span> El puente epistemológico: entre Eros y los datos</h2>
+<div id="outline-container-orgb8ec926" class="outline-2">
+<h2 id="orgb8ec926"><span class="section-number-2">1.</span> El puente epistemológico: entre Eros y los datos</h2>
 <div class="outline-text-2" id="text-1">
 <blockquote>
 <p>
@@ -304,12 +305,12 @@ A partir de hoy: la muestra \(\boldsymbol{y}\) se concibe como <i>una realizaci�
 </p>
 
 <p>
-<i>Advertencia, desde ya</i>: lo que sigue es una <b>analogía</b>, no una demostración. Y solo es válida para variables aleatorias con esperanza y varianza definidas — <i>no todas la tienen</i>.
+<i>Advertencia, desde ya</i>: lo que sigue es una <b>analogía</b>, no una demostración. Y solo es válida para variables aleatorias con esperanza y varianza definidas — <i>no todas las tienen</i>.
 </p>
 </div>
-<div id="outline-container-orgb823fe9" class="outline-4">
-<h4 id="orgb823fe9">El puente epistemológico: entre Eros y los datos</h4>
-<div class="outline-text-4" id="text-orgb823fe9">
+<div id="outline-container-org5fe30f7" class="outline-4">
+<h4 id="org5fe30f7">El puente epistemológico: entre Eros y los datos</h4>
+<div class="outline-text-4" id="text-org5fe30f7">
 <p>
 Esta analogía platónica encierra el problema epistemológico de la econometría. En las primeras lecciones de este curso nos hemos dedicado a describir muestras: hemos calculado medias, varianzas y rectas de regresión para conjuntos de datos concretos (\(\boldsymbol{y} \in \mathbb{R}^n\)). En ese nivel, no había incertidumbre: si medimos la covarianza de nuestra muestra, el número que obtenemos es un hecho geométrico exacto. 
 </p>
@@ -345,16 +346,16 @@ Para quien quiera ver hasta qué punto la intuición cotidiana sobre ``el valor 
 </p>
 <ul class="org-ul">
 <li>Platón, <i>Banquete</i>, 203e–204a (discurso de Diotima sobre la naturaleza de Eros).</li>
-<li>Wooldridge, J. M. (2020), Apéndice C.1–C.2: repaso de variable aleatoria, función de distribución y esperanza matemática desde la estadística clásica.</li>
+<li>Wooldridge, J. M. (2020), Apéndice B, secciones B.1–B.3: repaso de variable aleatoria, función de distribución y esperanza matemática desde la estadística clásica.</li>
 </ul>
 </div>
 </div>
 </div>
-<div id="outline-container-org805cd93" class="outline-2">
-<h2 id="org805cd93"><span class="section-number-2">2.</span> Un vector es una función; y una variable aleatoria también</h2>
+<div id="outline-container-org43c4603" class="outline-2">
+<h2 id="org43c4603"><span class="section-number-2">2.</span> Un vector es una función; y una variable aleatoria también</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-Un vector \(\boldsymbol{y}\in\mathbb{R}^n\) (<span class="underline">lista ordenada de números</span> &#x2014;Lección 2) es literalmente una <i>función</i> que asigna un número a cada índice \(i\in\{1,\ldots,n\}\).
+Un vector \(\boldsymbol{y}\in\mathbb{R}^n\) (<span class="underline">lista ordenada de números</span>, lección 2) es literalmente una <i>función</i> que asigna un número a cada índice \(i\in\{1,\ldots,n\}\).
 </p>
 
 <p>
@@ -405,9 +406,9 @@ La <i>combinación lineal</i> (lección 2) de variables aleatorias \(\beta_1\,\m
 <b>Nota</b>: \(\mathit{1}\) es la variable aleatoria constante que asigna \(1\) a todo suceso elemental de \(\Omega\).
 </p>
 </div>
-<div id="outline-container-org3a77892" class="outline-4">
-<h4 id="org3a77892">Un vector es una función; y una variable aleatoria también</h4>
-<div class="outline-text-4" id="text-org3a77892">
+<div id="outline-container-orgff3178a" class="outline-4">
+<h4 id="orgff3178a">Un vector es una función; y una variable aleatoria también</h4>
+<div class="outline-text-4" id="text-orgff3178a">
 <p>
 En la lección 2 definimos un vector \(\boldsymbol{y}=(y_1,\ldots,y_n)\) como una lista ordenada de números; pero esta definición nos permite afirmar que un vector de \(\mathbb{R}^n\) es, sencillamente, una <i>función</i> que asigna a cada índice \(i\), del conjunto \(\{1,2,\ldots,n\}\), un número real \(y_i\).
 </p>
@@ -433,8 +434,8 @@ Pese a esta diferencia importante, lo que sobrevive intacto a este cambio es lo 
 </div>
 </div>
 </div>
-<div id="outline-container-orgfb9333f" class="outline-2">
-<h2 id="orgfb9333f"><span class="section-number-2">3.</span> El producto escalar de la probabilidad</h2>
+<div id="outline-container-org0712e52" class="outline-2">
+<h2 id="org0712e52"><span class="section-number-2">3.</span> El producto escalar de la probabilidad</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 En \(\mathbb{R}^n\): \(\;\langle\boldsymbol{x},\boldsymbol{y}\rangle_s=\sum\limits_{j=1}^n\frac{x_jy_j}{n}\).
@@ -464,9 +465,9 @@ Con variables aleatorias, el papel de \(\langle\cdot,\cdot\rangle_s\) lo juega l
 Pero Pitágoras, Cauchy–Schwarz y la desigualdad triangular (lección 3) solo exigían simetría, linealidad y positividad — <i>no</i> positividad estricta. Así que <i>siguen siendo válidos</i>, sin cambiar una coma.
 </p>
 </div>
-<div id="outline-container-orgc67c148" class="outline-4">
-<h4 id="orgc67c148">El producto escalar de la probabilidad</h4>
-<div class="outline-text-4" id="text-orgc67c148">
+<div id="outline-container-org358ecd6" class="outline-4">
+<h4 id="org358ecd6">El producto escalar de la probabilidad</h4>
+<div class="outline-text-4" id="text-org358ecd6">
 <p>
 Toda la geometría que hemos construido desde la lección 3 —ortogonalidad, ángulos, Pitágoras, proyecciones— dependía de un único ingrediente: un producto escalar \(\langle\cdot,\cdot\rangle\) con tres propiedades abstractas (simetría, linealidad en cada argumento, positividad). En la lección 4 vimos que, para hacer estadística en \(\mathbb{R}^n\), se usa el producto escalar \(\langle\boldsymbol x,\boldsymbol y\rangle_s=\frac1n\langle\boldsymbol x,\boldsymbol y\rangle_e\), con el factor \(\frac1n\) elegido precisamente para que \(\|\boldsymbol 1\|_s=1\).
 </p>
@@ -515,8 +516,8 @@ Para no sobrecargar la notación, se suele escribir sencillamente \(\mathrm{E}(X
 </div>
 </div>
 </div>
-<div id="outline-container-org7de3332" class="outline-2">
-<h2 id="org7de3332"><span class="section-number-2">4.</span> La esperanza: dos caras de la misma moneda</h2>
+<div id="outline-container-org9865d9b" class="outline-2">
+<h2 id="org9865d9b"><span class="section-number-2">4.</span> La esperanza: dos caras de la misma moneda</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 En \(\mathbb{R}^n\), el vector constante uno, \(\boldsymbol{1}\), tuvo un papel especial; ahora lo tiene la v.a. cte. \(\mathit{1}\).
@@ -555,7 +556,7 @@ En \(\mathbb{R}^n\), el vector constante uno, \(\boldsymbol{1}\), tuvo un papel 
 </table>
 
 
-<div id="org39e59a7" class="figure">
+<div id="org0d212da" class="figure">
 <p><img src="./img/S12-Lecc09/EspMatematicayCondicional_ancho.png" alt="EspMatematicayCondicional_ancho.png" width="650px" />
 </p>
 <p><span class="figure-number">Figura 1: </span>Proyección de la variable aleatoria \(Y\) sobre el subespacio generado por la variable constante \(\mathit{1}\). El escalar de la proyección es \(\mathrm{E}(Y)\) (la esperanza matemática o valor esperado), y el vector proyectado es la v.a. constante \(E[Y|\mathit{1}] = \mathrm{E}(Y)\,\mathit{1}\) (la esperanza condicional).</p>
@@ -566,9 +567,9 @@ En \(\mathbb{R}^n\), el vector constante uno, \(\boldsymbol{1}\), tuvo un papel 
 Por Pitágoras (como lección 5): \(\quad \mathrm{Var}(Y) = \Big\|Y - E[Y|\mathit{1}]\Big\|_P^2 = \mathrm{E}(Y^2) - (\mathrm{E}(Y))^2\).
 </p>
 </div>
-<div id="outline-container-orgacff07d" class="outline-4">
-<h4 id="orgacff07d">La esperanza: dos caras de la misma moneda</h4>
-<div class="outline-text-4" id="text-orgacff07d">
+<div id="outline-container-org2c77c80" class="outline-4">
+<h4 id="org2c77c80">La esperanza: dos caras de la misma moneda</h4>
+<div class="outline-text-4" id="text-org2c77c80">
 <p>
 Empecemos por el concepto más simple: la proyección sobre las variables aleatorias constantes. 
 </p>
@@ -595,7 +596,7 @@ La diferencia entre el vector \(Y\) y su proyección es ortogonal al vector cons
 </p>
 
 <p>
-Y igual que hicimos en las lecciones 4 y 5, si aplicamos el teorema de Pitágoras a este triángulo rectángulo, vemos que el cuadrado de la hipotenusa, \(\mathrm{E}(Y^2)\), es la suma de los cuadrados de los catetos, \((\mathrm{E}(Y))^2 + \mathrm{Var}(Y)\). Despejando, obtenemos la fórmula clásica de la varianza de la variable aleatoria \(Y\) (también llamada varianza poblacional): \(\mathrm{Var}(Y) = \mathrm{E}(Y^2) - (\mathrm{E}(Y))^2\). 
+E igual que hicimos en las lecciones 4 y 5, si aplicamos el teorema de Pitágoras a este triángulo rectángulo, vemos que el cuadrado de la hipotenusa, \(\mathrm{E}(Y^2)\), es la suma de los cuadrados de los catetos, \((\mathrm{E}(Y))^2 + \mathrm{Var}(Y)\). Despejando, obtenemos la fórmula clásica de la varianza de la variable aleatoria \(Y\) (también llamada varianza poblacional): \(\mathrm{Var}(Y) = \mathrm{E}(Y^2) - (\mathrm{E}(Y))^2\). 
 </p>
 
 <p>
@@ -611,15 +612,15 @@ La geometría no ha cambiado; solo hemos cambiado de espacio (ahora los objetos 
 </div>
 </div>
 </div>
-<div id="outline-container-org0cf8f76" class="outline-2">
-<h2 id="org0cf8f76"><span class="section-number-2">5.</span> Esperanza condicional: proyección sobre un espacio ENORME</h2>
+<div id="outline-container-org2dbf846" class="outline-2">
+<h2 id="org2dbf846"><span class="section-number-2">5.</span> Esperanza condicional: proyección sobre un espacio ENORME</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 La <i>Esperanza Condicional</i>, \(E[Y|X]\), es la proyección ortogonal de \(Y\) sobre el subespacio generado por las funciones de la variable \(X\) (¡Un espacio enorme!).
 </p>
 
 
-<div id="orgf04a72d" class="figure">
+<div id="org06c647e" class="figure">
 <p><img src="./img/S12-Lecc09/ECond_fila_ancho.png" alt="ECond_fila_ancho.png" width="700px" />
 </p>
 <p><span class="figure-number">Figura 2: </span>Proyección de \(Y\) sobre el espacio vectorial generado por las funciones de \(\mathit{1}\) y \(X\). La perturbación \(U\) es ortogonal a dichas funciones. A la izquierda, el triángulo rectángulo de Pitágoras para las varianzas.</p>
@@ -652,9 +653,9 @@ La <i>Esperanza Condicional</i>, \(E[Y|X]\), es la proyección ortogonal de \(Y\
 </tbody>
 </table>
 </div>
-<div id="outline-container-orgdf0c4fc" class="outline-4">
-<h4 id="orgdf0c4fc">La esperanza condicional: proyección sobre un espacio ENORME</h4>
-<div class="outline-text-4" id="text-orgdf0c4fc">
+<div id="outline-container-org88907f2" class="outline-4">
+<h4 id="org88907f2">La esperanza condicional: proyección sobre un espacio ENORME</h4>
+<div class="outline-text-4" id="text-org88907f2">
 <p>
 La regresión lineal simple que vimos en las lecciones 6, 7 y 8 consistía en proyectar los datos sobre el plano \(\mathcal{L}(\boldsymbol{1}, \boldsymbol{x})\). El análogo poblacional es proyectar la variable \(Y\) sobre el espacio de funciones de las variables aleatorias \(X\) (y la variable aleatoria \(\mathit{1}\) es, trivialmente, una de ellas). El vector resultante es la <i>Esperanza Condicional</i>, \(E[Y|X]\); es decir, la variable aleatoria (de dicho espacio) más próxima a \(Y\).
 </p>
@@ -671,7 +672,7 @@ Pero en el mundo de las variables aleatorias, <span class="underline">el subespa
 
 
 <p>
-Consecuentemente, el subespacio sobre el que proyectamos para obtener \(E[Y|X]\) no es un plano; es ¡un monstruo de dimensión infinita!
+Consecuentemente, el subespacio sobre el que proyectamos para obtener \(E[Y|X]\) no es un plano: tiene dimensión infinita.
 </p>
 
 <p>
@@ -696,8 +697,8 @@ Esta observación no es un mero tecnicismo: es la que da sentido genuino al <i>p
 </div>
 </div>
 </div>
-<div id="outline-container-org8256674" class="outline-2">
-<h2 id="org8256674"><span class="section-number-2">6.</span> El Modelo Clásico de Regresión Lineal (MCRL)</h2>
+<div id="outline-container-org4e339c5" class="outline-2">
+<h2 id="org4e339c5"><span class="section-number-2">6.</span> El Modelo Clásico de Regresión Lineal (MCRL)</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 El MCRL consiste en <i>imponer tres supuestos</i> para que el modelo sea manejable:
@@ -743,9 +744,9 @@ la ``dispersión'' de \(U\) no depende de \(X\).
 (no son los \(\hat\beta_1\) y \(\hat\beta_2\) de la lección 7).
 </p>
 </div>
-<div id="outline-container-orgee421ae" class="outline-4">
-<h4 id="orgee421ae">El Modelo Clásico de Regresión Lineal (MCRL)</h4>
-<div class="outline-text-4" id="text-orgee421ae">
+<div id="outline-container-orgbacf88d" class="outline-4">
+<h4 id="orgbacf88d">El Modelo Clásico de Regresión Lineal (MCRL)</h4>
+<div class="outline-text-4" id="text-orgbacf88d">
 <p>
 Esta es una de las transparencias nucleares del curso. El ``Modelo Clásico de Regresión Lineal'' es simplemente un conjunto de reglas de juego geométricas que imponemos sobre un mecanismo poblacional que en realidad es desconocido.
 </p>
@@ -759,7 +760,7 @@ Esta descomposición es, como todas las que hemos hecho en \(\mathbb{R}^n\), pur
 </p>
 
 <p>
-Antes de enunciarlos, conviene advertir que <i>tres</i> es un supuesto menos de los que encontrará en casi cualquier manual —Wooldridge, por ejemplo, enumera cinco para la regresión simple—. La diferencia no es un descuido ni un atajo: es consecuencia directa de haber definido \(U\) como lo que queda al proyectar. Al final de esta sección explicamos la equivalencia con detalle (apéndice ``Tres supuestos aquí, cinco en Wooldridge'').
+Antes de enunciarlos, conviene advertir que <i>tres</i> son menos de los que encontrará en casi cualquier manual (Wooldridge enumera cinco para la regresión simple). La diferencia no es un descuido ni un atajo: es consecuencia directa de haber definido \(U\) como lo que queda al proyectar. Al final de esta sección explicamos la equivalencia con detalle (apéndice ``Tres supuestos aquí, cinco en Wooldridge'').
 </p>
 
 <ol class="org-ol">
@@ -779,7 +780,7 @@ Adviértase la ausencia de sombrero sobre \(\beta_1\) y \(\beta_2\). En la lecci
 </p>
 
 <p>
-<i>¿Cómo de realista es este supuesto?</i>: Recuerde que el espacio sobre el que se proyecta \(Y\) es de dimensión infinita, así que la esperanza condicional \(E[Y|X]\) podría ser casi cualquier función de \(X\) (por muy extraña o complicada que fuera). El Supuesto 1 impone que, ``milagrosamente'', la sombra de \(Y\) (la variable aleatoria función de \(X\) más próxima a \(Y\)) cae sobre el plano formado por la constante \(\mathit{1}\) y la variable \(X\). Es decir, que \(E[Y|X]\) es sencillamente la combinación lineal \(\beta_1\,\mathit{1} + \beta_2 X\). ¿Es esto realista? Depende. Si sabemos (teorema en los cursos de probabilidad) que \(X\) e \(Y\) provienen de una distribución conjunta Normal, la matemática garantiza que la esperanza condicional siempre es lineal. Si no lo son, este supuesto supone una restricción fortísima (estamos imponiendo un corsé lineal a la realidad, pues estamos imponiendo que de todas las funciones posibles entre \(\mathit{1}\) y \(X\), la que mejor se aproxima a \(Y\) es una combinación lineal de los regresores).
+<i>¿Cómo de realista es este supuesto?</i>: Recuerde que el espacio sobre el que se proyecta \(Y\) es de dimensión infinita, así que la esperanza condicional \(E[Y|X]\) podría ser casi cualquier función de \(X\) (por muy extraña o complicada que fuera). El Supuesto 1 impone que, ``milagrosamente'', la sombra de \(Y\) (la variable aleatoria función de \(X\) más próxima a \(Y\)) cae sobre el plano formado por la constante \(\mathit{1}\) y la variable \(X\). Es decir, que \(E[Y|X]\) es sencillamente la combinación lineal \(\beta_1\,\mathit{1} + \beta_2 X\). ¿Es esto realista? Depende. Si sabemos (teorema en los cursos de probabilidad) que \(X\) e \(Y\) provienen de una distribución conjunta Normal, la matemática garantiza que la esperanza condicional siempre es lineal. Si no lo son, este supuesto supone una restricción fortísima (estamos imponiendo un corsé lineal a la realidad, pues estamos imponiendo que, de todas las funciones posibles de \(X\), la que mejor se aproxima a \(Y\) es una combinación lineal de los regresores).
 </p>
 
 <p>
@@ -812,8 +813,8 @@ Conviene notar, además, que al enunciar este tercer supuesto estamos asumiendo 
 </ol>
 </div>
 <ul class="org-ul">
-<li><a id="orgeb29507"></a>Apéndice: tres supuestos aquí, cinco en Wooldridge<br />
-<div class="outline-text-5" id="text-orgeb29507">
+<li><a id="org8ff2e2c"></a>Apéndice: tres supuestos aquí, cinco en Wooldridge<br />
+<div class="outline-text-5" id="text-org8ff2e2c">
 <p>
 Si abre el manual de Wooldridge por el capítulo 2 encontrará <i>cinco</i> supuestos
 donde nosotros hemos puesto tres. Conviene entender por qué, porque no se trata
@@ -910,8 +911,8 @@ distintos.
 </ul>
 </div>
 </div>
-<div id="outline-container-orge05e91f" class="outline-2">
-<h2 id="orge05e91f"><span class="section-number-2">7.</span> Cuidado: Esta descomposición ortogonal no implica causalidad</h2>
+<div id="outline-container-orgb798990" class="outline-2">
+<h2 id="orgb798990"><span class="section-number-2">7.</span> Cuidado: Esta descomposición ortogonal no implica causalidad</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 La descomposición \(Y = E[Y|X] + U\) <i>es un hecho algebraico</i> (una proyección ortogonal). 
@@ -923,8 +924,8 @@ La descomposición \(Y = E[Y|X] + U\) <i>es un hecho algebraico</i> (una proyecc
 </p>
 
 <ul class="org-ul">
-<li><i>Sentido económico razonable:</i> \(Consumo = f(Renta) + U\). Tiene sentido pensar que la Renta determina el Consumo, y que \(U\) agrupa otros factores (gustos, necesidades).</li>
-<li><i>Causalidad absurda (pero aceptable algebraicamente):</i> \(Superficie = f(Precio) + U\). Podemos proyectar la superficie de una casa sobre su precio. La matemática funcionará perfectamente. Pero asumir que ``variaciones del precio cambian el tamaño de la casa'' es absurdo.</li>
+<li><i>Sentido económico razonable:</i> \(\mathit{Consumo} = f(\mathit{Renta}) + U\). Tiene sentido pensar que la Renta determina el Consumo, y que \(U\) agrupa otros factores (gustos, necesidades).</li>
+<li><i>Causalidad absurda (pero aceptable algebraicamente):</i> \(\mathit{Superficie} = f(\mathit{Precio}) + U\). Podemos proyectar la superficie de una casa sobre su precio. La matemática funcionará perfectamente. Pero asumir que ``variaciones del precio cambian el tamaño de la casa'' es absurdo.</li>
 </ul>
 
 <p>
@@ -932,9 +933,9 @@ La descomposición \(Y = E[Y|X] + U\) <i>es un hecho algebraico</i> (una proyecc
 Debe provenir de una Teoría (Económica, Política, Sociológica, etc.) previa.
 </p>
 </div>
-<div id="outline-container-orgb46b9a0" class="outline-4">
-<h4 id="orgb46b9a0">Cuidado: Esta descomposición ortogonal no implica causalidad</h4>
-<div class="outline-text-4" id="text-orgb46b9a0">
+<div id="outline-container-orgc8eb962" class="outline-4">
+<h4 id="orgc8eb962">Cuidado: Esta descomposición ortogonal no implica causalidad</h4>
+<div class="outline-text-4" id="text-orgc8eb962">
 <p>
 Esta es la advertencia más importante de todo el curso, y el motivo principal por el que hemos pospuesto hablar de modelos y causalidad hasta la novena lección.
 </p>
@@ -969,11 +970,11 @@ Esta es la razón por la que en la lección 6 pospusimos deliberadamente la dist
 </p>
 
 <p>
-¿De dónde puede venir dicha lectura? No de la geometría, ni del álgebra: únicamente de una <i>teoría económica previa</i>. Si, antes de mirar ningún dato, tenemos razones teóricas sólidas para pensar que la renta disponible de un consumidor influye en cuánto consume —y no al revés, ni por alguna tercera vía—, entonces sí podemos aventurar una lectura causal de la descomposición \(Consumo=E[Consumo\mid Renta]+U\). Pero si, por el contrario, no tenemos ninguna teoría previa que distinga qué variable debería hacer de \(X\) y cuál de \(Y\) —como en el ejemplo, deliberadamente absurdo pero matemáticamente impecable, de regresar la superficie de una vivienda sobre su precio—, entonces la descomposición algebraica sigue siendo perfectamente válida, pero carece de cualquier interpretación causal razonable.
+¿De dónde puede venir dicha lectura? No de la geometría, ni del álgebra: únicamente de una <i>teoría económica previa</i>. Si, antes de mirar ningún dato, tenemos razones teóricas sólidas para pensar que la renta disponible de un consumidor influye en cuánto consume —y no al revés, ni por alguna tercera vía—, entonces sí podemos aventurar una lectura causal de la descomposición \(\mathit{Consumo}=E[\mathit{Consumo}\mid \mathit{Renta}]+U\). Pero si, por el contrario, no tenemos ninguna teoría previa que distinga qué variable debería hacer de \(X\) y cuál de \(Y\) —como en el ejemplo, deliberadamente absurdo pero matemáticamente impecable, de regresar la superficie de una vivienda sobre su precio—, entonces la descomposición algebraica sigue siendo perfectamente válida, pero carece de cualquier interpretación causal razonable.
 </p>
 
 <p>
-Conviene, además, prevenir una lectura equivocada de la transparencia anterior. Que hayamos enunciado <i>tres</i> supuestos en lugar de los cuatro o cinco habituales, y que la exogeneidad haya resultado ser un corolario gratuito, NO significa que el modelo clásico exija menos de la realidad, ni que se cumpla más a menudo. Significa exactamente lo contrario de lo que podría parecer: todo el peso —todo lo que puede fallar— se ha concentrado en un único sitio, el supuesto 1. Es ahí, y solo ahí, donde afirmamos algo fuerte sobre el mundo: que de entre las infinitas funciones de \(X\) que podríamos haber usado para aproximar \(Y\), la mejor resulta ser precisamente una recta. Cuando, en la última parte del curso, pongamos a prueba la <i>especificación</i> de un modelo, será ese supuesto el que estemos contrastando.
+Conviene, además, prevenir una lectura equivocada de la transparencia anterior. Que hayamos enunciado <i>tres</i> supuestos en lugar de los cinco habituales, y que la exogeneidad haya resultado ser un corolario gratuito, NO significa que el modelo clásico exija menos de la realidad, ni que se cumpla más a menudo. Significa exactamente lo contrario de lo que podría parecer: todo el peso —todo lo que puede fallar— se ha concentrado en un único sitio, el supuesto 1. Es ahí, y solo ahí, donde afirmamos algo fuerte sobre el mundo: que de entre las infinitas funciones de \(X\) que podríamos haber usado para aproximar \(Y\), la mejor resulta ser precisamente una recta. Cuando, en la última parte del curso, pongamos a prueba la <i>especificación</i> de un modelo, será ese supuesto el que estemos contrastando.
 </p>
 
 <p>
@@ -994,8 +995,8 @@ La econometría proporciona el método para <i>cuantificar</i> la magnitud de un
 </div>
 </div>
 </div>
-<div id="outline-container-org3974d5d" class="outline-2">
-<h2 id="org3974d5d"><span class="section-number-2">8.</span> El salto: método de los momentos</h2>
+<div id="outline-container-org7516c55" class="outline-2">
+<h2 id="org7516c55"><span class="section-number-2">8.</span> El salto: método de los momentos</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 En el modelo poblacional, los verdaderos parámetros \(\beta_2\) y \(\beta_1\) dependen de la geometría de la <i>población</i> (del producto escalar probabilístico \(\langle \cdot, \cdot \rangle_P\)):
@@ -1005,7 +1006,7 @@ En el modelo poblacional, los verdaderos parámetros \(\beta_2\) y \(\beta_1\) d
 </p>
 
 <p>
-<i>Problema</i>: Eros no conoce la población entera; aunque conoce algunos datos.
+<i>Problema</i>: Eros no conoce la población entera, pero conoce algunos datos.
 </p>
 
 <p>
@@ -1026,9 +1027,9 @@ Mínimos Cuadrados Ordinarios (MCO) equivale al Método de los Momentos en el Mo
 </p>
 </div>
 </div>
-<div id="outline-container-org4c4798c" class="outline-4">
-<h4 id="org4c4798c">El salto: método de los momentos</h4>
-<div class="outline-text-4" id="text-org4c4798c">
+<div id="outline-container-org77f313b" class="outline-4">
+<h4 id="org77f313b">El salto: método de los momentos</h4>
+<div class="outline-text-4" id="text-org77f313b">
 <p>
 Llegamos al momento en que todo el andamiaje construido hoy se pone al servicio de algo muy concreto: entender, con una mirada nueva, las fórmulas que ya calculamos en la lección 7.
 </p>
@@ -1080,11 +1081,11 @@ El ``salto'' que da nombre a esta transparencia consiste en resolver este proble
 </p>
 
 <p>
-Lo que ha cambiado, entre la lección 7 y hoy, no es la fórmula —es idéntica—, sino su <i>interpretación</i>. En la lección 7, \(\hat\beta_2\) era, sencillamente, la pendiente del ajuste que mejor se acomodaba a un vector de datos concreto: un hecho geométrico sobre ese vector, sin ninguna pretensión más allá de él. Hoy, con el modelo poblacional \(Y=\beta_1\,\mathit1+\beta_2X+U\) ya construido, \(\hat\beta_2\) pasa a ser algo distinto: un <i>estimador</i> del parámetro poblacional (desconocido) \(\beta_2\) —una aproximación, calculada a partir de nuestra muestra, a una cantidad que presumimos que existe en el mundo económico subyacente pero que nunca observaremos directamente—.
+Lo que ha cambiado entre la lección 7 y hoy no es la fórmula, que es idéntica, sino su <i>interpretación</i>. En la lección 7, \(\hat\beta_2\) era, sencillamente, la pendiente del ajuste que mejor se acomodaba a un vector de datos concreto: un hecho geométrico sobre ese vector, sin ninguna pretensión más allá de él. Hoy, con el modelo poblacional \(Y=\beta_1\,\mathit1+\beta_2X+U\) ya construido, \(\hat\beta_2\) pasa a ser algo distinto: un <i>estimador</i> del parámetro poblacional (desconocido) \(\beta_2\) —una aproximación, calculada a partir de nuestra muestra, a una cantidad que presumimos que existe en el mundo económico subyacente pero que nunca observaremos directamente—.
 </p>
 
 <p>
-Un ejemplo concreto, para no perder el contacto con el laboratorio de regresión simple con datos reales. Escribamos el modelo poblacional \(Price=\beta_1\,\mathit{1}+\beta_2 Rooms+U\), con la interpretación —bajo el primer supuesto, y con las reservas causales de la transparencia anterior— de que \(\beta_2\) mide cómo varía, en promedio, el precio de una vivienda cualquiera ante un incremento de una habitación; no solo de las 506 del Boston metropolitano que observamos. Entonces el coeficiente \(\hat\beta_2\) que Gretl calculó en aquella práctica no es solo ``la pendiente de la recta que mejor se ajusta a esos 506 puntos''. Es, además, nuestra mejor <i>estimación</i>, con los datos disponibles, de ese parámetro poblacional desconocido.
+Un ejemplo concreto, para no perder el contacto con el laboratorio de regresión simple con datos reales. Escribamos el modelo poblacional \(\mathit{Price}=\beta_1\,\mathit{1}+\beta_2\,\mathit{Rooms}+U\), con la interpretación —bajo el primer supuesto, y con las reservas causales de la transparencia anterior— de que \(\beta_2\) mide cómo varía, en promedio, el precio de una vivienda cualquiera ante un incremento de una habitación; no solo de las 506 del Boston metropolitano que observamos. Entonces el coeficiente \(\hat\beta_2\) que Gretl calculó en aquella práctica no es solo ``la pendiente de la recta que mejor se ajusta a esos 506 puntos''. Es, además, nuestra mejor <i>estimación</i>, con los datos disponibles, de ese parámetro poblacional desconocido.
 </p>
 
 <p>
@@ -1092,13 +1093,13 @@ Un ejemplo concreto, para no perder el contacto con el laboratorio de regresión
 </p>
 <ul class="org-ul">
 <li>Bujosa, M., sección <a href="https://mbujosab.github.io/Ectr/apuntes-Ectr-print.pdf#section.11">``Estimación del Modelo Clásico de Regresión Lineal''</a>: discusión extensa (con el ejemplo detallado del precio de la vivienda) de por qué sustituir momentos poblacionales por muestrales constituye ``un salto audaz'', y de la relación exacta entre \((\mathbb{R}^n,\langle\cdot,\cdot\rangle_s)\) y un espacio de probabilidad.</li>
-<li>Wooldridge, J. M. (2020), Apéndice C.1: introducción al método de los momentos como principio general de estimación.</li>
+<li>Wooldridge, J. M. (2020), Apéndice C, sección C.4: introducción al método de los momentos como principio general de estimación.</li>
 </ul>
 </div>
 </div>
 </div>
-<div id="outline-container-orgbc11ae4" class="outline-2">
-<h2 id="orgbc11ae4"><span class="section-number-2">9.</span> Recapitulación y guiño a la lección siguiente</h2>
+<div id="outline-container-org9c6a652" class="outline-2">
+<h2 id="org9c6a652"><span class="section-number-2">9.</span> Recapitulación y guiño a la lección siguiente</h2>
 <div class="outline-text-2" id="text-9">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -1167,27 +1168,27 @@ Un ejemplo concreto, para no perder el contacto con el laboratorio de regresión
 <li><i>Lección 10 (Regresión Múltiple)</i>: Ampliaremos la proyección del plano 2D a subespacios de mayor dimensión. Para manejar tantas condiciones de ortogonalidad, introduciremos una notación muy elegante: las <i>matrices</i>.</li>
 </ul>
 </div>
-<div id="outline-container-orgc8f2900" class="outline-4">
-<h4 id="orgc8f2900">Recapitulación y guiño a la lección siguiente</h4>
-<div class="outline-text-4" id="text-orgc8f2900">
+<div id="outline-container-org7b4d1f2" class="outline-4">
+<h4 id="org7b4d1f2">Recapitulación y guiño a la lección siguiente</h4>
+<div class="outline-text-4" id="text-org7b4d1f2">
 <p>
-Cerramos esta lección con la tabla-diccionario que resume, de un vistazo, todo el camino recorrido. Conviene leerla despacio, fila por fila, porque cada línea condensa una transparencia entera de la sesión.
+Cerramos esta lección con la tabla-diccionario que resume todo el camino recorrido. Cada fila resume una transparencia de la sesión.
 </p>
 
 <p>
-La primera fila recoge la idea de partida (transparencia 2): tanto el vector de datos \(\boldsymbol y\) como la variable aleatoria \(Y\) son, en el fondo, funciones —solo que definidas sobre dominios de naturaleza radicalmente distinta: uno finito y perfectamente conocido (\(\{1,\ldots,n\}\)), el otro potencialmente inmenso y, en la práctica, nunca descrito en detalle (\(\Omega\)).
+La primera fila recoge la idea de partida (``Un vector es una función; y una variable aleatoria también''): tanto el vector de datos \(\boldsymbol y\) como la variable aleatoria \(Y\) son, en el fondo, funciones —solo que definidas sobre dominios de naturaleza radicalmente distinta: uno finito y perfectamente conocido (\(\{1,\ldots,n\}\)), el otro potencialmente inmenso y, en la práctica, nunca descrito en detalle (\(\Omega\)).
 </p>
 
 <p>
-La segunda y tercera filas recogen la distinción, mantenida durante toda la sesión, entre el valor esperado como número y la esperanza condicional como función constante (transparencia 4). \(\mathrm{E}(Y)\) es un escalar, como lo era \(\mu_{\boldsymbol y}\). \(E[Y|\mathit{1}]\) es una función constante —la variable aleatoria constante más próxima a \(Y\)—, como lo era \(\boldsymbol{\mathop{\overline y}}\), el vector constante más próximo a \(\boldsymbol y\).
+La segunda y tercera filas recogen la distinción, mantenida durante toda la sesión, entre el valor esperado como número y la esperanza condicional como función constante (``La esperanza: dos caras de la misma moneda''). \(\mathrm{E}(Y)\) es un escalar, como lo era \(\mu_{\boldsymbol y}\). \(E[Y|\mathit{1}]\) es una función constante —la variable aleatoria constante más próxima a \(Y\)—, como lo era \(\boldsymbol{\mathop{\overline y}}\), el vector constante más próximo a \(\boldsymbol y\).
 </p>
 
 <p>
-La cuarta fila recoge, quizá, la diferencia más profunda de toda la sesión (transparencia 5). \(\boldsymbol{\mathop{\widehat y}}\) era la proyección sobre un plano de solo dos direcciones linealmente independientes; \(E[Y|X]\) es la proyección sobre un espacio de funciones que, en general, tiene infinitas. Por eso la linealidad de \(E[Y|X]\) es un supuesto sustantivo, y no una consecuencia automática de la definición.
+La cuarta fila recoge, quizá, la diferencia más profunda de toda la sesión (``Esperanza condicional: proyección sobre un espacio ENORME''). \(\boldsymbol{\mathop{\widehat y}}\) era la proyección sobre un plano de solo dos direcciones linealmente independientes; \(E[Y|X]\) es la proyección sobre un espacio de funciones que, en general, tiene infinitas. Por eso la linealidad de \(E[Y|X]\) es un supuesto sustantivo, y no una consecuencia automática de la definición.
 </p>
 
 <p>
-La quinta fila es la descomposición fundamental que ambos mundos comparten: en \(\mathbb{R}^n\), \(\boldsymbol y=\boldsymbol{\mathop{\widehat y}}+\boldsymbol{\mathop{\widehat e}}\); con variables aleatorias, \(Y=E[Y|X]+U\). Ambas son descomposiciones ortogonales que existen <i>siempre</i>, sin necesidad de ningún supuesto adicional — y, por eso mismo, ninguna de las dos implica, por sí sola, ninguna relación de causalidad (transparencia 7).
+La quinta fila es la descomposición fundamental que ambos mundos comparten: en \(\mathbb{R}^n\), \(\boldsymbol y=\boldsymbol{\mathop{\widehat y}}+\boldsymbol{\mathop{\widehat e}}\); con variables aleatorias, \(Y=E[Y|X]+U\). Ambas son descomposiciones ortogonales que existen <i>siempre</i>, sin necesidad de ningún supuesto adicional — y, por eso mismo, ninguna de las dos implica, por sí sola, ninguna relación de causalidad (``Cuidado: esta descomposición ortogonal no implica causalidad'').
 </p>
 
 <p>
@@ -1195,7 +1196,7 @@ La sexta fila recuerda que la varianza, en ambos mundos, mide lo mismo: la dispe
 </p>
 
 <p>
-La séptima fila recuerda que la identidad pitagórica permite descomponer la varianza (cuadrado de la hipotenusa \(Y-E[Y|\mathit{1}]\)), como suma de varianzas (cuadrados de los catetos horizontal: \(E[Y|X]-E[Y|\mathit{1}]\) y vertical: \(U\)) &#x2014;véase la figura de la transparencia 5.
+La séptima fila recuerda que la identidad pitagórica permite descomponer la varianza (cuadrado de la hipotenusa \(Y-E[Y|\mathit{1}]\)), como suma de varianzas (cuadrados de los catetos horizontal: \(E[Y|X]-E[Y|\mathit{1}]\) y vertical: \(U\)); véase la figura de ``Esperanza condicional: proyección sobre un espacio ENORME''.
 </p>
 
 <p>
@@ -1221,25 +1222,25 @@ En la <i>Lección 10 (Regresión Múltiple)</i> proyectaremos sobre subespacios 
 </div>
 </div>
 </div>
-<div id="outline-container-org62cb19c" class="outline-2">
-<h2 id="org62cb19c"><span class="section-number-2">10.</span> Preguntas de repaso (sesión 12)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div id="outline-container-org0710006" class="outline-2">
+<h2 id="org0710006"><span class="section-number-2">10.</span> Preguntas de repaso (sesión 12)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
 <div class="outline-text-2" id="text-10">
 <p>
-Te propongo 12 preguntas.
+Le propongo 12 preguntas.
 Las marco con un nivel orientativo: [B] básica, [M] media, [D] discriminadora.
 </p>
 </div>
-<div id="outline-container-orgce8b4e1" class="outline-4">
-<h4 id="orgce8b4e1">Comentario</h4>
-<div class="outline-text-4" id="text-orgce8b4e1">
+<div id="outline-container-org0e0176e" class="outline-4">
+<h4 id="org0e0176e">Comentario</h4>
+<div class="outline-text-4" id="text-org0e0176e">
 <p>
-Las preguntas más valiosas pedagógicamente son la 5 (obliga a entender <i>por qué</i> la linealidad de \(E[Y|X]\) es un supuesto sustantivo, no una trivialidad, dado que el espacio de proyección tiene dimensión infinita) y la 9 (fija la advertencia causal central de la sesión con un ejemplo concreto e inequívoco). La 8 es la más discriminadora en términos puramente algebraicos: exige reconstruir el mecanismo del "truco del vector de media nula", no solo recordar su conclusión (probada en la pregunta 7). Conviene comentar en clase la 6 (alcance de la analogía): es la advertencia de honestidad epistemológica que sostiene toda la sesión, y merece discusión.
+Las preguntas más valiosas pedagógicamente son la 5 (obliga a entender <i>por qué</i> la linealidad de \(E[Y|X]\) es un supuesto sustantivo, no una trivialidad, dado que el espacio de proyección tiene dimensión infinita) y la 9 (fija la advertencia causal central de la sesión con un ejemplo concreto e inequívoco). La 8 es la más discriminadora en términos puramente algebraicos: exige reconstruir el mecanismo del ``truco del vector de media nula'', no solo recordar su conclusión (probada en la pregunta 7). Conviene comentar en clase la 6 (alcance de la analogía): es la advertencia de honestidad epistemológica que sostiene toda la sesión, y merece discusión.
 </p>
 </div>
 </div>
-<div id="outline-container-org099328a" class="outline-4">
-<h4 id="org099328a">Pregunta 1 [B] — La diferencia entre \(\boldsymbol{y}\) y \(Y\)</h4>
-<div class="outline-text-4" id="text-org099328a">
+<div id="outline-container-org8e6cf95" class="outline-4">
+<h4 id="org8e6cf95">Pregunta 1 [B] — La diferencia entre \(\boldsymbol{y}\) y \(Y\)</h4>
+<div class="outline-text-4" id="text-org8e6cf95">
 <p>
 Según lo visto en la sesión, ¿cuál es la principal diferencia conceptual entre el vector de datos \(\boldsymbol{y}\) y la variable aleatoria \(Y\) de un modelo econométrico?
 </p>
@@ -1252,9 +1253,9 @@ Según lo visto en la sesión, ¿cuál es la principal diferencia conceptual ent
 </ol>
 </div>
 </div>
-<div id="outline-container-org4254d63" class="outline-4">
-<h4 id="org4254d63">Pregunta 2 [B] — El diccionario: la media</h4>
-<div class="outline-text-4" id="text-org4254d63">
+<div id="outline-container-org2432365" class="outline-4">
+<h4 id="org2432365">Pregunta 2 [B] — El diccionario: la media</h4>
+<div class="outline-text-4" id="text-org2432365">
 <p>
 ¿Cuál es el equivalente poblacional (en el espacio de variables aleatorias) del vector de medias muestral \(\boldsymbol{\mathop{\overline{y}}}\)?
 </p>
@@ -1267,9 +1268,9 @@ Según lo visto en la sesión, ¿cuál es la principal diferencia conceptual ent
 </ol>
 </div>
 </div>
-<div id="outline-container-org6aa71b6" class="outline-4">
-<h4 id="org6aa71b6">Pregunta 3 [B] — El diccionario: la regresión</h4>
-<div class="outline-text-4" id="text-org6aa71b6">
+<div id="outline-container-org38dc215" class="outline-4">
+<h4 id="org38dc215">Pregunta 3 [B] — El diccionario: la regresión</h4>
+<div class="outline-text-4" id="text-org38dc215">
 <p>
 Al pasar de la muestra a la población, el equivalente conceptual del ajuste muestral (la proyección) \(\boldsymbol{\mathop{\widehat{y}}}\) es:
 </p>
@@ -1282,9 +1283,9 @@ Al pasar de la muestra a la población, el equivalente conceptual del ajuste mue
 </ol>
 </div>
 </div>
-<div id="outline-container-org91eee29" class="outline-4">
-<h4 id="org91eee29">Pregunta 4 [M] — El espacio sobre el que se proyecta</h4>
-<div class="outline-text-4" id="text-org91eee29">
+<div id="outline-container-org1dada3b" class="outline-4">
+<h4 id="org1dada3b">Pregunta 4 [M] — El espacio sobre el que se proyecta</h4>
+<div class="outline-text-4" id="text-org1dada3b">
 <p>
 \(E[Y\mid X]\) es la proyección de \(Y\) sobre:
 </p>
@@ -1293,13 +1294,13 @@ Al pasar de la muestra a la población, el equivalente conceptual del ajuste mue
 <li>El plano de las combinaciones lineales \(\beta_1\,\mathit{1}+\beta_2X\), exclusivamente.</li>
 <li>El conjunto de TODAS las funciones de \(X\) con varianza finita.</li>
 <li>El conjunto de todas las variables aleatorias, sin restricción alguna.</li>
-<li>La recta \(\mathcal L(1)\).</li>
+<li>La recta \(\mathcal L(\mathit{1})\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org1163128" class="outline-4">
-<h4 id="org1163128">Pregunta 5 [D] — El supuesto de Linealidad</h4>
-<div class="outline-text-4" id="text-org1163128">
+<div id="outline-container-org3ac6d1b" class="outline-4">
+<h4 id="org3ac6d1b">Pregunta 5 [D] — El supuesto de Linealidad</h4>
+<div class="outline-text-4" id="text-org3ac6d1b">
 <p>
 En el Modelo Clásico de Regresión Lineal, ¿por qué necesitamos imponer el supuesto de que \(E[Y|X] = \beta_1\,\mathit{1} + \beta_2 X\)?
 </p>
@@ -1312,9 +1313,9 @@ En el Modelo Clásico de Regresión Lineal, ¿por qué necesitamos imponer el su
 </ol>
 </div>
 </div>
-<div id="outline-container-org164d42d" class="outline-4">
-<h4 id="org164d42d">Pregunta 6 [D] — Alcance de la analogía</h4>
-<div class="outline-text-4" id="text-org164d42d">
+<div id="outline-container-orgce2ddb9" class="outline-4">
+<h4 id="orgce2ddb9">Pregunta 6 [D] — Alcance de la analogía</h4>
+<div class="outline-text-4" id="text-orgce2ddb9">
 <p>
 La analogía entre \(\mathbb{R}^n\) y el espacio de variables aleatorias, tal como se ha presentado en esta sesión:
 </p>
@@ -1327,9 +1328,9 @@ La analogía entre \(\mathbb{R}^n\) y el espacio de variables aleatorias, tal co
 </ol>
 </div>
 </div>
-<div id="outline-container-orge5a97c1" class="outline-4">
-<h4 id="orge5a97c1">Pregunta 7 [M] — Consecuencia de \(E[U\mid X]=\mathit{0}\)</h4>
-<div class="outline-text-4" id="text-orge5a97c1">
+<div id="outline-container-org47d047a" class="outline-4">
+<h4 id="org47d047a">Pregunta 7 [M] — Consecuencia de \(E[U\mid X]=\mathit{0}\)</h4>
+<div class="outline-text-4" id="text-org47d047a">
 <p>
 Si \(E[U\mid X]=\mathit{0}\), entonces necesariamente:
 </p>
@@ -1342,9 +1343,9 @@ Si \(E[U\mid X]=\mathit{0}\), entonces necesariamente:
 </ol>
 </div>
 </div>
-<div id="outline-container-org094690f" class="outline-4">
-<h4 id="org094690f">Pregunta 8 [D] — El truco del vector de media nula</h4>
-<div class="outline-text-4" id="text-org094690f">
+<div id="outline-container-org90cadee" class="outline-4">
+<h4 id="org90cadee">Pregunta 8 [D] — El truco del vector de media nula</h4>
+<div class="outline-text-4" id="text-org90cadee">
 <p>
 ¿Por qué \(\mathrm{E}(UX)\) coincide con \(\mathrm{Cov}(U,X)\)?
 </p>
@@ -1357,9 +1358,9 @@ Si \(E[U\mid X]=\mathit{0}\), entonces necesariamente:
 </ol>
 </div>
 </div>
-<div id="outline-container-orgac0ced5" class="outline-4">
-<h4 id="orgac0ced5">Pregunta 9 [M] — Causalidad y Ortogonalidad</h4>
-<div class="outline-text-4" id="text-orgac0ced5">
+<div id="outline-container-orga662fc5" class="outline-4">
+<h4 id="orga662fc5">Pregunta 9 [M] — Causalidad y Ortogonalidad</h4>
+<div class="outline-text-4" id="text-orga662fc5">
 <p>
 Supongamos que proyectamos algebraicamente la superficie de una casa (\(Y\)) sobre su precio (\(X\)) y que la perturbación \(U\) es perfectamente ortogonal a \(X\). ¿Podemos afirmar que un aumento en el precio causa que la casa gane metros cuadrados?
 </p>
@@ -1372,9 +1373,9 @@ Supongamos que proyectamos algebraicamente la superficie de una casa (\(Y\)) sob
 </ol>
 </div>
 </div>
-<div id="outline-container-org3a1a711" class="outline-4">
-<h4 id="org3a1a711">Pregunta 10 [B] — Homocedasticidad</h4>
-<div class="outline-text-4" id="text-org3a1a711">
+<div id="outline-container-org2b525d8" class="outline-4">
+<h4 id="org2b525d8">Pregunta 10 [B] — Homocedasticidad</h4>
+<div class="outline-text-4" id="text-org2b525d8">
 <p>
 En el contexto del Modelo Clásico de Regresión Lineal, el supuesto de homocedasticidad significa que:
 </p>
@@ -1387,9 +1388,9 @@ En el contexto del Modelo Clásico de Regresión Lineal, el supuesto de homoceda
 </ol>
 </div>
 </div>
-<div id="outline-container-orge23cbd3" class="outline-4">
-<h4 id="orge23cbd3">Pregunta 11 [M] — El salto del método de los momentos</h4>
-<div class="outline-text-4" id="text-orge23cbd3">
+<div id="outline-container-org6fd1c0f" class="outline-4">
+<h4 id="org6fd1c0f">Pregunta 11 [M] — El salto del método de los momentos</h4>
+<div class="outline-text-4" id="text-org6fd1c0f">
 <p>
 El método de los momentos consiste en:
 </p>
@@ -1402,9 +1403,9 @@ El método de los momentos consiste en:
 </ol>
 </div>
 </div>
-<div id="outline-container-org8b45877" class="outline-4">
-<h4 id="org8b45877">Pregunta 12 [D] — Fórmulas y su interpretación</h4>
-<div class="outline-text-4" id="text-org8b45877">
+<div id="outline-container-org31848ad" class="outline-4">
+<h4 id="org31848ad">Pregunta 12 [D] — Fórmulas y su interpretación</h4>
+<div class="outline-text-4" id="text-org31848ad">
 <p>
 \(\hat\beta_2=\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol x}^2\) (en la lección 7) y \(\hat\beta_2=\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol x}^2\) (en esta sesión, tras el método de los momentos):
 </p>
@@ -1418,101 +1419,101 @@ El método de los momentos consiste en:
 </div>
 </div>
 </div>
-<div id="outline-container-org1e0b8fe" class="outline-2">
-<h2 id="org1e0b8fe"><span class="section-number-2">11.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div id="outline-container-org3b1b1dd" class="outline-2">
+<h2 id="org3b1b1dd"><span class="section-number-2">11.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
 <div class="outline-text-2" id="text-11">
 </div>
 <ul class="org-ul">
-<li><a id="orgb63079f"></a>Pregunta 1 [B] — La diferencia entre \(\boldsymbol{y}\) y \(Y\)<br />
-<div class="outline-text-5" id="text-orgb63079f">
+<li><a id="orgb31694b"></a>Pregunta 1 [B] — La diferencia entre \(\boldsymbol{y}\) y \(Y\)<br />
+<div class="outline-text-5" id="text-orgb31694b">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: comprensión del "salto" de la muestra (\(\mathbb{R}^n\)) a la población.
+<i>Evalúa</i>: comprensión del ``salto'' de la muestra (\(\mathbb{R}^n\)) a la población.
 </p>
 </div>
 </li>
-<li><a id="org217ef34"></a>Pregunta 2 [B] — El diccionario: la media<br />
-<div class="outline-text-5" id="text-org217ef34">
+<li><a id="org26e8dbc"></a>Pregunta 2 [B] — El diccionario: la media<br />
+<div class="outline-text-5" id="text-org26e8dbc">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: asimilación de la distinción notacional entre el escalar (valor esperado) y el vector constante de la proyección (esperanza condicionada a la constante).
 </p>
 </div>
 </li>
-<li><a id="org015e975"></a>Pregunta 3 [B] — El diccionario: la regresión<br />
-<div class="outline-text-5" id="text-org015e975">
+<li><a id="org2686d07"></a>Pregunta 3 [B] — El diccionario: la regresión<br />
+<div class="outline-text-5" id="text-org2686d07">
 <p>
 <i>Respuesta correcta: 4.</i>
 <i>Evalúa</i>: conocimiento del mapeo fundamental de la regresión de \(\mathbb{R}^n\) al espacio probabilístico.
 </p>
 </div>
 </li>
-<li><a id="org8164de0"></a>Pregunta 4 [M] — El espacio sobre el que se proyecta<br />
-<div class="outline-text-5" id="text-org8164de0">
+<li><a id="org82ebf29"></a>Pregunta 4 [M] — El espacio sobre el que se proyecta<br />
+<div class="outline-text-5" id="text-org82ebf29">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: comprensión de que el espacio de proyección de \(E[Y\mid X]\) es mucho más amplio que el plano usado en regresión lineal simple.
 </p>
 </div>
 </li>
-<li><a id="org2f4d57f"></a>Pregunta 5 [D] — El supuesto de Linealidad<br />
-<div class="outline-text-5" id="text-org2f4d57f">
+<li><a id="orga372f0b"></a>Pregunta 5 [D] — El supuesto de Linealidad<br />
+<div class="outline-text-5" id="text-orga372f0b">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: comprensión de por qué la abstracción poblacional es mucho más "peligrosa" (dimensión infinita de funciones de \(X\)) y exige un supuesto fuerte para que funcione el ajuste lineal simple.
+<i>Evalúa</i>: comprensión de por qué la abstracción poblacional es mucho más ``peligrosa'' (dimensión infinita de funciones de \(X\)) y exige un supuesto fuerte para que funcione el ajuste lineal simple.
 </p>
 </div>
 </li>
-<li><a id="orgb46b42a"></a>Pregunta 6 [D] — Alcance de la analogía<br />
-<div class="outline-text-5" id="text-orgb46b42a">
+<li><a id="org29db41d"></a>Pregunta 6 [D] — Alcance de la analogía<br />
+<div class="outline-text-5" id="text-org29db41d">
 <p>
 <i>Respuesta correcta: 3.</i>
 <i>Evalúa</i>: la advertencia de honestidad epistemológica planteada ya en la primera transparencia y recordada durante toda la sesión.
 </p>
 </div>
 </li>
-<li><a id="org1f26118"></a>Pregunta 7 [M] — Consecuencia de \(E[U\mid X]=\mathit{0}\)<br />
-<div class="outline-text-5" id="text-org1f26118">
+<li><a id="orgd9c6de1"></a>Pregunta 7 [M] — Consecuencia de \(E[U\mid X]=\mathit{0}\)<br />
+<div class="outline-text-5" id="text-orgd9c6de1">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: las dos consecuencias concretas de la exogeneidad estricta (ortogonalidad frente a \(1\) y frente a \(X\)).
 </p>
 </div>
 </li>
-<li><a id="orgc7a96a7"></a>Pregunta 8 [D] — El truco del vector de media nula<br />
-<div class="outline-text-5" id="text-orgc7a96a7">
+<li><a id="orgbd2f3ed"></a>Pregunta 8 [D] — El truco del vector de media nula<br />
+<div class="outline-text-5" id="text-orgbd2f3ed">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: reconstrucción explícita del "truco", ya usado en la lección 6 con vectores, ahora aplicado a esperanzas.
+<i>Evalúa</i>: reconstrucción explícita del ``truco'', ya usado en la lección 6 con vectores, ahora aplicado a esperanzas.
 </p>
 </div>
 </li>
-<li><a id="org795f682"></a>Pregunta 9 [M] — Causalidad y Ortogonalidad<br />
-<div class="outline-text-5" id="text-org795f682">
+<li><a id="org9e9c7dd"></a>Pregunta 9 [M] — Causalidad y Ortogonalidad<br />
+<div class="outline-text-5" id="text-org9e9c7dd">
 <p>
 <i>Respuesta correcta: 3.</i>
 <i>Evalúa</i>: retención de la advertencia central de la sesión: la matemática es ciega a la dirección de la causalidad.
 </p>
 </div>
 </li>
-<li><a id="org2248c46"></a>Pregunta 10 [B] — Homocedasticidad<br />
-<div class="outline-text-5" id="text-org2248c46">
+<li><a id="orga879346"></a>Pregunta 10 [B] — Homocedasticidad<br />
+<div class="outline-text-5" id="text-orga879346">
 <p>
 <i>Respuesta correcta: 4.</i>
 <i>Evalúa</i>: conocimiento de la definición formal del tercer supuesto del MCRL.
 </p>
 </div>
 </li>
-<li><a id="org07fbc1a"></a>Pregunta 11 [M] — El salto del método de los momentos<br />
-<div class="outline-text-5" id="text-org07fbc1a">
+<li><a id="orgd3b773d"></a>Pregunta 11 [M] — El salto del método de los momentos<br />
+<div class="outline-text-5" id="text-orgd3b773d">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión de la operación central de la transparencia "El salto: método de los momentos".
+<i>Evalúa</i>: comprensión de la operación central de la transparencia ``El salto: método de los momentos''.
 </p>
 </div>
 </li>
-<li><a id="org25bc838"></a>Pregunta 12 [D] — Fórmulas y su interpretación<br />
-<div class="outline-text-5" id="text-org25bc838">
+<li><a id="orge1b329f"></a>Pregunta 12 [D] — Fórmulas y su interpretación<br />
+<div class="outline-text-5" id="text-orge1b329f">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: el punto culminante de la sesión — el mismo cálculo, dos lecturas.
@@ -1546,7 +1547,7 @@ El método de los momentos consiste en:
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-19 sáb 23:26</p>
+<p class="date">Created: 2026-09-23 mié 21:24</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

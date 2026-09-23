@@ -1,0 +1,81 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open data3-7.gdt --quiet
+outfile --quiet descripcion.txt
+    labels
+    summary cost age miles --simple
+    corr age miles
+end outfile
+outfile --quiet simples.txt
+    ols cost const age --quiet
+    printf "cost ~ age:    coef(age)   = %8.3f   ee = %7.3f   t = %6.2f   R2 = %.4f   s = %.1f\n", $coeff(age), $stderr(age), $coeff(age)/$stderr(age), $rsq, $sigma
+    ols cost const miles --quiet
+    printf "cost ~ miles:  coef(miles) = %8.3f   ee = %7.3f   t = %6.2f   R2 = %.4f   s = %.1f\n", $coeff(miles), $stderr(miles), $coeff(miles)/$stderr(miles), $rsq, $sigma
+end outfile
+gnuplot cost age --output="@workdir/costAge.png"
+gnuplot miles age --output="@workdir/milesAge.png"
+
+outfile --quiet conjunto.txt
+    ols cost const age miles
+    vif
+end outfile
+
+outfile --quiet partesPropias.txt
+    ols age const miles --quiet
+    printf "parte propia de age   sobre miles: ||.|| = %8.3f    ||age en desviaciones||   = %8.3f    R2aux = %.4f\n", sqrt($ess), sqrt(sum((age-mean(age))^2)), $rsq
+    ols miles const age --quiet
+    scalar longPropiaMiles = sqrt($ess)
+    printf "parte propia de miles sobre age:   ||.|| = %8.3f    ||miles en desviaciones|| = %8.3f    R2aux = %.4f\n", longPropiaMiles, sqrt(sum((miles-mean(miles))^2)), $rsq
+    ols cost const age miles --quiet
+    printf "s = %.3f ;  s/||parte propia de miles|| = %.3f ;  ee(miles) de Gretl = %.3f\n", $sigma, $sigma/longPropiaMiles, $stderr(miles)
+end outfile
+
+ols cost const age miles --quiet
+scalar df = $df
+restrict --quiet
+    b[age] = 0
+end restrict
+scalar F_age = $test
+restrict --quiet
+    b[miles] = 0
+end restrict
+scalar F_miles = $test
+outfile --quiet contrastes.txt
+    scalar tc = critical(t, df, 0.025)
+    printf "Modelo completo: t(age) = %.2f   t(miles) = %.2f   t_c = %.3f\n", $coeff(age)/$stderr(age), $coeff(miles)/$stderr(miles), tc
+    printf "IC 95%% de age:   [%.2f ; %.2f]\n", $coeff(age) - tc*$stderr(age), $coeff(age) + tc*$stderr(age)
+    printf "IC 95%% de miles: [%.1f ; %.1f]\n", $coeff(miles) - tc*$stderr(miles), $coeff(miles) + tc*$stderr(miles)
+    printf "F de significacion conjunta (pie de tabla) = %.1f   F_c(2,%d) = %.3f\n", $Fstat, df, critical(F, 2, df, 0.05)
+    printf "Omitir age:   F(1,%d) = %.2f = t^2   valor p = %.2e\n", df, F_age, pvalue(F, 1, df, F_age)
+    printf "Omitir miles: F(1,%d) = %.2f = t^2   valor p = %.2e\n", df, F_miles, pvalue(F, 1, df, F_miles)
+    printf "correlacion entre los estimadores de age y miles: %.4f\n", $vcv[2,3]/sqrt($vcv[2,2]*$vcv[3,3])
+end outfile
+
+outfile --quiet submuestras.txt
+    printf "La misma regresion en dos mitades de la muestra:\n"
+    smpl 1 28
+    ols cost const age miles --quiet
+    printf "obs 1-28 : coef(age) = %8.3f (ee %6.3f)   coef(miles) = %9.3f (ee %7.3f)   s = %.1f\n", $coeff(age), $stderr(age), $coeff(miles), $stderr(miles), $sigma
+    smpl 29 57
+    ols cost const age miles --quiet
+    printf "obs 29-57: coef(age) = %8.3f (ee %6.3f)   coef(miles) = %9.3f (ee %7.3f)   s = %.1f\n", $coeff(age), $stderr(age), $coeff(miles), $stderr(miles), $sigma
+    smpl full
+end outfile

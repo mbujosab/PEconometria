@@ -3,11 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-19 sáb 09:48 -->
+<!-- 2026-09-23 mié 22:30 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 14 (B) &#x2014; Del R² al R² ajustado: coeficientes parciales en hprice2</title>
 <meta name="author" content="Marcos Bujosa" />
+<meta name="description" content="Práctica de Gretl, sesión 14 (B): de la regresión simple a la múltiple en hprice2; el R² nunca baja al añadir regresores y el R² ajustado corrige ese defecto." />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
   #content { max-width: 60em; margin: auto; }
@@ -286,30 +287,30 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org73cabdc">Descripción de la práctica</a></li>
-<li><a href="#org4dd4575">Actividad 1 - Reapertura de hprice2 y etiquetas</a></li>
-<li><a href="#org51ee019">Actividad 2 - Dos regresores no constantes a la vez: price~rooms+nox</a></li>
-<li><a href="#orgfb695c7">Actividad 3 - Un tercer regresor: stratio</a>
+<li><a href="#org03bebb0">Descripción de la práctica</a></li>
+<li><a href="#org618796b">Actividad 1 - Reapertura de hprice2 y etiquetas</a></li>
+<li><a href="#org08e2251">Actividad 2 - Dos regresores no constantes a la vez: price~rooms+nox</a></li>
+<li><a href="#orgadd437a">Actividad 3 - Un tercer regresor: stratio</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orga897853">Lo que debe observar</a></li>
+<li><a href="#org02a0cec">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org122d08d">Actividad 4 - \(R^2\) nunca disminuye: los cuatro modelos a la vez</a></li>
-<li><a href="#org54b7b6f">Actividad 5 - Del \(R^2\) al \(R^2\) ajustado</a></li>
-<li><a href="#orgbf65215">Apéndice - De dónde sale la fórmula del \(R^2\) ajustado</a></li>
-<li><a href="#org20673ed">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org3eb6e2d">Código completo de la práctica</a></li>
-<li><a href="#org49e447b">Respuestas</a></li>
+<li><a href="#org9b3e1c2">Actividad 4 - \(R^2\) nunca disminuye: los cuatro modelos a la vez</a></li>
+<li><a href="#org87fd200">Actividad 5 - Del \(R^2\) al \(R^2\) ajustado</a></li>
+<li><a href="#org0eda4f6">Apéndice - De dónde sale la fórmula del \(R^2\) ajustado</a></li>
+<li><a href="#org89219f8">Preguntas de interpretación para la clase</a></li>
+<li><a href="#orgde20823">Código completo de la práctica</a></li>
+<li><a href="#org6cada30">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org73cabdc" class="outline-2">
-<h2 id="org73cabdc">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org73cabdc">
+<div id="outline-container-org03bebb0" class="outline-2">
+<h2 id="org03bebb0">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org03bebb0">
 <p>
 Retomamos <code>hprice2</code>, ya usado en la práctica de regresión simple con datos reales, y damos el paso a la regresión <i>múltiple</i>: primero con dos regresores (<code>rooms</code> y <code>nox</code> a la vez), y después con un tercero (<code>stratio</code>, la proporción alumnos/profesor de cada zona). El hilo conductor es doble: por un lado, observar cómo cambia el coeficiente de <code>rooms</code> al pasar del modelo simple al múltiple (efecto parcial, lección 10); por otro, comprobar con datos reales una propiedad algebraica de MCO anunciada en la lección 8 —el \(R^2\) nunca disminuye al añadir un regresor— y ver por qué esto exige corregirlo con el <i>\(R^2\) ajustado</i> (\(\bar R^2\)), que sí puede bajar.
 </p>
@@ -327,14 +328,14 @@ Retomamos <code>hprice2</code>, ya usado en la práctica de regresión simple co
 </ol>
 </div>
 </div>
-<div id="outline-container-org4dd4575" class="outline-2">
-<h2 id="org4dd4575">Actividad 1 - Reapertura de hprice2 y etiquetas</h2>
-<div class="outline-text-2" id="text-org4dd4575">
+<div id="outline-container-org618796b" class="outline-2">
+<h2 id="org618796b">Actividad 1 - Reapertura de hprice2 y etiquetas</h2>
+<div class="outline-text-2" id="text-org618796b">
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org3e9ea05">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="orgdb430da">open hprice2.gdt --quiet
 setinfo price   -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
 setinfo rooms   -d "Número medio de habitaciones" -n "Habitaciones"
 setinfo nox     -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
@@ -348,9 +349,9 @@ summary price rooms nox stratio
 </p>
 </div>
 </div>
-<div id="outline-container-org51ee019" class="outline-2">
-<h2 id="org51ee019">Actividad 2 - Dos regresores no constantes a la vez: price~rooms+nox</h2>
-<div class="outline-text-2" id="text-org51ee019">
+<div id="outline-container-org08e2251" class="outline-2">
+<h2 id="org08e2251">Actividad 2 - Dos regresores no constantes a la vez: price~rooms+nox</h2>
+<div class="outline-text-2" id="text-org08e2251">
 <p>
 Estimamos el modelo con ambos regresores a la vez, y recordamos (reestimándolas aquí mismo, para tener los números a mano) las dos regresiones simples correspondientes.
 </p>
@@ -363,7 +364,7 @@ Estimamos el modelo con ambos regresores a la vez, y recordamos (reestimándolas
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org5be70c8">ols price const rooms
+<pre class="src src-gretl" id="orgd5a29ea">ols price const rooms
 ols price const nox
 ols price const rooms nox
 corr rooms nox
@@ -373,7 +374,7 @@ corr rooms nox
 <i>Lo que debe observar</i>: compare \(\hat\beta_{\text{rooms}}\) en <code>price~rooms</code> frente a <code>price~rooms+nox</code>, y \(\hat\beta_{\text{nox}}\) en <code>price~nox</code> frente a <code>price~rooms+nox</code>. 
 </p>
 
-<pre class="example" id="org54e98e4">
+<pre class="example" id="org5da4409">
 Modelo 1: MCO, usando las observaciones 1-506
 Variable dependiente: price
 
@@ -449,9 +450,9 @@ donde interviene también la <i>magnitud</i> del coeficiente del regresor añadi
 </p>
 </div>
 </div>
-<div id="outline-container-orgfb695c7" class="outline-2">
-<h2 id="orgfb695c7">Actividad 3 - Un tercer regresor: stratio</h2>
-<div class="outline-text-2" id="text-orgfb695c7">
+<div id="outline-container-orgadd437a" class="outline-2">
+<h2 id="orgadd437a">Actividad 3 - Un tercer regresor: stratio</h2>
+<div class="outline-text-2" id="text-orgadd437a">
 <p>
 Añadimos el ratio alumnos/profesor de la zona, una variable que cabe esperar relacionada negativamente con el precio (zonas con colegios más masificados, en principio menos atractivas).
 </p>
@@ -460,14 +461,14 @@ Añadimos el ratio alumnos/profesor de la zona, una variable que cabe esperar re
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org58010c3">ols price const rooms nox stratio
+<pre class="src src-gretl" id="org1d026d4">ols price const rooms nox stratio
 </pre>
 </div>
 <p>
 <i>Antes de mirar el resultado</i>: ¿qué signo espera para el coeficiente de <code>stratio</code>?
 </p>
 
-<pre class="example" id="org3097412">
+<pre class="example" id="org1c83494">
 Modelo 4: MCO, usando las observaciones 1-506
 Variable dependiente: price
 
@@ -486,18 +487,18 @@ Log-verosimilitud      -5104,059   Criterio de Akaike      10216,12
 Criterio de Schwarz     10233,02   Crit. de Hannan-Quinn   10222,75
 </pre>
 </div>
-<div id="outline-container-orga897853" class="outline-4">
-<h4 id="orga897853">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orga897853">
+<div id="outline-container-org02a0cec" class="outline-4">
+<h4 id="org02a0cec">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org02a0cec">
 <p>
 El coeficiente de <code>stratio</code> es \(-1\,167\): un alumno más por profesor en la zona se asocia, manteniendo fijas habitaciones y contaminación, con unos \(1\,200\) dólares menos de precio mediano. Compare de nuevo los coeficientes de <code>rooms</code> y <code>nox</code> con los de la Actividad 2: <code>rooms</code> baja de \(8\,179\) a \(7\,001\) y <code>nox</code> de \(-1\,885\) a \(-1\,693\). Vuelven a moverse, porque <code>stratio</code> está correlacionada con ambos; cada coeficiente responde a la pregunta ``manteniendo fijos <i>los demás regresores del modelo</i>'', y esa lista acaba de cambiar.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org122d08d" class="outline-2">
-<h2 id="org122d08d">Actividad 4 - \(R^2\) nunca disminuye: los cuatro modelos a la vez</h2>
-<div class="outline-text-2" id="text-org122d08d">
+<div id="outline-container-org9b3e1c2" class="outline-2">
+<h2 id="org9b3e1c2">Actividad 4 - \(R^2\) nunca disminuye: los cuatro modelos a la vez</h2>
+<div class="outline-text-2" id="text-org9b3e1c2">
 <p>
 Reunimos los cuatro modelos ya estimados (dos simples, dos múltiples) y comparamos su \(R^2\).
 </p>
@@ -506,7 +507,7 @@ Reunimos los cuatro modelos ya estimados (dos simples, dos múltiples) y compara
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgd40b489">ols price const rooms --quiet
+<pre class="src src-gretl" id="org491e34d">ols price const rooms --quiet
 scalar r2_rooms = $rsq
 
 ols price const nox --quiet
@@ -524,7 +525,7 @@ printf "R2 price~rooms+nox            = %.4f\n", r2_rooms_nox
 printf "R2 price~rooms+nox+stratio    = %.4f\n", r2_todos
 </pre>
 </div>
-<pre class="example" id="org475d89a">
+<pre class="example" id="org1291851">
 R2 price~rooms                = 0,4841
 R2 price~nox                  = 0,1815
 R2 price~rooms+nox            = 0,5352
@@ -535,18 +536,18 @@ Observe que \(R^2\) del modelo con tres regresores no constantes es, como mínim
 </p>
 </div>
 </div>
-<div id="outline-container-org54b7b6f" class="outline-2">
-<h2 id="org54b7b6f">Actividad 5 - Del \(R^2\) al \(R^2\) ajustado</h2>
-<div class="outline-text-2" id="text-org54b7b6f">
+<div id="outline-container-org87fd200" class="outline-2">
+<h2 id="org87fd200">Actividad 5 - Del \(R^2\) al \(R^2\) ajustado</h2>
+<div class="outline-text-2" id="text-org87fd200">
 <p>
-Si \(R^2\) nunca baja, ¿cómo distinguir un regresor que de verdad mejora el modelo de uno que solo lo ``infla'' artificialmente? Gretl reporta el \(R^2\) con <code>$rsq</code>, pero no ofrece ningún <i>accesor</i> (<code>$...</code>) para el <i>\(R^2\) ajustado</i> —aunque sí lo imprime, como ``R-cuadrado corregido'', en la salida habitual de =ols=—, así que lo vamos a recalcular a mano (véase la sección <a href="#orgbf65215">Apéndice - De dónde sale la fórmula del \(R^2\) ajustado</a>). 
+Si \(R^2\) nunca baja, ¿cómo distinguir un regresor que de verdad mejora el modelo de uno que solo lo ``infla'' artificialmente? Gretl reporta el \(R^2\) con <code>$rsq</code>, pero no ofrece ningún <i>accesor</i> (<code>$...</code>) para el <i>\(R^2\) ajustado</i> —aunque sí lo imprime, como ``R-cuadrado corregido'', en la salida habitual de =ols=—, así que lo vamos a recalcular a mano (véase la sección <a href="#org0eda4f6">Apéndice - De dónde sale la fórmula del \(R^2\) ajustado</a>). 
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgbac3064">ols price const rooms nox --quiet
+<pre class="src src-gretl" id="orge4269f7">ols price const rooms nox --quiet
 scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
 printf "Modelo price~rooms+nox\n"
 printf "  R2          = %.4f\n", $rsq
@@ -565,7 +566,7 @@ printf "  R2          = %.4f\n", $rsq
 printf "  R2 ajustado = %.4f\n", Rbarsq
 </pre>
 </div>
-<pre class="example" id="org8569e4e">
+<pre class="example" id="org268f249">
 Modelo price~rooms+nox
   R2          = 0,5352
   R2 ajustado = 0,5333
@@ -606,9 +607,9 @@ El apéndice siguiente explica de dónde sale exactamente la fórmula de \(\bar 
 </p>
 </div>
 </div>
-<div id="outline-container-orgbf65215" class="outline-2">
-<h2 id="orgbf65215">Apéndice - De dónde sale la fórmula del \(R^2\) ajustado</h2>
-<div class="outline-text-2" id="text-orgbf65215">
+<div id="outline-container-org0eda4f6" class="outline-2">
+<h2 id="org0eda4f6">Apéndice - De dónde sale la fórmula del \(R^2\) ajustado</h2>
+<div class="outline-text-2" id="text-org0eda4f6">
 <p>
 Recordemos (lección 8) que \(R^2=1-\mathrm{SRC}/\mathrm{STC}\), con \(\mathrm{STC}=\sum_i(y_i-\mu_{\boldsymbol y})^2\) y \(\mathrm{SRC}=\sum_i\hat e_i^2\). La idea del \(R^2\) ajustado es sustituir, en ese cociente, cada suma de cuadrados por su <i>cuasivarianza</i> correspondiente —es decir, dividir cada una por sus <i>grados de libertad</i>, no por el número de observaciones—:
 \[
@@ -645,7 +646,7 @@ Verifiquemos que las dos fórmulas arrojan el mismo resultado:
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org9bfa89e">ols price const rooms nox stratio --quiet
+<pre class="src src-gretl" id="orgefbb8ab">ols price const rooms nox stratio --quiet
 scalar n_obs = $nobs
 scalar k_reg = $ncoeff
 
@@ -657,16 +658,16 @@ printf "R2 ajustado (formula original: 1-(SRC/(n-k))/(STC/(n-1)) ) = %.6f\n", Rb
 printf "R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = %.6f\n", Rbarsq
 </pre>
 </div>
-<pre class="example" id="orgeb0cad4">
+<pre class="example" id="org9cbce79">
 n = 506,  k = 4 (incluida la constante)
 R2 ajustado (formula original: 1-(SRC/(n-k))/(STC/(n-1)) ) = 0,598133
 R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = 0,598133
 </pre>
 </div>
 </div>
-<div id="outline-container-org20673ed" class="outline-2">
-<h2 id="org20673ed">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org20673ed">
+<div id="outline-container-org89219f8" class="outline-2">
+<h2 id="org89219f8">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org89219f8">
 <ol class="org-ol">
 <li>¿Por qué los coeficientes de <code>rooms</code> y <code>nox</code> cambian relativamente poco entre el modelo simple y el múltiple, a diferencia de lo que ocurría con <code>bedrms</code> en la práctica de Ramanathan?</li>
 <li>¿Cómo interpreta el signo obtenido para <code>stratio</code>? ¿Es coherente con lo que cabría esperar económicamente?</li>
@@ -680,14 +681,14 @@ R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = 0,598133
 </p>
 
 <ul class="org-ul">
-<li>Véanse las lecciones <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html">lecciones 8</a> y  <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html">10</a> para la propiedad mecánica de \(R^2\) y la interpretación del efecto parcial.</li>
+<li>Véanse las lecciones <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html">8</a> y <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html">10</a> para la propiedad mecánica de \(R^2\) y la interpretación del efecto parcial.</li>
 <li>Wooldridge, J. M. (2020). <i>Introductory Econometrics</i>, cap. 6, sección 6.3 (\(R^2\) ajustado).</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org3eb6e2d" class="outline-2">
-<h2 id="org3eb6e2d">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org3eb6e2d">
+<div id="outline-container-orgde20823" class="outline-2">
+<h2 id="orgde20823">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-orgde20823">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -705,9 +706,9 @@ R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = 0,598133
 </table>
 </div>
 </div>
-<div id="outline-container-org49e447b" class="outline-2">
-<h2 id="org49e447b">Respuestas</h2>
-<div class="outline-text-2" id="text-org49e447b">
+<div id="outline-container-org6cada30" class="outline-2">
+<h2 id="org6cada30">Respuestas</h2>
+<div class="outline-text-2" id="text-org6cada30">
 <ol class="org-ol">
 <li>¿Cambian <code>rooms</code> y <code>nox</code> al pasar del modelo simple al múltiple? De forma muy desigual: <code>rooms</code> baja alrededor de un \(10\%\) y <code>nox</code> se reduce casi a la mitad. Conviene resistir la explicación fácil —``estarán muy correlacionadas''—, porque los números no la respaldan: la correlación entre <code>rooms</code> y <code>nox</code> es \(-0{,}3028\), <i>menor</i> en valor absoluto que el \(+0{,}4647\) entre <code>sqft</code> y <code>bedrms</code> de la práctica de Ramanathan. El desplazamiento de \(\hat\beta_2\) al incorporar \(\boldsymbol{x}_3\) vale \(\hat\beta_3\,\sigma_{\boldsymbol{x}_2\boldsymbol{x}_3}/\sigma^2_{\boldsymbol{x}_2}\): intervienen también el tamaño del coeficiente del regresor añadido y las escalas de ambas variables, que aquí son muy distintas (habitaciones frente a partes por cien millones). La correlación anticipa <i>si</i> habrá desplazamiento, no <i>cuánto</i>.</li>
 
@@ -732,7 +733,7 @@ R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = 0,598133
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-19 sáb 09:48</p>
+<p class="date">Created: 2026-09-23 mié 22:30</p>
 </div>
 </body>
 </html>

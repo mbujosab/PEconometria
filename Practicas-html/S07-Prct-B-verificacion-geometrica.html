@@ -3,11 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-19 sáb 09:48 -->
+<!-- 2026-09-23 mié 21:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 7 (B) &#x2014; Verificación geométrica: identidades con datos simulados</title>
 <meta name="author" content="Marcos Bujosa" />
+<meta name="description" content="Práctica de Gretl, sesión 7 (B): verificación con datos simulados de las identidades de media, varianza, covarianza y correlación, que se cumplen siempre." />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
   #content { max-width: 60em; margin: auto; }
@@ -286,23 +287,23 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgdf6bbc0">Descripción de la práctica</a></li>
-<li><a href="#org44640f0">Actividad 1 - Un vector pequeño, verificación completa</a>
+<li><a href="#org0dea6a7">Descripción de la práctica</a></li>
+<li><a href="#orgeab1e0e">Actividad 1 - Un vector pequeño, verificación completa</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgdad39f3">Ortogonalidad del vector en desviaciones</a></li>
-<li><a href="#org2cccfaa">Pitágoras (fórmula de cálculo de la varianza)</a></li>
+<li><a href="#org5e08946">Ortogonalidad del vector en desviaciones</a></li>
+<li><a href="#orgd1f3fb1">Pitágoras (fórmula de cálculo de la varianza)</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org18d5678">Actividad 2 - ¿Depende del tamaño o de la distribución?</a>
+<li><a href="#orga7029ea">Actividad 2 - ¿Depende del tamaño o de la distribución?</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orga9b8ea8">Una variante más compacta (opcional): el mismo cálculo con <code>loop</code></a></li>
-<li><a href="#org0cfccfb">Un caso extremo: con \(n=2\) la correlación es siempre \(\pm1\)</a></li>
+<li><a href="#org9ec98f7">Una variante más compacta (opcional): el mismo cálculo con <code>loop</code></a></li>
+<li><a href="#org4564d54">Un caso extremo: con \(n=2\) la correlación es siempre \(\pm1\)</a></li>
 </ul>
 </li>
 </ul>
@@ -311,24 +312,24 @@ org_html_manager.setup();  // activate after the parameters are set
 <ul>
 <li>
 <ul>
-<li><a href="#org3bc38aa">Covarianza como producto escalar de vectores centrados</a></li>
-<li><a href="#org1905e11">Correlación como coseno</a></li>
-<li><a href="#org8ed99a3">Cauchy&#x2013;Schwarz y la desigualdad triangular</a></li>
+<li><a href="#orgbd31ba1">Covarianza como producto escalar de vectores centrados</a></li>
+<li><a href="#orgae204e1">Correlación como coseno</a></li>
+<li><a href="#org88daa2d">Cauchy&#x2013;Schwarz y la desigualdad triangular</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org7a1684f">Actividad 4 - Síntesis</a></li>
-<li><a href="#org15e75ef">Actividad 5 (OPCIONAL, según el tiempo disponible y las preguntas) - ¿Y si repetimos esto cientos de veces?</a></li>
-<li><a href="#orge5029dc">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org42d668a">Código completo de la práctica</a></li>
-<li><a href="#org4718a03">Respuestas</a></li>
+<li><a href="#org0e561ce">Actividad 4 - Síntesis</a></li>
+<li><a href="#orgb974e2f">Actividad 5 (OPCIONAL, según el tiempo disponible y las preguntas) - ¿Y si repetimos esto cientos de veces?</a></li>
+<li><a href="#org3b050b3">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org2e5260b">Código completo de la práctica</a></li>
+<li><a href="#orgcf35489">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgdf6bbc0" class="outline-2">
-<h2 id="orgdf6bbc0">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-orgdf6bbc0">
+<div id="outline-container-org0dea6a7" class="outline-2">
+<h2 id="org0dea6a7">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org0dea6a7">
 <p>
 En las lecciones 4 y 5 demostramos una serie de identidades: el vector en desviaciones es ortogonal a \(\boldsymbol{1}\); la varianza satisface una identidad de Pitágoras (fórmula de cálculo); la covarianza es un producto escalar de vectores centrados; la correlación es el coseno del ángulo entre ellos. En la práctica A las verificamos con datos <i>reales</i>. Aquí las verificamos con datos <i>simulados por nosotros mismos</i>: al controlar por completo cómo se construyen los datos, podemos comprobar que estas identidades no son una peculiaridad de un dataset concreto, sino teoremas que se cumplen siempre, sea cual sea la distribución subyacente o el tamaño de la muestra.
 </p>
@@ -344,9 +345,9 @@ En las lecciones 4 y 5 demostramos una serie de identidades: el vector en desvia
 </ol>
 </div>
 </div>
-<div id="outline-container-org44640f0" class="outline-2">
-<h2 id="org44640f0">Actividad 1 - Un vector pequeño, verificación completa</h2>
-<div class="outline-text-2" id="text-org44640f0">
+<div id="outline-container-orgeab1e0e" class="outline-2">
+<h2 id="orgeab1e0e">Actividad 1 - Un vector pequeño, verificación completa</h2>
+<div class="outline-text-2" id="text-orgeab1e0e">
 <p>
 Generamos un vector de solo \(n=6\) observaciones, lo bastante pequeño como para poder mirar los números uno a uno.
 </p>
@@ -355,7 +356,7 @@ Generamos un vector de solo \(n=6\) observaciones, lo bastante pequeño como par
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgb7acfce">nulldata 6 --preserve
+<pre class="src src-gretl" id="org48d6ec4">nulldata 6 --preserve
 set seed 12345
 
 series y = normal(10, 3)
@@ -363,24 +364,24 @@ print y
 </pre>
 </div>
 </div>
-<div id="outline-container-orgdad39f3" class="outline-4">
-<h4 id="orgdad39f3">Ortogonalidad del vector en desviaciones</h4>
-<div class="outline-text-4" id="text-orgdad39f3">
+<div id="outline-container-org5e08946" class="outline-4">
+<h4 id="org5e08946">Ortogonalidad del vector en desviaciones</h4>
+<div class="outline-text-4" id="text-org5e08946">
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org87c06ec">printf "Suma de (y - mu_y) = %.10f   (debe ser 0)\n", sum(y - mean(y))
+<pre class="src src-gretl" id="orgdaa8607">printf "Suma de (y - mu_y) = %.10f   (debe ser 0)\n", sum(y - mean(y))
 </pre>
 </div>
-<pre class="example" id="org88407ca">
+<pre class="example" id="org190462c">
 Suma de (y - mu_y) = -0,0000000000   (debe ser 0)
 </pre>
 </div>
 </div>
-<div id="outline-container-org2cccfaa" class="outline-4">
-<h4 id="org2cccfaa">Pitágoras (fórmula de cálculo de la varianza)</h4>
-<div class="outline-text-4" id="text-org2cccfaa">
+<div id="outline-container-orgd1f3fb1" class="outline-4">
+<h4 id="orgd1f3fb1">Pitágoras (fórmula de cálculo de la varianza)</h4>
+<div class="outline-text-4" id="text-orgd1f3fb1">
 <p>
 Recuerde la identidad de la lección 5: \(\mu_{\boldsymbol{y}^2}=\mu_{\boldsymbol{y}}^2+\sigma_{\boldsymbol{y}}^2\), donde \(\sigma_{\boldsymbol{y}}^2\) es la varianza tal como la define la lección 5: con divisor \(1/n\), el del producto escalar estadístico.
 </p>
@@ -389,7 +390,7 @@ Recuerde la identidad de la lección 5: \(\mu_{\boldsymbol{y}^2}=\mu_{\boldsymbo
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orga028b33">scalar mu_y      = mean(y)
+<pre class="src src-gretl" id="orgb74ac84">scalar mu_y      = mean(y)
 scalar var_n     = sum((y - mu_y)^2) / $nobs        # divisor 1/n (convención del curso)
 scalar mu_y2     = mean(y^2)
 
@@ -397,20 +398,20 @@ printf "mu_y2                = %.6f\n", mu_y2
 printf "mu_y^2 + sigma_y^2   = %.6f   (divisor n)\n", mu_y^2 + var_n
 </pre>
 </div>
-<pre class="example" id="orgd2764f1">
+<pre class="example" id="orge5aa276">
 mu_y2                = 149,479709
 mu_y^2 + sigma_y^2   = 149,479709   (divisor n)
 </pre>
 <p>
-<i>IMPORTANTE &#x2014; a diferencia de la correlación (Apéndice de la práctica A), aquí el divisor SÍ importa: la identidad de Pitágoras usa el producto escalar estadístico con divisor \(1/n\) (lección 5). Compruebe qué ocurre si, en su lugar, divide por \((n-1)\) (el convenio muestral habitual en estadística inferencial, y el que usa por defecto la función/=var=</i> de Gretl):/
+<i>IMPORTANTE: a diferencia de la correlación (Apéndice de la práctica A), aquí el divisor sí importa: la identidad de Pitágoras usa el producto escalar estadístico con divisor \(1/n\) (lección 5). Compruebe qué ocurre si, en su lugar, divide por \((n-1)\), el convenio muestral habitual en estadística inferencial y el que usa por defecto la función</i> <code>var</code> <i>de Gretl:</i>
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf5b0fa1">scalar var_n1 = sum((y - mu_y)^2) / ($nobs - 1)     # divisor 1/(n-1)
+<pre class="src src-gretl" id="org356f250">scalar var_n1 = sum((y - mu_y)^2) / ($nobs - 1)     # divisor 1/(n-1)
 printf "mu_y^2 + var(n-1)    = %.6f   (divisor n-1, ya NO coincide con mu_y2)\n", mu_y^2 + var_n1
 </pre>
 </div>
 
-<pre class="example" id="org8e660e1">
+<pre class="example" id="org8abf0ae">
 mu_y^2 + var(n-1)    = 153,621305   (divisor n-1, ya NO coincide con mu_y2)
 </pre>
 <p>
@@ -419,9 +420,9 @@ mu_y^2 + var(n-1)    = 153,621305   (divisor n-1, ya NO coincide con mu_y2)
 </div>
 </div>
 </div>
-<div id="outline-container-org18d5678" class="outline-2">
-<h2 id="org18d5678">Actividad 2 - ¿Depende del tamaño o de la distribución?</h2>
-<div class="outline-text-2" id="text-org18d5678">
+<div id="outline-container-orga7029ea" class="outline-2">
+<h2 id="orga7029ea">Actividad 2 - ¿Depende del tamaño o de la distribución?</h2>
+<div class="outline-text-2" id="text-orga7029ea">
 <p>
 Repetimos las mismas comprobaciones (ortogonalidad y Pitágoras) con dos series de \(n=50\): una con forma simétrica (normal) y otra con forma marcadamente asimétrica (\(\chi^2\) con 2 grados de libertad, igual que la Serie B de la práctica C de esta misma sesión). Obsérvese que con esto cambian <i>las dos cosas</i> respecto a la Actividad 1: allí el tamaño era \(n=6\), aquí es \(n=50\) y en la Actividad 3 será \(n=100\); entre las tres actividades se recorren, pues, tres tamaños muestrales muy distintos además de tres formas distintas. Lo hacemos primero ``a mano'', serie a serie, para que quede completamente explícito qué se calcula en cada caso.
 </p>
@@ -430,7 +431,7 @@ Repetimos las mismas comprobaciones (ortogonalidad y Pitágoras) con dos series 
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org716b060">nulldata 50 --preserve
+<pre class="src src-gretl" id="orgaa900a4">nulldata 50 --preserve
 set seed 54321
 
 series y_normal = normal(0, 1)
@@ -456,14 +457,14 @@ printf "%-10s -&gt; ortogonalidad: %.10f    Pitágoras (desajuste): %.10f\n", "y
 <p>
 <i>¿Cambia algo el resultado por tratarse de una distribución simétrica o muy asimétrica? ¿Por qué no?</i>
 </p>
-<pre class="example" id="org8a8290e">
+<pre class="example" id="org36a0904">
 y_normal   -&gt; ortogonalidad: 0,0000000000    Pitágoras (desajuste): 0,0000000000
 y_chi2     -&gt; ortogonalidad: 0,0000000000    Pitágoras (desajuste): 0,0000000000
 </pre>
 </div>
-<div id="outline-container-orga9b8ea8" class="outline-4">
-<h4 id="orga9b8ea8">Una variante más compacta (opcional): el mismo cálculo con <code>loop</code></h4>
-<div class="outline-text-4" id="text-orga9b8ea8">
+<div id="outline-container-org9ec98f7" class="outline-4">
+<h4 id="org9ec98f7">Una variante más compacta (opcional): el mismo cálculo con <code>loop</code></h4>
+<div class="outline-text-4" id="text-org9ec98f7">
 <p>
 Repetir a mano el mismo bloque de código para cada serie es razonable con dos series, pero se volvería tedioso con veinte. Gretl ofrece el comando <code>loop</code> precisamente para automatizar este tipo de repeticiones. Al igual que ocurrirá en la Actividad 5, no pretendemos aquí explicar la mecánica de los bucles (<code>loop</code>) de Gretl —eso se hará con detalle en el laboratorio que sigue a la lección 11 (propiedades de MCO) y en futuras prácticas sobre inferencia (contrastes \(t\) y \(F\))—; aquí lo presentamos simplemente como una ``caja negra'' que aplica, serie a serie, el mismo cálculo que acabamos de hacer a mano. La ventaja se aprecia enseguida: con muy poco código adicional podríamos repetir esta misma comprobación sobre diez, veinte o cien series distintas, sin copiar el bloque una y otra vez.
 </p>
@@ -472,7 +473,7 @@ Repetir a mano el mismo bloque de código para cada serie es razonable con dos s
 <i>en línea de comandos (variante con <code>loop</code>, mismo resultado que arriba)</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org444e6ce">loop foreach i y_normal y_chi2 --quiet
+<pre class="src src-gretl" id="orgec9e42e">loop foreach i y_normal y_chi2 --quiet
     scalar mu    = mean($i)
     scalar var_n = sum(($i - mu)^2) / $nobs
     scalar ortog = sum($i - mu)
@@ -481,15 +482,15 @@ Repetir a mano el mismo bloque de código para cada serie es razonable con dos s
 endloop
 </pre>
 </div>
-<pre class="example" id="org9c4b24f">
+<pre class="example" id="orgf60a0b7">
 y_normal   -&gt; ortogonalidad: 0,0000000000    Pitágoras (desajuste): 0,0000000000
 y_chi2     -&gt; ortogonalidad: 0,0000000000    Pitágoras (desajuste): 0,0000000000
 </pre>
 </div>
 </div>
-<div id="outline-container-org0cfccfb" class="outline-4">
-<h4 id="org0cfccfb">Un caso extremo: con \(n=2\) la correlación es siempre \(\pm1\)</h4>
-<div class="outline-text-4" id="text-org0cfccfb">
+<div id="outline-container-org4564d54" class="outline-4">
+<h4 id="org4564d54">Un caso extremo: con \(n=2\) la correlación es siempre \(\pm1\)</h4>
+<div class="outline-text-4" id="text-org4564d54">
 <p>
 La lección 5 demostró un hecho que conviene ver con los propios ojos. En \(\mathbb{R}^2\), el complemento ortogonal \(\mathcal{L}(\boldsymbol{1})^\perp\) es una simple <i>recta</i>; y dos vectores cualesquiera situados sobre una recta están forzosamente alineados. Por tanto, con solo dos observaciones los vectores en desviaciones siempre están alineados y la correlación vale \(\pm1\), <i>sean cuales sean los datos</i>.
 </p>
@@ -498,7 +499,7 @@ La lección 5 demostró un hecho que conviene ver con los propios ojos. En \(\ma
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org68864c5">nulldata 2 --preserve
+<pre class="src src-gretl" id="org325aec7">nulldata 2 --preserve
 set seed 777
 series a = normal()
 series b = normal()
@@ -510,7 +511,7 @@ series b = normal()
 printf "Segundo sorteo (n=2): corr(a,b) = %+.10f\n", corr(a,b)
 </pre>
 </div>
-<pre class="example" id="org8462300">
+<pre class="example" id="orga161606">
 Primer sorteo  (n=2): corr(a,b) = +1,0000000000
 Segundo sorteo (n=2): corr(a,b) = -1,0000000000
 </pre>
@@ -531,7 +532,7 @@ Construimos ahora \(\boldsymbol{x}\) y \(\boldsymbol{y}\) <i>a propósito</i>, d
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org7d2bb1c">nulldata 100 --preserve
+<pre class="src src-gretl" id="orgd533c17">nulldata 100 --preserve
 set seed 11223
 
 series x = uniform(0, 10)
@@ -543,34 +544,34 @@ series y = 2 + 3*x + u
 <i>Atención</i>: \(\boldsymbol{u}\) es el vector con el que <i>hemos construido</i> \(\boldsymbol{y}\) —lo conocemos porque lo hemos fabricado nosotros—, no algo que pueda leerse en los datos. Cuando en la lección 6 aparezca el vector de error de un ajuste, será un objeto distinto: lo que queda al restar a \(\boldsymbol{y}\) su ajuste, calculado a partir de \(\boldsymbol{x}\) e \(\boldsymbol{y}\) y nada más. Conviene no confundirlos; volveremos sobre ello cuando tengamos el segundo.
 </p>
 </div>
-<div id="outline-container-org3bc38aa" class="outline-4">
-<h4 id="org3bc38aa">Covarianza como producto escalar de vectores centrados</h4>
-<div class="outline-text-4" id="text-org3bc38aa">
+<div id="outline-container-orgbd31ba1" class="outline-4">
+<h4 id="orgbd31ba1">Covarianza como producto escalar de vectores centrados</h4>
+<div class="outline-text-4" id="text-orgbd31ba1">
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org3d9f554">scalar x_c_dot_y_c = sum((x - mean(x)) * (y - mean(y)))
+<pre class="src src-gretl" id="org49c4c9b">scalar x_c_dot_y_c = sum((x - mean(x)) * (y - mean(y)))
 scalar cov_manual  = x_c_dot_y_c / $nobs
 
 printf "Covarianza \"a mano\" (divisor n) = %.6f\n", cov_manual
 printf "cov(x,y) de Gretl (divisor n-1)  = %.6f\n", cov(x,y)
 </pre>
 </div>
-<pre class="example" id="org4f233e8">
+<pre class="example" id="orgb142a6c">
 Covarianza "a mano" (divisor n) = 26,372167
 cov(x,y) de Gretl (divisor n-1)  = 26,638553
 </pre>
 </div>
 </div>
-<div id="outline-container-org1905e11" class="outline-4">
-<h4 id="org1905e11">Correlación como coseno</h4>
-<div class="outline-text-4" id="text-org1905e11">
+<div id="outline-container-orgae204e1" class="outline-4">
+<h4 id="orgae204e1">Correlación como coseno</h4>
+<div class="outline-text-4" id="text-orgae204e1">
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf918191">scalar norma_x = sqrt(sum((x - mean(x))^2))
+<pre class="src src-gretl" id="org7ffb387">scalar norma_x = sqrt(sum((x - mean(x))^2))
 scalar norma_y = sqrt(sum((y - mean(y))^2))
 scalar coseno  = x_c_dot_y_c / (norma_x * norma_y)
 
@@ -578,7 +579,7 @@ printf "cos(theta) \"a mano\" = %.6f\n", coseno
 printf "corr(x,y) de Gretl  = %.6f\n", corr(x,y)
 </pre>
 </div>
-<pre class="example" id="orgd4ac77b">
+<pre class="example" id="orgeceda86">
 cos(theta) "a mano" = 0,972574
 corr(x,y) de Gretl  = 0,972574
 </pre>
@@ -590,9 +591,9 @@ corr(x,y) de Gretl  = 0,972574
 </p>
 </div>
 </div>
-<div id="outline-container-org8ed99a3" class="outline-4">
-<h4 id="org8ed99a3">Cauchy&#x2013;Schwarz y la desigualdad triangular</h4>
-<div class="outline-text-4" id="text-org8ed99a3">
+<div id="outline-container-org88daa2d" class="outline-4">
+<h4 id="org88daa2d">Cauchy&#x2013;Schwarz y la desigualdad triangular</h4>
+<div class="outline-text-4" id="text-org88daa2d">
 <p>
 La lección 3 demostró dos desigualdades que hasta ahora no habíamos comprobado con datos. Las dos se leen directamente sobre los vectores en desviaciones que acabamos de construir.
 </p>
@@ -601,7 +602,7 @@ La lección 3 demostró dos desigualdades que hasta ahora no habíamos comprobad
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf9c0155">scalar norma_suma = sqrt(sum(((x - mean(x)) + (y - mean(y)))^2))
+<pre class="src src-gretl" id="org2040b75">scalar norma_suma = sqrt(sum(((x - mean(x)) + (y - mean(y)))^2))
 
 printf "Cauchy-Schwarz:  |&lt;x_c,y_c&gt;| = %.4f  &lt;=  ||x_c||*||y_c|| = %.4f\n", \
        abs(x_c_dot_y_c), norma_x * norma_y
@@ -609,7 +610,7 @@ printf "Triangular:      ||x_c+y_c|| = %.4f  &lt;=  ||x_c||+||y_c|| = %.4f\n", \
        norma_suma, norma_x + norma_y
 </pre>
 </div>
-<pre class="example" id="org75f91b9">
+<pre class="example" id="orgaf0d860">
 Cauchy-Schwarz:  |&lt;x_c,y_c&gt;| = 2637,2167  &lt;=  ||x_c||*||y_c|| = 2711,5839
 Triangular:      ||x_c+y_c|| = 119,1665  &lt;=  ||x_c||+||y_c|| = 119,7889
 </pre>
@@ -619,17 +620,17 @@ Triangular:      ||x_c+y_c|| = 119,1665  &lt;=  ||x_c||+||y_c|| = 119,7889
 </div>
 </div>
 </div>
-<div id="outline-container-org7a1684f" class="outline-2">
-<h2 id="org7a1684f">Actividad 4 - Síntesis</h2>
-<div class="outline-text-2" id="text-org7a1684f">
+<div id="outline-container-org0e561ce" class="outline-2">
+<h2 id="org0e561ce">Actividad 4 - Síntesis</h2>
+<div class="outline-text-2" id="text-org0e561ce">
 <p>
 Estas identidades y desigualdades —ortogonalidad, Pitágoras, covarianza como producto escalar, correlación como coseno, Cauchy&#x2013;Schwarz y la desigualdad triangular— son <i>teoremas</i> de la geometría de \(\mathbb{R}^n\) (lecciones 3, 4 y 5), no propiedades empíricas de un dataset concreto. Por eso se cumplen igual con datos reales (práctica A) que con datos simulados de cualquier distribución y cualquier tamaño (aquí). La próxima sesión da un paso más: en lugar de <i>verificar</i> identidades que ya conocemos, empezaremos a <i>usarlas</i> para construir un estimador (MCO), camino que se completa en la lección 7.
 </p>
 </div>
 </div>
-<div id="outline-container-org15e75ef" class="outline-2">
-<h2 id="org15e75ef">Actividad 5 (OPCIONAL, según el tiempo disponible y las preguntas) - ¿Y si repetimos esto cientos de veces?</h2>
-<div class="outline-text-2" id="text-org15e75ef">
+<div id="outline-container-orgb974e2f" class="outline-2">
+<h2 id="orgb974e2f">Actividad 5 (OPCIONAL, según el tiempo disponible y las preguntas) - ¿Y si repetimos esto cientos de veces?</h2>
+<div class="outline-text-2" id="text-orgb974e2f">
 <p>
 <i>Esta actividad es opcional: es probable que no dé tiempo a cubrirla en clase. Está reservada para si surge la pregunta natural: ``¿esto se cumple siempre, o ha sido casualidad de esta muestra concreta?'' No se pretende aquí explicar la mecánica de los bucles (<code>loop</code>) de Gretl &#x2013;eso se hará con detalle en el laboratorio que sigue a la lección 11 (propiedades de MCO) y en las prácticas sobre inferencia (contrastes \(t\) y \(F\))&#x2013;; aquí se presenta como una ``caja negra'' que repite la verificación cientos de veces con una muestra nueva en cada repetición.</i>
 </p>
@@ -637,7 +638,7 @@ Estas identidades y desigualdades —ortogonalidad, Pitágoras, covarianza como 
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org5f4731e">nulldata 30 --preserve
+<pre class="src src-gretl" id="orgdd1bb13">nulldata 30 --preserve
 set seed 987654
 
 scalar R = 500
@@ -678,7 +679,7 @@ printf "  Desviación MÁXIMA Pitágoras        : %.10f\n", max_dev_pitag
 printf "  Desviación MÁXIMA rho = cos(theta) : %.10f\n", max_dev_rho
 </pre>
 </div>
-<pre class="example" id="orgc256a55">
+<pre class="example" id="org9510c16">
 Tras 500 repeticiones, cada una con una muestra nueva:
   Desviación MÁXIMA ortogonalidad    : 0,0000000000
   Desviación MÁXIMA Pitágoras        : 0,0000000000
@@ -689,9 +690,9 @@ Tras 500 repeticiones, cada una con una muestra nueva:
 </p>
 </div>
 </div>
-<div id="outline-container-orge5029dc" class="outline-2">
-<h2 id="orge5029dc">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-orge5029dc">
+<div id="outline-container-org3b050b3" class="outline-2">
+<h2 id="org3b050b3">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org3b050b3">
 <ol class="org-ol">
 <li>¿Por qué el resultado de la Actividad 2 no depende de si la distribución es simétrica o muy asimétrica?</li>
 <li>En la Actividad 1, ¿por qué la identidad de Pitágoras deja de cumplirse exactamente al dividir por \((n-1)\) en vez de por \(n\)? ¿Es esto una contradicción con la invarianza de la correlación vista en la práctica A?</li>
@@ -710,9 +711,9 @@ Tras 500 repeticiones, cada una con una muestra nueva:
 </ul>
 </div>
 </div>
-<div id="outline-container-org42d668a" class="outline-2">
-<h2 id="org42d668a">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org42d668a">
+<div id="outline-container-org2e5260b" class="outline-2">
+<h2 id="org2e5260b">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org2e5260b">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -730,9 +731,9 @@ Tras 500 repeticiones, cada una con una muestra nueva:
 </table>
 </div>
 </div>
-<div id="outline-container-org4718a03" class="outline-2">
-<h2 id="org4718a03">Respuestas</h2>
-<div class="outline-text-2" id="text-org4718a03">
+<div id="outline-container-orgcf35489" class="outline-2">
+<h2 id="orgcf35489">Respuestas</h2>
+<div class="outline-text-2" id="text-orgcf35489">
 <ol class="org-ol">
 <li>¿Por qué el resultado de la Actividad 2 no depende de si la distribución es simétrica o muy asimétrica? Porque la ortogonalidad del vector en desviaciones (\(\sum(y_i-\mu_{\boldsymbol{y}})=0\)) y la identidad de Pitágoras (\(\mu_{\boldsymbol{y}^2}=\mu_{\boldsymbol{y}}^2+\sigma_{\boldsymbol{y}}^2\)) son consecuencias <i>algebraicas</i> de cómo se define la media (como proyección) y la varianza (como norma al cuadrado del vector en desviaciones): se demuestran manipulando sumas y productos escalares, sin usar en ningún momento supuestos sobre la forma de la distribución (normalidad, simetría, etc.). Son propiedades de <i>cualquier</i> vector de \(\mathbb{R}^n\), no de un tipo particular de dato. Por eso da igual que \(\boldsymbol{y}\) sea normal o \(\chi^2\): la demostración de la lección 5 no distingue casos.</li>
 
@@ -749,7 +750,7 @@ Tras 500 repeticiones, cada una con una muestra nueva:
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-19 sáb 09:48</p>
+<p class="date">Created: 2026-09-23 mié 21:25</p>
 </div>
 </body>
 </html>

@@ -1,0 +1,87 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open hprice2.gdt --quiet
+outfile --quiet completo.txt
+    ols price const rooms nox stratio
+    scalar n   = $nobs
+    scalar k   = 4
+    scalar SRC = $ess
+    scalar s2  = SRC/(n-k)
+    printf "\nSRC = %.4e    n-k = %d    s^2 = SRC/(n-k) = %.4e\n", SRC, n-k, s2
+end outfile
+
+outfile --quiet dosExclusiones.txt
+    ols price const rooms --quiet
+    scalar SRCr = $ess
+    scalar q    = 2
+    scalar F    = ((SRCr - SRC)/q)/s2
+    printf "Modelo restringido (price ~ rooms):  SRC_r = %.4e\n", SRCr
+    printf "Subida de la SRC:                   SRC_r - SRC = %.4e\n", SRCr - SRC
+    printf "F = ((SRC_r - SRC)/%d)/(SRC/(n-k)) = %.3f\n", q, F
+    printf "F_c(%d,%d) al 5%% = %.3f    valor p = %.3g\n", q, n-k, critical(F, q, n-k, 0.05), pvalue(F, q, n-k, F)
+end outfile
+
+ols price const rooms nox stratio --quiet
+outfile --quiet restrictDos.txt
+    restrict
+        b[nox] = 0
+        b[stratio] = 0
+    end restrict
+end outfile
+
+outfile --quiet unaExclusion.txt
+    ols price const rooms nox --quiet
+    scalar SRCr1 = $ess
+    scalar F1 = ((SRCr1 - SRC)/1)/s2
+    ols price const rooms nox stratio --quiet
+    scalar t_st = $coeff(stratio)/$stderr(stratio)
+    printf "Modelo restringido (price ~ rooms + nox): SRC_r = %.4e\n", SRCr1
+    printf "F = (SRC_r - SRC)/(SRC/(n-k)) = %.3f\n", F1
+    printf "t de stratio en el modelo completo = %.3f ;  t^2 = %.3f\n", t_st, t_st^2
+    printf "F_c(1,%d) al 5%% = %.3f ;  t_c^2 = %.3f\n", n-k, critical(F, 1, n-k, 0.05), critical(t, n-k, 0.025)^2
+end outfile
+
+outfile --quiet igualdad.txt
+    series nox_mas_stratio = nox + stratio
+    ols price const rooms nox_mas_stratio --quiet
+    scalar SRCr2 = $ess
+    scalar F2 = ((SRCr2 - SRC)/1)/s2
+    printf "Modelo restringido (price ~ rooms + (nox + stratio)): SRC_r = %.4e\n", SRCr2
+    printf "Subida de la SRC = %.4e\n", SRCr2 - SRC
+    printf "F = %.3f    F_c(1,%d) al 5%% = %.3f    valor p = %.4f\n", F2, n-k, critical(F, 1, n-k, 0.05), pvalue(F, 1, n-k, F2)
+end outfile
+
+ols price const rooms nox stratio --quiet
+outfile --quiet restrictIgualdad.txt
+    restrict
+        b[nox] - b[stratio] = 0
+    end restrict
+end outfile
+
+outfile --quiet apertura.txt
+    ols price const rooms nox lnox --quiet
+    printf "price ~ rooms + nox + lnox:  t(nox) = %.2f   t(lnox) = %.2f   SRC = %.4e\n", $coeff(nox)/$stderr(nox), $coeff(lnox)/$stderr(lnox), $ess
+    scalar SRCc = $ess
+    scalar dfc  = $df
+    ols price const rooms --quiet
+    scalar Fap = (($ess - SRCc)/2)/(SRCc/dfc)
+    printf "F de excluir nox y lnox a la vez = %.2f   F_c(2,%d) = %.3f   valor p = %.3g\n", Fap, dfc, critical(F, 2, dfc, 0.05), pvalue(F, 2, dfc, Fap)
+end outfile
