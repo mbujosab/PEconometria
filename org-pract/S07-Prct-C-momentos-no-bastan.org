@@ -101,9 +101,19 @@ En la práctica A de esta misma sesión comprobamos que $\rho=\cos\theta$. Ahora
 
 /Nota técnica/: en esta práctica los datos no son reales ni simulados al azar sin más: cada serie se genera con un tipo de distribución propia y luego se /reescala/ para forzar una media y una desviación típica comunes. El procedimiento exacto se explica, con el detalle geométrico completo, en el Apéndice final. El tamaño muestral (=n = $nobs=) es un parámetro (cuyo valor =$nobs= queda fijado inicialmente con =nulldata 40=): si al dibujar los histogramas la muestra pareciera escasa, basta con cambiar ese valor a 60 u 80 y volver a ejecutar el guión.
 
+/Comandos nuevos de esta práctica/. Seguimos usando =nulldata=, =set seed=, =normal=, =uniform=, =series=, =scalar= y =printf= de las prácticas A y B. Lo nuevo:
+- =setobs 1 1 --cross-section= :: declara que las observaciones son de sección cruzada (sesión 4).
+- =D_bruto[1] = 15= :: cambia solo la primera componente de la serie; los corchetes seleccionan una observación.
+- =(uniform(0,1) < 0.5)= :: una comparación aplicada a una serie produce otra serie de ceros y unos, con un uno donde se cumple la condición. Sirve para sortear a qué grupo pertenece cada empleado.
+- =sd(x)= :: desviación típica de la serie, con divisor $n-1$ (véase el Apéndice). =median=, =skewness= y =kurtosis= se presentan en la Actividad 5.
+- =summary --simple= :: versión reducida de =summary=: media, mediana, desviación típica, mínimo y máximo.
+- =boxplot A B C D= :: un diagrama de caja por variable, en la misma figura y con la misma escala. =freq= dibuja el histograma de una variable (sesión 4).
+
 * Actividad 1 - Generación de los datos
 
 Generamos cuatro series de $n=40$ observaciones con distribuciones muy distintas, pero forzando en las cuatro la misma media ($\mu_0$) y la misma desviación típica ($\sigma_0$, medida con la función =sd= de Gretl; véase la nota sobre el divisor en el Apéndice). El truco (reescalado de un vector en desviaciones) usa exactamente las propiedades de invarianza y homogeneidad demostradas en la lección 5; el detalle completo se explica en el Apéndice.
+
+Conjunto vacío de 40 observaciones, declarado de sección cruzada, semilla fija y tres escalares: =n=, el número de observaciones (=$nobs=), y los dos valores objetivo, la media =mu0= y la desviación típica =sigma0=. El texto que sigue a =#= es un comentario que Gretl ignora.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -121,6 +131,8 @@ scalar sigma0 = 250  # desviación típica común objetivo (euros)
 
 *** Serie A: forma aproximadamente simétrica (TechNorte)
 
+Tres pasos, que se repetirán en las cuatro series. =A_bruto=: 40 sorteos de una normal estándar, la forma que queremos. =A_z=: la serie estandarizada, restando su media y dividiendo por su desviación típica, con lo que pasa a tener media $0$ y =sd= igual a $1$. =A=: la serie final, con la media y la desviación típica objetivo, =mu0 + sigma0 * A_z=. Por último, =setinfo= le pone descripción y nombre para los gráficos, como en la sesión 4.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Serie A simetrica
@@ -133,6 +145,8 @@ setinfo A -d "Salario mensual, TechNorte (forma simétrica)" -n "TechNorte"
 #+latex: }
 
 *** Serie B: asimetría positiva (Comercial Sur)
+
+Misma receta; cambia solo la forma de partida. =B_bruto= es la suma de los cuadrados de dos normales estándar independientes, una $\chi^2$ con 2 grados de libertad, con cola larga hacia la derecha.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -149,6 +163,8 @@ setinfo B -d "Salario mensual, Comercial Sur (asimetría positiva)" -n "Comercia
 
 *** Serie C: bimodal (Industrias Centro)
 
+La forma de partida es una mezcla de dos grupos. =grupo= vale $1$ o $0$ para cada empleado según un sorteo uniforme, con probabilidad $1/2$ cada valor. =C_bruto= toma en cada fila un valor de una normal centrada en $-3$ si =grupo= vale $1$, y de una normal centrada en $3$ si vale $0$: la fórmula =grupo*normal(-3,1) + (1-grupo)*normal(3,1)= anula uno de los dos sumandos en cada fila. Después, la misma estandarización y el mismo reescalado.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Serie C bimodal
@@ -163,6 +179,8 @@ setinfo C -d "Salario mensual, Industrias Centro (bimodal: dos categorías)" -n 
 
 *** Serie D: con un valor atípico (Consultora Este)
 
+Plantilla muy homogénea: normal de media $0$ y desviación típica $0{,}3$. La segunda línea sustituye la primera observación por $15$, cincuenta desviaciones típicas por encima: el directivo. Después, la misma estandarización y el mismo reescalado, que reparten el efecto de ese valor entre la media y la =sd= comunes.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Serie D atipico
@@ -176,6 +194,8 @@ setinfo D -d "Salario mensual, Consultora Este (con un valor atípico)" -n "Cons
 #+latex: }
 
 * Actividad 2 - Estadísticos descriptivos clásicos
+
+=summary= de las cuatro series. Con =--simple= muestra solo media, mediana, desviación típica, mínimo y máximo, una fila por serie.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -202,7 +222,7 @@ end outfile
 
 * Actividad 3 - Histogramas
 
-- GUI: seleccione cada variable → clic derecho → //~Gráficos~// → //~Distribución de frecuencias~//.
+- GUI: seleccione cada variable → clic derecho → //~Gráficos~// → //~Distribución de frecuencias~//. En la consola, =freq= dibuja el histograma de una variable (sesión 4); hace falta una orden por serie.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -257,6 +277,8 @@ freq D --plot="histD.png"
 
 * Actividad 4 - Diagramas de caja
 
+=boxplot= con las cuatro series dibuja las cuatro cajas en una misma figura y con la misma escala vertical. En cada caja, la línea horizontal es la mediana, la cruz es la media y los puntos aislados son los valores atípicos.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Boxplot conjunto ABCD
@@ -291,7 +313,7 @@ Compare las cuatro cajas: mediana, rango intercuartílico, longitud de los bigot
 
 *** Respuesta
 
-El diagrama de caja pone en primer plano, de forma directamente comparable entre las cuatro empresas y sobre una única escala vertical, varios resúmenes que el histograma deja implícitos: la /mediana/ (que en Consultora Este se separa claramente de la media, delatando el efecto del directivo con salario disparado, algo que un histograma con pocos intervalos podría disimular en una barra casi invisible); el /rango intercuartílico/, una medida de dispersión robusta que —a diferencia de la desviación típica, idéntica por construcción en las cuatro series— sí puede diferir entre empresas si los datos están distribuidos de forma distinta dentro de ese rango central; y, sobre todo, el /marcado explícito de valores atípicos/ como puntos aislados fuera de los bigotes: en Consultora Este, un único punto extremo salta a la vista de inmediato, mientras que en un histograma ese mismo dato podría pasar desapercibido como una barra solitaria de altura mínima en el extremo del eje. El boxplot es, en definitiva, el instrumento idóneo para comparar /varias/ distribuciones de un vistazo sobre los mismos ejes.
+El diagrama de caja pone en primer plano, de forma directamente comparable entre las cuatro empresas y sobre una única escala vertical, varios resúmenes que el histograma deja implícitos: la /mediana/; el /rango intercuartílico/, una medida de dispersión robusta que sí difiere entre empresas, a diferencia de la desviación típica, idéntica por construcción en las cuatro series. Lo que hay que mirar aquí es la caja de Consultora Este: es estrechísima (el $50\,\%$ central de los salarios cabe en unos $56$ euros, frente a más de $230$ en las otras tres empresas) y la media, marcada con una cruz, queda /fuera/ de ella, por encima del tercer cuartil. Eso delata el efecto del directivo con salario disparado: un solo dato arrastra la media lejos del grueso de la plantilla, algo que un histograma con pocos intervalos podría disimular en una barra casi invisible. Y, sobre todo, el /marcado explícito de valores atípicos/ como puntos aislados fuera de los bigotes: en Consultora Este, un único punto extremo salta a la vista de inmediato, mientras que en un histograma ese mismo dato podría pasar desapercibido como una barra solitaria de altura mínima en el extremo del eje. El boxplot es, en definitiva, el instrumento idóneo para comparar /varias/ distribuciones de un vistazo sobre los mismos ejes.
 
 Sin embargo, el diagrama de caja tiene un punto ciego precisamente donde el histograma es insustituible: la /forma global/ de la distribución. El boxplot de Industrias Centro (cuya distribución es bimodal, con dos grupos de empleados bien separados y prácticamente ningún salario ``intermedio'') puede tener un aspecto perfectamente ordinario —una caja, una mediana, unos bigotes— sin insinuar en absoluto la existencia de dos picos separados; los cinco números que resume un boxplot (mínimo, $Q_1$, mediana, $Q_3$, máximo, más atípicos) simplemente no tienen capacidad para codificar cuántas modas tiene una distribución. Solo el histograma, al mostrar la densidad de puntos en cada tramo del rango, revela sin ambigüedad los dos grupos separados por un hueco central. La lección general es que ambas herramientas son complementarias: el boxplot compara resúmenes de posición y dispersión entre grupos; el histograma muestra la forma que esos resúmenes, por sí solos, no pueden capturar.
 
@@ -299,6 +321,8 @@ Sin embargo, el diagrama de caja tiene un punto ciego precisamente donde el hist
 * Actividad 5 - Más allá de la media y la desviación típica
 
 Calculemos, para las cuatro series, algunos estadísticos adicionales: la /mediana/ (=median=), la /asimetría/ (=skewness=) y la /curtosis/ (=kurtosis=, curtosis /excedente/ respecto a la normal, que vale 0). Son estadísticos vistos en la asignatura de estadística del cuatrimestre anterior.
+
+Una tabla hecha con =printf=. La primera línea imprime la cabecera: un hueco =%-15s= (texto de quince caracteres, alineado a la izquierda) y cinco huecos =%10s= (diez caracteres, alineados a la derecha). Cada línea siguiente rellena una fila con el nombre de la empresa y cinco funciones aplicadas a su serie: =mean=, =median=, =sd=, =skewness= y =kurtosis=. Los anchos fijos hacen que las columnas queden alineadas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -365,6 +389,8 @@ Por la /linealidad/ de la media (lección 4: sumar una constante desplaza la med
 
 Verifiquemos numéricamente que las cuatro series comparten, en efecto, media y sd (salvo el redondeo de coma flotante):
 
+Cuatro =printf=: las medias y las =sd= de las cuatro series, y los dos valores objetivo, para compararlos.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Verificacion momentos comunes
@@ -389,6 +415,8 @@ end outfile
 
 Verifiquemos que la estandarización logra que las cuatro series tengan media cero y =sd= igual a uno (salvo el redondeo de coma flotante):
 
+
+Lo mismo para las series estandarizadas =A_z=, =B_z=, =C_z= y =D_z=, que deben tener =sd= igual a $1$ y media $0$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

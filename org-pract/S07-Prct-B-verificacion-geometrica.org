@@ -97,9 +97,17 @@ En las lecciones 4 y 5 demostramos una serie de identidades: el vector en desvia
 2. Comprobar que estas identidades no dependen del tamaño muestral ni de la distribución subyacente.
 3. Construir explícitamente un caso con una relación lineal conocida entre dos vectores, anticipando el modelo de regresión simple (lección 6).
 
+/Comandos nuevos de esta práctica/. Seguimos usando =series=, =scalar=, las funciones =mean=, =sum=, =sqrt=, =corr= y el comando =printf= de la práctica A. Lo nuevo es que los datos los generamos nosotros:
+- =nulldata 6= :: crea un conjunto de datos vacío con 6 observaciones. Sustituye al =open= de las prácticas con datos reales. La opción =--preserve= conserva los escalares definidos antes; sin ella, Gretl los borra al crear el conjunto nuevo.
+- =set seed 12345= :: fija el punto de partida del generador de números aleatorios. Con la misma semilla todos obtenemos exactamente los mismos números, y las salidas de este documento coinciden con las suyas. Cambie la semilla y obtendrá otra muestra.
+- =normal(m, s)= :: crea una serie con, en cada observación, un valor aleatorio de la distribución normal de media =m= y desviación típica =s=; =normal()= sin argumentos usa media $0$ y desviación típica $1$. =uniform(a, b)= hace lo mismo con la distribución uniforme en el intervalo $[a,b]$.
+- =print y= :: muestra los valores de la serie (en la sesión 4 usamos =print -o=, la misma orden con los datos en columna).
+- =$nobs= :: el número de observaciones del conjunto de datos actual.
+- =#= :: lo que sigue a una almohadilla es un comentario: Gretl lo ignora.
+
 * Actividad 1 - Un vector pequeño, verificación completa
 
-Generamos un vector de solo $n=6$ observaciones, lo bastante pequeño como para poder mirar los números uno a uno.
+Generamos un vector de solo $n=6$ observaciones, lo bastante pequeño como para poder mirar los números uno a uno. El bloque crea el conjunto de 6 observaciones, fija la semilla y genera la serie =y= con seis valores de una normal de media $10$ y desviación típica $3$; =print y= los muestra. Son los seis números con los que trabaja el resto de la actividad.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -114,6 +122,8 @@ print y
 #+latex: }
 
 *** Ortogonalidad del vector en desviaciones
+
+=y - mean(y)= es el vector en desviaciones (a cada componente se le resta la media) y =sum= suma sus seis componentes. Esa suma es el producto escalar con $\boldsymbol{1}$ y debe ser cero. Pedimos diez decimales para ver que solo queda redondeo.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -136,7 +146,7 @@ end outfile
 
 *** Pitágoras (fórmula de cálculo de la varianza)
 
-Recuerde la identidad de la lección 5: $\mu_{\boldsymbol{y}^2}=\mu_{\boldsymbol{y}}^2+\sigma_{\boldsymbol{y}}^2$, donde $\sigma_{\boldsymbol{y}}^2$ es la varianza tal como la define la lección 5: con divisor $1/n$, el del producto escalar estadístico.
+Recuerde la identidad de la lección 5: $\mu_{\boldsymbol{y}^2}=\mu_{\boldsymbol{y}}^2+\sigma_{\boldsymbol{y}}^2$, donde $\sigma_{\boldsymbol{y}}^2$ es la varianza tal como la define la lección 5: con divisor $1/n$, el del producto escalar estadístico. Guardamos en tres escalares las tres piezas de la identidad: la media =mu_y=; la varianza =var_n=, suma de los cuadrados de las desviaciones dividida por =$nobs=; y la media de los cuadrados =mu_y2= (=y^2= eleva al cuadrado cada componente). Los dos =printf= imprimen los dos lados de la identidad, uno debajo del otro.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -167,6 +177,8 @@ end outfile
 /IMPORTANTE: a diferencia de la correlación (Apéndice de la práctica A), aquí el divisor sí importa: la identidad de Pitágoras usa el producto escalar estadístico con divisor $1/n$ (lección 5). Compruebe qué ocurre si, en su lugar, divide por $(n-1)$, el convenio muestral habitual en estadística inferencial y el que usa por defecto la función/ =var= /de Gretl:/
 #+latex: }
 
+El bloque repite el cálculo de la varianza dividiendo por =$nobs - 1= en lugar de por =$nobs=, y vuelve a imprimir el lado derecho de la identidad:
+
 #+NAME: Pitagoras n=6 con divisor n-1
 #+begin_src gretl :eval no
 scalar var_n1 = sum((y - mu_y)^2) / ($nobs - 1)     # divisor 1/(n-1)
@@ -192,6 +204,8 @@ end outfile
 * Actividad 2 - ¿Depende del tamaño o de la distribución?
 
 Repetimos las mismas comprobaciones (ortogonalidad y Pitágoras) con dos series de $n=50$: una con forma simétrica (normal) y otra con forma marcadamente asimétrica ($\chi^2$ con 2 grados de libertad, igual que la Serie B de la práctica C de esta misma sesión). Obsérvese que con esto cambian /las dos cosas/ respecto a la Actividad 1: allí el tamaño era $n=6$, aquí es $n=50$ y en la Actividad 3 será $n=100$; entre las tres actividades se recorren, pues, tres tamaños muestrales muy distintos además de tres formas distintas. Lo hacemos primero ``a mano'', serie a serie, para que quede completamente explícito qué se calcula en cada caso.
+
+Creamos un conjunto nuevo de 50 observaciones y dos series: =y_normal=, normal estándar, e =y_chi2=, suma de los cuadrados de dos normales estándar independientes (=u1= y =u2=), que es una $\chi^2$ con 2 grados de libertad y tiene una cola larga hacia la derecha. Para cada serie calculamos cuatro escalares: la media; la varianza con divisor $n$; la suma del vector en desviaciones, que debe ser cero; y el /desajuste/ de Pitágoras, la diferencia entre los dos lados de la identidad, que también debe ser cero. En el =printf=, el hueco =%-10s= es para un texto de diez caracteres alineado a la izquierda, el nombre de la serie; así las dos líneas de la salida quedan alineadas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -239,6 +253,8 @@ end outfile
 
 Repetir a mano el mismo bloque de código para cada serie es razonable con dos series, pero se volvería tedioso con veinte. Gretl ofrece el comando =loop= precisamente para automatizar este tipo de repeticiones. Al igual que ocurrirá en la Actividad 5, no pretendemos aquí explicar la mecánica de los bucles (=loop=) de Gretl —eso se hará con detalle en el laboratorio que sigue a la lección 11 (propiedades de MCO) y en futuras prácticas sobre inferencia (contrastes $t$ y $F$)—; aquí lo presentamos simplemente como una ``caja negra'' que aplica, serie a serie, el mismo cálculo que acabamos de hacer a mano. La ventaja se aprecia enseguida: con muy poco código adicional podríamos repetir esta misma comprobación sobre diez, veinte o cien series distintas, sin copiar el bloque una y otra vez.
 
+Léalo así: =loop foreach i y_normal y_chi2= repite las líneas que hay hasta =endloop= una vez por cada serie de la lista, y en cada vuelta =$i= toma el nombre de la serie que toca. Las cuatro líneas interiores son las de arriba con =$i= en lugar del nombre concreto, y el =printf= es el mismo. La opción =--quiet= evita que Gretl imprima cada vuelta del bucle.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos (variante con =loop=, mismo resultado que arriba)/:
 #+NAME: Dos series n=50 con loop
@@ -266,6 +282,8 @@ end outfile
 *** Un caso extremo: con $n=2$ la correlación es siempre $\pm1$
 
 La lección 5 demostró un hecho que conviene ver con los propios ojos. En $\mathbb{R}^2$, el complemento ortogonal $\mathcal{L}(\boldsymbol{1})^\perp$ es una simple /recta/; y dos vectores cualesquiera situados sobre una recta están forzosamente alineados. Por tanto, con solo dos observaciones los vectores en desviaciones siempre están alineados y la correlación vale $\pm1$, /sean cuales sean los datos/.
+
+Conjunto de solo dos observaciones. Sorteamos dos series =a= y =b= de normales estándar y calculamos su correlación con la función =corr(a,b)=; después cambiamos la semilla y repetimos el sorteo. El formato =%+.10f= imprime siempre el signo, también cuando es positivo, para que se vea si sale $+1$ o $-1$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -305,6 +323,8 @@ end outfile
 
 Construimos ahora $\boldsymbol{x}$ y $\boldsymbol{y}$ /a propósito/, de forma que conocemos exactamente cómo se relacionan: $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$, con $\boldsymbol{u}$ un término de ruido generado con independencia de $\boldsymbol{x}$ y, por tanto, prácticamente incorrelado con él.
 
+Cien observaciones. =x= toma valores uniformes entre $0$ y $10$; =u= es ruido normal de media $0$ y desviación típica $2$; e =y= se construye con la fórmula $\boldsymbol{y}=2\cdot\boldsymbol{1}+3\boldsymbol{x}+\boldsymbol{u}$. Gretl aplica la operación fila a fila: el $2$ se suma a las cien componentes, y cada componente de =x= se multiplica por $3$.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Relacion lineal conocida
@@ -323,6 +343,8 @@ series y = 2 + 3*x + u
 #+latex: }
 
 *** Covarianza como producto escalar de vectores centrados
+
+=x_c_dot_y_c= es el producto escalar euclídeo de los dos vectores en desviaciones: producto componente a componente y suma, como en la práctica A. Dividido por =$nobs= da la covarianza de la lección 5. Después imprimimos ese valor y el que devuelve la función =cov(x,y)= de Gretl, que divide por $n-1$: no coincidirán exactamente.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -347,6 +369,8 @@ end outfile
 #+latex: }
 
 *** Correlación como coseno
+
+Las dos normas euclídeas de los vectores en desviaciones (raíz cuadrada de la suma de cuadrados) y el cociente del producto escalar anterior entre el producto de ambas: el coseno del ángulo. La última línea lo compara con =corr(x,y)=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -384,6 +408,8 @@ end outfile
 
 La lección 3 demostró dos desigualdades que hasta ahora no habíamos comprobado con datos. Las dos se leen directamente sobre los vectores en desviaciones que acabamos de construir.
 
+Para la desigualdad triangular hace falta la norma de la suma de los dos vectores en desviaciones, =norma_suma=. =abs= es el valor absoluto. Los dos =printf= imprimen cada desigualdad con sus dos lados; la barra invertida =\= al final de una línea indica a Gretl que la instrucción continúa en la línea siguiente.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Cauchy-Schwarz y triangular
@@ -420,6 +446,8 @@ Estas identidades y desigualdades —ortogonalidad, Pitágoras, covarianza como 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
 /Esta actividad es opcional: es probable que no dé tiempo a cubrirla en clase. Está reservada para si surge la pregunta natural: ``¿esto se cumple siempre, o ha sido casualidad de esta muestra concreta?'' No se pretende aquí explicar la mecánica de los bucles (=loop=) de Gretl --eso se hará con detalle en el laboratorio que sigue a la lección 11 (propiedades de MCO) y en las prácticas sobre inferencia (contrastes $t$ y $F$)--; aquí se presenta como una ``caja negra'' que repite la verificación cientos de veces con una muestra nueva en cada repetición./
 #+latex: }
+
+Qué hace el bloque, leído por encima. Crea un conjunto de 30 observaciones y tres escalares a cero, que guardarán la mayor desviación encontrada en cada una de las tres identidades. =loop R --quiet= repite =R= veces (500) las líneas que hay hasta =endloop=. En cada vuelta genera una muestra nueva (=y_loop= es una normal estándar a la que, con probabilidad $0{,}1$, se le suma un sorteo de una normal de media $5$, lo que produce una cola de valores altos; =x_loop= es uniforme), calcula las tres desviaciones en valor absoluto y, con tres bloques =if ... endif=, se queda con la mayor vista hasta el momento. Al terminar, imprime los tres máximos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

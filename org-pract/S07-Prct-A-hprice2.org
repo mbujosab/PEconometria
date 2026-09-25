@@ -103,6 +103,13 @@ En las lecciones 4 y 5 vimos que la media se obtiene mediante una proyección or
 
 Retomamos =hprice2= (práctica de la sesión con Gretl anterior) y las mismas tres variables ya etiquetadas: =price=, =rooms=, =nox=.
 
+/Los comandos de Gretl que aparecen hoy/. En la sesión 4 usamos Gretl casi solo desde los menús. Hoy escribiremos instrucciones en la consola (menú //~Herramientas -> Consola de Gretl~//) o en un guion (//~Archivo -> Archivos de guion -> Nuevo guion~//). Conviene fijar antes cuatro ideas del lenguaje:
+- =series= :: crea una variable nueva del conjunto de datos, con un valor por observación. Para nosotros, un vector de $\mathbb{R}^n$. Las operaciones entre series se hacen componente a componente: =price - mean(price)= resta la media a cada uno de los 506 precios.
+- =scalar= :: crea un número (un escalar), por ejemplo el resultado de una suma o de una norma. Los escalares se conservan durante toda la sesión y pueden usarse en instrucciones posteriores.
+- Funciones :: =mean(x)=, =sum(x)=, =sqrt(a)=, =cov(x,y)=, =corr(x,y)= o =acos(a)= devuelven un número a partir de una o dos series, o de un escalar. Se escriben con paréntesis, como en matemáticas.
+- =printf= :: imprime un texto con números intercalados. Cada =%.4f= es el hueco para un número con cuatro decimales; los valores que rellenan los huecos van después del texto, separados por comas y en el mismo orden; =\n= es un salto de línea.
+Todo lo demás son comandos ya vistos (=open=, =setinfo=, =summary=) o que se explican donde aparecen. Para consultar cualquiera de ellos: =help nombre= en la consola (sesión 4).
+
 /Objetivo/
 
 1. Repasar estadísticos descriptivos de varias variables a la vez.
@@ -113,7 +120,7 @@ Retomamos =hprice2= (práctica de la sesión con Gretl anterior) y las mismas tr
 
 * Actividad 1 - Recordatorio: datos y estadísticos descriptivos
 
-Abrimos de nuevo =hprice2= y recuperamos las etiquetas de la práctica anterior.
+Abrimos de nuevo =hprice2= y recuperamos las etiquetas de la práctica anterior. =open= carga el fichero de muestra (=--quiet= evita que Gretl liste sus variables) y =setinfo= vuelve a dar a cada variable su descripción (=-d=) y el nombre que se mostrará en los gráficos (=-n=), como en la sesión 4. Hay que repetirlo porque las etiquetas no quedaron guardadas en el fichero de muestra.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -126,7 +133,7 @@ setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx
 #+end_src
 #+latex: }
 
-- Recuerde los estadísticos descriptivos:
+- Recuerde los estadísticos descriptivos. =summary= muestra, para cada variable, la media, la mediana, el mínimo, el máximo, la desviación típica y algunas medidas más (sesión 4):
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -150,6 +157,8 @@ end outfile
 * Actividad 2 - Covarianzas y correlaciones
 
 - En la ventana principal de Gretl, marque =price=, =rooms= y =nox= (con ~Ctrl~), ``pinche'' con el botón derecho y seleccione */~Matriz de correlación~/*.
+
+  El comando =corr= seguido de una lista de variables calcula la correlación de cada par y las presenta en una matriz simétrica, con unos en la diagonal (la correlación de cada variable consigo misma). No lo confunda con la función =corr(x,y)=, con paréntesis y dos variables, que devuelve un solo número y que usaremos en el bloque siguiente.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -176,7 +185,7 @@ end outfile
 #+latex: }
 
 
-- Calculemos también, por separado, la covarianza y la correlación de cada par de variables (funciones =cov= y =corr= de Gretl)[fn::Fíjese que =corr(x,y)= de Gretl es la implementación numérica del mismo coeficiente de correlación \(\rho_{\boldsymbol{x}\boldsymbol{y}}\) definido en la lección 5; aunque =cov(x,y)= no es la implementación exacta de la covarianza \(\sigma_{\boldsymbol{x}\boldsymbol{y}}\) pues Gretl divide internamente por $n-1$ (en lugar de por $n$).]:
+- Calculemos también, por separado, la covarianza y la correlación de cada par de variables (funciones =cov= y =corr= de Gretl)[fn::Fíjese que =corr(x,y)= de Gretl es la implementación numérica del mismo coeficiente de correlación \(\rho_{\boldsymbol{x}\boldsymbol{y}}\) definido en la lección 5; aunque =cov(x,y)= no es la implementación exacta de la covarianza \(\sigma_{\boldsymbol{x}\boldsymbol{y}}\) pues Gretl divide internamente por $n-1$ (en lugar de por $n$).]. Son tres líneas =printf=, una por par. Cada una tiene dos huecos =%.4f= que se rellenan, por orden, con el valor de =cov(x,y)= y el de =corr(x,y)=; el texto entre comillas se imprime tal cual:
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /en línea de comandos/:
@@ -203,6 +212,8 @@ end outfile
 * Actividad 3 - Diagramas de dispersión
 
 - Marque dos variables a la vez (p. ej. =price= y =rooms=), ``pinche'' con el botón derecho y seleccione */~Gráfico X-Y~/*.
+
+  El comando =gnuplot= con dos variables dibuja su diagrama de dispersión: la primera en el eje vertical y la segunda en el horizontal. Por defecto superpone una recta ajustada a la nube cuando la relación es apreciable, y en las tres figuras de abajo aparece. En la consola, cada gráfico se abre en una ventana.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -253,6 +264,9 @@ Compare la ``forma'' de cada nube de puntos (más o menos alargada y ``alineada'
 Vamos a reconstruir, con instrucciones de Gretl, exactamente lo que hicimos con lápiz y papel en la lección 5: centrar los vectores (i.e., restarles su media), comprobar que son ortogonales a $\boldsymbol{1}$, calcular su producto escalar y sus normas, y formar el coseno del ángulo.
 
 *** Vectores centrados
+
+Tres series nuevas: a cada variable le restamos su media. Gretl resta el mismo número, =mean(price)=, a las 506 componentes, y el resultado es el vector en desviaciones de la lección 4. El sufijo =_c= (de /centrado/) es solo un nombre.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Vectores centrados
@@ -264,7 +278,7 @@ series nox_c   = nox   - mean(nox)
 #+latex: }
 
 *** Comprobación de ortogonalidad con $\boldsymbol{1}$
-La media de cada vector centrado debe ser (esencialmente) cero, es decir, sus valores deben sumar cero (salvo por errores de redondeo). Por tanto, ``cada vector centrado debe ser ortogonal a $\boldsymbol{1}$'':
+La media de cada vector centrado debe ser (esencialmente) cero, es decir, sus valores deben sumar cero (salvo por errores de redondeo). Por tanto, ``cada vector centrado debe ser ortogonal a $\boldsymbol{1}$''. Lo comprobamos con =sum(price_c)=, que suma las 506 componentes del vector centrado: es su producto escalar euclídeo con $\boldsymbol{1}$. El formato =%.10f= pide diez decimales, para ver que lo que quede es solo redondeo:
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -292,7 +306,12 @@ end outfile
 
 
 *** El coseno del ángulo entre los datos en desviaciones (par price-rooms)
-Producto escalar y normas ``a mano'' (sin dividir por ningún $n$, es decir, con el producto escalar y la norma /euclídeos/):
+Producto escalar y normas ``a mano'' (sin dividir por ningún $n$, es decir, con el producto escalar y la norma /euclídeos/). El bloque traduce línea a línea la fórmula $\cos\theta=\langle\boldsymbol{x}_c,\boldsymbol{y}_c\rangle/(\|\boldsymbol{x}_c\|\,\|\boldsymbol{y}_c\|)$:
+- =sum(price_c * rooms_c)= multiplica los dos vectores componente a componente y suma los productos: el producto escalar euclídeo.
+- =sqrt(sum(price_c^2))= eleva al cuadrado cada componente, suma y extrae la raíz cuadrada: la norma euclídea. El operador =^= actúa componente a componente.
+- =coseno_pr= es el cociente de las dos cantidades anteriores.
+- =acos= es la función arcocoseno: devuelve el ángulo cuyo coseno es el argumento, en radianes. Multiplicar por =rad2deg=, que vale $180/\pi$, lo pasa a grados.
+- Los tres =printf= imprimen el coseno calculado a mano, la correlación que da Gretl y el ángulo.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -325,12 +344,11 @@ end outfile
 #+include: ./S07-Prct-A-hprice2/coseno-price-rooms.txt example
 #+latex: }
 
-#+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-(/Hemos usado =acos=, la función arcocoseno de Gretl, que devuelve el ángulo en radianes; por eso multiplicamos por \(\frac{180}{\pi}\) para expresarlo en grados./)
-#+latex: }
-
 
 *** Repetimos para los otros dos pares
+
+Lo mismo para los otros dos pares. Solo falta calcular la norma de =nox_c=: las de =price_c= y =rooms_c= siguen guardadas en los escalares =norma_price= y =norma_rooms=, y el factor =rad2deg= también.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Coseno price-nox y rooms-nox
@@ -369,7 +387,7 @@ De los tres pares calculados, ¿cuál tiene el ángulo más cercano a $90^\circ$
 
 * Apéndice - ¿Importa dividir entre $n$, entre $n-1$, o no dividir?
 
-En la Actividad 4 no dividimos por ningún $n$: usamos directamente el producto escalar y la norma /euclídeos/ (sin el factor $1/n$ de la lección 4), y aun así el coseno obtenido coincidió con =corr=. Esto no es casualidad: al ser un /cociente/, cualquier factor común que multiplique por igual al numerador y ambas normas se cancela. Comprobémoslo explícitamente, calculando $\rho$ de tres formas distintas:
+En la Actividad 4 no dividimos por ningún $n$: usamos directamente el producto escalar y la norma /euclídeos/ (sin el factor $1/n$ de la lección 4), y aun así el coseno obtenido coincidió con =corr=. Esto no es casualidad: al ser un /cociente/, cualquier factor común que multiplique por igual al numerador y ambas normas se cancela. Comprobémoslo explícitamente, calculando $\rho$ de tres formas distintas. =$nobs= es el número de observaciones del conjunto de datos, 506, y lo guardamos en el escalar =n=. Después calculamos la covarianza y las dos varianzas dos veces, dividiendo por =n= y por =n-1=, y formamos con cada juego el cociente $\rho$. Los cuatro =printf= imprimen los cuatro resultados uno debajo de otro:
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
