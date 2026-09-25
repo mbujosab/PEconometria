@@ -104,9 +104,17 @@ Volvemos a =data4-1= de Ramanathan, el fichero de catorce viviendas de la práct
 3. Ver que el conjunto de pares $(\beta_{\text{bedrms}},\beta_{\text{baths}})$ que el $F$ no rechaza no es el rectángulo formado por los dos intervalos: contrastar las cuatro esquinas del rectángulo.
 4. Distinguir ``no se rechaza que sean cero'' de ``son cero''.
 
+/Comandos nuevos de esta práctica/. Seguimos usando =ols= y sus accesores, =critical= y =pvalue= (sesión 18) y =restrict= con los coeficientes nombrados por su variable (práctica A de esta sesión). Lo nuevo:
+- =restrict --quiet= :: hace el contraste sin imprimir las estimaciones restringidas. Sirve cuando solo queremos el estadístico.
+- =$test= :: tras un contraste, el valor de su estadístico; aquí, el $F$ que =restrict= acaba de calcular. Guardarlo en un escalar permite compararlo con el valor crítico o pasarlo a =pvalue=.
+- Escalares en una restricción :: a la derecha del igual, en lugar de un número, puede ir el nombre de un escalar: =b[bedrms] = iL=.
+- =$vcv= :: la matriz de varianzas y covarianzas de los coeficientes del último modelo. Entre corchetes, =$vcv[3,4]=, se toma el elemento de la fila $3$ y la columna $4$: la covarianza entre el tercer y el cuarto coeficiente. Aparece en el guion completo de la Actividad 3.
+
 * Actividad 1 - El modelo completo y los regresores uno a uno
 
-Abra =data4-1= y estime =price= sobre =sqft=, =bedrms= y =baths=. Después omita =baths=, y después también =bedrms=, anotando en cada paso el $t$ de lo que queda y la $\mathrm{SRC}$.
+Abra =data4-1= (//~Archivo -> Abrir archivo de datos -> Archivo de muestra~//, pestaña //~Ramanathan~//) y estime =price= sobre =sqft=, =bedrms= y =baths= con //~Modelo -> Mínimos cuadrados ordinarios~//. Después omita =baths=, y después también =bedrms=, anotando en cada paso el $t$ de lo que queda y la $\mathrm{SRC}$.
+
+Tres estimaciones seguidas con =ols=, sin =--quiet= para ver las tres tablas: el modelo completo, el modelo sin =baths= y el modelo con =sqft= solo. Cada =ols= sustituye al anterior como último modelo, así que los accesores se refieren siempre a la tabla que acaba de imprimirse. Tras la primera estimación se guardan tres escalares que harán falta en la Actividad 2: =SRC= (=$ess=), =df= (los grados de libertad, =$df=) y =s2=, la cuasivarianza =SRC/df=; tras la tercera, =SRCr=. El guion completo calcula además los $t$ como cociente de =$coeff= y =$stderr=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -114,8 +122,12 @@ Abra =data4-1= y estime =price= sobre =sqft=, =bedrms= y =baths=. Después omita
 #+begin_src gretl :eval no
 open data4-1.gdt --quiet
 ols price const sqft bedrms baths
+scalar SRC = $ess
+scalar df  = $df
+scalar s2  = SRC/df
 ols price const sqft bedrms
 ols price const sqft
+scalar SRCr = $ess
 #+end_src
 #+latex: }
 
@@ -157,6 +169,8 @@ Fíjese también en =sqft=: su coeficiente pasa de $0{,}155$ a $0{,}139$ y su er
 * Actividad 2 - La exclusión conjunta
 
 Estime el $F$ de $H_0\!:\beta_{\text{bedrms}}=\beta_{\text{baths}}=0$ con las dos $\mathrm{SRC}$ que ya tiene, y compruébelo con =restrict= (//~Contrastes -> Restricciones lineales~// en la ventana del modelo completo).
+
+La primera línea construye el $F$ con $q=2$ a partir de los escalares =SRC=, =SRCr=, =s2= y =df= guardados en la actividad anterior. El =printf= imprime el $F$, el valor crítico y el valor $p$. Después se vuelve a estimar el modelo completo, porque =restrict= actúa sobre el último modelo estimado, y se imponen las dos restricciones.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -200,6 +214,8 @@ $F=0{,}47$ con $F_c(2,10)=4{,}10$: quitar los dos regresores a la vez sube la $\
 * Actividad 3 - El rectángulo y las esquinas
 
 Los intervalos al $95\%$ de =bedrms= y =baths= definen un rectángulo en el plano $(\beta_{\text{bedrms}},\beta_{\text{baths}})$. Cabe pensar que el $F$ no rechaza ningún par de valores dentro del rectángulo y rechaza todos los de fuera. Compruébelo en las cuatro esquinas: cada esquina es un par de valores que está, a la vez, en el borde de los dos intervalos.
+
+Con =critical= se obtiene $t_c$, y con él los extremos de los dos intervalos al $95\%$: =iL= e =iR= para =bedrms=, =jL= y =jR= para =baths=. Después, un =restrict --quiet= fija a la vez los dos coeficientes en una esquina del rectángulo, y =$test= recoge el $F$ de ese contraste en el escalar =F_LL=. Falta repetirlo para las otras tres esquinas, cambiando los escalares de la derecha; el guion completo lo hace y calcula además la correlación entre los dos estimadores a partir de =$vcv=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

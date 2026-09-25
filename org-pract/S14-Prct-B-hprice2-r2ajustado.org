@@ -99,7 +99,14 @@ Retomamos =hprice2=, ya usado en la práctica de regresión simple con datos rea
 4. Calcular $\bar R^2$ ``a mano'' y contrastarlo con el que reporta Gretl, entendiendo por qué $\bar R^2$ sí puede bajar.
 5. Practicar, una vez más, la lectura /ceteris paribus/ de los coeficientes sin caer en lenguaje causal.
 
+/Comandos nuevos de esta práctica/. Casi todo es conocido: =open=, =setinfo=, =summary= (sesión 4), =printf= y los escalares (sesión 7), =ols= con varios regresores y la opción =--quiet=, =corr= y el accesor =$rsq= (sesión 11 y práctica A de hoy). Lo nuevo son dos accesores del último modelo estimado y una función:
+- =$ncoeff= :: el número de coeficientes estimados, es decir, $k$ contando la constante. =$nobs= es el número de observaciones (sesión 7).
+- =$ess= :: la suma de los cuadrados de los residuos del último modelo, $\mathrm{SRC}$.
+- =sst(y)= :: la suma de los cuadrados de las desviaciones de =y= respecto a su media, $\mathrm{STC}$.
+
 * Actividad 1 - Reapertura de hprice2 y etiquetas
+
+=open=, cuatro =setinfo= con la descripción y el nombre para los gráficos, y un =summary= de las cuatro variables, como en la sesión 4. =stratio= es nueva en el curso, por eso la etiquetamos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -124,6 +131,8 @@ summary price rooms nox stratio
 Estimamos el modelo con ambos regresores a la vez, y recordamos (reestimándolas aquí mismo, para tener los números a mano) las dos regresiones simples correspondientes.
 
 /Antes de mirar el resultado/: ¿espera que el coeficiente de =rooms= sea muy distinto en la regresión simple y en la múltiple? ¿Y el de =nox=?
+
+Tres =ols= y un =corr=. Los dos primeros son las regresiones simples de la sesión 11; el tercero, con =rooms= y =nox= tras =const=, es el modelo con dos regresores no constantes. =corr rooms nox= imprime la correlación entre ambos, que hará falta en la lectura.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -165,6 +174,8 @@ donde interviene también la /magnitud/ del coeficiente del regresor añadido y 
 
 Añadimos el ratio alumnos/profesor de la zona, una variable que cabe esperar relacionada negativamente con el precio (zonas con colegios más masificados, en principio menos atractivas).
 
+Un regresor más en la lista de =ols=.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols con stratio
@@ -193,6 +204,8 @@ El coeficiente de =stratio= es $-1\,167$: un alumno más por profesor en la zona
 * Actividad 4 - $R^2$ nunca disminuye: los cuatro modelos a la vez
 
 Reunimos los cuatro modelos ya estimados (dos simples, dos múltiples) y comparamos su $R^2$.
+
+Cuatro =ols= con =--quiet= y, tras cada uno, el accesor =$rsq= guardado en un escalar antes de estimar el siguiente modelo (los accesores se refieren siempre al último modelo estimado). Los =printf= imprimen los cuatro $R^2$ juntos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -232,6 +245,8 @@ Observe que $R^2$ del modelo con tres regresores no constantes es, como mínimo,
 * Actividad 5 - Del $R^2$ al $R^2$ ajustado
 
 Si $R^2$ nunca baja, ¿cómo distinguir un regresor que de verdad mejora el modelo de uno que solo lo ``infla'' artificialmente? Gretl reporta el $R^2$ con =$rsq=, pero no ofrece ningún /accesor/ (=$...=) para el /$R^2$ ajustado/ —aunque sí lo imprime, como ``R-cuadrado corregido'', en la salida habitual de =ols=—, así que lo vamos a recalcular a mano (véase la sección [[Apéndice - De dónde sale la fórmula del $R^2$ ajustado]]). 
+
+Tres modelos con el mismo esquema: =ols --quiet=, un escalar =Rbarsq= calculado con la fórmula $1-(1-R^2)(n-1)/(n-k)$ escrita con los accesores =$rsq=, =$nobs= y =$ncoeff=, y tres =printf=. El escalar se sobrescribe en cada modelo, porque se imprime antes de pasar al siguiente. El tercer modelo añade =radial=, una variable de =hprice2= que no habíamos usado hasta ahora.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -303,6 +318,8 @@ Operando algebraicamente sobre esta definición se obtiene una expresión equiva
 Sin embargo, en el /coeficiente de determinación ajustado/ $\bar R^2$ hay /dos/ efectos en juego: $\mathrm{SRC}$ baja (o se mantiene), lo que empuja $\bar R^2$ hacia arriba, pero $k$ sube en una unidad, lo que reduce $n-k$ y por tanto agranda el cociente $\mathrm{SRC}/(n-k)$, empujando $\bar R^2$ hacia abajo. Si el regresor añadido aporta poco (reduce muy poco $\mathrm{SRC}$), el segundo efecto puede dominar al primero, y $\bar R^2$ baja pese a que $R^2$ no pueda hacerlo.
 
 Verifiquemos que las dos fórmulas arrojan el mismo resultado:
+
+Estimamos el modelo con tres regresores, guardamos $n$ y $k$ con =$nobs= y =$ncoeff=, y calculamos $\bar R^2$ de las dos maneras: con la definición, usando =$ess= para $\mathrm{SRC}$ y =sst(price)= para $\mathrm{STC}$, y con la fórmula reducida. =%d= es el hueco de =printf= para un número entero.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

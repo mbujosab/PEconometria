@@ -106,9 +106,18 @@ Los datos son /simulados/ por la razón de siempre: solo conociendo la verdad se
 3. Contrastar una hipótesis /falsa por poco/ con $n=12$ y con $n=120$: el mismo desvío, medido con un regresor $\sqrt{10}$ veces más largo.
 4. (Apéndice) Ver qué ocurre con la cobertura cuando las perturbaciones no son normales.
 
+/Comandos nuevos de esta práctica/. La mecánica de =loop R --progressive --quiet= con =store=, y la reapertura del fichero de réplicas con =open=, son las de la práctica A de la sesión 16; =critical=, =$coeff= y =$stderr=, las de las prácticas A y B de hoy; =randgen(X, 1)=, la de la práctica C de la sesión 16. Lo nuevo:
+- =quantile(x, p)= :: el cuantil de orden =p= de la serie: el valor que deja por debajo una fracción =p= de los datos.
+- =%= :: resto de la división entera: =(index - 1) % 12= toma los valores $0,1,\ldots,11$ y vuelve a empezar.
+- =rech += expresión= :: suma la expresión al escalar y guarda el resultado en él; es la forma abreviada de =rech = rech + expresión=. Como aquí la expresión vale $1$ o $0$, el escalar cuenta las réplicas que cumplen la condición.
+- =smpl 1 12= :: restringe la muestra a las observaciones 1 a 12 (sesión 14); =smpl full= la devuelve entera.
+- =gnuplot ... --time-series --with-lines= :: dibuja las series frente al número de observación y con líneas en lugar de puntos.
+
 * Actividad 1 - ¿Cubre el 95 por ciento?
 
 Construimos el mundo, fijamos el valor crítico de la $t$ con $n-k=10$ grados de libertad, y repetimos el experimento $4\,000$ veces guardando, en cada réplica, la estimación, su error estándar, los dos extremos del intervalo, un indicador de si contiene al verdadero $\beta_2$ y el estadístico $t$ para la hipótesis /cierta/ $H_0\!:\beta_2=0{,}5$.
+
+Tres bloques. El primero construye el mundo (doce observaciones, el regresor disperso de la práctica B, los parámetros y el número de réplicas =R=) y guarda los dos valores críticos: el de la $t_{10}$ y el $1{,}96$ de la normal. Sigue el bucle: en cada vuelta sortea doce perturbaciones, forma =y=, estima con =--quiet= y guarda en escalares la estimación, su error estándar, los dos extremos del intervalo, el indicador =dentro= (vale $1$ si el verdadero $\beta_2$ está entre los dos extremos; =&&= une las dos desigualdades), el estadístico $t$ de la hipótesis cierta y el indicador análogo construido con $1{,}96$; =store= añade al fichero de réplicas una fila con esos siete valores. El segundo bloque abre ese fichero, que tiene una observación por réplica, y vuelve a definir =tc= y =zc=. El tercero imprime el número de réplicas y dos medias: la de =dentro=, que es la fracción de intervalos que contienen a $\beta_2$, y la de la condición $|t|>t_c$, que es la fracción de rechazos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -174,13 +183,15 @@ end outfile
 
 Un porcentaje es un resumen. Para /ver/ qué significa, dibujamos los cien primeros intervalos: sus dos extremos como dos líneas, y el verdadero $\beta_2$ como una línea horizontal. Cada vez que la banda inferior sube por encima de $0{,}5$, o la superior baja por debajo, ese intervalo ha fallado.
 
+=smpl 1 100= se queda con las cien primeras réplicas. =B2= es una serie constante igual a $0{,}5$, para dibujarla como línea horizontal. =gnuplot= dibuja los dos extremos y esa constante frente al número de réplica, con líneas. =100 - sum(dentro)= cuenta los intervalos que fallan entre esos cien, y =smpl full= recupera las $4\,000$ réplicas.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Baile
 #+begin_src gretl :eval no
 smpl 1 100
 series B2 = 0.5
-gnuplot cL cR B2 --time-series --with-lines --output=display
+gnuplot cL cR B2 --time-series --with-lines
 printf "Intervalos que fallan entre los 100 primeros: %d\n", 100 - sum(dentro)
 smpl full
 #+end_src
@@ -215,6 +226,8 @@ Y la figura muestra lo que la frecuencia esconde. El intervalo /cambia/ de una r
 
 La lección 12 explicó por qué el estadístico sigue una $t_{n-k}$ y no una normal: en el denominador va $\mathfrak s$, que fluctúa de muestra en muestra, y eso ensancha las colas. Con $n-k=10$ la diferencia entre $t_c=2{,}228$ y $1{,}96$ es del $14\%$. Ya hemos guardado, en cada réplica, si el intervalo construido con $1{,}96$ contenía al verdadero $\beta_2$; y tenemos los $4\,000$ estadísticos $t$ bajo la hipótesis cierta, cuya distribución podemos mirar directamente.
 
+Los dos primeros =printf= comparan la cobertura con =tc= y con $1{,}96$ (medias de =dentro= y de =dentroZ=). Los dos siguientes imprimen los cuantiles empíricos del $2{,}5\%$ y del $97{,}5\%$ de los $4\,000$ estadísticos, calculados con =quantile=, junto a los valores que predicen la $t_{10}$ y la normal. El último calcula la fracción de $|t|$ mayores que $1{,}96$. =freq tstat= dibuja el histograma de los estadísticos.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Precio sigma
@@ -225,7 +238,7 @@ printf "\nCuantiles empiricos del estadistico t bajo la H0 cierta:\n"
 printf "   2,5%%  -> %.3f      (la t_10 predice %.3f; la normal, %.3f)\n", quantile(tstat, 0.025), -tc, -zc
 printf "  97,5%%  -> %.3f      (la t_10 predice  %.3f; la normal,  %.3f)\n", quantile(tstat, 0.975), tc, zc
 printf "Fraccion de |t| > 1,96                 : %.4f   (con 1,96 se rechazaria la H0 cierta mas del 5%%)\n", mean(abs(tstat) > zc)
-freq tstat --plot=display
+freq tstat
 #+end_src
 #+latex: }
 
@@ -257,6 +270,8 @@ Con $1{,}96$ el intervalo cubre bastante menos del $95\%$, y el contraste rechaz
 * Actividad 3 - Una hipótesis falsa por poco, con $n=12$ y con $n=120$
 
 Hasta aquí hemos contrastado una hipótesis cierta. Ahora contrastamos una /falsa por poco/: $H_0\!:\beta_2=0{,}47$, cuando el verdadero es $0{,}5$. ¿Con qué frecuencia la detecta el contraste? Lo hacemos dos veces: con las doce observaciones de siempre, y con ciento veinte —el mismo patrón de regresor repetido diez veces, el mismo $\sigma$, la misma hipótesis—. Lo único que cambia es la cantidad de evidencia.
+
+Tres bloques. El primero crea un conjunto de 120 observaciones (=--preserve= conserva los escalares) con el patrón del regresor repetido diez veces gracias al resto =% 12=, y vuelve a fijar los parámetros y el valor falso =c_falsa=. El segundo restringe la muestra a las doce primeras, calcula el valor crítico con los grados de libertad =$nobs - 2=, fija la semilla, pone a cero dos contadores y repite =R= veces: sortear, estimar, y sumar a =rech= un $1$ si el estadístico de la hipótesis falsa supera el valor crítico y a =cov= un $1$ si el intervalo contiene al verdadero $\beta_2$. Este bucle no lleva =--progressive= ni =store=: solo acumula en los dos escalares, y el =printf= final los divide por =R=. El tercero repite lo mismo con =smpl full=, es decir, con las 120 observaciones.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -332,6 +347,8 @@ Y tiene una lectura inmediata para la práctica A, donde con doce viviendas el i
 /Material complementario/, con el mismo estatus que el apéndice matricial del laboratorio anterior: va más allá de lo que da tiempo en clase y queda aquí para quien quiera completarlo.
 
 La lección 12 fue explícita: la normalidad es el único supuesto nuevo, y su cometido es dar /forma/ a la distribución de $\hat\beta_2$. El laboratorio anterior mostró que insesgadez y varianza no la necesitan; la pregunta natural es si la cobertura del intervalo —que sí depende de la forma— la necesita. Repetimos la Actividad 1 con perturbaciones $\chi^2$ de un grado de libertad, centradas y reescaladas a la misma $\sigma$: una distribución muy asimétrica, la misma con la que el laboratorio anterior obtuvo, con $n=12$, un histograma que el contraste de normalidad rechazaba.
+
+Dos bloques con la misma estructura que los de la Actividad 3, cambiando la perturbación: =randgen(X, 1)= sortea una $\chi^2$ con un grado de libertad, que tiene media $1$ y varianza $2$; restar $1$ y dividir por $\sqrt2$ la centra y le da desviación típica $1$, y multiplicar por =sig= le da la de nuestro mundo. Los contadores son ahora la cobertura y los rechazos de la hipótesis cierta.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

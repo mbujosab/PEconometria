@@ -100,9 +100,16 @@ Empezamos el bloque de regresión múltiple (lección 10) con el conjunto de dat
 5. Practicar la lectura de una salida de regresión múltiple sin dejarse arrastrar a conclusiones causales injustificadas.
 6. Ver cuánto se mueve el ajuste al quitar una sola vivienda, y que no todas pesan igual: el primer indicio de que una estimación tiene una /dispersión/, que la lección 11 cuantificará.
 
+/Comandos nuevos de esta práctica/. Seguimos usando =open=, =setinfo=, =summary=, =corr=, =gnuplot=, =printf= y los escalares (sesiones 4 y 7), y =ols= con la opción =--quiet= y sus accesores =$coeff=, =$uhat= y =$rsq= (prácticas de la sesión 11). Lo nuevo:
+- =ols y const x2 x3= :: la misma orden de la sesión 11 con más regresores tras la constante. Cada nombre añadido es una columna más de la matriz de datos $\boldsymbol{\mathsf X}$ de la lección 10.
+- =smpl= :: restringe la muestra a las observaciones que cumplen una condición: =smpl obs != 1 --restrict= deja fuera la observación 1 (=obs= es la variable interna con el número de orden de cada observación). =smpl full= restablece la muestra completa.
+- =resid[12]= :: la duodécima componente de una serie (sesión 7).
+
 * Actividad 1 - Carga y exploración de los datos
 
 - GUI: //~Archivo -> Abrir archivo de datos -> Archivo de muestra~//, pestaña //~Ramanathan~//, fichero =data4-1= (Prices of single-family homes).
+
+  =open= carga el fichero de muestra =data4-1= (=--quiet= evita listar sus variables), como en las sesiones 4 y 11.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -114,6 +121,8 @@ open data4-1.gdt --quiet
 
 Si lo consideramos conveniente podemos castellanizar las etiquetas de las variables para tener gráficos con las leyendas en español.
 Además, siempre conviene echar un vistazo a los estadísticos descriptivos principales de las variables.
+
+  Cuatro =setinfo=, uno por variable, con la descripción (=-d=) y el nombre para los gráficos (=-n=), y un =summary --simple= con las cuatro variables (media, mediana, desviación típica, mínimo y máximo).
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /en línea de comandos/:
@@ -128,7 +137,7 @@ summary price sqft bedrms baths --simple
   #+end_src
   #+latex: }
 
-Son solo 14 observaciones: puede inspeccionarlas todas de un vistazo con
+Son solo 14 observaciones: puede inspeccionarlas todas de un vistazo con =print= y la opción =--byobs=, que muestra varias series en una tabla con una fila por observación (sesión 11):
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   #+NAME: vistazo de los datos
   #+begin_src gretl :eval no
@@ -148,13 +157,11 @@ end outfile
 
 Un conjunto de datos tan pequeño no es representativo de ningún mercado real, pero es perfecto para una primera toma de contacto con la regresión múltiple.
 
-# #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-# /Son solo 14 observaciones: puede inspeccionarlas todas de un vistazo con/ =print price sqft bedrms baths --byobs=. /Un conjunto de datos tan pequeño no es representativo de ningún mercado real, pero es perfecto para una primera toma de contacto con la regresión múltiple./
-# #+latex: }
-
 * Actividad 2 - Recordatorio: la regresión simple =price~sqft=
 
 Antes de añadir regresores, recordamos el punto de partida: la regresión simple ya vista en la lección 6.
+
+=ols= estima por mínimos cuadrados el modelo cuyo regresando es la primera variable de la lista y cuyos regresores son las siguientes; =const= es la columna de unos. Es la misma orden de la sesión 11, y su salida se lee igual.
 
 #+latex: {\vspace{0pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -181,6 +188,8 @@ De dicha salida, ya podemos reconocer algunos de los resultados obtenidos:
 - El número a la derecha del nombre =R-cuadrado= es el coeficiente de determinación $R^2$ del ajuste.
 
 Veamos la recta de regresión correspondiente al ajuste MCO que hemos logrado:
+
+=gnuplot= con el regresando y el regresor dibuja la nube de puntos y la recta ajustada (sesión 7). La opción =--output= guarda el gráfico en un fichero en lugar de abrir una ventana.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -215,6 +224,8 @@ Estimamos ahora =price= en función únicamente de =bedrms=, y a continuación e
 
 /Antes de mirar el resultado/: ¿qué signo espera para el coeficiente de =bedrms= en el modelo simple? ¿Y en el modelo con =sqft= incluido? ¿Espera que sea /el mismo número/ en ambos casos?
 
+Dos =ols= seguidos. El primero es una regresión simple. El segundo lleva dos regresores no constantes tras =const=: es la primera regresión múltiple de la práctica, y Gretl la estima con la misma orden, añadiendo un nombre más a la lista.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols bedrms solo y acompanado
@@ -237,6 +248,8 @@ end outfile
 *** Lo que debe observar
 
 Compare el coeficiente de =bedrms= en ambas regresiones: solo, vale $+56{,}2$ (mil dólares por dormitorio) con un $R^2$ de apenas $0{,}10$; junto a =sqft=, pasa a $-23{,}9$, y el $R^2$ sube a $0{,}83$, casi el mismo que tenía =sqft= sola. En la lección 10 vimos que cada $\hat\beta_j$, en un modelo con varios regresores, mide un /efecto parcial/: ``el efecto promedio en =price= ante un dormitorio más, /manteniendo fija la superficie/''. Eso es una pregunta distinta de ``el efecto promedio en =price= ante un dormitorio más, sin ninguna información adicional'' (lo que mide el coeficiente del modelo simple). No tienen por qué coincidir, ni siquiera en signo: dos viviendas con la misma superficie pero distinto número de dormitorios reparten ese mismo espacio en habitaciones más pequeñas o más grandes, lo cual puede pesar en el precio de forma diferente a como pesa ``más dormitorios sin más información sobre otras características de la vivienda''. Muchos dormitorios solo caben en viviendas grandes, así que cabe esperar una correlación positiva entre dormitorios y superficie en la muestra. Verifíquelo.
+
+Comprobemos cuán correlacionados están los dos regresores. El comando =corr= imprime la correlación de las variables de la lista (sesión 7).
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -261,6 +274,8 @@ end outfile
 
 Ampliamos el modelo con otro regresor adicional: el número de cuartos de baño.
 
+Un regresor más en la lista de =ols=: ahora $\boldsymbol{\mathsf X}$ tiene cuatro columnas.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols con baths
@@ -281,7 +296,7 @@ end outfile
 
 Compare de nuevo el coeficiente de =bedrms= (y ahora también el de =sqft=) con los obtenidos en la Actividad 3: apenas se mueven ($-23{,}9\to-21{,}6$ y $0{,}148\to0{,}155$). ¿Qué signo tiene el coeficiente de =baths=, $-12{,}2$, y le parece razonable? Si no le parece razonable ¿Cuál podría ser el motivo por el que el resultado obtenido es distinto de lo que usted esperaba?
 
-Observe la matriz de correlaciones entre =sqft=, =bedrms= y =baths=:
+Observe la matriz de correlaciones entre =sqft=, =bedrms= y =baths=. Con tres variables, =corr= devuelve la matriz simétrica de la sesión 7:
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -316,6 +331,8 @@ Complete la tabla con los resultados de las cuatro regresiones estimadas en esta
 | price~bedrms            | ---                       |                             | ---                        |       |
 | price~sqft+bedrms       |                           |                             | ---                        |       |
 | price~sqft+bedrms+baths |                           |                             |                            |       |
+
+Cuatro estimaciones seguidas con la opción =--quiet=, que evita imprimir la salida completa de cada una. Tras cada =ols= guardamos en un escalar el accesor =$rsq=, el $R^2$ del último modelo estimado (sesión 11). Un accesor se refiere siempre al /último/ modelo, por eso hay que guardarlo antes de estimar el siguiente. Los cuatro =printf= finales imprimen los cuatro valores juntos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos, para obtener los cuatro $R^2$ de golpe/:
@@ -365,6 +382,10 @@ distancia quedan de la recta ajustada con las catorce. Anotamos ambas cosas
 junto a cada resultado, porque la comparación entre las tres filas es todo el
 contenido de la actividad.
 
+El bloque se lee en cuatro tramos iguales. En el primero, =smpl full= asegura que están las 14 viviendas; se estima la recta y se guardan los dos coeficientes con =$coeff(const)= y =$coeff(sqft)=, los residuos con =$uhat= (la distancia de cada vivienda a la recta) y la media de =sqft=. En cada uno de los tres tramos siguientes, =smpl obs != 1 --restrict= deja fuera una observación (la 1, la 12 o la 14), se reestima y se guardan los dos coeficientes con nombres distintos. Antes de cada restricción se vuelve a =smpl full=, porque una restricción nueva se aplica sobre la muestra vigente y se acumularía con la anterior.
+
+- GUI: //~Muestra -> Restringir, a partir de criterio~// con la condición =obs != 1= (y después =obs != 12= y =obs != 14=), estimar con //~Modelo -> Mínimos cuadrados ordinarios~// y, antes de la siguiente restricción, //~Muestra -> Recuperar el rango completo~//.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
 #+NAME: Submuestras
@@ -397,6 +418,8 @@ scalar b_s14 = $coeff(sqft)
 smpl full                       # recuperamos siempre la muestra completa
 #+end_src
 #+latex: }
+
+Una tabla con =printf=, como en la práctica C de la sesión 7: una fila por estimación, con el valor de =sqft= y el residuo de la vivienda excluida (=sqft[1]= y =resid[1]= son sus primeras componentes; =[12]= y =[14]=, la duodécima y la decimocuarta) y los dos coeficientes. =%5.0f= es un número sin decimales en cinco caracteres; =%10.4f=, cuatro decimales en diez.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /y ahora los comparamos/:

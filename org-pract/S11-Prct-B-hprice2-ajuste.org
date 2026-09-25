@@ -100,7 +100,11 @@ Retomamos =hprice2= (ya usado en las prácticas de correlación) y sus tres vari
 5. Visualizar ambos ajustes mediante diagramas de dispersión con la recta ajustada.
 6. Intercambiar los papeles de las dos variables y comprobar que el $R^2$ no cambia —la advertencia de la lección 8—, aunque la recta sí.
 
+/Comandos de esta práctica/. Todos aparecen ya en la práctica A de esta sesión: =ols= con la constante =const= y la opción =--quiet=, y los accesores =$uhat=, =$coeff= y =$rsq=, que se refieren siempre al último modelo estimado. Lo único nuevo es =$pi=, el número $\pi$, que usamos para pasar un ángulo de radianes a grados.
+
 * Actividad 1 - Reapertura de hprice2 y etiquetas
+
+Como en las prácticas anteriores con estos datos: =open= carga el fichero de muestra sin listar sus variables y =setinfo= vuelve a poner a cada una su descripción y su nombre para los gráficos (sesión 4).
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -114,6 +118,8 @@ setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx
 #+latex: }
 
 * Actividad 2 - Regresión: price sobre rooms
+
+Regresión de =price= sobre la constante y =rooms=. Gretl imprime la tabla completa; de ella leeremos los dos coeficientes y el $R^2$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -143,6 +149,8 @@ La pendiente es $9\,119{,}55$: en el ajuste, a una habitación más le correspon
 
 * Actividad 3 - Regresión: price sobre nox
 
+La misma orden con =nox= en el lugar de =rooms=.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Ols price nox
@@ -169,7 +177,7 @@ La pendiente es negativa, $-3\,386{,}85$: a una unidad más de contaminación le
 
 * Actividad 4 - Verificación de las dos condiciones de ortogonalidad
 
-Repetimos ambas regresiones, guardando en cada caso los residuos, para verificar $\sum\hat e_i=0$ y $\sum x_i\hat e_i=0$.
+Repetimos ambas regresiones, guardando en cada caso los residuos, para verificar $\sum\hat e_i=0$ y $\sum x_i\hat e_i=0$. Cada regresión se estima con =--quiet= para no repetir la tabla, y a continuación se copia =$uhat= en una serie de residuos y se calculan sus dos sumas. Hay que hacerlo modelo a modelo, porque =$uhat= solo guarda los residuos del último modelo estimado. Los dos =printf= finales imprimen las cuatro sumas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -205,6 +213,8 @@ end outfile
 #+latex: }
 
 * Actividad 5 - Bondad de ajuste: STC, SEC, SRC y $R^2$ en ambos modelos
+
+Para cada modelo, estimado en silencio: =STC= con las desviaciones de =price= respecto a su media, =SRC= como suma de cuadrados de =$uhat= y =SEC= por diferencia. El cociente =SEC/STC= es el $R^2$ a mano. Los últimos =printf= calculan el cuadrado de la correlación de cada par con =corr=, para comparar.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -246,6 +256,8 @@ end outfile
 
 El $R^2$ que acabamos de calcular /es/ un coseno al cuadrado (lección 8). Nada nos impide, por tanto, deshacer el coseno y ver de cuántos grados estamos hablando:
 
+Dos =printf= que deshacen el coseno: =acos= devuelve el ángulo en radianes (práctica A de la sesión 7) y el factor =180/$pi= lo pasa a grados. =$pi= es el número $\pi$ que Gretl tiene guardado.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Angulo theta en grados
@@ -272,6 +284,8 @@ end outfile
 * Actividad 6 - Diagramas de dispersión con la recta ajustada
 
 - GUI: seleccione =price= y =rooms= (con ~Ctrl~), botón derecho, */~Gráfico X-Y~/*; repita con =price= y =nox=.
+
+  =gnuplot= con dos variables dibuja el diagrama de dispersión, la primera en el eje vertical y la segunda en el horizontal, y superpone la recta ajustada (práctica A de la sesión 7).
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -313,6 +327,8 @@ Compare cómo de ``ceñidos'' están los puntos que rodean cada recta con el $R^
 * Actividad 7 - Intercambiar los papeles: el $R^2$ no distingue causa de efecto
 
 La lección 8 advirtió que, si regresamos la superficie sobre el precio en lugar del precio sobre la superficie, el $R^2$ /no cambia/. Comprobémoslo con =price= y =rooms=: estimamos las dos regresiones, la habitual y la ``del revés''.
+
+Dos regresiones en silencio. En la primera, =price= es la variable dependiente y =rooms= el regresor; en la segunda, al revés. Tras cada una se guardan en escalares la pendiente (=$coeff= del regresor correspondiente) y el $R^2$ (=$rsq=). Los =printf= comparan los dos $R^2$, las dos pendientes, la inversa de la primera y el producto de ambas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

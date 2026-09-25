@@ -107,9 +107,22 @@ Trabajamos con datos /reales/ porque el objetivo de esta práctica es la /lectur
 4. Contrastar una hipótesis distinta de ``el coeficiente es cero'' y ver que el intervalo de confianza ya contenía la respuesta.
 5. Repetir la estimación con doce viviendas para ver qué cambia —y qué no— cuando la evidencia es escasa.
 
+/Comandos nuevos de esta práctica/. Seguimos usando =ols= y sus accesores =$coeff=, =$ess= y =$rsq= (prácticas de la sesión 11), =$df= y =$nobs= (sesión 16) y =printf= con sus formatos (sesión 7). Lo nuevo:
+- =$stderr(x)= :: error estándar del coeficiente de =x= en el último modelo estimado. Con el nombre entre paréntesis devuelve un número; sin argumento, el vector con todos, igual que =$coeff=.
+- =$sigma= :: la desviación típica de la regresión del último modelo, $\mathfrak s=\sqrt{\mathrm{SRC}/(n-k)}$.
+- =$Fstat= :: el estadístico $F$ que aparece al pie de la tabla del último modelo.
+- =critical(t, gl, p)= :: el valor de la $t$ con =gl= grados de libertad que deja probabilidad =p= a su derecha. Para un contraste bilateral al $5\%$ se pide =p = 0.025=.
+- =pvalue(t, gl, x)= :: la probabilidad de que una $t$ con =gl= grados de libertad supere =x=. El valor $p$ bilateral es el doble de la de $|t|$.
+- =restrict ... end restrict= :: bloque que contrasta una restricción lineal sobre los coeficientes del último modelo; =b[2]= es el segundo coeficiente.
+- =smpl n --random= y =smpl full= :: elegir al azar =n= observaciones del conjunto de datos y volver después a la muestra completa (sesiones 14 y 16).
+- =(condición ? "sí" : "no")= :: expresión que vale el primer texto si la condición se cumple y el segundo si no; =&&= es la conjunción «y» entre dos condiciones.
+- =%d= y =%.3g= :: formatos de =printf= para un entero y para un número con tres cifras significativas; =%%= imprime el signo de tanto por ciento.
+
 * Actividad 1 - La tabla de resultados y sus cuatro columnas
 
 Abra =hprice2= y estime la regresión de =price= sobre =rooms=: en la ventana principal, //~Modelo -> Mínimos cuadrados ordinarios~//, con =price= como variable dependiente y =rooms= como regresor.
+
+=open= abre =hprice2= y =ols price const rooms= estima por mínimos cuadrados la regresión de =price= sobre la constante y =rooms=, como en la práctica B de la sesión 11, e imprime la tabla completa.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -157,6 +170,8 @@ En inglés solo la primera es /standard deviation/; las otras dos son /standard 
 
 Ninguno de los números de la tabla es un misterio: todos salen de las fórmulas de la lección 12 y de cantidades que ya sabíamos calcular. Vamos a rehacerlos uno a uno con los /accesores/ de Gretl (los objetos que empiezan por =$= y que conocemos desde la práctica que siguió a la lección 8) y a comprobar que coinciden.
 
+El bloque guarda en escalares las piezas de la lección 12 y las compara con lo que imprime Gretl: =n= y =k=; =SRC= con el accesor =$ess=; =STC=, despejada de $R^2=1-\mathrm{SRC}/\mathrm{STC}$ con =$rsq=; =SEC= por diferencia; =s=, la raíz de la cuasivarianza; =Lx=, la longitud euclídea del regresor en desviaciones (raíz de la suma de cuadrados, sesión 7); =ee=, su cociente; =b2= con =$coeff(rooms)=; el estadístico =tst=; el valor crítico con =critical= y el valor $p$ con =pvalue=. Los =printf= imprimen cada pieza junto a la de Gretl (=$sigma= y =$stderr(rooms)=), y el último construye el intervalo con sus dos extremos, $\hat\beta_2\mp t_c\,\mathrm{ee}$.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Reconstruccion
@@ -199,11 +214,6 @@ end outfile
 
 Cada línea reproduce un número de la tabla. Fíjese en particular en el error estándar: es, literalmente, la $\mathfrak s$ de la lección 11 dividida por la longitud del regresor en desviaciones, $\|\boldsymbol x-\boldsymbol{\mathop{\overline x}}\|_e$, que aquí hemos calculado tal como se definió en la lección 4. Es el ``ruido por unidad de longitud del regresor'' de la lección 12, y no hay nada más dentro.
 
-Dos detalles de la reconstrucción:
-
-- Gretl no ofrece un accesor para $\mathrm{STC}$, pero sí para $\mathrm{SRC}$ (=$ess=) y para $R^2$ (=$rsq=); como $R^2=1-\mathrm{SRC}/\mathrm{STC}$, basta despejar.
-- =critical(t, gl, 0.025)= devuelve el valor que deja una probabilidad $0{,}025$ en la cola derecha de la $t$ con =gl= grados de libertad —de ahí que el $5\%$ bilateral se pida como $0{,}025$—; y =pvalue(t, gl, x)= devuelve la probabilidad a la derecha de =x=, por lo que el valor $p$ bilateral se obtiene multiplicando por dos la de $\vert t\vert$.
-
 También puede obtener el intervalo desde los menús: en la ventana del modelo estimado, //~Análisis -> Intervalos de confianza para los coeficientes~//. Compruebe que coincide con el calculado.
 
 * Actividad 3 - La identidad de la lección 12, y el $F$ del pie de la tabla
@@ -213,6 +223,8 @@ La lección 12 demostró que el estadístico $t$ no contiene nada que no estuvie
 t^2=(n-k)\,\frac{\mathrm{SEC}}{\mathrm{SRC}}=(n-k)\,\frac{R^2}{1-R^2}.
 \]
 Comprobémoslo con los tres números que acabamos de calcular.
+
+Tres =printf= con los escalares del bloque anterior: la raíz de $(n-k)\,\mathrm{SEC}/\mathrm{SRC}$ frente a $t$; la versión con $R^2$ frente a $t^2$; y el $F$ que Gretl guarda en =$Fstat=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -240,6 +252,8 @@ Las dos vías dan el mismo $t$, y $t^2$ coincide con el =F(1, 504)= que Gretl im
 
 Puede verlo también desde los menús: en la ventana del modelo, //~Contrastes -> Restricciones lineales~//, escriba =b[2] = 0= y acepte. Gretl responde con un estadístico $F$ y su valor $p$; compárelos con $t^2$ y con el valor $p$ de la tabla.
 
+El bloque =restrict= contrasta la restricción escrita en su interior sobre el último modelo estimado: =b[2] = 0= dice que el segundo coeficiente, el de =rooms=, es cero. Gretl imprime el estadístico $F$ de la restricción y su valor $p$.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
 #+NAME: Restriccion cero
@@ -263,6 +277,8 @@ end outfile
 * Actividad 4 - Contrastar contra un valor distinto de cero
 
 Que =rooms= intervenga no es ninguna noticia. Una pregunta con más sustancia es, por ejemplo: /¿es compatible con estos datos que una habitación valga diez mil dólares?/ Es decir, $H_0\!:\beta_2=10\,000$ frente a $H_1\!:\beta_2\neq10\,000$.
+
+Fijamos el valor hipotético =c=, calculamos el estadístico $t$ restándolo al coeficiente y dividiendo por el error estándar, su valor $p$ bilateral, y un segundo valor crítico al $1\%$ (=0.005= en cada cola). Los =printf= usan una expresión condicional, =(condición ? "se rechaza" : "no se rechaza")=, que imprime un texto u otro según se cumpla la condición; =&&= une las dos desigualdades que definen «estar dentro del intervalo».
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -302,6 +318,8 @@ Ahora mire los intervalos: el de $95\%$ deja fuera a $10\,000$ y el de $99\%$ lo
 * Actividad 5 - La misma regresión con doce viviendas
 
 Todo lo anterior descansa sobre $506$ observaciones. ¿Qué cambia si solo tuviéramos una docena? Tomamos doce viviendas al azar[fn::/Al azar/ es esencial: =hprice2= viene ordenado por distritos, de modo que las doce primeras filas son vecinas entre sí y anómalamente parecidas. Con =smpl 1 12= el experimento engañaría, como ya se advirtió en el laboratorio anterior; =smpl 12 --random= elige doce filas cualesquiera.] y repetimos.
+
+=set seed= fija la semilla para que las doce viviendas sean las mismas para todos. =smpl 12 --random= reduce la muestra a doce observaciones elegidas al azar; a partir de ahí, =ols= y los accesores trabajan solo con ellas, y =$nobs= y =$df= valen $12$ y $10$. Los =printf= comparan el valor crítico y el intervalo con los de la muestra completa, guardados en =tc=, =b2= y =ee=. =smpl full= devuelve la muestra completa al terminar.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

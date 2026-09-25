@@ -105,9 +105,15 @@ Es la comprobación numérica del enunciado de la lección 12, $\mathrm{ee}(\hat
 4. Repetir la cuenta sin =lnox= para ver de dónde sale el factor $8{,}7$ de la lección 14.
 5. Leer los intervalos de confianza de =nox= con y sin =lnox=, y la correlación entre los dos estimadores.
 
+/Comandos nuevos de esta práctica/. Casi todo se ha visto ya: =open=, =ols= y sus accesores =$sigma=, =$stderr=, =$rsq=, =$ess=, =$coeff= y =$df= (sesiones 11 a 18), =critical= (sesión 18) y =$vcv= (práctica B de la sesión 21). Recuerde que los accesores se refieren siempre al /último/ modelo estimado: por eso, en esta práctica, se guardan en escalares antes de estimar el siguiente. Lo nuevo:
+- =vif= :: se escribe después de estimar un modelo con al menos dos regresores no constantes, y para cada regresor calcula $1/(1-R_j^2)$, con $R_j^2$ el de la regresión de ese regresor sobre los demás. En la ventana del modelo es //~Análisis -> Colinealidad~//.
+- =$vcv[3,4]= :: =$vcv= es la matriz de varianzas y covarianzas de los coeficientes, y entre corchetes van la fila y la columna. Los coeficientes siguen el orden de la lista de regresores, así que =[3,4]= es la covarianza entre el tercero (=nox=) y el cuarto (=lnox=), y =[3,3]= la varianza del tercero.
+
 * Actividad 1 - El modelo y la regresión auxiliar
 
 Abra =hprice2= y estime =price= sobre =rooms=, =nox= y =lnox=. Anote $\mathfrak s$ y el error estándar de =nox=. Después estime la regresión auxiliar: =nox= sobre la constante, =rooms= y =lnox=. Su $\mathrm{SRC}$ es la longitud al cuadrado de la parte propia de =nox=, y su $R^2$ es el $R_j^2$ de la lección 14.
+
+Dos regresiones seguidas. La primera es el modelo completo: guardamos en =s= la desviación típica de la regresión, $\mathfrak s$ (=$sigma=), y en =ee_nox= el error estándar de =nox=. La segunda es la /regresión auxiliar/: =nox= como regresando sobre la constante, =rooms= y =lnox=. De ella guardamos el $R^2$ y la raíz de su $\mathrm{SRC}$ (=$ess=), que es la longitud de la parte propia de =nox=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -155,6 +161,8 @@ La regresión auxiliar tiene un $R^2$ de $0{,}9879$: =rooms= y =lnox= reproducen
 
 Divida $\mathfrak s$ entre la longitud de la parte propia y compare con la columna ``Desv. típica'' de la tabla. Calcule también el VIF y descomponga el error estándar en los dos factores de la lección 14.
 
+Tres =printf= con los escalares guardados: $\mathfrak s$ entre la longitud de la parte propia, el error estándar que imprimió Gretl, y el VIF con su raíz, calculados a partir del $R^2$ auxiliar.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: ErrorEstandar
@@ -187,6 +195,8 @@ $6290{,}37/2{,}8608=2198{,}85$, el error estándar de la tabla con cuatro decima
 
 Vuelva al modelo completo y pida los factores de inflación: en la ventana del modelo, //~Análisis -> Colinealidad~//.
 
+Hay que volver a estimar el modelo completo (con =--quiet=, para no repetir la tabla), porque =vif= actúa sobre el último modelo estimado y el último fue la regresión auxiliar.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
 #+NAME: Vif
@@ -214,6 +224,8 @@ Gretl devuelve el $82{,}8$ de la Actividad 2 para =nox=, $82{,}9$ para =lnox= y 
 * Actividad 4 - La misma cuenta sin =lnox=
 
 Estime =price ~ rooms + nox= y repita: parte propia de =nox= sobre =rooms=, $\mathfrak s$ dividido por ella, VIF.
+
+La misma secuencia con el modelo sin =lnox=: estimación, $\mathfrak s$ guardado en =s_sin=, regresión auxiliar de =nox= sobre =rooms= (ahora un solo regresor), el cociente impreso directamente con los accesores de esa auxiliar, y =vif= tras volver a estimar el modelo de precios.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -252,6 +264,8 @@ Sin =lnox=, la parte propia de =nox= mide $24{,}81$, casi toda su longitud en de
 * Actividad 5 - Los intervalos y la correlación entre estimadores
 
 Construya el intervalo al $95\%$ de =nox= en los dos modelos, el de =lnox= en el completo, y lea en la matriz de varianzas de los estimadores (//~Análisis -> Matriz de covarianzas de los coeficientes~//) la correlación entre $\hat\beta_{\text{nox}}$ y $\hat\beta_{\text{lnox}}$.
+
+Con el modelo completo estimado, =critical(t, $df, 0.025)= da el valor crítico de la $t$ con los grados de libertad del modelo (sesión 18), y cada intervalo es el coeficiente más y menos =tc= por su error estándar. En el =printf=, =%%= imprime un signo de tanto por ciento (un =%= solo abriría un hueco). La correlación entre los dos estimadores es su covarianza dividida por la raíz del producto de sus varianzas, las tres leídas en =$vcv=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

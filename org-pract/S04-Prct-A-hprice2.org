@@ -107,6 +107,17 @@ Esta es nuestra /primera práctica/ con [[https://gretl.sourceforge.net/es.html]
 
 Trabajamos con datos /reales/ (y no simulados) porque queremos enfrentarnos desde el inicio a la dificultad propia de la realidad económica. Los datos simulados los reservaremos, más adelante, para /verificar/ propiedades teóricas.
 
+/Los comandos de Gretl que aparecen hoy/. Todo lo que haremos por menús tiene su equivalente en una orden escrita, que mostramos en gris debajo de cada paso con la coletilla ``o bien teclee en línea de comandos''. Esas órdenes se escriben en la consola de Gretl (menú //~Herramientas -> Consola de Gretl~//) o se guardan, una tras otra, en un /guion/: un fichero de texto (//~Archivo -> Archivos de guion -> Nuevo guion~//) que Gretl ejecuta entero de una vez. Al final de este documento está el guion completo de la práctica. Los comandos de hoy:
+- =open= :: carga un fichero de datos.
+- =print= :: muestra los valores de una o varias variables.
+- =setinfo= :: cambia la descripción y el nombre de una variable.
+- =labels= :: lista las descripciones de todas las variables.
+- =summary= :: calcula los estadísticos descriptivos.
+- =freq= :: distribución de frecuencias e histograma.
+- =boxplot= :: diagrama de caja.
+- =help= :: ayuda sobre cualquier comando.
+Las palabras que empiezan por dos guiones (=--quiet=, =--plot=) son /opciones/ que modifican lo que hace el comando; cada una se explica donde aparece.
+
 /Objetivo/
 
 Tras cargar los datos, cada actividad persigue un objetivo:
@@ -120,6 +131,8 @@ Tras cargar los datos, cada actividad persigue un objetivo:
 Comencemos cargando los datos:
 
 //~Archivo -> Abrir archivo de datos -> Archivo de muestra~// y, en la pestaña //~Wooldridge~//, seleccione =hprice2=.
+
+La orden equivalente es =open= seguido del nombre del fichero. Los conjuntos de muestra vienen con Gretl y basta el nombre, =hprice2.gdt= (=.gdt= es el formato propio de Gretl); para un fichero suyo habría que dar la ruta, como haremos en la práctica B. Al cargar, Gretl lista las variables del fichero.
 
 #+latex: {\vspace{0pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -136,8 +149,10 @@ Gretl no preguntará por la frecuencia: son datos de /sección cruzada/ (cada ob
 Visualice los valores de los precios de la vivienda:
 - En la ventana principal de [[https://gretl.sourceforge.net/es.html][Gretl]], marque con el ratón la variable: =price=.
 - ``Pinche'' sobre ella con el botón derecho del ratón.
-- Seleccione */~mostrar valores~/* del menú desplegable que se ha abierto al pinchar.
-  
+- Seleccione */~Mostrar valores~/* del menú desplegable que se ha abierto al pinchar.
+
+  =print= seguido del nombre de la variable muestra sus valores. Con la opción =-o= los presenta por observación, uno debajo de otro y con el número de observación delante; sin ella, los muestra por variable, varios por fila.
+
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
     #+NAME: Mostramos los valores de los datos en columna
@@ -153,7 +168,9 @@ La variable =price= es una /lista de 506 números/. Para nosotros, eso es un /ve
   
 *** Para Acceder a la ayuda
 Para consultar la documentación sobre cualquier comando, puede emplear el menú desplegable */~Ayuda~/* que aparece arriba, a la derecha de la ventana principal de [[https://gretl.sourceforge.net/es.html][Gretl]].
-  + */~Ayuda -> Guía de Instrucciones~/* y ``pinche'' sobre //~print~//
+  + */~Ayuda -> Guía de instrucciones~/* y ``pinche'' sobre //~print~//
+
+En la consola, =help= seguido del nombre de un comando muestra su descripción y sus opciones; =help= a secas lista todos los comandos disponibles.
 
 #+latex: {\vspace{0pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/: =help print=
@@ -166,6 +183,8 @@ Las variables traen ya cierta información, pero podemos enriquecerla con descri
 - Marque la variable =price=, ``pinche'' sobre ella con el botón derecho y seleccione */~Editar atributos~/*.
 - Escriba como descripción =Precio mediano de la vivienda ($)= y como nombre a mostrar en gráficos =Precio ($)=.
 
+  =setinfo= seguido del nombre de la variable cambia sus atributos: =-d= fija la descripción, la que aparece junto al nombre en la ventana principal, y =-n= el nombre con el que aparecerá en los gráficos. Los dos textos van entre comillas.
+
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
     #+NAME: Editamos atributos de price
@@ -177,6 +196,8 @@ setinfo price -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
 
 *** Haga lo mismo con =rooms= y con =nox=
 
+Dos órdenes =setinfo= más, una por variable, con la misma estructura:
+
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /en línea de comandos/:
     #+begin_src gretl :tangle ./guiones/S04-Prct-A-hprice2.inp :eval no 
@@ -187,6 +208,8 @@ setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx
 
 *** Compruebe las etiquetas de todas las variables
 - Las etiquetas se pueden leer en la pantalla principal a la derecha del nombre de cada variable.
+
+  =labels= sin argumentos lista las descripciones de todas las variables del conjunto de datos; con una lista de nombres, solo las de esas variables.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -203,8 +226,10 @@ Emplee el menú desplegable */~Datos -> Información del conjunto de datos~/*.
 Queremos resumir numéricamente varias variables a la vez.
 
 - Marque con el ratón las variables =price=, =rooms= y =nox= (manteniendo pulsada la tecla ~Ctrl~).
-- ``pinche'' con el botón derecho y seleccione */~Estadísticos descriptivos~/*.
+- ``pinche'' con el botón derecho y seleccione */~Estadísticos principales~/*.
 - Gretl preguntará si debe mostrar todos los estadísticos o solo los más importantes (explore ambas opciones).
+
+  =summary= seguido de una lista de variables calcula, para cada una, la media, la mediana, el mínimo, el máximo, la desviación típica, el coeficiente de variación, la asimetría y la curtosis, y las presenta en una tabla con una fila por variable. La opción =--simple= reduce la tabla a los estadísticos básicos (media, mediana, desviación típica, mínimo y máximo).
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -237,11 +262,13 @@ Para ver la /distribución/ de una variable:
 - Marque =price=, ``pinche'' con el botón derecho y seleccione */~Distribución de frecuencias~/*.
 - Gretl preguntará por el número de intervalos; acepte el valor por defecto.
 
+  =freq= seguido del nombre de una variable cuenta cuántas observaciones caen en cada intervalo y muestra la tabla de frecuencias y el histograma; el número de intervalos lo elige Gretl (puede fijarlo con la opción =--nbins=). Tecleado en la consola de Gretl, =freq price= muestra la tabla y abre el histograma en una ventana; con la opción =--plot="histograma.png"= lo guardaría en un fichero en lugar de mostrarlo.
+
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
     #+NAME: Histograma de price
     #+begin_src gretl :eval no
-freq price --plot=display
+freq price
     #+end_src
   #+latex: }
 
@@ -271,11 +298,13 @@ El /diagrama de caja/ (boxplot) resume la distribución mediante la mediana, los
 
 - Marque =price=, ``pinche'' con el botón derecho y seleccione */~Gráfico de caja~/*.
 
+  =boxplot= seguido de una o varias variables dibuja un diagrama de caja por variable. La caja encierra el $50\%$ central de los datos, entre el primer y el tercer cuartil; la línea que la cruza es la mediana y el signo =+= es la media; los bigotes se extienden hasta $1{,}5$ veces el rango intercuartílico y los puntos que quedan fuera son los valores atípicos. En la consola, =boxplot price= abre el gráfico en una ventana; con =--output="caja.png"= lo guardaría en un fichero.
+
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
     #+NAME: Boxplot de price
     #+begin_src gretl :eval no
-boxplot price --output=display
+boxplot price
     #+end_src
   #+latex: }
 

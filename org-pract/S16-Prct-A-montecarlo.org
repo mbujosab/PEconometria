@@ -111,6 +111,14 @@ Esta práctica hace una trampa instructiva: /fabrica/ ese conjunto de muestras p
 
 /Nota sobre el =loop=/. Ya usamos este comando una vez, en la práctica de verificación geométrica que siguió a la lección 5, pero allí lo presentamos como una ``caja negra'': servía para repetir una comprobación muchas veces, sin explicar su mecánica. Hoy toca abrir la caja.
 
+/Comandos nuevos de esta práctica/. Seguimos usando =open=, =ols= con la opción =--quiet= y los accesores =$coeff=, =$ess= y =$df= (prácticas de las sesiones 11 y 14), y =series=, =scalar=, =printf=, =normal= y =set seed= (sesión 7). Lo nuevo:
+- =loop R --progressive --quiet= … =endloop= :: repite =R= veces las instrucciones que van entre las dos líneas. Se explica en la Actividad 3.
+- =store "@workdir/fichero.gdt" a b= :: dentro de un bucle progresivo, guarda una fila por repetición con los escalares indicados. Actividad 3.
+- =open "@workdir/fichero.gdt"= :: abre ese fichero de réplicas como un conjunto de datos normal, en el que cada observación es una repetición. =@workdir= se sustituye por la ruta del directorio de trabajo de Gretl, de modo que el fichero se guarda y se vuelve a abrir en el mismo sitio. Cuando un bloque calcula sobre las réplicas, antes hay que haber abierto el fichero; en el guion completo del final se ve dónde va cada =open=.
+- =freq x --normal= :: histograma con la densidad normal superpuesta y un contraste de normalidad. Actividad 5.
+- =%d= :: en =printf=, hueco para un número entero.
+- =matrix=, =invpd=, =mcov= :: solo en el Apéndice; las dos primeras se usaron en la práctica D de la sesión 14.
+
 
 * Actividad 1 - Un mundo artificial con parámetros conocidos
 
@@ -118,8 +126,10 @@ Para simular necesitamos un mundo del que conozcamos la verdad. Podríamos inven
 
 Partimos de =hprice2= y de la regresión =price~rooms= que ya estimamos en la práctica que siguió a la lección 8. Sus resultados dejan de ser ``estimaciones'' para convertirse, /por decreto/, en los parámetros verdaderos de nuestro mundo inventado.
 
+El primer bloque toma prestados los parámetros de un ajuste real. =open= carga =hprice2=; =ols price const rooms --quiet= estima la regresión sin imprimir la tabla; los accesores =$coeff(const)= y =$coeff(rooms)= devuelven los dos coeficientes estimados, y =$ess= y =$df= la suma de los residuos al cuadrado y los grados de libertad $n-k$, así que =sqrt($ess/$df)= es la raíz de la cuasivarianza de los residuos, $\mathfrak s$. =Sxx= es la suma de cuadrados del regresor en desviaciones (se comenta después de la salida) y =var_teo= es la fórmula de la lección 11. Los escalares quedan guardados para el resto de la práctica.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Mundo artificial datos
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
@@ -133,6 +143,8 @@ scalar Sxx     = sum((rooms - mean(rooms))^2)
 scalar var_teo = sigma^2 / Sxx          # formula de la leccion 11
 
 #+end_src
+
+El segundo bloque solo imprime esos escalares; =%d= es el hueco para un número entero.
 
 #+NAME: Mundo artificial
 #+begin_src gretl :eval no
@@ -183,8 +195,10 @@ Antes de repetir nada mil veces, conviene hacer /una/ vez, despacio, lo que desp
 
 Una ``muestra de nuestro mundo'' se construye en dos pasos: primero la parte sistemática $\beta_1\boldsymbol 1+\beta_2\boldsymbol x$, que es siempre la misma; después una perturbación aleatoria nueva, que es lo único que cambia de una muestra a otra. Sumadas dan un regresando simulado.
 
+Primera muestra simulada. =set seed= fija la semilla; =normal(0, sigma)= sortea una perturbación por observación, con la desviación típica del mundo artificial; =y_sim= es la parte sistemática más esa perturbación, calculada fila a fila sobre el regresor real. =ols y_sim const rooms=, esta vez sin =--quiet= para ver la tabla completa, estima la recta sobre la muestra simulada, y los tres =printf= comparan el coeficiente estimado con el verdadero.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Una replica
 #+begin_src gretl :eval no
 set seed 20261030                       # para que el resultado sea reproducible
@@ -243,8 +257,10 @@ store "@workdir/fichero.gdt" escalar1 escalar2
 
 Dentro de un bucle =--progressive=, =store= no sobrescribe el fichero en cada vuelta: va /añadiendo/ una fila por repetición. Al terminar el bucle tenemos un conjunto de datos nuevo en el que *cada observación es una repetición del experimento* y cada variable es un resultado que hemos decidido guardar. Después basta con abrirlo, fuera del bucle, y tratarlo como cualquier otro conjunto de datos.
 
+Léalo línea a línea. =scalar R = 2000= fija el número de réplicas. Entre =loop R --progressive --quiet= y =endloop= van las seis instrucciones que se repiten: sortear la perturbación, construir el regresando, estimar con =ols --quiet=, copiar los dos coeficientes en los escalares =b1hat= y =b2hat=, y guardarlos con =store= como una fila más de =replicas.gdt=. El =set seed= anterior al bucle hace que las 2000 perturbaciones sean reproducibles.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Bucle montecarlo datos
 #+begin_src gretl :eval no
 scalar R = 2000                         # numero de replicas
@@ -260,6 +276,8 @@ loop R --progressive --quiet
 endloop
 
 #+end_src
+
+Al salir del bucle imprimimos un aviso; =R= sigue disponible como escalar.
 
 #+NAME: Bucle montecarlo
 #+begin_src gretl :eval no
@@ -287,8 +305,10 @@ Abrimos ahora el fichero de réplicas y lo tratamos como lo que es: un conjunto 
 
 /Atención a un detalle práctico/: al abrir un conjunto de datos nuevo, Gretl descarta los escalares que teníamos definidos. Por eso imprimimos los valores teóricos /antes/ de abrir el fichero de réplicas, y los empíricos después.
 
+Tres bloques. El primero imprime los valores teóricos con los escalares que todavía tenemos. El segundo, =open "@workdir/replicas.gdt"=, abre el fichero de réplicas: desde ese momento el conjunto de datos tiene 2000 observaciones y dos series, =b1hat= y =b2hat=, y los escalares anteriores desaparecen (de ahí el orden). El tercero calcula sobre =b2hat= la media y la varianza con divisor $n$, es decir =$nobs=, que ahora vale 2000: las mismas fórmulas de la práctica B de la sesión 7, aplicadas a una serie cuyas observaciones son estimaciones.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Teoria replicas
 #+begin_src gretl :eval no
 printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
@@ -337,13 +357,13 @@ Compare las dos mitades de la salida, línea por línea:
 
 * Actividad 5 - El histograma de $\hat\beta_2$
 
-Tenemos 2000 estimaciones. Veamos cómo se reparten.
+Tenemos 2000 estimaciones. Veamos cómo se reparten. =freq b2hat= dibuja el histograma de la serie (sesión 4). La opción =--normal= superpone la densidad de una normal con la misma media y la misma varianza que los datos, y añade el contraste de normalidad de Doornik y Hansen; en la consola, el gráfico se abre en una ventana.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Histograma
 #+begin_src gretl :eval no
-freq b2hat --normal --plot=display
+freq b2hat --normal
 #+end_src
 #+latex: }
 
@@ -355,8 +375,6 @@ freq b2hat --normal --plot="@workdir/histograma_b2.png"
 #+attr_html: :width 600px
 #+CAPTION: Distribución de $\hat\beta_2$ sobre 2000 muestras simuladas del mismo mundo, con una densidad normal superpuesta.
 [[file:./S16-Prct-A-montecarlo/histograma_b2.png]]
-
-La opción =--normal= superpone al histograma la densidad de una normal con la misma media y la misma varianza que los datos, además de contrastar formalmente si la distribución es normal.
 
 *** Una pregunta que esta práctica NO responde
 
@@ -378,8 +396,10 @@ Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol
 \]
 Podemos verificarla numéricamente con el mismo experimento, guardando también $\hat\beta_1$ y comparando la matriz de varianzas y covarianzas /empírica/ de las réplicas con la que predice la fórmula.
 
+Tres bloques. Al abrir el fichero de réplicas se perdieron los datos de =hprice2= y los escalares, así que el primero vuelve a abrirlo, reestima y recupera =sigma=. El segundo construye la matriz de datos con el comando =matrix= (práctica D de la sesión 14): ={const, rooms}= coloca las dos series como columnas, =X'X= es el producto de la traspuesta de =X= por =X=, =invpd= invierte una matriz simétrica definida positiva y =print Vteo= muestra el resultado. El tercero va precedido de la reapertura del fichero de réplicas; después, ={b1hat}~{b2hat}= forma una matriz de 2000 filas y dos columnas (el operador =~= pega dos matrices lado a lado) y =mcov= calcula su matriz de varianzas y covarianzas tratando cada columna como una variable, con divisor $n-1$; con 2000 réplicas la diferencia con el divisor $n$ es despreciable.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Matriz teorica datos
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet                  # recuperamos los regresores
@@ -395,6 +415,10 @@ matrix invXTX = invpd(X'X)
 matrix Vteo   = sigma^2 * invXTX
 printf "Matriz sigma^2 (X'X)^{-1} predicha por la leccion 11:\n"
 print Vteo
+#+end_src
+
+#+begin_src gretl :eval no
+open "@workdir/replicas.gdt" --quiet
 #+end_src
 
 #+NAME: Matriz empirica

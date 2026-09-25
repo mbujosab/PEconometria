@@ -102,9 +102,18 @@ En las lecciones 7 y 8 obtuvimos, con lápiz y papel, las fórmulas de $\hat\bet
 5. Distinguir, con una muestra simulada más grande, qué se cumple /siempre/ (ortogonalidad) de qué es solo una /aproximación/ (recuperar el coeficiente generador).
 6. Ver qué se pierde si se ajusta la recta /sin constante/: la primera condición de ortogonalidad desaparece, y con ella todo lo que la lección 7 dedujo de ella.
 
+/Comandos nuevos de esta práctica/. Seguimos usando =nulldata --preserve=, =setobs=, =set seed=, =normal=, =uniform=, =series=, =scalar=, =print= y =printf= (prácticas de las sesiones 4 y 7). Lo nuevo:
+- =ols y const x= :: estima por mínimos cuadrados ordinarios la regresión de =y= sobre la lista de regresores que sigue. =const= es el nombre que Gretl da al vector $\boldsymbol{1}$, es decir, a la constante; si no lo incluye, la recta pasa por el origen. Gretl imprime la tabla de coeficientes y un pie con varias medidas; con la opción =--quiet= estima sin imprimir nada.
+- Accesores :: tras cada estimación, Gretl guarda los resultados en variables cuyo nombre empieza por =$=: =$uhat= es la serie de residuos, =$yhat= la del ajuste, =$coeff(x)= el coeficiente del regresor =x= (un escalar), =$rsq= el $R^2$ y =$ess= la suma de cuadrados de los residuos. Se refieren siempre al /último/ modelo estimado: si estima otro, cambian.
+- =matrix mx = {1;2;3;4;5}= :: crea una matriz escribiendo sus elementos entre llaves; el punto y coma separa filas, así que esta es una columna de cinco números. =series x = mx= convierte esa columna en una serie del conjunto de datos, con un valor por observación.
+- =print x u ehat --byobs= :: muestra varias series a la vez, con la opción =--byobs=, una observación por fila.
+- =max(x)= :: el mayor valor de una serie; =abs= es el valor absoluto (práctica B de la sesión 7).
+
 * Actividad 1 - El ejemplo de la lección 7, ahora con Gretl
 
 Recuperamos exactamente el ejemplo de la lección 7: $\boldsymbol{x}=(1,2,3,4,5)$, $\boldsymbol{u}=(1,-2,0,2,-1)$, $\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}$.
+
+Conjunto vacío de cinco observaciones, declarado de sección cruzada. Los cinco valores de $\boldsymbol{x}$ y de $\boldsymbol{u}$ se escriben como matrices columna entre llaves (punto y coma entre filas) y se convierten en series; =y= se construye con la fórmula, componente a componente.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -122,6 +131,8 @@ series y = 2 + 3*x + u
 #+latex: }
 
 Ahora pedimos la regresión:
+
+La primera regresión de la práctica: =ols= con =y= como variable dependiente y, como regresores, la constante =const= y =x=. Gretl imprimirá la tabla completa.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -151,7 +162,7 @@ Los coeficientes son exactamente $2$ y $3$, los mismos que calculamos a mano en 
 
 * Actividad 2 - Residuos y las dos condiciones de ortogonalidad
 
-Gretl guarda, tras cada regresión, el vector de residuos en el accesor =$uhat= y el vector ajustado en =$yhat=.
+Gretl guarda, tras cada regresión, el vector de residuos en el accesor =$uhat= y el vector ajustado en =$yhat=. Las dos primeras líneas del bloque copian esos dos vectores en las series =ehat= e =yhat=, para poder operar con ellos. =print= con =--byobs= muestra, fila a fila, el regresor, la perturbación con la que construimos los datos y el residuo. Los tres =printf= calculan las dos sumas de las condiciones de ortogonalidad (=x*ehat= es el producto componente a componente) y la mayor diferencia, en valor absoluto, entre residuo y perturbación.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -184,6 +195,8 @@ end outfile
 
 * Actividad 3 - Bondad de ajuste: STC = SEC + SRC y $R^2$
 
+Las tres sumas de cuadrados de la lección 8, cada una en un escalar: =STC= con las desviaciones de =y= respecto a su media, =SEC= con las del ajuste =yhat= y =SRC= con los residuos. El primer =printf= las imprime junto con =SEC+SRC=, para comparar con =STC=; los otros dos comparan el cociente =SEC/STC= con el $R^2$ que Gretl guarda en =$rsq=.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: STC SEC SRC y R2
@@ -212,6 +225,8 @@ end outfile
 *** El ajuste preserva la media, y la recta pasa por el punto de las medias
 
 Fíjese en que, al calcular SEC, hemos escrito =sum((yhat - mu_y)^2)= usando la media de $\boldsymbol{y}$, cuando lo que pide la definición es la media de $\boldsymbol{\mathop{\widehat{y}}}$. No es un descuido: la lección 7 demostró que ambas coinciden. Comprobémoslo, junto con las otras dos consecuencias de la primera condición de ortogonalidad:
+
+Dos escalares más, la media de =x= y la del ajuste, y tres =printf=. El segundo evalúa la recta ajustada en $\mu_{\boldsymbol{x}}$ usando los dos coeficientes, =$coeff(const)= y =$coeff(x)=. El tercero calcula la mayor diferencia entre los dos vectores de la identidad que se comprueba.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -244,6 +259,8 @@ end outfile
 
 Recordando la lección 7 ($\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}$) y la lección 8 ($R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ en regresión simple):
 
+La correlación con la función =corr= y la pendiente reconstruida con la fórmula de la lección 7, con las desviaciones típicas que da =sd=. Los cinco =printf= ponen una debajo de otra cada cantidad calculada a mano y la que guarda Gretl. Recuerde que =sd= divide por $n-1$ (práctica C de la sesión 7); como el cociente de dos =sd= cancela ese divisor, la fórmula no se ve afectada.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Pendiente como correlacion
@@ -273,6 +290,8 @@ end outfile
 
 Generamos una muestra nueva, mayor ($n=60$), con una perturbación genuinamente aleatoria (no diseñada para ser ortogonal a $\boldsymbol{x}$).
 
+Conjunto nuevo de 60 observaciones y semilla fija. =x2= toma valores uniformes entre $0$ y $10$, =u2= es ruido normal de media $0$ y desviación típica $2$, e =y2= se construye con la misma fórmula que en la Actividad 1. La regresión se estima y sus residuos se guardan en =ehat2=.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Muestra grande simulada
@@ -288,6 +307,8 @@ ols y2 const x2
 series ehat2 = $uhat
 #+end_src
 #+latex: }
+
+Cuatro =printf=: las dos sumas de las condiciones de ortogonalidad con los residuos nuevos y los dos coeficientes estimados, leídos con =$coeff=, para compararlos con los valores $2$ y $3$ con los que se generaron los datos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -317,6 +338,8 @@ end outfile
 * Actividad 6 - ¿Y si quitamos la constante?
 
 La lección 7 sostuvo que sin constante no puede hablarse de regresión. Comprobemos qué se pierde, con la muestra de la Actividad 5: pedimos a Gretl la recta que pasa por el origen (solo el regresor =x2=, sin =const=).
+
+Primero se reestima el modelo con constante en silencio (=--quiet=) para guardar en dos escalares su pendiente y la media de su ajuste. Después se estima /sin/ =const=: en la lista de regresores solo queda =x2=. Los cuatro =printf= comparan, para el ajuste sin constante, la suma de residuos, la suma de =x2= por residuos, la media del ajuste y la pendiente con lo obtenido con constante.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

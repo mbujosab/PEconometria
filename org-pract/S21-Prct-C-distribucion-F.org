@@ -103,9 +103,18 @@ El mundo artificial usa los regresores /reales/ de =hprice2= —=rooms=, =nox= y
 2. Repetir con $n=20$ para ver que la distribución depende de $n-k$ y que usar el valor crítico equivocado cambia la frecuencia de rechazo.
 3. Con una $H_0$ falsa por poco, comparar la frecuencia de rechazo con $n=20$ y con $n=506$.
 
+/Comandos nuevos de esta práctica/. La mecánica es la de la práctica A de la sesión 16: =loop R --progressive --quiet=, =store= para acumular una fila por réplica en un fichero =.gdt=, y =open= de ese fichero al terminar el bucle; =smpl 20 --random= y =smpl full= (sesiones 16 y 18); =critical= y =quantile= (sesión 18). Lo nuevo:
+- =$Fstat= :: el $F$ del pie de la tabla de =ols=, el contraste de que todos los coeficientes salvo la constante son cero. Es el $F$ de hoy, porque $H_0$ excluye los tres regresores.
+- =$rsq= :: el $R^2$ del último modelo. Junto con =$ess= permite recuperar la $\mathrm{SEC}$, que Gretl no devuelve directamente.
+- =mean(Fst > Fc)= :: la comparación produce una serie de ceros y unos (práctica C de la sesión 7), y su media es la fracción de réplicas en que el $F$ supera el valor crítico (práctica C de la sesión 18).
+- =rech += (...)= :: suma al escalar =rech= el valor entre paréntesis, uno o cero: el contador de rechazos de la práctica C de la sesión 18.
+- =open= y los escalares :: al abrir un conjunto de datos, =open= borra los escalares definidos antes, salvo con la opción =--preserve=. Por eso los bloques de las Actividades 2 y 3 vuelven a definir =b1=, =sig= y =R= justo después de =open=.
+
 * Actividad 1 - Dos mil réplicas bajo $H_0$ cierta, $n=506$
 
 Abra =hprice2=, fije la semilla y repita $2\,000$ veces: sortee las perturbaciones, construya $y$, estime el modelo con los tres regresores y guarde el $F$ del pie de la tabla junto con su numerador $\mathrm{SEC}/(k-1)$ y su denominador $\mathrm{SRC}/(n-k)$. Gretl no da la $\mathrm{SEC}$ directamente, pero $\mathrm{STC}=\mathrm{SRC}/(1-R^2)$.
+
+Tras abrir =hprice2=, tres escalares fijan la constante =b1=, la desviación típica del ruido =sig= y el número de réplicas =R=. En cada vuelta del bucle se sortea =u=, se construye =y= sin ningún regresor, se estima el modelo con los tres y se guardan cuatro escalares: el $F$ del pie de la tabla, la $\mathrm{SRC}$, la $\mathrm{SEC}$ recuperada de =$ess= y =$rsq=, y el numerador y el denominador del $F$, cada uno dividido por sus grados de libertad, $3$ y $502$. =store= añade una fila por réplica al fichero =replicasF.gdt=. Al salir del bucle, =open= carga ese fichero: ahora cada observación es una réplica, y =Fst=, =numer= y =denom= son series de $2\,000$ valores. El =printf= imprime la fracción de réplicas que superan el valor crítico y =freq= dibuja el histograma del $F$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -129,7 +138,7 @@ loop R --progressive --quiet
 endloop
 open "@workdir/replicasF.gdt" --quiet
 printf "fraccion de F > F_c(3,502) = %.4f\n", mean(Fst > critical(F, 3, 502, 0.05))
-freq Fst --plot="@workdir/histF.png"
+freq Fst
 #+end_src
 #+latex: }
 
@@ -182,11 +191,16 @@ Las dos medias, la del numerador y la del denominador, están junto a $\sigma^2=
 
 Tome veinte viviendas al azar y repita. El valor crítico ya no es $F_c(3,502)$ sino $F_c(3,16)$, y esa diferencia importa.
 
+Igual que antes, con dos cambios. =smpl 20 --random= reduce la muestra a veinte viviendas elegidas al azar; la semilla se fija antes, para que sean las mismas para todos, y se vuelve a fijar antes del bucle. Y el valor crítico se calcula con $16$ grados de libertad en el denominador. Los escalares =R=, =sig= y =b1= se definen de nuevo después de =open=, que los había borrado (véase la lista de comandos nuevos). Al final se imprime la fracción de rechazos con el valor crítico correcto y con el de $n=506$.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: n20
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
+scalar b1  = 20000
+scalar sig = 5000
+scalar R   = 2000
 set seed 20261119
 smpl 20 --random
 scalar Fc20 = critical(F, 3, 16, 0.05)
@@ -249,11 +263,16 @@ Con dieciséis grados de libertad en el denominador, el $F$ sigue oscilando en t
 
 Haga que =nox= intervenga con un coeficiente pequeño frente al ruido, $\beta_{\text{nox}}=-800$ (=nox= recorre unas cinco unidades en la muestra, así que su efecto máximo es de unos $4\,000$ dólares, menos que la desviación típica de $u$), y mantenga los otros dos en cero. $H_0$ es ahora falsa. Cuente cuántas veces se rechaza con $n=20$ y con $n=506$.
 
+Ahora =y= se construye con =nox= dentro, con el coeficiente =bn=, y el bucle ya no acumula réplicas: es un =loop= sin =--progressive= que solo cuenta. En cada vuelta, =rech += ($Fstat > Fc)= suma uno si el $F$ supera el valor crítico, y al terminar =rech/R= es la fracción de rechazos. =Fc= se calcula con los grados de libertad de la muestra activa, =$nobs-4=. Primero con la submuestra de veinte viviendas; después =smpl full= recupera las $506$ y se repite el bloque, desde la línea de =Fc=, como hace el guion completo.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Deteccion
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
+scalar b1  = 20000
+scalar sig = 5000
+scalar R   = 2000
 scalar bn = -800                         # efecto pequeno de nox; rooms y stratio siguen sin intervenir
 set seed 20261119
 smpl 20 --random

@@ -116,6 +116,8 @@ En esta práctica aprenderemos a /importar datos desde internet/ —una destreza
 4. Examinar la variable dicotómica =chas= y entender qué significa su /media/.
 5. Comparar este dataset con el =hprice2= de la práctica anterior.
 
+/Comandos de esta práctica/. Los mismos de la práctica A (=open=, =print=, =summary=) más uno nuevo, =setobs=, que declara la estructura del conjunto de datos. La diferencia principal está en =open=: aquí carga un fichero /suyo/, no uno de muestra, así que hay que indicarle dónde está.
+
 * Actividad 1 - Descargar el fichero de datos
 El conjunto original está disponible en varios repositorios públicos. Usaremos una copia en formato =CSV= (valores separados por comas), el formato de intercambio de datos más habitual.
 
@@ -139,6 +141,8 @@ El conjunto original está disponible en varios repositorios públicos. Usaremos
 - En la ventana principal de [[https://gretl.sourceforge.net/es.html][Gretl]], seleccione //~Archivo -> Abrir archivo de datos -> Archivo de usuario~//; en el menú desplegable en la parte inferior de la pantalla escoja //~texto/CSV~// y elija el fichero descargado.
 - Gretl detectará el separador (coma) y la fila de nombres. Acepte las opciones por defecto y confirme.
 
+  =open= seguido de la ruta del fichero. Gretl reconoce el formato por la extensión =.csv= y, como en la ventana, detecta el separador y la fila de nombres. La ruta es relativa al directorio de trabajo de Gretl (menú //~Archivo -> Directorio de trabajo~//); escriba la que corresponda en su ordenador. La opción =--quiet= evita que se listen las variables al cargar.
+
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos (ajustando la ruta a su sistema)/:
     #+NAME: Importar CSV
@@ -149,6 +153,8 @@ open ../../data/boston.csv --quiet
 
 * Actividad 3 - Declarar los datos como sección cruzada
 Al importar un CSV, Gretl trata las observaciones como una serie sin estructura temporal, lo que es correcto: estos son datos de /sección cruzada/ (cada fila es una zona del área de Boston, no un instante de tiempo). Si Gretl preguntara, indique que /no/ se trata de series temporales ni de panel.
+
+=setobs= declara la estructura del conjunto de datos. Los dos números son la periodicidad y la observación inicial, que para datos de sección cruzada valen =1= y =1=; la opción =--cross-section= dice de qué tipo de datos se trata. Gretl responde con el rango de datos, =1 - 506 (n = 506)=.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /en línea de comandos, para asegurarse/:
@@ -161,7 +167,9 @@ setobs 1 1 --cross-section
 La variable =chas= es /dicotómica/ (o /binaria/, o /dummy/): solo toma los valores 0 y 1. Vale 1 si la zona limita con el río Charles y 0 en caso contrario.
 
 *** Mostrar sus valores
-- Marque =chas=, ``pinche'' con el botón derecho y seleccione */~mostrar valores~/*.
+- Marque =chas=, ``pinche'' con el botón derecho y seleccione */~Mostrar valores~/*.
+
+  =print -o=, como en la práctica A: los valores por observación, en columna.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -174,7 +182,9 @@ print -o chas
 Comprobará que solo contiene ceros y unos.
 
 *** Calcular su media
-- Marque =chas=, ``pinche'' con el botón derecho y seleccione */~Estadísticos descriptivos~/*.
+- Marque =chas=, ``pinche'' con el botón derecho y seleccione */~Estadísticos principales~/*.
+
+  =summary= de una sola variable: una fila con sus estadísticos (práctica A). Fíjese en la media.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -202,6 +212,8 @@ end outfile
 Compare el valor mediano de la vivienda en ambos datasets. En el original, la variable es =medv= (en /miles/ de dólares); en =hprice2=, =price= (en dólares).
 
 - Obtenga los estadísticos descriptivos de =medv=.
+
+  =summary= con las tres variables que se corresponden con =price=, =rooms= y =nox= de =hprice2=: =medv=, =rm= y =nox=.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /en línea de comandos/:

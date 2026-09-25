@@ -99,9 +99,17 @@ Las dos prácticas anteriores de esta sesión se centraron en el contenido econo
 4. Exportar directamente a fichero un histograma y un diagrama de caja (ya vistos en la primera práctica del curso).
 5. Fijar un pequeño ``checklist'' de buenas prácticas para preparar un informe reproducible.
 
+/Comandos nuevos de esta práctica/. Además de =ols= (práctica A de esta sesión) y de =gnuplot=, =freq= y =boxplot= (sesiones 4 y 7):
+- =list PL = price rooms= :: da un nombre a una lista de variables, para poder pasarla a otros comandos como un solo argumento.
+- =plot ... end plot= :: un bloque, en lugar de una sola línea, para construir un gráfico con opciones y con instrucciones propias de gnuplot (el programa que Gretl usa para dibujar). Se explica en la Actividad 2.
+- =--output="fichero.png"= :: opción de =gnuplot=, =boxplot= y =end plot= (y =--plot= en =freq=) que guarda el gráfico en un fichero en vez de abrirlo en una ventana; la extensión decide el formato.
+- =eqnprint= y =tabprint= :: escriben el último modelo estimado en un fichero, como ecuación o como tabla, listo para un documento.
+
 * Actividad 1 - Reapertura y reestimación
 
 Esta práctica es autocontenida: reabrimos =hprice2= y volvemos a estimar el modelo =price~rooms= de la práctica anterior.
+
+Abrimos =hprice2=, ponemos etiquetas a las dos variables que usaremos y estimamos =price= sobre la constante y =rooms=. Los comandos que siguen (=eqnprint=, =tabprint=) actúan sobre el último modelo estimado, así que conviene tenerlo fresco.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -118,6 +126,8 @@ ols price const rooms
 * Actividad 2 - Personalizar el diagrama de dispersión
 
 - GUI: genere el gráfico */~Gráfico X-Y~/* de =price= sobre =rooms= (como en la práctica anterior). Sobre la ventana del gráfico, botón derecho, */~Editar~/*: se abre un panel con pestañas para el título, las etiquetas de los ejes, el estilo de los puntos/líneas y los colores. Cambie el título a algo descriptivo (p. ej. ``Precio mediano frente a número de habitaciones'') y añada unidades explícitas en las etiquetas de los ejes (p. ej. ``Precio ($)'', ``Habitaciones (número medio)'').
+
+  El equivalente en línea de comandos, línea a línea: =list PL = price rooms= define la lista de las dos variables, la última de ellas en el eje horizontal; =plot PL= abre el bloque; =options fit=none= pide el gráfico sin recta ajustada; cada línea =literal= pasa a gnuplot una orden tal cual (aquí, el título y las etiquetas de los dos ejes); y =end plot --output="..."= cierra el bloque y guarda el gráfico en el fichero indicado.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /el equivalente en línea de comandos usa un bloque ``literal'' de gnuplot, entre llaves, para personalizar el gráfico/:
@@ -182,7 +192,7 @@ El destino del fichero (~--output=~) es una opción de ~end plot~, igual que ~--
 - GUI: sobre la ventana del gráfico, botón derecho, */~Guardar como~/*, y elija el formato (PNG, PDF, EPS, SVG según disponibilidad).
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-  /o bien, en línea de comandos, repitiendo el mismo gráfico con distinta extensión/:
+  /o bien, en línea de comandos, repitiendo el mismo gráfico con distinta extensión/. Son tres veces el mismo =gnuplot=; solo cambia la extensión del fichero de =--output=, y con ella el formato en que se guarda:
   #+NAME: Exportar formatos
   #+begin_src gretl :tangle ./guiones/S11-Prct-C-graficos-informes.inp :eval no
 gnuplot price rooms --output="price_rooms.png"
@@ -198,7 +208,7 @@ gnuplot price rooms --output="price_rooms.eps"
 - GUI: en la ventana del modelo estimado (=price~rooms= de la Actividad 1), menú */~LaTeX -> Tabular~/* o */~LaTeX -> Ecuación~/*, con las opciones de */~Ver~/*, */~Copiar~/* o */~Guardar~/*. También, desde */~Archivo -> Guardar como~/*, puede exportar en formato RTF (para Word) directamente.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-  /en línea de comandos, Gretl ofrece los comandos/ =eqnprint= /(la ecuación estimada) y/ =tabprint= /(una tabla completa de coeficientes y errores estándar) para exportar directamente a LaTeX/:
+  /o bien, en línea de comandos, Gretl ofrece los comandos/ =eqnprint= /(la ecuación estimada) y/ =tabprint= /(una tabla completa de coeficientes y errores estándar) para exportar directamente a LaTeX/. El bloque reestima el modelo en silencio, para asegurarse de que es el último, y después escribe la ecuación en un fichero y la tabla en otro; el nombre del fichero va en =--output= y su extensión decide el formato (=.tex= para LaTeX, =.rtf= para un procesador de textos):
   #+NAME: Exportar resultados regresion
   #+begin_src gretl :tangle ./guiones/S11-Prct-C-graficos-informes.inp :eval no
 ols price const rooms --quiet
@@ -208,7 +218,7 @@ tabprint --output="tabla_price_rooms.tex"
   #+latex: }
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-(/Consulte/ =help tabprint= /y/ =help eqnprint= /en la consola de Gretl si las opciones exactas difieren en su versión; ambos comandos admiten también/ =--format=rtf= /para exportar directamente a RTF en lugar de LaTeX./)
+(/Consulte/ =help tabprint= /y/ =help eqnprint= /en la consola de Gretl si las opciones exactas difieren en su versión. En/ =tabprint= /el formato lo decide la extensión del fichero de/ =--output=: =.tex= /para LaTeX,/ =.rtf= /para RTF y/ =.csv= /para valores separados por comas;/ =eqnprint= /está documentado para LaTeX./)
 #+latex: }
 
 /Ventaja frente a copiar a mano/: estos comandos generan directamente el código (LaTeX o RTF) listo para pegar en el informe, con los números exactos que calculó Gretl —evitando errores de transcripción y ahorrando el tedioso trabajo de dar formato a una tabla a mano—.
@@ -227,7 +237,7 @@ tabprint --output="tabla_price_rooms.tex"
 
 * Actividad 5 - Exportar histograma y diagrama de caja directamente a fichero
 
-Recordando la primera práctica del curso (histograma y diagrama de caja de =price=):
+Recordando la primera práctica del curso (histograma y diagrama de caja de =price=). Son los mismos =freq= y =boxplot= de entonces; la diferencia es que, en vez de abrir una ventana, guardan el gráfico en el fichero indicado, =freq= con la opción =--plot= y =boxplot= con =--output=:
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

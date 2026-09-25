@@ -113,13 +113,21 @@ Si la distinción fuera irrelevante, ambos experimentos darían lo mismo. Veremo
 
 /Advertencia de diseño/. Para que la diferencia se vea con claridad, trabajaremos con una muestra deliberadamente /pequeña/: doce viviendas. Cuanto mayor es la muestra, menos importa la distinción que queremos ilustrar, y con las 506 observaciones de la práctica anterior costaría apreciarla. En la última actividad repetiremos el experimento con una muestra grande para comprobar precisamente eso.
 
+/Comandos nuevos de esta práctica/. Todo el aparato es el de la práctica A: =open=, =ols --quiet= y sus accesores, =loop --progressive=, =store= y la apertura del fichero de réplicas con =open "@workdir/…"=. Lo nuevo:
+- =smpl 12 --random= :: elige al azar doce observaciones del conjunto de datos y restringe la muestra a ellas; a partir de ahí =$nobs= vale 12 y las funciones sobre series actúan solo sobre esas doce. Con =set seed= delante, siempre salen las mismas.
+- =sd(x)= :: desviación típica de una serie, con divisor $n-1$ (sesión 7).
+- =min(x)=, =max(x)= :: mínimo y máximo de una serie.
+- Bloques que empiezan con =open= :: cuando la salida de una actividad mezcla escalares teóricos y series de réplicas, los =printf= van en bloques distintos: el que calcula sobre las réplicas va precedido de =open "@workdir/…"=, que abre su fichero, y desde esa línea los escalares anteriores ya no existen. Por eso los valores teóricos se imprimen siempre antes.
+
 
 * Actividad 1 - El mismo mundo, pero con doce viviendas
 
 Reutilizamos el mundo artificial de la práctica A —mismos $\beta_1$, $\beta_2$ y $\sigma$—, pero nos quedamos solo con doce viviendas, elegidas al azar. Además, anotamos la media y la desviación típica de =rooms= en el conjunto completo: harán de ``población'' de la que se sortean regresores nuevos en el experimento B.
 
+Dos bloques. El primero repite el mundo artificial de la práctica A y añade dos escalares, la media y la desviación típica de =rooms= en las 506 viviendas, que harán de población del regresor. El segundo imprime esa población, restringe la muestra a doce viviendas con =smpl 12 --random= (después de =set seed 160=, para que sean siempre las mismas doce) y calcula sobre ellas =Sxx_obs=, la suma de cuadrados en desviaciones, y =var_cond=, la varianza que predice la lección 11. El «Sxx típico» que también se imprime es $(n-1)$ veces la varianza poblacional del regresor: lo que cabría esperar de doce viviendas cualesquiera.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Preparacion datos
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
@@ -170,10 +178,10 @@ Compare ahora las dos últimas cifras: el Sxx de nuestras doce viviendas y el Sx
 
 * Actividad 2 - Experimento A: el regresor se queda quieto
 
-Es el experimento de la práctica anterior, sin más cambio que el tamaño muestral.
+Es el experimento de la práctica anterior, sin más cambio que el tamaño muestral. El bucle es el de la práctica A con =R = 4000= réplicas y la muestra de doce viviendas: cada vuelta sortea la perturbación, construye =y=, estima con =ols --quiet= y guarda el coeficiente =b_fijo= como una fila más de =repFijo.gdt=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Experimento A
 #+begin_src gretl :eval no
 scalar R = 4000
@@ -196,10 +204,10 @@ endloop
 
 * Actividad 3 - Experimento B: el regresor también se sortea
 
-Ahora añadimos una línea dentro del bucle: antes de construir el regresando, sorteamos un regresor nuevo. Conceptualmente estamos diciendo ``no solo podría haber sido otra la perturbación; también podrían haber sido otras las doce viviendas''.
+Ahora añadimos una línea dentro del bucle: antes de construir el regresando, sorteamos un regresor nuevo. Conceptualmente estamos diciendo ``no solo podría haber sido otra la perturbación; también podrían haber sido otras las doce viviendas''. En el código, la línea nueva es =series xnew = mu_r + sd_r*normal(0,1)=: doce sorteos de una normal estándar, reescalados a la media y la desviación típica de la población del regresor. Después =y= se construye con =xnew=, la regresión se estima sobre =xnew=, y =store= guarda dos escalares por réplica, el coeficiente =b_var= y =Sxx_i=, la suma de cuadrados en desviaciones del regresor de esa réplica, en =repVar.gdt=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Experimento B
 #+begin_src gretl :eval no
 set seed 160
@@ -224,8 +232,10 @@ Guardamos también =Sxx_i=, la suma de cuadrados en desviaciones del regresor /d
 
 * Actividad 4 - Las dos varianzas, cara a cara
 
+Tres bloques de =printf=. El primero usa los escalares teóricos. El segundo abre =repFijo.gdt= y calcula la media y la varianza (divisor $n$) de =b_fijo=. El tercero abre =repVar.gdt= y hace lo mismo con =b_var= y añade, con =mean=, =min= y =max=, el recorrido de =Sxx_i= a lo largo de las réplicas.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Comparacion teoria
 #+begin_src gretl :eval no
 printf "=== LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===\n"
@@ -233,11 +243,19 @@ printf "beta_2 verdadero  = %.2f\n", b2_true
 printf "Var[b2 | X]       = %.1f\n\n", var_cond
 #+end_src
 
+#+begin_src gretl :eval no
+open "@workdir/repFijo.gdt" --quiet
+#+end_src
+
 #+NAME: Comparacion A
 #+begin_src gretl :eval no
 printf "=== EXPERIMENTO A: regresor FIJO ===\n"
 printf "media de b2hat    = %.2f\n", mean(b_fijo)
 printf "varianza de b2hat = %.1f\n\n", sum((b_fijo-mean(b_fijo))^2)/$nobs
+#+end_src
+
+#+begin_src gretl :eval no
+open "@workdir/repVar.gdt" --quiet
 #+end_src
 
 #+NAME: Comparacion B
@@ -287,10 +305,10 @@ Esta es la razón por la que la lección 11 se detuvo en la fórmula condicional
 
 * Actividad 5 - ¿Y si la muestra fuera grande?
 
-Repita el experimento con cuatrocientas viviendas en lugar de doce, dejando todo lo demás igual.
+Repita el experimento con cuatrocientas viviendas en lugar de doce, dejando todo lo demás igual. El primer bloque lo hace todo seguido: reabre =hprice2= y recupera los escalares (se perdieron al abrir los ficheros de réplicas), toma cuatrocientas viviendas con =smpl 400 --random=, y ejecuta un solo bucle de 40 000 vueltas que hace los dos experimentos a la vez: primero con =rooms= fijo (coeficiente =bg_fijo=) y después con un regresor nuevo =xnew= y una perturbación nueva =u2= (coeficiente =bg_var=); =store= guarda los dos por réplica en =repGrande.gdt=. Tarda bastante más que los bucles anteriores. El segundo bloque imprime las cifras teóricas y el tercero, tras abrir =repGrande.gdt=, las dos varianzas empíricas y su cociente.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/o bien teclee en línea de comandos/:
+/en línea de comandos/:
 #+NAME: Muestra grande datos
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
@@ -327,6 +345,10 @@ endloop
 printf "Con n = 400:  Sxx observado = %.2f   (tipico: %.2f)\n", Sxx_obs, ($nobs-1)*sd_r^2
 printf "             Var[b2|X] condicional teorica = %.2f\n", var_cond
 printf "             cociente Sxx observado/tipico = %.3f  <- lo que cabe esperar de var_B/var_A\n", Sxx_obs/(($nobs-1)*sd_r^2)
+#+end_src
+
+#+begin_src gretl :eval no
+open "@workdir/repGrande.gdt" --quiet
 #+end_src
 
 #+NAME: Muestra grande resultado

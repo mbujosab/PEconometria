@@ -105,9 +105,16 @@ Retomamos =hprice2= con el modelo de la lección 13, =price ~ rooms + nox + stra
 4. Imponer una igualdad entre dos coeficientes construyendo la suma de los regresores como regresor único.
 5. Reencontrar el caso =nox= y =lnox= de la lección 13, que la práctica B de la sesión 22 explicará.
 
+/Comandos nuevos de esta práctica/. Seguimos usando =ols= con la opción =--quiet=, los accesores =$ess=, =$coeff= y =$stderr= (sesiones 11 a 18), las funciones =critical= y =pvalue= y el bloque =restrict ... end restrict= (práctica A de la sesión 18). Lo nuevo:
+- =b[nox]= :: dentro de =restrict=, un coeficiente puede nombrarse por su posición en la lista de regresores, =b[3]=, como en la sesión 18, o por el nombre de su variable, =b[nox]=. Cada línea del bloque es una restricción: una combinación lineal de coeficientes a la izquierda del igual y un número a la derecha.
+- =critical(F, q, gl, 0.05)= :: el valor de la $F$ de Fisher con =q= y =gl= grados de libertad que deja una probabilidad $0{,}05$ a su derecha; =pvalue(F, q, gl, x)= es la probabilidad de que esa $F$ supere =x=. Son las funciones de la sesión 18 con la letra =F= en lugar de =t=, y con dos grados de libertad en lugar de uno.
+- =%.4e=, =%d= y =%.3g= :: tres formatos más de =printf=: notación científica con cuatro decimales, cómoda para las sumas de cuadrados; un número entero; y un número con tres cifras significativas, en notación decimal o científica según su tamaño.
+
 * Actividad 1 - El modelo completo
 
 Abra =hprice2= y estime =price= sobre =rooms=, =nox= y =stratio=: //~Modelo -> Mínimos cuadrados ordinarios~//. Anote la suma de cuadrados de los residuos y los grados de libertad, $n-k=506-4=502$.
+
+El bloque abre =hprice2=, estima el modelo completo con =ols= y guarda en escalares lo que hará falta en toda la práctica: el número de observaciones =n=, el número de coeficientes =k= (la constante y tres regresores), la suma de cuadrados de los residuos =SRC=, que Gretl devuelve en el accesor =$ess=, y el denominador del $F$, =s2 = SRC/(n-k)=, que es $\mathfrak s^2$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -146,6 +153,8 @@ Los tres regresores tienen $t$ grandes; ninguna de las tres restricciones de hoy
 
 La hipótesis $H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}=0$ dice que el modelo es =price ~ rooms=. Estime ese modelo restringido, anote su $\mathrm{SRC}_r$ y construya el $F$ con $q=2$.
 
+Estimamos el modelo restringido con =ols= y =--quiet=, que evita imprimir la tabla: solo queremos su =$ess=, que guardamos en =SRCr=. Con =q = 2= restricciones, =F= es la fórmula de la lección 13 escrita tal cual: la subida de la $\mathrm{SRC}$ por restricción, dividida por =s2=. El =printf= imprime el $F$, el valor crítico de la $F$ con $2$ y $n-k$ grados de libertad al $5\%$ y el valor $p$.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: DosExclusiones
@@ -176,6 +185,8 @@ end outfile
 #+latex: }
 
 Ahora pida a Gretl el mismo contraste. Vuelva a estimar el modelo completo y, en la ventana del modelo, //~Contrastes -> Restricciones lineales~//; escriba las dos restricciones =b[nox] = 0= y =b[stratio] = 0=, una por línea.
+
+Primero volvemos a estimar el modelo completo, porque =restrict= actúa siempre sobre el último modelo estimado, y el último fue el restringido. El bloque =restrict ... end restrict= lleva una restricción por línea, con los coeficientes nombrados por su variable. Al cerrar el bloque, Gretl imprime el $F$, su valor $p$ y las estimaciones del modelo que respeta las restricciones.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -212,6 +223,8 @@ La ``desviación típica de la regresión'' del modelo restringido, $6620{,}9$, 
 * Actividad 3 - Excluir un solo regresor: $F=t^2$
 
 Con $q=1$ la restricción $\beta_{\text{stratio}}=0$ se puede contrastar de dos maneras: con el $F$ de los dos ajustes anidados o con el $t$ de la tabla del modelo completo. La lección 13 dijo que son el mismo contraste. Compruébelo.
+
+Modelo restringido sin =stratio=, con su =$ess= guardado en =SRCr1=, y el $F$ con $q=1$. Después se vuelve a estimar el modelo completo para leer el $t$ de =stratio=: el cociente entre su coeficiente, =$coeff(stratio)=, y su error estándar, =$stderr(stratio)=. El =printf= pone el $F$ junto al cuadrado del $t$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -252,6 +265,8 @@ $F=t^2$ con todos los decimales, y $F_c(1,502)=t_c^2$: $3{,}860=1{,}965^2$. El $
 
 La hipótesis $H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}$ no excluye ningún regresor, así que el modelo restringido no se obtiene borrando una variable. Si los dos coeficientes son iguales a un mismo $\beta$, entonces $\beta_{\text{nox}}\,\text{nox}+\beta_{\text{stratio}}\,\text{stratio}=\beta\,(\text{nox}+\text{stratio})$: el modelo restringido tiene como regresor la /suma/ =nox + stratio=. Constrúyala (//~Añadir -> Definir nueva variable~//), estime el modelo con =rooms= y la suma, y calcule el $F$ con $q=1$.
 
+Creamos con =series= el regresor suma, estimamos el modelo restringido con =rooms= y esa suma, y construimos el $F$ con $q=1$ como antes. El =printf= imprime el $F$, el valor crítico y el valor $p$.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Igualdad
@@ -281,6 +296,8 @@ end outfile
 #+latex: }
 
 Y de nuevo con =restrict=, escribiendo la restricción como =b[nox] - b[stratio] = 0=.
+
+De nuevo el modelo completo, y un bloque =restrict= con una sola línea: la diferencia de los dos coeficientes igual a cero. La salida da el $F$ y las estimaciones restringidas, en las que =nox= y =stratio= comparten coeficiente.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -315,6 +332,8 @@ Las estimaciones restringidas de =restrict= muestran el mismo coeficiente para =
 * Actividad 5 - Apertura: el caso =nox= y =lnox=
 
 Sustituya =stratio= por =lnox=, el logaritmo de =nox=, y compare el $F$ de excluir las dos medidas de contaminación con los $t$ de cada una.
+
+El modelo con =lnox= en lugar de =stratio=, esta vez sin =--quiet= para ver la tabla con los $t$, seguido de un bloque =restrict= que excluye las dos medidas de contaminación a la vez.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

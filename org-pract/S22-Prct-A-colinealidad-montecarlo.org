@@ -104,35 +104,64 @@ El mundo artificial tiene $n=100$, $y=1+x_2+x_3+u$ con $u$ normal de desviación
 3. Ver que $\hat\beta_2$ y $\hat\beta_3$ oscilan /juntos y al revés/: covarianza negativa, y suma $\hat\beta_2+\hat\beta_3$ tan estable como lo era $\hat\beta_2$ sin colinealidad.
 4. Ver cómo un efecto verdadero deja de ser significativo cuando el regresor pierde parte propia.
 
+/Comandos nuevos de esta práctica/. Seguimos con =nulldata=, =set seed=, =normal()=, =series= y =scalar= (sesión 7), =ols= con =--quiet= y los accesores =$ess=, =$coeff= y =$stderr= (sesiones 11 a 18), las matrices y =mcov= (práctica A de la sesión 16) y =critical= (sesión 18). Lo nuevo:
+- =zeros(R, 2)= :: crea una matriz de =R= filas y 2 columnas llena de ceros, para ir guardando en ella un resultado por réplica.
+- =B[i,] = {a, b}= :: escribe la fila =i= de la matriz =B=; entre llaves, los dos valores que la rellenan. Al revés, =B0[,1]= es la primera columna entera de =B0=.
+- =loop i=1..R= :: repite el bloque hasta =endloop= con el índice =i= tomando los valores $1, 2, \ldots, R$ (en la sesión 11 lo usamos con cuatro vueltas). Aquí hay dos bucles, uno dentro de otro: el exterior recorre las cuatro correlaciones y el interior las réplicas.
+- =rhos[j]= y =meanc(S[,1])= :: el elemento $j$ de un vector, y la media de la primera columna de una matriz.
+- =mcov(B)= :: matriz de varianzas y covarianzas de las columnas de =B=, tratando cada columna como una variable y cada fila como una observación (divisor $n-1$). =V[1,1]= es la varianza de la primera columna y =V[1,2]= la covarianza entre las dos.
+- =series b = B0[,1]= :: convierte una columna de una matriz en una serie del conjunto de datos, para poder dibujarla con =freq= y =gnuplot=. El conjunto tiene que tener tantas observaciones como filas la matriz: de ahí el =nulldata R --preserve= previo, con =--preserve= para no perder las matrices.
+
 * Actividad 1 - Cuatro experimentos, una tabla
 
 Para cada $\rho$: genere los regresores, mida la parte propia de $\boldsymbol x_2$ con la regresión auxiliar, y repita $2\,000$ veces la estimación guardando $\hat\beta_2$, $\hat\beta_3$, la $\mathrm{SRC}$ y el $R^2$. Después resuma: varianza empírica de $\hat\beta_2$ frente a la teórica, covarianza, varianza de la suma, y fracción de réplicas en que el $t$ de $\boldsymbol x_2$ supera $t_c$.
+
+Léalo en tres partes. /Preparación/: un conjunto de 100 observaciones, los coeficientes verdaderos =b1=, =b2= y =b3= (los tres valen $1$), la desviación típica del ruido =sig=, el número de réplicas =R=, el valor crítico =tc= de la $t$ con $n-3$ grados de libertad (sesión 18) y el vector =rhos= con las cuatro correlaciones que se van a probar; el primer =printf= imprime la cabecera de la tabla. /Los regresores/: el bucle exterior, =loop j=1..4=, toma en cada vuelta un $\rho$ de =rhos= (=rhos[j]= es su elemento $j$) y, con la semilla fija, sortea =z1= y =z2=, dos normales estándar independientes; =x2= es =z1= y =x3= es la combinación $\rho\boldsymbol z_1+\sqrt{1-\rho^2}\,\boldsymbol z_2$, que tiene correlación $\rho$ con =x2=. La regresión auxiliar =ols x2 const x3 --quiet= deja en =$ess= la longitud al cuadrado de la parte propia de =x2=, y =varTeorica= es $\sigma^2$ dividido por ella. /Las réplicas/: se fija otra semilla para el ruido y el bucle interior, en cada vuelta, sortea =u=, construye =y= con los coeficientes verdaderos, estima por MCO, guarda los dos coeficientes en la fila =i= de =B= y la $\mathrm{SRC}$ y el $R^2$ en la fila =i= de =S=, y suma un $1$ a =signif= cuando el $|t|$ de =x2= supera =tc= (=signif += …=). Al salir del bucle interior, =mcov(B)= da la varianza empírica de $\hat\beta_2$ y su covarianza con $\hat\beta_3$, =meanc= promedia cada columna de =S=, y el =printf= imprime la fila de la tabla. Los regresores no cambian dentro del bucle interior: solo cambia =u=. Las últimas líneas guardan en =B0= y =B99= las réplicas con $\rho=0$ y con $\rho=0{,}99$ para la Actividad 2 (=if=, =elif= y =endif=: sesión 7).
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: MonteCarlo
 #+begin_src gretl :eval no
 nulldata 100
+scalar n   = $nobs
+scalar b1  = 1
+scalar b2  = 1
+scalar b3  = 1
 scalar sig = 1
 scalar R   = 2000
-scalar rho = 0.99                                # y despues 0, 0.9 y 0.999
-set seed 2026
-series z1 = normal()
-series z2 = normal()
-series x2 = z1
-series x3 = rho*z1 + sqrt(1-rho^2)*z2
-ols x2 const x3 --quiet
-scalar varTeorica = sig^2/$ess                   # sigma^2 / ||parte propia de x2||^2
-matrix B = zeros(R, 2)
-set seed 20261120
-loop i=1..R --quiet
-    series u = normal(0, sig)
-    series y = 1 + x2 + x3 + u
-    ols y const x2 x3 --quiet
-    B[i,] = {$coeff(x2), $coeff(x3)}
+scalar tc  = critical(t, n-3, 0.025)
+matrix rhos = {0, 0.9, 0.99, 0.999}
+printf "%7s %8s %8s %10s %10s %10s %10s %8s %8s %8s\n", "rho", "corr", "VIF", "var(b2)", "teorica", "cov(b2,b3)", "var(b2+b3)", "SRC", "R2", "%|t|>tc"
+loop j=1..4 --quiet
+    scalar rho = rhos[j]
+    set seed 2026
+    series z1 = normal()
+    series z2 = normal()
+    series x2 = z1
+    series x3 = rho*z1 + sqrt(1-rho^2)*z2
+    ols x2 const x3 --quiet
+    scalar longPropia2 = sqrt($ess)                 # || parte propia de x2 ||
+    scalar varTeorica  = sig^2/longPropia2^2         # sigma^2 / ||x2 propia||^2
+    matrix B = zeros(R, 2)
+    matrix S = zeros(R, 2)
+    scalar signif = 0
+    set seed 20261120
+    loop i=1..R --quiet
+        series u = normal(0, sig)
+        series y = b1 + b2*x2 + b3*x3 + u
+        ols y const x2 x3 --quiet
+        B[i,] = {$coeff(x2), $coeff(x3)}
+        S[i,] = {$ess, $rsq}
+        signif += abs($coeff(x2)/$stderr(x2)) > tc
+    endloop
+    matrix V = mcov(B)
+    printf "%7.3f %8.4f %8.1f %10.4f %10.4f %10.4f %10.4f %8.2f %8.4f %8.3f\n", rho, corr(x2, x3), 1/(1-corr(x2,x3)^2), V[1,1], varTeorica, V[1,2], V[1,1]+V[2,2]+2*V[1,2], meanc(S[,1]), meanc(S[,2]), signif/R
+    if j == 1
+        matrix B0 = B
+    elif j == 3
+        matrix B99 = B
+    endif
 endloop
-matrix V = mcov(B)
-printf "var(b2) = %.4f  teorica = %.4f  cov(b2,b3) = %.4f\n", V[1,1], varTeorica, V[1,2]
 #+end_src
 #+latex: }
 
@@ -198,6 +227,8 @@ La covarianza entre $\hat\beta_2$ y $\hat\beta_3$ es negativa y casi igual a la 
 
 Compare la distribución de $\hat\beta_2$ con $\rho=0$ y con $\rho=0{,}99$, y dibuje $\hat\beta_3$ frente a $\hat\beta_2$ en el segundo caso.
 
+Las matrices =B0= y =B99= guardan las $2\,000$ réplicas con $\rho=0$ y con $\rho=0{,}99$ (las guardó el bucle de la Actividad 1). Para dibujarlas hay que pasarlas a series: =nulldata R --preserve= abre un conjunto de =R= observaciones sin borrar las matrices, y cada =series= toma una columna. Después =freq= dibuja el histograma de cada serie y =gnuplot= la nube de $\hat\beta_3$ frente a $\hat\beta_2$ (la primera variable en el eje vertical, sesión 7). Las opciones =--plot= y =--output= mandan cada gráfico a un fichero de la carpeta de trabajo.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/ (con las matrices =B0= y =B99= de la Actividad 1):
 #+NAME: Histogramas
@@ -206,9 +237,9 @@ nulldata R --preserve
 series b2_rho0  = B0[,1]
 series b2_rho99 = B99[,1]
 series b3_rho99 = B99[,2]
-freq b2_rho0 --plot="@workdir/histRho0.png"
-freq b2_rho99 --plot="@workdir/histRho99.png"
-gnuplot b3_rho99 b2_rho99 --output="@workdir/nubeRho99.png"
+freq b2_rho0
+freq b2_rho99
+gnuplot b3_rho99 b2_rho99
 #+end_src
 #+latex: }
 

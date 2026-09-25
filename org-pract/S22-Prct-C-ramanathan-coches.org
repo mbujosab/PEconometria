@@ -104,9 +104,15 @@ Los datos son =data3-7= de Ramanathan: cincuenta y siete coches con su coste acu
 3. Ver que un VIF de $142$ es compatible con dos $t$ grandes, y qué es lo que ese VIF sí está diciendo.
 4. Comprobar la inestabilidad de las coordenadas estimando en dos mitades de la muestra.
 
+/Comandos nuevos de esta práctica/. No hay ninguno: =open= y =labels= (sesión 4), =summary --simple= y el comando =corr= (sesión 7), =ols= y sus accesores (sesiones 11 a 18), =vif= (práctica B de hoy), =restrict= y =$test= (sesión 21), =$vcv= (práctica B de la sesión 21 y de hoy) y =smpl= (sesiones 14 a 18). Dos recordatorios:
+- =restrict= ... =end restrict= :: contrasta sobre el último modelo la restricción escrita dentro; =b[miles] = 0= se refiere al coeficiente de =miles=. Con =--quiet= no imprime las estimaciones restringidas, y =$test= recoge después el estadístico del contraste.
+- =smpl 1 28= :: restringe la muestra a las observaciones 1 a 28: todo lo que se estime después usa solo esas filas. =smpl full= devuelve la muestra completa. En los menús, //~Muestra -> Establecer rango~//.
+
 * Actividad 1 - Los datos y las dos regresiones simples
 
 Abra =data3-7=, mire las variables y su correlación, y estime =cost= sobre =age= y =cost= sobre =miles= por separado.
+
+=open= carga el fichero de muestra de Ramanathan (=--quiet= evita listar las variables) y =labels= muestra la descripción de cada una. =summary --simple= da media, mediana, desviación típica, mínimo y máximo de las tres variables, y el comando =corr= la correlación entre =age= y =miles=. Las dos últimas líneas estiman las dos regresiones simples, cada una con su tabla completa.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -156,6 +162,8 @@ Las dos regresiones simples dicen lo esperable: cada semana de edad añade unos 
 
 Estime =cost= sobre =age= y =miles=, y pida los factores de inflación (//~Análisis -> Colinealidad~//).
 
+La regresión con los dos regresores y, a continuación, =vif= sobre ese modelo (práctica B).
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
 #+NAME: Conjunto
@@ -185,6 +193,8 @@ Léase el signo con cuidado. $-155$ no dice que rodar abarate las reparaciones. 
 * Actividad 3 - Las partes propias y el error estándar
 
 Mida la parte propia de cada regresor con la regresión auxiliar y compruebe la fórmula del error estándar con =miles=.
+
+Regresión auxiliar de =miles= sobre =age= (con =--quiet=, porque solo queremos su =$ess=): la raíz es la longitud de la parte propia de =miles=. Después se vuelve a estimar el modelo completo y se imprime $\mathfrak s$ entre esa longitud junto al error estándar de =miles= que da Gretl; =$sigma= y =$stderr= se refieren al modelo que acaba de estimarse.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -220,6 +230,8 @@ La parte propia de =miles= mide $12{,}5$ cuando el regresor en desviaciones mide
 * Actividad 4 - Contrastes: $t$ grandes con un VIF de $142$
 
 Compare los $t$ individuales, el $F$ conjunto y el $F$ de omitir cada regresor, y lea la correlación entre los dos estimadores.
+
+Sobre el modelo completo, el bloque =restrict= contrasta que el coeficiente de =miles= sea cero, y el $F$ resultante queda en =$test=. La correlación entre los dos estimadores se lee en =$vcv=: la fila 2 y la columna 3 corresponden a =age= y =miles=, segundo y tercer coeficiente de la lista (el primero es la constante). El guion completo añade los intervalos, el $F$ global del pie de la tabla (=$Fstat=) y los valores $p$ con =pvalue= (sesión 18).
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -268,6 +280,8 @@ Con un VIF de $142$, los dos coeficientes son significativos y ninguno de los do
 * Actividad 5 - La misma regresión en dos mitades
 
 Estime el modelo con los coches $1$ a $28$ y con los coches $29$ a $57$.
+
+=smpl 1 28= deja activas las 28 primeras observaciones y la regresión que sigue se estima solo con ellas. =smpl 29 57= hace lo mismo con la segunda mitad, y =smpl full= restablece los 57 coches antes de seguir.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/ (o //~Muestra -> Establecer rango~//):

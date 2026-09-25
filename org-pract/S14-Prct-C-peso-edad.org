@@ -100,9 +100,17 @@ Las dos prácticas anteriores mostraron que añadir un regresor nunca empeora el
 4. Distinguir con precisión /variable explicativa/ (la edad) de /regresores/ (edad, edad al cuadrado, edad al cubo): tres regresores distintos al servicio de una sola variable explicativa.
 5. Comparar la elección de modelo que sugiere $\bar R^2$ con la que sugiere extrapolar fuera de la muestra.
 
+/Comandos nuevos de esta práctica/. Además de =nulldata=, =setobs=, =setinfo=, =print --byobs=, =ols=, =gnuplot= y los accesores =$coeff=, =$rsq=, =$nobs= y =$ncoeff= (sesión 11 y prácticas A y B de hoy), aparecen:
+- =matrix medad = {7;7;8;...}= :: una matriz escrita a mano. El punto y coma separa filas, así que esto es un vector columna de 8 números (práctica A de la sesión 11). =series edad = medad= copia sus componentes en una serie.
+- =edad^2= :: eleva al cuadrado cada componente (sesión 7).
+- =gnuplot ... --fit=quadratic= :: en lugar de la recta, superpone a la nube el ajuste de una parábola; =--fit=cubic=, el de una cúbica.
+- =loop e=13..20= :: repite el bloque hasta =endloop= con =e= tomando los valores enteros de 13 a 20 (sesión 11; la mecánica del bucle se explica en la sesión 16).
+
 * Actividad 1 - Los datos
 
 Introducimos a mano los datos de peso (kg) y edad (años) de los 8 niños.
+
+Conjunto vacío de 8 observaciones de sección cruzada. Las dos matrices contienen, escritas a mano, las edades y los pesos; las dos =series= las convierten en variables del conjunto de datos; =setinfo= las etiqueta y =print --byobs= las muestra en una tabla con una fila por niño.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -128,6 +136,8 @@ print edad peso --byobs
 #+latex: }
 
 * Actividad 2 - Modelo 1: la recta
+
+=ols= estima la recta y =gnuplot= la dibuja sobre la nube de puntos, guardando el gráfico en un fichero con =--output=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -160,6 +170,8 @@ Anote $R^2$ y $\bar R^2$ de este primer modelo.
 * Actividad 3 - Modelo 2: la parábola
 
 Añadimos edad al cuadrado como segundo regresor.
+
+=series edad2 = edad^2= crea el regresor nuevo elevando al cuadrado cada edad. =ols= lo añade a la lista, y =gnuplot= con =--fit=quadratic= superpone a la nube el ajuste de una parábola en lugar de la recta.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -198,6 +210,8 @@ Compare $R^2$ y $\bar R^2$ con los del Modelo 1. ¿Tiene sentido la comparación
 
 Añadimos, además, edad al cubo.
 
+Igual que antes: =edad^3= es el tercer regresor y =--fit=cubic= dibuja la cúbica ajustada.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Modelo cubico peso edad
@@ -228,6 +242,8 @@ gnuplot peso edad --fit=cubic --output="peso_edad_cubico.png"
 /Antes de continuar/: mire con atención el tramo final de esta última curva, hacia las edades más altas de la muestra (13-14 años). ¿Ve algo que le llame la atención?
 
 * Actividad 5 - Los tres modelos, uno al lado del otro
+
+Tres =ols= con =--quiet=; tras cada uno, un escalar con $\bar R^2$ calculado como en la práctica B (=$rsq=, =$nobs=, =$ncoeff=) y un =printf= con los dos índices.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -266,6 +282,8 @@ lo haremos con los /tres/ modelos a la vez, no solo con el ``ganador'': si
 extrapoláramos únicamente el Modelo 3 podríamos llevarnos una impresión
 equivocada sobre los otros dos. Además, llegaremos hasta los 20 años, porque el
 problema que buscamos no aparece al mismo tiempo en todos.
+
+El bloque tiene tres partes. Primero estima los tres modelos con =--quiet= y guarda sus coeficientes en escalares con =$coeff(nombre)=: cuatro para la cúbica (=b1= a =b4=), dos para la recta (=r1=, =r2=) y tres para la parábola (=p1= a =p3=). Después imprime una cabecera y, con =loop e=13..20=, una fila por edad de 13 a 20 años: en cada vuelta =e= es la edad y los tres números son los tres polinomios evaluados en ella (=%3d= es un entero en tres caracteres; la barra invertida =\= continúa la instrucción en la línea siguiente). Por último imprime la edad en la que cada modelo alcanza su máximo, que se obtiene anulando la derivada: $-p_2/(2p_3)$ para la parábola y la raíz de una ecuación de segundo grado para la cúbica.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

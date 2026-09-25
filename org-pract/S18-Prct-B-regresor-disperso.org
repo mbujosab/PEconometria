@@ -106,9 +106,17 @@ Los datos son /simulados con parámetros conocidos/: $\beta_1=10$, $\beta_2=0{,}
 3. Contrastar $H_0\!:\beta_2=0{,}5$ —que es cierta— en los dos ajustes.
 4. Ver qué columnas de la tabla cambian, y cuáles no, al cambiar las unidades del regresor.
 
+/Comandos nuevos de esta práctica/. Los accesores =$coeff=, =$stderr=, =$sigma=, =$rsq= y =$df=, y las funciones =critical= y =pvalue=, son los de la práctica A de hoy; =nulldata=, =setobs= y =printf=, los de las sesiones 4 y 7. Lo nuevo:
+- =index= :: serie interna con el número de orden de cada observación, $1,2,\ldots,n$. Sirve para construir un regresor con valores equiespaciados.
+- ={a, b, c}'= :: una lista de números entre llaves es una matriz fila; el apóstrofo la traspone a columna, y una columna con $n$ valores puede asignarse a una serie. Así se teclean a mano los doce valores del regresando.
+- =\= al final de una línea :: la instrucción continúa en la línea siguiente (práctica B de la sesión 7).
+- =max(x)= :: el mayor valor de la serie.
+
 * Actividad 1 - Regresor concentrado
 
 Los doce valores del regresor van de $47{,}25$ a $52{,}75$ en pasos de $0{,}5$; los del regresando son los del panel izquierdo de la figura.
+
+Dos bloques. El primero crea un conjunto de doce observaciones de sección cruzada y las dos series: =x_c=, con los doce valores equiespaciados (=47.25 + 0.5*(index - 1)= vale $47{,}25$ en la primera observación y sube $0{,}5$ en cada una), e =y_c=, con los doce valores del regresando tecleados entre llaves. El segundo estima la regresión, guarda el valor crítico al $5\%$ con los grados de libertad del modelo (=$df=) y reconstruye el error estándar como $\mathfrak s$ (=$sigma=) dividido por la longitud del regresor en desviaciones, comparándolo con =$stderr(x_c)=; después imprime el estadístico $t$ y el intervalo.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -150,6 +158,8 @@ Son los números del panel izquierdo de la lección: $\hat\beta_2=0{,}4931$, err
 * Actividad 2 - Regresor disperso
 
 Ahora los valores del regresor van de $22{,}5$ a $77{,}5$ en pasos de $5$ —diez veces más separados, alrededor del mismo centro—, y el regresando es el del panel derecho.
+
+Tres bloques. El primero crea el regresor disperso, con pasos de $5$, y su regresando. El segundo repite el ajuste y las mismas comparaciones que en la Actividad 1, con el =tc= ya calculado. El tercero recupera las perturbaciones de cada panel restando a =y= la parte verdadera $10+0{,}5x$, y con =max(abs(u_c - u_d))= imprime la mayor diferencia entre las dos series: si es cero, las perturbaciones son las mismas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -198,6 +208,8 @@ Toda la diferencia está, por tanto, en el denominador del error estándar: la l
 
 Con datos reales no sabemos cuánto vale $\beta_2$. Aquí sí: vale $0{,}5$, porque lo hemos elegido nosotros. Podemos entonces contrastar $H_0\!:\beta_2=0{,}5$ sabiendo que es /cierta/, y ver qué hace el contraste con ella; y de paso, contrastar $H_0\!:\beta_2=0$, que sabemos /falsa/.
 
+Reestimamos los dos ajustes con =--quiet= para no reimprimir las tablas y, tras cada uno, guardamos dos estadísticos $t$: el de la hipótesis cierta, restando $0{,}5$ al coeficiente, y el de la falsa, restando $0$. Los =printf= finales los disponen en una tabla de dos columnas; el formato =%6.2f= reserva seis caracteres por número para que queden alineados.
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: Contrastes B
@@ -235,6 +247,8 @@ Aquí conviene resistir una tentación. Que el intervalo contenga al verdadero $
 * Actividad 4 - Cambiar las unidades del regresor
 
 Midamos el regresor disperso en centésimas (multiplicamos =x_d= por cien) y reestimemos.
+
+Creamos =x_d100=, el regresor multiplicado por cien, y estimamos dos veces con =--quiet=, una con cada versión. Tras cada ajuste, un =printf= imprime el coeficiente, el error estándar, el estadístico $t$ y el valor $p$ del regresor; el último imprime el $R^2$ del segundo ajuste.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
