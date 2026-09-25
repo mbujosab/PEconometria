@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-23 mié 22:31 -->
+<!-- 2026-09-25 vie 20:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 22 (B) &#x2014; El caso =nox= y =lnox=: la parte propia, el VIF y el error estándar</title>
@@ -287,62 +287,62 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org3cc2a0c">Descripción de la práctica</a></li>
-<li><a href="#org5631369">Actividad 1 - El modelo y la regresión auxiliar</a>
+<li><a href="#org28bf035">Descripción de la práctica</a></li>
+<li><a href="#org19b7840">Actividad 1 - El modelo y la regresión auxiliar</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgdc10c51">Lo que debe observar</a></li>
+<li><a href="#org5bfddf6">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgd27bdae">Actividad 2 - El error estándar, reconstruido</a>
+<li><a href="#orgf253e88">Actividad 2 - El error estándar, reconstruido</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgc1d0101">Lo que debe observar</a></li>
+<li><a href="#org530de2a">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgbb87db2">Actividad 3 - El comando <code>vif</code></a>
+<li><a href="#org877fb44">Actividad 3 - El comando <code>vif</code></a>
 <ul>
 <li>
 <ul>
-<li><a href="#org4d30d31">Lo que debe observar</a></li>
+<li><a href="#org8fc8d16">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgb727fc4">Actividad 4 - La misma cuenta sin <code>lnox</code></a>
+<li><a href="#org391388a">Actividad 4 - La misma cuenta sin <code>lnox</code></a>
 <ul>
 <li>
 <ul>
-<li><a href="#org435f045">Lo que debe observar</a></li>
+<li><a href="#org19fda17">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org01694c9">Actividad 5 - Los intervalos y la correlación entre estimadores</a>
+<li><a href="#orgc0eedf1">Actividad 5 - Los intervalos y la correlación entre estimadores</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org50175b6">Lo que debe observar</a></li>
+<li><a href="#orgc9f3588">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org6e8e026">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org4cf7caf">Para profundizar</a></li>
-<li><a href="#org8f9c86d">Código completo de la práctica</a></li>
-<li><a href="#org107a376">Respuestas</a></li>
+<li><a href="#org0f57577">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org25f8431">Para profundizar</a></li>
+<li><a href="#orga996fe8">Código completo de la práctica</a></li>
+<li><a href="#orgb256df1">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org3cc2a0c" class="outline-2">
-<h2 id="org3cc2a0c">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org3cc2a0c">
+<div id="outline-container-org28bf035" class="outline-2">
+<h2 id="org28bf035">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org28bf035">
 <p>
 La lección 13 dejó un caso sin explicar y la 14 lo explicó: en <code>price ~ rooms + nox + lnox</code> los dos \(t\) de la contaminación son nulos y el \(F\) de excluirlas juntas vale \(28\). La explicación fue una longitud: la parte propia de <code>nox</code>, lo que queda de ella después de proyectarla sobre los demás regresores, mide \(2{,}86\), cuando el regresor en desviaciones mide \(26\). Esta práctica hace esa cuenta con Gretl, paso a paso, y comprueba que el error estándar de la tabla es exactamente \(\mathfrak s\) dividido por esa longitud.
 </p>
@@ -362,20 +362,32 @@ Es la comprobación numérica del enunciado de la lección 12, \(\mathrm{ee}(\ha
 <li>Repetir la cuenta sin <code>lnox</code> para ver de dónde sale el factor \(8{,}7\) de la lección 14.</li>
 <li>Leer los intervalos de confianza de <code>nox</code> con y sin <code>lnox</code>, y la correlación entre los dos estimadores.</li>
 </ol>
+
+<p>
+<i>Comandos nuevos de esta práctica</i>. Casi todo se ha visto ya: <code>open</code>, <code>ols</code> y sus accesores <code>$sigma</code>, <code>$stderr</code>, <code>$rsq</code>, <code>$ess</code>, <code>$coeff</code> y <code>$df</code> (sesiones 11 a 18), <code>critical</code> (sesión 18) y <code>$vcv</code> (práctica B de la sesión 21). Recuerde que los accesores se refieren siempre al <i>último</i> modelo estimado: por eso, en esta práctica, se guardan en escalares antes de estimar el siguiente. Lo nuevo:
+</p>
+<dl class="org-dl">
+<dt><code>vif</code></dt><dd>se escribe después de estimar un modelo con al menos dos regresores no constantes, y para cada regresor calcula \(1/(1-R_j^2)\), con \(R_j^2\) el de la regresión de ese regresor sobre los demás. En la ventana del modelo es <i><i><code>Análisis -&gt; Colinealidad</code></i></i>.</dd>
+<dt><code>$vcv[3,4]</code></dt><dd><code>$vcv</code> es la matriz de varianzas y covarianzas de los coeficientes, y entre corchetes van la fila y la columna. Los coeficientes siguen el orden de la lista de regresores, así que <code>[3,4]</code> es la covarianza entre el tercero (<code>nox</code>) y el cuarto (<code>lnox</code>), y <code>[3,3]</code> la varianza del tercero.</dd>
+</dl>
 </div>
 </div>
-<div id="outline-container-org5631369" class="outline-2">
-<h2 id="org5631369">Actividad 1 - El modelo y la regresión auxiliar</h2>
-<div class="outline-text-2" id="text-org5631369">
+<div id="outline-container-org19b7840" class="outline-2">
+<h2 id="org19b7840">Actividad 1 - El modelo y la regresión auxiliar</h2>
+<div class="outline-text-2" id="text-org19b7840">
 <p>
 Abra <code>hprice2</code> y estime <code>price</code> sobre <code>rooms</code>, <code>nox</code> y <code>lnox</code>. Anote \(\mathfrak s\) y el error estándar de <code>nox</code>. Después estime la regresión auxiliar: <code>nox</code> sobre la constante, <code>rooms</code> y <code>lnox</code>. Su \(\mathrm{SRC}\) es la longitud al cuadrado de la parte propia de <code>nox</code>, y su \(R^2\) es el \(R_j^2\) de la lección 14.
+</p>
+
+<p>
+Dos regresiones seguidas. La primera es el modelo completo: guardamos en <code>s</code> la desviación típica de la regresión, \(\mathfrak s\) (<code>$sigma</code>), y en <code>ee_nox</code> el error estándar de <code>nox</code>. La segunda es la <i>regresión auxiliar</i>: <code>nox</code> como regresando sobre la constante, <code>rooms</code> y <code>lnox</code>. De ella guardamos el \(R^2\) y la raíz de su \(\mathrm{SRC}\) (<code>$ess</code>), que es la longitud de la parte propia de <code>nox</code>.
 </p>
 
 <p>
 <i>o bien teclee en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org626dace">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="orge4ae7b6">open hprice2.gdt --quiet
 ols price const rooms nox lnox
 scalar s = $sigma
 scalar ee_nox = $stderr(nox)
@@ -384,7 +396,7 @@ scalar R2aux = $rsq
 scalar longPropia = sqrt($ess)
 </pre>
 </div>
-<pre class="example" id="org6b29030">
+<pre class="example" id="org1b0f49d">
 Modelo 1: MCO, usando las observaciones 1-506
 Variable dependiente: price
 
@@ -404,7 +416,7 @@ Criterio de Schwarz     10308,59   Crit. de Hannan-Quinn   10298,32
 
 Sin considerar la constante, el valor p más alto fue el de la variable 3 (nox)
 </pre>
-<pre class="example" id="org0c12842">
+<pre class="example" id="org58072db">
 Modelo 2: MCO, usando las observaciones 1-506
 Variable dependiente: nox
 
@@ -429,32 +441,36 @@ sqrt(1 - R2aux)          = 0,1099   (= seno del angulo)
 producto                 = 2,8608
 </pre>
 </div>
-<div id="outline-container-orgdc10c51" class="outline-4">
-<h4 id="orgdc10c51">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgdc10c51">
+<div id="outline-container-org5bfddf6" class="outline-4">
+<h4 id="org5bfddf6">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org5bfddf6">
 <p>
 La regresión auxiliar tiene un \(R^2\) de \(0{,}9879\): <code>rooms</code> y <code>lnox</code> reproducen el \(98{,}8\%\) de la variación de <code>nox</code>, casi todo por cuenta de <code>lnox</code> (mire los dos \(t\)). La parte propia mide \(2{,}861\), y las dos maneras de calcularla coinciden: raíz de la \(\mathrm{SRC}\) auxiliar, o longitud en desviaciones por \(\sqrt{1-R_j^2}=0{,}110\), que es el seno del ángulo entre <code>nox</code> y el subespacio de los otros dos regresores, unos \(6^\circ\).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgd27bdae" class="outline-2">
-<h2 id="orgd27bdae">Actividad 2 - El error estándar, reconstruido</h2>
-<div class="outline-text-2" id="text-orgd27bdae">
+<div id="outline-container-orgf253e88" class="outline-2">
+<h2 id="orgf253e88">Actividad 2 - El error estándar, reconstruido</h2>
+<div class="outline-text-2" id="text-orgf253e88">
 <p>
 Divida \(\mathfrak s\) entre la longitud de la parte propia y compare con la columna ``Desv. típica'' de la tabla. Calcule también el VIF y descomponga el error estándar en los dos factores de la lección 14.
+</p>
+
+<p>
+Tres <code>printf</code> con los escalares guardados: \(\mathfrak s\) entre la longitud de la parte propia, el error estándar que imprimió Gretl, y el VIF con su raíz, calculados a partir del \(R^2\) auxiliar.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgd7a3646">printf "s / ||parte propia de nox||       = %.4f\n", s/longPropia
+<pre class="src src-gretl" id="org0fabd8f">printf "s / ||parte propia de nox||       = %.4f\n", s/longPropia
 printf "error estandar de nox segun Gretl = %.4f\n", ee_nox
 printf "VIF = %.3f   sqrt(VIF) = %.3f\n", 1/(1-R2aux), 1/sqrt(1-R2aux)
 </pre>
 </div>
-<pre class="example" id="org6e2e8df">
+<pre class="example" id="orgb373822">
 s del modelo completo               = 6290,3733
 s / ||parte propia de nox||         = 2198,8472
 error estandar de nox segun Gretl   = 2198,8472
@@ -462,31 +478,35 @@ VIF = 1/(1 - R2aux)                 = 82,802      sqrt(VIF) = 9,100
 s / ||nox en desviaciones||         = 241,643      x sqrt(VIF) = 2198,847
 </pre>
 </div>
-<div id="outline-container-orgc1d0101" class="outline-4">
-<h4 id="orgc1d0101">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgc1d0101">
+<div id="outline-container-org530de2a" class="outline-4">
+<h4 id="org530de2a">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org530de2a">
 <p>
 \(6290{,}37/2{,}8608=2198{,}85\), el error estándar de la tabla con cuatro decimales. El enunciado de la lección 12 se cumple sobre datos reales. Y la descomposición: \(241{,}6\) es el error estándar que <code>nox</code> tendría si no compartiera nada con los demás regresores, \(\mathfrak s\) entre su longitud completa en desviaciones; multiplicado por \(\sqrt{\mathrm{VIF}}=9{,}10\) da los \(2198{,}85\). El VIF es \(82{,}8\): la varianza se ha multiplicado por \(83\), el error estándar por \(9\).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgbb87db2" class="outline-2">
-<h2 id="orgbb87db2">Actividad 3 - El comando <code>vif</code></h2>
-<div class="outline-text-2" id="text-orgbb87db2">
+<div id="outline-container-org877fb44" class="outline-2">
+<h2 id="org877fb44">Actividad 3 - El comando <code>vif</code></h2>
+<div class="outline-text-2" id="text-org877fb44">
 <p>
 Vuelva al modelo completo y pida los factores de inflación: en la ventana del modelo, <i><i><code>Análisis -&gt; Colinealidad</code></i></i>.
+</p>
+
+<p>
+Hay que volver a estimar el modelo completo (con <code>--quiet</code>, para no repetir la tabla), porque <code>vif</code> actúa sobre el último modelo estimado y el último fue la regresión auxiliar.
 </p>
 
 <p>
 <i>o bien teclee en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org48b5038">ols price const rooms nox lnox --quiet
+<pre class="src src-gretl" id="orga8f0d2a">ols price const rooms nox lnox --quiet
 vif
 </pre>
 </div>
-<pre class="example" id="orgb96533b">
+<pre class="example" id="orge7f3a9a">
 Factores de inflación de varianza (VIF)
 Mínimo valor posible = 1.0
 Valores mayores que 10.0 pueden indicar un problema de colinealidad
@@ -499,27 +519,31 @@ VIF(j) = 1/(1 - R(j)^2), donde R(j) es el coeficiente de correlación múltiple
 entre la variable j y las demás variables independientes
 </pre>
 </div>
-<div id="outline-container-org4d30d31" class="outline-4">
-<h4 id="org4d30d31">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org4d30d31">
+<div id="outline-container-org8fc8d16" class="outline-4">
+<h4 id="org8fc8d16">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org8fc8d16">
 <p>
 Gretl devuelve el \(82{,}8\) de la Actividad 2 para <code>nox</code>, \(82{,}9\) para <code>lnox</code> y \(1{,}1\) para <code>rooms</code>: las dos medidas de contaminación se estorban entre sí y ninguna estorba a <code>rooms</code>. La nota al pie de la salida define el VIF como \(1/(1-R_j^2)\) con el \(R_j^2\) de la regresión auxiliar, que es lo que usted acaba de calcular, y da la regla del \(10\). Léala como lo que es, una convención: \(10\) significa error estándar multiplicado por \(3{,}2\).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgb727fc4" class="outline-2">
-<h2 id="orgb727fc4">Actividad 4 - La misma cuenta sin <code>lnox</code></h2>
-<div class="outline-text-2" id="text-orgb727fc4">
+<div id="outline-container-org391388a" class="outline-2">
+<h2 id="org391388a">Actividad 4 - La misma cuenta sin <code>lnox</code></h2>
+<div class="outline-text-2" id="text-org391388a">
 <p>
 Estime <code>price ~ rooms + nox</code> y repita: parte propia de <code>nox</code> sobre <code>rooms</code>, \(\mathfrak s\) dividido por ella, VIF.
+</p>
+
+<p>
+La misma secuencia con el modelo sin <code>lnox</code>: estimación, \(\mathfrak s\) guardado en <code>s_sin</code>, regresión auxiliar de <code>nox</code> sobre <code>rooms</code> (ahora un solo regresor), el cociente impreso directamente con los accesores de esa auxiliar, y <code>vif</code> tras volver a estimar el modelo de precios.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgadf0520">ols price const rooms nox
+<pre class="src src-gretl" id="org0b6de77">ols price const rooms nox
 scalar s_sin = $sigma
 ols nox const rooms --quiet
 printf "||parte propia de nox sobre rooms|| = %.3f    s/||.|| = %.2f\n", sqrt($ess), s_sin/sqrt($ess)
@@ -527,7 +551,7 @@ ols price const rooms nox --quiet
 vif
 </pre>
 </div>
-<pre class="example" id="orgecccf77">
+<pre class="example" id="orgaa9cc07">
 price ~ rooms + nox:   coef(nox) = -1884,68   ee(nox) = 253,57   t = -7,43   s = 6290,99
 parte propia de nox sobre rooms:  ||.|| = 24,809    R2aux = 0,0917    VIF = 1,101
 s / ||parte propia|| = 253,57
@@ -543,51 +567,55 @@ VIF(j) = 1/(1 - R(j)^2), donde R(j) es el coeficiente de correlación múltiple
 entre la variable j y las demás variables independientes
 </pre>
 </div>
-<div id="outline-container-org435f045" class="outline-4">
-<h4 id="org435f045">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org435f045">
+<div id="outline-container-org19fda17" class="outline-4">
+<h4 id="org19fda17">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org19fda17">
 <p>
 Sin <code>lnox</code>, la parte propia de <code>nox</code> mide \(24{,}81\), casi toda su longitud en desviaciones (\(26{,}03\)), porque <code>rooms</code> comparte poco con ella: \(\mathrm{VIF}=1{,}1\). El error estándar es \(253{,}57\), y \(6290{,}99/24{,}809=253{,}57\) de nuevo. Entre los dos modelos, \(\mathfrak s\) casi no cambia (\(6291{,}0\) frente a \(6290{,}4\)) y el número de observaciones es el mismo. Lo único que ha cambiado es la longitud con la que <code>nox</code> se mide a sí misma: de \(24{,}81\) a \(2{,}86\), un factor \(8{,}7\), y el error estándar sube en ese factor, de \(253{,}6\) a \(2198{,}9\).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org01694c9" class="outline-2">
-<h2 id="org01694c9">Actividad 5 - Los intervalos y la correlación entre estimadores</h2>
-<div class="outline-text-2" id="text-org01694c9">
+<div id="outline-container-orgc0eedf1" class="outline-2">
+<h2 id="orgc0eedf1">Actividad 5 - Los intervalos y la correlación entre estimadores</h2>
+<div class="outline-text-2" id="text-orgc0eedf1">
 <p>
 Construya el intervalo al \(95\%\) de <code>nox</code> en los dos modelos, el de <code>lnox</code> en el completo, y lea en la matriz de varianzas de los estimadores (<i><i><code>Análisis -&gt; Matriz de covarianzas de los coeficientes</code></i></i>) la correlación entre \(\hat\beta_{\text{nox}}\) y \(\hat\beta_{\text{lnox}}\).
+</p>
+
+<p>
+Con el modelo completo estimado, <code>critical(t, $df, 0.025)</code> da el valor crítico de la \(t\) con los grados de libertad del modelo (sesión 18), y cada intervalo es el coeficiente más y menos <code>tc</code> por su error estándar. En el <code>printf</code>, <code>%%</code> imprime un signo de tanto por ciento (un <code>%</code> solo abriría un hueco). La correlación entre los dos estimadores es su covarianza dividida por la raíz del producto de sus varianzas, las tres leídas en <code>$vcv</code>.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgdda2929">ols price const rooms nox lnox --quiet
+<pre class="src src-gretl" id="org9237434">ols price const rooms nox lnox --quiet
 scalar tc = critical(t, $df, 0.025)
 printf "IC 95%% de nox: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
 printf "correlacion entre los estimadores: %.4f\n", $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
 </pre>
 </div>
-<pre class="example" id="org3c568d2">
+<pre class="example" id="orgf497980">
 IC 95% de nox  con lnox en el modelo: [-3915,9 ; 4724,3]
 IC 95% de lnox con nox  en el modelo: [-38126,8 ; 11602,3]
 correlacion entre los dos estimadores: -0,9933
 IC 95% de nox  sin lnox: [-2382,9 ; -1386,5]
 </pre>
 </div>
-<div id="outline-container-org50175b6" class="outline-4">
-<h4 id="org50175b6">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org50175b6">
+<div id="outline-container-orgc9f3588" class="outline-4">
+<h4 id="orgc9f3588">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgc9f3588">
 <p>
 Con <code>lnox</code> en el modelo, el intervalo de <code>nox</code> va de \(-3\,900\) a \(+4\,700\) dólares por unidad de contaminación: los datos no saben ni el signo. Sin <code>lnox</code>, de \(-2\,400\) a \(-1\,400\): un efecto negativo bien medido. Y la correlación entre los dos estimadores es \(-0{,}993\): es la nube de la práctica A con datos reales. Los coeficientes \(404\) y \(-13\,262\) de la tabla son un reparto casi arbitrario de un efecto que, tomado en conjunto, es el de siempre; con otra muestra de viviendas, el reparto sería otro y el ajuste casi el mismo.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org6e8e026" class="outline-2">
-<h2 id="org6e8e026">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org6e8e026">
+<div id="outline-container-org0f57577" class="outline-2">
+<h2 id="org0f57577">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org0f57577">
 <ol class="org-ol">
 <li>En la Actividad 1, el \(t\) de <code>rooms</code> en la regresión auxiliar es \(0{,}07\). ¿Qué dice eso sobre la parte propia de <code>nox</code>, y por qué el VIF de <code>rooms</code> en el modelo de precios es \(1{,}1\) y no \(1\)?</li>
 <li>La descomposición de la Actividad 2 escribe el error estándar como \(241{,}6\cdot9{,}10\). ¿Cuál de los dos factores cambia si se duplican las observaciones manteniendo la misma correlación entre <code>nox</code> y <code>lnox</code>, y cómo?</li>
@@ -597,9 +625,9 @@ Con <code>lnox</code> en el modelo, el intervalo de <code>nox</code> va de \(-3\
 </ol>
 </div>
 </div>
-<div id="outline-container-org4cf7caf" class="outline-2">
-<h2 id="org4cf7caf">Para profundizar</h2>
-<div class="outline-text-2" id="text-org4cf7caf">
+<div id="outline-container-org25f8431" class="outline-2">
+<h2 id="org25f8431">Para profundizar</h2>
+<div class="outline-text-2" id="text-org25f8431">
 <ul class="org-ul">
 <li>Lección 14 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S20-Lecc14.html">lección 14</a>), ``Cuánto se acorta: el factor de inflación de la varianza'' y ``El caso <code>nox</code> y <code>lnox</code> con números''.</li>
 <li>Lección 12 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html">lección 12</a>), el enunciado del error estándar con \(k\) regresores.</li>
@@ -608,9 +636,9 @@ Con <code>lnox</code> en el modelo, el intervalo de <code>nox</code> va de \(-3\
 </ul>
 </div>
 </div>
-<div id="outline-container-org8f9c86d" class="outline-2">
-<h2 id="org8f9c86d">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org8f9c86d">
+<div id="outline-container-orga996fe8" class="outline-2">
+<h2 id="orga996fe8">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-orga996fe8">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -628,9 +656,9 @@ Con <code>lnox</code> en el modelo, el intervalo de <code>nox</code> va de \(-3\
 </table>
 </div>
 </div>
-<div id="outline-container-org107a376" class="outline-2">
-<h2 id="org107a376">Respuestas</h2>
-<div class="outline-text-2" id="text-org107a376">
+<div id="outline-container-orgb256df1" class="outline-2">
+<h2 id="orgb256df1">Respuestas</h2>
+<div class="outline-text-2" id="text-orgb256df1">
 <ol class="org-ol">
 <li><i>El \(t\) de <code>rooms</code> en la auxiliar.</i> Que <code>rooms</code> no aporta nada a la reproducción de <code>nox</code> una vez que está <code>lnox</code>: la parte propia de <code>nox</code> es, en la práctica, lo que <code>nox</code> no comparte con <code>lnox</code>. El VIF de <code>rooms</code> es \(1{,}1\) y no \(1\) porque <code>rooms</code> sí comparte algo con la pareja <code>nox</code> y <code>lnox</code> (barrios más contaminados tienen viviendas algo distintas): su \(R_j^2\) es \(0{,}09\). Es un VIF pequeño, y su raíz, \(1{,}05\), dice que el error estándar de <code>rooms</code> apenas se ha inflado.</li>
 
@@ -647,7 +675,7 @@ Con <code>lnox</code> en el modelo, el intervalo de <code>nox</code> va de \(-3\
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-23 mié 22:31</p>
+<p class="date">Created: 2026-09-25 vie 20:00</p>
 </div>
 </body>
 </html>

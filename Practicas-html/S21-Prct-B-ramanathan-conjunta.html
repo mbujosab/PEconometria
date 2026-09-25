@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-23 mié 22:30 -->
+<!-- 2026-09-25 vie 20:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 21 (B) &#x2014; Dos regresores que no son significativos: uno a uno y a la vez</title>
@@ -287,44 +287,44 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org732d623">Descripción de la práctica</a></li>
-<li><a href="#org606c8b8">Actividad 1 - El modelo completo y los regresores uno a uno</a>
+<li><a href="#org39e029b">Descripción de la práctica</a></li>
+<li><a href="#org2b14191">Actividad 1 - El modelo completo y los regresores uno a uno</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org94831bf">Lo que debe observar</a></li>
+<li><a href="#org548d0c3">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org36d2885">Actividad 2 - La exclusión conjunta</a>
+<li><a href="#org0ddba31">Actividad 2 - La exclusión conjunta</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org4eed96d">Lo que debe observar</a></li>
+<li><a href="#org9a8aea2">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org0258c3a">Actividad 3 - El rectángulo y las esquinas</a>
+<li><a href="#orgd9546b3">Actividad 3 - El rectángulo y las esquinas</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org12f3e39">Lo que debe observar</a></li>
+<li><a href="#org23d8b9d">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org02729cf">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org8a1cf5b">Para profundizar</a></li>
-<li><a href="#org96ce569">Código completo de la práctica</a></li>
-<li><a href="#org96ccd9a">Respuestas</a></li>
+<li><a href="#org529dd91">Preguntas de interpretación para la clase</a></li>
+<li><a href="#orge375d0f">Para profundizar</a></li>
+<li><a href="#org819ef9c">Código completo de la práctica</a></li>
+<li><a href="#org1c7bcfd">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org732d623" class="outline-2">
-<h2 id="org732d623">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org732d623">
+<div id="outline-container-org39e029b" class="outline-2">
+<h2 id="org39e029b">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org39e029b">
 <p>
 Cuando un modelo tiene dos regresores con \(t\) pequeños, la tentación es quitar los dos. La lección 13 avisó de que dos \(t\) pequeños no son un \(F\) pequeño: la pregunta ``¿sobra esta variable?'' y la pregunta ``¿sobran estas dos?'' son distintas, y solo la segunda se responde con el \(F\) de \(q=2\). Esta práctica hace las dos preguntas sobre unos datos pequeños y compara.
 </p>
@@ -343,26 +343,44 @@ Volvemos a <code>data4-1</code> de Ramanathan, el fichero de catorce viviendas d
 <li>Ver que el conjunto de pares \((\beta_{\text{bedrms}},\beta_{\text{baths}})\) que el \(F\) no rechaza no es el rectángulo formado por los dos intervalos: contrastar las cuatro esquinas del rectángulo.</li>
 <li>Distinguir ``no se rechaza que sean cero'' de ``son cero''.</li>
 </ol>
-</div>
-</div>
-<div id="outline-container-org606c8b8" class="outline-2">
-<h2 id="org606c8b8">Actividad 1 - El modelo completo y los regresores uno a uno</h2>
-<div class="outline-text-2" id="text-org606c8b8">
+
 <p>
-Abra <code>data4-1</code> y estime <code>price</code> sobre <code>sqft</code>, <code>bedrms</code> y <code>baths</code>. Después omita <code>baths</code>, y después también <code>bedrms</code>, anotando en cada paso el \(t\) de lo que queda y la \(\mathrm{SRC}\).
+<i>Comandos nuevos de esta práctica</i>. Seguimos usando <code>ols</code> y sus accesores, <code>critical</code> y <code>pvalue</code> (sesión 18) y <code>restrict</code> con los coeficientes nombrados por su variable (práctica A de esta sesión). Lo nuevo:
+</p>
+<dl class="org-dl">
+<dt><code>restrict --quiet</code></dt><dd>hace el contraste sin imprimir las estimaciones restringidas. Sirve cuando solo queremos el estadístico.</dd>
+<dt><code>$test</code></dt><dd>tras un contraste, el valor de su estadístico; aquí, el \(F\) que <code>restrict</code> acaba de calcular. Guardarlo en un escalar permite compararlo con el valor crítico o pasarlo a <code>pvalue</code>.</dd>
+<dt>Escalares en una restricción</dt><dd>a la derecha del igual, en lugar de un número, puede ir el nombre de un escalar: <code>b[bedrms] = iL</code>.</dd>
+<dt><code>$vcv</code></dt><dd>la matriz de varianzas y covarianzas de los coeficientes del último modelo. Entre corchetes, <code>$vcv[3,4]</code>, se toma el elemento de la fila \(3\) y la columna \(4\): la covarianza entre el tercer y el cuarto coeficiente. Aparece en el guion completo de la Actividad 3.</dd>
+</dl>
+</div>
+</div>
+<div id="outline-container-org2b14191" class="outline-2">
+<h2 id="org2b14191">Actividad 1 - El modelo completo y los regresores uno a uno</h2>
+<div class="outline-text-2" id="text-org2b14191">
+<p>
+Abra <code>data4-1</code> (<i><i><code>Archivo -&gt; Abrir archivo de datos -&gt; Archivo de muestra</code></i></i>, pestaña <i><i><code>Ramanathan</code></i></i>) y estime <code>price</code> sobre <code>sqft</code>, <code>bedrms</code> y <code>baths</code> con <i><i><code>Modelo -&gt; Mínimos cuadrados ordinarios</code></i></i>. Después omita <code>baths</code>, y después también <code>bedrms</code>, anotando en cada paso el \(t\) de lo que queda y la \(\mathrm{SRC}\).
+</p>
+
+<p>
+Tres estimaciones seguidas con <code>ols</code>, sin <code>--quiet</code> para ver las tres tablas: el modelo completo, el modelo sin <code>baths</code> y el modelo con <code>sqft</code> solo. Cada <code>ols</code> sustituye al anterior como último modelo, así que los accesores se refieren siempre a la tabla que acaba de imprimirse. Tras la primera estimación se guardan tres escalares que harán falta en la Actividad 2: <code>SRC</code> (<code>$ess</code>), <code>df</code> (los grados de libertad, <code>$df</code>) y <code>s2</code>, la cuasivarianza <code>SRC/df</code>; tras la tercera, <code>SRCr</code>. El guion completo calcula además los \(t\) como cociente de <code>$coeff</code> y <code>$stderr</code>.
 </p>
 
 <p>
 <i>o bien teclee en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org022133b">open data4-1.gdt --quiet
+<pre class="src src-gretl" id="org41b73a5">open data4-1.gdt --quiet
 ols price const sqft bedrms baths
+scalar SRC = $ess
+scalar df  = $df
+scalar s2  = SRC/df
 ols price const sqft bedrms
 ols price const sqft
+scalar SRCr = $ess
 </pre>
 </div>
-<pre class="example" id="orgc2ce30b">
+<pre class="example" id="orgc806a65">
 Modelo 1: MCO, usando las observaciones 1-14
 Variable dependiente: price
 
@@ -386,15 +404,15 @@ Sin considerar la constante, el valor p más alto fue el de la variable 4 (baths
 n = 14   k = 4   n-k = 10
 t_c al 5% (10 g.l.) = 2,228
 </pre>
-<pre class="example" id="org9eb56fb">
+<pre class="example" id="orge178cbc">
 Modelo completo: t(bedrms) = -0,799   t(baths) = -0,282   (t_c = 2,228)
 Sin baths:       t(bedrms) = -0,970   (t_c = 2,201)   SRC = 16832,8
 Sin baths ni bedrms:  SRC_r = 18273,6   coef(sqft) = 0,1388   ee = 0,0187   t = 7,41
 </pre>
 </div>
-<div id="outline-container-org94831bf" class="outline-4">
-<h4 id="org94831bf">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org94831bf">
+<div id="outline-container-org548d0c3" class="outline-4">
+<h4 id="org548d0c3">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org548d0c3">
 <p>
 Los dos coeficientes son negativos y sus \(t\) están lejos de \(t_c=2{,}23\): con diez grados de libertad, ni los dormitorios ni los baños añaden nada medible a lo que ya dice la superficie. Al quitar <code>baths</code>, el \(t\) de <code>bedrms</code> cambia de \(-0{,}80\) a \(-0{,}97\): cambia, porque la parte propia de <code>bedrms</code> ya no descuenta lo que compartía con <code>baths</code>, pero sigue sin acercarse al umbral.
 </p>
@@ -405,18 +423,22 @@ Fíjese también en <code>sqft</code>: su coeficiente pasa de \(0{,}155\) a \(0{
 </div>
 </div>
 </div>
-<div id="outline-container-org36d2885" class="outline-2">
-<h2 id="org36d2885">Actividad 2 - La exclusión conjunta</h2>
-<div class="outline-text-2" id="text-org36d2885">
+<div id="outline-container-org0ddba31" class="outline-2">
+<h2 id="org0ddba31">Actividad 2 - La exclusión conjunta</h2>
+<div class="outline-text-2" id="text-org0ddba31">
 <p>
 Estime el \(F\) de \(H_0\!:\beta_{\text{bedrms}}=\beta_{\text{baths}}=0\) con las dos \(\mathrm{SRC}\) que ya tiene, y compruébelo con <code>restrict</code> (<i><i><code>Contrastes -&gt; Restricciones lineales</code></i></i> en la ventana del modelo completo).
+</p>
+
+<p>
+La primera línea construye el \(F\) con \(q=2\) a partir de los escalares <code>SRC</code>, <code>SRCr</code>, <code>s2</code> y <code>df</code> guardados en la actividad anterior. El <code>printf</code> imprime el \(F\), el valor crítico y el valor \(p\). Después se vuelve a estimar el modelo completo, porque <code>restrict</code> actúa sobre el último modelo estimado, y se imponen las dos restricciones.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orga4fdb9a">scalar Fj = ((SRCr - SRC)/2)/s2
+<pre class="src src-gretl" id="org7b66466">scalar Fj = ((SRCr - SRC)/2)/s2
 printf "F(2,10) = %.3f   F_c = %.3f   valor p = %.4f\n", Fj, critical(F, 2, df, 0.05), pvalue(F, 2, df, Fj)
 ols price const sqft bedrms baths --quiet
 restrict
@@ -425,12 +447,12 @@ restrict
 end restrict
 </pre>
 </div>
-<pre class="example" id="org1cc71d1">
+<pre class="example" id="org80581d8">
 H0: beta_bedrms = beta_baths = 0
 SRC completo = 16700,1   SRC_r = 18273,6   subida = 1573,5
 F(2,10) = 0,471   F_c al 5% = 4,103   valor p = 0,6375
 </pre>
-<pre class="example" id="org2315209">
+<pre class="example" id="org4f03f7f">
 Conjunto de restricciones
  1: b[bedrms] = 0
  2: b[baths] = 0
@@ -449,27 +471,31 @@ Estimaciones restringidas:
   Desviación típica de la regresión = 39,023
 </pre>
 </div>
-<div id="outline-container-org4eed96d" class="outline-4">
-<h4 id="org4eed96d">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org4eed96d">
+<div id="outline-container-org9a8aea2" class="outline-4">
+<h4 id="org9a8aea2">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org9a8aea2">
 <p>
 \(F=0{,}47\) con \(F_c(2,10)=4{,}10\): quitar los dos regresores a la vez sube la \(\mathrm{SRC}\) en \(1573\), menos de la mitad de lo que vale una sola dimensión de ruido, \(\mathfrak s^2=1670\). Aquí los dos veredictos coinciden: uno a uno, no significativos; a la vez, tampoco. No siempre es así, y la práctica A de esta sesión terminó con el caso contrario. La coincidencia de hoy no es la regla; es lo que ocurre cuando los dos regresores no comparten mucho entre sí.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org0258c3a" class="outline-2">
-<h2 id="org0258c3a">Actividad 3 - El rectángulo y las esquinas</h2>
-<div class="outline-text-2" id="text-org0258c3a">
+<div id="outline-container-orgd9546b3" class="outline-2">
+<h2 id="orgd9546b3">Actividad 3 - El rectángulo y las esquinas</h2>
+<div class="outline-text-2" id="text-orgd9546b3">
 <p>
 Los intervalos al \(95\%\) de <code>bedrms</code> y <code>baths</code> definen un rectángulo en el plano \((\beta_{\text{bedrms}},\beta_{\text{baths}})\). Cabe pensar que el \(F\) no rechaza ningún par de valores dentro del rectángulo y rechaza todos los de fuera. Compruébelo en las cuatro esquinas: cada esquina es un par de valores que está, a la vez, en el borde de los dos intervalos.
+</p>
+
+<p>
+Con <code>critical</code> se obtiene \(t_c\), y con él los extremos de los dos intervalos al \(95\%\): <code>iL</code> e <code>iR</code> para <code>bedrms</code>, <code>jL</code> y <code>jR</code> para <code>baths</code>. Después, un <code>restrict --quiet</code> fija a la vez los dos coeficientes en una esquina del rectángulo, y <code>$test</code> recoge el \(F\) de ese contraste en el escalar <code>F_LL</code>. Falta repetirlo para las otras tres esquinas, cambiando los escalares de la derecha; el guion completo lo hace y calcula además la correlación entre los dos estimadores a partir de <code>$vcv</code>.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org4240ceb">ols price const sqft bedrms baths --quiet
+<pre class="src src-gretl" id="orgaec335e">ols price const sqft bedrms baths --quiet
 scalar tc = critical(t, $df, 0.025)
 scalar iL = $coeff(bedrms) - tc*$stderr(bedrms)
 scalar iR = $coeff(bedrms) + tc*$stderr(bedrms)
@@ -482,7 +508,7 @@ end restrict
 scalar F_LL = $test          # y lo mismo con las otras tres esquinas
 </pre>
 </div>
-<pre class="example" id="org182bc58">
+<pre class="example" id="orge904b06">
 IC 95% bedrms: [-81,81 ; 38,64]    IC 95% baths: [-108,56 ; 84,17]
 F_c(2,10) al 5% = 4,103
 Contraste conjunto de cada esquina del rectangulo:
@@ -493,9 +519,9 @@ Contraste conjunto de cada esquina del rectangulo:
 Correlacion entre los estimadores de bedrms y baths (de la matriz de varianzas): -0,305
 </pre>
 </div>
-<div id="outline-container-org12f3e39" class="outline-4">
-<h4 id="org12f3e39">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org12f3e39">
+<div id="outline-container-org23d8b9d" class="outline-4">
+<h4 id="org23d8b9d">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org23d8b9d">
 <p>
 Dos esquinas se rechazan (\(F=7{,}14>4{,}10\)) y dos no (\(F=3{,}80\)). Las cuatro están en el borde de los dos intervalos, así que el rectángulo no es la región que el \(F\) acepta. Esa región es el conjunto de pares \((c_2,c_3)\) para los que \(H_0\!:\beta_{\text{bedrms}}=c_2,\ \beta_{\text{baths}}=c_3\) no se rechaza al \(5\%\), y tiene forma de elipse centrada en las estimaciones: es el intervalo de confianza en dos dimensiones. Gretl la dibuja desde la ventana del modelo, <i><i><code>Análisis -&gt; Elipse de confianza</code></i></i>, eligiendo los dos coeficientes.
 </p>
@@ -506,9 +532,9 @@ La elipse está inclinada porque los dos estimadores están correlados: \(-0{,}3
 </div>
 </div>
 </div>
-<div id="outline-container-org02729cf" class="outline-2">
-<h2 id="org02729cf">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org02729cf">
+<div id="outline-container-org529dd91" class="outline-2">
+<h2 id="org529dd91">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org529dd91">
 <ol class="org-ol">
 <li>En la Actividad 1, el \(t\) de <code>bedrms</code> pasa de \(-0{,}80\) a \(-0{,}97\) al quitar <code>baths</code>. ¿Qué dos cosas cambian en el cociente \(t=\hat\beta/\mathrm{ee}\) cuando se elimina un regresor?</li>
 <li>La Actividad 2 da \(F=0{,}47\). ¿Qué diría un \(F\) menor que \(1\) sobre la subida de la \(\mathrm{SRC}\) comparada con el ruido de una dimensión?</li>
@@ -518,9 +544,9 @@ La elipse está inclinada porque los dos estimadores están correlados: \(-0{,}3
 </ol>
 </div>
 </div>
-<div id="outline-container-org8a1cf5b" class="outline-2">
-<h2 id="org8a1cf5b">Para profundizar</h2>
-<div class="outline-text-2" id="text-org8a1cf5b">
+<div id="outline-container-orge375d0f" class="outline-2">
+<h2 id="orge375d0f">Para profundizar</h2>
+<div class="outline-text-2" id="text-orge375d0f">
 <ul class="org-ul">
 <li>Lección 13 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html">lección 13</a>), secciones ``La hipótesis conjunta'' y ``Conjunto \(\neq\) individual: el caso de la apertura''.</li>
 <li>Lección 12 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html">lección 12</a>), el intervalo de confianza como conjunto de valores que el contraste no rechaza.</li>
@@ -529,9 +555,9 @@ La elipse está inclinada porque los dos estimadores están correlados: \(-0{,}3
 </ul>
 </div>
 </div>
-<div id="outline-container-org96ce569" class="outline-2">
-<h2 id="org96ce569">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org96ce569">
+<div id="outline-container-org819ef9c" class="outline-2">
+<h2 id="org819ef9c">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org819ef9c">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -549,9 +575,9 @@ La elipse está inclinada porque los dos estimadores están correlados: \(-0{,}3
 </table>
 </div>
 </div>
-<div id="outline-container-org96ccd9a" class="outline-2">
-<h2 id="org96ccd9a">Respuestas</h2>
-<div class="outline-text-2" id="text-org96ccd9a">
+<div id="outline-container-org1c7bcfd" class="outline-2">
+<h2 id="org1c7bcfd">Respuestas</h2>
+<div class="outline-text-2" id="text-org1c7bcfd">
 <ol class="org-ol">
 <li><i>Qué cambia en el \(t\) al quitar un regresor.</i> Numerador y denominador. El coeficiente de <code>bedrms</code> es una coordenada, y cambia porque cambia la base: pasa de \(-21{,}6\) a \(-23{,}9\) al quitar <code>baths</code>. El error estándar es \(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\) y cambia por dos vías: la parte propia de <code>bedrms</code> se alarga al no descontar lo que compartía con <code>baths</code>, y \(\mathfrak s\) se recalcula con un grado de libertad más: el error estándar baja de \(27{,}0\) a \(24{,}6\). El efecto neto es pequeño, porque <code>bedrms</code> y <code>baths</code> comparten poco.</li>
 
@@ -568,7 +594,7 @@ La elipse está inclinada porque los dos estimadores están correlados: \(-0{,}3
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-23 mié 22:30</p>
+<p class="date">Created: 2026-09-25 vie 20:00</p>
 </div>
 </body>
 </html>

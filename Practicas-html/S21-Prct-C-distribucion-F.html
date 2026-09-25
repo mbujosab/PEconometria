@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-23 mié 22:31 -->
+<!-- 2026-09-25 vie 20:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 21 (C) &#x2014; La distribución del $F$ cuando $H_0$ es cierta</title>
@@ -287,44 +287,44 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5f45d6a">Descripción de la práctica</a></li>
-<li><a href="#org625615d">Actividad 1 - Dos mil réplicas bajo \(H_0\) cierta, \(n=506\)</a>
+<li><a href="#orgf9a59a7">Descripción de la práctica</a></li>
+<li><a href="#org6d887c8">Actividad 1 - Dos mil réplicas bajo \(H_0\) cierta, \(n=506\)</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgb8fcb8d">Lo que debe observar</a></li>
+<li><a href="#org9ac003d">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org3eba11f">Actividad 2 - Lo mismo con \(n=20\)</a>
+<li><a href="#org0529392">Actividad 2 - Lo mismo con \(n=20\)</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orga481b45">Lo que debe observar</a></li>
+<li><a href="#org6f0d46f">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org12d9f69">Actividad 3 - Una hipótesis falsa por poco, con \(n=20\) y con \(n=506\)</a>
+<li><a href="#org911843a">Actividad 3 - Una hipótesis falsa por poco, con \(n=20\) y con \(n=506\)</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgf0fbb1e">Lo que debe observar</a></li>
+<li><a href="#orga7ae570">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgc0ab076">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orgb9ba57f">Para profundizar</a></li>
-<li><a href="#org7934952">Código completo de la práctica</a></li>
-<li><a href="#orgbc6414b">Respuestas</a></li>
+<li><a href="#org68aaefc">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org4f27433">Para profundizar</a></li>
+<li><a href="#org063dded">Código completo de la práctica</a></li>
+<li><a href="#orgbe3bfbf">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5f45d6a" class="outline-2">
-<h2 id="org5f45d6a">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org5f45d6a">
+<div id="outline-container-orgf9a59a7" class="outline-2">
+<h2 id="orgf9a59a7">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orgf9a59a7">
 <p>
 La lección 13 dijo que, si \(H_0\) es cierta y las perturbaciones son normales, el \(F\) sigue una distribución \(F\) de Fisher con \(q\) y \(n-k\) grados de libertad: numerador y denominador estiman los dos \(\sigma^2\), así que el cociente oscila en torno a \(1\), y el valor crítico deja un \(5\%\) de probabilidad a su derecha. Esta práctica lo comprueba repitiendo, como la práctica C de la sesión 18 comprobó la cobertura del intervalo.
 </p>
@@ -342,20 +342,35 @@ El mundo artificial usa los regresores <i>reales</i> de <code>hprice2</code> —
 <li>Repetir con \(n=20\) para ver que la distribución depende de \(n-k\) y que usar el valor crítico equivocado cambia la frecuencia de rechazo.</li>
 <li>Con una \(H_0\) falsa por poco, comparar la frecuencia de rechazo con \(n=20\) y con \(n=506\).</li>
 </ol>
+
+<p>
+<i>Comandos nuevos de esta práctica</i>. La mecánica es la de la práctica A de la sesión 16: <code>loop R --progressive --quiet</code>, <code>store</code> para acumular una fila por réplica en un fichero <code>.gdt</code>, y <code>open</code> de ese fichero al terminar el bucle; <code>smpl 20 --random</code> y <code>smpl full</code> (sesiones 16 y 18); <code>critical</code> y <code>quantile</code> (sesión 18). Lo nuevo:
+</p>
+<dl class="org-dl">
+<dt><code>$Fstat</code></dt><dd>el \(F\) del pie de la tabla de <code>ols</code>, el contraste de que todos los coeficientes salvo la constante son cero. Es el \(F\) de hoy, porque \(H_0\) excluye los tres regresores.</dd>
+<dt><code>$rsq</code></dt><dd>el \(R^2\) del último modelo. Junto con <code>$ess</code> permite recuperar la \(\mathrm{SEC}\), que Gretl no devuelve directamente.</dd>
+<dt><code>mean(Fst &gt; Fc)</code></dt><dd>la comparación produce una serie de ceros y unos (práctica C de la sesión 7), y su media es la fracción de réplicas en que el \(F\) supera el valor crítico (práctica C de la sesión 18).</dd>
+<dt><code>rech +</code> (&#x2026;)=</dt><dd>suma al escalar <code>rech</code> el valor entre paréntesis, uno o cero: el contador de rechazos de la práctica C de la sesión 18.</dd>
+<dt><code>open</code> y los escalares</dt><dd>al abrir un conjunto de datos, <code>open</code> borra los escalares definidos antes, salvo con la opción <code>--preserve</code>. Por eso los bloques de las Actividades 2 y 3 vuelven a definir <code>b1</code>, <code>sig</code> y <code>R</code> justo después de <code>open</code>.</dd>
+</dl>
 </div>
 </div>
-<div id="outline-container-org625615d" class="outline-2">
-<h2 id="org625615d">Actividad 1 - Dos mil réplicas bajo \(H_0\) cierta, \(n=506\)</h2>
-<div class="outline-text-2" id="text-org625615d">
+<div id="outline-container-org6d887c8" class="outline-2">
+<h2 id="org6d887c8">Actividad 1 - Dos mil réplicas bajo \(H_0\) cierta, \(n=506\)</h2>
+<div class="outline-text-2" id="text-org6d887c8">
 <p>
 Abra <code>hprice2</code>, fije la semilla y repita \(2\,000\) veces: sortee las perturbaciones, construya \(y\), estime el modelo con los tres regresores y guarde el \(F\) del pie de la tabla junto con su numerador \(\mathrm{SEC}/(k-1)\) y su denominador \(\mathrm{SRC}/(n-k)\). Gretl no da la \(\mathrm{SEC}\) directamente, pero \(\mathrm{STC}=\mathrm{SRC}/(1-R^2)\).
+</p>
+
+<p>
+Tras abrir <code>hprice2</code>, tres escalares fijan la constante <code>b1</code>, la desviación típica del ruido <code>sig</code> y el número de réplicas <code>R</code>. En cada vuelta del bucle se sortea <code>u</code>, se construye <code>y</code> sin ningún regresor, se estima el modelo con los tres y se guardan cuatro escalares: el \(F\) del pie de la tabla, la \(\mathrm{SRC}\), la \(\mathrm{SEC}\) recuperada de <code>$ess</code> y <code>$rsq</code>, y el numerador y el denominador del \(F\), cada uno dividido por sus grados de libertad, \(3\) y \(502\). <code>store</code> añade una fila por réplica al fichero <code>replicasF.gdt</code>. Al salir del bucle, <code>open</code> carga ese fichero: ahora cada observación es una réplica, y <code>Fst</code>, <code>numer</code> y <code>denom</code> son series de \(2\,000\) valores. El <code>printf</code> imprime la fracción de réplicas que superan el valor crítico y <code>freq</code> dibuja el histograma del \(F\).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgeb4d177">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="org66dee48">open hprice2.gdt --quiet
 scalar b1  = 20000
 scalar sig = 5000
 scalar R   = 2000
@@ -373,10 +388,10 @@ loop R --progressive --quiet
 endloop
 open "@workdir/replicasF.gdt" --quiet
 printf "fraccion de F &gt; F_c(3,502) = %.4f\n", mean(Fst &gt; critical(F, 3, 502, 0.05))
-freq Fst --plot="@workdir/histF.png"
+freq Fst
 </pre>
 </div>
-<pre class="example" id="org4aa1b27">
+<pre class="example" id="orga52dcd4">
 H0 cierta, n = 506, k = 4, 2000 replicas, sigma^2 = 2,500e+07
 media de SEC/(k-1) = 2,5391e+07
 media de SRC/(n-k) = 2,4954e+07
@@ -385,33 +400,40 @@ fraccion de F &gt; F_c(3,502) = 2,623 = 0,0555   (nominal 0,05)
 cuantil empirico 95% de F  = 2,697   (F_c = 2,623)
 </pre>
 
-<div id="orgc5253bc" class="figure">
+<div id="org15883b6" class="figure">
 <p><img src="./S21-Prct-C-distribucion-F/histF.png" alt="histF.png" width="550px" />
 </p>
 <p><span class="figure-number">Figura 1: </span>Los \(2\,000\) valores del \(F\) bajo \(H_0\) cierta con \(n=506\). La masa está entre \(0\) y \(2\); la cola derecha llega más allá de \(5\). El valor crítico \(F_c(3,502)=2{,}62\) deja a su derecha el \(5{,}5\%\) de las réplicas.</p>
 </div>
 </div>
-<div id="outline-container-orgb8fcb8d" class="outline-4">
-<h4 id="orgb8fcb8d">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgb8fcb8d">
+<div id="outline-container-org9ac003d" class="outline-4">
+<h4 id="org9ac003d">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org9ac003d">
 <p>
 Las dos medias, la del numerador y la del denominador, están junto a \(\sigma^2=2{,}5\cdot10^7\): bajo \(H_0\) cierta las dos son estimaciones del mismo ruido, y esa es la razón de que el \(F\) se mueva alrededor de \(1\). La media del \(F\) es \(1{,}02\); la mediana, \(0{,}81\): la distribución es asimétrica, con muchos valores pequeños y una cola larga a la derecha, y el histograma lo muestra. El \(5{,}5\%\) de las réplicas supera \(F_c\), frente al \(5\%\) nominal; con \(2\,000\) réplicas la frecuencia observada tiene su propia oscilación, igual que en la práctica C de la sesión 18.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org3eba11f" class="outline-2">
-<h2 id="org3eba11f">Actividad 2 - Lo mismo con \(n=20\)</h2>
-<div class="outline-text-2" id="text-org3eba11f">
+<div id="outline-container-org0529392" class="outline-2">
+<h2 id="org0529392">Actividad 2 - Lo mismo con \(n=20\)</h2>
+<div class="outline-text-2" id="text-org0529392">
 <p>
 Tome veinte viviendas al azar y repita. El valor crítico ya no es \(F_c(3,502)\) sino \(F_c(3,16)\), y esa diferencia importa.
+</p>
+
+<p>
+Igual que antes, con dos cambios. <code>smpl 20 --random</code> reduce la muestra a veinte viviendas elegidas al azar; la semilla se fija antes, para que sean las mismas para todos, y se vuelve a fijar antes del bucle. Y el valor crítico se calcula con \(16\) grados de libertad en el denominador. Los escalares <code>R</code>, <code>sig</code> y <code>b1</code> se definen de nuevo después de <code>open</code>, que los había borrado (véase la lista de comandos nuevos). Al final se imprime la fracción de rechazos con el valor crítico correcto y con el de \(n=506\).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org22f98b1">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="orgd1567cd">open hprice2.gdt --quiet
+scalar b1  = 20000
+scalar sig = 5000
+scalar R   = 2000
 set seed 20261119
 smpl 20 --random
 scalar Fc20 = critical(F, 3, 16, 0.05)
@@ -428,40 +450,47 @@ printf "fraccion de F &gt; F_c(3,16)  = %.4f\n", mean(F20 &gt; Fc20)
 printf "fraccion de F &gt; F_c(3,502) = %.4f\n", mean(F20 &gt; critical(F, 3, 502, 0.05))
 </pre>
 </div>
-<pre class="example" id="org7da9f28">
+<pre class="example" id="org0ea1ccd">
 H0 cierta, n = 20 (n-k = 16), 2000 replicas
 media de F = 1,132    mediana = 0,798    cuantil 95% = 3,275   (F_c(3,16) = 3,239)
 fraccion de F &gt; F_c(3,16) = 0,0505   (nominal 0,05)
 fraccion de F &gt; F_c(3,502) = 0,0875  &lt;- si se usara el valor critico de n = 506
 </pre>
 
-<div id="org2dd0e48" class="figure">
+<div id="orgf056737" class="figure">
 <p><img src="./S21-Prct-C-distribucion-F/histF20.png" alt="histF20.png" width="550px" />
 </p>
 <p><span class="figure-number">Figura 2: </span>Los \(2\,000\) valores del \(F\) bajo \(H_0\) cierta con \(n=20\). La cola derecha es más pesada que con \(n=506\): llega hasta \(9\), y el \(5\%\) superior empieza en \(3{,}24\) en lugar de \(2{,}62\).</p>
 </div>
 </div>
-<div id="outline-container-orga481b45" class="outline-4">
-<h4 id="orga481b45">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orga481b45">
+<div id="outline-container-org6f0d46f" class="outline-4">
+<h4 id="org6f0d46f">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org6f0d46f">
 <p>
 Con dieciséis grados de libertad en el denominador, el \(F\) sigue oscilando en torno a \(1\) pero se dispersa más: el denominador, \(\mathrm{SRC}/16\), es una estimación de \(\sigma^2\) mucho peor que \(\mathrm{SRC}/502\), y cuando sale pequeño el cociente se dispara. Por eso \(F_c(3,16)=3{,}24\) es mayor que \(F_c(3,502)=2{,}62\). Con el valor crítico correcto se rechaza el \(5{,}05\%\) de las veces; con el de \(n=506\), el \(8{,}75\%\): un contraste que dice ``\(5\%\)'' y rechaza casi el \(9\%\) de las hipótesis ciertas. Es el mismo precio de estimar \(\sigma\) que la práctica C de la sesión 18 midió con la \(t\).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org12d9f69" class="outline-2">
-<h2 id="org12d9f69">Actividad 3 - Una hipótesis falsa por poco, con \(n=20\) y con \(n=506\)</h2>
-<div class="outline-text-2" id="text-org12d9f69">
+<div id="outline-container-org911843a" class="outline-2">
+<h2 id="org911843a">Actividad 3 - Una hipótesis falsa por poco, con \(n=20\) y con \(n=506\)</h2>
+<div class="outline-text-2" id="text-org911843a">
 <p>
 Haga que <code>nox</code> intervenga con un coeficiente pequeño frente al ruido, \(\beta_{\text{nox}}=-800\) (<code>nox</code> recorre unas cinco unidades en la muestra, así que su efecto máximo es de unos \(4\,000\) dólares, menos que la desviación típica de \(u\)), y mantenga los otros dos en cero. \(H_0\) es ahora falsa. Cuente cuántas veces se rechaza con \(n=20\) y con \(n=506\).
+</p>
+
+<p>
+Ahora <code>y</code> se construye con <code>nox</code> dentro, con el coeficiente <code>bn</code>, y el bucle ya no acumula réplicas: es un <code>loop</code> sin <code>--progressive</code> que solo cuenta. En cada vuelta, <code>rech +</code> ($Fstat &gt; Fc)= suma uno si el \(F\) supera el valor crítico, y al terminar <code>rech/R</code> es la fracción de rechazos. <code>Fc</code> se calcula con los grados de libertad de la muestra activa, <code>$nobs-4</code>. Primero con la submuestra de veinte viviendas; después <code>smpl full</code> recupera las \(506\) y se repite el bloque, desde la línea de <code>Fc</code>, como hace el guion completo.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org4fec728">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="org6d11aa4">open hprice2.gdt --quiet
+scalar b1  = 20000
+scalar sig = 5000
+scalar R   = 2000
 scalar bn = -800                         # efecto pequeno de nox; rooms y stratio siguen sin intervenir
 set seed 20261119
 smpl 20 --random
@@ -477,23 +506,23 @@ printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rech/R
 smpl full                                # y lo mismo con n = 506
 </pre>
 </div>
-<pre class="example" id="org82d45b6">
+<pre class="example" id="orgb3635bc">
 H0 falsa (beta_nox = -800), n =  20: rechazos = 0,077
 H0 falsa (beta_nox = -800), n = 506: rechazos = 0,944
 </pre>
 </div>
-<div id="outline-container-orgf0fbb1e" class="outline-4">
-<h4 id="orgf0fbb1e">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgf0fbb1e">
+<div id="outline-container-orga7ae570" class="outline-4">
+<h4 id="orga7ae570">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orga7ae570">
 <p>
 Con veinte viviendas, la hipótesis falsa se rechaza el \(7{,}7\%\) de las veces: apenas por encima del \(5\%\) con que se rechaza una hipótesis cierta. El contraste casi no distingue. Con quinientas seis, el \(94{,}4\%\). El efecto es el mismo, \(-800\) por unidad de <code>nox</code>; lo que cambia es la longitud de la parte propia de <code>nox</code>, que con \(n=506\) es unas cinco veces mayor, y con ella la subida de la \(\mathrm{SRC}\) que la restricción falsa provoca. El denominador, en cambio, sigue estimando \(\sigma^2\). Un \(F\) grande necesita un efecto, o muchos datos, o las dos cosas; con pocos datos, no rechazar dice poco.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgc0ab076" class="outline-2">
-<h2 id="orgc0ab076">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-orgc0ab076">
+<div id="outline-container-org68aaefc" class="outline-2">
+<h2 id="org68aaefc">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org68aaefc">
 <ol class="org-ol">
 <li>En la Actividad 1, el numerador y el denominador tienen media \(\sigma^2\) y aun así la mediana del \(F\) es \(0{,}81\), no \(1\). ¿Cómo puede el cociente de dos cantidades de media \(\sigma^2\) estar por debajo de \(1\) más de la mitad de las veces?</li>
 <li>¿Por qué bajo \(H_0\) cierta \(\mathrm{SEC}/(k-1)\) estima \(\sigma^2\)? Diga qué son los \(k-1\) del denominador en la geometría de la lección 13.</li>
@@ -503,9 +532,9 @@ Con veinte viviendas, la hipótesis falsa se rechaza el \(7{,}7\%\) de las veces
 </ol>
 </div>
 </div>
-<div id="outline-container-orgb9ba57f" class="outline-2">
-<h2 id="orgb9ba57f">Para profundizar</h2>
-<div class="outline-text-2" id="text-orgb9ba57f">
+<div id="outline-container-org4f27433" class="outline-2">
+<h2 id="org4f27433">Para profundizar</h2>
+<div class="outline-text-2" id="text-org4f27433">
 <ul class="org-ul">
 <li>Lección 13 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html">lección 13</a>), secciones ``El estadístico \(F\)'' y ``Lectura geométrica: la misma figura''.</li>
 <li>Práctica C de la sesión 18, con la misma lógica aplicada al intervalo y al \(t\).</li>
@@ -514,9 +543,9 @@ Con veinte viviendas, la hipótesis falsa se rechaza el \(7{,}7\%\) de las veces
 </ul>
 </div>
 </div>
-<div id="outline-container-org7934952" class="outline-2">
-<h2 id="org7934952">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org7934952">
+<div id="outline-container-org063dded" class="outline-2">
+<h2 id="org063dded">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org063dded">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -534,9 +563,9 @@ Con veinte viviendas, la hipótesis falsa se rechaza el \(7{,}7\%\) de las veces
 </table>
 </div>
 </div>
-<div id="outline-container-orgbc6414b" class="outline-2">
-<h2 id="orgbc6414b">Respuestas</h2>
-<div class="outline-text-2" id="text-orgbc6414b">
+<div id="outline-container-orgbe3bfbf" class="outline-2">
+<h2 id="orgbe3bfbf">Respuestas</h2>
+<div class="outline-text-2" id="text-orgbe3bfbf">
 <ol class="org-ol">
 <li><i>Mediana menor que uno.</i> El cociente de dos variables no tiene por media el cociente de las medias, y la distribución del numerador es muy asimétrica: \(\mathrm{SEC}/3\) es una suma de tres cuadrados, con muchos valores pequeños y pocos grandes que tiran de la media hacia arriba. Más de la mitad de las veces el numerador queda por debajo de su media, y el \(F\) por debajo de \(1\); las réplicas en que sale grande compensan en la media pero no en la mediana.</li>
 
@@ -553,7 +582,7 @@ Con veinte viviendas, la hipótesis falsa se rechaza el \(7{,}7\%\) de las veces
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-23 mié 22:31</p>
+<p class="date">Created: 2026-09-25 vie 20:00</p>
 </div>
 </body>
 </html>

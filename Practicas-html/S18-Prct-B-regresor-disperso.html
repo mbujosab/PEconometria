@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-23 mié 22:30 -->
+<!-- 2026-09-25 vie 19:59 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 18 (B) &#x2014; El ejemplo de la lección 12, en Gretl: regresor concentrado frente a regresor disperso</title>
@@ -287,53 +287,53 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgbd7cc90">Descripción de la práctica</a></li>
-<li><a href="#orgc94e49c">Actividad 1 - Regresor concentrado</a>
+<li><a href="#orgb4c7a4c">Descripción de la práctica</a></li>
+<li><a href="#org7543e63">Actividad 1 - Regresor concentrado</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org7906a88">Lo que debe observar</a></li>
+<li><a href="#orgc304485">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org2ca4513">Actividad 2 - Regresor disperso</a>
+<li><a href="#org3faf774">Actividad 2 - Regresor disperso</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org437d587">Lo que debe observar</a></li>
+<li><a href="#org32a6dec">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org62b76c0">Actividad 3 - Contrastar la hipótesis verdadera</a>
+<li><a href="#orgec6d1e8">Actividad 3 - Contrastar la hipótesis verdadera</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org0255158">Lo que debe observar</a></li>
+<li><a href="#orgbf34aa3">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgbbfe6de">Actividad 4 - Cambiar las unidades del regresor</a>
+<li><a href="#orge85b280">Actividad 4 - Cambiar las unidades del regresor</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org58c2b77">Lo que debe observar</a></li>
+<li><a href="#orgf2c41c8">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org9009511">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org0cd5af8">Para profundizar</a></li>
-<li><a href="#orgebaa48b">Código completo de la práctica</a></li>
-<li><a href="#org9e42bba">Respuestas</a></li>
+<li><a href="#org1daffdf">Preguntas de interpretación para la clase</a></li>
+<li><a href="#orgd96bfab">Para profundizar</a></li>
+<li><a href="#orgd86faaf">Código completo de la práctica</a></li>
+<li><a href="#orgfc8cd90">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgbd7cc90" class="outline-2">
-<h2 id="orgbd7cc90">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-orgbd7cc90">
+<div id="outline-container-orgb4c7a4c" class="outline-2">
+<h2 id="orgb4c7a4c">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orgb4c7a4c">
 <p>
 La lección 12 ilustró el intervalo de confianza con una figura de dos paneles: dos ajustes con <i>la misma</i> muestra de doce perturbaciones, los mismos parámetros verdaderos y el mismo residuo, en los que lo único distinto era cuánto se separaban los valores del regresor. En uno el intervalo era \([0{,}08;\,0{,}90]\); en el otro, \([0{,}46;\,0{,}54]\).
 </p>
@@ -356,20 +356,34 @@ Los datos son <i>simulados con parámetros conocidos</i>: \(\beta_1=10\), \(\bet
 <li>Contrastar \(H_0\!:\beta_2=0{,}5\) —que es cierta— en los dos ajustes.</li>
 <li>Ver qué columnas de la tabla cambian, y cuáles no, al cambiar las unidades del regresor.</li>
 </ol>
+
+<p>
+<i>Comandos nuevos de esta práctica</i>. Los accesores <code>$coeff</code>, <code>$stderr</code>, <code>$sigma</code>, <code>$rsq</code> y <code>$df</code>, y las funciones <code>critical</code> y <code>pvalue</code>, son los de la práctica A de hoy; <code>nulldata</code>, <code>setobs</code> y <code>printf</code>, los de las sesiones 4 y 7. Lo nuevo:
+</p>
+<dl class="org-dl">
+<dt><code>index</code></dt><dd>serie interna con el número de orden de cada observación, \(1,2,\ldots,n\). Sirve para construir un regresor con valores equiespaciados.</dd>
+<dt><code>{a, b, c}'</code></dt><dd>una lista de números entre llaves es una matriz fila; el apóstrofo la traspone a columna, y una columna con \(n\) valores puede asignarse a una serie. Así se teclean a mano los doce valores del regresando.</dd>
+<dt><code>\</code> al final de una línea</dt><dd>la instrucción continúa en la línea siguiente (práctica B de la sesión 7).</dd>
+<dt><code>max(x)</code></dt><dd>el mayor valor de la serie.</dd>
+</dl>
 </div>
 </div>
-<div id="outline-container-orgc94e49c" class="outline-2">
-<h2 id="orgc94e49c">Actividad 1 - Regresor concentrado</h2>
-<div class="outline-text-2" id="text-orgc94e49c">
+<div id="outline-container-org7543e63" class="outline-2">
+<h2 id="org7543e63">Actividad 1 - Regresor concentrado</h2>
+<div class="outline-text-2" id="text-org7543e63">
 <p>
 Los doce valores del regresor van de \(47{,}25\) a \(52{,}75\) en pasos de \(0{,}5\); los del regresando son los del panel izquierdo de la figura.
+</p>
+
+<p>
+Dos bloques. El primero crea un conjunto de doce observaciones de sección cruzada y las dos series: <code>x_c</code>, con los doce valores equiespaciados (<code>47.25 + 0.5*(index - 1)</code> vale \(47{,}25\) en la primera observación y sube \(0{,}5\) en cada una), e <code>y_c</code>, con los doce valores del regresando tecleados entre llaves. El segundo estima la regresión, guarda el valor crítico al \(5\%\) con los grados de libertad del modelo (<code>$df</code>) y reconstruye el error estándar como \(\mathfrak s\) (<code>$sigma</code>) dividido por la longitud del regresor en desviaciones, comparándolo con <code>$stderr(x_c)</code>; después imprime el estadístico \(t\) y el intervalo.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgea70f2c">nulldata 12
+<pre class="src src-gretl" id="org4bea0a0">nulldata 12
 setobs 1 1 --cross-section
 
 series x_c = 47.25 + 0.5*(index - 1)
@@ -379,14 +393,14 @@ series y_c = {35.045, 33.025, 34.435, 32.415, 35.365, 35.975, \
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org4a3b3bb">ols y_c const x_c
+<pre class="src src-gretl" id="org5d1f9b3">ols y_c const x_c
 scalar tc = critical(t, $df, 0.025)
 printf "\n||x - xbar|| = %.4f    s = %.4f    ee = s/||x - xbar|| = %.4f  (Gretl: %.4f)\n", sqrt(sum((x_c-mean(x_c))^2)), $sigma, $sigma/sqrt(sum((x_c-mean(x_c))^2)), $stderr(x_c)
 printf "t = %.2f   (t_c al 5%% = %.3f)\n", $coeff(x_c)/$stderr(x_c), tc
 printf "IC 95%%: [%.2f ; %.2f]\n", $coeff(x_c) - tc*$stderr(x_c), $coeff(x_c) + tc*$stderr(x_c)
 </pre>
 </div>
-<pre class="example" id="orgc939019">
+<pre class="example" id="org3ec1360">
 Modelo 1: MCO, usando las observaciones 1-12
 Variable dependiente: y_c
 
@@ -408,34 +422,38 @@ t = 2,68   (t_c al 5% = 2,228)
 IC 95%: [0,08 ; 0,90]
 </pre>
 </div>
-<div id="outline-container-org7906a88" class="outline-4">
-<h4 id="org7906a88">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org7906a88">
+<div id="outline-container-orgc304485" class="outline-4">
+<h4 id="orgc304485">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgc304485">
 <p>
 Son los números del panel izquierdo de la lección: \(\hat\beta_2=0{,}4931\), error estándar \(0{,}184\), \(\vert t\vert=2{,}68\) e intervalo \([0{,}08;\,0{,}90]\). El coeficiente es significativo al \(5\%\) —el cero queda fuera— y el intervalo es tan ancho que no dice casi nada sobre cuánto vale la pendiente. Fíjese también en el error estándar reconstruido: \(\mathfrak s\) dividido por una longitud de solo \(5{,}98\).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org2ca4513" class="outline-2">
-<h2 id="org2ca4513">Actividad 2 - Regresor disperso</h2>
-<div class="outline-text-2" id="text-org2ca4513">
+<div id="outline-container-org3faf774" class="outline-2">
+<h2 id="org3faf774">Actividad 2 - Regresor disperso</h2>
+<div class="outline-text-2" id="text-org3faf774">
 <p>
 Ahora los valores del regresor van de \(22{,}5\) a \(77{,}5\) en pasos de \(5\) —diez veces más separados, alrededor del mismo centro—, y el regresando es el del panel derecho.
+</p>
+
+<p>
+Tres bloques. El primero crea el regresor disperso, con pasos de \(5\), y su regresando. El segundo repite el ajuste y las mismas comparaciones que en la Actividad 1, con el <code>tc</code> ya calculado. El tercero recupera las perturbaciones de cada panel restando a <code>y</code> la parte verdadera \(10+0{,}5x\), y con <code>max(abs(u_c - u_d))</code> imprime la mayor diferencia entre las dos series: si es cero, las perturbaciones son las mismas.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgc5acf5e">series x_d = 22.5 + 5*(index - 1)
+<pre class="src src-gretl" id="org3fa65c2">series x_d = 22.5 + 5*(index - 1)
 series y_d = {22.670, 22.900, 26.560, 26.790, 31.990, 34.850, \
               35.780, 37.430, 42.130, 43.800, 45.620, 49.480}'
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf6ee3a9">ols y_d const x_d
+<pre class="src src-gretl" id="org1c8794b">ols y_d const x_d
 printf "\n||x - xbar|| = %.4f    s = %.4f    ee = s/||x - xbar|| = %.4f  (Gretl: %.4f)\n", sqrt(sum((x_d-mean(x_d))^2)), $sigma, $sigma/sqrt(sum((x_d-mean(x_d))^2)), $stderr(x_d)
 printf "t = %.2f   (t_c al 5%% = %.3f)\n", $coeff(x_d)/$stderr(x_d), tc
 printf "IC 95%%: [%.2f ; %.2f]\n", $coeff(x_d) - tc*$stderr(x_d), $coeff(x_d) + tc*$stderr(x_d)
@@ -443,12 +461,12 @@ printf "IC 95%%: [%.2f ; %.2f]\n", $coeff(x_d) - tc*$stderr(x_d), $coeff(x_d) + 
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org1b5b9fb">series u_c = y_c - 10 - 0.5*x_c        # perturbacion del panel concentrado
+<pre class="src src-gretl" id="org851cc59">series u_c = y_c - 10 - 0.5*x_c        # perturbacion del panel concentrado
 series u_d = y_d - 10 - 0.5*x_d        # perturbacion del panel disperso
 printf "\nmayor diferencia entre las dos series de perturbaciones: %.6f\n", max(abs(u_c - u_d))
 </pre>
 </div>
-<pre class="example" id="orgf4fb183">
+<pre class="example" id="org2c42f07">
 Modelo 2: MCO, usando las observaciones 1-12
 Variable dependiente: y_d
 
@@ -472,9 +490,9 @@ IC 95%: [0,46 ; 0,54]
 mayor diferencia entre las dos series de perturbaciones: 0,000000
 </pre>
 </div>
-<div id="outline-container-org437d587" class="outline-4">
-<h4 id="org437d587">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org437d587">
+<div id="outline-container-org32a6dec" class="outline-4">
+<h4 id="org32a6dec">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org32a6dec">
 <p>
 La \(\mathfrak s\) es <i>la misma</i> que en la Actividad 1, \(1{,}1001\), hasta la cuarta cifra. Y la última línea lo explica: las doce perturbaciones —lo que queda al restar de cada \(y_i\) la parte verdadera \(10+0{,}5x_i\)— son idénticas en los dos paneles. Como el regresor en desviaciones apunta en la misma dirección en ambos casos (es el mismo patrón, multiplicado por diez), la proyección del ruido sobre esa dirección, y con ella el residuo, coincide.
 </p>
@@ -485,18 +503,22 @@ Toda la diferencia está, por tanto, en el denominador del error estándar: la l
 </div>
 </div>
 </div>
-<div id="outline-container-org62b76c0" class="outline-2">
-<h2 id="org62b76c0">Actividad 3 - Contrastar la hipótesis verdadera</h2>
-<div class="outline-text-2" id="text-org62b76c0">
+<div id="outline-container-orgec6d1e8" class="outline-2">
+<h2 id="orgec6d1e8">Actividad 3 - Contrastar la hipótesis verdadera</h2>
+<div class="outline-text-2" id="text-orgec6d1e8">
 <p>
 Con datos reales no sabemos cuánto vale \(\beta_2\). Aquí sí: vale \(0{,}5\), porque lo hemos elegido nosotros. Podemos entonces contrastar \(H_0\!:\beta_2=0{,}5\) sabiendo que es <i>cierta</i>, y ver qué hace el contraste con ella; y de paso, contrastar \(H_0\!:\beta_2=0\), que sabemos <i>falsa</i>.
+</p>
+
+<p>
+Reestimamos los dos ajustes con <code>--quiet</code> para no reimprimir las tablas y, tras cada uno, guardamos dos estadísticos \(t\): el de la hipótesis cierta, restando \(0{,}5\) al coeficiente, y el de la falsa, restando \(0\). Los <code>printf</code> finales los disponen en una tabla de dos columnas; el formato <code>%6.2f</code> reserva seis caracteres por número para que queden alineados.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org33683e5">ols y_c const x_c --quiet
+<pre class="src src-gretl" id="orgdb484e1">ols y_c const x_c --quiet
 scalar t_cierta_c = ($coeff(x_c) - 0.5)/$stderr(x_c)
 scalar t_falsa_c  = ($coeff(x_c) - 0.0)/$stderr(x_c)
 ols y_d const x_d --quiet
@@ -509,7 +531,7 @@ printf "H0: beta_2 = 0,5 (cierta)   t = %6.2f    t = %6.2f\n", t_cierta_c, t_cie
 printf "H0: beta_2 = 0   (falsa)    t = %6.2f    t = %6.2f\n", t_falsa_c,  t_falsa_d
 </pre>
 </div>
-<pre class="example" id="orgac5dc2f">
+<pre class="example" id="org61a8a62">
 t_c al 5% con 10 grados de libertad = 2,228
 
                         concentrado     disperso
@@ -517,9 +539,9 @@ H0: beta_2 = 0,5 (cierta)   t =  -0,04    t =  -0,04
 H0: beta_2 = 0   (falsa)    t =   2,68    t =  27,14
 </pre>
 </div>
-<div id="outline-container-org0255158" class="outline-4">
-<h4 id="org0255158">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org0255158">
+<div id="outline-container-orgbf34aa3" class="outline-4">
+<h4 id="orgbf34aa3">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgbf34aa3">
 <p>
 La hipótesis cierta no se rechaza en ningún panel —los dos estadísticos están cerca de cero—, y el \(0{,}5\) verdadero está dentro de los dos intervalos: dentro del ancho y dentro del estrecho. La hipótesis falsa se rechaza en los dos, pero con evidencias muy desiguales: \(2{,}68\) frente a \(27{,}14\).
 </p>
@@ -530,18 +552,22 @@ Aquí conviene resistir una tentación. Que el intervalo contenga al verdadero \
 </div>
 </div>
 </div>
-<div id="outline-container-orgbbfe6de" class="outline-2">
-<h2 id="orgbbfe6de">Actividad 4 - Cambiar las unidades del regresor</h2>
-<div class="outline-text-2" id="text-orgbbfe6de">
+<div id="outline-container-orge85b280" class="outline-2">
+<h2 id="orge85b280">Actividad 4 - Cambiar las unidades del regresor</h2>
+<div class="outline-text-2" id="text-orge85b280">
 <p>
 Midamos el regresor disperso en centésimas (multiplicamos <code>x_d</code> por cien) y reestimemos.
+</p>
+
+<p>
+Creamos <code>x_d100</code>, el regresor multiplicado por cien, y estimamos dos veces con <code>--quiet</code>, una con cada versión. Tras cada ajuste, un <code>printf</code> imprime el coeficiente, el error estándar, el estadístico \(t\) y el valor \(p\) del regresor; el último imprime el \(R^2\) del segundo ajuste.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org0d047fa">series x_d100 = 100*x_d
+<pre class="src src-gretl" id="org83692c2">series x_d100 = 100*x_d
 ols y_d const x_d --quiet
 printf "x en unidades originales : coef = %.6f   ee = %.6f   t = %.2f   p = %.3g\n", $coeff(x_d), $stderr(x_d), $coeff(x_d)/$stderr(x_d), 2*pvalue(t, $df, abs($coeff(x_d)/$stderr(x_d)))
 ols y_d const x_d100 --quiet
@@ -549,24 +575,24 @@ printf "x multiplicado por 100   : coef = %.6f   ee = %.6f   t = %.2f   p = %.3g
 printf "R2 en ambos casos        : %.4f\n", $rsq
 </pre>
 </div>
-<pre class="example" id="org38433df">
+<pre class="example" id="org534667e">
 x en unidades originales : coef = 0,499315   ee = 0,018399   t = 27,14   p = 1,07e-10
 x multiplicado por 100   : coef = 0,004993   ee = 0,000184   t = 27,14   p = 1,07e-10
 R2 en ambos casos        : 0,9866
 </pre>
 </div>
-<div id="outline-container-org58c2b77" class="outline-4">
-<h4 id="org58c2b77">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org58c2b77">
+<div id="outline-container-orgf2c41c8" class="outline-4">
+<h4 id="orgf2c41c8">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgf2c41c8">
 <p>
 El coeficiente y su error estándar se dividen los dos por cien; el estadístico \(t\), el valor \(p\) y el \(R^2\) no se mueven. Es la pregunta 10 de la lección 12 con números: las dos primeras columnas de la tabla están en las unidades del problema y las dos últimas son adimensionales. Por eso \(t\) y \(p\) sirven para comparar y no sirven para valorar la magnitud de un efecto, y por eso el coeficiente hay que leerlo siempre sabiendo en qué unidades está.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org9009511" class="outline-2">
-<h2 id="org9009511">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org9009511">
+<div id="outline-container-org1daffdf" class="outline-2">
+<h2 id="org1daffdf">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org1daffdf">
 <ol class="org-ol">
 <li>Los dos paneles tienen el mismo residuo. ¿Por qué? ¿Seguiría siendo así si, en lugar de multiplicar por diez los valores del regresor, los hubiéramos sorteado de nuevo?</li>
 <li>En la Actividad 1, el intervalo \([0{,}08;\,0{,}90]\) no contiene al cero. ¿Diría usted que ese ajuste ``demuestra'' que la pendiente es positiva? ¿Y que ``demuestra'' que vale \(0{,}5\)?</li>
@@ -576,18 +602,18 @@ El coeficiente y su error estándar se dividen los dos por cien; el estadístico
 </ol>
 </div>
 </div>
-<div id="outline-container-org0cd5af8" class="outline-2">
-<h2 id="org0cd5af8">Para profundizar</h2>
-<div class="outline-text-2" id="text-org0cd5af8">
+<div id="outline-container-orgd96bfab" class="outline-2">
+<h2 id="orgd96bfab">Para profundizar</h2>
+<div class="outline-text-2" id="text-orgd96bfab">
 <ul class="org-ul">
 <li>Lección 12 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html">lección 12</a>), secciones ``El error estándar, y el precio de estimar \(\sigma\)'' y ``El intervalo de confianza'', cuya figura se ha reproducido aquí.</li>
 <li>Wooldridge, J. M. (2020). <i>Introductory Econometrics</i>, cap. 2, sección 2.5 (varianza de los estimadores MCO: el papel de la variación del regresor) y cap. 4, sección 4.3.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgebaa48b" class="outline-2">
-<h2 id="orgebaa48b">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-orgebaa48b">
+<div id="outline-container-orgd86faaf" class="outline-2">
+<h2 id="orgd86faaf">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-orgd86faaf">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -605,9 +631,9 @@ El coeficiente y su error estándar se dividen los dos por cien; el estadístico
 </table>
 </div>
 </div>
-<div id="outline-container-org9e42bba" class="outline-2">
-<h2 id="org9e42bba">Respuestas</h2>
-<div class="outline-text-2" id="text-org9e42bba">
+<div id="outline-container-orgfc8cd90" class="outline-2">
+<h2 id="orgfc8cd90">Respuestas</h2>
+<div class="outline-text-2" id="text-orgfc8cd90">
 <ol class="org-ol">
 <li><i>El mismo residuo.</i> El residuo es lo que queda de \(\boldsymbol y\) tras quitarle su proyección sobre \(\mathcal L(\boldsymbol 1,\boldsymbol x)\) (lección 6), y ese subespacio es el mismo en los dos paneles: multiplicar por diez el regresor en desviaciones, sin mover su centro, no cambia el plano que generan \(\boldsymbol 1\) y \(\boldsymbol x\), solo sus generadores. Como además \(\boldsymbol y\) se construyó con las mismas perturbaciones, la parte de \(\boldsymbol y\) ortogonal a ese plano —el residuo— es idéntica. Si hubiéramos sorteado de nuevo los valores del regresor, el plano sería otro y el residuo, en general, distinto.</li>
 
@@ -624,7 +650,7 @@ El coeficiente y su error estándar se dividen los dos por cien; el estadístico
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-23 mié 22:30</p>
+<p class="date">Created: 2026-09-25 vie 19:59</p>
 </div>
 </body>
 </html>

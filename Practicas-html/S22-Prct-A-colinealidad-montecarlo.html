@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-23 mié 22:31 -->
+<!-- 2026-09-25 vie 20:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 22 (A) &#x2014; Dos regresores cada vez más alineados: un experimento de Monte Carlo</title>
@@ -287,35 +287,35 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orged818cb">Descripción de la práctica</a></li>
-<li><a href="#org0510054">Actividad 1 - Cuatro experimentos, una tabla</a>
+<li><a href="#org0ce0de2">Descripción de la práctica</a></li>
+<li><a href="#org60a984f">Actividad 1 - Cuatro experimentos, una tabla</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org2ef7d2a">Lo que debe observar</a></li>
+<li><a href="#orgfad903d">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orga95875a">Actividad 2 - Los histogramas y la nube</a>
+<li><a href="#org3f13859">Actividad 2 - Los histogramas y la nube</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org5b5a9f4">Lo que debe observar</a></li>
+<li><a href="#orgd157f65">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org97fcf1d">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org1d5b2eb">Para profundizar</a></li>
-<li><a href="#orgde2d15f">Código completo de la práctica</a></li>
-<li><a href="#org918fc8d">Respuestas</a></li>
+<li><a href="#org107fcb4">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org6200e17">Para profundizar</a></li>
+<li><a href="#orgb2edbe2">Código completo de la práctica</a></li>
+<li><a href="#org5960229">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orged818cb" class="outline-2">
-<h2 id="orged818cb">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-orged818cb">
+<div id="outline-container-org0ce0de2" class="outline-2">
+<h2 id="org0ce0de2">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org0ce0de2">
 <p>
 La lección 14 dijo que el error estándar de \(\hat\beta_j\) es \(\mathfrak s\) dividido por la longitud de la parte propia del regresor, y que esa longitud se encoge con el ángulo entre el regresor y los demás: \(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j\). Con dos regresores no constantes, \(\sin^2\theta=1-\rho^2\) y la varianza del estimador se multiplica por \(\mathrm{VIF}=1/(1-\rho^2)\). Esta práctica lo comprueba repitiendo: construimos dos regresores con una correlación elegida, sorteamos la perturbación dos mil veces y miramos cuánto oscilan las estimaciones.
 </p>
@@ -334,43 +334,78 @@ El mundo artificial tiene \(n=100\), \(y=1+x_2+x_3+u\) con \(u\) normal de desvi
 <li>Ver que \(\hat\beta_2\) y \(\hat\beta_3\) oscilan <i>juntos y al revés</i>: covarianza negativa, y suma \(\hat\beta_2+\hat\beta_3\) tan estable como lo era \(\hat\beta_2\) sin colinealidad.</li>
 <li>Ver cómo un efecto verdadero deja de ser significativo cuando el regresor pierde parte propia.</li>
 </ol>
+
+<p>
+<i>Comandos nuevos de esta práctica</i>. Seguimos con <code>nulldata</code>, <code>set seed</code>, <code>normal()</code>, <code>series</code> y <code>scalar</code> (sesión 7), <code>ols</code> con <code>--quiet</code> y los accesores <code>$ess</code>, <code>$coeff</code> y <code>$stderr</code> (sesiones 11 a 18), las matrices y <code>mcov</code> (práctica A de la sesión 16) y <code>critical</code> (sesión 18). Lo nuevo:
+</p>
+<dl class="org-dl">
+<dt><code>zeros(R, 2)</code></dt><dd>crea una matriz de <code>R</code> filas y 2 columnas llena de ceros, para ir guardando en ella un resultado por réplica.</dd>
+<dt><code>B[i,] = {a, b}</code></dt><dd>escribe la fila <code>i</code> de la matriz <code>B</code>; entre llaves, los dos valores que la rellenan. Al revés, <code>B0[,1]</code> es la primera columna entera de <code>B0</code>.</dd>
+<dt><code>loop i=1..R</code></dt><dd>repite el bloque hasta <code>endloop</code> con el índice <code>i</code> tomando los valores \(1, 2, \ldots, R\) (en la sesión 11 lo usamos con cuatro vueltas). Aquí hay dos bucles, uno dentro de otro: el exterior recorre las cuatro correlaciones y el interior las réplicas.</dd>
+<dt><code>rhos[j]</code> y <code>meanc(S[,1])</code></dt><dd>el elemento \(j\) de un vector, y la media de la primera columna de una matriz.</dd>
+<dt><code>mcov(B)</code></dt><dd>matriz de varianzas y covarianzas de las columnas de <code>B</code>, tratando cada columna como una variable y cada fila como una observación (divisor \(n-1\)). <code>V[1,1]</code> es la varianza de la primera columna y <code>V[1,2]</code> la covarianza entre las dos.</dd>
+<dt><code>series b = B0[,1]</code></dt><dd>convierte una columna de una matriz en una serie del conjunto de datos, para poder dibujarla con <code>freq</code> y <code>gnuplot</code>. El conjunto tiene que tener tantas observaciones como filas la matriz: de ahí el <code>nulldata R --preserve</code> previo, con <code>--preserve</code> para no perder las matrices.</dd>
+</dl>
 </div>
 </div>
-<div id="outline-container-org0510054" class="outline-2">
-<h2 id="org0510054">Actividad 1 - Cuatro experimentos, una tabla</h2>
-<div class="outline-text-2" id="text-org0510054">
+<div id="outline-container-org60a984f" class="outline-2">
+<h2 id="org60a984f">Actividad 1 - Cuatro experimentos, una tabla</h2>
+<div class="outline-text-2" id="text-org60a984f">
 <p>
 Para cada \(\rho\): genere los regresores, mida la parte propia de \(\boldsymbol x_2\) con la regresión auxiliar, y repita \(2\,000\) veces la estimación guardando \(\hat\beta_2\), \(\hat\beta_3\), la \(\mathrm{SRC}\) y el \(R^2\). Después resuma: varianza empírica de \(\hat\beta_2\) frente a la teórica, covarianza, varianza de la suma, y fracción de réplicas en que el \(t\) de \(\boldsymbol x_2\) supera \(t_c\).
+</p>
+
+<p>
+Léalo en tres partes. <i>Preparación</i>: un conjunto de 100 observaciones, los coeficientes verdaderos <code>b1</code>, <code>b2</code> y <code>b3</code> (los tres valen \(1\)), la desviación típica del ruido <code>sig</code>, el número de réplicas <code>R</code>, el valor crítico <code>tc</code> de la \(t\) con \(n-3\) grados de libertad (sesión 18) y el vector <code>rhos</code> con las cuatro correlaciones que se van a probar; el primer <code>printf</code> imprime la cabecera de la tabla. <i>Los regresores</i>: el bucle exterior, <code>loop j=1..4</code>, toma en cada vuelta un \(\rho\) de <code>rhos</code> (<code>rhos[j]</code> es su elemento \(j\)) y, con la semilla fija, sortea <code>z1</code> y <code>z2</code>, dos normales estándar independientes; <code>x2</code> es <code>z1</code> y <code>x3</code> es la combinación \(\rho\boldsymbol z_1+\sqrt{1-\rho^2}\,\boldsymbol z_2\), que tiene correlación \(\rho\) con <code>x2</code>. La regresión auxiliar <code>ols x2 const x3 --quiet</code> deja en <code>$ess</code> la longitud al cuadrado de la parte propia de <code>x2</code>, y <code>varTeorica</code> es \(\sigma^2\) dividido por ella. <i>Las réplicas</i>: se fija otra semilla para el ruido y el bucle interior, en cada vuelta, sortea <code>u</code>, construye <code>y</code> con los coeficientes verdaderos, estima por MCO, guarda los dos coeficientes en la fila <code>i</code> de <code>B</code> y la \(\mathrm{SRC}\) y el \(R^2\) en la fila <code>i</code> de <code>S</code>, y suma un \(1\) a <code>signif</code> cuando el \(|t|\) de <code>x2</code> supera <code>tc</code> (<code>signif +</code> …=). Al salir del bucle interior, <code>mcov(B)</code> da la varianza empírica de \(\hat\beta_2\) y su covarianza con \(\hat\beta_3\), <code>meanc</code> promedia cada columna de <code>S</code>, y el <code>printf</code> imprime la fila de la tabla. Los regresores no cambian dentro del bucle interior: solo cambia <code>u</code>. Las últimas líneas guardan en <code>B0</code> y <code>B99</code> las réplicas con \(\rho=0\) y con \(\rho=0{,}99\) para la Actividad 2 (<code>if</code>, <code>elif</code> y <code>endif</code>: sesión 7).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org507493a">nulldata 100
+<pre class="src src-gretl" id="org530d523">nulldata 100
+scalar n   = $nobs
+scalar b1  = 1
+scalar b2  = 1
+scalar b3  = 1
 scalar sig = 1
 scalar R   = 2000
-scalar rho = 0.99                                # y despues 0, 0.9 y 0.999
-set seed 2026
-series z1 = normal()
-series z2 = normal()
-series x2 = z1
-series x3 = rho*z1 + sqrt(1-rho^2)*z2
-ols x2 const x3 --quiet
-scalar varTeorica = sig^2/$ess                   # sigma^2 / ||parte propia de x2||^2
-matrix B = zeros(R, 2)
-set seed 20261120
-loop i=1..R --quiet
-    series u = normal(0, sig)
-    series y = 1 + x2 + x3 + u
-    ols y const x2 x3 --quiet
-    B[i,] = {$coeff(x2), $coeff(x3)}
+scalar tc  = critical(t, n-3, 0.025)
+matrix rhos = {0, 0.9, 0.99, 0.999}
+printf "%7s %8s %8s %10s %10s %10s %10s %8s %8s %8s\n", "rho", "corr", "VIF", "var(b2)", "teorica", "cov(b2,b3)", "var(b2+b3)", "SRC", "R2", "%|t|&gt;tc"
+loop j=1..4 --quiet
+    scalar rho = rhos[j]
+    set seed 2026
+    series z1 = normal()
+    series z2 = normal()
+    series x2 = z1
+    series x3 = rho*z1 + sqrt(1-rho^2)*z2
+    ols x2 const x3 --quiet
+    scalar longPropia2 = sqrt($ess)                 # || parte propia de x2 ||
+    scalar varTeorica  = sig^2/longPropia2^2         # sigma^2 / ||x2 propia||^2
+    matrix B = zeros(R, 2)
+    matrix S = zeros(R, 2)
+    scalar signif = 0
+    set seed 20261120
+    loop i=1..R --quiet
+        series u = normal(0, sig)
+        series y = b1 + b2*x2 + b3*x3 + u
+        ols y const x2 x3 --quiet
+        B[i,] = {$coeff(x2), $coeff(x3)}
+        S[i,] = {$ess, $rsq}
+        signif += abs($coeff(x2)/$stderr(x2)) &gt; tc
+    endloop
+    matrix V = mcov(B)
+    printf "%7.3f %8.4f %8.1f %10.4f %10.4f %10.4f %10.4f %8.2f %8.4f %8.3f\n", rho, corr(x2, x3), 1/(1-corr(x2,x3)^2), V[1,1], varTeorica, V[1,2], V[1,1]+V[2,2]+2*V[1,2], meanc(S[,1]), meanc(S[,2]), signif/R
+    if j == 1
+        matrix B0 = B
+    elif j == 3
+        matrix B99 = B
+    endif
 endloop
-matrix V = mcov(B)
-printf "var(b2) = %.4f  teorica = %.4f  cov(b2,b3) = %.4f\n", V[1,1], varTeorica, V[1,2]
 </pre>
 </div>
-<pre class="example" id="org9b45696">
+<pre class="example" id="orgc1b23d3">
 n = 100, beta = (1, 1, 1), sigma = 1, 2000 replicas por cada rho
 
     rho     corr      VIF    var(b2)    teorica cov(b2,b3) var(b2+b3)      SRC       R2  %|t|&gt;tc
@@ -380,9 +415,9 @@ n = 100, beta = (1, 1, 1), sigma = 1, 2000 replicas por cada rho
   0,999   0,9991    563,3     5,7069     5,8603    -5,7085     0,0108    96,56   0,7999    0,071
 </pre>
 </div>
-<div id="outline-container-org2ef7d2a" class="outline-4">
-<h4 id="org2ef7d2a">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org2ef7d2a">
+<div id="outline-container-orgfad903d" class="outline-4">
+<h4 id="orgfad903d">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgfad903d">
 <p>
 Lea la tabla por columnas. La varianza empírica de \(\hat\beta_2\) coincide con \(\sigma^2/\Vert\tilde{\boldsymbol x}_2\Vert_e^2\) en los cuatro casos, con la oscilación propia de dos mil réplicas: el enunciado de la lección 12 y la fórmula de la 14 funcionan. Y crece como el VIF: de \(0{,}011\) con \(\rho=0\) a \(5{,}7\) con \(\rho=0{,}999\), un factor \(530\) que la columna del VIF anuncia.
 </p>
@@ -397,56 +432,60 @@ La covarianza entre \(\hat\beta_2\) y \(\hat\beta_3\) es negativa y casi igual a
 </div>
 </div>
 </div>
-<div id="outline-container-orga95875a" class="outline-2">
-<h2 id="orga95875a">Actividad 2 - Los histogramas y la nube</h2>
-<div class="outline-text-2" id="text-orga95875a">
+<div id="outline-container-org3f13859" class="outline-2">
+<h2 id="org3f13859">Actividad 2 - Los histogramas y la nube</h2>
+<div class="outline-text-2" id="text-org3f13859">
 <p>
 Compare la distribución de \(\hat\beta_2\) con \(\rho=0\) y con \(\rho=0{,}99\), y dibuje \(\hat\beta_3\) frente a \(\hat\beta_2\) en el segundo caso.
+</p>
+
+<p>
+Las matrices <code>B0</code> y <code>B99</code> guardan las \(2\,000\) réplicas con \(\rho=0\) y con \(\rho=0{,}99\) (las guardó el bucle de la Actividad 1). Para dibujarlas hay que pasarlas a series: <code>nulldata R --preserve</code> abre un conjunto de <code>R</code> observaciones sin borrar las matrices, y cada <code>series</code> toma una columna. Después <code>freq</code> dibuja el histograma de cada serie y <code>gnuplot</code> la nube de \(\hat\beta_3\) frente a \(\hat\beta_2\) (la primera variable en el eje vertical, sesión 7). Las opciones <code>--plot</code> y <code>--output</code> mandan cada gráfico a un fichero de la carpeta de trabajo.
 </p>
 
 <p>
 <i>en línea de comandos</i> (con las matrices <code>B0</code> y <code>B99</code> de la Actividad 1):
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org8cf2c3b">nulldata R --preserve
+<pre class="src src-gretl" id="org0f56f2a">nulldata R --preserve
 series b2_rho0  = B0[,1]
 series b2_rho99 = B99[,1]
 series b3_rho99 = B99[,2]
-freq b2_rho0 --plot="@workdir/histRho0.png"
-freq b2_rho99 --plot="@workdir/histRho99.png"
-gnuplot b3_rho99 b2_rho99 --output="@workdir/nubeRho99.png"
+freq b2_rho0
+freq b2_rho99
+gnuplot b3_rho99 b2_rho99
 </pre>
 </div>
-<pre class="example" id="orge9fc844">
+<pre class="example" id="orga9dc8d4">
 rho = 0     : b2 medio = 1,0046   desv. tipica = 0,1037   min = 0,661   max = 1,357
 rho = 0,99  : b2 medio = 1,0152   desv. tipica = 0,7549   min = -1,701   max = 3,318
 rho = 0,99  : b2 + b3 medio = 2,0045   desv. tipica = 0,1042
 correlacion entre b2 y b3 con rho = 0,99: -0,9905
 </pre>
 
-<div id="orgb40d480" class="figure">
+<div id="orgbdd984a" class="figure">
 <p><img src="./S22-Prct-A-colinealidad-montecarlo/histRho0.png" alt="histRho0.png" width="380px" />
 </p>
 <p><span class="figure-number">Figura 1: </span>\(\hat\beta_2\) en las \(2\,000\) réplicas con \(\rho=0\). El eje horizontal va de \(0{,}66\) a \(1{,}36\).</p>
 </div>
 
 
-<div id="org5ad26a7" class="figure">
+<div id="orgf1f8afa" class="figure">
 <p><img src="./S22-Prct-A-colinealidad-montecarlo/histRho99.png" alt="histRho99.png" width="380px" />
 </p>
 <p><span class="figure-number">Figura 2: </span>\(\hat\beta_2\) en las \(2\,000\) réplicas con \(\rho=0{,}99\). El eje horizontal va de \(-1{,}7\) a \(3{,}3\): la misma forma, siete veces más ancha.</p>
 </div>
 
 
-<div id="org005c8d0" class="figure">
+<div id="orgc1d25c9" class="figure">
 <p><img src="./S22-Prct-A-colinealidad-montecarlo/nubeRho99.png" alt="nubeRho99.png" width="550px" />
 </p>
 <p><span class="figure-number">Figura 3: </span>\(\hat\beta_3\) frente a \(\hat\beta_2\) con \(\rho=0{,}99\). Las \(2\,000\) réplicas se alinean sobre la recta \(\hat\beta_3=2-\hat\beta_2\): lo que una coordenada gana lo pierde la otra, y la suma apenas se mueve.</p>
 </div>
 </div>
-<div id="outline-container-org5b5a9f4" class="outline-4">
-<h4 id="org5b5a9f4">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org5b5a9f4">
+<div id="outline-container-orgd157f65" class="outline-4">
+<h4 id="orgd157f65">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgd157f65">
 <p>
 Fíjese en los ejes antes que en las barras. Los dos histogramas tienen la misma forma y el mismo centro, \(1\): el estimador sigue siendo insesgado. Lo que cambia es la escala: con \(\rho=0{,}99\) la desviación típica es \(0{,}75\) en lugar de \(0{,}10\), el factor \(\sqrt{\mathrm{VIF}}\approx7\) de la lección 14, y hay réplicas en que \(\hat\beta_2\) sale negativo, con un verdadero valor de \(1\).
 </p>
@@ -457,9 +496,9 @@ La nube es la figura de la lección 14 vista dos mil veces: los pares \((\hat\be
 </div>
 </div>
 </div>
-<div id="outline-container-org97fcf1d" class="outline-2">
-<h2 id="org97fcf1d">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org97fcf1d">
+<div id="outline-container-org107fcb4" class="outline-2">
+<h2 id="org107fcb4">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org107fcb4">
 <ol class="org-ol">
 <li>¿Por qué la \(\mathrm{SRC}\) es exactamente la misma en las cuatro filas de la tabla, y por qué el \(R^2\) no lo es? ¿Habría pasado lo mismo si \(\boldsymbol x_3\) se hubiera generado de forma independiente para cada \(\rho\)?</li>
 <li>Con \(\rho=0\) la varianza de \(\hat\beta_2+\hat\beta_3\) es \(0{,}023\), el doble que con \(\rho=0{,}99\). ¿Es que la colinealidad <i>mejora</i> la estimación de la suma? Razónelo con la parte propia del regresor \(\boldsymbol x_2+\boldsymbol x_3\).</li>
@@ -469,9 +508,9 @@ La nube es la figura de la lección 14 vista dos mil veces: los pares \((\hat\be
 </ol>
 </div>
 </div>
-<div id="outline-container-org1d5b2eb" class="outline-2">
-<h2 id="org1d5b2eb">Para profundizar</h2>
-<div class="outline-text-2" id="text-org1d5b2eb">
+<div id="outline-container-org6200e17" class="outline-2">
+<h2 id="org6200e17">Para profundizar</h2>
+<div class="outline-text-2" id="text-org6200e17">
 <ul class="org-ul">
 <li>Lección 14 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S20-Lecc14.html">lección 14</a>), en especial ``La parte propia de un regresor'' y ``Por qué oscilan los coeficientes''.</li>
 <li>Lección 11 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html">lección 11</a>), la covarianza entre \(\hat\beta_1\) y \(\hat\beta_2\) con \(k=2\).</li>
@@ -480,9 +519,9 @@ La nube es la figura de la lección 14 vista dos mil veces: los pares \((\hat\be
 </ul>
 </div>
 </div>
-<div id="outline-container-orgde2d15f" class="outline-2">
-<h2 id="orgde2d15f">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-orgde2d15f">
+<div id="outline-container-orgb2edbe2" class="outline-2">
+<h2 id="orgb2edbe2">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-orgb2edbe2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -500,9 +539,9 @@ La nube es la figura de la lección 14 vista dos mil veces: los pares \((\hat\be
 </table>
 </div>
 </div>
-<div id="outline-container-org918fc8d" class="outline-2">
-<h2 id="org918fc8d">Respuestas</h2>
-<div class="outline-text-2" id="text-org918fc8d">
+<div id="outline-container-org5960229" class="outline-2">
+<h2 id="org5960229">Respuestas</h2>
+<div class="outline-text-2" id="text-org5960229">
 <ol class="org-ol">
 <li><i>La \(\mathrm{SRC}\) idéntica.</i> El residuo es \(\boldsymbol y\) menos su proyección sobre el subespacio de los regresores, y ese subespacio es el mismo para los cuatro \(\rho\), porque \(\boldsymbol x_3\) es siempre una combinación de \(\boldsymbol z_1\) y \(\boldsymbol z_2\) y \(\boldsymbol x_2=\boldsymbol z_1\). Como además la perturbación sorteada es la misma (la semilla se fija antes de cada bucle), y \(\boldsymbol y\) es \(\boldsymbol u\) más un vector del subespacio, el residuo es el residuo de \(\boldsymbol u\), idéntico en las cuatro filas. El \(R^2\) cambia porque cambia la longitud de \(\boldsymbol{\mathop{\widehat y}}\): con los dos efectos positivos, alinear los regresores hace que se sumen. Con un \(\boldsymbol x_3\) generado por separado para cada \(\rho\), los subespacios serían distintos y la \(\mathrm{SRC}\) variaría un poco, sin que eso cambiara la conclusión: el ajuste es casi el mismo; las coordenadas, no.</li>
 
@@ -519,7 +558,7 @@ La nube es la figura de la lección 14 vista dos mil veces: los pares \((\hat\be
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-23 mié 22:31</p>
+<p class="date">Created: 2026-09-25 vie 20:00</p>
 </div>
 </body>
 </html>

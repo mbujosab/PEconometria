@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-23 mié 22:30 -->
+<!-- 2026-09-25 vie 20:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 18 (C) &#x2014; ¿Cubre de verdad el 95 por ciento? La cobertura del intervalo y la frecuencia de detección</title>
@@ -287,54 +287,54 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org0f6767c">Descripción de la práctica</a></li>
-<li><a href="#orgea76687">Actividad 1 - ¿Cubre el 95 por ciento?</a>
+<li><a href="#org97a8b91">Descripción de la práctica</a></li>
+<li><a href="#org4c93379">Actividad 1 - ¿Cubre el 95 por ciento?</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org460b07e">Los intervalos, uno a uno</a></li>
-<li><a href="#org81eec6c">Lo que debe observar</a></li>
+<li><a href="#orgdd722dc">Los intervalos, uno a uno</a></li>
+<li><a href="#org0b30f1a">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgdd11af3">Actividad 2 - El precio de estimar \(\sigma\)</a>
+<li><a href="#orgb07b6eb">Actividad 2 - El precio de estimar \(\sigma\)</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org8c934ec">Lo que debe observar</a></li>
+<li><a href="#org01b4314">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org4b75884">Actividad 3 - Una hipótesis falsa por poco, con \(n=12\) y con \(n=120\)</a>
+<li><a href="#org3bbd678">Actividad 3 - Una hipótesis falsa por poco, con \(n=12\) y con \(n=120\)</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org5b49967">Lo que debe observar</a></li>
+<li><a href="#org9b845d7">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org0ebff2f">Apéndice - ¿Y si las perturbaciones no son normales?</a>
+<li><a href="#orgf834299">Apéndice - ¿Y si las perturbaciones no son normales?</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org8db072d">Lo que debe observar</a></li>
+<li><a href="#orgd9b2715">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgf9d6792">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orgd2e6817">Para profundizar</a></li>
-<li><a href="#org982d044">Código completo de la práctica</a></li>
-<li><a href="#orgf7c9831">Respuestas</a></li>
+<li><a href="#org8f9393f">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org968e448">Para profundizar</a></li>
+<li><a href="#org5b7e8a2">Código completo de la práctica</a></li>
+<li><a href="#org645a3d3">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org0f6767c" class="outline-2">
-<h2 id="org0f6767c">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org0f6767c">
+<div id="outline-container-org97a8b91" class="outline-2">
+<h2 id="org97a8b91">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org97a8b91">
 <p>
 La lección 12 fue muy cuidadosa con lo que el intervalo de confianza <i>dice</i> y lo que <i>no dice</i>: dice que el \(95\%\) de las muestras producen un intervalo que contiene a \(\beta_2\); no dice que \(\beta_2\) esté en <i>este</i> intervalo con probabilidad \(0{,}95\). Es una afirmación sobre una <i>frecuencia</i>, y una frecuencia se comprueba repitiendo. Esta práctica la repite.
 </p>
@@ -357,20 +357,35 @@ Los datos son <i>simulados</i> por la razón de siempre: solo conociendo la verd
 <li>Contrastar una hipótesis <i>falsa por poco</i> con \(n=12\) y con \(n=120\): el mismo desvío, medido con un regresor \(\sqrt{10}\) veces más largo.</li>
 <li>(Apéndice) Ver qué ocurre con la cobertura cuando las perturbaciones no son normales.</li>
 </ol>
+
+<p>
+<i>Comandos nuevos de esta práctica</i>. La mecánica de <code>loop R --progressive --quiet</code> con <code>store</code>, y la reapertura del fichero de réplicas con <code>open</code>, son las de la práctica A de la sesión 16; <code>critical</code>, <code>$coeff</code> y <code>$stderr</code>, las de las prácticas A y B de hoy; <code>randgen(X, 1)</code>, la de la práctica C de la sesión 16. Lo nuevo:
+</p>
+<dl class="org-dl">
+<dt><code>quantile(x, p)</code></dt><dd>el cuantil de orden <code>p</code> de la serie: el valor que deja por debajo una fracción <code>p</code> de los datos.</dd>
+<dt><code>%</code></dt><dd>resto de la división entera: <code>(index - 1) % 12</code> toma los valores \(0,1,\ldots,11\) y vuelve a empezar.</dd>
+<dt><code>rech +</code> expresión=</dt><dd>suma la expresión al escalar y guarda el resultado en él; es la forma abreviada de <code>rech = rech + expresión</code>. Como aquí la expresión vale \(1\) o \(0\), el escalar cuenta las réplicas que cumplen la condición.</dd>
+<dt><code>smpl 1 12</code></dt><dd>restringe la muestra a las observaciones 1 a 12 (sesión 14); <code>smpl full</code> la devuelve entera.</dd>
+<dt><code>gnuplot ... --time-series --with-lines</code></dt><dd>dibuja las series frente al número de observación y con líneas en lugar de puntos.</dd>
+</dl>
 </div>
 </div>
-<div id="outline-container-orgea76687" class="outline-2">
-<h2 id="orgea76687">Actividad 1 - ¿Cubre el 95 por ciento?</h2>
-<div class="outline-text-2" id="text-orgea76687">
+<div id="outline-container-org4c93379" class="outline-2">
+<h2 id="org4c93379">Actividad 1 - ¿Cubre el 95 por ciento?</h2>
+<div class="outline-text-2" id="text-org4c93379">
 <p>
 Construimos el mundo, fijamos el valor crítico de la \(t\) con \(n-k=10\) grados de libertad, y repetimos el experimento \(4\,000\) veces guardando, en cada réplica, la estimación, su error estándar, los dos extremos del intervalo, un indicador de si contiene al verdadero \(\beta_2\) y el estadístico \(t\) para la hipótesis <i>cierta</i> \(H_0\!:\beta_2=0{,}5\).
+</p>
+
+<p>
+Tres bloques. El primero construye el mundo (doce observaciones, el regresor disperso de la práctica B, los parámetros y el número de réplicas <code>R</code>) y guarda los dos valores críticos: el de la \(t_{10}\) y el \(1{,}96\) de la normal. Sigue el bucle: en cada vuelta sortea doce perturbaciones, forma <code>y</code>, estima con <code>--quiet</code> y guarda en escalares la estimación, su error estándar, los dos extremos del intervalo, el indicador <code>dentro</code> (vale \(1\) si el verdadero \(\beta_2\) está entre los dos extremos; <code>&amp;&amp;</code> une las dos desigualdades), el estadístico \(t\) de la hipótesis cierta y el indicador análogo construido con \(1{,}96\); <code>store</code> añade al fichero de réplicas una fila con esos siete valores. El segundo bloque abre ese fichero, que tiene una observación por réplica, y vuelve a definir <code>tc</code> y <code>zc</code>. El tercero imprime el número de réplicas y dos medias: la de <code>dentro</code>, que es la fracción de intervalos que contienen a \(\beta_2\), y la de la condición \(|t|>t_c\), que es la fracción de rechazos.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orge7e7ed4">nulldata 12
+<pre class="src src-gretl" id="orgbd6a6f4">nulldata 12
 setobs 1 1 --cross-section
 series x  = 22.5 + 5*(index - 1)              # el regresor disperso de la leccion 12
 scalar b1 = 10
@@ -405,12 +420,12 @@ scalar zc = 1.96
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orge223885">printf "Replicas                                   : %d\n", $nobs
+<pre class="src src-gretl" id="org36b2d4c">printf "Replicas                                   : %d\n", $nobs
 printf "Intervalos que contienen al verdadero b2   : %.4f   (objetivo: 0,95)\n", mean(dentro)
 printf "Rechazos de la H0 cierta al 5%%             : %.4f   (objetivo: 0,05)\n", mean(abs(tstat) &gt; tc)
 </pre>
 </div>
-<pre class="example" id="org04a6a87">
+<pre class="example" id="org2eb8832">
 Replicas                                   : 4000
 Intervalos que contienen al verdadero b2   : 0,9520   (objetivo: 0,95)
 Rechazos de la H0 cierta al 5%             : 0,0480   (objetivo: 0,05)
@@ -419,39 +434,43 @@ Rechazos de la H0 cierta al 5%             : 0,0480   (objetivo: 0,05)
 <i>Atención al detalle práctico ya conocido del laboratorio anterior</i>: al abrir el fichero de réplicas, Gretl descarta los escalares que teníamos definidos; por eso <code>tc</code> y <code>zc</code> se vuelven a definir después de abrirlo.
 </p>
 </div>
-<div id="outline-container-org460b07e" class="outline-4">
-<h4 id="org460b07e">Los intervalos, uno a uno</h4>
-<div class="outline-text-4" id="text-org460b07e">
+<div id="outline-container-orgdd722dc" class="outline-4">
+<h4 id="orgdd722dc">Los intervalos, uno a uno</h4>
+<div class="outline-text-4" id="text-orgdd722dc">
 <p>
 Un porcentaje es un resumen. Para <i>ver</i> qué significa, dibujamos los cien primeros intervalos: sus dos extremos como dos líneas, y el verdadero \(\beta_2\) como una línea horizontal. Cada vez que la banda inferior sube por encima de \(0{,}5\), o la superior baja por debajo, ese intervalo ha fallado.
+</p>
+
+<p>
+<code>smpl 1 100</code> se queda con las cien primeras réplicas. <code>B2</code> es una serie constante igual a \(0{,}5\), para dibujarla como línea horizontal. <code>gnuplot</code> dibuja los dos extremos y esa constante frente al número de réplica, con líneas. <code>100 - sum(dentro)</code> cuenta los intervalos que fallan entre esos cien, y <code>smpl full</code> recupera las \(4\,000\) réplicas.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org7c23915">smpl 1 100
+<pre class="src src-gretl" id="org5ff9e9d">smpl 1 100
 series B2 = 0.5
-gnuplot cL cR B2 --time-series --with-lines --output=display
+gnuplot cL cR B2 --time-series --with-lines
 printf "Intervalos que fallan entre los 100 primeros: %d\n", 100 - sum(dentro)
 smpl full
 </pre>
 </div>
 
-<div id="org8d322b6" class="figure">
+<div id="orga06c170" class="figure">
 <p><img src="./S18-Prct-C-cobertura/baile.png" alt="baile.png" width="650px" />
 </p>
 <p><span class="figure-number">Figura 1: </span>Los cien primeros intervalos de confianza al \(95\%\): extremo inferior y superior de cada uno, frente al verdadero \(\beta_2=0{,}5\) (línea horizontal). Los intervalos que no lo contienen son aquellos en los que una de las dos líneas cruza la horizontal.</p>
 </div>
 
-<pre class="example" id="org3169500">
+<pre class="example" id="orga14f744">
 Intervalos que fallan entre los 100 primeros: 7
 </pre>
 </div>
 </div>
-<div id="outline-container-org81eec6c" class="outline-4">
-<h4 id="org81eec6c">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org81eec6c">
+<div id="outline-container-org0b30f1a" class="outline-4">
+<h4 id="org0b30f1a">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org0b30f1a">
 <p>
 La frecuencia empírica de cobertura queda muy cerca de \(0{,}95\), y la de rechazos de la hipótesis cierta muy cerca de \(0{,}05\): son la misma cosa vista desde dos lados. Con \(4\,000\) réplicas no cabe esperar exactamente \(0{,}9500\) —la frecuencia observada es a su vez una variable aleatoria—, pero sí una distancia pequeña.
 </p>
@@ -462,27 +481,31 @@ Y la figura muestra lo que la frecuencia esconde. El intervalo <i>cambia</i> de 
 </div>
 </div>
 </div>
-<div id="outline-container-orgdd11af3" class="outline-2">
-<h2 id="orgdd11af3">Actividad 2 - El precio de estimar \(\sigma\)</h2>
-<div class="outline-text-2" id="text-orgdd11af3">
+<div id="outline-container-orgb07b6eb" class="outline-2">
+<h2 id="orgb07b6eb">Actividad 2 - El precio de estimar \(\sigma\)</h2>
+<div class="outline-text-2" id="text-orgb07b6eb">
 <p>
 La lección 12 explicó por qué el estadístico sigue una \(t_{n-k}\) y no una normal: en el denominador va \(\mathfrak s\), que fluctúa de muestra en muestra, y eso ensancha las colas. Con \(n-k=10\) la diferencia entre \(t_c=2{,}228\) y \(1{,}96\) es del \(14\%\). Ya hemos guardado, en cada réplica, si el intervalo construido con \(1{,}96\) contenía al verdadero \(\beta_2\); y tenemos los \(4\,000\) estadísticos \(t\) bajo la hipótesis cierta, cuya distribución podemos mirar directamente.
+</p>
+
+<p>
+Los dos primeros <code>printf</code> comparan la cobertura con <code>tc</code> y con \(1{,}96\) (medias de <code>dentro</code> y de <code>dentroZ</code>). Los dos siguientes imprimen los cuantiles empíricos del \(2{,}5\%\) y del \(97{,}5\%\) de los \(4\,000\) estadísticos, calculados con <code>quantile</code>, junto a los valores que predicen la \(t_{10}\) y la normal. El último calcula la fracción de \(|t|\) mayores que \(1{,}96\). <code>freq tstat</code> dibuja el histograma de los estadísticos.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org8309f27">printf "Cobertura del intervalo con t_c = %.3f : %.4f\n", tc, mean(dentro)
+<pre class="src src-gretl" id="org163323e">printf "Cobertura del intervalo con t_c = %.3f : %.4f\n", tc, mean(dentro)
 printf "Cobertura del intervalo con 1,96       : %.4f\n", mean(dentroZ)
 printf "\nCuantiles empiricos del estadistico t bajo la H0 cierta:\n"
 printf "   2,5%%  -&gt; %.3f      (la t_10 predice %.3f; la normal, %.3f)\n", quantile(tstat, 0.025), -tc, -zc
 printf "  97,5%%  -&gt; %.3f      (la t_10 predice  %.3f; la normal,  %.3f)\n", quantile(tstat, 0.975), tc, zc
 printf "Fraccion de |t| &gt; 1,96                 : %.4f   (con 1,96 se rechazaria la H0 cierta mas del 5%%)\n", mean(abs(tstat) &gt; zc)
-freq tstat --plot=display
+freq tstat
 </pre>
 </div>
-<pre class="example" id="org76c972d">
+<pre class="example" id="orgb57d107">
 Cobertura del intervalo con t_c = 2,228 : 0,9520
 Cobertura del intervalo con 1,96       : 0,9188
 
@@ -492,33 +515,37 @@ Cuantiles empiricos del estadistico t bajo la H0 cierta:
 Fraccion de |t| &gt; 1,96                 : 0,0812   (con 1,96 se rechazaria la H0 cierta mas del 5%)
 </pre>
 
-<div id="org592575e" class="figure">
+<div id="org41ead9d" class="figure">
 <p><img src="./S18-Prct-C-cobertura/histT.png" alt="histT.png" width="600px" />
 </p>
 <p><span class="figure-number">Figura 2: </span>Histograma de los \(4\,000\) estadísticos \(t=(\hat\beta_2-0{,}5)/\mathrm{ee}(\hat\beta_2)\), calculados bajo la hipótesis cierta. Sus cuantiles del \(2{,}5\%\) y del \(97{,}5\%\) caen donde los sitúa la \(t_{10}\), no donde los sitúa la normal.</p>
 </div>
 </div>
-<div id="outline-container-org8c934ec" class="outline-4">
-<h4 id="org8c934ec">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org8c934ec">
+<div id="outline-container-org01b4314" class="outline-4">
+<h4 id="org01b4314">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org01b4314">
 <p>
 Con \(1{,}96\) el intervalo cubre bastante menos del \(95\%\), y el contraste rechaza la hipótesis cierta bastante más del \(5\%\). Los cuantiles empíricos del estadístico lo confirman: se sitúan alrededor de \(\pm2{,}23\), no de \(\pm1{,}96\). Esa diferencia es lo que la lección llamó ``el precio de estimar \(\sigma\)'': el \(\mathfrak s\) del denominador fluctúa, el cociente se dispersa más que una normal, y la \(t_{n-k}\) lo tiene en cuenta. Con diez grados de libertad el precio se paga; con quinientos, como en la práctica A, \(t_c\) y \(1{,}96\) son casi lo mismo.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org4b75884" class="outline-2">
-<h2 id="org4b75884">Actividad 3 - Una hipótesis falsa por poco, con \(n=12\) y con \(n=120\)</h2>
-<div class="outline-text-2" id="text-org4b75884">
+<div id="outline-container-org3bbd678" class="outline-2">
+<h2 id="org3bbd678">Actividad 3 - Una hipótesis falsa por poco, con \(n=12\) y con \(n=120\)</h2>
+<div class="outline-text-2" id="text-org3bbd678">
 <p>
 Hasta aquí hemos contrastado una hipótesis cierta. Ahora contrastamos una <i>falsa por poco</i>: \(H_0\!:\beta_2=0{,}47\), cuando el verdadero es \(0{,}5\). ¿Con qué frecuencia la detecta el contraste? Lo hacemos dos veces: con las doce observaciones de siempre, y con ciento veinte —el mismo patrón de regresor repetido diez veces, el mismo \(\sigma\), la misma hipótesis—. Lo único que cambia es la cantidad de evidencia.
+</p>
+
+<p>
+Tres bloques. El primero crea un conjunto de 120 observaciones (<code>--preserve</code> conserva los escalares) con el patrón del regresor repetido diez veces gracias al resto <code>% 12</code>, y vuelve a fijar los parámetros y el valor falso <code>c_falsa</code>. El segundo restringe la muestra a las doce primeras, calcula el valor crítico con los grados de libertad <code>$nobs - 2</code>, fija la semilla, pone a cero dos contadores y repite <code>R</code> veces: sortear, estimar, y sumar a <code>rech</code> un \(1\) si el estadístico de la hipótesis falsa supera el valor crítico y a <code>cov</code> un \(1\) si el intervalo contiene al verdadero \(\beta_2\). Este bucle no lleva <code>--progressive</code> ni <code>store</code>: solo acumula en los dos escalares, y el <code>printf</code> final los divide por <code>R</code>. El tercero repite lo mismo con <code>smpl full</code>, es decir, con las 120 observaciones.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org3a4a259">nulldata 120 --preserve
+<pre class="src src-gretl" id="org20ef9ed">nulldata 120 --preserve
 setobs 1 1 --cross-section
 series x = 22.5 + 5*((index - 1) % 12)       # el mismo patron, diez veces
 scalar b1 = 10                               # los parametros del mundo, de nuevo
@@ -530,7 +557,7 @@ scalar c_falsa = 0.47
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org9d037b8">smpl 1 12                                    # una sola vuelta del patron: n = 12
+<pre class="src src-gretl" id="orgb86ea9b">smpl 1 12                                    # una sola vuelta del patron: n = 12
 scalar tc = critical(t, $nobs - 2, 0.025)
 set seed 20261113
 scalar rech = 0
@@ -547,7 +574,7 @@ printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org81b36ab">smpl full                                    # las diez vueltas: n = 120
+<pre class="src src-gretl" id="orgeea6451">smpl full                                    # las diez vueltas: n = 120
 scalar tc = critical(t, $nobs - 2, 0.025)
 set seed 20261113
 scalar rech = 0
@@ -562,14 +589,14 @@ endloop
 printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura del IC = %.3f\n", $nobs, tc, rech/R, cov/R
 </pre>
 </div>
-<pre class="example" id="orgd2612e8">
+<pre class="example" id="org48967cd">
 n =  12:  t_c = 2,228   rechazos de la H0 falsa (0,47) = 0,319   cobertura del IC = 0,952
 n = 120:  t_c = 1,980   rechazos de la H0 falsa (0,47) = 0,999   cobertura del IC = 0,946
 </pre>
 </div>
-<div id="outline-container-org5b49967" class="outline-4">
-<h4 id="org5b49967">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org5b49967">
+<div id="outline-container-org9b845d7" class="outline-4">
+<h4 id="org9b845d7">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org9b845d7">
 <p>
 La cobertura del intervalo es la misma en los dos casos —en torno al \(95\%\)—, como debe: el intervalo cumple su garantía con doce datos y con ciento veinte. Lo que cambia es la <i>detección</i>: con \(n=12\) la hipótesis falsa se rechaza menos de una vez de cada tres; con \(n=120\), prácticamente siempre.
 </p>
@@ -584,9 +611,9 @@ Y tiene una lectura inmediata para la práctica A, donde con doce viviendas el i
 </div>
 </div>
 </div>
-<div id="outline-container-org0ebff2f" class="outline-2">
-<h2 id="org0ebff2f">Apéndice - ¿Y si las perturbaciones no son normales?</h2>
-<div class="outline-text-2" id="text-org0ebff2f">
+<div id="outline-container-orgf834299" class="outline-2">
+<h2 id="orgf834299">Apéndice - ¿Y si las perturbaciones no son normales?</h2>
+<div class="outline-text-2" id="text-orgf834299">
 <p>
 <i>Material complementario</i>, con el mismo estatus que el apéndice matricial del laboratorio anterior: va más allá de lo que da tiempo en clase y queda aquí para quien quiera completarlo.
 </p>
@@ -596,10 +623,14 @@ La lección 12 fue explícita: la normalidad es el único supuesto nuevo, y su c
 </p>
 
 <p>
+Dos bloques con la misma estructura que los de la Actividad 3, cambiando la perturbación: <code>randgen(X, 1)</code> sortea una \(\chi^2\) con un grado de libertad, que tiene media \(1\) y varianza \(2\); restar \(1\) y dividir por \(\sqrt2\) la centra y le da desviación típica \(1\), y multiplicar por <code>sig</code> le da la de nuestro mundo. Los contadores son ahora la cobertura y los rechazos de la hipótesis cierta.
+</p>
+
+<p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org9618f00">smpl 1 12
+<pre class="src src-gretl" id="orgf429243">smpl 1 12
 scalar tc = critical(t, $nobs - 2, 0.025)
 set seed 20261113
 scalar cov = 0
@@ -616,7 +647,7 @@ printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orga6b8dc5">smpl full
+<pre class="src src-gretl" id="orgaca9794">smpl full
 scalar tc = critical(t, $nobs - 2, 0.025)
 set seed 20261113
 scalar cov = 0
@@ -631,14 +662,14 @@ endloop
 printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 cierta = %.4f\n", $nobs, cov/R, rech0/R
 </pre>
 </div>
-<pre class="example" id="org1e7242e">
+<pre class="example" id="org83a5868">
 chi2(1) centrada, n =  12:  cobertura del IC = 0,9620   rechazos de la H0 cierta = 0,0380
 chi2(1) centrada, n = 120:  cobertura del IC = 0,9478   rechazos de la H0 cierta = 0,0523
 </pre>
 </div>
-<div id="outline-container-org8db072d" class="outline-4">
-<h4 id="org8db072d">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org8db072d">
+<div id="outline-container-orgd9b2715" class="outline-4">
+<h4 id="orgd9b2715">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgd9b2715">
 <p>
 Con \(n=12\) la cobertura y la tasa de rechazo se apartan de sus valores nominales, y lo hacen en la dirección que menos se espera: el intervalo cubre <i>más</i> del \(95\%\) y el contraste rechaza <i>menos</i> del \(5\%\). El aparato de la lección 12, construido bajo normalidad, se vuelve conservador con estas perturbaciones y esta muestra. No es un desastre —nadie saca conclusiones falsas por rechazar de menos—, pero el \(5\%\) que imprime el programa ya no es el \(5\%\) real.
 </p>
@@ -649,9 +680,9 @@ Con \(n=120\) la desviación prácticamente desaparece. Es el cierre de la lecci
 </div>
 </div>
 </div>
-<div id="outline-container-orgf9d6792" class="outline-2">
-<h2 id="orgf9d6792">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-orgf9d6792">
+<div id="outline-container-org8f9393f" class="outline-2">
+<h2 id="org8f9393f">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org8f9393f">
 <ol class="org-ol">
 <li>En la Actividad 1, la frecuencia de cobertura no ha salido exactamente \(0{,}95\). ¿Qué esperaría que ocurriese con la diferencia si el experimento se repitiera con \(400\,000\) réplicas en lugar de \(4\,000\)? ¿Y si se repitiera con otras \(4\,000\), cambiando la semilla?</li>
 <li>Escoja uno de los intervalos de la figura que <i>no</i> contiene a \(0{,}5\). Si ese fuera el único que tuviera —como ocurre siempre con datos reales—, ¿qué diría de él? ¿Habría alguna forma de saber que es de los que fallan?</li>
@@ -661,9 +692,9 @@ Con \(n=120\) la desviación prácticamente desaparece. Es el cierre de la lecci
 </ol>
 </div>
 </div>
-<div id="outline-container-orgd2e6817" class="outline-2">
-<h2 id="orgd2e6817">Para profundizar</h2>
-<div class="outline-text-2" id="text-orgd2e6817">
+<div id="outline-container-org968e448" class="outline-2">
+<h2 id="org968e448">Para profundizar</h2>
+<div class="outline-text-2" id="text-org968e448">
 <ul class="org-ul">
 <li>Lección 12 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html">lección 12</a>), secciones ``El intervalo de confianza'' y ``Por qué el valor crítico depende de \(n-k\)''.</li>
 <li>Wooldridge, J. M. (2020). <i>Introductory Econometrics</i>, cap. 4, sección 4.3 (intervalos de confianza) y cap. 5, sección 5.2 (validez aproximada de los contrastes en muestras grandes sin normalidad).</li>
@@ -671,9 +702,9 @@ Con \(n=120\) la desviación prácticamente desaparece. Es el cierre de la lecci
 </ul>
 </div>
 </div>
-<div id="outline-container-org982d044" class="outline-2">
-<h2 id="org982d044">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org982d044">
+<div id="outline-container-org5b7e8a2" class="outline-2">
+<h2 id="org5b7e8a2">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org5b7e8a2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -691,9 +722,9 @@ Con \(n=120\) la desviación prácticamente desaparece. Es el cierre de la lecci
 </table>
 </div>
 </div>
-<div id="outline-container-orgf7c9831" class="outline-2">
-<h2 id="orgf7c9831">Respuestas</h2>
-<div class="outline-text-2" id="text-orgf7c9831">
+<div id="outline-container-org645a3d3" class="outline-2">
+<h2 id="org645a3d3">Respuestas</h2>
+<div class="outline-text-2" id="text-org645a3d3">
 <ol class="org-ol">
 <li><i>Más réplicas, otra semilla.</i> La frecuencia de cobertura observada es la media de \(R\) indicadores \(0/1\) independientes, cada uno con probabilidad \(0{,}95\) de valer \(1\); su desviación típica es \(\sqrt{0{,}95\cdot0{,}05/R}\), unos \(0{,}0034\) con \(R=4\,000\) y diez veces menos con \(R=400\,000\). Cabe esperar, por tanto, que la distancia a \(0{,}95\) se reduzca a la décima parte. Con otra semilla y las mismas \(4\,000\) réplicas, la frecuencia sería otra, distinta de la obtenida en el mismo orden de magnitud (unas milésimas): la propia frecuencia empírica tiene su dispersión.</li>
 
@@ -710,7 +741,7 @@ Con \(n=120\) la desviación prácticamente desaparece. Es el cierre de la lecci
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-23 mié 22:30</p>
+<p class="date">Created: 2026-09-25 vie 20:00</p>
 </div>
 </body>
 </html>

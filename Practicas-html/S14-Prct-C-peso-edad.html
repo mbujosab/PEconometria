@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-23 mié 22:30 -->
+<!-- 2026-09-25 vie 19:58 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 14 (C) &#x2014; La importancia del R² ajustado</title>
@@ -287,23 +287,23 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org4db2736">Descripción de la práctica</a></li>
-<li><a href="#org8efb831">Actividad 1 - Los datos</a></li>
-<li><a href="#org2bffbf1">Actividad 2 - Modelo 1: la recta</a></li>
-<li><a href="#org08aec93">Actividad 3 - Modelo 2: la parábola</a></li>
-<li><a href="#org9e3841d">Actividad 4 - Modelo 3: la cúbica</a></li>
-<li><a href="#orgac0bf04">Actividad 5 - Los tres modelos, uno al lado del otro</a></li>
-<li><a href="#org5fb9cc2">Actividad 6 - Extrapolar los tres modelos</a></li>
-<li><a href="#orgc3bb40a">Actividad 7 - Una variable explicativa, tres regresores</a></li>
-<li><a href="#orgc4a0038">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orgd3681dc">Código completo de la práctica</a></li>
-<li><a href="#orgbb0fc15">Respuestas</a></li>
+<li><a href="#orgb7e1c7e">Descripción de la práctica</a></li>
+<li><a href="#orgfbf4269">Actividad 1 - Los datos</a></li>
+<li><a href="#org0e00a89">Actividad 2 - Modelo 1: la recta</a></li>
+<li><a href="#org1558dd5">Actividad 3 - Modelo 2: la parábola</a></li>
+<li><a href="#org72984e7">Actividad 4 - Modelo 3: la cúbica</a></li>
+<li><a href="#org530bf95">Actividad 5 - Los tres modelos, uno al lado del otro</a></li>
+<li><a href="#org825162f">Actividad 6 - Extrapolar los tres modelos</a></li>
+<li><a href="#org370ddd6">Actividad 7 - Una variable explicativa, tres regresores</a></li>
+<li><a href="#org001ee4b">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org5419887">Código completo de la práctica</a></li>
+<li><a href="#org0421539">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org4db2736" class="outline-2">
-<h2 id="org4db2736">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org4db2736">
+<div id="outline-container-orgb7e1c7e" class="outline-2">
+<h2 id="orgb7e1c7e">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orgb7e1c7e">
 <p>
 Las dos prácticas anteriores mostraron que añadir un regresor nunca empeora el \(R^2\), y que el \(R^2\) ajustado corrige ese defecto penalizando la complejidad. Podría pensarse, entonces, que basta con perseguir el \(\bar R^2\) más alto para encontrar ``el mejor modelo''. Veámoslo con un conjunto de datos (posiblemente ficticios) minúsculo: el peso y la edad de 8 niños. Ajustaremos tres modelos alternativos.
 </p>
@@ -319,20 +319,34 @@ Las dos prácticas anteriores mostraron que añadir un regresor nunca empeora el
 <li>Distinguir con precisión <i>variable explicativa</i> (la edad) de <i>regresores</i> (edad, edad al cuadrado, edad al cubo): tres regresores distintos al servicio de una sola variable explicativa.</li>
 <li>Comparar la elección de modelo que sugiere \(\bar R^2\) con la que sugiere extrapolar fuera de la muestra.</li>
 </ol>
+
+<p>
+<i>Comandos nuevos de esta práctica</i>. Además de <code>nulldata</code>, <code>setobs</code>, <code>setinfo</code>, <code>print --byobs</code>, <code>ols</code>, <code>gnuplot</code> y los accesores <code>$coeff</code>, <code>$rsq</code>, <code>$nobs</code> y <code>$ncoeff</code> (sesión 11 y prácticas A y B de hoy), aparecen:
+</p>
+<dl class="org-dl">
+<dt><code>matrix medad = {7;7;8;...}</code></dt><dd>una matriz escrita a mano. El punto y coma separa filas, así que esto es un vector columna de 8 números (práctica A de la sesión 11). <code>series edad = medad</code> copia sus componentes en una serie.</dd>
+<dt><code>edad^2</code></dt><dd>eleva al cuadrado cada componente (sesión 7).</dd>
+<dt><code>gnuplot ... --fit=quadratic</code></dt><dd>en lugar de la recta, superpone a la nube el ajuste de una parábola; <code>--fit=cubic</code>, el de una cúbica.</dd>
+<dt><code>loop e=13..20</code></dt><dd>repite el bloque hasta <code>endloop</code> con <code>e</code> tomando los valores enteros de 13 a 20 (sesión 11; la mecánica del bucle se explica en la sesión 16).</dd>
+</dl>
 </div>
 </div>
-<div id="outline-container-org8efb831" class="outline-2">
-<h2 id="org8efb831">Actividad 1 - Los datos</h2>
-<div class="outline-text-2" id="text-org8efb831">
+<div id="outline-container-orgfbf4269" class="outline-2">
+<h2 id="orgfbf4269">Actividad 1 - Los datos</h2>
+<div class="outline-text-2" id="text-orgfbf4269">
 <p>
 Introducimos a mano los datos de peso (kg) y edad (años) de los 8 niños.
+</p>
+
+<p>
+Conjunto vacío de 8 observaciones de sección cruzada. Las dos matrices contienen, escritas a mano, las edades y los pesos; las dos <code>series</code> las convierten en variables del conjunto de datos; <code>setinfo</code> las etiqueta y <code>print --byobs</code> las muestra en una tabla con una fila por niño.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org618c501">nulldata 8 --preserve
+<pre class="src src-gretl" id="org39538bc">nulldata 8 --preserve
 setobs 1 1 --cross-section
 
 matrix medad = {7;7;8;10;10;11;12;14}
@@ -351,14 +365,18 @@ print edad peso --byobs
 </p>
 </div>
 </div>
-<div id="outline-container-org2bffbf1" class="outline-2">
-<h2 id="org2bffbf1">Actividad 2 - Modelo 1: la recta</h2>
-<div class="outline-text-2" id="text-org2bffbf1">
+<div id="outline-container-org0e00a89" class="outline-2">
+<h2 id="org0e00a89">Actividad 2 - Modelo 1: la recta</h2>
+<div class="outline-text-2" id="text-org0e00a89">
+<p>
+<code>ols</code> estima la recta y <code>gnuplot</code> la dibuja sobre la nube de puntos, guardando el gráfico en un fichero con <code>--output</code>.
+</p>
+
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org01125fe">ols peso const edad
+<pre class="src src-gretl" id="orga878d48">ols peso const edad
 gnuplot peso edad --output="peso_edad_lineal.png"
 </pre>
 </div>
@@ -372,18 +390,22 @@ Anote \(R^2\) y \(\bar R^2\) de este primer modelo.
 </p>
 </div>
 </div>
-<div id="outline-container-org08aec93" class="outline-2">
-<h2 id="org08aec93">Actividad 3 - Modelo 2: la parábola</h2>
-<div class="outline-text-2" id="text-org08aec93">
+<div id="outline-container-org1558dd5" class="outline-2">
+<h2 id="org1558dd5">Actividad 3 - Modelo 2: la parábola</h2>
+<div class="outline-text-2" id="text-org1558dd5">
 <p>
 Añadimos edad al cuadrado como segundo regresor.
+</p>
+
+<p>
+<code>series edad2 = edad^2</code> crea el regresor nuevo elevando al cuadrado cada edad. <code>ols</code> lo añade a la lista, y <code>gnuplot</code> con <code>--fit=quadratic</code> superpone a la nube el ajuste de una parábola en lugar de la recta.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org3c69e61">series edad2 = edad^2
+<pre class="src src-gretl" id="org9319520">series edad2 = edad^2
 ols peso const edad edad2
 gnuplot peso edad --fit=quadratic --output="peso_edad_cuadratico.png"
 </pre>
@@ -401,18 +423,22 @@ Compare \(R^2\) y \(\bar R^2\) con los del Modelo 1. ¿Tiene sentido la comparac
 </p>
 </div>
 </div>
-<div id="outline-container-org9e3841d" class="outline-2">
-<h2 id="org9e3841d">Actividad 4 - Modelo 3: la cúbica</h2>
-<div class="outline-text-2" id="text-org9e3841d">
+<div id="outline-container-org72984e7" class="outline-2">
+<h2 id="org72984e7">Actividad 4 - Modelo 3: la cúbica</h2>
+<div class="outline-text-2" id="text-org72984e7">
 <p>
 Añadimos, además, edad al cubo.
+</p>
+
+<p>
+Igual que antes: <code>edad^3</code> es el tercer regresor y <code>--fit=cubic</code> dibuja la cúbica ajustada.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org8d150c7">series edad3 = edad^3
+<pre class="src src-gretl" id="org49d341c">series edad3 = edad^3
 ols peso const edad edad2 edad3
 gnuplot peso edad --fit=cubic --output="peso_edad_cubico.png"
 </pre>
@@ -427,14 +453,18 @@ gnuplot peso edad --fit=cubic --output="peso_edad_cubico.png"
 </p>
 </div>
 </div>
-<div id="outline-container-orgac0bf04" class="outline-2">
-<h2 id="orgac0bf04">Actividad 5 - Los tres modelos, uno al lado del otro</h2>
-<div class="outline-text-2" id="text-orgac0bf04">
+<div id="outline-container-org530bf95" class="outline-2">
+<h2 id="org530bf95">Actividad 5 - Los tres modelos, uno al lado del otro</h2>
+<div class="outline-text-2" id="text-org530bf95">
+<p>
+Tres <code>ols</code> con <code>--quiet</code>; tras cada uno, un escalar con \(\bar R^2\) calculado como en la práctica B (<code>$rsq</code>, <code>$nobs</code>, <code>$ncoeff</code>) y un <code>printf</code> con los dos índices.
+</p>
+
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgfa59218">ols peso const edad --quiet
+<pre class="src src-gretl" id="orgc9ddc73">ols peso const edad --quiet
 scalar Rbarsq1 = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
 printf "Modelo 1 (recta):    R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq1
 
@@ -447,7 +477,7 @@ scalar Rbarsq3 = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
 printf "Modelo 3 (cubica):   R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq3
 </pre>
 </div>
-<pre class="example" id="org21f335a">
+<pre class="example" id="org10b5eec">
 Modelo 1 (recta):    R2 = 0,9490   R2 ajustado = 0,9405
 Modelo 2 (parabola): R2 = 0,9840   R2 ajustado = 0,9776
 Modelo 3 (cubica):   R2 = 0,9922   R2 ajustado = 0,9863
@@ -457,9 +487,9 @@ Tanto \(R^2\) como \(\bar R^2\) crecen sin excepción del Modelo 1 al Modelo 3. 
 </p>
 </div>
 </div>
-<div id="outline-container-org5fb9cc2" class="outline-2">
-<h2 id="org5fb9cc2">Actividad 6 - Extrapolar los tres modelos</h2>
-<div class="outline-text-2" id="text-org5fb9cc2">
+<div id="outline-container-org825162f" class="outline-2">
+<h2 id="org825162f">Actividad 6 - Extrapolar los tres modelos</h2>
+<div class="outline-text-2" id="text-org825162f">
 <p>
 Vamos a predecir el peso a edades <i>fuera</i> del rango observado (7 a 14 años). Y
 lo haremos con los <i>tres</i> modelos a la vez, no solo con el ``ganador'': si
@@ -469,10 +499,14 @@ problema que buscamos no aparece al mismo tiempo en todos.
 </p>
 
 <p>
+El bloque tiene tres partes. Primero estima los tres modelos con <code>--quiet</code> y guarda sus coeficientes en escalares con <code>$coeff(nombre)</code>: cuatro para la cúbica (<code>b1</code> a <code>b4</code>), dos para la recta (<code>r1</code>, <code>r2</code>) y tres para la parábola (<code>p1</code> a <code>p3</code>). Después imprime una cabecera y, con <code>loop e=13..20</code>, una fila por edad de 13 a 20 años: en cada vuelta <code>e</code> es la edad y los tres números son los tres polinomios evaluados en ella (<code>%3d</code> es un entero en tres caracteres; la barra invertida <code>\</code> continúa la instrucción en la línea siguiente). Por último imprime la edad en la que cada modelo alcanza su máximo, que se obtiene anulando la derivada: \(-p_2/(2p_3)\) para la parábola y la raíz de una ecuación de segundo grado para la cúbica.
+</p>
+
+<p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org4c23092">ols peso const edad edad2 edad3 --quiet
+<pre class="src src-gretl" id="orgb016871">ols peso const edad edad2 edad3 --quiet
 scalar b1 = $coeff(const)
 scalar b2 = $coeff(edad)
 scalar b3 = $coeff(edad2)
@@ -503,7 +537,7 @@ printf "  Modelo 2 (parabola) : %.1f anios\n", -p2/(2*p3)
 printf "  Modelo 3 (cubica)   : %.1f anios\n", (-2*b3 - sqrt(4*b3^2 - 12*b2*b4))/(6*b4)
 </pre>
 </div>
-<pre class="example" id="org7c6980b">
+<pre class="example" id="org19ac2a3">
 edad    Modelo 1     Modelo 2     Modelo 3
         (recta)     (parabola)    (cubica)
 --------------------------------------------
@@ -588,17 +622,17 @@ De hecho, para descartar el Modelo 3 ni siquiera hace falta salir de la muestra:
 </p>
 </div>
 </div>
-<div id="outline-container-orgc3bb40a" class="outline-2">
-<h2 id="orgc3bb40a">Actividad 7 - Una variable explicativa, tres regresores</h2>
-<div class="outline-text-2" id="text-orgc3bb40a">
+<div id="outline-container-org370ddd6" class="outline-2">
+<h2 id="org370ddd6">Actividad 7 - Una variable explicativa, tres regresores</h2>
+<div class="outline-text-2" id="text-org370ddd6">
 <p>
 En los tres modelos de esta práctica hay una única <i>variable explicativa</i>: la edad. Sin embargo, el número de <i>regresores</i> crece de uno (Modelo 1: <code>edad</code>) a tres (Modelo 3: <code>edad</code>, <code>edad2</code>, <code>edad3</code>). Recordando la distinción de la lección 6: un regresor es cada vector que multiplica a un coeficiente \(\hat\beta_j\) del modelo; una variable explicativa es el concepto económico o sustantivo que puede entrar en el modelo a través de uno o varios regresores a la vez —aquí, la propia edad, y sus potencias, todas ellas funciones de la misma variable explicativa original—.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc4a0038" class="outline-2">
-<h2 id="orgc4a0038">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-orgc4a0038">
+<div id="outline-container-org001ee4b" class="outline-2">
+<h2 id="org001ee4b">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org001ee4b">
 <ol class="org-ol">
 <li>¿Por qué \(R^2\) y \(\bar R^2\) crecen sin excepción del Modelo 1 al Modelo 3, si ya sabemos (lección 8, prácticas anteriores) que \(R^2\) nunca puede bajar al añadir un regresor?</li>
 <li>Si tuviera que elegir uno de los tres modelos únicamente en función de \(\bar R^2\), ¿cuál elegiría? ¿Sigue eligiendo el mismo tras ver la Actividad 6?</li>
@@ -617,9 +651,9 @@ En los tres modelos de esta práctica hay una única <i>variable explicativa</i>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd3681dc" class="outline-2">
-<h2 id="orgd3681dc">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-orgd3681dc">
+<div id="outline-container-org5419887" class="outline-2">
+<h2 id="org5419887">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org5419887">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -637,9 +671,9 @@ En los tres modelos de esta práctica hay una única <i>variable explicativa</i>
 </table>
 </div>
 </div>
-<div id="outline-container-orgbb0fc15" class="outline-2">
-<h2 id="orgbb0fc15">Respuestas</h2>
-<div class="outline-text-2" id="text-orgbb0fc15">
+<div id="outline-container-org0421539" class="outline-2">
+<h2 id="org0421539">Respuestas</h2>
+<div class="outline-text-2" id="text-org0421539">
 <ol class="org-ol">
 <li>¿Por qué crecen \(R^2\) y \(\bar R^2\) sin excepción aquí, si \(\bar R^2\) en general puede bajar? La propiedad de la lección 8 (``\(R^2\) nunca baja'') es universal: se cumple siempre. La de \(\bar R^2\) (``puede bajar'') es solo una posibilidad, no una certeza: baja únicamente cuando el regresor añadido aporta muy poco a la reducción de SRC. En este ejemplo concreto, con solo 8 observaciones y una relación no lineal genuina entre peso y edad, cada potencia adicional de la edad reduce sustancialmente los residuos, lo suficiente como para que también \(\bar R^2\) suba. Que \(\bar R^2\) suba aquí no contradice que en otros casos (como pudo ocurrir con <code>radial</code> en la práctica anterior) pueda bajar: ambos comportamientos son compatibles con la misma fórmula.</li>
 
@@ -656,7 +690,7 @@ En los tres modelos de esta práctica hay una única <i>variable explicativa</i>
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-23 mié 22:30</p>
+<p class="date">Created: 2026-09-25 vie 19:58</p>
 </div>
 </body>
 </html>

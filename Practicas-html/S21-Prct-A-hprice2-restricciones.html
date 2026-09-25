@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-09-23 mié 22:30 -->
+<!-- 2026-09-25 vie 20:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 21 (A) &#x2014; El contraste $F$ con datos reales: tres restricciones sobre =hprice2=</title>
@@ -287,62 +287,62 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgb5419e4">Descripción de la práctica</a></li>
-<li><a href="#org449cb71">Actividad 1 - El modelo completo</a>
+<li><a href="#orgb901f88">Descripción de la práctica</a></li>
+<li><a href="#org47fbc4f">Actividad 1 - El modelo completo</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgc096470">Lo que debe observar</a></li>
+<li><a href="#orgc79df57">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org3511c87">Actividad 2 - Excluir dos regresores: el \(F\) a mano y con <code>restrict</code></a>
+<li><a href="#org5459208">Actividad 2 - Excluir dos regresores: el \(F\) a mano y con <code>restrict</code></a>
 <ul>
 <li>
 <ul>
-<li><a href="#org76760ab">Lo que debe observar</a></li>
+<li><a href="#org9cd5830">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org0a5c367">Actividad 3 - Excluir un solo regresor: \(F=t^2\)</a>
+<li><a href="#org1f8534d">Actividad 3 - Excluir un solo regresor: \(F=t^2\)</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org40aabf3">Lo que debe observar</a></li>
+<li><a href="#org21f98ba">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orga8db0e1">Actividad 4 - Una igualdad entre coeficientes</a>
+<li><a href="#orgfdb1b25">Actividad 4 - Una igualdad entre coeficientes</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgdb40b87">Lo que debe observar</a></li>
+<li><a href="#org6ecdb57">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org4b8eb92">Actividad 5 - Apertura: el caso <code>nox</code> y <code>lnox</code></a>
+<li><a href="#org8862b91">Actividad 5 - Apertura: el caso <code>nox</code> y <code>lnox</code></a>
 <ul>
 <li>
 <ul>
-<li><a href="#org263b70f">Lo que debe observar</a></li>
+<li><a href="#org2b553e1">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgb017fea">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orgbb31020">Para profundizar</a></li>
-<li><a href="#org2b8cad6">Código completo de la práctica</a></li>
-<li><a href="#org0f0265f">Respuestas</a></li>
+<li><a href="#org5ba2e59">Preguntas de interpretación para la clase</a></li>
+<li><a href="#orga923a2c">Para profundizar</a></li>
+<li><a href="#org09c9b5b">Código completo de la práctica</a></li>
+<li><a href="#org627b170">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgb5419e4" class="outline-2">
-<h2 id="orgb5419e4">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-orgb5419e4">
+<div id="outline-container-orgb901f88" class="outline-2">
+<h2 id="orgb901f88">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orgb901f88">
 <p>
 La lección 13 construyó el contraste \(F\) comparando dos ajustes anidados: el del modelo completo y el del modelo que respeta \(H_0\). La diferencia \(\mathrm{SRC}_r-\mathrm{SRC}\) es lo que la restricción cuesta en longitud al cuadrado; dividida por el número de restricciones \(q\) y por \(\mathrm{SRC}/(n-k)\) da el \(F\). Hoy hacemos esa cuenta con datos reales, restricción por restricción, y después dejamos que Gretl la haga con <code>restrict</code>.
 </p>
@@ -362,20 +362,33 @@ Retomamos <code>hprice2</code> con el modelo de la lección 13, <code>price ~ ro
 <li>Imponer una igualdad entre dos coeficientes construyendo la suma de los regresores como regresor único.</li>
 <li>Reencontrar el caso <code>nox</code> y <code>lnox</code> de la lección 13, que la práctica B de la sesión 22 explicará.</li>
 </ol>
+
+<p>
+<i>Comandos nuevos de esta práctica</i>. Seguimos usando <code>ols</code> con la opción <code>--quiet</code>, los accesores <code>$ess</code>, <code>$coeff</code> y <code>$stderr</code> (sesiones 11 a 18), las funciones <code>critical</code> y <code>pvalue</code> y el bloque <code>restrict ... end restrict</code> (práctica A de la sesión 18). Lo nuevo:
+</p>
+<dl class="org-dl">
+<dt><code>b[nox]</code></dt><dd>dentro de <code>restrict</code>, un coeficiente puede nombrarse por su posición en la lista de regresores, <code>b[3]</code>, como en la sesión 18, o por el nombre de su variable, <code>b[nox]</code>. Cada línea del bloque es una restricción: una combinación lineal de coeficientes a la izquierda del igual y un número a la derecha.</dd>
+<dt><code>critical(F, q, gl, 0.05)</code></dt><dd>el valor de la \(F\) de Fisher con <code>q</code> y <code>gl</code> grados de libertad que deja una probabilidad \(0{,}05\) a su derecha; <code>pvalue(F, q, gl, x)</code> es la probabilidad de que esa \(F\) supere <code>x</code>. Son las funciones de la sesión 18 con la letra <code>F</code> en lugar de <code>t</code>, y con dos grados de libertad en lugar de uno.</dd>
+<dt><code>%.4e</code>, <code>%d</code> y <code>%.3g</code></dt><dd>tres formatos más de <code>printf</code>: notación científica con cuatro decimales, cómoda para las sumas de cuadrados; un número entero; y un número con tres cifras significativas, en notación decimal o científica según su tamaño.</dd>
+</dl>
 </div>
 </div>
-<div id="outline-container-org449cb71" class="outline-2">
-<h2 id="org449cb71">Actividad 1 - El modelo completo</h2>
-<div class="outline-text-2" id="text-org449cb71">
+<div id="outline-container-org47fbc4f" class="outline-2">
+<h2 id="org47fbc4f">Actividad 1 - El modelo completo</h2>
+<div class="outline-text-2" id="text-org47fbc4f">
 <p>
 Abra <code>hprice2</code> y estime <code>price</code> sobre <code>rooms</code>, <code>nox</code> y <code>stratio</code>: <i><i><code>Modelo -&gt; Mínimos cuadrados ordinarios</code></i></i>. Anote la suma de cuadrados de los residuos y los grados de libertad, \(n-k=506-4=502\).
+</p>
+
+<p>
+El bloque abre <code>hprice2</code>, estima el modelo completo con <code>ols</code> y guarda en escalares lo que hará falta en toda la práctica: el número de observaciones <code>n</code>, el número de coeficientes <code>k</code> (la constante y tres regresores), la suma de cuadrados de los residuos <code>SRC</code>, que Gretl devuelve en el accesor <code>$ess</code>, y el denominador del \(F\), <code>s2 = SRC/(n-k)</code>, que es \(\mathfrak s^2\).
 </p>
 
 <p>
 <i>o bien teclee en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf77c96d">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="org6f81f01">open hprice2.gdt --quiet
 ols price const rooms nox stratio
 scalar n   = $nobs
 scalar k   = 4
@@ -383,7 +396,7 @@ scalar SRC = $ess
 scalar s2  = SRC/(n-k)
 </pre>
 </div>
-<pre class="example" id="org8bc1000">
+<pre class="example" id="org55be241">
 Modelo 1: MCO, usando las observaciones 1-506
 Variable dependiente: price
 
@@ -405,34 +418,38 @@ Criterio de Schwarz     10233,02   Crit. de Hannan-Quinn   10222,75
 SRC = 1,7108e+10    n-k = 502    s^2 = SRC/(n-k) = 3,4080e+07
 </pre>
 </div>
-<div id="outline-container-orgc096470" class="outline-4">
-<h4 id="orgc096470">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgc096470">
+<div id="outline-container-orgc79df57" class="outline-4">
+<h4 id="orgc79df57">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgc79df57">
 <p>
 Los tres regresores tienen \(t\) grandes; ninguna de las tres restricciones de hoy va a sorprender por su resultado, y esa es la intención: lo que interesa es la mecánica. El denominador del \(F\), \(\mathrm{SRC}/(n-k)\), es \(\mathfrak s^2\), el cuadrado de la ``D.T. de la regresión'' de la tabla. Compruébelo: \(5837{,}77^2=3{,}408\cdot10^7\).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org3511c87" class="outline-2">
-<h2 id="org3511c87">Actividad 2 - Excluir dos regresores: el \(F\) a mano y con <code>restrict</code></h2>
-<div class="outline-text-2" id="text-org3511c87">
+<div id="outline-container-org5459208" class="outline-2">
+<h2 id="org5459208">Actividad 2 - Excluir dos regresores: el \(F\) a mano y con <code>restrict</code></h2>
+<div class="outline-text-2" id="text-org5459208">
 <p>
 La hipótesis \(H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}=0\) dice que el modelo es <code>price ~ rooms</code>. Estime ese modelo restringido, anote su \(\mathrm{SRC}_r\) y construya el \(F\) con \(q=2\).
+</p>
+
+<p>
+Estimamos el modelo restringido con <code>ols</code> y <code>--quiet</code>, que evita imprimir la tabla: solo queremos su <code>$ess</code>, que guardamos en <code>SRCr</code>. Con <code>q = 2</code> restricciones, <code>F</code> es la fórmula de la lección 13 escrita tal cual: la subida de la \(\mathrm{SRC}\) por restricción, dividida por <code>s2</code>. El <code>printf</code> imprime el \(F\), el valor crítico de la \(F\) con \(2\) y \(n-k\) grados de libertad al \(5\%\) y el valor \(p\).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org8a5a2f5">ols price const rooms --quiet
+<pre class="src src-gretl" id="orgb998294">ols price const rooms --quiet
 scalar SRCr = $ess
 scalar q    = 2
 scalar F    = ((SRCr - SRC)/q)/s2
 printf "F = %.3f   F_c(2,502) = %.3f   valor p = %.3g\n", F, critical(F, q, n-k, 0.05), pvalue(F, q, n-k, F)
 </pre>
 </div>
-<pre class="example" id="orgf5346c7">
+<pre class="example" id="orgcae7aa7">
 Modelo restringido (price ~ rooms):  SRC_r = 2,2093e+10
 Subida de la SRC:                   SRC_r - SRC = 4,9854e+09
 F = ((SRC_r - SRC)/2)/(SRC/(n-k)) = 73,143
@@ -443,17 +460,21 @@ Ahora pida a Gretl el mismo contraste. Vuelva a estimar el modelo completo y, en
 </p>
 
 <p>
+Primero volvemos a estimar el modelo completo, porque <code>restrict</code> actúa siempre sobre el último modelo estimado, y el último fue el restringido. El bloque <code>restrict ... end restrict</code> lleva una restricción por línea, con los coeficientes nombrados por su variable. Al cerrar el bloque, Gretl imprime el \(F\), su valor \(p\) y las estimaciones del modelo que respeta las restricciones.
+</p>
+
+<p>
 <i>o bien teclee en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orga2aaff4">ols price const rooms nox stratio --quiet
+<pre class="src src-gretl" id="org089aead">ols price const rooms nox stratio --quiet
 restrict
     b[nox] = 0
     b[stratio] = 0
 end restrict
 </pre>
 </div>
-<pre class="example" id="org78a90e2">
+<pre class="example" id="org9fc414f">
 Conjunto de restricciones
  1: b[nox] = 0
  2: b[stratio] = 0
@@ -472,9 +493,9 @@ Estimaciones restringidas:
   Desviación típica de la regresión = 6620,87
 </pre>
 </div>
-<div id="outline-container-org76760ab" class="outline-4">
-<h4 id="org76760ab">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org76760ab">
+<div id="outline-container-org9cd5830" class="outline-4">
+<h4 id="org9cd5830">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org9cd5830">
 <p>
 El \(F\) de <code>restrict</code> es el que usted acaba de construir con las dos \(\mathrm{SRC}\); la coincidencia es exacta porque son la misma cuenta. La salida añade las <i>estimaciones restringidas</i>: los coeficientes del modelo que respeta \(H_0\). El de <code>rooms</code> no es el del modelo completo. Al quitar <code>nox</code> y <code>stratio</code>, la proyección de <code>price</code> cae sobre un subespacio más pequeño y la coordenada de <code>rooms</code> se recalcula: es la figura de la proyección en dos pasos de la lección 13, con \(\boldsymbol{\mathop{\widehat y}}_r\) en el plano de \(\boldsymbol 1\) y <code>rooms</code>.
 </p>
@@ -485,18 +506,22 @@ La ``desviación típica de la regresión'' del modelo restringido, \(6620{,}9\)
 </div>
 </div>
 </div>
-<div id="outline-container-org0a5c367" class="outline-2">
-<h2 id="org0a5c367">Actividad 3 - Excluir un solo regresor: \(F=t^2\)</h2>
-<div class="outline-text-2" id="text-org0a5c367">
+<div id="outline-container-org1f8534d" class="outline-2">
+<h2 id="org1f8534d">Actividad 3 - Excluir un solo regresor: \(F=t^2\)</h2>
+<div class="outline-text-2" id="text-org1f8534d">
 <p>
 Con \(q=1\) la restricción \(\beta_{\text{stratio}}=0\) se puede contrastar de dos maneras: con el \(F\) de los dos ajustes anidados o con el \(t\) de la tabla del modelo completo. La lección 13 dijo que son el mismo contraste. Compruébelo.
+</p>
+
+<p>
+Modelo restringido sin <code>stratio</code>, con su <code>$ess</code> guardado en <code>SRCr1</code>, y el \(F\) con \(q=1\). Después se vuelve a estimar el modelo completo para leer el \(t\) de <code>stratio</code>: el cociente entre su coeficiente, <code>$coeff(stratio)</code>, y su error estándar, <code>$stderr(stratio)</code>. El <code>printf</code> pone el \(F\) junto al cuadrado del \(t\).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org57abbd8">ols price const rooms nox --quiet
+<pre class="src src-gretl" id="orgf2063cf">ols price const rooms nox --quiet
 scalar SRCr1 = $ess
 scalar F1 = ((SRCr1 - SRC)/1)/s2
 ols price const rooms nox stratio --quiet
@@ -504,41 +529,45 @@ scalar t_st = $coeff(stratio)/$stderr(stratio)
 printf "F = %.3f   t^2 = %.3f\n", F1, t_st^2
 </pre>
 </div>
-<pre class="example" id="org035c377">
+<pre class="example" id="orgb66e2aa">
 Modelo restringido (price ~ rooms + nox): SRC_r = 1,9907e+10
 F = (SRC_r - SRC)/(SRC/(n-k)) = 82,133
 t de stratio en el modelo completo = -9,063 ;  t^2 = 82,133
 F_c(1,502) al 5% = 3,860 ;  t_c^2 = 3,860
 </pre>
 </div>
-<div id="outline-container-org40aabf3" class="outline-4">
-<h4 id="org40aabf3">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org40aabf3">
+<div id="outline-container-org21f98ba" class="outline-4">
+<h4 id="org21f98ba">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org21f98ba">
 <p>
 \(F=t^2\) con todos los decimales, y \(F_c(1,502)=t_c^2\): \(3{,}860=1{,}965^2\). El \(t\) bilateral al \(5\%\) y el \(F\) con \(q=1\) al \(5\%\) rechazan exactamente en los mismos casos. La diferencia es de lectura: el \(t\) tiene signo y dice en qué dirección se aleja el coeficiente de cero; el \(F\) solo mide cuánto sube la \(\mathrm{SRC}\), y por eso sirve también cuando las restricciones son varias.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orga8db0e1" class="outline-2">
-<h2 id="orga8db0e1">Actividad 4 - Una igualdad entre coeficientes</h2>
-<div class="outline-text-2" id="text-orga8db0e1">
+<div id="outline-container-orgfdb1b25" class="outline-2">
+<h2 id="orgfdb1b25">Actividad 4 - Una igualdad entre coeficientes</h2>
+<div class="outline-text-2" id="text-orgfdb1b25">
 <p>
 La hipótesis \(H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}\) no excluye ningún regresor, así que el modelo restringido no se obtiene borrando una variable. Si los dos coeficientes son iguales a un mismo \(\beta\), entonces \(\beta_{\text{nox}}\,\text{nox}+\beta_{\text{stratio}}\,\text{stratio}=\beta\,(\text{nox}+\text{stratio})\): el modelo restringido tiene como regresor la <i>suma</i> <code>nox + stratio</code>. Constrúyala (<i><i><code>Añadir -&gt; Definir nueva variable</code></i></i>), estime el modelo con <code>rooms</code> y la suma, y calcule el \(F\) con \(q=1\).
+</p>
+
+<p>
+Creamos con <code>series</code> el regresor suma, estimamos el modelo restringido con <code>rooms</code> y esa suma, y construimos el \(F\) con \(q=1\) como antes. El <code>printf</code> imprime el \(F\), el valor crítico y el valor \(p\).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org7525179">series nox_mas_stratio = nox + stratio
+<pre class="src src-gretl" id="org7257093">series nox_mas_stratio = nox + stratio
 ols price const rooms nox_mas_stratio --quiet
 scalar SRCr2 = $ess
 scalar F2 = ((SRCr2 - SRC)/1)/s2
 printf "F = %.3f   F_c(1,502) = %.3f   valor p = %.4f\n", F2, critical(F, 1, n-k, 0.05), pvalue(F, 1, n-k, F2)
 </pre>
 </div>
-<pre class="example" id="org5e9e266">
+<pre class="example" id="org102d812">
 Modelo restringido (price ~ rooms + (nox + stratio)): SRC_r = 1,7229e+10
 Subida de la SRC = 1,2131e+08
 F = 3,560    F_c(1,502) al 5% = 3,860    valor p = 0,0598
@@ -548,16 +577,20 @@ Y de nuevo con <code>restrict</code>, escribiendo la restricción como <code>b[n
 </p>
 
 <p>
+De nuevo el modelo completo, y un bloque <code>restrict</code> con una sola línea: la diferencia de los dos coeficientes igual a cero. La salida da el \(F\) y las estimaciones restringidas, en las que <code>nox</code> y <code>stratio</code> comparten coeficiente.
+</p>
+
+<p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org4e6d468">ols price const rooms nox stratio --quiet
+<pre class="src src-gretl" id="orge32f9d9">ols price const rooms nox stratio --quiet
 restrict
     b[nox] - b[stratio] = 0
 end restrict
 </pre>
 </div>
-<pre class="example" id="org91d304d">
+<pre class="example" id="org99dc302">
 Restricción:
  b[nox] - b[stratio] = 0
 
@@ -575,9 +608,9 @@ Estimaciones restringidas:
   Desviación típica de la regresión = 5852,6
 </pre>
 </div>
-<div id="outline-container-orgdb40b87" class="outline-4">
-<h4 id="orgdb40b87">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgdb40b87">
+<div id="outline-container-org6ecdb57" class="outline-4">
+<h4 id="org6ecdb57">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org6ecdb57">
 <p>
 La \(\mathrm{SRC}\) sube poco: \(1{,}21\cdot10^8\) sobre \(1{,}71\cdot10^{10}\), y el \(F\) vale \(3{,}56\), por debajo de \(F_c=3{,}86\). Al \(5\%\) la igualdad no se rechaza, con un valor \(p\) de \(0{,}060\): cerca del umbral, y la lección 12 ya dijo qué hacer con un valor \(p\), que es leerlo, no solo compararlo.
 </p>
@@ -588,41 +621,45 @@ Las estimaciones restringidas de <code>restrict</code> muestran el mismo coefici
 </div>
 </div>
 </div>
-<div id="outline-container-org4b8eb92" class="outline-2">
-<h2 id="org4b8eb92">Actividad 5 - Apertura: el caso <code>nox</code> y <code>lnox</code></h2>
-<div class="outline-text-2" id="text-org4b8eb92">
+<div id="outline-container-org8862b91" class="outline-2">
+<h2 id="org8862b91">Actividad 5 - Apertura: el caso <code>nox</code> y <code>lnox</code></h2>
+<div class="outline-text-2" id="text-org8862b91">
 <p>
 Sustituya <code>stratio</code> por <code>lnox</code>, el logaritmo de <code>nox</code>, y compare el \(F\) de excluir las dos medidas de contaminación con los \(t\) de cada una.
+</p>
+
+<p>
+El modelo con <code>lnox</code> en lugar de <code>stratio</code>, esta vez sin <code>--quiet</code> para ver la tabla con los \(t\), seguido de un bloque <code>restrict</code> que excluye las dos medidas de contaminación a la vez.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org5248d3c">ols price const rooms nox lnox
+<pre class="src src-gretl" id="org8dc429a">ols price const rooms nox lnox
 restrict
     b[nox] = 0
     b[lnox] = 0
 end restrict
 </pre>
 </div>
-<pre class="example" id="org78c5286">
+<pre class="example" id="orgc8a7ab1">
 price ~ rooms + nox + lnox:  t(nox) = 0,18   t(lnox) = -1,05   SRC = 1,9864e+10
 F de excluir nox y lnox a la vez = 28,18   F_c(2,502) = 3,014   valor p = 2,53e-12
 </pre>
 </div>
-<div id="outline-container-org263b70f" class="outline-4">
-<h4 id="org263b70f">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org263b70f">
+<div id="outline-container-org2b553e1" class="outline-4">
+<h4 id="org2b553e1">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org2b553e1">
 <p>
 Ningún \(t\) llega a \(1{,}05\) en valor absoluto; el \(F\) de excluir las dos a la vez vale \(28\). Uno a uno, ninguno de los dos regresores parece necesario; juntos, lo son sin discusión. No es una contradicción del contraste: es que las dos preguntas son distintas, y la lección 14 explicó por qué esta pareja las separa tanto. La práctica B de la sesión 22 le pondrá números.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgb017fea" class="outline-2">
-<h2 id="orgb017fea">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-orgb017fea">
+<div id="outline-container-org5ba2e59" class="outline-2">
+<h2 id="org5ba2e59">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org5ba2e59">
 <ol class="org-ol">
 <li>En la Actividad 2, \(\mathrm{SRC}_r-\mathrm{SRC}\) vale \(4{,}99\cdot10^9\). ¿Qué longitud al cuadrado es esa, en la figura de la proyección en dos pasos de la lección 13? ¿Por qué no puede ser negativa?</li>
 <li>El coeficiente de <code>rooms</code> pasa de \(7000{,}6\) en el modelo completo a \(9119{,}6\) en el restringido de la Actividad 2. ¿Qué ha cambiado, si <code>rooms</code> es el mismo vector?</li>
@@ -632,9 +669,9 @@ Ningún \(t\) llega a \(1{,}05\) en valor absoluto; el \(F\) de excluir las dos 
 </ol>
 </div>
 </div>
-<div id="outline-container-orgbb31020" class="outline-2">
-<h2 id="orgbb31020">Para profundizar</h2>
-<div class="outline-text-2" id="text-orgbb31020">
+<div id="outline-container-orga923a2c" class="outline-2">
+<h2 id="orga923a2c">Para profundizar</h2>
+<div class="outline-text-2" id="text-orga923a2c">
 <ul class="org-ul">
 <li>Lección 13 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html">lección 13</a>), en especial ``Restricciones lineales: modelos anidados'' (con la figura de la proyección en dos pasos) y ``Tres restricciones sobre <code>hprice2</code>''.</li>
 <li>Wooldridge, J. M. (2020). <i>Introductory Econometrics</i>, cap. 4, sección 4.5 (contraste de restricciones lineales múltiples) y el ejemplo 4.9.</li>
@@ -642,9 +679,9 @@ Ningún \(t\) llega a \(1{,}05\) en valor absoluto; el \(F\) de excluir las dos 
 </ul>
 </div>
 </div>
-<div id="outline-container-org2b8cad6" class="outline-2">
-<h2 id="org2b8cad6">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org2b8cad6">
+<div id="outline-container-org09c9b5b" class="outline-2">
+<h2 id="org09c9b5b">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org09c9b5b">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -662,9 +699,9 @@ Ningún \(t\) llega a \(1{,}05\) en valor absoluto; el \(F\) de excluir las dos 
 </table>
 </div>
 </div>
-<div id="outline-container-org0f0265f" class="outline-2">
-<h2 id="org0f0265f">Respuestas</h2>
-<div class="outline-text-2" id="text-org0f0265f">
+<div id="outline-container-org627b170" class="outline-2">
+<h2 id="org627b170">Respuestas</h2>
+<div class="outline-text-2" id="text-org627b170">
 <ol class="org-ol">
 <li><i>La subida de la \(\mathrm{SRC}\).</i> Es \(\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2\), el cuadrado de la distancia entre el ajuste completo y el restringido: el cateto que separa las dos proyecciones en la figura de la lección 13. Por Pitágoras anidado, \(\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e^2\), y un cuadrado no es negativo: el residuo restringido nunca es más corto que el libre, porque se proyecta sobre un subespacio contenido en el otro.</li>
 
@@ -681,7 +718,7 @@ Ningún \(t\) llega a \(1{,}05\) en valor absoluto; el \(F\) de excluir las dos 
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-09-23 mié 22:30</p>
+<p class="date">Created: 2026-09-25 vie 20:00</p>
 </div>
 </body>
 </html>
