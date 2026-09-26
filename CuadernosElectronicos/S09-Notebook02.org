@@ -26,7 +26,7 @@ Este cuaderno retoma la construcción del primer cuaderno (proyección sobre $\m
 
 Seguimos trabajando en $\mathbb{R}^3$ ($n=3$ observaciones) para poder dibujar la escena, pero conviene señalar desde el principio una diferencia geométrica importante respecto al primer cuaderno: allí, con un solo generador $\boldsymbol{1}$, el complemento ortogonal $\mathcal{L}(\boldsymbol{1})^\perp$ era un /plano/ (dimensión 2) dentro de $\mathbb{R}^3$. Aquí, con /dos/ generadores ($\boldsymbol{1}$ y $\boldsymbol{x}$), el complemento ortogonal $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})^\perp$ es una /recta/ (dimensión 1): solo queda una dirección posible para el residuo. Esta observación será la clave de la Parte 3.
 
-Podrá, como en el primer cuaderno, rotar las figuras con el ratón y editar los vectores en las celdas de código para crear sus propios ejemplos. Además, junto a cada figura 3D verá su gemela: el diagrama de dispersión clásico $(x_i,y_i)$ con la recta ajustada, para no perder de vista la lectura “de manual” de lo mismo.
+Podrá, como en el primer cuaderno, rotar las figuras con el ratón y editar los vectores en las celdas de código para crear sus propios ejemplos. Además, junto a cada figura 3D verá su gemela: el diagrama de dispersión clásico $(x_i,y_i)$ con la recta ajustada, para compararla con el diagrama habitual.
 
 * Herramientas auxiliares
 
@@ -337,7 +337,7 @@ ejemplos = {
 
 * Parte 1: el ajuste y su residuo
 
-Elegimos un ejemplo y dibujamos la escena completa: el plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ (observe, al rotar la figura, que sus dos ejes, $\mathcal{L}(\boldsymbol{1})$ en azul y $\mathcal{L}(\boldsymbol{x})$ en negro, son oblicuos, no perpendiculares, exactamente como advertía la lección 6), el vector de datos $\boldsymbol{y}$, su ajuste $\boldsymbol{\mathop{\widehat{y}}}$, y el residuo $\boldsymbol{\mathop{\widehat{e}}}$ como el segmento perpendicular al plano que los conecta. Fíjese en las marcas negras sobre $\mathcal{L}(\boldsymbol{x})$: cada una indica, al pasar el ratón por encima, cuántas veces $\boldsymbol{x}$ hay que sumar (con signo) para llegar a ese punto de la recta (igual que las marcas azules sobre $\mathcal{L}(\boldsymbol{1})$ indican el valor de $\mu$, pero aquí sin traducción a ningún estadístico, pues la escala de $\boldsymbol{x}$ es arbitraria). Fíjese también en las líneas grises discontinuas que unen $\hat\beta_1\boldsymbol{1}$ (naranja) y $\hat\beta_2\boldsymbol{x}$ (siena) con la punta de $\boldsymbol{\mathop{\widehat{y}}}$: son los dos lados del paralelogramo cuya suma reconstruye el ajuste.
+Elegimos un ejemplo y dibujamos la escena completa. El plano $\mathcal{L}(\boldsymbol{1},\boldsymbol{x})$ tiene dos ejes, $\mathcal{L}(\boldsymbol{1})$ en azul y $\mathcal{L}(\boldsymbol{x})$ en negro; al rotar la figura verá que son oblicuos, no perpendiculares, como advertía la lección 6. Sobre él están el vector de datos $\boldsymbol{y}$, su ajuste $\boldsymbol{\mathop{\widehat{y}}}$ y el residuo $\boldsymbol{\mathop{\widehat{e}}}$, el segmento perpendicular al plano que los conecta. Las marcas negras sobre $\mathcal{L}(\boldsymbol{x})$ indican, al pasar el ratón por encima, cuántas veces hay que sumar $\boldsymbol{x}$ (con signo) para llegar a ese punto; las marcas azules sobre $\mathcal{L}(\boldsymbol{1})$ indican el valor de $\mu$, pero la escala de $\boldsymbol{x}$ es arbitraria y no se traduce a ningún estadístico. Las líneas grises discontinuas unen $\hat\beta_1\boldsymbol{1}$ (naranja) y $\hat\beta_2\boldsymbol{x}$ (siena) con la punta de $\boldsymbol{\mathop{\widehat{y}}}$: son los dos lados del paralelogramo cuya suma reconstruye el ajuste.
 
 #+BEGIN_SRC jupyter-python
 x, y = ejemplos['canonico']
@@ -452,7 +452,7 @@ def resumen(res):
           f"beta1_hat={res['beta1_hat']:+7.4f}  beta2_hat={res['beta2_hat']:+7.4f}")
 #+END_SRC
 
-Fijamos $\boldsymbol{x}=(1,2,3)$ y los valores verdaderos $\beta_1=2,\beta_2=3$ (el mismo ejemplo, en espíritu, que el de la lección 7). El truco para encontrar la /única/ dirección ortogonal a la vez a $\boldsymbol{1}$ y a $\boldsymbol{x}$ es el producto vectorial: $\boldsymbol{1}\times\boldsymbol{x}$ es, por definición, perpendicular a ambos.
+Fijamos $\boldsymbol{x}=(1,2,3)$ y los valores verdaderos $\beta_1=2,\beta_2=3$ (el mismo ejemplo, en espíritu, que el de la lección 7). Para encontrar la única dirección ortogonal a la vez a $\boldsymbol{1}$ y a $\boldsymbol{x}$ es el producto vectorial: $\boldsymbol{1}\times\boldsymbol{x}$ es, por definición, perpendicular a ambos.
 
 #+BEGIN_SRC jupyter-python
 x = np.array([1., 2., 3.])
@@ -514,7 +514,7 @@ El caso (a) es trivial: sin perturbación, no hay nada que estimar. El caso (b) 
 
 Los casos (c) y (d) son los más instructivos. Cada uno satisface /solo una/ de las dos condiciones de ortogonalidad: (c) tiene media cero pero no es ortogonal a $\boldsymbol{x}$, y (d) es ortogonal a $\boldsymbol{x}$ pero tiene media distinta de cero. En ambos $\hat\beta_1,\hat\beta_2$ se alejan de los valores verdaderos. Esto confirma, con números, lo que ya anticipaba la lección 6: que el residuo de una proyección es ortogonal a /todo/ el plano exige ortogonalidad a /cada uno/ de sus generadores /simultáneamente/. Para que el residuo recupere el componente $\boldsymbol{u}$, es necesario que $\boldsymbol{u}$ sea ortogonal a ambos regresores; satisfacer solo una de las dos condiciones no basta. El caso (e), sin ninguna de las dos, es en general el más alejado de todos. Solo cuando el residuo coincide con $\boldsymbol{u}$, los betas estimados coinciden con los verdaderos valores usados para generar $\boldsymbol{y}$.
 
-Guardemos esta idea: solo cuando $\boldsymbol{u}$ vive enteramente en la (única) dirección ortogonal al plano de los regresores, MCO recupera los coeficientes generadores con exactitud. Esta es, en miniatura, la intuición geométrica detrás de la condición $E[\boldsymbol{U}\mid\boldsymbol{X}]=\boldsymbol{0}$ que exigiremos a la perturbación poblacional en la lección 9.
+Guardemos esta idea: solo cuando $\boldsymbol{u}$ vive enteramente en la (única) dirección ortogonal al plano de los regresores, MCO recupera los coeficientes generadores con exactitud. Esta es, en miniatura, la intuición geométrica detrás de la condición $E[U\mid X]=\mathit{0}$ que exigiremos a la perturbación poblacional en la lección 9.
 
 *** Actividad
 

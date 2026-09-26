@@ -93,9 +93,9 @@ set verbose off
 
 * Descripción de la práctica
 
-Cerramos la sesión con tres experimentos que responden a dos preguntas incómodas.
+Cerramos la sesión con tres experimentos que responden a dos preguntas.
 
-La primera nació al final de la práctica A: el histograma de $\hat\beta_2$ tenía forma de campana, y dijimos que no debíamos sacar conclusiones de ello porque habíamos /impuesto/ esa forma al generar las perturbaciones con una normal. Toca comprobarlo: ¿qué pasa si las generamos con distribuciones muy poco normales? ¿Se desmorona algo?
+La primera nació al final de la práctica A: el histograma de $\hat\beta_2$ tenía forma de campana, y dijimos que no debíamos sacar conclusiones de ello porque habíamos /impuesto/ esa forma al generar las perturbaciones con una normal. Toca comprobarlo: ¿qué pasa si las generamos con distribuciones muy poco normales?
 
 La segunda es más antigua. En el ejemplo de juguete de la lección 7, aquel $\boldsymbol u=(1,-2,0,2,-1)$, MCO recuperaba los coeficientes verdaderos /exactamente/, y advertimos que era una casualidad de diseño. La lección 11 explicó por qué: porque $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$, y aquel $\boldsymbol u$ estaba construido para que el segundo término se anulase. Vamos a fabricar esa casualidad a propósito, miles de veces seguidas, y ver qué le ocurre al histograma.
 
@@ -205,9 +205,9 @@ end outfile
 
 *** Lo que debe observar
 
-Las tres medias quedan cerca de $\beta_2$ y las tres varianzas cerca de $\sigma^2/\mathrm{Sxx}$. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a francamente asimétrica) no ha estropeado nada.
+Las tres medias quedan cerca de $\beta_2$ y las tres varianzas cerca de $\sigma^2/\mathrm{Sxx}$. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a francamente asimétrica) no cambia ni la media ni la varianza.
 
-No debería sorprender: es lo que la lección 11 demostró. Merece la pena volver sobre aquella demostración y comprobar qué se usó en cada paso.
+Es lo que la lección 11 demostró. Merece la pena volver sobre aquella demostración y comprobar qué se usó en cada paso.
 
 - Para la insesgadez se usó $E[U_i\mid\boldsymbol X]=\mathit 0$ (exogeneidad estricta) y el lema para sacar los $W_i$ fuera de la esperanza condicionada.
 - Para la varianza se usó, además, $Var[U_i\mid\boldsymbol X]=\sigma^2\,\mathit 1$ (homocedasticidad) y $Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0$ para $i\neq j$.
@@ -215,7 +215,7 @@ No debería sorprender: es lo que la lección 11 demostró. Merece la pena volve
 En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su media condicional, su varianza condicional y la ausencia de covarianzas cruzadas. Y esas tres cosas las cumplen igual de bien una normal, una uniforme y una chi-cuadrado centrada. La demostración era más general de lo que parecía.
 
 
-* Actividad 2 - ¿Y la forma? Aquí sí cambia la historia
+* Actividad 2 - La forma sí depende de la distribución de $U$
 
 Que la media y la varianza no dependan de la distribución de $U$ no significa que /nada/ dependa de ella. Veamos los histogramas. =freq b_chi --normal= dibuja, como en la práctica A, el histograma de las estimaciones obtenidas con perturbación chi-cuadrado, con la normal superpuesta y el contraste de normalidad.
 
@@ -236,9 +236,9 @@ freq b_chi --normal --plot="@workdir/hist_chi_grande.png"
 #+CAPTION: Distribución de $\hat\beta_2$ con perturbaciones $\chi^2$ (asimétricas) y $n=506$.
 [[file:./S16-Prct-C-sorpresas/hist_chi_grande.png]]
 
-Probablemente esperaba ver algo torcido, y no lo es: con las 506 observaciones de =hprice2=, el histograma de $\hat\beta_2$ sigue pareciendo una campana aunque las perturbaciones sean muy asimétricas.
+Con las 506 observaciones de =hprice2=, el histograma de $\hat\beta_2$ sigue pareciendo una campana aunque las perturbaciones sean muy asimétricas.
 
-Antes de sacar conclusiones, probemos con una muestra pequeña y una asimetría aún más agresiva: doce viviendas y perturbaciones $\chi^2$ con /un/ grado de libertad, que es de las distribuciones más torcidas que hay a mano.
+Antes de sacar conclusiones, probemos con una muestra pequeña y una asimetría mayor: doce viviendas y perturbaciones $\chi^2$ con /un/ grado de libertad.
 
 Tres bloques. El primero reabre =hprice2=, recupera los parámetros y se queda con doce viviendas: con =set seed 160= y =smpl 12 --random=, las mismas doce de la práctica B. El segundo es el bucle: 4000 réplicas con una perturbación chi-cuadrado de un grado de libertad, centrada (se le resta su media, $1$) y reescalada (se divide por su desviación típica, $\sqrt2$, y se multiplica por =sigma=), guardando =b_peq=. El tercero, tras abrir =repCpeq.gdt=, calcula la media, la desviación típica y el coeficiente de asimetría escrito con sumas: la media de los cubos de las desviaciones dividida por el cubo de la desviación típica.
 
@@ -302,9 +302,9 @@ freq b_peq --normal --plot="@workdir/hist_chi_peq.png"
 #+CAPTION: Distribución de $\hat\beta_2$ con perturbaciones $\chi^2$ de un grado de libertad y solo $n=12$. Sigue pareciendo simétrica.
 [[file:./S16-Prct-C-sorpresas/hist_chi_peq.png]]
 
-*** Una simetría que no esperábamos
+*** Por qué el histograma sigue siendo simétrico
 
-El resultado desconcierta: aunque la perturbación es de las más asimétricas imaginables y la muestra es diminuta, el histograma de $\hat\beta_2$ /sigue pareciendo simétrico/, y el coeficiente de asimetría que acabamos de calcular sale prácticamente nulo. (El contraste de normalidad de =freq --normal= sí rechaza, pero lo hace por las colas, la curtosis, no por la asimetría.)
+Aunque la perturbación es muy asimétrica y la muestra es diminuta, el histograma de $\hat\beta_2$ /sigue pareciendo simétrico/, y el coeficiente de asimetría que acabamos de calcular sale prácticamente nulo. (El contraste de normalidad de =freq --normal= sí rechaza, pero lo hace por las colas, la curtosis, no por la asimetría.)
 
 La explicación está, una vez más, en la fórmula de la lección 11:
 \[
@@ -312,9 +312,9 @@ La explicación está, una vez más, en la fórmula de la lección 11:
 \]
 Los pesos $W_i$ son proporcionales a las /desviaciones/ del regresor respecto a su media, y esas desviaciones son negativas para aproximadamente la mitad de las observaciones. Así que $\sum_iW_iU_i$ suma perturbaciones torcidas hacia la derecha con peso positivo y perturbaciones torcidas hacia la derecha con peso /negativo/, que al cambiarles el signo quedan torcidas hacia la izquierda. Las dos asimetrías se compensan en buena medida, y el resultado sale casi simétrico.
 
-*** ¿De quién es la culpa: de la perturbación o del regresor?
+*** ¿Perturbación o regresor?
 
-Hay dos sospechosos y todavía no los hemos distinguido. Cuando el histograma salga torcido, ¿será por la distribución de la /perturbación/ o por la del /regresor/?
+Hay dos causas posibles y todavía no las hemos separado. Cuando el histograma salga torcido, ¿será por la distribución de la /perturbación/ o por la del /regresor/?
 
 Para separarlos hace falta cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y $\chi^2$ con un grado de libertad) con dos regresores: uno /equilibrado/ (las mismas doce viviendas reales de antes) y otro con una /observación dominante/, en el que once viviendas comparten el mismo valor y una se sale mucho del grupo.
 
@@ -429,7 +429,7 @@ Que el regresor no pueda crearla se ve en la fórmula de la lección 11. En esto
 \[
 \hat\beta_2=\beta_2\,\mathit 1+\sum_iw_iU_i
 \]
-es, ahora sí, una auténtica /combinación lineal/ de las perturbaciones, con coeficientes que son números.[fn::Conviene no generalizar el atajo. En la lección 11 el regresor es aleatorio, los pesos $W_i$ son variables aleatorias, y NO se convierten en números por el hecho de condicionar en $\boldsymbol X$: lo que autoriza allí a sacarlos fuera de la esperanza es el Lema, no ninguna transmutación de funciones en números. Aquí el atajo es legítimo por un motivo distinto y mucho más humilde: el regresor está fijado de antemano, así que los $w_i$ son números desde el principio.] Si esas perturbaciones son normales, cualquier combinación lineal suya vuelve a ser normal, sean cuales sean los pesos. Por eso la fila de arriba es plana: el diseño del regresor no tiene por dónde introducir asimetría.
+es, ahora sí, una auténtica /combinación lineal/ de las perturbaciones, con coeficientes que son números.[fn::Conviene no generalizar el atajo. En la lección 11 el regresor es aleatorio, los pesos $W_i$ son variables aleatorias, y no se convierten en números por condicionar en $\boldsymbol X$: lo que autoriza allí a sacarlos fuera de la esperanza es el Lema. Aquí el atajo es legítimo por otro motivo: el regresor está fijado de antemano, así que los $w_i$ son números desde el principio.] Si esas perturbaciones son normales, cualquier combinación lineal suya vuelve a ser normal, sean cuales sean los pesos. Por eso la fila de arriba es plana: el diseño del regresor no tiene por dónde introducir asimetría.
 
 Lo que el regresor sí controla es /cuánta/ de la asimetría de $U$ llega al resultado. Con pesos repartidos, la suma mezcla muchas perturbaciones y sus asimetrías se compensan; con un peso que domina a los demás, $\hat\beta_2\approx\beta_2+W_1U_1$ y el estimador reproduce casi tal cual la forma de una sola perturbación.
 
@@ -447,7 +447,7 @@ Las dos primeras filas están /demostradas/ en la lección 11 y verificadas en l
 
 /Una observación/. Habrá notado una regularidad: la asimetría se diluye cuando hay muchas observaciones, o cuando ninguna domina. Hay un resultado general detrás de ese comportamiento, y explica por qué la econometría aplicada puede permitirse a menudo no preocuparse demasiado por la distribución de $U$. No lo vamos a abordar aquí: anótelo como pregunta pendiente para la próxima lección.
 
-* Actividad 3 - El experimento imposible: forzar los supuestos exactamente
+* Actividad 3 - Forzar los supuestos exactamente
 
 Tanto los supuestos del modelo como el corolario de la exogeneidad se enuncian /en esperanza/: $E[U_i\mid\boldsymbol X]=\mathit 0$ dice que la perturbación vale cero /en promedio/, no que valga cero en ninguna muestra concreta. En cualquier muestra real, el vector de perturbaciones tendrá una media muestral que no será cero y no será exactamente ortogonal al regresor.
 
@@ -519,9 +519,7 @@ La explicación es inmediata a partir de la lección 11, que estableció
 \[
 \hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i,
 \]
-y los pesos $W_i$ son proporcionales a $(X_i-\overline{X})$. Ahora bien, una vez fijada la muestra concreta con la que trabajamos, esos pesos son números, los $w_i$ de la lección 7. Si hemos construido $\boldsymbol u$ exactamente ortogonal al regresor centrado, entonces $\sum_iw_iu_i=0$ /en esa muestra/, no solo en promedio. El segundo sumando desaparece y lo que queda es $\beta_2$ exactamente. Cada vez. Por construcción.
-
-La moraleja:
+y los pesos $W_i$ son proporcionales a $(X_i-\overline{X})$. Ahora bien, una vez fijada la muestra concreta con la que trabajamos, esos pesos son números, los $w_i$ de la lección 7. Si hemos construido $\boldsymbol u$ exactamente ortogonal al regresor centrado, entonces $\sum_iw_iu_i=0$ /en esa muestra/, no solo en promedio. El segundo sumando desaparece y lo que queda es $\beta_2$ exactamente, en cada réplica y por construcción.
 
 #+begin_center
 /La dispersión de $\hat\beta_2$ no procede de ningún defecto de MCO. Procede de que, en una muestra real, la perturbación no es ortogonal al regresor; solo lo es en promedio./
@@ -529,7 +527,7 @@ La moraleja:
 
 Dicho de otro modo: si viviéramos en un mundo en el que cada muestra cumpliese los supuestos de forma exacta, MCO sería un instrumento perfecto y no haría falta ninguna inferencia estadística. Toda la teoría que viene a continuación (errores estándar, intervalos, contrastes) existe porque ese mundo no es el nuestro. Este experimento lo hace visible fabricándolo artificialmente.
 
-Esto cierra el círculo con la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ del ejemplo de juguete, que parecía una curiosidad, era exactamente esto. Advertimos entonces que recuperar $\hat\beta_2=3$ exactamente ``no era lo habitual''. Ahora sabemos decir con precisión qué lo hacía posible, y podemos reproducirlo a voluntad.
+Es el caso del ejemplo de la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ era exactamente esto. Advertimos entonces que recuperar $\hat\beta_2=3$ exactamente ``no era lo habitual''. Ahora sabemos decir con precisión qué lo hacía posible, y podemos reproducirlo a voluntad.
 
 
 * Preguntas de interpretación para la clase

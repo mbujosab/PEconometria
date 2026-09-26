@@ -93,11 +93,11 @@ set verbose off
 
 * Descripción de la práctica
 
-La lección 12 fue muy cuidadosa con lo que el intervalo de confianza /dice/ y lo que /no dice/: dice que el $95\%$ de las muestras producen un intervalo que contiene a $\beta_2$; no dice que $\beta_2$ esté en /este/ intervalo con probabilidad $0{,}95$. Es una afirmación sobre una /frecuencia/, y una frecuencia se comprueba repitiendo. Esta práctica la repite.
+La lección 12 distinguió lo que el intervalo de confianza /dice/ y lo que /no dice/: dice que el suceso ``el intervalo contiene a $\beta_2$'' tiene probabilidad $0{,}95$, con los extremos del intervalo como variables aleatorias; no dice que $\beta_2$ esté en /este/ intervalo con probabilidad $0{,}95$. Una probabilidad se manifiesta como frecuencia al repetir, y esta práctica repite.
 
 Reutilizamos el mundo artificial de la práctica B (el panel disperso de la lección 12: doce valores del regresor de $22{,}5$ a $77{,}5$, $\beta_1=10$, $\beta_2=0{,}5$ y perturbaciones normales con $\sigma=1{,}1$) y la mecánica del =loop= que aprendimos en el laboratorio anterior. En cada réplica sorteamos doce perturbaciones nuevas, estimamos, construimos el intervalo y anotamos si contiene al $0{,}5$ verdadero. Después contamos.
 
-Los datos son /simulados/ por la razón de siempre: solo conociendo la verdad se puede saber si el intervalo la contiene.
+Los datos son /simulados/ porque solo conociendo la verdad se puede saber si el intervalo la contiene.
 
 /Objetivos/
 
@@ -220,7 +220,7 @@ smpl full
 
 La frecuencia empírica de cobertura queda muy cerca de $0{,}95$, y la de rechazos de la hipótesis cierta muy cerca de $0{,}05$: son la misma cosa vista desde dos lados. Con $4\,000$ réplicas no cabe esperar exactamente $0{,}9500$, porque la frecuencia observada es a su vez una variable aleatoria, pero sí una distancia pequeña.
 
-Y la figura muestra lo que la frecuencia esconde. El intervalo /cambia/ de una réplica a otra: sus extremos son variables aleatorias, funciones de la muestra. El $\beta_2$ verdadero, en cambio, no se mueve. Esa es la razón de la lectura correcta de la lección 12: lo aleatorio es el intervalo, no el parámetro, y el $95\%$ es la frecuencia con la que el intervalo aleatorio atrapa al parámetro fijo. Mirando un solo intervalo, cualquiera de los cien, no hay forma de saber si es de los que aciertan.
+La figura muestra lo que hay detrás de la frecuencia. El intervalo /cambia/ de una réplica a otra: sus extremos son variables aleatorias, funciones de la muestra. El $\beta_2$ verdadero, en cambio, no se mueve. Esa es la razón de la lectura correcta de la lección 12: lo aleatorio es el intervalo, no el parámetro, y el $0{,}95$ es la probabilidad de que el intervalo aleatorio contenga al parámetro fijo, que aquí vemos como frecuencia. Mirando un solo intervalo, cualquiera de los cien, no hay forma de saber si es de los que aciertan.
 
 * Actividad 2 - El precio de estimar $\sigma$
 
@@ -269,7 +269,7 @@ Con $1{,}96$ el intervalo cubre bastante menos del $95\%$, y el contraste rechaz
 
 * Actividad 3 - Una hipótesis falsa por poco, con $n=12$ y con $n=120$
 
-Hasta aquí hemos contrastado una hipótesis cierta. Ahora contrastamos una /falsa por poco/: $H_0\!:\beta_2=0{,}47$, cuando el verdadero es $0{,}5$. ¿Con qué frecuencia la detecta el contraste? Lo hacemos dos veces: con las doce observaciones de siempre, y con ciento veinte: el mismo patrón de regresor repetido diez veces, el mismo $\sigma$, la misma hipótesis. Lo único que cambia es la cantidad de evidencia.
+Hasta aquí hemos contrastado una hipótesis cierta. Ahora contrastamos una /falsa por poco/: $H_0\!:\beta_2=0{,}47$, cuando el verdadero es $0{,}5$. ¿Con qué frecuencia la detecta el contraste? Lo hacemos dos veces: con las doce observaciones de siempre, y con ciento veinte: el mismo patrón de regresor repetido diez veces, el mismo $\sigma$, la misma hipótesis. Lo único que cambia es el tamaño de la muestra.
 
 Tres bloques. El primero crea un conjunto de 120 observaciones (=--preserve= conserva los escalares) con el patrón del regresor repetido diez veces gracias al resto =% 12=, y vuelve a fijar los parámetros y el valor falso =c_falsa=. El segundo restringe la muestra a las doce primeras, calcula el valor crítico con los grados de libertad =$nobs - 2=, fija la semilla, pone a cero dos contadores y repite =R= veces: sortear, estimar, y sumar a =rech= un $1$ si el estadístico de la hipótesis falsa supera el valor crítico y a =cov= un $1$ si el intervalo contiene al verdadero $\beta_2$. Este bucle no lleva =--progressive= ni =store=: solo acumula en los dos escalares, y el =printf= final los divide por =R=. El tercero repite lo mismo con =smpl full=, es decir, con las 120 observaciones.
 
@@ -400,7 +400,7 @@ end outfile
 
 *** Lo que debe observar
 
-Con $n=12$ la cobertura y la tasa de rechazo se apartan de sus valores nominales, y lo hacen en la dirección que menos se espera: el intervalo cubre /más/ del $95\%$ y el contraste rechaza /menos/ del $5\%$. El aparato de la lección 12, construido bajo normalidad, se vuelve conservador con estas perturbaciones y esta muestra. No es un desastre, porque nadie saca conclusiones falsas por rechazar de menos, pero el $5\%$ que imprime el programa ya no es el $5\%$ real.
+Con $n=12$ la cobertura y la tasa de rechazo se apartan de sus valores nominales, y lo hacen hacia el lado conservador: el intervalo cubre /más/ del $95\%$ y el contraste rechaza /menos/ del $5\%$. El aparato de la lección 12, construido bajo normalidad, se vuelve conservador con estas perturbaciones y esta muestra. Rechazar de menos no lleva a conclusiones falsas, pero el $5\%$ que imprime el programa ya no es el $5\%$ real.
 
 Con $n=120$ la desviación prácticamente desaparece. Es el cierre de la lección 12: en muestras grandes, el teorema central del límite devuelve a $\hat\beta_2$ una distribución aproximadamente normal aunque $U$ no lo sea, y los contrastes e intervalos vuelven a ser válidos sin el supuesto. En muestras pequeñas, la normalidad es el supuesto que sostiene el resultado exacto; cuando falla, lo que falla es la calibración del nivel.
 
