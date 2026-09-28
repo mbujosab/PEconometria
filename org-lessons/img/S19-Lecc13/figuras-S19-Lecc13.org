@@ -21,8 +21,9 @@ reetiquetados: el papel que en la lección 8 hacía el vector de medias
 $\boldsymbol{\mathop{\overline{y}}}$ lo hace ahora el ajuste /restringido/
 $\boldsymbol{\mathop{\widehat{y}}}_r$. La hipotenusa es el residuo del
 modelo restringido, $\boldsymbol y-\boldsymbol{\mathop{\widehat{y}}}_r$
-(longitud $\sqrt{\mathrm{SRC}_r}$); el cateto horizontal es lo que las $q$
-direcciones liberadas añaden al ajuste,
+(longitud $\sqrt{\mathrm{SRC}_r}$); el cateto horizontal es lo que el modelo
+completo añade al ajuste en las $q$ direcciones del plano de los regresores
+ortogonales al subespacio restringido,
 $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\widehat{y}}}_r$
 (longitud $\sqrt{\mathrm{SRC}_r-\mathrm{SRC}}$); el cateto vertical es el
 residuo del modelo completo (longitud $\sqrt{\mathrm{SRC}}$). Cuando el
@@ -40,8 +41,8 @@ La segunda figura, =ProyeccionAnidada= (añadida el 2026-09-22, para los
 apuntes de la misma transparencia), muestra lo que el triángulo no muestra:
 los dos subespacios. El plano es $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$;
 la recta dentro del plano es el subespacio restringido; $\boldsymbol y$ está
-fuera del plano; $\boldsymbol{\mathop{\widehat{y}}}$ es su pie sobre el plano y
-$\boldsymbol{\mathop{\widehat{y}}}_r$ su pie sobre la recta. Como
+fuera del plano; $\boldsymbol{\mathop{\widehat{y}}}$ es su ``sombra'' sobre el plano y
+$\boldsymbol{\mathop{\widehat{y}}}_r$ su ``sombra'' sobre la recta. Como
 $\boldsymbol y-\boldsymbol{\mathop{\widehat{y}}}$ es ortogonal a todo el plano,
 $\boldsymbol{\mathop{\widehat{y}}}_r$ es también la proyección de
 $\boldsymbol{\mathop{\widehat{y}}}$ sobre la recta (la proyección se hace en dos
@@ -75,10 +76,10 @@ es =TrianguloAnidado= visto desde fuera del plano. Vista en perspectiva con
     \coordinate (B)  at (3.277, 2.294);  % datos
     \coordinate (Fin) at (3.55 , 0    );
 
-    % el eje horizontal: las q direcciones que la hipótesis nula suprime
+    % el eje horizontal: el complemento ortogonal del subespacio restringido dentro del plano de los regresores (dimensión q)
     \draw[axis] (-0.55,0) -- (Fin);
-    \node[anchor=north east,gray,yshift=-0.5mm,align=right] at (-0.55,0)
-      {\small $q$ direcciones liberadas};
+    \node[anchor=south east,gray,yshift=0.5mm,xshift=1mm,align=right] at (-0.55,0)
+      {\small $q$ direcciones ortogonales\\\small al subespacio restringido};
 
     % el ángulo
     \draw pic[-,draw=black,angle radius=26,\Verde,fill=\VerdeClaro!30] {angle = A--O--B};
@@ -131,26 +132,26 @@ convert TrianguloAnidado.png -gravity center -background white -extent 2900x Tri
   <<Colores>>
   <<Colores de la regresion>>
 
-  \tdplotsetmaincoords{70}{110}
+  \tdplotsetmaincoords{60}{10}
   \begin{tikzpicture}
     [scale=2.4, tdplot_main_coords,
      vector/.style={-{Stealth[length=3mm, width=2mm]},very thick},
      guide/.style={dashed,thin,gray}]
 
     \coordinate (O)  at (0,0,0);        % origen
-    \coordinate (Yr) at (0,1.9,0);      % ajuste restringido: pie sobre la recta
-    \coordinate (Yh) at (1.2,1.9,0);    % ajuste completo: pie sobre el plano
-    \coordinate (Y)  at (1.2,1.9,1.1);  % datos
+    \coordinate (Yr) at (0,1.9,0);      % ajuste restringido: sombra sobre la recta
+    \coordinate (Yh) at (1.2,1.9,0);    % ajuste completo: sombra sobre el plano
+    \coordinate (Y)  at (1.2,1.9,0.8);  % datos (z bajo: figura menos alta)
 
     % el plano de los regresores
     \fill[gray!10,draw=gray!50,very thin]
-      (-0.5,-0.6,0) -- (2.0,-0.6,0) -- (2.0,3.0,0) -- (-0.5,3.0,0) -- cycle;
-    \node[gray!70!black,anchor=west,font=\small] at (1.75,-0.35,0)
+      (-0.4,-0.3,0) -- (1.8,-0.3,0) -- (1.8,2.9,0) -- (-0.4,2.9,0) -- cycle;
+    \node[gray!70!black,anchor=west,font=\small] at (0.8,-0.1,0)
       {$\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$};
 
     % el subespacio restringido: una recta dentro del plano
-    \draw[\Regresor!80!black,thick] (0,-0.6,0) -- (0,3.0,0);
-    \node[\Regresor!80!black,anchor=south west,font=\small,align=left] at (0,2.45,0)
+    \draw[\Regresor!80!black,thick] (0,-0.3,0) -- (0,2.9,0)
+      node[pos=0.84,sloped,above,font=\small,align=center,\Regresor!80!black]
       {subespacio\\restringido};
 
     % el triángulo anidado, sombreado
@@ -164,18 +165,18 @@ convert TrianguloAnidado.png -gravity center -background white -extent 2900x Tri
 
     % los tres lados del triángulo anidado
     \draw[vector,\Ajuste] (Yr) -- (Yh)
-      node[midway,anchor=north west,xshift=0.5mm,yshift=-0.5mm]
+      node[anchor=west,xshift=0.5mm,yshift=-0.5mm]
       {$\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\widehat{y}}}_r$};
     \draw[vector,\Residuo] (Yh) -- (Y)
-      node[pos=0.72,anchor=east,xshift=-1mm]{$\boldsymbol{\mathop{\widehat{e}}}$};
+      node[pos=0.72,anchor=west,xshift=-1mm]{$\boldsymbol{\mathop{\widehat{e}}}$};
     \draw[vector,\Datos] (Yr) -- (Y)
-      node[midway,anchor=west,xshift=1.5mm]
+      node[pos=0.4,sloped,above,inner sep=1.5pt]
       {$\boldsymbol{y}-\boldsymbol{\mathop{\widehat{y}}}_r$};
 
     % los tres vectores desde el origen
     \draw[vector,green!50!black] (O) -- (Y) node[anchor=south]{$\boldsymbol{y}$};
-    \draw[vector,red!80!black]   (O) -- (Yh) node[anchor=north,yshift=-1mm]{$\boldsymbol{\mathop{\widehat{y}}}$};
-    \draw[vector,\Regresor]      (O) -- (Yr) node[anchor=south west,xshift=0.5mm,yshift=0.5mm]{$\boldsymbol{\mathop{\widehat{y}}}_r$};
+    \draw[vector,red!80!black]   (O) -- (Yh) node[midway,anchor=north,yshift=-1mm]{$\boldsymbol{\mathop{\widehat{y}}}$};
+    \draw[vector,\Regresor]      (O) -- (Yr) node[midway,anchor=east,xshift=-0.5mm]{$\boldsymbol{\mathop{\widehat{y}}}_r$};
 
   \end{tikzpicture}
 \end{document}
@@ -184,6 +185,22 @@ convert TrianguloAnidado.png -gravity center -background white -extent 2900x Tri
 #+ATTR_ORG: :width 600
 #+ATTR_LATEX: :width .6\textwidth :caption \caption{La estimación restringida como proyección sobre un subespacio menor, y la proyección en dos pasos}
 [[file:./ProyeccionAnidada.png]]
+
+*** Las dos figuras lado a lado (para la transparencia)
+
+Se recorta el blanco sobrante de cada una, se igualan las alturas a la de
+=TrianguloAnidado= recortado, se separan con un hueco blanco de 120 px y se
+añade un borde blanco de 30 px. Sin lienzo fijo: cuanto menos ancha sea la
+composición, más alta se ve en la transparencia.
+
+#+BEGIN_SRC bash :build yes
+convert TrianguloAnidado.png -trim +repage /tmp/Tri_trim.png
+H=$(identify -format %h /tmp/Tri_trim.png)
+convert ProyeccionAnidada.png -trim +repage -resize x$H /tmp/Proy_trim.png
+convert /tmp/Proy_trim.png -size 120x$H xc:white /tmp/Tri_trim.png +append +repage \
+        -bordercolor white -border 30 ProyeccionYTriangulo.png
+rm -f /tmp/Tri_trim.png /tmp/Proy_trim.png
+#+END_SRC
 
 
 ** El triángulo del $F$ (sin el regresor)
