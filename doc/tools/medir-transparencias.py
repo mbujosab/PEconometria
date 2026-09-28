@@ -24,6 +24,7 @@ JS = r"""
         var scale=Reveal.getScale(); var minTop=1e9, maxBottom=-1e9; var imgs=0, bad=0;
         var kids=sec.querySelectorAll('*');
         for (var i=0;i<kids.length;i++){ var el=kids[i]; if(el.tagName==='SCRIPT'||el.tagName==='STYLE') continue;
+          if(el.closest('.MathJax, .MathJax_Display, .MathJax_Preview')) continue; /* los span internos de MathJax (acentos, exponentes) sobresalen de su caja */
           var r=el.getBoundingClientRect(); if(r.height>0&&r.width>0){ if(r.top<minTop) minTop=r.top; if(r.bottom>maxBottom) maxBottom=r.bottom; }
           if(el.tagName==='IMG'){ imgs++; if(!(el.complete&&el.naturalHeight>0)) bad++; } }
         var hgt=(maxBottom-minTop)/scale;
