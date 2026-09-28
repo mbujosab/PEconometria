@@ -153,7 +153,7 @@ Los tres regresores tienen $t$ grandes; el resultado de las tres restricciones d
 
 La hipótesis $H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}=0$ dice que el modelo es =price ~ rooms=. Estime ese modelo restringido, anote su $\mathrm{SRC}_r$ y construya el $F$ con $q=2$.
 
-Estimamos el modelo restringido con =ols= y =--quiet=, que evita imprimir la tabla: solo queremos su =$ess=, que guardamos en =SRCr=. Con =q = 2= restricciones, =F= es la fórmula de la lección 13 escrita tal cual: la subida de la $\mathrm{SRC}$ por restricción, dividida por =s2=. El =printf= imprime el $F$, el valor crítico de la $F$ con $2$ y $n-k$ grados de libertad al $5\%$ y el valor $p$.
+Estimamos el modelo restringido con =ols= y =--quiet=, que evita imprimir la tabla: solo queremos su =$ess=, que guardamos en =SRCr=. Con =q = 2= restricciones, =F= es la fórmula de la lección 13 escrita tal cual: el aumento de la $\mathrm{SRC}$ por restricción, dividida por =s2=. El =printf= imprime el $F$, el valor crítico de la $F$ con $2$ y $n-k$ grados de libertad al $5\%$ y el valor $p$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -174,7 +174,7 @@ outfile --quiet dosExclusiones.txt
     scalar q    = 2
     scalar F    = ((SRCr - SRC)/q)/s2
     printf "Modelo restringido (price ~ rooms):  SRC_r = %.4e\n", SRCr
-    printf "Subida de la SRC:                   SRC_r - SRC = %.4e\n", SRCr - SRC
+    printf "Aumento de la SRC:                  SRC_r - SRC = %.4e\n", SRCr - SRC
     printf "F = ((SRC_r - SRC)/%d)/(SRC/(n-k)) = %.3f\n", q, F
     printf "F_c(%d,%d) al 5%% = %.3f    valor p = %.3g\n", q, n-k, critical(F, q, n-k, 0.05), pvalue(F, q, n-k, F)
 end outfile
@@ -286,7 +286,7 @@ outfile --quiet igualdad.txt
     scalar SRCr2 = $ess
     scalar F2 = ((SRCr2 - SRC)/1)/s2
     printf "Modelo restringido (price ~ rooms + (nox + stratio)): SRC_r = %.4e\n", SRCr2
-    printf "Subida de la SRC = %.4e\n", SRCr2 - SRC
+    printf "Aumento de la SRC = %.4e\n", SRCr2 - SRC
     printf "F = %.3f    F_c(1,%d) al 5%% = %.3f    valor p = %.4f\n", F2, n-k, critical(F, 1, n-k, 0.05), pvalue(F, 1, n-k, F2)
 end outfile
 #+end_src
@@ -393,7 +393,7 @@ Ningún $t$ llega a $1{,}05$ en valor absoluto; el $F$ de excluir las dos a la v
 
 * Respuestas
 
-1. /La subida de la $\mathrm{SRC}$./ Es $\Vert\boldsymbol{\mathop{\widehat y}}-{\boldsymbol{\mathop{\widehat y}}}_r\Vert_e^2$, el cuadrado de la distancia entre el ajuste completo y el restringido: el cateto que separa las dos proyecciones en la figura de la lección 13. Por Pitágoras anidado, $\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-{\boldsymbol{\mathop{\widehat y}}}_r\Vert_e^2$, y un cuadrado no es negativo: el residuo restringido nunca es más corto que el libre, porque se proyecta sobre un subespacio contenido en el otro.
+1. /El aumento de la $\mathrm{SRC}$./ Es $\Vert\boldsymbol{\mathop{\widehat y}}-{\boldsymbol{\mathop{\widehat y}}}_r\Vert_e^2$, el cuadrado de la distancia entre el ajuste completo y el restringido: el cateto que separa las dos proyecciones en la figura de la lección 13. Por Pitágoras anidado, $\mathrm{SRC}_r=\mathrm{SRC}+\Vert\boldsymbol{\mathop{\widehat y}}-{\boldsymbol{\mathop{\widehat y}}}_r\Vert_e^2$, y un cuadrado no es negativo: el residuo restringido nunca es más corto que el libre, porque se proyecta sobre un subespacio contenido en el otro.
 
 2. /El coeficiente de =rooms= cambia./ El vector =rooms= es el mismo, pero la coordenada de un vector en una base depende de toda la base. En el modelo completo, el coeficiente de =rooms= es la coordenada de $\boldsymbol{\mathop{\widehat y}}$ en la base $\{\boldsymbol 1,\text{rooms},\text{nox},\text{stratio}\}$; en el restringido, la de ${\boldsymbol{\mathop{\widehat y}}}_r$ en la base $\{\boldsymbol 1,\text{rooms}\}$. Son dos puntos distintos descritos en bases distintas. La lección 14 lo dijo con la parte propia: en el modelo completo, =rooms= se mide con lo que no comparte con =nox= y =stratio=.
 
