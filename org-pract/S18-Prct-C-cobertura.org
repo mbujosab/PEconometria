@@ -95,7 +95,7 @@ set verbose off
 
 La lección 12 distinguió lo que el intervalo de confianza /dice/ y lo que /no dice/: dice que el suceso ``el intervalo contiene a $\beta_2$'' tiene probabilidad $0{,}95$, con los extremos del intervalo como variables aleatorias; no dice que $\beta_2$ esté en /este/ intervalo con probabilidad $0{,}95$. Una probabilidad se manifiesta como frecuencia al repetir, y esta práctica repite.
 
-Reutilizamos el mundo artificial de la práctica B (el panel disperso de la lección 12: doce valores del regresor de $22{,}5$ a $77{,}5$, $\beta_1=10$, $\beta_2=0{,}5$ y perturbaciones normales con $\sigma=1{,}1$) y la mecánica del =loop= que aprendimos en el laboratorio anterior. En cada réplica sorteamos doce perturbaciones nuevas, estimamos, construimos el intervalo y anotamos si contiene al $0{,}5$ verdadero. Después contamos.
+Reutilizamos el mundo artificial de la práctica B ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-B-regresor-disperso.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-B-regresor-disperso.html#disperso][html]]): el panel disperso de la lección 12: doce valores del regresor de $22{,}5$ a $77{,}5$, $\beta_1=10$, $\beta_2=0{,}5$ y perturbaciones normales con $\sigma=1{,}1$) y la mecánica del =loop= que aprendimos en el laboratorio anterior ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop][html]])). En cada réplica sorteamos doce perturbaciones nuevas, estimamos, construimos el intervalo y anotamos si contiene al $0{,}5$ verdadero. Después contamos.
 
 Los datos son /simulados/ porque solo conociendo la verdad se puede saber si el intervalo la contiene.
 
@@ -114,6 +114,9 @@ Los datos son /simulados/ porque solo conociendo la verdad se puede saber si el 
 - =gnuplot ... --time-series --with-lines= :: dibuja las series frente al número de observación y con líneas en lugar de puntos.
 
 * Actividad 1 - ¿Cubre el 95 por ciento?
+:PROPERTIES:
+:CUSTOM_ID: cubre-95
+:END:
 
 Construimos el mundo, fijamos el valor crítico de la $t$ con $n-k=10$ grados de libertad, y repetimos el experimento $4\,000$ veces guardando, en cada réplica, la estimación, su error estándar, los dos extremos del intervalo, un indicador de si contiene al verdadero $\beta_2$ y el estadístico $t$ para la hipótesis /cierta/ $H_0\!:\beta_2=0{,}5$.
 
@@ -177,7 +180,7 @@ end outfile
 #+include: ./S18-Prct-C-cobertura/cobertura.txt example
 #+latex: }
 
-/Atención al detalle práctico ya conocido del laboratorio anterior/: al abrir el fichero de réplicas, Gretl descarta los escalares que teníamos definidos; por eso =tc= y =zc= se vuelven a definir después de abrirlo.
+/Atención al detalle práctico ya conocido del laboratorio anterior/ ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=5][actividad 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#abrir-replicas][html]])): al abrir el fichero de réplicas, Gretl descarta los escalares que teníamos definidos; por eso =tc= y =zc= se vuelven a definir después de abrirlo.
 
 *** Los intervalos, uno a uno
 
@@ -223,6 +226,9 @@ La frecuencia empírica de cobertura queda muy cerca de $0{,}95$, y la de rechaz
 La figura muestra lo que hay detrás de la frecuencia. El intervalo /cambia/ de una réplica a otra: sus extremos son variables aleatorias, funciones de la muestra. El $\beta_2$ verdadero, en cambio, no se mueve. Esa es la razón de la lectura correcta de la lección 12: lo aleatorio es el intervalo, no el parámetro, y el $0{,}95$ es la probabilidad de que el intervalo aleatorio contenga al parámetro fijo, que aquí vemos como frecuencia. Mirando un solo intervalo, cualquiera de los cien, no hay forma de saber si es de los que aciertan.
 
 * Actividad 2 - El precio de estimar $\sigma$
+:PROPERTIES:
+:CUSTOM_ID: precio-sigma
+:END:
 
 La lección 12 explicó por qué el estadístico sigue una $t_{n-k}$ y no una normal: en el denominador va $\mathfrak s$, que fluctúa de muestra en muestra, y eso ensancha las colas. Con $n-k=10$ la diferencia entre $t_c=2{,}228$ y $1{,}96$ es del $14\%$. Ya hemos guardado, en cada réplica, si el intervalo construido con $1{,}96$ contenía al verdadero $\beta_2$; y tenemos los $4\,000$ estadísticos $t$ bajo la hipótesis cierta, cuya distribución podemos mirar directamente.
 
@@ -340,13 +346,13 @@ La cobertura del intervalo es la misma en los dos casos, en torno al $95\%$, com
 
 Es el mecanismo de la lección 12: con diez copias del patrón, el regresor en desviaciones es $\sqrt{10}$ veces más largo, el error estándar $\sqrt{10}$ veces menor, y el mismo desvío de $0{,}03$ vale $\sqrt{10}$ veces más errores estándar. La relación entre $x$ e $y$ es la misma en los dos mundos, el ruido es el mismo y la hipótesis es igual de falsa; lo único que ha crecido es la longitud del regresor, el $\sqrt{n-k}$ de la identidad, y con ello la frecuencia con la que un efecto real se hace visible. (Los manuales llaman /potencia/ del contraste a esa frecuencia de detección.)
 
-Y tiene una lectura inmediata para la práctica A, donde con doce viviendas el intervalo iba de $1\,900$ a $20\,000$: con doce observaciones, dos de cada tres veces /no se rechaza/ una hipótesis que es falsa. ``No rechazar'' no era ``aceptar'': era, la mayoría de las veces, no tener evidencia suficiente para decidir.
+Y tiene una lectura inmediata para la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-A-hprice2-inferencia.pdf#page=5][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-A-hprice2-inferencia.html#doce-viviendas][html]])), donde con doce viviendas el intervalo iba de $1\,900$ a $20\,000$: con doce observaciones, dos de cada tres veces /no se rechaza/ una hipótesis que es falsa. ``No rechazar'' no era ``aceptar'': era, la mayoría de las veces, no tener evidencia suficiente para decidir.
 
 * Apéndice - ¿Y si las perturbaciones no son normales?
 
-/Material complementario/, con el mismo estatus que el apéndice matricial del laboratorio anterior: va más allá de lo que da tiempo en clase y queda aquí para quien quiera completarlo.
+/Material complementario/, con el mismo estatus que el [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=7][apéndice matricial]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#apendice-matricial][html]]) del laboratorio anterior: va más allá de lo que da tiempo en clase y queda aquí para quien quiera completarlo.
 
-La lección 12 fue explícita: la normalidad es el único supuesto nuevo, y su cometido es dar /forma/ a la distribución de $\hat\beta_2$. El laboratorio anterior mostró que insesgadez y varianza no la necesitan; la pregunta natural es si la cobertura del intervalo, que sí depende de la forma, la necesita. Repetimos la Actividad 1 con perturbaciones $\chi^2$ de un grado de libertad, centradas y reescaladas a la misma $\sigma$: una distribución muy asimétrica, la misma con la que el laboratorio anterior obtuvo, con $n=12$, un histograma que el contraste de normalidad rechazaba.
+La lección 12 fue explícita: la normalidad es el único supuesto nuevo, y su cometido es dar /forma/ a la distribución de $\hat\beta_2$. El laboratorio anterior ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-C-sorpresas.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-C-sorpresas.html#tres-perturbaciones][html]])) mostró que insesgadez y varianza no la necesitan; la pregunta natural es si la cobertura del intervalo, que sí depende de la forma, la necesita. Repetimos la Actividad 1 con perturbaciones $\chi^2$ de un grado de libertad, centradas y reescaladas a la misma $\sigma$: una distribución muy asimétrica, la misma con la que el laboratorio anterior obtuvo ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-C-sorpresas.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-C-sorpresas.html#forma][html]])), con $n=12$, un histograma que el contraste de normalidad rechazaba.
 
 Dos bloques con la misma estructura que los de la Actividad 3, cambiando la perturbación: =randgen(X, 1)= sortea una $\chi^2$ con un grado de libertad, que tiene media $1$ y varianza $2$; restar $1$ y dividir por $\sqrt2$ la centra y le da desviación típica $1$, y multiplicar por =sig= le da la de nuestro mundo. Los contadores son ahora la cobertura y los rechazos de la hipótesis cierta.
 
