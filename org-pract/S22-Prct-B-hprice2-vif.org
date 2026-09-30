@@ -105,7 +105,7 @@ Es la comprobación numérica del enunciado de la lección 12, $\mathrm{ee}(\hat
 4. Repetir la cuenta sin =lnox= para ver de dónde sale el factor $8{,}7$ de la lección 14.
 5. Leer los intervalos de confianza de =nox= con y sin =lnox=, y la correlación entre los dos estimadores.
 
-/Comandos nuevos de esta práctica/. Casi todo se ha visto ya: =open=, =ols= y sus accesores =$sigma=, =$stderr=, =$rsq=, =$ess=, =$coeff= y =$df= (sesiones 11 a 18), =critical= (sesión 18) y =$vcv= (práctica B de la sesión 21). Recuerde que los accesores se refieren siempre al /último/ modelo estimado: por eso, en esta práctica, se guardan en escalares antes de estimar el siguiente. Lo nuevo:
+/Comandos nuevos de esta práctica/. Casi todo se ha visto ya: =open=, =ols= y sus accesores =$sigma=, =$stderr=, =$rsq=, =$ess=, =$coeff= y =$df= (sesiones 11 a 18), =critical= (sesión 18) y =$vcv= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S21-Prct-B-ramanathan-conjunta.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S21-Prct-B-ramanathan-conjunta.html#rectangulo][html]]) de la práctica B de la sesión 21). Recuerde que los accesores se refieren siempre al /último/ modelo estimado: por eso, en esta práctica, se guardan en escalares antes de estimar el siguiente. Lo nuevo:
 - =vif= :: se escribe después de estimar un modelo con al menos dos regresores no constantes, y para cada regresor calcula $1/(1-R_j^2)$, con $R_j^2$ el de la regresión de ese regresor sobre los demás. En la ventana del modelo es //~Análisis -> Colinealidad~//.
 - =$vcv[3,4]= :: =$vcv= es la matriz de varianzas y covarianzas de los coeficientes, y entre corchetes van la fila y la columna. Los coeficientes siguen el orden de la lista de regresores, así que =[3,4]= es la covarianza entre el tercero (=nox=) y el cuarto (=lnox=), y =[3,3]= la varianza del tercero.
 
@@ -113,7 +113,7 @@ Es la comprobación numérica del enunciado de la lección 12, $\mathrm{ee}(\hat
 
 Abra =hprice2= y estime =price= sobre =rooms=, =nox= y =lnox=. Anote $\mathfrak s$ y el error estándar de =nox=. Después estime la regresión auxiliar: =nox= sobre la constante, =rooms= y =lnox=. Su $\mathrm{SRC}$ es la longitud al cuadrado de la parte propia de =nox=, y su $R^2$ es el $R_j^2$ de la lección 14.
 
-Dos regresiones seguidas. La primera es el modelo completo: guardamos en =s= la desviación típica de la regresión, $\mathfrak s$ (=$sigma=), y en =ee_nox= el error estándar de =nox=. La segunda es la /regresión auxiliar/: =nox= como regresando sobre la constante, =rooms= y =lnox=. De ella guardamos el $R^2$ y la raíz de su $\mathrm{SRC}$ (=$ess=), que es la longitud de la parte propia de =nox=.
+Dos regresiones seguidas. La primera es el modelo completo: guardamos en =s= la ``D.T. de la regresión'' de Gretl, $\mathfrak s$ (=$sigma=), y en =ee_nox= el error estándar de =nox=. La segunda es la /regresión auxiliar/: =nox= como regresando sobre la constante, =rooms= y =lnox=. De ella guardamos el $R^2$ y la raíz de su $\mathrm{SRC}$ (=$ess=), que es la longitud de la parte propia de =nox=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -159,7 +159,7 @@ La regresión auxiliar tiene un $R^2$ de $0{,}9879$: =rooms= y =lnox= reproducen
 
 * Actividad 2 - El error estándar, reconstruido
 
-Divida $\mathfrak s$ entre la longitud de la parte propia y compare con la columna ``Desv. típica'' de la tabla. Calcule también el VIF y descomponga el error estándar en los dos factores de la lección 14.
+Divida $\mathfrak s$ entre la longitud de la parte propia y compare con la columna ``Desv. típica'' de la tabla (el error estándar). Calcule también el VIF y descomponga el error estándar en los dos factores de la lección 14.
 
 Tres =printf= con los escalares guardados: $\mathfrak s$ entre la longitud de la parte propia, el error estándar que imprimió Gretl, y el VIF con su raíz, calculados a partir del $R^2$ auxiliar.
 
@@ -192,6 +192,9 @@ end outfile
 $6290{,}37/2{,}8608=2198{,}85$, el error estándar de la tabla con cuatro decimales. El enunciado de la lección 12 se cumple sobre datos reales. Y la descomposición: $241{,}6$ es el error estándar que =nox= tendría si no compartiera nada con los demás regresores, $\mathfrak s$ entre su longitud completa en desviaciones; multiplicado por $\sqrt{\mathrm{VIF}}=9{,}10$ da los $2198{,}85$. El VIF es $82{,}8$: la varianza se ha multiplicado por $83$, el error estándar por $9$.
 
 * Actividad 3 - El comando =vif=
+:PROPERTIES:
+:CUSTOM_ID: comando-vif
+:END:
 
 Vuelva al modelo completo. En la ventana del modelo, el menú //~Análisis -> Colinealidad~// calcula los factores de inflación de todos los regresores.
 
@@ -262,6 +265,9 @@ end outfile
 Sin =lnox=, la parte propia de =nox= mide $24{,}81$, casi toda su longitud en desviaciones ($26{,}03$), porque =rooms= comparte poco con ella: $\mathrm{VIF}=1{,}1$. El error estándar es $253{,}57$, y $6290{,}99/24{,}809=253{,}57$ de nuevo. Entre los dos modelos, $\mathfrak s$ casi no cambia ($6291{,}0$ frente a $6290{,}4$) y el número de observaciones es el mismo. Lo único que ha cambiado es la longitud con la que =nox= se mide a sí misma: de $24{,}81$ a $2{,}86$, un factor $8{,}7$, y el error estándar sube en ese factor, de $253{,}6$ a $2198{,}9$.
 
 * Actividad 5 - Los intervalos y la correlación entre estimadores
+:PROPERTIES:
+:CUSTOM_ID: ic-correlacion
+:END:
 
 Construya el intervalo al $95\%$ de =nox= en los dos modelos, el de =lnox= en el completo, y lea en la matriz de varianzas de los estimadores (//~Análisis -> Matriz de covarianzas de los coeficientes~//) la correlación entre $\hat\beta_{\text{nox}}$ y $\hat\beta_{\text{lnox}}$.
 
@@ -296,7 +302,7 @@ end outfile
 
 *** Lo que debe observar
 
-Con =lnox= en el modelo, el intervalo de =nox= va de $-3\,900$ a $+4\,700$ dólares por unidad de contaminación: los datos no saben ni el signo. Sin =lnox=, de $-2\,400$ a $-1\,400$: un coeficiente negativo medido con precisión. Y la correlación entre los dos estimadores es $-0{,}993$: es la nube de la práctica A con datos reales. Los coeficientes $404$ y $-13\,262$ de la tabla son un reparto casi arbitrario de un efecto que, tomado en conjunto, es el de siempre; con otra muestra de viviendas, el reparto sería otro y el ajuste casi el mismo.
+Con =lnox= en el modelo, el intervalo de =nox= va de $-3\,900$ a $+4\,700$ dólares por unidad de contaminación: los datos no saben ni el signo. Sin =lnox=, de $-2\,400$ a $-1\,400$: un coeficiente negativo medido con precisión. Y la correlación entre los dos estimadores es $-0{,}993$: es la nube de la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-A-colinealidad-montecarlo.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-A-colinealidad-montecarlo.html#nube][html]])) con datos reales. Los coeficientes $404$ y $-13\,262$ de la tabla son un reparto casi arbitrario de un efecto que, tomado en conjunto, es el de siempre; con otra muestra de viviendas, el reparto sería otro y el ajuste casi el mismo.
 
 * Preguntas de interpretación para la clase
 
