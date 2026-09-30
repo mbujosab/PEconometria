@@ -97,9 +97,9 @@ La lección 11 demostró dos cosas sobre $\hat\beta_2$: que es /insesgado/ ($\ma
 \[
 Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-\overline{X})^2}.
 \]
-Son dos afirmaciones sobre /todas las muestras que podríamos haber observado/, y por eso resultan difíciles de creer con una sola muestra delante: por definición, de ese conjunto de muestras posibles solo vemos una.
+Son dos afirmaciones sobre /todas las muestras que podríamos haber observado/, y por eso resultan difíciles de comprobar con una sola muestra observada: por definición, de ese conjunto de muestras posibles solo vemos una.
 
-Esta práctica /fabrica/ ese conjunto de muestras posibles. Inventamos un mundo artificial en el que conocemos $\beta_1$, $\beta_2$ y $\sigma^2$ porque los hemos elegido nosotros; generamos cientos de muestras de ese mundo; estimamos $\hat\beta_2$ en cada una; y comparamos lo que sale con lo que la lección 11 predice. Es lo que se conoce como un /experimento de Montecarlo/.
+Esta práctica /fabrica/ ese conjunto de muestras posibles. Inventamos un mundo artificial en el que conocemos $\beta_1$, $\beta_2$ y $\sigma^2$ porque los hemos elegido nosotros; generamos cientos de muestras de ese mundo; estimamos $\hat\beta_2$ en cada una; y comparamos los resultados con lo que la lección 11 predice. Es lo que se conoce como un /experimento de Montecarlo/.
 
 /Objetivos/
 
@@ -109,13 +109,13 @@ Esta práctica /fabrica/ ese conjunto de muestras posibles. Inventamos un mundo 
 4. Comprobar que la media de las estimaciones se acerca a $\beta_2$ (insesgadez) y que su varianza se acerca a la fórmula de la lección 11.
 5. Ver el histograma de $\hat\beta_2$ y empezar a preguntarse por su /forma/, una pregunta que esta práctica deja sin responder a propósito.
 
-/Nota sobre el =loop=/. Ya hemos usado este comando varias veces, en la [[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html][práctica de verificación geométrica de la sesión 7]], en la [[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-D-anscombe.html][del cuarteto de Anscombe de la sesión 11]] y en la [[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-C-peso-edad.html][del peso y la edad de la sesión 14]], pero siempre como una ``caja negra'': servía para repetir un bloque varias veces, sin explicar su mecánica. Hoy toca abrir la caja.
+/Nota sobre el =loop=/. Ya hemos usado este comando varias veces, en la [[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html][práctica de verificación geométrica de la sesión 7]], en la [[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-D-anscombe.html][del cuarteto de Anscombe de la sesión 11]] y en la [[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-C-peso-edad.html][del peso y la edad de la sesión 14]], pero siempre como una ``caja negra'': servía para repetir un bloque varias veces, sin explicar su mecánica. Hoy explicamos esa mecánica.
 
 /Comandos nuevos de esta práctica/. Seguimos usando =open=, =ols= con la opción =--quiet= y los accesores =$coeff= y =$ess= (prácticas de las sesiones 11 y 14), y =series=, =scalar=, =printf=, =normal= y =set seed= (sesión 7). Lo nuevo:
 - =$df= :: los grados de libertad del último modelo estimado, $n-k$. Actividad 1.
 - =loop R --progressive --quiet= … =endloop= :: repite =R= veces las instrucciones que van entre las dos líneas. Se explica en la Actividad 3.
 - =store "@workdir/fichero.gdt" a b= :: dentro de un bucle progresivo, guarda una fila por repetición con los escalares indicados. Actividad 3.
-- =open "@workdir/fichero.gdt"= :: abre ese fichero de réplicas como un conjunto de datos normal, en el que cada observación es una repetición. =@workdir= se sustituye por la ruta del directorio de trabajo de Gretl, de modo que el fichero se guarda y se vuelve a abrir en el mismo sitio. Cuando un bloque calcula sobre las réplicas, antes hay que haber abierto el fichero; en el guion completo del final se ve dónde va cada =open=.
+- =open "@workdir/fichero.gdt"= :: abre ese fichero de réplicas como un conjunto de datos normal, en el que cada observación es una repetición. =@workdir= se sustituye por la ruta del directorio de trabajo de Gretl, de modo que el fichero se guarda y se vuelve a abrir en el mismo directorio. Cuando un bloque calcula sobre las réplicas, antes hay que haber abierto el fichero; en el guion completo del final se ve dónde va cada =open=.
 - =freq x --normal= :: histograma con la densidad normal superpuesta y un contraste de normalidad. Actividad 5.
 - =%d= :: en =printf=, hueco para un número entero.
 - =matrix=, =invpd=, =mcov= :: solo en el Apéndice; las dos primeras se usaron en la práctica D de la sesión 14.
@@ -126,11 +126,11 @@ Esta práctica /fabrica/ ese conjunto de muestras posibles. Inventamos un mundo 
 :CUSTOM_ID: mundo-artificial
 :END:
 
-Para simular necesitamos un mundo del que conozcamos la verdad. Podríamos inventar los números de la nada, pero es más instructivo tomarlos prestados de un ajuste real: así el mundo artificial se parece al que ya hemos estado estudiando.
+Para simular necesitamos un mundo del que conozcamos la verdad. Podríamos elegir los números arbitrariamente, pero es más instructivo tomarlos de un ajuste real: así el mundo artificial se parece al que ya hemos estado estudiando.
 
-Partimos de =hprice2= y de la regresión =price~rooms= que ya estimamos en la práctica que siguió a la lección 8. Sus resultados dejan de ser ``estimaciones'' para convertirse, /por decreto/, en los parámetros verdaderos de nuestro mundo inventado.
+Partimos de =hprice2= y de la regresión =price~rooms= que ya estimamos en la práctica que siguió a la lección 8. Sus resultados dejan de ser ``estimaciones'' para convertirse, /por construcción/, en los parámetros verdaderos de nuestro mundo inventado.
 
-El primer bloque toma prestados los parámetros de un ajuste real. =open= carga =hprice2=; =ols price const rooms --quiet= estima la regresión sin imprimir la tabla; los accesores =$coeff(const)= y =$coeff(rooms)= devuelven los dos coeficientes estimados, y =$ess= y =$df= la suma de los residuos al cuadrado y los grados de libertad $n-k$, así que =sqrt($ess/$df)= es la raíz de la cuasivarianza de los residuos, $\mathfrak s$. =Sxx= es la suma de cuadrados del regresor en desviaciones (se comenta después de la salida) y =var_teo= es la fórmula de la lección 11. Los escalares quedan guardados para el resto de la práctica.
+El primer bloque toma los parámetros de un ajuste real. =open= carga =hprice2=; =ols price const rooms --quiet= estima la regresión sin imprimir la tabla; los accesores =$coeff(const)= y =$coeff(rooms)= devuelven los dos coeficientes estimados, y =$ess= y =$df= la suma de los residuos al cuadrado y los grados de libertad $n-k$, así que =sqrt($ess/$df)= es la raíz de la cuasivarianza de los residuos, $\mathfrak s$. =Sxx= es la suma de cuadrados del regresor en desviaciones (se comenta después de la salida) y =var_teo= es la fórmula de la lección 11. Los escalares quedan guardados para el resto de la práctica.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -179,7 +179,7 @@ En el código aparece un nombre que no hemos usado en ninguna lección teórica:
 \[
 \mathrm{Sxx}\;=\;\sum_i(X_i-\overline{X})^2.
 \]
-Conviene reconocerla bajo sus otros dos disfraces, que sí son del curso:
+Conviene reconocerla en sus otras dos expresiones, que sí son del curso:
 
 - Es el /cuadrado de la norma euclídea del vector en desviaciones del regresor/, $\|\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\|_e^2$, la lectura geométrica que daba la nota a pie de página de la lección 11.
 - Y es $n$ veces la varianza del regresor con el convenio del curso: $\mathrm{Sxx}=n\,S^2$, con $S^2=\frac1n\sum_i(X_i-\overline{X})^2$. Por eso la fórmula de la lección 11 se puede escribir indistintamente $\sigma^2/\mathrm{Sxx}$ o $\sigma^2/(nS^2)$.
@@ -188,7 +188,7 @@ La usamos aquí porque en un guion resulta más legible que cualquiera de las do
 
 *** Tres observaciones sobre lo que acabamos de hacer
 
-- =rooms= /no se toca/. El vector de datos del regresor se queda exactamente como está, con sus 506 valores observados. Es el $\boldsymbol x$ de la lección 11, y permanecerá fijo durante todo el experimento. Es la versión experimental de condicionar en $\boldsymbol X$: fijar los regresores y dejar variar solo la perturbación; en la práctica siguiente veremos qué pasa si dejamos de hacerlo.
+- =rooms= /no se modifica/. El vector de datos del regresor se mantiene exactamente igual, con sus 506 valores observados. Es el $\boldsymbol x$ de la lección 11, y permanecerá fijo durante todo el experimento. Es la versión experimental de condicionar en $\boldsymbol X$: fijar los regresores y dejar variar solo la perturbación; en la práctica siguiente veremos qué ocurre si dejamos de hacerlo.
 - $\sigma$ se toma como la raíz de $\mathrm{SRC}/(n-k)$, es decir, de la cuasivarianza de los residuos $\mathfrak s^2$ que definimos en la lección 11. Aquí no la usamos como /estimación/ de nada: la usamos como el valor /verdadero/ de nuestro mundo inventado.
 - =var_teo= es la predicción de la lección 11. Anótela: es el número contra el que vamos a contrastar todo lo que sigue.
 
@@ -254,7 +254,7 @@ endloop
 Dos opciones merecen comentario:
 
 - =--quiet= evita que Gretl imprima la salida completa de cada una de las repeticiones (imagine 1000 tablas de regresión seguidas).
-- =--progressive= le dice a Gretl que va a acumular resultados a lo largo de las repeticiones, en lugar de olvidarlos al terminar cada una. Es lo que permite usar =store= dentro del bucle.
+- =--progressive= indica a Gretl que acumule resultados a lo largo de las repeticiones, en lugar de descartarlos al terminar cada una. Es lo que permite usar =store= dentro del bucle.
 
 Y =store= es la pieza que convierte el experimento en datos analizables:
 
@@ -359,7 +359,7 @@ end outfile
 Compare las dos mitades de la salida, línea por línea:
 
 1. /Insesgadez/. La media de las estimaciones debe quedar muy cerca de $\beta_2$. No igual: con un número finito de réplicas, la media muestral de las estimaciones es a su vez una variable aleatoria. Pero la distancia debe ser pequeña comparada con la dispersión de las propias estimaciones.
-2. /Varianza/. La varianza empírica de las $R$ estimaciones debe quedar cerca de $\sigma^2/\sum_i(X_i-\overline{X})^2$. Una fórmula obtenida con álgebra y esperanzas condicionales, sin simular nada, acierta el resultado de un experimento numérico.
+2. /Varianza/. La varianza empírica de las $R$ estimaciones debe quedar cerca de $\sigma^2/\sum_i(X_i-\overline{X})^2$. Una fórmula obtenida con álgebra y esperanzas condicionales, sin simular nada, predice correctamente el resultado de un experimento numérico.
 3. /La insesgadez no dice nada sobre la varianza/. Fíjese en que el error típico de una estimación individual es mucho mayor que la distancia entre la media de las estimaciones y $\beta_2$. Estar bien centrado no equivale a ser preciso: son las dos preguntas distintas que la lección 11 planteó desde su primera transparencia.
 
 /Nota sobre la reproducibilidad/. La instrucción =set seed= fija la secuencia de números pseudoaleatorios, de modo que este guion produce siempre los mismos números. Si la comenta y lo ejecuta dos veces, obtendrá resultados ligeramente distintos: la propia media de las réplicas tiene su dispersión.
@@ -388,7 +388,7 @@ freq b2hat --normal --plot="@workdir/histograma_b2.png"
 
 *** Una pregunta que esta práctica NO responde
 
-El histograma tiene una forma muy reconocible. Y es tentador dar el paso siguiente: si conocemos la media de $\hat\beta_2$, su varianza, y /además/ su forma, entonces podríamos calcular la probabilidad de que $\hat\beta_2$ caiga en tal o cual intervalo, y con eso construir intervalos de confianza y contrastes de hipótesis.
+El histograma tiene una forma muy reconocible. Y es tentador dar el paso siguiente: si conocemos la media de $\hat\beta_2$, su varianza, y /además/ su forma, entonces podríamos calcular la probabilidad de que $\hat\beta_2$ caiga en un intervalo dado, y con eso construir intervalos de confianza y contrastes de hipótesis.
 
 Ese paso no está justificado, por dos motivos:
 
@@ -401,7 +401,7 @@ Ese paso no está justificado, por dos motivos:
 :CUSTOM_ID: apendice-matricial
 :END:
 
-/Material complementario/. Este apéndice va más allá de lo que da tiempo a hacer en clase; queda aquí para quien quiera completarlo por su cuenta, con el mismo estatus de material complementario que la [[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html][práctica matricial con datos simulados de la sesión 14]].
+/Material complementario/. Este apéndice excede lo que puede hacerse en el tiempo de clase; queda aquí para quien quiera completarlo por su cuenta, con el mismo estatus de material complementario que la [[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html][práctica matricial con datos simulados de la sesión 14]].
 
 La transparencia ``¿Y con más regresores?'' de la lección 11 enunció, /sin demostrarla/, la generalización matricial de lo que sí demostramos:
 \[
@@ -409,7 +409,7 @@ Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol
 \]
 Podemos verificarla numéricamente con el mismo experimento, guardando también $\hat\beta_1$ y comparando la matriz de varianzas y covarianzas /empírica/ de las réplicas con la que predice la fórmula.
 
-Tres bloques. Al abrir el fichero de réplicas se perdieron los datos de =hprice2= y los escalares, así que el primero vuelve a abrirlo, reestima y recupera =sigma=. El segundo construye la matriz de datos con el comando =matrix= (práctica D de la sesión 14): ={const, rooms}= coloca las dos series como columnas, =X'X= es el producto de la traspuesta de =X= por =X=, =invpd= invierte una matriz simétrica definida positiva y =print Vteo= muestra el resultado. El tercero va precedido de la reapertura del fichero de réplicas; después, ={b1hat}~{b2hat}= forma una matriz de 2000 filas y dos columnas (el operador =~= pega dos matrices lado a lado) y =mcov= calcula su matriz de varianzas y covarianzas tratando cada columna como una variable, con divisor $n-1$; con 2000 réplicas la diferencia con el divisor $n$ es despreciable.
+Tres bloques. Al abrir el fichero de réplicas se perdieron los datos de =hprice2= y los escalares, así que el primero vuelve a abrirlo, reestima y recupera =sigma=. El segundo construye la matriz de datos con el comando =matrix= (práctica D de la sesión 14): ={const, rooms}= coloca las dos series como columnas, =X'X= es el producto de la traspuesta de =X= por =X=, =invpd= invierte una matriz simétrica definida positiva y =print Vteo= muestra el resultado. El tercero va precedido de la reapertura del fichero de réplicas; después, ={b1hat}~{b2hat}= forma una matriz de 2000 filas y dos columnas (el operador =~= yuxtapone dos matrices por columnas) y =mcov= calcula su matriz de varianzas y covarianzas tratando cada columna como una variable, con divisor $n-1$; con 2000 réplicas la diferencia con el divisor $n$ es despreciable.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -487,15 +487,15 @@ Compare las dos matrices elemento a elemento. El elemento $(2,2)$ es la varianza
 
 * Respuestas
 
-1. /¿Ha fallado MCO?/ No. MCO ha hecho exactamente lo que sabe hacer: encontrar la combinación lineal de los regresores más próxima al regresando /de esa muestra/. Lo que ocurre es que el regresando de esa muestra incluye una perturbación concreta que no conocemos y que MCO no puede separar de la parte sistemática. Según la identidad de la lección 11, $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$: para que coincidieran tendría que anularse $\sum_iW_iU_i$, es decir, la perturbación sorteada tendría que resultar ortogonal al regresor centrado. Con una perturbación generada al azar eso no ocurre nunca (salvo casualidad numérica); en la práctica C lo forzaremos a propósito para ver qué pasa.
+1. /¿Ha fallado MCO?/ No. MCO ha hecho exactamente aquello para lo que está definido: encontrar la combinación lineal de los regresores más próxima al regresando /de esa muestra/. Lo que ocurre es que el regresando de esa muestra incluye una perturbación concreta que no conocemos y que MCO no puede separar de la parte sistemática. Según la identidad de la lección 11, $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$: para que coincidieran tendría que anularse $\sum_iW_iU_i$, es decir, la perturbación sorteada tendría que resultar ortogonal al regresor centrado. Con una perturbación generada al azar eso no ocurre nunca (salvo casualidad numérica); en la práctica C lo forzaremos a propósito para ver qué ocurre.
 
 2. /¿Por qué el regresor se queda fijo?/ Porque lo que la lección 11 calculó es la varianza /condicional/ $Var[\hat\beta_2\mid\boldsymbol X]$: la dispersión de las estimaciones /para un conjunto dado de valores del regresor/. Mantener =rooms= fijo en todas las réplicas es, literalmente, la versión experimental de condicionar en $\boldsymbol X$: fijamos la matriz de regresores y dejamos variar solo lo que el modelo considera aleatorio, la perturbación. La práctica B explora qué ocurre si dejamos de condicionar.
 
 3. /La media no coincide/. No lo contradice. La insesgadez es una afirmación sobre la esperanza, es decir, sobre el promedio en el límite de infinitas muestras posibles. Con $R$ réplicas obtenemos un promedio /muestral/ de estimaciones, que es él mismo una variable aleatoria con varianza aproximadamente $Var[\hat\beta_2\mid\boldsymbol X]/R$. Al multiplicar $R$ por cien, esa varianza se divide por cien y la desviación típica por diez: cabe esperar que la diferencia con $\beta_2$ se reduzca aproximadamente a la décima parte.
 
-4. /Un $\sigma$ diez veces mayor/. La media de las estimaciones seguiría centrada en $\beta_2$: la insesgadez no depende de $\sigma$ en absoluto (la demostración de la lección 11 solo usa $E[U_i\mid\boldsymbol X]=\mathit 0$). La dispersión, en cambio, se multiplicaría por diez la desviación típica, y por cien la varianza, porque $\sigma^2$ aparece como factor en el numerador de la fórmula. Dicho de otro modo: más ruido no descentra el estimador, solo lo vuelve menos preciso.
+4. /Un $\sigma$ diez veces mayor/. La media de las estimaciones seguiría centrada en $\beta_2$: la insesgadez no depende de $\sigma$ en absoluto (la demostración de la lección 11 solo usa $E[U_i\mid\boldsymbol X]=\mathit 0$). La dispersión, en cambio, se multiplicaría por diez la desviación típica, y por cien la varianza, porque $\sigma^2$ aparece como factor en el numerador de la fórmula. Dicho de otro modo: una perturbación de mayor varianza no descentra el estimador, solo lo hace menos preciso.
 
-5. /La objeción al compañero/. Que la forma de campana del histograma no la hemos /descubierto/, sino /impuesto/: hemos generado las perturbaciones con =normal(0, sigma)= porque así lo decidimos al construir el mundo artificial. Nada de lo demostrado en la lección 11 garantiza esa forma; allí se demostraron la media y la varianza, y ambas se obtuvieron sin suponer nada sobre la distribución de $U$. Para calcular probabilidades hace falta un supuesto adicional sobre esa distribución, y ese supuesto, con sus consecuencias, es el asunto de la lección 12. La práctica C de hoy muestra, además, que con perturbaciones muy poco normales la media y la varianza siguen cumpliéndose igual de bien.
+5. /La objeción al compañero/. Que la forma de campana del histograma no la hemos /descubierto/, sino /impuesto/: hemos generado las perturbaciones con =normal(0, sigma)= porque así lo decidimos al construir el mundo artificial. Nada de lo demostrado en la lección 11 garantiza esa forma; allí se demostraron la media y la varianza, y ambas se obtuvieron sin suponer nada sobre la distribución de $U$. Para calcular probabilidades hace falta un supuesto adicional sobre esa distribución, y ese supuesto, con sus consecuencias, es el asunto de la lección 12. La práctica C de hoy muestra, además, que con perturbaciones muy alejadas de la normal las fórmulas de la media y la varianza siguen cumpliéndose.
 
 
 * COMMENT Banco de preguntas de reserva

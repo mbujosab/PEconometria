@@ -97,8 +97,8 @@ Empezamos el bloque de regresión múltiple (lección 10) con el conjunto de dat
 2. Comparar el coeficiente de un regresor cuando se estima /solo/ frente a cuando se estima /junto/ a otro: la esencia del efecto parcial o /ceteris paribus/ (lección 10).
 3. Ampliar el modelo con un tercer regresor y observar cómo cambia (o no) la lectura de los anteriores.
 4. Observar, sin todavía formalizarlo, que el $R^2$ no baja al añadir regresores (se formalizará, con el $R^2$ ajustado, en la práctica siguiente).
-5. Practicar la lectura de una salida de regresión múltiple sin dejarse arrastrar a conclusiones causales injustificadas.
-6. Ver cuánto se mueve el ajuste al quitar una sola vivienda, y que no todas pesan igual: el primer indicio de que una estimación tiene una /dispersión/, que la lección 11 cuantificará.
+5. Practicar la lectura de una salida de regresión múltiple sin extraer conclusiones causales injustificadas.
+6. Ver cuánto cambia el ajuste al quitar una sola vivienda, y que no todas influyen igual: el primer indicio de que una estimación tiene una /dispersión/, que la lección 11 cuantificará.
 
 /Comandos nuevos de esta práctica/. Seguimos usando =open=, =setinfo=, =summary=, =corr=, =gnuplot=, =printf= y los escalares (sesiones 4 y 7), y =ols= con la opción =--quiet= y sus accesores =$coeff=, =$uhat= y =$rsq= (prácticas de la sesión 11). Lo nuevo:
 - =ols y const x2 x3= :: la misma orden de la sesión 11 con más regresores tras la constante. Cada nombre añadido es una columna más de la matriz de datos $\boldsymbol{\mathsf X}$ de la lección 10.
@@ -123,7 +123,7 @@ open data4-1.gdt --quiet
   #+latex: }
 
 Si lo consideramos conveniente podemos castellanizar las etiquetas de las variables para tener gráficos con las leyendas en español.
-Además, siempre conviene echar un vistazo a los estadísticos descriptivos principales de las variables.
+Además, siempre conviene examinar los estadísticos descriptivos principales de las variables.
 
   Cuatro =setinfo=, uno por variable, con la descripción (=-d=) y el nombre para los gráficos (=-n=), y un =summary --simple= con las cuatro variables (media, mediana, desviación típica, mínimo y máximo).
 
@@ -140,7 +140,7 @@ summary price sqft bedrms baths --simple
   #+end_src
   #+latex: }
 
-Son solo 14 observaciones: puede inspeccionarlas todas de un vistazo con =print= y la opción =--byobs=, que muestra varias series en una tabla con una fila por observación (sesión 11):
+Son solo 14 observaciones: puede inspeccionarlas todas en una sola tabla con =print= y la opción =--byobs=, que muestra varias series en una tabla con una fila por observación (sesión 11):
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   #+NAME: vistazo de los datos
   #+begin_src gretl :eval no
@@ -158,7 +158,7 @@ end outfile
 #+include: ./S14-Prct-A-ramanathan/vistazoDatos.txt example
 #+latex: }
 
-Un conjunto de datos tan pequeño no es representativo de ningún mercado real, pero sirve para una primera toma de contacto con la regresión múltiple.
+Un conjunto de datos tan pequeño no es representativo de ningún mercado real, pero sirve como primer ejemplo de regresión múltiple.
 
 * Actividad 2 - Recordatorio: la regresión simple =price~sqft=
 
@@ -253,7 +253,7 @@ end outfile
 
 *** Lo que debe observar
 
-Compare el coeficiente de =bedrms= en ambas regresiones: solo, vale $+56{,}2$ (mil dólares por dormitorio) con un $R^2$ de apenas $0{,}10$; junto a =sqft=, pasa a $-23{,}9$, y el $R^2$ sube a $0{,}83$, casi el mismo que tenía =sqft= sola. En la lección 10 vimos que cada $\hat\beta_j$, en un modelo con varios regresores, mide un /efecto parcial/: ``el efecto promedio en =price= ante un dormitorio más, /manteniendo fija la superficie/''. Eso es una pregunta distinta de ``el efecto promedio en =price= ante un dormitorio más, sin ninguna información adicional'' (lo que mide el coeficiente del modelo simple). No tienen por qué coincidir, ni siquiera en signo: dos viviendas con la misma superficie pero distinto número de dormitorios reparten ese mismo espacio en habitaciones más pequeñas o más grandes, lo cual puede pesar en el precio de forma diferente a como pesa ``más dormitorios sin más información sobre otras características de la vivienda''. Muchos dormitorios solo caben en viviendas grandes, así que cabe esperar una correlación positiva entre dormitorios y superficie en la muestra. Verifíquelo.
+Compare el coeficiente de =bedrms= en ambas regresiones: solo, vale $+56{,}2$ (mil dólares por dormitorio) con un $R^2$ de apenas $0{,}10$; junto a =sqft=, pasa a $-23{,}9$, y el $R^2$ sube a $0{,}83$, casi el mismo que tenía =sqft= sola. En la lección 10 vimos que cada $\hat\beta_j$, en un modelo con varios regresores, mide un /efecto parcial/: ``el efecto promedio en =price= ante un dormitorio más, /manteniendo fija la superficie/''. Eso es una pregunta distinta de ``el efecto promedio en =price= ante un dormitorio más, sin ninguna información adicional'' (lo que mide el coeficiente del modelo simple). No tienen por qué coincidir, ni siquiera en signo: dos viviendas con la misma superficie pero distinto número de dormitorios reparten ese mismo espacio en habitaciones más pequeñas o más grandes, lo cual puede influir en el precio de forma diferente a como influye ``más dormitorios sin más información sobre otras características de la vivienda''. Muchos dormitorios solo caben en viviendas grandes, así que cabe esperar una correlación positiva entre dormitorios y superficie en la muestra. Verifíquelo.
 
 Comprobemos cuán correlacionados están los dos regresores. El comando =corr= imprime la correlación de las variables de la lista (sesión 7).
 
@@ -300,7 +300,7 @@ end outfile
 #+include: ./S14-Prct-A-ramanathan/olsBaths.txt example
 #+latex: }
 
-Compare de nuevo el coeficiente de =bedrms= (y ahora también el de =sqft=) con los obtenidos en la Actividad 3: apenas se mueven ($-23{,}9\to-21{,}6$ y $0{,}148\to0{,}155$). ¿Qué signo tiene el coeficiente de =baths=, $-12{,}2$, y le parece razonable? Si no le parece razonable, ¿cuál podría ser el motivo por el que el resultado obtenido es distinto de lo que usted esperaba?
+Compare de nuevo el coeficiente de =bedrms= (y ahora también el de =sqft=) con los obtenidos en la Actividad 3: apenas cambian ($-23{,}9\to-21{,}6$ y $0{,}148\to0{,}155$). ¿Qué signo tiene el coeficiente de =baths=, $-12{,}2$, y le parece razonable? Si no le parece razonable, ¿cuál podría ser el motivo por el que el resultado obtenido es distinto de lo que usted esperaba?
 
 Observe la matriz de correlaciones entre =sqft=, =bedrms= y =baths=. Con tres variables, =corr= devuelve la matriz simétrica de la sesión 7:
 
@@ -341,7 +341,7 @@ Complete la tabla con los resultados de las cuatro regresiones estimadas en esta
 Cuatro estimaciones seguidas con la opción =--quiet=, que evita imprimir la salida completa de cada una. Tras cada =ols= guardamos en un escalar el accesor =$rsq=, el $R^2$ del último modelo estimado (sesión 11). Un accesor se refiere siempre al /último/ modelo, por eso hay que guardarlo antes de estimar el siguiente. Los cuatro =printf= finales imprimen los cuatro valores juntos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/en línea de comandos, para obtener los cuatro $R^2$ de golpe/:
+/en línea de comandos, para obtener los cuatro $R^2$ en una sola ejecución/:
 #+NAME: Sintesis R2
 #+begin_src gretl :eval no
 ols price const sqft --quiet
@@ -377,7 +377,7 @@ Observe el $R^2$ a medida que se añaden regresores: nunca /baja/. Es una propie
 :CUSTOM_ID: quitar-viviendas
 :END:
 
-Hasta aquí hemos cambiado el /modelo/ y hemos visto moverse los coeficientes. Ahora vamos a hacer justo lo contrario: dejar el modelo quieto y cambiar los /datos/. Concretamente, vamos a quitar una vivienda de las catorce y reestimar la misma regresión.
+Hasta aquí hemos cambiado el /modelo/ y hemos visto cambiar los coeficientes. Ahora vamos a hacer justo lo contrario: mantener fijo el modelo y cambiar los /datos/. Concretamente, vamos a quitar una vivienda de las catorce y reestimar la misma regresión.
 
 La pregunta es sencilla y conviene planteársela antes de ejecutar nada: /si una sola de estas catorce casas hubiera sido distinta, o sencillamente no estuviera en nuestra lista, ¿cambiaría mucho la recta que hemos ajustado?/
 
@@ -457,19 +457,19 @@ end outfile
 
 *** Lo que debe observar
 
-Las tres viviendas que hemos ido quitando se comportan de tres maneras muy distintas, y esa es la lección:
+Las tres viviendas que hemos ido quitando afectan al ajuste de tres maneras muy distintas, y esa es la lección:
 
-- /La obs. 1/ es la más pequeña de todas (1065 pies cuadrados, el mínimo de la muestra): está en el borde mismo del rango. Y sin embargo quitarla no mueve nada: la pendiente pasa de $0{,}1388$ a $0{,}1387$. Mire su residuo: $-0{,}22$. Esa vivienda cae prácticamente /encima/ de la recta.
-- /La obs. 14/ es la más grande (3000 pies cuadrados, el máximo): también está en el borde. Pero su residuo es $-53{,}60$, y quitarla mueve la pendiente de $0{,}1388$ a $0{,}1593$ y la constante de $52{,}351$ a $18{,}962$.
-- /La obs. 12/ (2600 pies cuadrados) /no/ está en ningún extremo. Y aun así, con un residuo de $+91{,}90$, quitarla mueve la pendiente a $0{,}1209$ y la constante a $78{,}380$.
+- /La obs. 1/ es la más pequeña de todas (1065 pies cuadrados, el mínimo de la muestra): está en el borde mismo del rango. Y sin embargo quitarla apenas altera el ajuste: la pendiente pasa de $0{,}1388$ a $0{,}1387$. Mire su residuo: $-0{,}22$. Esa vivienda está prácticamente /sobre/ la recta.
+- /La obs. 14/ es la más grande (3000 pies cuadrados, el máximo): también está en el borde. Pero su residuo es $-53{,}60$, y quitarla cambia la pendiente de $0{,}1388$ a $0{,}1593$ y la constante de $52{,}351$ a $18{,}962$.
+- /La obs. 12/ (2600 pies cuadrados) /no/ está en ningún extremo. Y aun así, con un residuo de $+91{,}90$, quitarla cambia la pendiente a $0{,}1209$ y la constante a $78{,}380$.
 
 De donde se siguen tres conclusiones que conviene no confundir:
 
-1. /No hemos cambiado el modelo/. La especificación es idéntica en las cuatro filas; lo único que cambia es qué viviendas entran en el cálculo. Todo el movimiento que vea procede exclusivamente de la muestra.
-2. /No todas las observaciones pesan igual, y la posición no lo explica sola/. Estar en un extremo del rango de superficies no basta para tirar de la recta (la obs. 1 está en el extremo y no tira de nada), y no estar en un extremo no protege (la obs. 12 está en el interior y es de las que más mueven el ajuste). Lo que hace falta son /las dos cosas a la vez/: estar lejos del centro en el eje del regresor, /y además/ quedar lejos de la recta. Volveremos sobre esta idea, con nombre propio (/apalancamiento/ e /influencia/) y con una medida concreta, en el laboratorio integrador que cierra el curso.
-3. /Con $n=14$ esto es muy visible; con $n=506$ lo sería mucho menos/. Esa fragilidad es lo que ocurre con pocos datos, con cualquier método.
+1. /No hemos cambiado el modelo/. La especificación es idéntica en las cuatro filas; lo único que cambia es qué viviendas entran en el cálculo. Toda la variación que vea procede exclusivamente de la muestra.
+2. /No todas las observaciones pesan igual, y la posición no lo explica sola/. Estar en un extremo del rango de superficies no basta para desplazar la recta (la obs. 1 está en el extremo y no la desplaza), y no estar en un extremo no lo impide (la obs. 12 está en el interior y es de las que más alteran el ajuste). Lo que hace falta son /las dos cosas a la vez/: estar lejos del centro en el eje del regresor, /y además/ quedar lejos de la recta. Volveremos sobre esta idea, con nombre propio (/apalancamiento/ e /influencia/) y con una medida concreta, en el laboratorio integrador que cierra el curso.
+3. /Con $n=14$ esto es muy visible; con $n=506$ lo sería mucho menos/. Esa sensibilidad a los datos es propia de las muestras pequeñas, con cualquier método.
 
-Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que el ajuste /se mueve/ cuando cambian los datos, pero no tenemos todavía ninguna forma de decir /cuánto/ se mueve, ni de anticiparlo antes de mirar. Para eso hace falta hablar de la variabilidad del estimador, y eso exige un aparato que aún no tenemos. Es lo que hará la lección 11: dar una fórmula para la dispersión de $\hat\beta_2$, y mostrar que en ella aparecen el número de observaciones y cuán dispersas están las superficies de las viviendas.
+Esta actividad no resuelve nada; deja una pregunta abierta. Hemos comprobado que el ajuste /cambia/ cuando cambian los datos, pero no tenemos todavía ninguna forma de decir /cuánto/ cambia, ni de anticiparlo antes de estimar. Para eso hace falta hablar de la variabilidad del estimador, y eso exige herramientas que aún no tenemos. Es lo que hará la lección 11: dar una fórmula para la dispersión de $\hat\beta_2$, y mostrar que en ella aparecen el número de observaciones y cuán dispersas están las superficies de las viviendas.
 
 * Preguntas de interpretación para la clase
 

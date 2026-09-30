@@ -89,7 +89,7 @@ set workdir "@directory"
 
 * Descripción de la práctica
 
-En las lecciones 7 y 8 obtuvimos, con lápiz y papel, las fórmulas de $\hat\beta_1$ y $\hat\beta_2$ (a partir de dos condiciones de ortogonalidad) y la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ con su cociente $R^2$. Hoy usamos por primera vez el comando =ols= de Gretl para comprobar que reproduce exactamente esos cálculos: primero con el mismo ejemplo pequeño ($n=5$) ya resuelto a mano en la lección 7, y después con una muestra simulada más grande, para distinguir qué es una /identidad algebraica/ (se cumple siempre) de qué es una /estimación/ (no coincide, pero se aproxima al valor verdadero que generó los datos).
+En las lecciones 7 y 8 obtuvimos, a mano, las fórmulas de $\hat\beta_1$ y $\hat\beta_2$ (a partir de dos condiciones de ortogonalidad) y la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ con su cociente $R^2$. Hoy usamos por primera vez el comando =ols= de Gretl para comprobar que reproduce exactamente esos cálculos: primero con el mismo ejemplo pequeño ($n=5$) ya resuelto a mano en la lección 7, y después con una muestra simulada más grande, para distinguir qué es una /identidad algebraica/ (se cumple siempre) de qué es una /estimación/ (no coincide, pero se aproxima al valor verdadero que generó los datos).
 
 /Nota importante/: al pedir =ols= a Gretl, la salida incluye columnas adicionales (error estándar, valor $t$, /p/-valor) que /todavía no sabemos interpretar/: son objeto de estudio más adelante en el curso, cuando lleguemos a inferencia. Por ahora, ignórelas deliberadamente y fíjese solo en los coeficientes estimados y en las cantidades ya conocidas ($\hat e_i$, $R^2$).
 
@@ -332,7 +332,7 @@ end outfile
 #+latex: }
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-/Compare: la ortogonalidad (primeras dos líneas) se cumple exactamente, sea cual sea la muestra: es álgebra pura, consecuencia de cómo se define MCO. En cambio, $\hat\beta_1,\hat\beta_2$ solo se/ aproximan /a los valores 2 y 3 que usamos para generar los datos: son una estimación, no una identidad./
+/Compare: la ortogonalidad (primeras dos líneas) se cumple exactamente, sea cual sea la muestra: es una identidad algebraica, consecuencia de cómo se define MCO. En cambio, $\hat\beta_1,\hat\beta_2$ solo se/ aproximan /a los valores 2 y 3 que usamos para generar los datos: son una estimación, no una identidad./
 #+latex: }
 
 * Actividad 6 - ¿Y si quitamos la constante?
@@ -342,7 +342,7 @@ end outfile
 
 La lección 7 sostuvo que sin constante no puede hablarse de regresión. Comprobemos qué se pierde, con la muestra de la Actividad 5: pedimos a Gretl la recta que pasa por el origen (solo el regresor =x2=, sin =const=).
 
-Primero se reestima el modelo con constante en silencio (=--quiet=) para guardar en dos escalares su pendiente y la media de su ajuste. Después se estima /sin/ =const=: en la lista de regresores solo queda =x2=. Los cuatro =printf= comparan, para el ajuste sin constante, la suma de residuos, la suma de =x2= por residuos, la media del ajuste y la pendiente con lo obtenido con constante.
+Primero se reestima el modelo con constante sin imprimir la tabla (=--quiet=) para guardar en dos escalares su pendiente y la media de su ajuste. Después se estima /sin/ =const=: en la lista de regresores solo queda =x2=. Los cuatro =printf= comparan, para el ajuste sin constante, la suma de residuos, la suma de =x2= por residuos, la media del ajuste y la pendiente con lo obtenido con constante.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -373,11 +373,11 @@ end outfile
 
 *** Lo que debe observar
 
-Sin la constante solo queda una condición de ortogonalidad, la del regresor: $\sum x_i\hat e_i$ sigue siendo cero, pero $\sum\hat e_i$ vale $24{,}9$. Con ello se pierde todo lo que la lección 7 dedujo de la primera condición: el ajuste ya no tiene la media de los datos ($16{,}01$ frente a $16{,}42$), la recta ya no pasa por el punto de las medias, y la pendiente sube de $3{,}06$ a $3{,}355$: obligada a pasar por el origen, la recta se inclina para compensar la constante que le falta. Fíjese también en que Gretl ya no imprime un =R-cuadrado=, sino dos: sin constante no existe la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ de la lección 8, y el programa ofrece dos sustitutos (``no centrado'' y ``centrado'') que no son comparables con el $R^2$ de los modelos con constante.
+Sin la constante solo queda una condición de ortogonalidad, la del regresor: $\sum x_i\hat e_i$ sigue siendo cero, pero $\sum\hat e_i$ vale $24{,}9$. Con ello se pierde todo lo que la lección 7 dedujo de la primera condición: el ajuste ya no tiene la media de los datos ($16{,}01$ frente a $16{,}42$), la recta ya no pasa por el punto de las medias, y la pendiente sube de $3{,}06$ a $3{,}355$: al imponer que la recta pase por el origen, la pendiente aumenta para compensar la constante omitida. Fíjese también en que Gretl ya no imprime un =R-cuadrado=, sino dos: sin constante no existe la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ de la lección 8, y el programa ofrece dos sustitutos (``no centrado'' y ``centrado'') que no son comparables con el $R^2$ de los modelos con constante.
 
 * Actividad 7 - Síntesis
 
-Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en las lecciones 7 y 8: (i) las fórmulas de $\hat\beta_1,\hat\beta_2$; (ii) las dos condiciones de ortogonalidad que, por construcción de MCO, se cumplen /siempre/ (no dependen de si el ejemplo está ``diseñado'' o no); (iii) $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$. Y hemos visto la diferencia esencial entre una /identidad algebraica/ (ortogonalidad: exacta siempre) y una /estimación/ (recuperar el coeficiente generador: solo aproximada, y solo exacta en el ejemplo construido de la lección 7).
+Hoy hemos comprobado con Gretl, en vez de a mano, tres resultados ya demostrados en las lecciones 7 y 8: (i) las fórmulas de $\hat\beta_1,\hat\beta_2$; (ii) las dos condiciones de ortogonalidad que, por construcción de MCO, se cumplen /siempre/ (no dependen de si el ejemplo está ``diseñado'' o no); (iii) $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$. Y hemos visto la diferencia esencial entre una /identidad algebraica/ (ortogonalidad: exacta siempre) y una /estimación/ (recuperar el coeficiente generador: solo aproximada, y solo exacta en el ejemplo construido de la lección 7).
 
 * Preguntas de interpretación para la clase
 
@@ -415,4 +415,4 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres cosas ya demostradas en l
 
 5. Con $n=600$ en lugar de $n=60$. Cabe esperar que $\hat\beta_2$ se acerque /todavía más/ a 3: con muestras más grandes, la covarianza muestral entre la perturbación $u_2$ y el regresor $x_2$ tiende a acercarse a cero (si, como es el caso, $u_2$ se generó independientemente de $x_2$), de modo que el ``desajuste'' entre $\hat\beta_2$ y el valor generador 3 tiende a reducirse. Esta es una primera intuición, sin demostrar todavía, de la propiedad de /consistencia/ de un estimador, que se estudiará con más detalle más adelante en el curso.
 
-6. /Sin constante./ Al quitar $\boldsymbol 1$, el subespacio sobre el que se proyecta es la recta $\mathcal L(\boldsymbol x)$, con un solo generador; el residuo es ortogonal a ese único generador (de ahí $\sum x_i\hat e_i=0$), pero nada le obliga a ser ortogonal a $\boldsymbol 1$, que ya no está en el subespacio. Por eso los residuos no suman cero, el ajuste no preserva la media y la recta no pasa por el punto de las medias: todas esas propiedades eran consecuencias de la primera condición de ortogonalidad, y esa condición ha desaparecido.
+6. /Sin constante./ Al quitar $\boldsymbol 1$, el subespacio sobre el que se proyecta es la recta $\mathcal L(\boldsymbol x)$, con un solo generador; el residuo es ortogonal a ese único generador (de ahí $\sum x_i\hat e_i=0$), pero ninguna condición impone su ortogonalidad a $\boldsymbol 1$, que ya no está en el subespacio. Por eso los residuos no suman cero, el ajuste no preserva la media y la recta no pasa por el punto de las medias: todas esas propiedades eran consecuencias de la primera condición de ortogonalidad, y esa condición ha desaparecido.

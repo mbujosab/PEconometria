@@ -97,7 +97,7 @@ Las dos prácticas anteriores de esta sesión se centraron en el contenido econo
 2. Exportar gráficos en distintos formatos (PNG, PDF, EPS) y entender cuándo conviene cada uno.
 3. Exportar los resultados de una regresión en un formato apto para un informe (LaTeX/RTF), en vez de copiarlos a mano.
 4. Exportar directamente a fichero un histograma y un diagrama de caja (ya vistos en la primera práctica del curso).
-5. Fijar un pequeño ``checklist'' de buenas prácticas para preparar un informe reproducible.
+5. Fijar una breve lista de comprobaciones de buenas prácticas para preparar un informe reproducible.
 
 /Comandos nuevos de esta práctica/. Además de =ols= (práctica A de esta sesión) y de =gnuplot=, =freq= y =boxplot= (sesiones 4 y 7):
 - =list PL = price rooms= :: da un nombre a una lista de variables, para poder pasarla a otros comandos como un solo argumento.
@@ -109,7 +109,7 @@ Las dos prácticas anteriores de esta sesión se centraron en el contenido econo
 
 Esta práctica es autocontenida: reabrimos =hprice2= y volvemos a estimar el modelo =price~rooms= de la práctica anterior.
 
-Abrimos =hprice2=, ponemos etiquetas a las dos variables que usaremos y estimamos =price= sobre la constante y =rooms=. Los comandos que siguen (=eqnprint=, =tabprint=) actúan sobre el último modelo estimado, así que conviene tenerlo fresco.
+Abrimos =hprice2=, ponemos etiquetas a las dos variables que usaremos y estimamos =price= sobre la constante y =rooms=. Los comandos que siguen (=eqnprint=, =tabprint=) actúan sobre el último modelo estimado, así que conviene estimarlo justo antes de usarlos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -201,14 +201,14 @@ gnuplot price rooms --output="price_rooms.eps"
   #+end_src
   #+latex: }
 
-/Discusión/: para un documento LaTeX, se prefiere normalmente un formato /vectorial/ (PDF o EPS) frente a uno /de mapa de bits/ (PNG): un PDF/EPS se puede escalar sin perder nitidez (líneas y texto siguen nítidos a cualquier tamaño), mientras que un PNG, al ampliarse, se pixela. El PNG es preferible sobre todo para páginas web o cuando el propio gráfico contiene muchísimos puntos (una nube de dispersión muy densa en PDF puede generar ficheros pesados).
+/Discusión/: para un documento LaTeX, se prefiere normalmente un formato /vectorial/ (PDF o EPS) frente a uno /de mapa de bits/ (PNG): un PDF/EPS se puede escalar sin perder nitidez (líneas y texto siguen nítidos a cualquier tamaño), mientras que un PNG, al ampliarse, se pixela. El PNG es preferible sobre todo para páginas web o cuando el propio gráfico contiene un número muy grande de puntos (una nube de dispersión muy densa en PDF puede generar ficheros muy grandes).
 
 * Actividad 4 - Exportar resultados de una regresión para un informe
 
 - GUI: en la ventana del modelo estimado (=price~rooms= de la Actividad 1), menú */~LaTeX -> Tabular~/* o */~LaTeX -> Ecuación~/*, con las opciones de */~Ver~/*, */~Copiar~/* o */~Guardar~/*. También, desde */~Archivo -> Guardar como~/*, puede exportar en formato RTF (para Word) directamente.
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-  /o bien, en línea de comandos, Gretl ofrece los comandos/ =eqnprint= /(la ecuación estimada) y/ =tabprint= /(una tabla completa de coeficientes y errores estándar) para exportar directamente a LaTeX/. El bloque reestima el modelo en silencio, para asegurarse de que es el último, y después escribe la ecuación en un fichero y la tabla en otro; el nombre del fichero va en =--output= y su extensión decide el formato (=.tex= para LaTeX, =.rtf= para un procesador de textos):
+  /o bien, en línea de comandos, Gretl ofrece los comandos/ =eqnprint= /(la ecuación estimada) y/ =tabprint= /(una tabla completa de coeficientes y errores estándar) para exportar directamente a LaTeX/. El bloque reestima el modelo con =--quiet=, para asegurarse de que es el último, y después escribe la ecuación en un fichero y la tabla en otro; el nombre del fichero va en =--output= y su extensión decide el formato (=.tex= para LaTeX, =.rtf= para un procesador de textos):
   #+NAME: Exportar resultados regresion
   #+begin_src gretl :tangle ./guiones/S11-Prct-C-graficos-informes.inp :eval no
 ols price const rooms --quiet
@@ -232,7 +232,7 @@ tabprint --output="tabla_price_rooms.tex"
 #+latex: }
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
-/El fichero/ =tabla_price_rooms.tex= /contiene, de forma análoga, el entorno/ =tabular= /completo con los coeficientes, sus desviaciones típicas y el resto de columnas. Nótese que ambos ficheros traen los números con todas sus cifras y con la coma decimal ya puesta: no hay que teclear nada./
+/El fichero/ =tabla_price_rooms.tex= /contiene, de forma análoga, el entorno/ =tabular= /completo con los coeficientes, sus desviaciones típicas y el resto de columnas. Nótese que ambos ficheros contienen los números con todas sus cifras y con la coma decimal: no es necesario transcribir nada./
 #+latex: }
 
 * Actividad 5 - Exportar histograma y diagrama de caja directamente a fichero
@@ -303,10 +303,10 @@ boxplot price --output="boxplot_price_informe.png"
 
 1. PDF/EPS frente a PNG en LaTeX. Un formato vectorial (PDF, EPS) describe el gráfico mediante instrucciones geométricas (líneas, curvas, texto), de modo que se puede escalar a cualquier tamaño sin perder nitidez; un PNG es un mapa de bits (una cuadrícula de píxeles de tamaño fijo), y al ampliarlo dentro del documento (o al imprimirlo a alta resolución) se pixela y pierde calidad, especialmente notorio en el texto de los ejes.
 
-2. Ventaja de ~tabprint/eqnprint~ frente a copiar a mano. Copiar números manualmente introduce el riesgo de errores de transcripción (un dígito mal copiado, un signo perdido) y obliga a dar formato a la tabla desde cero cada vez que cambia la regresión. Generar la tabla directamente desde Gretl garantiza que los números que aparecen en el informe coinciden con los calculados, y que si se vuelve a estimar el modelo con datos actualizados basta con volver a ejecutar el mismo comando para regenerar la tabla, sin retrabajo manual.
+2. Ventaja de ~tabprint/eqnprint~ frente a copiar a mano. Copiar números manualmente introduce el riesgo de errores de transcripción (un dígito mal copiado, un signo perdido) y obliga a dar formato a la tabla desde cero cada vez que cambia la regresión. Generar la tabla directamente desde Gretl garantiza que los números que aparecen en el informe coinciden con los calculados, y que si se vuelve a estimar el modelo con datos actualizados basta con volver a ejecutar el mismo comando para regenerar la tabla, sin repetir ningún paso manual.
 
 3. Unidades en las etiquetas de los ejes. Sin unidades explícitas, un lector no puede saber si ``price'' está en dólares, en miles de dólares, o en otra escala, ni si ``rooms'' es un conteo o un promedio; esto puede llevar a interpretaciones erróneas de la magnitud de los efectos mostrados en el gráfico. Las etiquetas con unidades hacen el gráfico autosuficiente, comprensible sin necesidad de leer el texto que lo acompaña.
 
-4. Conservar el guion completo (=.inp=). Un informe reproducible debe permitir que otra persona (o uno mismo, meses después) obtenga los mismos resultados a partir de los mismos datos, sin depender de pasos manuales no documentados (clics de menú, ajustes hechos ``a ojo'' en una ventana gráfica). El guion completo documenta, de forma exacta y ejecutable, cada transformación de los datos y cada estimación realizada; los gráficos y tablas finales son solo su /consecuencia/, no una fuente independiente de verdad.
+4. Conservar el guion completo (=.inp=). Un informe reproducible debe permitir que otra persona (o uno mismo, meses después) obtenga los mismos resultados a partir de los mismos datos, sin depender de pasos manuales no documentados (clics de menú, ajustes manuales no registrados en una ventana gráfica). El guion completo documenta, de forma exacta y ejecutable, cada transformación de los datos y cada estimación realizada; los gráficos y tablas finales son solo su /consecuencia/, no una fuente independiente de verdad.
 
 5. Elementos para comparar =price~rooms= y =price~nox=. Como mínimo: (i) una tabla con $\hat\beta_1,\hat\beta_2,R^2$ de ambos modelos (generada con =tabprint=, no copiada a mano); (ii) los dos diagramas de dispersión con la recta ajustada, con ejes debidamente etiquetados y unidades explícitas, para que el lector aprecie visualmente la diferencia de ajuste; (iii) una breve discusión textual de los signos obtenidos y de por qué un $R^2$ mayor no debe leerse como ``una relación causal más fuerte'', sino solo como ``una nube de puntos más alineada con la recta'' (lección 8). No haría falta incluir capturas de pantalla de la consola de Gretl.

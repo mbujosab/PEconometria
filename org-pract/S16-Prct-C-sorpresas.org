@@ -95,7 +95,7 @@ set verbose off
 
 Cerramos la sesión con tres experimentos que responden a dos preguntas.
 
-La primera nació al final de la práctica A: el histograma de $\hat\beta_2$ tenía forma de campana, y dijimos que no debíamos sacar conclusiones de ello porque habíamos /impuesto/ esa forma al generar las perturbaciones con una normal. Toca comprobarlo: ¿qué pasa si las generamos con distribuciones muy poco normales?
+La primera se planteó al final de la práctica A: el histograma de $\hat\beta_2$ tenía forma de campana, y dijimos que no debíamos sacar conclusiones de ello porque habíamos /impuesto/ esa forma al generar las perturbaciones con una normal. Ahora lo comprobamos: ¿qué ocurre si las generamos con distribuciones muy alejadas de la normal?
 
 La segunda es más antigua. En el ejemplo de juguete de la lección 7, aquel $\boldsymbol u=(1,-2,0,2,-1)$, MCO recuperaba los coeficientes verdaderos /exactamente/, y advertimos que era una casualidad de diseño. La lección 11 explicó por qué: porque $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$, y aquel $\boldsymbol u$ estaba construido para que el segundo término se anulase. Vamos a fabricar esa casualidad a propósito, miles de veces seguidas, y ver qué le ocurre al histograma.
 
@@ -126,7 +126,7 @@ Vamos a repetir el experimento de la práctica A tres veces en paralelo, cambian
 - /Uniforme/: simétrica también, pero sin colas en absoluto; todos los valores de un intervalo son igual de probables. Para que su varianza sea $\sigma^2$ hay que tomar el intervalo $[-\sigma\sqrt3,\;\sigma\sqrt3]$.
 - /Chi-cuadrado centrada/: marcadamente /asimétrica/. Una $\chi^2$ con 4 grados de libertad tiene media 4 y varianza 8; restándole su media y dividiendo por $\sqrt8$ queda con media cero y varianza uno, y basta multiplicar por $\sigma$.
 
-Un solo bucle que hace tres experimentos por vuelta. Antes del bucle: el mundo artificial de la práctica A y =a_unif=, la semiamplitud del intervalo de la uniforme. Dentro, tres perturbaciones: la normal, como en la práctica A; la uniforme, =-a_unif + 2*a_unif*uniform(0,1)=, un sorteo en $[0,1]$ estirado al intervalo $[-a,a]$; y la chi-cuadrado, =randgen(X,4)=, a la que se resta su media $4$, se divide por su desviación típica $\sqrt8$ y se multiplica por =sigma=. Cada perturbación da su regresando, su regresión y su coeficiente, y =store= guarda los tres por réplica en =repC.gdt=.
+Un solo bucle que hace tres experimentos por vuelta. Antes del bucle: el mundo artificial de la práctica A y =a_unif=, la semiamplitud del intervalo de la uniforme. Dentro, tres perturbaciones: la normal, como en la práctica A; la uniforme, =-a_unif + 2*a_unif*uniform(0,1)=, un sorteo en $[0,1]$ reescalado al intervalo $[-a,a]$; y la chi-cuadrado, =randgen(X,4)=, a la que se resta su media $4$, se divide por su desviación típica $\sqrt8$ y se multiplica por =sigma=. Cada perturbación da su regresando, su regresión y su coeficiente, y =store= guarda los tres por réplica en =repC.gdt=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -208,14 +208,14 @@ end outfile
 
 *** Lo que debe observar
 
-Las tres medias quedan cerca de $\beta_2$ y las tres varianzas cerca de $\sigma^2/\mathrm{Sxx}$. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a francamente asimétrica) no cambia ni la media ni la varianza.
+Las tres medias quedan cerca de $\beta_2$ y las tres varianzas cerca de $\sigma^2/\mathrm{Sxx}$. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a marcadamente asimétrica) no cambia ni la media ni la varianza.
 
 Es lo que la lección 11 demostró. Merece la pena volver sobre aquella demostración y comprobar qué se usó en cada paso.
 
 - Para la insesgadez se usó $E[U_i\mid\boldsymbol X]=\mathit 0$ (exogeneidad estricta) y el lema para sacar los $W_i$ fuera de la esperanza condicionada.
 - Para la varianza se usó, además, $Var[U_i\mid\boldsymbol X]=\sigma^2\,\mathit 1$ (homocedasticidad) y $Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0$ para $i\neq j$.
 
-En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su media condicional, su varianza condicional y la ausencia de covarianzas cruzadas. Y esas tres cosas las cumplen igual de bien una normal, una uniforme y una chi-cuadrado centrada. La demostración era más general de lo que parecía.
+En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su media condicional, su varianza condicional y la ausencia de covarianzas cruzadas. Y esas tres condiciones las cumplen por igual una normal, una uniforme y una chi-cuadrado centrada. La demostración era más general de lo que parecía.
 
 
 * Actividad 2 - La forma sí depende de la distribución de $U$
@@ -310,19 +310,19 @@ freq b_peq --normal --plot="@workdir/hist_chi_peq.png"
 
 *** Por qué el histograma sigue siendo simétrico
 
-Aunque la perturbación es muy asimétrica y la muestra es diminuta, el histograma de $\hat\beta_2$ /sigue pareciendo simétrico/, y el coeficiente de asimetría que acabamos de calcular sale prácticamente nulo. (El contraste de normalidad de =freq --normal= sí rechaza, pero lo hace por las colas, la curtosis, no por la asimetría.)
+Aunque la perturbación es muy asimétrica y la muestra es muy pequeña, el histograma de $\hat\beta_2$ /sigue pareciendo simétrico/, y el coeficiente de asimetría que acabamos de calcular sale prácticamente nulo. (El contraste de normalidad de =freq --normal= sí rechaza, pero lo hace por las colas, la curtosis, no por la asimetría.)
 
 La explicación está, una vez más, en la fórmula de la lección 11:
 \[
 \hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i,\qquad W_i\ \text{proporcional a}\ (X_i-\overline{X}).
 \]
-Los pesos $W_i$ son proporcionales a las /desviaciones/ del regresor respecto a su media, y esas desviaciones son negativas para aproximadamente la mitad de las observaciones. Así que $\sum_iW_iU_i$ suma perturbaciones torcidas hacia la derecha con peso positivo y perturbaciones torcidas hacia la derecha con peso /negativo/, que al cambiarles el signo quedan torcidas hacia la izquierda. Las dos asimetrías se compensan en buena medida, y el resultado sale casi simétrico.
+Los pesos $W_i$ son proporcionales a las /desviaciones/ del regresor respecto a su media, y esas desviaciones son negativas para aproximadamente la mitad de las observaciones. Así que $\sum_iW_iU_i$ suma perturbaciones asimétricas hacia la derecha con peso positivo y perturbaciones asimétricas hacia la derecha con peso /negativo/, que al cambiarles el signo quedan asimétricas hacia la izquierda. Las dos asimetrías se compensan en buena medida, y el resultado sale casi simétrico.
 
 *** ¿Perturbación o regresor?
 
-Hay dos causas posibles y todavía no las hemos separado. Cuando el histograma salga torcido, ¿será por la distribución de la /perturbación/ o por la del /regresor/?
+Hay dos causas posibles y todavía no las hemos separado. Cuando el histograma salga asimétrico, ¿será por la distribución de la /perturbación/ o por la del /regresor/?
 
-Para separarlos hace falta cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y $\chi^2$ con un grado de libertad) con dos regresores: uno /equilibrado/ (las mismas doce viviendas reales de antes) y otro con una /observación dominante/, en el que once viviendas comparten el mismo valor y una se sale mucho del grupo.
+Para separarlos hace falta cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y $\chi^2$ con un grado de libertad) con dos regresores: uno /equilibrado/ (las mismas doce viviendas reales de antes) y otro con una /observación dominante/, en el que once viviendas comparten el mismo valor y una toma un valor muy alejado de ellas.
 
 Tres bloques. El primero recupera las mismas doce viviendas y define los dos regresores: =x_eq= es una copia de =rooms=; =series x_pal = 6= da el valor 6 a las doce observaciones y =x_pal[1] = 14= cambia solo la primera. El segundo es un bucle de 8000 vueltas con dos perturbaciones por réplica, normal y chi-cuadrado de un grado de libertad, y cuatro regresiones, una por cada combinación de perturbación y regresor; =store= guarda los cuatro coeficientes en =repDD.gdt=. El tercero, tras abrir ese fichero, calcula la media y la desviación típica de cada serie y la tabla de asimetrías, con =%8.3f= para alinear las columnas.
 
@@ -422,22 +422,22 @@ Y los dos histogramas de la columna de la derecha, los dos con el regresor de ob
 
 Lea la tabla por filas, que es donde está la respuesta:
 
-- /Fila de arriba (perturbación normal)/: la asimetría es prácticamente nula en las DOS columnas. Por muy extraño que sea el regresor, con perturbaciones normales $\hat\beta_2$ sale simétrico.
+- /Fila de arriba (perturbación normal)/: la asimetría es prácticamente nula en las DOS columnas. Por muy desequilibrado que sea el regresor, con perturbaciones normales $\hat\beta_2$ sale simétrico.
 - /Fila de abajo (perturbación $\chi^2$)/: la asimetría es pequeña con el regresor equilibrado y grande con el de observación dominante.
 
 De ahí la respuesta a la pregunta del epígrafe:
 
 #+begin_center
-/La asimetría procede de la distribución de la perturbación. El regresor no la crea: solo decide si sobrevive./
+/La asimetría procede de la distribución de la perturbación. El regresor no la crea: solo determina cuánta se conserva./
 #+end_center
 
 Que el regresor no pueda crearla se ve en la fórmula de la lección 11. En estos cuatro experimentos el regresor lo hemos /fijado nosotros/ (=x_eq= y =x_pal= se construyen una vez y no vuelven a tocarse dentro del bucle), de modo que los pesos son números: son los $w_i$ de la lección 7, proporcionales a $(x_i-\mu_{\boldsymbol x})$. Y entonces
 \[
 \hat\beta_2=\beta_2\,\mathit 1+\sum_iw_iU_i
 \]
-es, ahora sí, una auténtica /combinación lineal/ de las perturbaciones, con coeficientes que son números.[fn::Conviene no generalizar el atajo. En la lección 11 el regresor es aleatorio, los pesos $W_i$ son variables aleatorias, y no se convierten en números por condicionar en $\boldsymbol X$: lo que autoriza allí a sacarlos fuera de la esperanza es el Lema. Aquí el atajo es legítimo por otro motivo: el regresor está fijado de antemano, así que los $w_i$ son números desde el principio.] Si esas perturbaciones son normales, cualquier combinación lineal suya vuelve a ser normal, sean cuales sean los pesos. Por eso la fila de arriba es plana: el diseño del regresor no tiene por dónde introducir asimetría.
+es, ahora sí, una auténtica /combinación lineal/ de las perturbaciones, con coeficientes que son números.[fn::Conviene no generalizar este paso. En la lección 11 el regresor es aleatorio, los pesos $W_i$ son variables aleatorias, y no se convierten en números por condicionar en $\boldsymbol X$: lo que autoriza allí a sacarlos fuera de la esperanza es el Lema. Aquí el paso es legítimo por otro motivo: el regresor está fijado de antemano, así que los $w_i$ son números desde el principio.] Si esas perturbaciones son normales, cualquier combinación lineal suya vuelve a ser normal, sean cuales sean los pesos. Por eso la fila de arriba es prácticamente nula: el diseño del regresor no puede introducir asimetría.
 
-Lo que el regresor sí controla es /cuánta/ de la asimetría de $U$ llega al resultado. Con pesos repartidos, la suma mezcla muchas perturbaciones y sus asimetrías se compensan; con un peso que domina a los demás, $\hat\beta_2\approx\beta_2+W_1U_1$ y el estimador reproduce casi tal cual la forma de una sola perturbación.
+Lo que el regresor sí controla es /cuánta/ de la asimetría de $U$ llega al resultado. Con pesos repartidos, la suma mezcla muchas perturbaciones y sus asimetrías se compensan; con un peso que domina a los demás, $\hat\beta_2\approx\beta_2+W_1U_1$ y el estimador reproduce casi exactamente la forma de una sola perturbación.
 
 *** Recapitulando las dos preguntas
 
@@ -447,11 +447,11 @@ Conviene no confundir lo que hemos establecido con lo que solo hemos observado:
 |----------------------------+-------------------------------------+------------------------|
 | Media (insesgadez)         | No                                  | No                     |
 | Varianza                   | No                                  | Sí (a través de Sxx)   |
-| Forma                      | Sí                                  | Solo cuánto se nota    |
+| Forma                      | Sí                                  | Solo en qué medida     |
 
-Las dos primeras filas están /demostradas/ en la lección 11 y verificadas en la Actividad 1. La tercera es lo que acabamos de explorar experimentalmente, y es también la razón por la que la lección 11 se detuvo donde se detuvo: demostró exactamente lo que se podía demostrar sin suponer nada sobre la distribución de $U$. Todo lo que dependa de la forma, y los intervalos de confianza y los contrastes de hipótesis dependen de ella, exige un supuesto adicional. Ese supuesto, y lo que se puede hacer con él, es el asunto de la lección 12.
+Las dos primeras filas están /demostradas/ en la lección 11 y verificadas en la Actividad 1. La tercera es lo que acabamos de explorar experimentalmente, y es también la razón por la que la lección 11 se detuvo en la media y la varianza: demostró exactamente lo que se podía demostrar sin suponer nada sobre la distribución de $U$. Todo lo que dependa de la forma, y los intervalos de confianza y los contrastes de hipótesis dependen de ella, exige un supuesto adicional. Ese supuesto, y lo que se puede hacer con él, es el asunto de la lección 12.
 
-/Una observación/. Habrá notado una regularidad: la asimetría se diluye cuando hay muchas observaciones, o cuando ninguna domina. Hay un resultado general detrás de ese comportamiento, y explica por qué la econometría aplicada puede permitirse a menudo no preocuparse demasiado por la distribución de $U$. No lo vamos a abordar aquí: anótelo como pregunta pendiente para la próxima lección.
+/Una observación/. Habrá notado una regularidad: la asimetría se atenúa cuando hay muchas observaciones, o cuando ninguna domina. Hay un resultado general detrás de ese comportamiento, y explica por qué la econometría aplicada puede a menudo prescindir de supuestos sobre la distribución de $U$. No lo vamos a abordar aquí: anótelo como pregunta pendiente para la próxima lección.
 
 * Actividad 3 - Forzar los supuestos exactamente
 
@@ -531,7 +531,7 @@ y los pesos $W_i$ son proporcionales a $(X_i-\overline{X})$. Ahora bien, una vez
 /La dispersión de $\hat\beta_2$ no procede de ningún defecto de MCO. Procede de que, en una muestra real, la perturbación no es ortogonal al regresor; solo lo es en promedio./
 #+end_center
 
-Dicho de otro modo: si viviéramos en un mundo en el que cada muestra cumpliese los supuestos de forma exacta, MCO sería un instrumento perfecto y no haría falta ninguna inferencia estadística. Toda la teoría que viene a continuación (errores estándar, intervalos, contrastes) existe porque ese mundo no es el nuestro. Este experimento lo hace visible fabricándolo artificialmente.
+Dicho de otro modo: si viviéramos en un mundo en el que cada muestra cumpliese los supuestos de forma exacta, MCO recuperaría los parámetros exactamente y no haría falta ninguna inferencia estadística. Toda la teoría que viene a continuación (errores estándar, intervalos, contrastes) existe porque ese mundo no es el nuestro. Este experimento lo hace visible fabricándolo artificialmente.
 
 Es el caso del ejemplo de la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ era exactamente esto. Advertimos entonces que recuperar $\hat\beta_2=3$ exactamente ``no era lo habitual''. Ahora sabemos decir con precisión qué lo hacía posible, y podemos reproducirlo a voluntad.
 
@@ -541,7 +541,7 @@ Es el caso del ejemplo de la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ era
 1. Un compañero afirma: ``para que MCO sea insesgado hace falta que las perturbaciones sean normales''. A la vista de la Actividad 1, ¿qué le respondería? ¿En qué paso concreto de la demostración de la lección 11 se apoyaría?
 2. En la Actividad 2, con $n=506$ el histograma parecía normal aunque $U$ no lo fuera. ¿Diría entonces que la normalidad de $U$ es irrelevante para todo? Distinga entre lo que la práctica demuestra y lo que solo sugiere.
 3. ¿Por qué la varianza de $\hat\beta_2$ es cero en la Actividad 3? ¿Contradice eso la fórmula de la lección 11?
-4. En la Actividad 3 hemos ``hecho trampa'' construyendo perturbaciones ortogonales al regresor. ¿Podría un investigador hacer esa trampa con datos reales? ¿Por qué?
+4. En la Actividad 3 hemos forzado los supuestos construyendo perturbaciones ortogonales al regresor. ¿Podría un investigador hacer lo mismo con datos reales? ¿Por qué?
 5. Suponga que en una muestra real la perturbación resultara, por pura casualidad, casi ortogonal al regresor. ¿Sería su estimación especialmente buena? ¿Podría saberlo mirando los datos?
 
 /Para profundizar/:
@@ -564,13 +564,13 @@ Es el caso del ejemplo de la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ era
 
 1. /¿Hace falta normalidad para la insesgadez?/ No, y el experimento lo confirma: con perturbaciones uniformes y con perturbaciones muy asimétricas la media de las estimaciones sigue quedando en $\beta_2$. La razón está en la demostración de la lección 11: la insesgadez sale de tomar esperanza condicional en $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$, usar el lema para sacar los $W_i$ fuera, y aplicar $E[U_i\mid\boldsymbol X]=\mathit 0$. Ese supuesto habla de la /media condicional/ de $U$, no de su distribución. Una uniforme y una chi-cuadrado centrada tienen media condicional cero igual que una normal, y eso es cuanto se necesita.
 
-2. /¿Es irrelevante la normalidad?/ Hay que separar dos cosas. Lo que la práctica /demuestra/ es que la insesgadez y la fórmula de la varianza no requieren normalidad: se cumplen con las tres distribuciones ensayadas. Lo que la práctica solo /sugiere/, y no prueba, es algo sobre la forma: con muchas observaciones el histograma de $\hat\beta_2$ tiende a parecer una campana aunque $U$ no sea normal, mientras que con pocas observaciones y una perturbación muy asimétrica deja de parecerlo. De ahí no se puede concluir que la normalidad sobre. Puede concluirse, como mucho, que el papel de ese supuesto es más sutil de lo que parecía, y que hace falta un resultado teórico, que aquí no tenemos, para saber cuándo cabe prescindir de él.
+2. /¿Es irrelevante la normalidad?/ Hay que separar dos cosas. Lo que la práctica /demuestra/ es que la insesgadez y la fórmula de la varianza no requieren normalidad: se cumplen con las tres distribuciones ensayadas. Lo que la práctica solo /sugiere/, y no prueba, es algo sobre la forma: con muchas observaciones el histograma de $\hat\beta_2$ tiende a parecer una campana aunque $U$ no sea normal, mientras que con pocas observaciones y una perturbación muy asimétrica deja de parecerlo. De ahí no se puede concluir que la normalidad sea innecesaria. Puede concluirse, como mucho, que el papel de ese supuesto es más sutil de lo que parecía, y que hace falta un resultado teórico, que aquí no tenemos, para saber cuándo cabe prescindir de él.
 
 3. /Varianza cero/. Porque hemos construido cada perturbación de modo que $\sum_iw_iu_i=0$ exactamente en cada muestra, de forma que $\hat\beta_2=\beta_2$ siempre, sin variabilidad alguna. No contradice la fórmula de la lección 11, sino que ilustra su alcance: aquella fórmula calcula la varianza de $\hat\beta_2$ /bajo los supuestos del modelo/, entre los cuales está que $\boldsymbol U$ sea aleatoria con $E[U_i\mid\boldsymbol X]=\mathit 0$. Nuestras perturbaciones fabricadas no cumplen ese modelo: no son un sorteo libre, sino un sorteo al que después le hemos impuesto una restricción que depende de $\boldsymbol X$. Al condicionar el sorteo a esa restricción hemos salido del marco en el que la fórmula era válida.
 
 4. /¿Podría hacerse con datos reales?/ No. Para restar a $\boldsymbol u$ su proyección sobre los regresores hay que /conocer/ $\boldsymbol u$, y la perturbación es justamente lo que no se observa: sabemos $\boldsymbol y$ y sabemos $\boldsymbol x$, pero $\boldsymbol u$ solo existe en el modelo. Lo que sí observamos son los residuos $\boldsymbol{\mathop{\widehat e}}$, que por construcción /siempre/ son exactamente ortogonales a los regresores: es una identidad algebraica de MCO, no un supuesto. Precisamente por eso los residuos no sirven para detectar si la perturbación era o no ortogonal: lo son siempre, se cumpla o no el supuesto.
 
-5. /Una muestra afortunada/. Sí sería una estimación especialmente buena: si $\sum_iw_iu_i$ resultara casi nulo, $\hat\beta_2$ quedaría casi en $\beta_2$. Pero no hay forma de saberlo mirando los datos, por lo dicho en la respuesta anterior: la cantidad que habría que mirar, $\sum_iw_iu_i$, depende de $\boldsymbol u$, que es inobservable. Este es, en el fondo, el motivo de ser de toda la inferencia estadística: como nunca sabremos si nuestra muestra concreta fue afortunada o desafortunada, lo único que podemos hacer es cuantificar cuánta suerte cabe esperar, y eso es lo que mide un error estándar.
+5. /Una muestra favorable/. Sí sería una estimación especialmente buena: si $\sum_iw_iu_i$ resultara casi nulo, $\hat\beta_2$ quedaría casi en $\beta_2$. Pero no hay forma de saberlo mirando los datos, por lo dicho en la respuesta anterior: la cantidad que habría que mirar, $\sum_iw_iu_i$, depende de $\boldsymbol u$, que es inobservable. Este es el motivo de ser de toda la inferencia estadística: como nunca sabremos si en nuestra muestra concreta ese término resultó pequeño o grande, lo único que podemos hacer es cuantificar su dispersión esperada, y eso es lo que mide un error estándar.
 
 
 * COMMENT Banco de preguntas de reserva
