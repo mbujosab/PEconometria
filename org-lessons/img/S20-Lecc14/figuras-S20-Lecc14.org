@@ -38,12 +38,15 @@ azul, el residuo en gris, el ajuste en violeta.
   solapen con $\boldsymbol x_2$ (decisión del 2026-09-30; antes el ajuste era
   $(1;\,0{,}35)$ y en el panel de $70^\circ$ se superponían tres flechas
   horizontales). La caja de cada panel se pasa como argumento porque el de
-  $10^\circ$ necesita más sitio a la izquierda.
+  $10^\circ$ necesita más sitio a la izquierda; las cajas son ajustadas al
+  dibujo para no dejar blanco a los lados.
 
 Ambas se compilan como un único fichero con los paneles en fila (sin
-=convert=), y después se ensanchan (a 3800 px ambas) para que su proporción ancho/alto
-quede entre 4 y 4,4, como =AngulosContraste_fila= (4,3), y ocupen poco alto
-en pantalla.
+=convert=). =PartePropia= se ensancha después a 3800 px para que su proporción
+ancho/alto quede entre 4 y 4,4, como =AngulosContraste_fila= (4,3), y ocupe
+poco alto en pantalla. =ParalelogramoAplastado= no se ensancha: se recorta el
+blanco de los bordes (2200x729, proporción 3) para que la imagen se vea mayor
+en la transparencia (decisión del 2026-09-30; antes también iba a 3800 px).
 
 * Figuras con fuente tikz
 
@@ -60,8 +63,8 @@ en pantalla.
   \newcommand{\panel}[2]{%
   % #1 = angulo entre generadores; #2 = coef. numérico a de yhat; #3 = a' de yhat';
   % #4 = texto de la descomposición de yhat; #5 = texto de la de yhat'; #6 = título;
-  % #7 = borde izquierdo de la caja del panel
-  \newcommand{\panel}[7]{%
+  % #7 = borde izquierdo de la caja del panel; #8 = borde derecho
+  \newcommand{\panel}[8]{%
   \begin{tikzpicture}
     [scale=1.6,
      axis/.style={-,gray,very thin},
@@ -88,18 +91,18 @@ en pantalla.
     \fill[\Ajuste!60] (Yp) circle (0.035) node[anchor=south west,xshift=0.5mm]{$\boldsymbol{\mathop{\widehat y}}'$};
     % etiquetas
     \node[anchor=north west,font=\small,align=left] at ({#7+0.05},-0.15) {#4\\#5};
-    \node[anchor=south,font=\small,gray!60!black] at ({(#7+1.5)/2},1.35) {#6};
-    \path (#7,-0.9) rectangle (1.5,1.6);
+    \node[anchor=south,font=\small,gray!60!black] at ({(#7+#8)/2},1.3) {#6};
+    \path (#7,-0.85) rectangle (#8,1.55);
   \end{tikzpicture}}
 
   \panel{70}{-0.627}{-0.653}
     {$\boldsymbol{\mathop{\widehat y}}=-0{,}63\,\boldsymbol x_2+0{,}37\,\boldsymbol x_3$}
     {$\boldsymbol{\mathop{\widehat y}}'=-0{,}65\,\boldsymbol x_2+0{,}45\,\boldsymbol x_3$}
-    {generadores a $70^\circ$}{-1.6}\hspace{6mm}%
+    {generadores a $70^\circ$}{-1.2}{1.3}\hspace{3mm}%
   \panel{10}{-2.485}{-2.882}
     {$\boldsymbol{\mathop{\widehat y}}=-2{,}48\,\boldsymbol x_2+2{,}02\,\boldsymbol x_3$}
     {$\boldsymbol{\mathop{\widehat y}}'=-2{,}88\,\boldsymbol x_2+2{,}42\,\boldsymbol x_3$}
-    {generadores a $10^\circ$}{-3.1}
+    {generadores a $10^\circ$}{-3.05}{1.3}
 \end{document}
 #+END_SRC
 
@@ -174,7 +177,7 @@ convert PartePropia.png -gravity center -background white -extent 3800x PartePro
 *** Ajuste de la figura
 
 #+BEGIN_SRC bash :build yes
-convert ParalelogramoAplastado.png -gravity center -background white -extent 3800x ParalelogramoAplastado_fila.png
+convert ParalelogramoAplastado.png -trim +repage -bordercolor white -border 15 ParalelogramoAplastado_fila.png
 #+END_SRC
 
 * Trozos de código
