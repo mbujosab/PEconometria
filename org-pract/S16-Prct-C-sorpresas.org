@@ -130,7 +130,7 @@ Un solo bucle que hace tres experimentos por vuelta. Antes del bucle: el mundo a
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Tres perturbaciones
+#+NAME: BucleTresPerturbaciones
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
@@ -165,25 +165,38 @@ endloop
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
-<<Tres perturbaciones>>
+<<BucleTresPerturbaciones>>
 #+end_src
 
 Los dos bloques siguientes imprimen la teoría, con los escalares aún disponibles, y después, tras abrir =repC.gdt=, la media y la varianza (divisor $n$) de las tres series de estimaciones. Los formatos =%10.2f= y =%12.2f= reservan campos de anchura fija para que las columnas queden alineadas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /y ahora comparamos los tres casos con lo que predice la lección 11/:
-#+NAME: Comparacion tres teoria
+#+NAME: ComparacionTresTeoria
 #+begin_src gretl :eval no
 printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
 printf "beta_2     = %.4f\n", b2_true
 printf "Var[b2|X]  = %.2f   (desv. tipica %.2f)\n\n", var_teo, sqrt(var_teo)
 #+end_src
+#+latex: }
 
+#+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
+outfile --quiet comparacionTres.txt
+    <<ComparacionTresTeoria>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-C-sorpresas/comparacionTres.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: AbrirRepC
 #+begin_src gretl :eval no
 open "@workdir/repC.gdt" --quiet
 #+end_src
 
-#+NAME: Comparacion tres resultado
+#+NAME: ComparacionTresResultado
 #+begin_src gretl :eval no
 printf "=== LO QUE SALE DE %d REPLICAS, SEGUN COMO SEA LA PERTURBACION ===\n", $nobs
 printf "perturbacion normal    : media = %10.2f    varianza = %12.2f\n", mean(b_nor), sum((b_nor-mean(b_nor))^2)/$nobs
@@ -193,17 +206,14 @@ printf "perturbacion chi2(4)   : media = %10.2f    varianza = %12.2f\n", mean(b_
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
-outfile --quiet comparacionTres.txt
-    <<Comparacion tres teoria>>
-end outfile
-open "@workdir/repC.gdt" --quiet
-outfile --quiet --append comparacionTres.txt
-    <<Comparacion tres resultado>>
+<<AbrirRepC>>
+outfile --quiet comparacionTresResultado.txt
+    <<ComparacionTresResultado>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S16-Prct-C-sorpresas/comparacionTres.txt example
+#+include: ./S16-Prct-C-sorpresas/comparacionTresResultado.txt example
 #+latex: }
 
 *** Lo que debe observar
@@ -227,7 +237,7 @@ Que la media y la varianza no dependan de la distribución de $U$ no significa q
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Histograma chi grande
+#+NAME: HistogramaChiGrande
 #+begin_src gretl :eval no
 freq b_chi --normal
 #+end_src
@@ -250,7 +260,7 @@ Tres bloques. El primero reabre =hprice2=, recupera los parámetros y se queda c
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Chi pequeno datos
+#+NAME: ChiPequenoDatos
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
@@ -262,7 +272,7 @@ set seed 160
 smpl 12 --random
 #+end_src
 
-#+NAME: Chi pequeno bucle
+#+NAME: ChiPequenoBucle
 #+begin_src gretl :eval no
 set seed 99
 loop 4000 --progressive --quiet
@@ -274,11 +284,12 @@ loop 4000 --progressive --quiet
 endloop
 #+end_src
 
+#+NAME: AbrirRepCpeq
 #+begin_src gretl :eval no
 open "@workdir/repCpeq.gdt" --quiet
 #+end_src
 
-#+NAME: Chi pequeno resultado
+#+NAME: ChiPequenoResultado
 #+begin_src gretl :eval no
 scalar m_p = mean(b_peq)
 scalar s_p = sqrt(sum((b_peq-m_p)^2)/$nobs)
@@ -290,11 +301,11 @@ printf "  asimetria = %.3f\n", (sum((b_peq-m_p)^3)/$nobs)/s_p^3
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
-<<Chi pequeno datos>>
-<<Chi pequeno bucle>>
-open "@workdir/repCpeq.gdt" --quiet
+<<ChiPequenoDatos>>
+<<ChiPequenoBucle>>
+<<AbrirRepCpeq>>
 outfile --quiet chiPequeno.txt
-    <<Chi pequeno resultado>>
+    <<ChiPequenoResultado>>
 end outfile
 freq b_peq --normal --plot="@workdir/hist_chi_peq.png"
 #+end_src
@@ -328,7 +339,7 @@ Tres bloques. El primero recupera las mismas doce viviendas y define los dos reg
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Dos por dos datos
+#+NAME: DosPorDosDatos
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
@@ -343,7 +354,7 @@ series x_pal = 6            # regresor con una observacion dominante:
 x_pal[1]     = 14           #   once iguales y una que se sale
 #+end_src
 
-#+NAME: Dos por dos bucle
+#+NAME: DosPorDosBucle
 #+begin_src gretl :eval no
 set seed 99
 loop 8000 --progressive --quiet
@@ -370,11 +381,12 @@ loop 8000 --progressive --quiet
 endloop
 #+end_src
 
+#+NAME: AbrirRepDD
 #+begin_src gretl :eval no
 open "@workdir/repDD.gdt" --quiet
 #+end_src
 
-#+NAME: Dos por dos resultado
+#+NAME: DosPorDosResultado
 #+begin_src gretl :eval no
 scalar m1 = mean(eq_nor)
 scalar s1 = sqrt(sum((eq_nor-m1)^2)/$nobs)
@@ -392,11 +404,11 @@ printf "perturbacion CHI2(1)               %8.3f               %8.3f\n", (sum((e
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
-<<Dos por dos datos>>
-<<Dos por dos bucle>>
-open "@workdir/repDD.gdt" --quiet
+<<DosPorDosDatos>>
+<<DosPorDosBucle>>
+<<AbrirRepDD>>
 outfile --quiet dosPorDos.txt
-    <<Dos por dos resultado>>
+    <<DosPorDosResultado>>
 end outfile
 freq pal_nor --normal --plot="@workdir/hist_pal_nor.png"
 freq pal_chi --normal --plot="@workdir/hist_pal_chi.png"
@@ -463,7 +475,7 @@ Antes del bucle, el mundo artificial. En cada vuelta: =u0= es un sorteo normal e
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: U exacta bucle
+#+NAME: UExactaBucle
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
@@ -485,16 +497,30 @@ endloop
 
 #+end_src
 
-#+NAME: U exacta teoria
+#+NAME: UExactaTeoria
 #+begin_src gretl :eval no
 printf "beta_2 verdadero = %.6f\n", b2_true
 #+end_src
+#+latex: }
 
+#+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
+<<UExactaBucle>>
+outfile --quiet uExacta.txt
+    <<UExactaTeoria>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-C-sorpresas/uExacta.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: AbrirRepExacta
 #+begin_src gretl :eval no
 open "@workdir/repExacta.gdt" --quiet
 #+end_src
 
-#+NAME: U exacta resultado
+#+NAME: UExactaResultado
 #+begin_src gretl :eval no
 printf "media de las 2000 estimaciones = %.6f\n", mean(b_exa)
 printf "varianza de las estimaciones   = %.10f\n", sum((b_exa-mean(b_exa))^2)/$nobs
@@ -503,18 +529,14 @@ printf "minimo = %.6f    maximo = %.6f\n", min(b_exa), max(b_exa)
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
-<<U exacta bucle>>
-outfile --quiet uExacta.txt
-    <<U exacta teoria>>
-end outfile
-open "@workdir/repExacta.gdt" --quiet
-outfile --quiet --append uExacta.txt
-    <<U exacta resultado>>
+<<AbrirRepExacta>>
+outfile --quiet uExactaResultado.txt
+    <<UExactaResultado>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S16-Prct-C-sorpresas/uExacta.txt example
+#+include: ./S16-Prct-C-sorpresas/uExactaResultado.txt example
 #+latex: }
 
 *** Lo que debe observar

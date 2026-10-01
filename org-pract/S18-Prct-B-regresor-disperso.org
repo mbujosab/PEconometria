@@ -120,7 +120,7 @@ Dos bloques. El primero crea un conjunto de doce observaciones de sección cruza
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Datos concentrado
+#+NAME: DatosConcentrado
 #+begin_src gretl :eval no
 nulldata 12
 setobs 1 1 --cross-section
@@ -130,7 +130,7 @@ series y_c = {35.045, 33.025, 34.435, 32.415, 35.365, 35.975, \
               34.655, 34.055, 36.505, 35.925, 35.495, 37.105}'
 #+end_src
 
-#+NAME: Ajuste concentrado
+#+NAME: AjusteConcentrado
 #+begin_src gretl :eval no
 ols y_c const x_c
 scalar tc = critical(t, $df, 0.025)
@@ -141,9 +141,9 @@ printf "IC 95%%: [%.2f ; %.2f]\n", $coeff(x_c) - tc*$stderr(x_c), $coeff(x_c) + 
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S18-Prct-B-regresor-disperso.inp :eval no :exports none :noweb yes
-<<Datos concentrado>>
+<<DatosConcentrado>>
 outfile --quiet concentrado.txt
-    <<Ajuste concentrado>>
+    <<AjusteConcentrado>>
 end outfile
 #+end_src
 
@@ -166,22 +166,35 @@ Tres bloques. El primero crea el regresor disperso, con pasos de $5$, y su regre
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Datos disperso
+#+NAME: DatosDisperso
 #+begin_src gretl :eval no
 series x_d = 22.5 + 5*(index - 1)
 series y_d = {22.670, 22.900, 26.560, 26.790, 31.990, 34.850, \
               35.780, 37.430, 42.130, 43.800, 45.620, 49.480}'
 #+end_src
 
-#+NAME: Ajuste disperso
+#+NAME: AjusteDisperso
 #+begin_src gretl :eval no
 ols y_d const x_d
 printf "\n||x - xbar|| = %.4f    s = %.4f    ee = s/||x - xbar|| = %.4f  (Gretl: %.4f)\n", sqrt(sum((x_d-mean(x_d))^2)), $sigma, $sigma/sqrt(sum((x_d-mean(x_d))^2)), $stderr(x_d)
 printf "t = %.2f   (t_c al 5%% = %.3f)\n", $coeff(x_d)/$stderr(x_d), tc
 printf "IC 95%%: [%.2f ; %.2f]\n", $coeff(x_d) - tc*$stderr(x_d), $coeff(x_d) + tc*$stderr(x_d)
 #+end_src
+#+latex: }
 
-#+NAME: Mismas perturbaciones
+#+begin_src gretl :tangle guiones/S18-Prct-B-regresor-disperso.inp :eval no :exports none :noweb yes
+<<DatosDisperso>>
+outfile --quiet disperso.txt
+    <<AjusteDisperso>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S18-Prct-B-regresor-disperso/disperso.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: MismasPerturbaciones
 #+begin_src gretl :eval no
 series u_c = y_c - 10 - 0.5*x_c        # perturbacion del panel concentrado
 series u_d = y_d - 10 - 0.5*x_d        # perturbacion del panel disperso
@@ -190,15 +203,13 @@ printf "\nmayor diferencia entre las dos series de perturbaciones: %.6f\n", max(
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S18-Prct-B-regresor-disperso.inp :eval no :exports none :noweb yes
-<<Datos disperso>>
-outfile --quiet disperso.txt
-    <<Ajuste disperso>>
-    <<Mismas perturbaciones>>
+outfile --quiet mismasPerturbaciones.txt
+    <<MismasPerturbaciones>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S18-Prct-B-regresor-disperso/disperso.txt example
+#+include: ./S18-Prct-B-regresor-disperso/mismasPerturbaciones.txt example
 #+latex: }
 
 *** Lo que debe observar
@@ -215,7 +226,7 @@ Reestimamos los dos ajustes con =--quiet= para no reimprimir las tablas y, tras 
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Contrastes B
+#+NAME: ContrastesB
 #+begin_src gretl :eval no
 ols y_c const x_c --quiet
 scalar t_cierta_c = ($coeff(x_c) - 0.5)/$stderr(x_c)
@@ -233,7 +244,7 @@ printf "H0: beta_2 = 0   (falsa)    t = %6.2f    t = %6.2f\n", t_falsa_c,  t_fal
 
 #+begin_src gretl :tangle guiones/S18-Prct-B-regresor-disperso.inp :eval no :exports none :noweb yes
 outfile --quiet contrastes.txt
-    <<Contrastes B>>
+    <<ContrastesB>>
 end outfile
 #+end_src
 

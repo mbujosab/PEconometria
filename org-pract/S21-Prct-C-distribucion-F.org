@@ -140,46 +140,41 @@ loop R --progressive --quiet
     store "@workdir/replicasF.gdt" Fst numer denom
 endloop
 open "@workdir/replicasF.gdt" --quiet
+#+end_src
+#+NAME: BajoH0Resultados
+#+begin_src gretl :eval no
+scalar sig = 5000
+scalar Fc506 = critical(F, 3, 502, 0.05)
+printf "H0 cierta, n = 506, k = 4, %d replicas, sigma^2 = %.3e\n", $nobs, sig^2
+printf "media de SEC/(k-1) = %.4e\n", mean(numer)
+printf "media de SRC/(n-k) = %.4e\n", mean(denom)
+printf "media de F         = %.3f    mediana = %.3f\n", mean(Fst), median(Fst)
 printf "fraccion de F > F_c(3,502) = %.4f\n", mean(Fst > critical(F, 3, 502, 0.05))
-freq Fst
+printf "cuantil empirico 95%% de F  = %.3f   (F_c = %.3f)\n", quantile(Fst, 0.95), Fc506
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none
-open hprice2.gdt --quiet
-scalar b1  = 20000
-scalar sig = 5000
-scalar R   = 2000
-scalar Fc506 = critical(F, 3, 502, 0.05)
-set seed 20261119
-loop R --progressive --quiet
-    series u = normal(0, sig)
-    series y = b1 + u                       # H0 cierta: rooms, nox y stratio no intervienen
-    ols y const rooms nox stratio --quiet
-    scalar Fst   = $Fstat
-    scalar SRC   = $ess
-    scalar SEC   = $ess*$rsq/(1-$rsq)      # SEC = STC - SRC, con STC = SRC/(1-R^2)
-    scalar numer = SEC/3
-    scalar denom = SRC/502
-    store "@workdir/replicasF.gdt" Fst numer denom
-endloop
-open "@workdir/replicasF.gdt" --quiet
-scalar sig = 5000
-scalar Fc506 = critical(F, 3, 502, 0.05)
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none :noweb yes
+<<BajoH0>>
 outfile --quiet bajoH0.txt
-    printf "H0 cierta, n = 506, k = 4, %d replicas, sigma^2 = %.3e\n", $nobs, sig^2
-    printf "media de SEC/(k-1) = %.4e\n", mean(numer)
-    printf "media de SRC/(n-k) = %.4e\n", mean(denom)
-    printf "media de F         = %.3f    mediana = %.3f\n", mean(Fst), median(Fst)
-    printf "fraccion de F > F_c(3,502) = %.3f = %.4f   (nominal 0,05)\n", Fc506, mean(Fst > Fc506)
-    printf "cuantil empirico 95%% de F  = %.3f   (F_c = %.3f)\n", quantile(Fst, 0.95), Fc506
+    <<BajoH0Resultados>>
 end outfile
-freq Fst --plot="@workdir/histF.png"
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
 #+include: ./S21-Prct-C-distribucion-F/bajoH0.txt example
 #+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: HistogramaF
+#+begin_src gretl :eval no
+freq Fst
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none
+freq Fst --plot="@workdir/histF.png"
+#+end_src
 
 #+attr_latex: :width 0.7\textwidth
 #+attr_html: :width 550px
@@ -198,7 +193,7 @@ Igual que antes, con dos cambios. =smpl 20 --random= reduce la muestra a veinte 
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: n20
+#+NAME: N20
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 scalar b1  = 20000
@@ -216,42 +211,38 @@ loop R --progressive --quiet
     store "@workdir/replicasF20.gdt" F20
 endloop
 open "@workdir/replicasF20.gdt" --quiet
+#+end_src
+#+NAME: N20Resultados
+#+begin_src gretl :eval no
+scalar Fc20 = critical(F, 3, 16, 0.05)
+printf "H0 cierta, n = 20 (n-k = 16), %d replicas\n", $nobs
+printf "media de F = %.3f    mediana = %.3f    cuantil 95%% = %.3f   (F_c(3,16) = %.3f)\n", mean(F20), median(F20), quantile(F20, 0.95), Fc20
 printf "fraccion de F > F_c(3,16)  = %.4f\n", mean(F20 > Fc20)
 printf "fraccion de F > F_c(3,502) = %.4f\n", mean(F20 > critical(F, 3, 502, 0.05))
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none
-# --- n = 20 ---
-open hprice2.gdt --quiet
-scalar b1  = 20000
-scalar sig = 5000
-scalar R   = 2000
-set seed 20261119
-smpl 20 --random
-scalar Fc20 = critical(F, 3, 16, 0.05)
-set seed 20261119
-loop R --progressive --quiet
-    series u = normal(0, sig)
-    series y = b1 + u
-    ols y const rooms nox stratio --quiet
-    scalar F20 = $Fstat
-    store "@workdir/replicasF20.gdt" F20
-endloop
-open "@workdir/replicasF20.gdt" --quiet
-scalar Fc20 = critical(F, 3, 16, 0.05)
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none :noweb yes
+<<N20>>
 outfile --quiet n20.txt
-    printf "H0 cierta, n = 20 (n-k = 16), %d replicas\n", $nobs
-    printf "media de F = %.3f    mediana = %.3f    cuantil 95%% = %.3f   (F_c(3,16) = %.3f)\n", mean(F20), median(F20), quantile(F20, 0.95), Fc20
-    printf "fraccion de F > F_c(3,16) = %.4f   (nominal 0,05)\n", mean(F20 > Fc20)
-    printf "fraccion de F > F_c(3,502) = %.4f  <- si se usara el valor critico de n = 506\n", mean(F20 > critical(F, 3, 502, 0.05))
+    <<N20Resultados>>
 end outfile
-freq F20 --plot="@workdir/histF20.png"
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
 #+include: ./S21-Prct-C-distribucion-F/n20.txt example
 #+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: HistogramaF20
+#+begin_src gretl :eval no
+freq F20
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none
+freq F20 --plot="@workdir/histF20.png"
+#+end_src
 
 #+attr_latex: :width 0.7\textwidth
 #+attr_html: :width 550px
@@ -270,9 +261,12 @@ Ahora =y= se construye con =nox= dentro, con el coeficiente =bn=, y el bucle ya 
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Deteccion
+#+NAME: AbrirDeteccion
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
+#+end_src
+#+NAME: Deteccion
+#+begin_src gretl :eval no
 scalar b1  = 20000
 scalar sig = 5000
 scalar R   = 2000
@@ -280,6 +274,7 @@ scalar bn = -800                         # efecto pequeno de nox; rooms y strati
 set seed 20261119
 smpl 20 --random
 scalar Fc = critical(F, 3, $nobs-4, 0.05)
+set seed 20261119
 scalar rech = 0
 loop R --quiet
     series u = normal(0, sig)
@@ -289,40 +284,23 @@ loop R --quiet
 endloop
 printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rech/R
 smpl full                                # y lo mismo con n = 506
+scalar Fc = critical(F, 3, $nobs-4, 0.05)
+set seed 20261119
+scalar rech = 0
+loop R --quiet
+    series u = normal(0, sig)
+    series y = b1 + bn*nox + u
+    ols y const rooms nox stratio --quiet
+    rech += ($Fstat > Fc)
+endloop
+printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rech/R
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none
-# --- H0 falsa por poco: n = 20 y n = 506 ---
-open hprice2.gdt --quiet
-scalar b1 = 20000
-scalar sig = 5000
-scalar R = 2000
-scalar bn = -800                         # efecto pequeno de nox; rooms y stratio siguen sin intervenir
+#+begin_src gretl :tangle guiones/S21-Prct-C-distribucion-F.inp :eval no :exports none :noweb yes
+<<AbrirDeteccion>>
 outfile --quiet deteccion.txt
-    set seed 20261119
-    smpl 20 --random
-    scalar Fc = critical(F, 3, $nobs-4, 0.05)
-    set seed 20261119
-    scalar rech = 0
-    loop R --quiet
-        series u = normal(0, sig)
-        series y = b1 + bn*nox + u
-        ols y const rooms nox stratio --quiet
-        rech += ($Fstat > Fc)
-    endloop
-    printf "H0 falsa (beta_nox = %d), n = %3d: rechazos = %.3f\n", bn, $nobs, rech/R
-    smpl full
-    scalar Fc = critical(F, 3, $nobs-4, 0.05)
-    set seed 20261119
-    scalar rech = 0
-    loop R --quiet
-        series u = normal(0, sig)
-        series y = b1 + bn*nox + u
-        ols y const rooms nox stratio --quiet
-        rech += ($Fstat > Fc)
-    endloop
-    printf "H0 falsa (beta_nox = %d), n = %3d: rechazos = %.3f\n", bn, $nobs, rech/R
+    <<Deteccion>>
 end outfile
 #+end_src
 

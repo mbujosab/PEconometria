@@ -118,46 +118,32 @@ Tres estimaciones seguidas con =ols=, sin =--quiet= para ver las tres tablas: el
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
-#+NAME: Completo
+#+NAME: Abrir
 #+begin_src gretl :eval no
 open data4-1.gdt --quiet
+#+end_src
+#+NAME: Completo
+#+begin_src gretl :eval no
 ols price const sqft bedrms baths
 scalar SRC = $ess
 scalar df  = $df
 scalar s2  = SRC/df
+printf "t_c al 5%% (%d g.l.) = %.3f\n", df, critical(t, df, 0.025)
 ols price const sqft bedrms
 ols price const sqft
 scalar SRCr = $ess
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :eval no :exports none
-open data4-1.gdt --quiet
+#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :eval no :exports none :noweb yes
+<<Abrir>>
 outfile --quiet completo.txt
-    ols price const sqft bedrms baths
-    scalar n = $nobs
-    scalar SRC = $ess
-    scalar s2 = SRC/$df
-    scalar df = $df
-    printf "\nn = %d   k = 4   n-k = %d\n", n, df
-    printf "t_c al 5%% (%d g.l.) = %.3f\n", df, critical(t, df, 0.025)
-end outfile
-outfile --quiet unaAuna.txt
-    ols price const sqft bedrms baths --quiet
-    scalar t_baths  = $coeff(baths)/$stderr(baths)
-    scalar t_bedrms = $coeff(bedrms)/$stderr(bedrms)
-    printf "Modelo completo: t(bedrms) = %.3f   t(baths) = %.3f   (t_c = %.3f)\n", t_bedrms, t_baths, critical(t, df, 0.025)
-    ols price const sqft bedrms --quiet
-    printf "Sin baths:       t(bedrms) = %.3f   (t_c = %.3f)   SRC = %.1f\n", $coeff(bedrms)/$stderr(bedrms), critical(t, $df, 0.025), $ess
-    ols price const sqft --quiet
-    printf "Sin baths ni bedrms:  SRC_r = %.1f   coef(sqft) = %.4f   ee = %.4f   t = %.2f\n", $ess, $coeff(sqft), $stderr(sqft), $coeff(sqft)/$stderr(sqft)
-    scalar SRCr = $ess
+    <<Completo>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
 #+include: ./S21-Prct-B-ramanathan-conjunta/completo.txt example
-#+include: ./S21-Prct-B-ramanathan-conjunta/unaAuna.txt example
 #+latex: }
 
 *** Lo que debe observar
@@ -177,6 +163,7 @@ La primera línea construye el $F$ con $q=2$ a partir de los escalares =SRC=, =S
 #+NAME: Conjunta
 #+begin_src gretl :eval no
 scalar Fj = ((SRCr - SRC)/2)/s2
+printf "SRC completo = %.1f   SRC_r = %.1f   aumento = %.1f\n", SRC, SRCr, SRCr - SRC
 printf "F(2,10) = %.3f   F_c = %.3f   valor p = %.4f\n", Fj, critical(F, 2, df, 0.05), pvalue(F, 2, df, Fj)
 ols price const sqft bedrms baths --quiet
 restrict
@@ -186,25 +173,14 @@ end restrict
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :eval no :exports none
+#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :eval no :exports none :noweb yes
 outfile --quiet conjunta.txt
-    scalar Fj = ((SRCr - SRC)/2)/s2
-    printf "H0: beta_bedrms = beta_baths = 0\n"
-    printf "SRC completo = %.1f   SRC_r = %.1f   aumento = %.1f\n", SRC, SRCr, SRCr - SRC
-    printf "F(2,%d) = %.3f   F_c al 5%% = %.3f   valor p = %.4f\n", df, Fj, critical(F, 2, df, 0.05), pvalue(F, 2, df, Fj)
-end outfile
-ols price const sqft bedrms baths --quiet
-outfile --quiet restrictConjunta.txt
-    restrict
-        b[bedrms] = 0
-        b[baths] = 0
-    end restrict
+    <<Conjunta>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
 #+include: ./S21-Prct-B-ramanathan-conjunta/conjunta.txt example
-#+include: ./S21-Prct-B-ramanathan-conjunta/restrictConjunta.txt example
 #+latex: }
 
 *** Lo que debe observar
@@ -218,7 +194,7 @@ $F=0{,}47$ con $F_c(2,10)=4{,}10$: quitar los dos regresores a la vez sube la $\
 
 Los intervalos al $95\%$ de =bedrms= y =baths= definen un rectángulo en el plano $(\beta_{\text{bedrms}},\beta_{\text{baths}})$. Cabe pensar que el $F$ no rechaza ningún par de valores dentro del rectángulo y rechaza todos los de fuera. Compruébelo en las cuatro esquinas: cada esquina es un par de valores que está, a la vez, en el borde de los dos intervalos.
 
-Con =critical= se obtiene $t_c$, y con él los extremos de los dos intervalos al $95\%$: =iL= e =iR= para =bedrms=, =jL= y =jR= para =baths=. Después, un =restrict --quiet= fija a la vez los dos coeficientes en una esquina del rectángulo, y =$test= recoge el $F$ de ese contraste en el escalar =F_LL=. Falta repetirlo para las otras tres esquinas, cambiando los escalares de la derecha; el guion completo lo hace y calcula además la correlación entre los dos estimadores a partir de =$vcv=.
+Con =critical= se obtiene $t_c$, y con él los extremos de los dos intervalos al $95\%$: =iL= e =iR= para =bedrms=, =jL= y =jR= para =baths=. =corrEst= es la correlación entre los dos estimadores, leída en =$vcv= (filas y columnas 3 y 4, los coeficientes de =bedrms= y =baths=). Después, cuatro bloques =restrict --quiet= fijan a la vez los dos coeficientes en cada esquina del rectángulo, y =$test= recoge el $F$ de cada contraste en los escalares =F_LL=, =F_LR=, =F_RL= y =F_RR= (la primera letra es el extremo de =bedrms=, la segunda el de =baths=). El segundo bloque imprime los dos intervalos, el valor crítico de la $F$ con $2$ y $10$ grados de libertad, el $F$ y el valor $p$ de cada esquina, y la correlación.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -230,23 +206,7 @@ scalar iL = $coeff(bedrms) - tc*$stderr(bedrms)
 scalar iR = $coeff(bedrms) + tc*$stderr(bedrms)
 scalar jL = $coeff(baths)  - tc*$stderr(baths)
 scalar jR = $coeff(baths)  + tc*$stderr(baths)
-restrict --quiet
-    b[bedrms] = iL
-    b[baths] = jL
-end restrict
-scalar F_LL = $test          # y lo mismo con las otras tres esquinas
-#+end_src
-#+latex: }
-
-#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :eval no :exports none
-ols price const sqft bedrms baths --quiet
-scalar tc = critical(t, $df, 0.025)
-scalar iL = $coeff(bedrms) - tc*$stderr(bedrms)
-scalar iR = $coeff(bedrms) + tc*$stderr(bedrms)
-scalar jL = $coeff(baths)  - tc*$stderr(baths)
-scalar jR = $coeff(baths)  + tc*$stderr(baths)
 scalar corrEst = $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
-# el F de fijar a la vez los dos coeficientes en cada esquina del rectangulo
 restrict --quiet
     b[bedrms] = iL
     b[baths] = jL
@@ -267,15 +227,24 @@ restrict --quiet
     b[baths] = jR
 end restrict
 scalar F_RR = $test
+#+end_src
+#+NAME: EsquinasResultados
+#+begin_src gretl :eval no
+printf "IC 95%% bedrms: [%.2f ; %.2f]    IC 95%% baths: [%.2f ; %.2f]\n", iL, iR, jL, jR
+printf "F_c(2,10) al 5%% = %.3f\n", critical(F, 2, 10, 0.05)
+printf "Contraste conjunto de cada esquina del rectangulo:\n"
+printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iL, jL, F_LL, pvalue(F, 2, 10, F_LL)
+printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iL, jR, F_LR, pvalue(F, 2, 10, F_LR)
+printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jL, F_RL, pvalue(F, 2, 10, F_RL)
+printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jR, F_RR, pvalue(F, 2, 10, F_RR)
+printf "Correlacion entre los estimadores de bedrms y baths (de la matriz de varianzas): %.3f\n", corrEst
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-B-ramanathan-conjunta.inp :eval no :exports none :noweb yes
+<<Esquinas>>
 outfile --quiet esquinas.txt
-    printf "IC 95%% bedrms: [%.2f ; %.2f]    IC 95%% baths: [%.2f ; %.2f]\n", iL, iR, jL, jR
-    printf "F_c(2,10) al 5%% = %.3f\n", critical(F, 2, 10, 0.05)
-    printf "Contraste conjunto de cada esquina del rectangulo:\n"
-    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iL, jL, F_LL, pvalue(F, 2, 10, F_LL)
-    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iL, jR, F_LR, pvalue(F, 2, 10, F_LR)
-    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jL, F_RL, pvalue(F, 2, 10, F_RL)
-    printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jR, F_RR, pvalue(F, 2, 10, F_RR)
-    printf "Correlacion entre los estimadores de bedrms y baths (de la matriz de varianzas): %.3f\n", corrEst
+    <<EsquinasResultados>>
 end outfile
 #+end_src
 

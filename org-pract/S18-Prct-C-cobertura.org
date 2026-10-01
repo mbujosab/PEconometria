@@ -124,7 +124,7 @@ Tres bloques. El primero construye el mundo (doce observaciones, el regresor dis
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Mundo C
+#+NAME: MundoC
 #+begin_src gretl :eval no
 nulldata 12
 setobs 1 1 --cross-section
@@ -152,6 +152,7 @@ loop R --progressive --quiet
 endloop
 #+end_src
 
+#+NAME: AbrirReplicas
 #+begin_src gretl :eval no
 open "@workdir/replicasIC.gdt" --quiet
 scalar tc = critical(t, 10, 0.025)            # al abrir otro fichero Gretl olvida los escalares
@@ -167,10 +168,8 @@ printf "Rechazos de la H0 cierta al 5%%             : %.4f   (objetivo: 0,05)\n"
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S18-Prct-C-cobertura.inp :eval no :exports none :noweb yes
-<<Mundo C>>
-open "@workdir/replicasIC.gdt" --quiet
-scalar tc = critical(t, 10, 0.025)
-scalar zc = 1.96
+<<MundoC>>
+<<AbrirReplicas>>
 outfile --quiet cobertura.txt
     <<Cobertura>>
 end outfile
@@ -236,7 +235,7 @@ Los dos primeros =printf= comparan la cobertura con =tc= y con $1{,}96$ (medias 
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Precio sigma
+#+NAME: PrecioSigma
 #+begin_src gretl :eval no
 printf "Cobertura del intervalo con t_c = %.3f : %.4f\n", tc, mean(dentro)
 printf "Cobertura del intervalo con 1,96       : %.4f\n", mean(dentroZ)
@@ -281,7 +280,7 @@ Tres bloques. El primero crea un conjunto de 120 observaciones (=--preserve= con
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Deteccion datos
+#+NAME: DeteccionDatos
 #+begin_src gretl :eval no
 nulldata 120 --preserve
 setobs 1 1 --cross-section
@@ -293,7 +292,7 @@ scalar R = 4000
 scalar c_falsa = 0.47
 #+end_src
 
-#+NAME: Deteccion n12
+#+NAME: DeteccionN12
 #+begin_src gretl :eval no
 smpl 1 12                                    # una sola vuelta del patron: n = 12
 scalar tc = critical(t, $nobs - 2, 0.025)
@@ -309,8 +308,21 @@ loop R --quiet
 endloop
 printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura del IC = %.3f\n", $nobs, tc, rech/R, cov/R
 #+end_src
+#+latex: }
 
-#+NAME: Deteccion n120
+#+begin_src gretl :tangle guiones/S18-Prct-C-cobertura.inp :eval no :exports none :noweb yes
+<<DeteccionDatos>>
+outfile --quiet deteccion.txt
+    <<DeteccionN12>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S18-Prct-C-cobertura/deteccion.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: DeteccionN120
 #+begin_src gretl :eval no
 smpl full                                    # las diez vueltas: n = 120
 scalar tc = critical(t, $nobs - 2, 0.025)
@@ -329,15 +341,13 @@ printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S18-Prct-C-cobertura.inp :eval no :exports none :noweb yes
-<<Deteccion datos>>
-outfile --quiet deteccion.txt
-    <<Deteccion n12>>
-    <<Deteccion n120>>
+outfile --quiet deteccionN120.txt
+    <<DeteccionN120>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S18-Prct-C-cobertura/deteccion.txt example
+#+include: ./S18-Prct-C-cobertura/deteccionN120.txt example
 #+latex: }
 
 *** Lo que debe observar
@@ -358,7 +368,7 @@ Dos bloques con la misma estructura que los de la Actividad 3, cambiando la pert
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Chi2 n12
+#+NAME: Chi2N12
 #+begin_src gretl :eval no
 smpl 1 12
 scalar tc = critical(t, $nobs - 2, 0.025)
@@ -374,8 +384,20 @@ loop R --quiet
 endloop
 printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 cierta = %.4f\n", $nobs, cov/R, rech0/R
 #+end_src
+#+latex: }
 
-#+NAME: Chi2 n120
+#+begin_src gretl :tangle guiones/S18-Prct-C-cobertura.inp :eval no :exports none :noweb yes
+outfile --quiet apendice.txt
+    <<Chi2N12>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S18-Prct-C-cobertura/apendice.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: Chi2N120
 #+begin_src gretl :eval no
 smpl full
 scalar tc = critical(t, $nobs - 2, 0.025)
@@ -394,14 +416,13 @@ printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S18-Prct-C-cobertura.inp :eval no :exports none :noweb yes
-outfile --quiet apendice.txt
-    <<Chi2 n12>>
-    <<Chi2 n120>>
+outfile --quiet apendiceN120.txt
+    <<Chi2N120>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S18-Prct-C-cobertura/apendice.txt example
+#+include: ./S18-Prct-C-cobertura/apendiceN120.txt example
 #+latex: }
 
 *** Lo que debe observar

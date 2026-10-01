@@ -131,7 +131,7 @@ Dos bloques. El primero repite el mundo artificial de la práctica A y añade do
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Preparacion datos
+#+NAME: PreparacionDatos
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 
@@ -162,7 +162,7 @@ printf "\nVar[b2 | X] que predice la leccion 11 = %.1f   (desv. tipica %.1f)\n",
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
-<<Preparacion datos>>
+<<PreparacionDatos>>
 outfile --quiet preparacion.txt
     <<Preparacion>>
 end outfile
@@ -185,7 +185,7 @@ Es el experimento de la práctica anterior, sin más cambio que el tamaño muest
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Experimento A
+#+NAME: ExperimentoA
 #+begin_src gretl :eval no
 scalar R = 4000
 
@@ -201,7 +201,7 @@ endloop
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
-<<Experimento A>>
+<<ExperimentoA>>
 #+end_src
 
 
@@ -211,7 +211,7 @@ Ahora añadimos una línea dentro del bucle: antes de construir el regresando, s
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Experimento B
+#+NAME: ExperimentoB
 #+begin_src gretl :eval no
 set seed 160
 loop R --progressive --quiet
@@ -227,7 +227,7 @@ endloop
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
-<<Experimento B>>
+<<ExperimentoB>>
 #+end_src
 
 Guardamos también =Sxx_i=, la suma de cuadrados en desviaciones del regresor /de cada réplica/. En el experimento A ese número era una constante; aquí es una variable aleatoria más, y en ella está la diferencia entre los dos experimentos.
@@ -239,29 +239,56 @@ Tres bloques de =printf=. El primero usa los escalares teóricos. El segundo abr
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Comparacion teoria
+#+NAME: ComparacionTeoria
 #+begin_src gretl :eval no
 printf "=== LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===\n"
 printf "beta_2 verdadero  = %.2f\n", b2_true
 printf "Var[b2 | X]       = %.1f\n\n", var_cond
 #+end_src
+#+latex: }
 
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+outfile --quiet comparacion.txt
+    <<ComparacionTeoria>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-B-condicionar/comparacion.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: AbrirRepFijo
 #+begin_src gretl :eval no
 open "@workdir/repFijo.gdt" --quiet
 #+end_src
 
-#+NAME: Comparacion A
+#+NAME: ComparacionA
 #+begin_src gretl :eval no
 printf "=== EXPERIMENTO A: regresor FIJO ===\n"
 printf "media de b2hat    = %.2f\n", mean(b_fijo)
 printf "varianza de b2hat = %.1f\n\n", sum((b_fijo-mean(b_fijo))^2)/$nobs
 #+end_src
+#+latex: }
 
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+<<AbrirRepFijo>>
+outfile --quiet comparacionA.txt
+    <<ComparacionA>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-B-condicionar/comparacionA.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: AbrirRepVar
 #+begin_src gretl :eval no
 open "@workdir/repVar.gdt" --quiet
 #+end_src
 
-#+NAME: Comparacion B
+#+NAME: ComparacionB
 #+begin_src gretl :eval no
 printf "=== EXPERIMENTO B: regresor REGENERADO en cada replica ===\n"
 printf "media de b2hat    = %.2f\n", mean(b_var)
@@ -272,21 +299,14 @@ printf "  medio = %.4f    minimo = %.4f    maximo = %.4f\n", mean(Sxx_i), min(Sx
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
-outfile --quiet comparacion.txt
-    <<Comparacion teoria>>
-end outfile
-open "@workdir/repFijo.gdt" --quiet
-outfile --quiet --append comparacion.txt
-    <<Comparacion A>>
-end outfile
-open "@workdir/repVar.gdt" --quiet
-outfile --quiet --append comparacion.txt
-    <<Comparacion B>>
+<<AbrirRepVar>>
+outfile --quiet comparacionB.txt
+    <<ComparacionB>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S16-Prct-B-condicionar/comparacion.txt example
+#+include: ./S16-Prct-B-condicionar/comparacionB.txt example
 #+latex: }
 
 *** Lo que debe observar
@@ -312,7 +332,7 @@ Repita el experimento con cuatrocientas viviendas en lugar de doce, dejando todo
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Muestra grande datos
+#+NAME: MuestraGrandeDatos
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
@@ -343,18 +363,32 @@ endloop
 
 #+end_src
 
-#+NAME: Muestra grande teoria
+#+NAME: MuestraGrandeTeoria
 #+begin_src gretl :eval no
 printf "Con n = 400:  Sxx observado = %.2f   (tipico: %.2f)\n", Sxx_obs, ($nobs-1)*sd_r^2
 printf "             Var[b2|X] condicional teorica = %.2f\n", var_cond
 printf "             cociente Sxx observado/tipico = %.3f  <- lo que cabe esperar de var_B/var_A\n", Sxx_obs/(($nobs-1)*sd_r^2)
 #+end_src
+#+latex: }
 
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+<<MuestraGrandeDatos>>
+outfile --quiet muestraGrande.txt
+    <<MuestraGrandeTeoria>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-B-condicionar/muestraGrande.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: AbrirRepGrande
 #+begin_src gretl :eval no
 open "@workdir/repGrande.gdt" --quiet
 #+end_src
 
-#+NAME: Muestra grande resultado
+#+NAME: MuestraGrandeResultado
 #+begin_src gretl :eval no
 printf "  regresor FIJO       : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
 printf "  regresor REGENERADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
@@ -363,18 +397,14 @@ printf "  cociente observado  : %.3f\n", (sum((bg_var-mean(bg_var))^2))/(sum((bg
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
-<<Muestra grande datos>>
-outfile --quiet muestraGrande.txt
-    <<Muestra grande teoria>>
-end outfile
-open "@workdir/repGrande.gdt" --quiet
-outfile --quiet --append muestraGrande.txt
-    <<Muestra grande resultado>>
+<<AbrirRepGrande>>
+outfile --quiet muestraGrandeResultado.txt
+    <<MuestraGrandeResultado>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S16-Prct-B-condicionar/muestraGrande.txt example
+#+include: ./S16-Prct-B-condicionar/muestraGrandeResultado.txt example
 #+latex: }
 
 *** Lo que debe observar

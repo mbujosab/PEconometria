@@ -117,39 +117,50 @@ Dos regresiones seguidas. La primera es el modelo completo: guardamos en =s= la 
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
-#+NAME: Auxiliar
+#+NAME: Abrir
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
+#+end_src
+#+NAME: Modelo
+#+begin_src gretl :eval no
 ols price const rooms nox lnox
 scalar s = $sigma
 scalar ee_nox = $stderr(nox)
-ols nox const rooms lnox
-scalar R2aux = $rsq
-scalar longPropia = sqrt($ess)
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
-open hprice2.gdt --quiet
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none :noweb yes
+<<Abrir>>
 outfile --quiet modelo.txt
-    ols price const rooms nox lnox
-    scalar s = $sigma
-    scalar ee_nox = $stderr(nox)
-end outfile
-outfile --quiet auxiliar.txt
-    ols nox const rooms lnox
-    scalar R2aux = $rsq
-    scalar longPropia = sqrt($ess)
-    printf "\nR2 de la regresion auxiliar        = %.4f\n", R2aux
-    printf "||parte propia de nox||  = sqrt(SRC) = %.4f\n", longPropia
-    printf "||nox en desviaciones||  = %.4f\n", sqrt(sum((nox - mean(nox))^2))
-    printf "sqrt(1 - R2aux)          = %.4f   (= seno del angulo)\n", sqrt(1 - R2aux)
-    printf "producto                 = %.4f\n", sqrt(sum((nox - mean(nox))^2))*sqrt(1 - R2aux)
+    <<Modelo>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
 #+include: ./S22-Prct-B-hprice2-vif/modelo.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: Auxiliar
+#+begin_src gretl :eval no
+ols nox const rooms lnox
+scalar R2aux = $rsq
+scalar longPropia = sqrt($ess)
+printf "\nR2 de la regresion auxiliar        = %.4f\n", R2aux
+printf "||parte propia de nox||  = sqrt(SRC) = %.4f\n", longPropia
+printf "||nox en desviaciones||  = %.4f\n", sqrt(sum((nox - mean(nox))^2))
+printf "sqrt(1 - R2aux)          = %.4f   (= seno del angulo)\n", sqrt(1 - R2aux)
+printf "producto                 = %.4f\n", sqrt(sum((nox - mean(nox))^2))*sqrt(1 - R2aux)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none :noweb yes
+outfile --quiet auxiliar.txt
+    <<Auxiliar>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
 #+include: ./S22-Prct-B-hprice2-vif/auxiliar.txt example
 #+latex: }
 
@@ -161,25 +172,23 @@ La regresión auxiliar tiene un $R^2$ de $0{,}9879$: =rooms= y =lnox= reproducen
 
 Divida $\mathfrak s$ entre la longitud de la parte propia y compare con la columna ``Desv. típica'' de la tabla (el error estándar). Calcule también el VIF y descomponga el error estándar en los dos factores de la lección 14.
 
-Tres =printf= con los escalares guardados: $\mathfrak s$ entre la longitud de la parte propia, el error estándar que imprimió Gretl, y el VIF con su raíz, calculados a partir del $R^2$ auxiliar.
+Cinco =printf= con los escalares guardados: $\mathfrak s$ del modelo completo; $\mathfrak s$ entre la longitud de la parte propia; el error estándar que imprimió Gretl; el VIF con su raíz, calculados a partir del $R^2$ auxiliar; y la descomposición de la lección 14, $\mathfrak s$ entre la longitud de =nox= en desviaciones (el error estándar ``como si estuviera solo'') multiplicado por $\sqrt{\mathrm{VIF}}$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: ErrorEstandar
 #+begin_src gretl :eval no
-printf "s / ||parte propia de nox||       = %.4f\n", s/longPropia
-printf "error estandar de nox segun Gretl = %.4f\n", ee_nox
-printf "VIF = %.3f   sqrt(VIF) = %.3f\n", 1/(1-R2aux), 1/sqrt(1-R2aux)
+printf "s del modelo completo               = %.4f\n", s
+printf "s / ||parte propia de nox||         = %.4f\n", s/longPropia
+printf "error estandar de nox segun Gretl   = %.4f\n", ee_nox
+printf "VIF = 1/(1 - R2aux)                 = %.3f      sqrt(VIF) = %.3f\n", 1/(1-R2aux), 1/sqrt(1-R2aux)
+printf "s / ||nox en desviaciones||         = %.3f      x sqrt(VIF) = %.3f\n", s/sqrt(sum((nox - mean(nox))^2)), s/sqrt(sum((nox - mean(nox))^2))/sqrt(1-R2aux)
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none :noweb yes
 outfile --quiet errorEstandar.txt
-    printf "s del modelo completo               = %.4f\n", s
-    printf "s / ||parte propia de nox||         = %.4f\n", s/longPropia
-    printf "error estandar de nox segun Gretl   = %.4f\n", ee_nox
-    printf "VIF = 1/(1 - R2aux)                 = %.3f      sqrt(VIF) = %.3f\n", 1/(1-R2aux), 1/sqrt(1-R2aux)
-    printf "s / ||nox en desviaciones||         = %.3f      x sqrt(VIF) = %.3f\n", s/sqrt(sum((nox - mean(nox))^2)), s/sqrt(sum((nox - mean(nox))^2))/sqrt(1-R2aux)
+    <<ErrorEstandar>>
 end outfile
 #+end_src
 
@@ -209,10 +218,9 @@ vif
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
-ols price const rooms nox lnox --quiet
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none :noweb yes
 outfile --quiet vif.txt
-    vif
+    <<Vif>>
 end outfile
 #+end_src
 
@@ -235,24 +243,19 @@ La misma secuencia con el modelo sin =lnox=: estimación, $\mathfrak s$ guardado
 #+NAME: SinLnox
 #+begin_src gretl :eval no
 ols price const rooms nox
+printf "price ~ rooms + nox:   coef(nox) = %.2f   ee(nox) = %.2f   t = %.2f   s = %.2f\n", $coeff(nox), $stderr(nox), $coeff(nox)/$stderr(nox), $sigma
 scalar s_sin = $sigma
 ols nox const rooms --quiet
-printf "||parte propia de nox sobre rooms|| = %.3f    s/||.|| = %.2f\n", sqrt($ess), s_sin/sqrt($ess)
+printf "parte propia de nox sobre rooms:  ||.|| = %.3f    R2aux = %.4f    VIF = %.3f\n", sqrt($ess), $rsq, 1/(1-$rsq)
+printf "s / ||parte propia|| = %.2f\n", s_sin/sqrt($ess)
 ols price const rooms nox --quiet
 vif
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none :noweb yes
 outfile --quiet sinLnox.txt
-    ols price const rooms nox --quiet
-    printf "price ~ rooms + nox:   coef(nox) = %.2f   ee(nox) = %.2f   t = %.2f   s = %.2f\n", $coeff(nox), $stderr(nox), $coeff(nox)/$stderr(nox), $sigma
-    scalar s_sin = $sigma
-    ols nox const rooms --quiet
-    printf "parte propia de nox sobre rooms:  ||.|| = %.3f    R2aux = %.4f    VIF = %.3f\n", sqrt($ess), $rsq, 1/(1-$rsq)
-    printf "s / ||parte propia|| = %.2f\n", s_sin/sqrt($ess)
-    ols price const rooms nox --quiet
-    vif
+    <<SinLnox>>
 end outfile
 #+end_src
 
@@ -271,7 +274,7 @@ Sin =lnox=, la parte propia de =nox= mide $24{,}81$, casi toda su longitud en de
 
 Construya el intervalo al $95\%$ de =nox= en los dos modelos, el de =lnox= en el completo, y lea en la matriz de varianzas de los estimadores (//~Análisis -> Matriz de covarianzas de los coeficientes~//) la correlación entre $\hat\beta_{\text{nox}}$ y $\hat\beta_{\text{lnox}}$.
 
-Con el modelo completo estimado, =critical(t, $df, 0.025)= da el valor crítico de la $t$ con los grados de libertad del modelo (sesión 18), y cada intervalo es el coeficiente más y menos =tc= por su error estándar. En el =printf=, =%%= imprime un signo de tanto por ciento (un =%= solo abriría un hueco). La correlación entre los dos estimadores es su covarianza dividida por la raíz del producto de sus varianzas, las tres leídas en =$vcv=.
+Con el modelo completo estimado, =critical(t, $df, 0.025)= da el valor crítico de la $t$ con los grados de libertad del modelo (sesión 18), y cada intervalo es el coeficiente más y menos =tc= por su error estándar: primero el de =nox= y el de =lnox= en el modelo completo. En el =printf=, =%%= imprime un signo de tanto por ciento (un =%= solo abriría un hueco). La correlación entre los dos estimadores es su covarianza dividida por la raíz del producto de sus varianzas, las tres leídas en =$vcv=. Las dos últimas líneas vuelven a estimar el modelo sin =lnox= e imprimen el intervalo de =nox= en ese modelo, con el mismo =tc=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -279,20 +282,17 @@ Con el modelo completo estimado, =critical(t, $df, 0.025)= da el valor crítico 
 #+begin_src gretl :eval no
 ols price const rooms nox lnox --quiet
 scalar tc = critical(t, $df, 0.025)
-printf "IC 95%% de nox: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
-printf "correlacion entre los estimadores: %.4f\n", $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
+printf "IC 95%% de nox  con lnox en el modelo: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
+printf "IC 95%% de lnox con nox  en el modelo: [%.1f ; %.1f]\n", $coeff(lnox) - tc*$stderr(lnox), $coeff(lnox) + tc*$stderr(lnox)
+printf "correlacion entre los dos estimadores: %.4f\n", $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
+ols price const rooms nox --quiet
+printf "IC 95%% de nox  sin lnox: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none
+#+begin_src gretl :tangle guiones/S22-Prct-B-hprice2-vif.inp :eval no :exports none :noweb yes
 outfile --quiet intervalos.txt
-    ols price const rooms nox lnox --quiet
-    scalar tc = critical(t, $df, 0.025)
-    printf "IC 95%% de nox  con lnox en el modelo: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
-    printf "IC 95%% de lnox con nox  en el modelo: [%.1f ; %.1f]\n", $coeff(lnox) - tc*$stderr(lnox), $coeff(lnox) + tc*$stderr(lnox)
-    printf "correlacion entre los dos estimadores: %.4f\n", $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
-    ols price const rooms nox --quiet
-    printf "IC 95%% de nox  sin lnox: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
+    <<Intervalos>>
 end outfile
 #+end_src
 

@@ -134,7 +134,7 @@ El primer bloque toma los parámetros de un ajuste real. =open= carga =hprice2=;
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Mundo artificial datos
+#+NAME: ConstruirMundo
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 
@@ -150,7 +150,7 @@ scalar var_teo = sigma^2 / Sxx          # formula de la leccion 11
 
 El segundo bloque solo imprime esos escalares; =%d= es el hueco para un número entero.
 
-#+NAME: Mundo artificial
+#+NAME: ImprimirMundo
 #+begin_src gretl :eval no
 printf "n            = %d\n", n
 printf "beta_1       = %.4f\n", b1_true
@@ -163,9 +163,9 @@ printf "desv. tipica = %.4f\n", sqrt(var_teo)
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
-<<Mundo artificial datos>>
+<<ConstruirMundo>>
 outfile --quiet mundoArtificial.txt
-    <<Mundo artificial>>
+    <<ImprimirMundo>>
 end outfile
 #+end_src
 
@@ -203,7 +203,7 @@ Primera muestra simulada. =set seed= fija la semilla; =normal(0, sigma)= sortea 
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Una replica
+#+NAME: UnaReplica
 #+begin_src gretl :eval no
 set seed 20261030                       # para que el resultado sea reproducible
 
@@ -219,7 +219,7 @@ printf "diferencia        = %.4f\n", $coeff(rooms) - b2_true
 
 #+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
 outfile --quiet unaReplica.txt
-    <<Una replica>>
+    <<UnaReplica>>
 end outfile
 #+end_src
 
@@ -268,7 +268,7 @@ Léalo línea a línea. =scalar R = 2000= fija el número de réplicas. Entre =l
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Bucle montecarlo datos
+#+NAME: BucleMontecarlo
 #+begin_src gretl :eval no
 scalar R = 2000                         # numero de replicas
 
@@ -286,16 +286,16 @@ endloop
 
 Al salir del bucle imprimimos un aviso; =R= sigue disponible como escalar.
 
-#+NAME: Bucle montecarlo
+#+NAME: AvisoBucle
 #+begin_src gretl :eval no
 printf "Hecho: %d replicas guardadas en replicas.gdt\n", R
 #+end_src
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
-<<Bucle montecarlo datos>>
+<<BucleMontecarlo>>
 outfile --quiet bucle.txt
-    <<Bucle montecarlo>>
+    <<AvisoBucle>>
 end outfile
 #+end_src
 
@@ -319,19 +319,32 @@ Tres bloques. El primero imprime los valores teóricos con los escalares que tod
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Teoria replicas
+#+NAME: TeoriaReplicas
 #+begin_src gretl :eval no
 printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
 printf "beta_2 verdadero          = %.4f\n", b2_true
 printf "Var[b2 | X] = sigma^2/Sxx = %.4f\n", var_teo
 printf "desviacion tipica         = %.4f\n\n", sqrt(var_teo)
 #+end_src
+#+latex: }
 
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
+outfile --quiet analisisReplicas.txt
+    <<TeoriaReplicas>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-A-montecarlo/analisisReplicas.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: AbrirFicheroReplicas
 #+begin_src gretl :eval no
 open "@workdir/replicas.gdt" --quiet
 #+end_src
 
-#+NAME: Empirico replicas
+#+NAME: EmpiricoReplicas
 #+begin_src gretl :eval no
 printf "=== LO QUE SALE DE %d REPLICAS SIMULADAS ===\n", $nobs
 printf "media de b2hat            = %.4f\n", mean(b2hat)
@@ -341,22 +354,19 @@ printf "desviacion tipica         = %.4f\n", sqrt(sum((b2hat-mean(b2hat))^2)/$no
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
-outfile --quiet analisisReplicas.txt
-    <<Teoria replicas>>
-end outfile
-open "@workdir/replicas.gdt" --quiet
-outfile --quiet --append analisisReplicas.txt
-    <<Empirico replicas>>
+<<AbrirFicheroReplicas>>
+outfile --quiet empiricoReplicas.txt
+    <<EmpiricoReplicas>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S16-Prct-A-montecarlo/analisisReplicas.txt example
+#+include: ./S16-Prct-A-montecarlo/empiricoReplicas.txt example
 #+latex: }
 
 *** Lo que debe observar
 
-Compare las dos mitades de la salida, línea por línea:
+Compare las dos salidas, línea por línea:
 
 1. /Insesgadez/. La media de las estimaciones debe quedar muy cerca de $\beta_2$. No igual: con un número finito de réplicas, la media muestral de las estimaciones es a su vez una variable aleatoria. Pero la distancia debe ser pequeña comparada con la dispersión de las propias estimaciones.
 2. /Varianza/. La varianza empírica de las $R$ estimaciones debe quedar cerca de $\sigma^2/\sum_i(X_i-\overline{X})^2$. Una fórmula obtenida con álgebra y esperanzas condicionales, sin simular nada, predice correctamente el resultado de un experimento numérico.
@@ -413,7 +423,7 @@ Tres bloques. Al abrir el fichero de réplicas se perdieron los datos de =hprice
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Matriz teorica datos
+#+NAME: MatrizTeoricaDatos
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet                  # recuperamos los regresores
 ols price const rooms --quiet
@@ -421,7 +431,7 @@ scalar sigma = sqrt($ess/$df)
 
 #+end_src
 
-#+NAME: Matriz teorica
+#+NAME: MatrizTeorica
 #+begin_src gretl :eval no
 matrix X      = {const, rooms}
 matrix invXTX = invpd(X'X)
@@ -429,12 +439,26 @@ matrix Vteo   = sigma^2 * invXTX
 printf "Matriz sigma^2 (X'X)^{-1} predicha por la leccion 11:\n"
 print Vteo
 #+end_src
+#+latex: }
 
+#+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
+<<MatrizTeoricaDatos>>
+outfile --quiet matrizVCV.txt
+    <<MatrizTeorica>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-A-montecarlo/matrizVCV.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: ReabrirReplicasVCV
 #+begin_src gretl :eval no
 open "@workdir/replicas.gdt" --quiet
 #+end_src
 
-#+NAME: Matriz empirica
+#+NAME: MatrizEmpirica
 #+begin_src gretl :eval no
 matrix B    = {b1hat}~{b2hat}
 matrix Vemp = mcov(B)
@@ -444,18 +468,14 @@ print Vemp
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S16-Prct-A-montecarlo.inp :eval no :exports none :noweb yes
-<<Matriz teorica datos>>
-outfile --quiet matrizVCV.txt
-    <<Matriz teorica>>
-end outfile
-open "@workdir/replicas.gdt" --quiet
-outfile --quiet --append matrizVCV.txt
-    <<Matriz empirica>>
+<<ReabrirReplicasVCV>>
+outfile --quiet matrizEmpirica.txt
+    <<MatrizEmpirica>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S16-Prct-A-montecarlo/matrizVCV.txt example
+#+include: ./S16-Prct-A-montecarlo/matrizEmpirica.txt example
 #+latex: }
 
 Compare las dos matrices elemento a elemento. El elemento $(2,2)$ es la varianza de $\hat\beta_2$ que ya habíamos comprobado en la Actividad 4; el $(1,1)$ es la de $\hat\beta_1$; y los de fuera de la diagonal son la covarianza entre ambos coeficientes, negativa porque la media de =rooms= es positiva (fórmula de la lección 11): si la recta se inclina más, tiene que bajar el punto de corte para seguir pasando cerca de la nube de puntos.
