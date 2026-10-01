@@ -117,7 +117,7 @@ Cuarenta observaciones y semilla fija. =x2= es uniforme entre $0$ y $10$; =x3= s
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Datos simulados caso general
+#+NAME: DatosSimuladosCasoGeneral
 #+begin_src gretl :tangle ./guiones/S14-Prct-D-simulados-matricial.inp :eval no
 nulldata 40 --preserve
 set seed 97531
@@ -147,7 +147,7 @@ Primero la lista =Xlist= con los tres regresores, la constante =const= incluida,
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Matriz X y ecuaciones normales
+#+NAME: MatrizXyEcuacionesNormales
 #+begin_src gretl :eval no
 list Xlist = const x2 x3
 matrix X = { Xlist }
@@ -166,7 +166,7 @@ print XtY
 
 #+begin_src gretl :tangle guiones/S14-Prct-D-simulados-matricial.inp :eval no :exports none :noweb yes
 outfile --quiet matrizXyEcuacionesNormales.txt
-    <<Matriz X y ecuaciones normales>>
+    <<MatrizXyEcuacionesNormales>>
 end outfile
 #+end_src
 
@@ -182,7 +182,7 @@ Ahora resolvemos las ecuaciones normales /usando la inversa/, tal como aparece e
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Beta matricial vs ols
+#+NAME: BetaMatricialVsOls
 #+begin_src gretl :eval no
 matrix beta_matricial = invpd(XtX)*XtY
 printf "beta calculado como (X'X)^(-1) X'y:\n"
@@ -201,7 +201,7 @@ print diferencia
 
 #+begin_src gretl :tangle guiones/S14-Prct-D-simulados-matricial.inp :eval no :exports none :noweb yes
 outfile --quiet betaMatricialVsOls.txt
-    <<Beta matricial vs ols>>
+    <<BetaMatricialVsOls>>
 end outfile
 #+end_src
 
@@ -221,7 +221,7 @@ Los residuos del último modelo, =$uhat=, pasan a una serie, de la serie a una l
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Verificacion Xte y eX
+#+NAME: VerificacionXteYeX
 #+begin_src gretl :eval no
 series ehat = $uhat
 list elist = ehat
@@ -239,7 +239,7 @@ print eX
 
 #+begin_src gretl :tangle guiones/S14-Prct-D-simulados-matricial.inp :eval no :exports none :noweb yes
 outfile --quiet verificacionXteYeX.txt
-    <<Verificacion Xte y eX>>
+    <<VerificacionXteYeX>>
 end outfile
 #+end_src
 
@@ -252,6 +252,9 @@ Observe que =XtE= y =eX= contienen /los mismos tres números/: es la identidad $
 Una advertencia sobre lo que ve en pantalla, para que no deshaga lo aprendido en la lección 10. Gretl presenta uno de los dos resultados ``en columna'' y el otro ``en fila'', y el guion ha tenido que escribir =E'X=, transponiendo lo que el curso llama un vector, porque el lenguaje matricial de Gretl no ofrece otra cosa: /para Gretl/ un vector es una matriz de una sola fila o de una sola columna, y por tanto tiene orientación. Para nosotros no la tiene: un vector es una lista de coordenadas, y solo las matrices se transponen (lección 10, ``Transposición''; y la pregunta 2 del repaso de esa lección, que quizá acaba de responder). De hecho, el sentido de aquella transparencia es precisamente este: $\boldsymbol{\mathop{\widehat e}}\boldsymbol{\mathsf{X}}$ /no exige/ transponer $\boldsymbol{\mathop{\widehat e}}$; la transposición recae sobre la matriz, no sobre el vector. Lo que ve en pantalla es una convención de Gretl, no un ingrediente del curso.
 
 * Actividad 4 - Familia ortogonal: el mismo experimento, cambiando una sola cosa
+:PROPERTIES:
+:CUSTOM_ID: construir-ortogonal
+:END:
 
 Vamos a construir ahora el caso especial de la transparencia ``Familia ortogonal''. Y lo construiremos cambiando una sola cosa, para que la comparación sea interpretable.
 
@@ -263,7 +266,7 @@ Para conseguirlo no hace falta ningún truco nuevo, solo la proyección ortogona
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Datos familia ortogonal
+#+NAME: DatosFamiliaOrtogonal
 #+begin_src gretl :eval no
 series z2 = x2 - mean(x2)        # centrado: media nula
 ols x3 const z2 --quiet
@@ -280,7 +283,7 @@ printf "corr(z2,z3)  = %.10f   (era 0,5046 entre x2 y x3)\n", corr(z2,z3)
 
 #+begin_src gretl :tangle guiones/S14-Prct-D-simulados-matricial.inp :eval no :exports none :noweb yes
 outfile --quiet datosFamiliaOrtogonal.txt
-    <<Datos familia ortogonal>>
+    <<DatosFamiliaOrtogonal>>
 end outfile
 #+end_src
 
@@ -302,7 +305,7 @@ Dos bloques idénticos, uno por escenario. En cada uno se estima el modelo conju
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Familia ortogonal comparacion
+#+NAME: FamiliaOrtogonalComparacion
 #+begin_src gretl :eval no
 printf "================ CASO GENERAL (Actividad 1) ================\n"
 printf "correlacion entre los regresores = %.4f\n\n", corr(x2,x3)
@@ -322,7 +325,7 @@ printf "R2    : conjunto = %10.6f     suma de rho^2     = %10.6f\n", $rsq, corr(
 
 #+begin_src gretl :tangle guiones/S14-Prct-D-simulados-matricial.inp :eval no :exports none :noweb yes
 outfile --quiet familiaOrtogonalComparacion.txt
-    <<Familia ortogonal comparacion>>
+    <<FamiliaOrtogonalComparacion>>
 end outfile
 #+end_src
 
@@ -355,7 +358,7 @@ La lección 10 puso un ejemplo de regresores /linealmente dependientes/: la temp
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: Colinealidad exacta
+#+NAME: CasoColinealidadExacta
 #+begin_src gretl :eval no
 series C = x2                     # "temperatura" en Celsius
 series F = 32 + 1.8*C             # la misma temperatura, en Fahrenheit
@@ -371,7 +374,7 @@ ols y const C F
 
 #+begin_src gretl :tangle guiones/S14-Prct-D-simulados-matricial.inp :eval no :exports none :noweb yes
 outfile --quiet colinealidadExacta.txt
-    <<Colinealidad exacta>>
+    <<CasoColinealidadExacta>>
 end outfile
 #+end_src
 

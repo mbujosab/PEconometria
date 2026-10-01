@@ -1,0 +1,371 @@
+#+Title: Sesión 22 (D) --- La tasación de la inmobiliaria: sustituir un regresor por su parte propia
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+DESCRIPTION: Práctica de Gretl, sesión 22 (D): precio de viviendas y tasación de la inmobiliaria (hprice1 de Wooldridge); la regresión auxiliar separa lo que la tasación añade a las características de la vivienda.
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L22-Prct-D-hprice1-tasacion
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S22-Prct-D-hprice1-tasacion"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S22-Prct-D-hprice1-tasacion.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S22-Prct-D-hprice1-tasacion.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S22-Prct-D-hprice1-tasacion.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+La [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=5][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#ortogonalizar][html]]) de la práctica C sustituyó un regresor por su parte propia: el residuo de su regresión auxiliar sobre los demás. El ajuste no cambió; cambió la pregunta que respondía el coeficiente del otro regresor. Esta práctica aplica la misma operación a un caso en el que la parte propia tiene una lectura económica directa.
+
+Los datos son =hprice1= de Wooldridge: ochenta y ocho viviendas unifamiliares con su precio de venta (=price=, en miles de dólares), la tasación de una inmobiliaria (=assess=, también en miles), el número de dormitorios (=bdrms=), la superficie de la parcela y de la vivienda (=lotsize= y =sqrft=, en pies cuadrados) y una variable que vale $1$ si la casa es de estilo colonial (=colonial=). La inmobiliaria tasa cada vivienda a partir de sus características: las cuatro que están en el fichero y otras que no están, como el estado de conservación, la situación, la orientación o las calidades. La tasación mezcla las dos cosas, y la regresión auxiliar permite separarlas.
+
+/Objetivos/
+
+1. Estimar el precio con la tasación y las características, y ver que con la tasación en el modelo las características apenas mejoran el ajuste.
+2. Distinguir ese resultado de la colinealidad: el VIF es moderado y lo que cambia es la pregunta que responde cada coeficiente.
+3. Obtener, con la regresión auxiliar de =assess=, la parte de la tasación que no se debe a las cuatro características del fichero.
+4. Sustituir =assess= por esa parte propia y comprobar qué cambia y qué no.
+5. Contrastar si las tasaciones son racionales y si, en media, están por encima o por debajo del precio.
+
+/Comandos nuevos de esta práctica/. No hay ninguno: =open= y =labels= (sesión 4), =summary --simple= y el comando =corr= (sesión 7), =ols= y sus accesores (sesiones 11 a 18), =list= y =series= con =$uhat= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=4][actividad 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#construir-ortogonal][html]]) de la práctica D de la sesión 14), =restrict= y =$test= (sesión 21) y =vif= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-B-hprice2-vif.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-B-hprice2-vif.html#comando-vif][html]]) de la práctica B de hoy).
+
+* Actividad 1 - Los datos y el modelo con la tasación
+
+Abra =hprice1= (//~Archivo -> Abrir datos -> Archivo de muestra~//, pestaña //~Wooldridge~//), mire las variables y estime el precio sobre la tasación y las cuatro características.
+
+=open= carga el fichero (=--quiet= evita listar las variables) y =labels= muestra la descripción de cada una. =summary --simple= da los estadísticos principales de las seis variables, y el comando =corr= la matriz de correlaciones entre los regresores. Después se estima el modelo con los cinco regresores y =vif= calcula sus factores de inflación.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Abrir
+#+begin_src gretl :eval no
+open hprice1 --quiet
+#+end_src
+#+NAME: Descripcion
+#+begin_src gretl :eval no
+labels
+summary price assess bdrms lotsize sqrft colonial --simple
+corr assess bdrms lotsize sqrft colonial
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-D-hprice1-tasacion.inp :eval no :exports none :noweb yes
+<<Abrir>>
+outfile --quiet descripcion.txt
+    <<Descripcion>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-D-hprice1-tasacion/descripcion.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: ConTasacion
+#+begin_src gretl :eval no
+ols price const assess bdrms lotsize sqrft colonial
+vif
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-D-hprice1-tasacion.inp :eval no :exports none :noweb yes
+outfile --quiet conTasacion.txt
+    <<ConTasacion>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-D-hprice1-tasacion/conTasacion.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Solo =assess= es significativa: su $t$ es $8{,}67$, y los de las cuatro características están entre $0{,}06$ y $1{,}39$. El de =sqrft= es el más llamativo, $0{,}06$, aunque la superficie es la característica más correlada con la tasación ($0{,}87$). El $R^2$ es $0{,}831$ y el $F$ de significación conjunta, $80{,}6$.
+
+El VIF de =assess= y el de =sqrft= son $4{,}5$; los demás, menores que $1{,}6$. Son valores moderados: el error estándar de =sqrft= es $2{,}1$ veces el que tendría si no compartiera variación con los demás regresores ($\sqrt{4{,}5}$), lejos del factor $9$ de =nox= y =lnox=. La actividad siguiente muestra que el $t$ de $0{,}06$ no se debe a la precisión, sino a la pregunta que responde el coeficiente.
+
+* Actividad 2 - Las características, con y sin la tasación
+
+Contraste si las cuatro características sobran cuando la tasación está en el modelo, y estime el modelo sin la tasación.
+
+Sobre el modelo con los cinco regresores, el bloque =restrict= impone que los cuatro coeficientes de las características sean cero, y =$test= recoge el $F$ del contraste; antes se guardan en =df= los grados de libertad del modelo. El =printf= imprime ese $F$ con su valor crítico (=critical=) y su valor $p$ (=pvalue=). Después se estima el precio sobre las cuatro características, sin =assess=.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: OmitirCaracteristicas
+#+begin_src gretl :eval no
+ols price const assess bdrms lotsize sqrft colonial --quiet
+scalar df = $df
+restrict --quiet
+    b[bdrms] = 0
+    b[lotsize] = 0
+    b[sqrft] = 0
+    b[colonial] = 0
+end restrict
+scalar Fcar = $test
+#+end_src
+#+NAME: SinTasacion
+#+begin_src gretl :eval no
+printf "Omitir las cuatro caracteristicas: F(4,%d) = %.3f   F_c = %.3f   valor p = %.3f\n\n", df, Fcar, critical(F, 4, df, 0.05), pvalue(F, 4, df, Fcar)
+ols price const bdrms lotsize sqrft colonial
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-D-hprice1-tasacion.inp :eval no :exports none :noweb yes
+<<OmitirCaracteristicas>>
+outfile --quiet sinTasacion.txt
+    <<SinTasacion>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-D-hprice1-tasacion/sinTasacion.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Con la tasación en el modelo, el $F$ de omitir las cuatro características es $1{,}37$, con un valor $p$ de $0{,}25$. A la luz del contraste, una vez incluida la tasación, las características no mejoran el ajuste de forma apreciable. Es el caso contrario al de =nox= y =lnox= en la lección 13: allí los $t$ eran pequeños y el $F$ conjunto grande; aquí los $t$ y el $F$ son pequeños.
+
+Sin la tasación, en cambio, =sqrft= tiene un $t$ de $9{,}3$ y =lotsize= de $3{,}2$. Compare las dos tablas: el error estándar de =sqrft= apenas cambia ($0{,}0172$ con la tasación, $0{,}0133$ sin ella), mientras que el coeficiente pasa de $0{,}001$ a $0{,}124$ (ciento veinticuatro dólares por pie cuadrado). El $t$ cambia porque cambia el coeficiente, no la precisión. No es colinealidad, es el efecto parcial de la lección 10. En la Actividad 1, el coeficiente de =sqrft= mide la diferencia de precio entre dos viviendas /con la misma tasación/ y distinta superficie; como la inmobiliaria ya ha tenido en cuenta la superficie al tasar, esa diferencia es casi nula. Aquí mide la diferencia de precio entre dos viviendas con distinta superficie e iguales en las otras tres características, cualquiera que sea su tasación.
+
+El ajuste sin la tasación es peor: $R^2=0{,}676$ y $\mathfrak s=59{,}9$, frente a $0{,}831$ y $43{,}5$. La tasación contiene información sobre el precio que las cuatro características no contienen. La actividad siguiente la aísla.
+
+* Actividad 3 - Lo que la tasación añade a las características
+:PROPERTIES:
+:CUSTOM_ID: otros-factores
+:END:
+
+Estime la regresión auxiliar de =assess= sobre las cuatro características y guarde sus residuos como =otrosTasac=.
+
+La primera línea estima la regresión auxiliar y la segunda guarda sus residuos, =$uhat=, en la serie =otrosTasac= (en los menús, en la ventana de la regresión, //~Guardar -> Residuos~//). =corr= comprueba que la nueva serie no está correlada con ninguna característica.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Auxiliar
+#+begin_src gretl :eval no
+ols assess const bdrms lotsize sqrft colonial
+series otrosTasac = $uhat
+printf "||assess en desviaciones|| = %.2f    ||otrosTasac|| = %.2f\n\n", sqrt(sum((assess-mean(assess))^2)), sqrt(sum(otrosTasac^2))
+corr otrosTasac bdrms lotsize sqrft colonial
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-D-hprice1-tasacion.inp :eval no :exports none :noweb yes
+outfile --quiet auxiliar.txt
+    <<Auxiliar>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-D-hprice1-tasacion/auxiliar.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Las cuatro características ajustan el $78\%$ de la variación de la tasación ($R^2=0{,}780$), sobre todo la superficie de la vivienda ($t=13{,}4$) y la de la parcela ($t=3{,}3$). El residuo, =otrosTasac=, es la parte propia de =assess= respecto a las características: la parte de la tasación que no se corresponde con dormitorios, superficies y estilo. Es la valoración de la inmobiliaria una vez descontado el efecto de las cuatro características: lo que la inmobiliaria valora y no está entre los otros regresores (estado de conservación, situación, calidades). Mide $417$ de las $889$ unidades de longitud de =assess= en desviaciones, y su correlación con cada característica es cero, por las ecuaciones normales de la regresión auxiliar.
+
+* Actividad 4 - El precio con la parte propia de la tasación
+:PROPERTIES:
+:CUSTOM_ID: precio-otros-factores
+:END:
+
+Estime el precio sobre las cuatro características y =otrosTasac=, pida los factores de inflación y compare con los modelos de las actividades 1 y 2.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: ConOtros
+#+begin_src gretl :eval no
+ols price const bdrms lotsize sqrft colonial otrosTasac
+vif
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-D-hprice1-tasacion.inp :eval no :exports none :noweb yes
+outfile --quiet conOtros.txt
+    <<ConOtros>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-D-hprice1-tasacion/conOtros.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+Con la Actividad 1 coinciden $\mathrm{SRC}$, $R^2=0{,}831$ y $\mathfrak s=43{,}51$: =otrosTasac= y las características generan con la constante el mismo subespacio que =assess= y las características. También coinciden el coeficiente de =otrosTasac= y el de =assess=, $0{,}904$, con el mismo error estándar, $0{,}104$: los dos se calculan con la misma parte propia de la tasación.
+
+Con la Actividad 2 coinciden los coeficientes de las cuatro características: =otrosTasac= es ortogonal a ellas, y añadir un regresor ortogonal no cambia los demás coeficientes (lección 10, familia ortogonal). Responden, por tanto, a la pregunta de la Actividad 2, sin mantener fija la tasación. Pero sus errores estándar son menores (el de =sqrft= pasa de $0{,}0133$ a $0{,}0097$) porque $\mathfrak s$ ha bajado de $59{,}9$ a $43{,}5$: la parte de la tasación que no se debe a las características ya no queda en los residuos.
+
+El modelo responde a la vez a dos preguntas. Las características tienen el efecto de la Actividad 2: cuánto más se paga, en el ajuste, por cada pie cuadrado o cada dormitorio. Y =otrosTasac= tiene un coeficiente de $0{,}904$ con un $t$ de $8{,}7$: cada mil dólares de tasación que la inmobiliaria asigna por encima de lo que corresponde a las cuatro características van con unos novecientos dólares más de precio. El precio responde también a esa valoración adicional de la inmobiliaria.
+
+Los VIF están ahora entre $1{,}0$ y $1{,}6$. La regresión auxiliar no ha creado información: ha asignado a las características toda la variación que comparten con la tasación, y a =otrosTasac= solo lo que la tasación tiene de propio. Aquí esa asignación tiene una justificación económica: la tasación se hace a partir de las características, y no al revés.
+
+* Actividad 5 - ¿Son racionales las tasaciones?
+:PROPERTIES:
+:CUSTOM_ID: racionalidad
+:END:
+
+Contraste, sobre el modelo de la Actividad 1, que la tasación recoge toda la información de las características y que cada mil dólares de tasación son mil dólares de precio. Después mida la diferencia media entre precio y tasación.
+
+Wooldridge plantea la pregunta así: si la inmobiliaria tasa bien, una vez conocida la tasación las características no deberían añadir nada (sus cuatro coeficientes son cero) y el coeficiente de =assess= debería ser $1$. Son cinco restricciones a la vez, y el bloque =restrict= las contrasta con un $F$ de cinco grados de libertad en el numerador (sesión 21); =$test= recoge el estadístico y el primer =printf= lo imprime con su valor crítico y su valor $p$. La segunda parte define la serie =dif=, precio menos tasación, y la regresa sobre la constante: el coeficiente es la media de =dif= y su error estándar el de esa media, lo que permite contrastar que la diferencia media sea cero; el último =printf= la expresa también como porcentaje del precio medio.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: ContrasteRacional
+#+begin_src gretl :eval no
+ols price const assess bdrms lotsize sqrft colonial --quiet
+scalar df = $df
+restrict --quiet
+    b[assess] = 1
+    b[bdrms] = 0
+    b[lotsize] = 0
+    b[sqrft] = 0
+    b[colonial] = 0
+end restrict
+scalar Frac = $test
+series dif = price - assess
+#+end_src
+#+NAME: DiferenciaMedia
+#+begin_src gretl :eval no
+printf "Tasacion racional (coef. de assess = 1 y caracteristicas = 0): F(5,%d) = %.3f   F_c = %.3f   valor p = %.3f\n\n", df, Frac, critical(F, 5, df, 0.05), pvalue(F, 5, df, Frac)
+ols dif const
+printf "media(price - assess) = %.2f   ee = %.2f   t = %.2f   (%.1f%% del precio medio, %.1f)\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), 100*$coeff(const)/mean(price), mean(price)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S22-Prct-D-hprice1-tasacion.inp :eval no :exports none :noweb yes
+<<ContrasteRacional>>
+outfile --quiet racionalidad.txt
+    <<DiferenciaMedia>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S22-Prct-D-hprice1-tasacion/racionalidad.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El $F$ de las cinco restricciones es $1{,}15$, con un valor crítico de $2{,}33$ y un valor $p$ de $0{,}34$: datos como estos no serían raros si la tasación recogiera toda la información de las características y cada mil dólares de tasación fueran mil de precio. A la luz del contraste, el modelo con la tasación como único regresor y pendiente $1$ es una descripción aceptable de estos datos; es la versión de la lección 13 en la que la restricción no se rechaza y el modelo restringido es más simple y más preciso.
+
+La constante de ese modelo restringido es la diferencia media entre precio y tasación: $-22{,}2$ mil dólares, el $7{,}6\%$ del precio medio, con un error estándar de $4{,}7$ y un $t$ de $-4{,}8$. Datos como estos serían muy raros si precio y tasación coincidieran en media: en esta muestra las viviendas se venden, en media, por debajo de su tasación. Las dos conclusiones son compatibles: la tasación ordena bien las viviendas (un dólar más de tasación es un dólar más de precio esperado, y nada de lo que recoge el fichero añade información), pero su nivel está, en media, unos veintidós mil dólares por encima del precio de venta.
+
+* Preguntas de interpretación para la clase
+
+1. En la Actividad 1, el coeficiente de =sqrft= es casi cero. ¿Quiere decir que la superficie no influye en el precio? ¿Qué pregunta responde ese coeficiente?
+2. En la Actividad 2, los $t$ de las características y el $F$ de omitirlas son pequeños. ¿En qué se diferencia esta situación de la de =nox= y =lnox=?
+3. ¿Por qué el coeficiente de =otrosTasac= en la Actividad 4 coincide con el de =assess= en la Actividad 1, y los de las características con los de la Actividad 2?
+4. ¿Qué modelo usaría para decidir cuánto vale, en el mercado, un pie cuadrado más de vivienda? ¿Y para predecir el precio de una vivienda de la que se conoce la tasación?
+5. Un comprador ve una vivienda tasada en cincuenta mil dólares más de lo que corresponde a sus características. ¿Qué dice el modelo de la Actividad 4 sobre su precio? ¿Qué no puede decir?
+6. Si en lugar de =assess= se sustituyera =sqrft= por su residuo sobre la tasación y las otras tres características, ¿qué coeficientes cambiarían? ¿Tendría esa asignación una justificación económica?
+7. En la Actividad 5, el contraste de racionalidad no rechaza y, a la vez, la diferencia media entre precio y tasación es claramente distinta de cero. ¿Hay contradicción? ¿Qué restricción adicional habría que añadir a las cinco para contrastar que la tasación es el precio salvo ruido?
+
+* Para profundizar
+
+- Lección 14 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S20-Lecc14.html][lección 14]]), ``Síntomas y diagnóstico'' (la distinción entre efecto parcial y colinealidad) y ``Qué hacer y qué no''.
+- Lección 10 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html][lección 10]]), el coeficiente de regresión múltiple como coordenada, y la familia ortogonal.
+- Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 3, sección 3.4, y cap. 4, sección 4.5, donde se contrasta con =hprice1= si las tasaciones son racionales.
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S22-Prct-D-hprice1-tasacion.inp}
+
+| /Enlace al guión/: | [[https://mbujosab.github.io/PEconometria/Practicas-html/guiones/S22-Prct-D-hprice1-tasacion.inp][S22-Prct-D-hprice1-tasacion.inp]] |
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. /El coeficiente de =sqrft= con la tasación./ No. El coeficiente mide la diferencia de precio, en el ajuste, entre dos viviendas con la misma tasación y las mismas otras características y distinta superficie. La inmobiliaria ya ha tenido en cuenta la superficie al tasar: dos viviendas con la misma tasación y distinta superficie difieren en otras cosas que compensan la superficie en la tasación, y la muestra no asocia a esa diferencia ningún precio adicional. La influencia de la superficie en el precio está en el modelo, pero pasa por la tasación.
+
+2. /Frente a =nox= y =lnox=./ Con =nox= y =lnox= el $F$ conjunto era grande y los $t$ pequeños: los dos regresores juntos mejoraban el ajuste, pero la muestra no permitía atribuir esa mejora a uno u otro. Aquí el $F$ de omitir las características también es pequeño: una vez incluida la tasación, las características apenas mejoran el ajuste, porque su información ya está en la tasación. El VIF moderado (4,5) confirma que el problema no es la precisión: es que la pregunta ``efecto a igual tasación'' tiene una respuesta próxima a cero.
+
+3. /Las coincidencias./ El coeficiente de un regresor en la regresión múltiple se calcula con su parte propia respecto a los demás. La parte propia de =assess= respecto a las características es =otrosTasac=, y la de =otrosTasac= es ella misma, porque ya es ortogonal a las características: mismo coeficiente y mismo error estándar. Las características, a su vez, son ortogonales a =otrosTasac=, y un regresor ortogonal no altera los coeficientes de los demás (familia ortogonal): los coeficientes son los de la Actividad 2. Los errores estándar difieren porque $\mathfrak s$ es menor.
+
+4. /Qué modelo usar./ Para el valor de mercado de un pie cuadrado, el de la Actividad 4 (o el de la Actividad 2, con los mismos coeficientes y errores estándar mayores): mide el efecto de la superficie sin mantener fija la tasación, que es lo que interesa a quien compra o construye. Para predecir el precio con la tasación conocida, el de la Actividad 1 o el de la 4, que dan las mismas predicciones.
+
+5. /Una vivienda tasada por encima de sus características./ Cincuenta mil dólares de =otrosTasac=, multiplicados por $0{,}904$, son unos cuarenta y cinco mil dólares más de precio en el ajuste, con las mismas características. El modelo no dice a qué se deben esos cincuenta mil dólares (estado, situación, calidades): =otrosTasac= agrupa todo lo que la inmobiliaria valora y no está entre las cuatro características, sin separarlo.
+
+6. /La asignación contraria./ Con la tasación en el modelo, el coeficiente de la parte propia de =sqrft= seguiría siendo el de =sqrft= en la Actividad 1, próximo a cero, y los de =assess= y las otras tres características pasarían a responder a la pregunta ``sin mantener fija la superficie''. Sería una asignación difícil de justificar: la superficie no se determina a partir de la tasación, sino la tasación a partir de la superficie.
+
+7. /Racionalidad y nivel./ No hay contradicción, porque las cinco restricciones dejan libre la constante. El contraste dice que la pendiente de la tasación es $1$ y que las características no añaden nada; no dice nada del nivel. Que la tasación sea el precio salvo ruido exige además que la constante sea cero, y esa sexta restricción, $\beta_1=0$, es la que la diferencia media de $-22{,}2$ con $t=-4{,}8$ hace muy difícil de sostener. Con las seis a la vez (=b[const] = 0= dentro del bloque =restrict=) el $F$ rechaza. Las inmobiliarias ordenan bien las viviendas y, en esta muestra, tasan por encima del precio de venta en una cantidad aproximadamente constante.
