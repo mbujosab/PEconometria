@@ -24,10 +24,11 @@ outfile --quiet descripcion.txt
     summary cost age miles --simple
     corr age miles
 end outfile
+
 outfile --quiet simples.txt
-    ols cost const age --quiet
+    ols cost const age
     printf "cost ~ age:    coef(age)   = %8.3f   ee = %7.3f   t = %6.2f   R2 = %.4f   s = %.1f\n", $coeff(age), $stderr(age), $coeff(age)/$stderr(age), $rsq, $sigma
-    ols cost const miles --quiet
+    ols cost const miles
     printf "cost ~ miles:  coef(miles) = %8.3f   ee = %7.3f   t = %6.2f   R2 = %.4f   s = %.1f\n", $coeff(miles), $stderr(miles), $coeff(miles)/$stderr(miles), $rsq, $sigma
 end outfile
 gnuplot cost age --output="@workdir/costAge.png"
@@ -72,10 +73,33 @@ end outfile
 outfile --quiet submuestras.txt
     printf "La misma regresion en dos mitades de la muestra:\n"
     smpl 1 28
-    ols cost const age miles --quiet
+    ols cost const age miles
     printf "obs 1-28 : coef(age) = %8.3f (ee %6.3f)   coef(miles) = %9.3f (ee %7.3f)   s = %.1f\n", $coeff(age), $stderr(age), $coeff(miles), $stderr(miles), $sigma
     smpl 29 57
-    ols cost const age miles --quiet
+    ols cost const age miles
     printf "obs 29-57: coef(age) = %8.3f (ee %6.3f)   coef(miles) = %9.3f (ee %7.3f)   s = %.1f\n", $coeff(age), $stderr(age), $coeff(miles), $stderr(miles), $sigma
     smpl full
+end outfile
+
+outfile --quiet ortogonal.txt
+    ols age const miles --quiet
+    scalar a0 = $coeff(const)
+    scalar a1 = $coeff(miles)
+    series uhatAge = $uhat
+    corr uhatAge miles
+    ols cost const miles uhatAge
+    vif
+end outfile
+
+outfile --quiet prediccion.txt
+    loop foreach i 1 2
+        scalar mi = (i == 1) ? 40 : 10
+        printf "Coche de 300 semanas y %d mil millas\n", mi
+        ols cost const age miles --quiet
+        matrix x0 = {1, 300, mi}
+        printf "   modelo con age:     prediccion = %8.1f   ee = %6.1f\n", x0*$coeff, sqrt(x0*$vcv*x0')
+        ols cost const miles uhatAge --quiet
+        matrix x0 = {1, mi, 300 - (a0 + a1*mi)}
+        printf "   modelo con uhatAge: prediccion = %8.1f   ee = %6.1f   (uhatAge del coche = %.1f)\n", x0*$coeff, sqrt(x0*$vcv*x0'), 300 - (a0 + a1*mi)
+    endloop
 end outfile

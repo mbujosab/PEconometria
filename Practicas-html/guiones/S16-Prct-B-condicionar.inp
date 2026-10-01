@@ -69,14 +69,16 @@ outfile --quiet comparacion.txt
     printf "beta_2 verdadero  = %.2f\n", b2_true
     printf "Var[b2 | X]       = %.1f\n\n", var_cond
 end outfile
+
 open "@workdir/repFijo.gdt" --quiet
-outfile --quiet --append comparacion.txt
+outfile --quiet comparacionA.txt
     printf "=== EXPERIMENTO A: regresor FIJO ===\n"
     printf "media de b2hat    = %.2f\n", mean(b_fijo)
     printf "varianza de b2hat = %.1f\n\n", sum((b_fijo-mean(b_fijo))^2)/$nobs
 end outfile
+
 open "@workdir/repVar.gdt" --quiet
-outfile --quiet --append comparacion.txt
+outfile --quiet comparacionB.txt
     printf "=== EXPERIMENTO B: regresor REGENERADO en cada replica ===\n"
     printf "media de b2hat    = %.2f\n", mean(b_var)
     printf "varianza de b2hat = %.1f\n", sum((b_var-mean(b_var))^2)/$nobs
@@ -116,8 +118,9 @@ outfile --quiet muestraGrande.txt
     printf "             Var[b2|X] condicional teorica = %.2f\n", var_cond
     printf "             cociente Sxx observado/tipico = %.3f  <- lo que cabe esperar de var_B/var_A\n", Sxx_obs/(($nobs-1)*sd_r^2)
 end outfile
+
 open "@workdir/repGrande.gdt" --quiet
-outfile --quiet --append muestraGrande.txt
+outfile --quiet muestraGrandeResultado.txt
     printf "  regresor FIJO       : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
     printf "  regresor REGENERADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
     printf "  cociente observado  : %.3f\n", (sum((bg_var-mean(bg_var))^2))/(sum((bg_fijo-mean(bg_fijo))^2))

@@ -24,6 +24,7 @@ outfile --quiet modelo.txt
     scalar s = $sigma
     scalar ee_nox = $stderr(nox)
 end outfile
+
 outfile --quiet auxiliar.txt
     ols nox const rooms lnox
     scalar R2aux = $rsq
@@ -43,13 +44,13 @@ outfile --quiet errorEstandar.txt
     printf "s / ||nox en desviaciones||         = %.3f      x sqrt(VIF) = %.3f\n", s/sqrt(sum((nox - mean(nox))^2)), s/sqrt(sum((nox - mean(nox))^2))/sqrt(1-R2aux)
 end outfile
 
-ols price const rooms nox lnox --quiet
 outfile --quiet vif.txt
+    ols price const rooms nox lnox --quiet
     vif
 end outfile
 
 outfile --quiet sinLnox.txt
-    ols price const rooms nox --quiet
+    ols price const rooms nox
     printf "price ~ rooms + nox:   coef(nox) = %.2f   ee(nox) = %.2f   t = %.2f   s = %.2f\n", $coeff(nox), $stderr(nox), $coeff(nox)/$stderr(nox), $sigma
     scalar s_sin = $sigma
     ols nox const rooms --quiet

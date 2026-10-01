@@ -43,7 +43,7 @@ loop R --progressive --quiet
     store "@workdir/replicasIC.gdt" b2hat ee cL cR dentro tstat dentroZ
 endloop
 open "@workdir/replicasIC.gdt" --quiet
-scalar tc = critical(t, 10, 0.025)
+scalar tc = critical(t, 10, 0.025)            # al abrir otro fichero Gretl olvida los escalares
 scalar zc = 1.96
 outfile --quiet cobertura.txt
     printf "Replicas                                   : %d\n", $nobs
@@ -91,6 +91,9 @@ outfile --quiet deteccion.txt
         cov  += ($coeff(x) - tc*$stderr(x) <= b2 && b2 <= $coeff(x) + tc*$stderr(x))
     endloop
     printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura del IC = %.3f\n", $nobs, tc, rech/R, cov/R
+end outfile
+
+outfile --quiet deteccionN120.txt
     smpl full                                    # las diez vueltas: n = 120
     scalar tc = critical(t, $nobs - 2, 0.025)
     set seed 20261113
@@ -120,6 +123,9 @@ outfile --quiet apendice.txt
         rech0 += (abs(($coeff(x) - b2)/$stderr(x)) > tc)
     endloop
     printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 cierta = %.4f\n", $nobs, cov/R, rech0/R
+end outfile
+
+outfile --quiet apendiceN120.txt
     smpl full
     scalar tc = critical(t, $nobs - 2, 0.025)
     set seed 20261113

@@ -39,8 +39,8 @@ outfile --quiet dosExclusiones.txt
     printf "F_c(%d,%d) al 5%% = %.3f    valor p = %.3g\n", q, n-k, critical(F, q, n-k, 0.05), pvalue(F, q, n-k, F)
 end outfile
 
-ols price const rooms nox stratio --quiet
 outfile --quiet restrictDos.txt
+    ols price const rooms nox stratio --quiet
     restrict
         b[nox] = 0
         b[stratio] = 0
@@ -69,19 +69,17 @@ outfile --quiet igualdad.txt
     printf "F = %.3f    F_c(1,%d) al 5%% = %.3f    valor p = %.4f\n", F2, n-k, critical(F, 1, n-k, 0.05), pvalue(F, 1, n-k, F2)
 end outfile
 
-ols price const rooms nox stratio --quiet
 outfile --quiet restrictIgualdad.txt
+    ols price const rooms nox stratio --quiet
     restrict
         b[nox] - b[stratio] = 0
     end restrict
 end outfile
 
 outfile --quiet apertura.txt
-    ols price const rooms nox lnox --quiet
-    printf "price ~ rooms + nox + lnox:  t(nox) = %.2f   t(lnox) = %.2f   SRC = %.4e\n", $coeff(nox)/$stderr(nox), $coeff(lnox)/$stderr(lnox), $ess
-    scalar SRCc = $ess
-    scalar dfc  = $df
-    ols price const rooms --quiet
-    scalar Fap = (($ess - SRCc)/2)/(SRCc/dfc)
-    printf "F de excluir nox y lnox a la vez = %.2f   F_c(2,%d) = %.3f   valor p = %.3g\n", Fap, dfc, critical(F, 2, dfc, 0.05), pvalue(F, 2, dfc, Fap)
+    ols price const rooms nox lnox
+    restrict
+        b[nox] = 0
+        b[lnox] = 0
+    end restrict
 end outfile

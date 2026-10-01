@@ -21,33 +21,20 @@ set verbose off
 open data4-1.gdt --quiet
 outfile --quiet completo.txt
     ols price const sqft bedrms baths
-    scalar n = $nobs
     scalar SRC = $ess
-    scalar s2 = SRC/$df
-    scalar df = $df
-    printf "\nn = %d   k = 4   n-k = %d\n", n, df
+    scalar df  = $df
+    scalar s2  = SRC/df
     printf "t_c al 5%% (%d g.l.) = %.3f\n", df, critical(t, df, 0.025)
-end outfile
-outfile --quiet unaAuna.txt
-    ols price const sqft bedrms baths --quiet
-    scalar t_baths  = $coeff(baths)/$stderr(baths)
-    scalar t_bedrms = $coeff(bedrms)/$stderr(bedrms)
-    printf "Modelo completo: t(bedrms) = %.3f   t(baths) = %.3f   (t_c = %.3f)\n", t_bedrms, t_baths, critical(t, df, 0.025)
-    ols price const sqft bedrms --quiet
-    printf "Sin baths:       t(bedrms) = %.3f   (t_c = %.3f)   SRC = %.1f\n", $coeff(bedrms)/$stderr(bedrms), critical(t, $df, 0.025), $ess
-    ols price const sqft --quiet
-    printf "Sin baths ni bedrms:  SRC_r = %.1f   coef(sqft) = %.4f   ee = %.4f   t = %.2f\n", $ess, $coeff(sqft), $stderr(sqft), $coeff(sqft)/$stderr(sqft)
+    ols price const sqft bedrms
+    ols price const sqft
     scalar SRCr = $ess
 end outfile
 
 outfile --quiet conjunta.txt
     scalar Fj = ((SRCr - SRC)/2)/s2
-    printf "H0: beta_bedrms = beta_baths = 0\n"
     printf "SRC completo = %.1f   SRC_r = %.1f   aumento = %.1f\n", SRC, SRCr, SRCr - SRC
-    printf "F(2,%d) = %.3f   F_c al 5%% = %.3f   valor p = %.4f\n", df, Fj, critical(F, 2, df, 0.05), pvalue(F, 2, df, Fj)
-end outfile
-ols price const sqft bedrms baths --quiet
-outfile --quiet restrictConjunta.txt
+    printf "F(2,10) = %.3f   F_c = %.3f   valor p = %.4f\n", Fj, critical(F, 2, df, 0.05), pvalue(F, 2, df, Fj)
+    ols price const sqft bedrms baths --quiet
     restrict
         b[bedrms] = 0
         b[baths] = 0
@@ -61,7 +48,6 @@ scalar iR = $coeff(bedrms) + tc*$stderr(bedrms)
 scalar jL = $coeff(baths)  - tc*$stderr(baths)
 scalar jR = $coeff(baths)  + tc*$stderr(baths)
 scalar corrEst = $vcv[3,4]/sqrt($vcv[3,3]*$vcv[4,4])
-# el F de fijar a la vez los dos coeficientes en cada esquina del rectangulo
 restrict --quiet
     b[bedrms] = iL
     b[baths] = jL
