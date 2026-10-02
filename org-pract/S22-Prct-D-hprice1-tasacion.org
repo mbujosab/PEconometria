@@ -93,7 +93,7 @@ set verbose off
 
 * Descripción de la práctica
 
-La [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=5][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#ortogonalizar][html]]) de la práctica C sustituyó un regresor por su parte propia: el residuo de su regresión auxiliar sobre los demás. El ajuste no cambió; cambió la pregunta que respondía el coeficiente del otro regresor. Esta práctica aplica la misma operación a un caso en el que la parte propia tiene una lectura económica directa.
+La [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=7][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#ortogonalizar][html]]) de la práctica C sustituyó un regresor por su parte propia: el residuo de su regresión auxiliar sobre los demás. El ajuste no cambió; cambió la pregunta que respondía el coeficiente del otro regresor. Esta práctica aplica la misma operación a un caso en el que la parte propia tiene una lectura económica directa.
 
 Los datos son =hprice1= de Wooldridge: ochenta y ocho viviendas unifamiliares con su precio de venta (=price=, en miles de dólares), la tasación de una inmobiliaria (=assess=, también en miles), el número de dormitorios (=bdrms=), la superficie de la parcela y de la vivienda (=lotsize= y =sqrft=, en pies cuadrados) y una variable que vale $1$ si la casa es de estilo colonial (=colonial=). La inmobiliaria tasa cada vivienda a partir de sus características: las cuatro que están en el fichero y otras que no están, como el estado de conservación, la situación, la orientación o las calidades. La tasación mezcla las dos cosas, y la regresión auxiliar permite separarlas.
 
@@ -285,7 +285,7 @@ Los VIF están ahora entre $1{,}0$ y $1{,}6$. La regresión auxiliar no ha cread
 
 Contraste, sobre el modelo de la Actividad 1, que la tasación recoge toda la información de las características y que cada mil dólares de tasación son mil dólares de precio. Después mida la diferencia media entre precio y tasación.
 
-Wooldridge plantea la pregunta así: si la inmobiliaria tasa bien, una vez conocida la tasación las características no deberían añadir nada (sus cuatro coeficientes son cero) y el coeficiente de =assess= debería ser $1$. Son cinco restricciones a la vez, y el bloque =restrict= las contrasta con un $F$ de cinco grados de libertad en el numerador (sesión 21); =$test= recoge el estadístico y el primer =printf= lo imprime con su valor crítico y su valor $p$. La segunda parte define la serie =dif=, precio menos tasación, y la regresa sobre la constante: el coeficiente es la media de =dif= y su error estándar el de esa media, lo que permite contrastar que la diferencia media sea cero; el último =printf= la expresa también como porcentaje del precio medio.
+Wooldridge plantea la pregunta así: si la inmobiliaria tasa bien, una vez conocida la tasación las características no deberían añadir nada (sus cuatro coeficientes son cero) y el coeficiente de =assess= debería ser $1$. Son cinco restricciones a la vez, y el bloque =restrict= las contrasta con un $F$ de cinco grados de libertad en el numerador (sesión 21); =$test= recoge el estadístico y el primer =printf= lo imprime con su valor crítico y su valor $p$. La segunda parte define la serie =dif=, precio menos tasación, y la regresa sobre la constante: el coeficiente es la media de =dif= y su error estándar el de esa media, lo que permite contrastar que la diferencia media sea cero; el siguiente =printf= la expresa también como porcentaje del precio medio. Un segundo bloque =restrict= añade a las cinco la sexta restricción, constante nula, y el último =printf= imprime su $F$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -301,6 +301,15 @@ restrict --quiet
     b[colonial] = 0
 end restrict
 scalar Frac = $test
+restrict --quiet
+    b[const] = 0
+    b[assess] = 1
+    b[bdrms] = 0
+    b[lotsize] = 0
+    b[sqrft] = 0
+    b[colonial] = 0
+end restrict
+scalar Fseis = $test
 series dif = price - assess
 #+end_src
 #+NAME: DiferenciaMedia
@@ -308,6 +317,7 @@ series dif = price - assess
 printf "Tasacion racional (coef. de assess = 1 y caracteristicas = 0): F(5,%d) = %.3f   F_c = %.3f   valor p = %.3f\n\n", df, Frac, critical(F, 5, df, 0.05), pvalue(F, 5, df, Frac)
 ols dif const
 printf "media(price - assess) = %.2f   ee = %.2f   t = %.2f   (%.1f%% del precio medio, %.1f)\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), 100*$coeff(const)/mean(price), mean(price)
+printf "Con la sexta restriccion, constante = 0: F(6,%d) = %.3f   valor p = %.4f\n", df, Fseis, pvalue(F, 6, df, Fseis)
 #+end_src
 #+latex: }
 
@@ -331,7 +341,7 @@ La constante de ese modelo restringido es la diferencia media entre precio y tas
 * Preguntas de interpretación para la clase
 
 1. En la Actividad 1, el coeficiente de =sqrft= es casi cero. ¿Quiere decir que la superficie no influye en el precio? ¿Qué pregunta responde ese coeficiente?
-2. En la Actividad 2, los $t$ de las características y el $F$ de omitirlas son pequeños. ¿En qué se diferencia esta situación de la de =nox= y =lnox=?
+2. Los $t$ de las características (Actividad 1) y el $F$ de omitirlas (Actividad 2) son pequeños. ¿En qué se diferencia esta situación de la de =nox= y =lnox=?
 3. ¿Por qué el coeficiente de =otrosTasac= en la Actividad 4 coincide con el de =assess= en la Actividad 1, y los de las características con los de la Actividad 2?
 4. ¿Qué modelo usaría para decidir cuánto vale, en el mercado, un pie cuadrado más de vivienda? ¿Y para predecir el precio de una vivienda de la que se conoce la tasación?
 5. Un comprador ve una vivienda tasada en cincuenta mil dólares más de lo que corresponde a sus características. ¿Qué dice el modelo de la Actividad 4 sobre su precio? ¿Qué no puede decir?
@@ -368,4 +378,4 @@ La constante de ese modelo restringido es la diferencia media entre precio y tas
 
 6. /La asignación contraria./ Con la tasación en el modelo, el coeficiente de la parte propia de =sqrft= seguiría siendo el de =sqrft= en la Actividad 1, próximo a cero, y los de =assess= y las otras tres características pasarían a responder a la pregunta ``sin mantener fija la superficie''. Sería una asignación difícil de justificar: la superficie no se determina a partir de la tasación, sino la tasación a partir de la superficie.
 
-7. /Racionalidad y nivel./ No hay contradicción, porque las cinco restricciones dejan libre la constante. El contraste dice que la pendiente de la tasación es $1$ y que las características no añaden nada; no dice nada del nivel. Que la tasación sea el precio salvo ruido exige además que la constante sea cero, y esa sexta restricción, $\beta_1=0$, es la que la diferencia media de $-22{,}2$ con $t=-4{,}8$ hace muy difícil de sostener. Con las seis a la vez (=b[const] = 0= dentro del bloque =restrict=) el $F$ rechaza. Las inmobiliarias ordenan bien las viviendas y, en esta muestra, tasan por encima del precio de venta en una cantidad aproximadamente constante.
+7. /Racionalidad y nivel./ No hay contradicción, porque las cinco restricciones dejan libre la constante. El contraste no rechaza que la pendiente de la tasación sea $1$ ni que las características no añadan nada; no dice nada del nivel. Que la tasación sea el precio salvo ruido exige además que la constante sea cero, y esa sexta restricción, $\beta_1=0$, es la que la diferencia media de $-22{,}2$ con $t=-4{,}8$ hace muy difícil de sostener. Con las seis a la vez (el segundo bloque =restrict= de la Actividad 5), $F(6,82)=4{,}77$ con un valor $p$ de $0{,}0003$: datos como estos serían muy raros si las seis restricciones se cumplieran. A la luz de los dos contrastes, la tasación ordena bien las viviendas y, en esta muestra, está por encima del precio de venta en una cantidad aproximadamente constante.
