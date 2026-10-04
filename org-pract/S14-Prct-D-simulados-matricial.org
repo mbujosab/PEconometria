@@ -399,9 +399,70 @@ end outfile
 
 La correlación entre =C= y =F= es $1$: son el mismo vector en desviaciones, salvo escala. El determinante de $\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}$ es nulo (o del orden del error de redondeo): la matriz no es invertible, y las ecuaciones normales tienen infinitas soluciones, como advertía la lección 10. Gretl no se detiene: detecta la dependencia, /elimina/ uno de los dos regresores y lo indica en la salida. Es la respuesta razonable, porque el ajuste $\boldsymbol{\mathop{\widehat y}}$ es único aunque los coeficientes no lo sean, pero conviene saber que ha ocurrido: el coeficiente de =C= que queda ya no es ``el efecto de C manteniendo F fija'', porque fijar =F= es fijar =C=. En la lección 14 veremos el caso menos extremo y más frecuente: regresores cuyos vectores en desviaciones forman un ángulo muy pequeño, que Gretl no elimina y que hacen inestables los coeficientes.
 
-* Actividad 7 - Síntesis
+* Actividad 7 - Coordenadas en una base ortonormal: $\mathrm{SEC}$, $\mathrm{SRC}$ y el $F$ con números
+:PROPERTIES:
+:CUSTOM_ID: coordenadas-base-ortonormal
+:END:
 
-Hoy hemos verificado con Gretl el álgebra matricial completa de la lección 10: (i) que $\boldsymbol{\mathop{\widehat{\beta}}}=(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}$ coincide con lo que calcula =ols=, y que $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}$ (que es lo mismo que $\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol{0}$); (ii) que con regresores mutuamente ortogonales cada coeficiente puede aislarse sin resolver ningún sistema, y $R^2$ se descompone como suma de correlaciones al cuadrado.
+El apéndice ``Estructura geométrica de la probabilidad y de la inferencia en el modelo de regresión'' (sección 5) escribe las sumas de cuadrados de la lección 8 como sumas de cuadrados de coordenadas: en una base ortonormal de $\mathcal L(\boldsymbol 1)^\perp$ cuyos $k-1$ primeros vectores generen el subespacio de los regresores en desviaciones (el apéndice lo llama $\mathcal E$) y cuyos $n-k$ restantes generen el del residuo ($\mathcal R$), $\mathrm{SEC}$ es la suma de los cuadrados de las $k-1$ primeras coordenadas del vector de datos en desviaciones, $\mathrm{SRC}$ la de las otras $n-k$, y el $F$ de significación conjunta es el cociente de las dos medias cuadráticas. Vamos a construir esa base con los datos de la Actividad 1 y a comprobarlo con números.
+
+Primero la parte de $\mathcal E$, ortogonalizando como en la Actividad 4: =b_1= es $\boldsymbol x_2$ en desviaciones dividido por su longitud, y =b_2= es la parte de $\boldsymbol x_3$ en desviaciones ortogonal a =b_1=, también normalizada (es la parte propia de $\boldsymbol x_3$, lección 14, dividida por su longitud). Después la parte de $\mathcal R$, con una regla fija: =M= es la matriz que proyecta sobre $\mathcal L(\boldsymbol 1)^\perp$ (la identidad menos la matriz de unos dividida por $n$), =PR= la que proyecta sobre $\mathcal R$ (se le quitan las dos direcciones de $\mathcal E$), y =eigensym= devuelve sus autovalores en =lam= y sus autovectores en =V=; los autovectores de autovalor $1$ son una base ortonormal de $\mathcal R$, y =selifc= se queda con esas columnas. Dos =printf= comprueban que la base entera es ortonormal y de media cero (las identidades (2) del apéndice). Las coordenadas se obtienen multiplicando la traspuesta de cada bloque por el vector de datos en desviaciones =v=, y el resto son comparaciones: las dos sumas de cuadrados de coordenadas frente a $\mathrm{SEC}$ y $\mathrm{SRC}$ (=$ess= es la $\mathrm{SRC}$ de Gretl), su suma frente a $\mathrm{STC}$, el cociente de medias cuadráticas frente a =$Fstat=, y la coordenada sobre =b_2= dividida por la longitud de la parte propia de $\boldsymbol x_3$ frente a $\hat\beta_3$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: CoordenadasBaseOrtonormal
+#+begin_src gretl :eval no
+ols y const x2 x3 --quiet
+scalar n = $nobs
+scalar k = 3
+
+series d2  = x2 - mean(x2)
+series b_1 = d2 / sqrt(sum(d2^2))
+series d3  = x3 - mean(x3)
+series e3  = d3 - sum(d3*b_1)*b_1
+series b_2 = e3 / sqrt(sum(e3^2))
+matrix BE  = {b_1} ~ {b_2}
+
+matrix M   = I(n) - ones(n,n)/n
+matrix PR  = M - BE*BE'
+matrix V
+matrix lam = eigensym(PR, &V)
+matrix BR  = selifc(V, (lam .> 0.5)')
+printf "vectores de la base: %d en E, %d en R, total %d = n-1\n", cols(BE), cols(BR), cols(BE)+cols(BR)
+printf "ortonormalidad: max|B'B - I| = %g ; media cero: max|B'1| = %g\n", max(abs(vec((BE~BR)'(BE~BR) - I(n-1)))), max(abs((BE~BR)'ones(n,1)))
+
+matrix v  = {y} - mean(y)
+matrix cE = BE'v
+matrix cR = BR'v
+printf "\ncoordenadas en E: c1 = %.4f, c2 = %.4f\n", cE[1], cE[2]
+printf "primeras coordenadas en R: %.4f, %.4f, %.4f, ...\n", cR[1], cR[2], cR[3]
+
+scalar STC = sum((y - mean(y))^2)
+printf "\nsuma de cuadrados de las coordenadas de E = %10.4f   SEC = %10.4f\n", cE'cE, STC - $ess
+printf "suma de cuadrados de las coordenadas de R = %10.4f   SRC = %10.4f\n", cR'cR, $ess
+printf "suma de todas                             = %10.4f   STC = %10.4f\n", cE'cE + cR'cR, STC
+printf "\n(SEC/(k-1)) / (SRC/(n-k)) = %.4f    F de Gretl = %.4f\n", (cE'cE/(k-1)) / (cR'cR/(n-k)), $Fstat
+printf "c2 / ||parte propia de x3|| = %.6f    beta3 de Gretl = %.6f\n", cE[2]/sqrt(sum(e3^2)), $coeff(x3)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-D-simulados-matricial.inp :eval no :exports none :noweb yes
+outfile --quiet coordenadasBaseOrtonormal.txt
+    <<CoordenadasBaseOrtonormal>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-D-simulados-matricial/coordenadasBaseOrtonormal.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La base tiene $n-1=39$ vectores, $2$ en $\mathcal E$ y $37$ en $\mathcal R$, ortonormales y de media cero con error del orden del redondeo. Las dos sumas de cuadrados de coordenadas coinciden con $\mathrm{SEC}$ y $\mathrm{SRC}$, y su suma con $\mathrm{STC}$: es Pitágoras generalizado (lección 10) con la base partida en dos. El cociente de las dos medias cuadráticas es, con todos sus decimales, el $F$ que Gretl imprime al pie de la tabla, que la lección 13 presenta como el contraste de significación conjunta: con la base construida así, el $F$ no es más que ``cuánto mide, por dimensión, la parte de $\boldsymbol y-\boldsymbol{\mathop{\overline y}}$ que cae en $\mathcal E$ frente a la que cae en $\mathcal R$''. Y la coordenada sobre =b_2=, dividida por la longitud de la parte propia de $\boldsymbol x_3$, es $\hat\beta_3$: la fórmula de la lección 14 ($\hat\beta_j$ es la proyección de $\boldsymbol y$ sobre la dirección de la parte propia, por unidad de longitud de esa parte), que el apéndice usa en su sección 5.4. Lo que en el apéndice es una variable aleatoria, la coordenada del ruido $C_j$, es aquí un número por coordenada: estamos en una realización, la de la Actividad 1.
+
+* Actividad 8 - Síntesis
+
+Hoy hemos verificado con Gretl el álgebra matricial completa de la lección 10: (i) que $\boldsymbol{\mathop{\widehat{\beta}}}=(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}$ coincide con lo que calcula =ols=, y que $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}$ (que es lo mismo que $\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol{0}$); (ii) que con regresores mutuamente ortogonales cada coeficiente puede aislarse sin resolver ningún sistema, y $R^2$ se descompone como suma de correlaciones al cuadrado; (iii) que en una base ortonormal adaptada a los regresores, $\mathrm{SEC}$ y $\mathrm{SRC}$ son sumas de cuadrados de coordenadas y el $F$ es el cociente de sus medias por dimensión.
 
 Y lo hemos verificado de una manera concreta que conviene retener, porque vale para cualquier experimento y no solo para este: comparando dos escenarios que se diferencian en /una sola cosa/. Si el caso ortogonal hubiera tenido además otro tamaño muestral, otros coeficientes y otro nivel de ruido, habríamos visto cambiar los números sin poder atribuir el cambio a la ortogonalidad. Al dejar fijo todo lo demás, incluida la perturbación, la única explicación posible de la diferencia entre los dos bloques de la Actividad 5 es la que queríamos estudiar.
 

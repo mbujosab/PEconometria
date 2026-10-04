@@ -86,7 +86,7 @@ Para cada $i$: $\;Y_i=\beta_1\,\mathit1+\beta_2X_i+U_i$, con los tres supuestos 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 - Perturbaciones de observaciones distintas, incorreladas: $Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0$ $\;(i\neq j)$.
 
-# $X$ (sin subíndice) es la variable poblacional (lección 9); $\boldsymbol X=(X_1,\ldots,X_n)$ es el vector con las $n$ copias del muestreo, el análogo aleatorio del vector de datos $\boldsymbol x=(x_1,\ldots,x_n)$ de la lección 4. De manera similar, $\boldsymbol U=(U_1,\ldots,U_n)$.
+# $X$ (sin subíndice) es la variable poblacional (lección 9); $\boldsymbol X=(X_1,\ldots,X_n)$ es la lista de las $n$ copias del muestreo, el análogo aleatorio del vector de datos $\boldsymbol x=(x_1,\ldots,x_n)$ de la lección 4, pero no un vector de $\mathbb R^n$: sus componentes son funciones, no números (apéndice, sección 4). De manera similar, $\boldsymbol U=(U_1,\ldots,U_n)$.
 
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
@@ -106,6 +106,13 @@ La lección 9 introdujo, sin desarrollarla, una frase que hoy se convierte en el
 
 Formalicemos esa idea. Desde la lección 4 venimos usando $\boldsymbol x=(x_1,\ldots,x_n)$ para el vector de datos observados (y, desde la lección 6, para el vector de datos observados de un /regresor/), y en la lección 10 agrupamos los regresores observados en la matriz de datos $\boldsymbol{\mathsf X}$ (en el modelo lineal simple, $\boldsymbol{\mathsf X}=[\boldsymbol1;\;\boldsymbol x]$, dos columnas). Hoy introducimos su análogo aleatorio: la matriz[fn::Denotada en negrita cursiva pero sin letra de palo seco (reservada para las matrices de datos observados).] $\boldsymbol X$. Este es el objeto sobre el que condicionaremos todos los momentos a lo largo de la sesión. Cada columna de $\boldsymbol X$ corresponderá al muestreo de uno de los regresores poblacionales. En el modelo lineal simple son $\mathit 1$ y $X$; por tanto, la segunda columna de $\boldsymbol X$ está formada por las $n$ variables aleatorias $X_1,\ldots,X_n$: cada una es una copia idéntica e independiente de la variable poblacional $X$ de la lección 9.[fn::Para decir que son copias idénticas basta con que tengan la misma función de distribución: $F_{X_i}(x) = \operatorname{P}(X_i \leq x) \quad \text{para todo } i = 1, \dots, n$. Esto no las obliga a ser la misma función sobre $\Omega$; al contrario: dos copias independientes suelen asignar valores distintos para un mismo suceso elemental. Lo que sí comparten, por tener la misma distribución, es el conjunto de valores que toman con probabilidad positiva: su imagen, salvo en sucesos de probabilidad nula, donde ninguna de las dos está sujeta a restricción alguna. Por otro lado, la independencia entre variables aleatorias implica que su función de distribución de probabilidad conjunta equivale al producto de sus distribuciones individuales. Para el caso de $n$ variables, esto se expresa como: $F_{X_1, X_2, \dots, X_n}(x_1, x_2, \dots, x_n) = \prod_{i=1}^{n} F_{X_i}(x_i)$.] Es la misma relación dato/variable aleatoria que venimos usando desde la lección 9 (entre $y_i$ e $Y$), aplicada componente a componente a los $n$ elementos de la muestra correspondiente a cada columna.
 
+#+attr_latex: :width .85\textwidth
+#+attr_html: :width 700px
+#+NAME: FiguraMatrizCopias
+#+CAPTION: La matriz de copias. Cada fila es una copia de la variable, una función sobre $\Omega$; la matriz continúa hacia abajo indefinidamente. Elegir $n$ filas es crear una muestra; elegir una columna es fijar un suceso elemental $\omega$ donde evaluar las infinitas copias; las dos cosas a la vez dan el vector de $\mathbb R^n$ de la derecha: la realización de la muestra. Los datos observados son una columna; repetir el experimento es recorrer otras columnas con las mismas filas.
+file:img/S15-Lecc11/MatrizCopias.png
+
+La figura ordena lo que sigue. Cada fila es una copia, una variable aleatoria entera; la lista $(X_1,\ldots,X_n)$ son $n$ filas, no un vector de $\mathbb R^n$: sus componentes son funciones, no números. Fijar un suceso elemental $\omega$ es elegir una columna. Las dos cosas a la vez dan un vector de $\mathbb R^n$, la realización de la muestra, que es lo que tenemos en un vector de datos: nuestro vector es una columna, de $n$ funciones ($n$ copias) evaluadas en un mismo $\omega$. Y cuando en el laboratorio de la sesión siguiente repitamos un experimento dos mil veces ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop][html]]) de la práctica A de la sesión 16), podremos interpretarlo como que estamos obteniendo dos mil columnas mediante la evaluación de las mismas filas en dos mil $\omega$ distintos. El apéndice (sección 3) desarrolla esta lectura.
 /Una precisión de uso/. Durante casi toda la sesión no necesitaremos ninguna operación matricial con $\boldsymbol X$: bastarán sumatorios sobre las $X_i$, y ``condicionar en $\boldsymbol X$'' significará siempre proyectar sobre el espacio de funciones cuyo argumento son, simultáneamente, todas las variables aleatorias presentes en $\boldsymbol X$. La estructura de matriz de $\boldsymbol X$ reaparecerá puntualmente al justificar el divisor $n-k$ (sección ``MCO es BLUE; estimando $\sigma^2$'', donde hablaremos de las columnas de $\boldsymbol{\mathsf X}$) y, con más de 2 columnas, en la generalización final a $k$ regresores. Es decir: el símbolo $\boldsymbol X$ significa lo mismo al principio y al final de la sesión; lo único que cambia es cuántas columnas tiene.
 
 Para cada observación $i$, el modelo poblacional de la lección 9 se aplica sin ningún cambio, con subíndice $i$ añadido:
@@ -120,7 +127,7 @@ $U_i$ es ortogonal al primer sumando por definición: es una función de $X_i$. 
 \[
 \big\langle U_i\,a(X_i),\;b(X_{-i})-\mathrm{E}(b)\,\mathit1\big\rangle_P=\mathrm{Cov}\big(U_i\,a(X_i),\,b(X_{-i})\big)=0.
 \]
-Así que $U_i$ es ortogonal a todos los productos $a(X_i)\,b(X_{-i})$ y, por linealidad del producto escalar, a sus combinaciones lineales. Lo único que admitimos sin demostración, el paso que pertenece a un curso de probabilidad, es que con esas combinaciones se aproxima cualquier función de $\boldsymbol X$. Con ello, $U_i$ es ortogonal a toda función de $\boldsymbol X$, que es lo que dice $E[U_i\mid\boldsymbol X]=\mathit0$.]
+Así que $U_i$ es ortogonal a todos los productos $a(X_i)\,b(X_{-i})$ y, por linealidad del producto escalar, a sus combinaciones lineales. Lo único que admitimos sin demostración, el paso que pertenece a un curso de probabilidad, es que con esas combinaciones se aproxima cualquier función de $\boldsymbol X$. Con ello, $U_i$ es ortogonal a toda función de $\boldsymbol X$, que es lo que dice $E[U_i\mid\boldsymbol X]=\mathit0$. El argumento completo, con la lectura de la independencia como escuadra, está en el apéndice, sección 6.1.]
 
 Sobre el supuesto $\mathrm{Var}(X)\neq0$ conviene una precisión, porque es fácil que el símbolo ``$X$'' induzca a confusión una vez que ya solo hablamos de $X_1,\ldots,X_n$. La letra $X$, sin subíndice, sigue denotando, como en la lección 9, la variable poblacional de la que $X_1,\ldots,X_n$ son copias. El supuesto $\mathrm{Var}(X)\neq0$ se enuncia sobre esa variable poblacional, y se aplica a cada copia $X_i$ porque, al ser copias idénticas, cada $X_i$ tiene la misma distribución que $X$ (y, en particular, la misma varianza).
 
@@ -130,7 +137,7 @@ La segunda consecuencia del muestreo aleatorio es aún más directa: si $(X_i,U_
 \[
 Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0 \qquad (i\neq j).
 \]
-No se trata, por tanto, de un supuesto añadido /ex novo/: es la traducción, en términos de covarianzas, de algo que ya habíamos dado por sentado desde la lección 9 al hablar de copias ``idénticas e independientes'' (lo que su curso de estadística del cuatrimestre anterior llamaba, seguramente, /muestreo aleatorio simple/). Hoy es la primera vez que necesitamos esta consecuencia de forma explícita, porque es la primera vez que trabajamos con /varias/ perturbaciones $U_1,\ldots,U_n$ simultáneamente, en lugar de con una sola $U$ genérica.
+No se trata, por tanto, de un supuesto añadido /ex novo/: es la traducción, en términos de covarianzas, de algo que ya habíamos dado por sentado desde la lección 9 al hablar de copias ``idénticas e independientes'' (lo que su curso de estadística del cuatrimestre anterior llamaba, seguramente, /muestreo aleatorio simple/). Hoy es la primera vez que necesitamos esta consecuencia de forma explícita, porque es la primera vez que trabajamos con /varias/ perturbaciones $U_1,\ldots,U_n$ simultáneamente, en lugar de con una sola $U$ genérica. En el lenguaje de la lección 9: dadas $\boldsymbol X$, las perturbaciones $U_1,\ldots,U_n$ son una familia ortogonal de variables aleatorias de la misma longitud $\sigma$. Es todo lo que usan la insesgadez y la varianza de esta sesión; la independencia completa, que es más, solo hará falta en la lección 12 (apéndice, secciones 6.1 y 7.1).
 
 Por último, nótese que, al enunciar el supuesto de homocedasticidad, la varianza de cada $U_i$ se condiciona a /toda/ la matriz $\boldsymbol X$; esta condición es más fuerte que condicionar solo sobre $X_i$. Es la condición que hace falta para todo lo que sigue (ni es un corolario de la definición de $U_i$ ni tampoco del muestreo aleatorio simple) y la estamos /imponiendo/ directamente en esa forma más fuerte.
 
@@ -223,7 +230,7 @@ Ambas valen para /cualquier/ lista de números y, por tanto, siguen siendo ciert
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
 Antes de sustituir el modelo poblacional en $\hat\beta_2=\sum_iW_iY_i$, necesitamos dos propiedades de los pesos $W_i$ que, en realidad, ya conocemos aunque nunca las hayamos escrito con este nombre. La primera es, literalmente, $\langle\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1,\boldsymbol1\rangle_s=0$ (lección 4: el vector en desviaciones tiene media cero), dividida por el denominador común de los $W_i$. La segunda es lo que, en la ``vía alternativa'' de la lección 7, hacía que al proyectar $\boldsymbol y$ sobre $\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1$ el coeficiente obtenido fuera la pendiente $\hat\beta_2$ (allí no aislamos unos ``pesos''; nos limitamos a escribir la fórmula como cociente de productos escalares).
 
-Un punto clave, para no reintroducir la confusión entre estimador y estimación de ``$\hat\beta_2$: la misma fórmula, aplicada a variables aleatorias'': estas dos propiedades NO son afirmaciones probabilísticas. Son identidades /algebraicas/, del mismo tipo que ``$2+3=5$'': se cumplen para cualquier elección de $n$ números $x_1,\ldots,x_n$ (iguales o distintos entre sí, positivos o negativos), porque se deducen únicamente de la propia definición de $\overline{X}$ y $W_i$, nunca de ninguna propiedad estadística de esos números. Por eso, cuando sustituimos $x_i$ por la variable aleatoria $X_i$, la identidad sigue siendo cierta sin necesidad de ningún argumento adicional (salvo, quizá, en el caso extremo de que todos los $X_i$ coincidieran, en cuyo caso $\sum_j(X_j-{\overline{X}})^2=\mathit 0$ y $W_i$ ni siquiera estaría definido).[fn::Una precisión: el supuesto $\mathrm{Var}(X)\neq0$ /no/ basta para excluir ese caso extremo con probabilidad uno. Si $X$ es continua, sí: el suceso ``las $n$ copias toman el mismo valor'' tiene probabilidad nula. Pero si $X$ es discreta no: con $X$ de Bernoulli de parámetro $1/2$, por ejemplo, $\mathrm{Var}(X)=1/4\neq0$ y, sin embargo, la probabilidad de que las $n$ copias coincidan vale $2^{1-n}>0$. Lo correcto, en general, es decir que $\mathrm{Var}(X)\neq0$ garantiza que esa probabilidad es /menor que uno/ y que tiende a cero al crecer $n$; y que todo lo que sigue se entiende condicionado a que la muestra observada no sea una de esas degeneradas, igual que un programa estadístico no calcula la pendiente cuando el regresor no varía en la muestra.]
+Un punto clave, para no reintroducir la confusión entre estimador y estimación de ``$\hat\beta_2$: la misma fórmula, aplicada a variables aleatorias'': estas dos propiedades NO son afirmaciones probabilísticas. Son identidades /algebraicas/, del mismo tipo que ``$2+3=5$'': se cumplen para cualquier elección de $n$ números $x_1,\ldots,x_n$ (iguales o distintos entre sí, positivos o negativos), porque se deducen únicamente de la propia definición de $\overline{X}$ y $W_i$, nunca de ninguna propiedad estadística de esos números. Por eso, cuando sustituimos $x_i$ por la variable aleatoria $X_i$, la identidad sigue siendo cierta sin necesidad de ningún argumento adicional (salvo, quizá, en el caso extremo de que todos los $X_i$ coincidieran, en cuyo caso $\sum_j(X_j-{\overline{X}})^2=\mathit 0$ y $W_i$ ni siquiera estaría definido).[fn::Una precisión: el supuesto $\mathrm{Var}(X)\neq0$ /no/ basta para excluir ese caso extremo con probabilidad uno. Si $X$ es continua, sí: el suceso ``las $n$ copias toman el mismo valor'' tiene probabilidad nula. Pero si $X$ es discreta no: con $X$ de Bernoulli de parámetro $1/2$, por ejemplo, $\mathrm{Var}(X)=1/4\neq0$ y, sin embargo, la probabilidad de que las $n$ copias coincidan vale $2^{1-n}>0$. Lo correcto, en general, es decir que $\mathrm{Var}(X)\neq0$ garantiza que esa probabilidad es /menor que uno/ y que tiende a cero al crecer $n$; y que todo lo que sigue se entiende condicionado a que la muestra observada no sea una de esas degeneradas, igual que un programa estadístico no calcula la pendiente cuando el regresor no varía en la muestra.] Conviene retener la regla, porque se usará muchas veces: por este camino solo pasan las identidades, las fórmulas ciertas para toda lista de números. Una afirmación como ``$X_i-\overline X$ tiene esperanza cero'' no es una identidad (para una lista de números, $x_i-\bar x$ no es cero), y por eso no pasa: se demuestra con la esperanza, no con el álgebra (apéndice, sección 4.3).
 
 /Primera propiedad/: $\sum_iW_i=\mathit 0$. Como $W_i=\frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}$ y el denominador es común a todos los términos, $\sum_iW_i=\frac{\sum_i(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}$; y donde el numerador sabemos que es nulo: $\sum_i(X_i-\overline{X})=\mathit 0$.
 
@@ -378,7 +385,7 @@ Falta un último paso, pasar de la esperanza condicional a la esperanza incondic
 \[
 \mathrm{E}\Big(\big(Z-E[Z\mid\boldsymbol X]\big)\,\mathit 1 \Big)=0 \iff \mathrm{E}(Z)-\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=0,
 \]
-es decir, $\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)$, sin ninguna restricción sobre $Z$. Esta es la Ley de las Esperanzas Iteradas, una consecuencia inmediata de nuestra propia definición geométrica de esperanza condicional.
+es decir, $\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)$, sin ninguna restricción sobre $Z$. Esta es la Ley de las Esperanzas Iteradas, una consecuencia inmediata de nuestra propia definición geométrica de esperanza condicional. Tanto el Lema como esta ley se demuestran en dos líneas a partir de la caracterización de la proyección por la ortogonalidad del resto (apéndice, sección 1.3), donde la ley se lee como proyectar en dos pasos sobre subespacios anidados: la misma figura del Pitágoras anidado que usará la lección 13.
 
 Aplicándola a $Z=\hat\beta_2$, y usando que $E[\hat\beta_2\mid\boldsymbol X]=\beta_2\,\mathit1$ es constante:
 \[
@@ -545,11 +552,11 @@ Tres divisores, tres motivos distintos: $1$ (geometría pura, sin más), $n$ (pa
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
 Con insesgadez y varianza ya establecidas, cerramos con dos observaciones que no vamos a demostrar en este curso, pero que conviene conocer.
 
-La primera es el /Teorema de Gauss–Markov/: bajo los tres supuestos del Modelo Clásico de Regresión Lineal (y el muestreo aleatorio de esta sesión), $\hat\beta_2$ no es solo insesgado; es, además, el estimador de /menor varianza/ entre todos los estimadores /lineales/ e /insesgados/. Lineal quiere decir de la forma $\sum_iC_iY_i$, donde $Y_1,\ldots,Y_n$ son las variables aleatorias de la muestra (no los datos observados $y_1,\ldots,y_n$) y los pesos $C_i$ no dependen de $\boldsymbol Y$ (van con mayúscula porque, igual que los $W_i$, pueden ser funciones de $\boldsymbol X$). Este resultado se resume con el acrónimo /BLUE/ (/Best Linear Unbiased Estimator/, ``el mejor estimador lineal insesgado''). No lo demostraremos: la demostración general requiere comparar $\hat\beta_2$ con un estimador lineal insesgado arbitrario, con maquinaria matricial que este curso no desarrolla. Pero conviene mencionarlo: es la justificación teórica de por qué, entre todas las rectas que podríamos ajustar, elegimos la de mínimos cuadrados.
+La primera es el /Teorema de Gauss–Markov/: bajo los tres supuestos del Modelo Clásico de Regresión Lineal (y el muestreo aleatorio de esta sesión), $\hat\beta_2$ no es solo insesgado; es, además, el estimador de /menor varianza/ entre todos los estimadores /lineales/ e /insesgados/. Lineal quiere decir de la forma $\sum_iC_iY_i$, donde $Y_1,\ldots,Y_n$ son las variables aleatorias de la muestra (no los datos observados $y_1,\ldots,y_n$) y los pesos $C_i$ no dependen de $\boldsymbol Y$ (van con mayúscula porque, igual que los $W_i$, pueden ser funciones de $\boldsymbol X$). Este resultado se resume con el acrónimo /BLUE/ (/Best Linear Unbiased Estimator/, ``el mejor estimador lineal insesgado''). La demostración está en el apéndice (sección 7.3), y no necesita matrices: cualquier otro vector de pesos insesgado difiere de los pesos MCO en un vector ortogonal a ellos, y Pitágoras hace el resto; aquí basta con saber que es la justificación teórica de por qué, entre todas las rectas que podríamos ajustar, elegimos la de mínimos cuadrados.
 
-La segunda observación es más práctica: la fórmula $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-{\overline{X}})^2$ depende de $\sigma^2$, la varianza de la perturbación poblacional, que no conocemos. Para usarla en la práctica (algo que haremos en la próxima sesión teórica, al construir errores estándar) necesitamos estimar $\sigma^2$ a partir de los residuos $\boldsymbol{\mathop{\widehat e}}$. Estos residuos observados se interpretan aquí como la realización, sobre nuestra muestra concreta, del vector aleatorio de residuos $\boldsymbol{\mathop{\widehat{E}}}$, cuyas componentes son $\hat E_i=Y_i-\hat\beta_1\,\mathit1-\hat\beta_2X_i$; es el mismo paso de variable aleatoria a dato que hemos dado varias veces en esta sesión. Esas componentes aproximan, sin ser idénticas a ellas, a las perturbaciones $U_i$ del modelo poblacional.[fn::Esta es la posición de Eros con la que abríamos la lección 9: ni conocemos $U_i$ (eso sería la posición del dios), ni carecemos de toda información sobre ella (la posición del ignorante); $\hat E_i$ es nuestro mejor sustituto calculable, construido para que, bajo los supuestos del modelo, su comportamiento medio reproduzca el de $U_i$.]
+La segunda observación es más práctica: la fórmula $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-{\overline{X}})^2$ depende de $\sigma^2$, la varianza de la perturbación poblacional, que no conocemos. Para usarla en la práctica (algo que haremos en la próxima sesión teórica, al construir errores estándar) necesitamos estimar $\sigma^2$ a partir de los residuos $\boldsymbol{\mathop{\widehat e}}$. Estos residuos observados se interpretan aquí como la realización, sobre nuestra muestra concreta, de la lista de residuos $(\hat E_1,\ldots,\hat E_n)$, con $\hat E_i=Y_i-\hat\beta_1\,\mathit1-\hat\beta_2X_i$; es el mismo paso de variable aleatoria a dato que hemos dado varias veces en esta sesión. Esas componentes aproximan, sin ser idénticas a ellas, a las perturbaciones $U_i$ del modelo poblacional.[fn::Esta es la posición de Eros con la que abríamos la lección 9: ni conocemos $U_i$ (eso sería la posición del dios), ni carecemos de toda información sobre ella (la posición del ignorante); $\hat E_i$ es nuestro mejor sustituto calculable, construido para que, bajo los supuestos del modelo, su comportamiento medio reproduzca el de $U_i$.]
 
-La estimación natural sería $\langle\boldsymbol{\mathop{\widehat e}},\boldsymbol{\mathop{\widehat e}}\rangle_s=\mathrm{SRC}/n$, la varianza de los residuos con nuestra convención habitual. Pero puede demostrarse (no lo haremos aquí) que el estimador subyacente es /sesgado/: subestima $\sigma^2$ en promedio. Ese estimador es la misma fórmula, evaluada sobre la muestra aleatoria $\boldsymbol{\mathop{\widehat{E}}}$ en lugar de sobre los datos observados $\boldsymbol{\mathop{\widehat e}}$.[fn::Seguimos aquí, por simplicidad, la misma convención del resto de esta sección: escribimos las fórmulas con los datos observados $\boldsymbol{\mathop{\widehat e}}$, aunque hablemos de propiedades, como el sesgo o la insesgadez, que, en sentido estricto, son propiedades del estimador (la variable aleatoria subyacente), no de un número concreto. Es el mismo tipo de abuso de notación, ya señalado al distinguir estimador de estimación, habitual en toda la literatura econométrica; introducir aquí toda la notación necesaria para evitarlo tendría un coste en claridad mayor que el beneficio.] La razón de este sesgo es geométrica, y ya la conocemos en parte: por construcción (ecuaciones normales, lección 10), los residuos $\boldsymbol{\mathop{\widehat e}}$ no son un vector arbitrario de $\mathbb R^n$, sino que viven siempre en el subespacio ortogonal a las columnas de $\boldsymbol{\mathsf X}$. Como ese subespacio de regresores tiene dimensión $k$ (hay $k$ regresores, incluida la constante), su complemento ortogonal tiene dimensión $n-k$ (la misma cuenta informal de dimensión que empleamos ya en la lección 4 para $\mathcal L(\boldsymbol1)^\perp$, de dimensión $n-1$, el caso particular $k=1$). Dicho de otro modo: aunque $\boldsymbol{\mathop{\widehat e}}$ tiene $n$ componentes, solo $n-k$ de ellas son realmente ``libres''; las $k$ restantes quedan fijadas por las $k$ condiciones de ortogonalidad $\boldsymbol{\mathsf X}^\top\boldsymbol{\mathop{\widehat e}}=\boldsymbol 0$. Dividir por $n-k$, en vez de por $n$, es la manera de tener en cuenta esta pérdida de $k$ grados de libertad, y es lo que hace insesgado al estimador resultante. El estimador que sí resulta insesgado usa, por tanto, ese divisor distinto: $n-k$ (el número de observaciones menos el número total de coeficientes estimados, incluida la constante) en vez de $n$.[fn::Esta idea ya la usamos, sin justificarla del todo, en la práctica de laboratorio que sigue a la lección 10, al motivar por qué dividir por $n-k$ (y no por $n$) produce estimadores insesgados. Precisemos ahora, con algo más de rigor, el motivo exacto de ese divisor.]
+La estimación natural sería $\langle\boldsymbol{\mathop{\widehat e}},\boldsymbol{\mathop{\widehat e}}\rangle_s=\mathrm{SRC}/n$, la varianza de los residuos con nuestra convención habitual. Pero ese estimador, la misma fórmula evaluada sobre la lista de residuos $(\hat E_1,\ldots,\hat E_n)$ en lugar de sobre los datos observados $\boldsymbol{\mathop{\widehat e}}$, es /sesgado/: subestima $\sigma^2$ en promedio. La demostración está en el apéndice (sección 7.2); aquí basta con la razón geométrica que sigue.[fn::Seguimos aquí, por simplicidad, la misma convención del resto de esta sección: escribimos las fórmulas con los datos observados $\boldsymbol{\mathop{\widehat e}}$, aunque hablemos de propiedades, como el sesgo o la insesgadez, que, en sentido estricto, son propiedades del estimador (la variable aleatoria subyacente), no de un número concreto. Es el mismo tipo de abuso de notación, ya señalado al distinguir estimador de estimación, habitual en toda la literatura econométrica; introducir aquí toda la notación necesaria para evitarlo tendría un coste en claridad mayor que el beneficio.] La razón de este sesgo es geométrica, y ya la conocemos en parte: por construcción (ecuaciones normales, lección 10), los residuos $\boldsymbol{\mathop{\widehat e}}$ no son un vector arbitrario de $\mathbb R^n$, sino que viven siempre en el subespacio ortogonal a las columnas de $\boldsymbol{\mathsf X}$. Como ese subespacio de regresores tiene dimensión $k$ (hay $k$ regresores, incluida la constante), su complemento ortogonal tiene dimensión $n-k$ (la misma cuenta informal de dimensión que empleamos ya en la lección 4 para $\mathcal L(\boldsymbol1)^\perp$, de dimensión $n-1$, el caso particular $k=1$). Dicho de otro modo: aunque $\boldsymbol{\mathop{\widehat e}}$ tiene $n$ componentes, solo $n-k$ de ellas son realmente ``libres''; las $k$ restantes quedan fijadas por las $k$ condiciones de ortogonalidad $\boldsymbol{\mathsf X}^\top\boldsymbol{\mathop{\widehat e}}=\boldsymbol 0$. En una base ortonormal de ese complemento, $\mathrm{SRC}$ es la suma de los cuadrados de $n-k$ coordenadas, y cada una de ellas, evaluada sobre la muestra, tiene esperanza $\sigma^2$: por eso $\mathrm{SRC}$ tiene esperanza $(n-k)\sigma^2$, y $\mathrm{SRC}/n$, esperanza $\frac{n-k}{n}\sigma^2$, menor que $\sigma^2$. Dividir por $n-k$, en vez de por $n$, es la manera de tener en cuenta esta pérdida de $k$ grados de libertad, y es lo que hace insesgado al estimador resultante. El estimador que sí resulta insesgado usa, por tanto, ese divisor distinto: $n-k$ (el número de observaciones menos el número total de coeficientes estimados, incluida la constante) en vez de $n$.[fn::Esta idea ya la usamos, sin justificarla del todo, en la práctica de laboratorio que sigue a la lección 10, al motivar por qué dividir por $n-k$ (y no por $n$) produce estimadores insesgados. Precisemos ahora, con algo más de rigor, el motivo exacto de ese divisor.]
 
 Esto nos lleva, de forma natural, a introducir un /tercer/ producto escalar en la familia que el curso ha ido construyendo desde la lección 2: junto al euclídeo $\langle\cdot,\cdot\rangle_e$ (divisor $1$) y al estadístico $\langle\cdot,\cdot\rangle_s=\langle\cdot,\cdot\rangle_n$ (divisor $n$), definimos
 \[
@@ -559,7 +566,7 @@ Sigue siendo, técnicamente, un producto escalar legítimo (multiplicar por una 
 \[
 \mathfrak s^2=\langle\boldsymbol{\mathop{\widehat e}},\boldsymbol{\mathop{\widehat e}}\rangle_{n-k}=\frac{\mathrm{SRC}}{n-k},
 \]
-que sí es un estimador insesgado de $\sigma^2$ (afirmación que no demostramos). Merece la pena subrayar que el motivo último de cada uno de los tres divisores es distinto. El divisor $1$ no obedece a ningún motivo particular (es la geometría euclídea sin más). El divisor $n$ se eligió, en la lección 4, para que $\|\boldsymbol1\|_s=1$: un motivo puramente geométrico. El divisor $n-k$ se elige aquí por un motivo /estadístico/, lograr insesgadez, aunque, como acabamos de ver, admite también una lectura geométrica: es la dimensión del subespacio donde vive $\boldsymbol{\mathop{\widehat e}}$. El símbolo $\mathfrak s^2$ (con la ese gótica) se reserva para esta cantidad, para no confundirla con la varianza muestral $S^2$ (introducida hoy) ni con la $s^2$ de los manuales clásicos de estadística, que suele denotar esto mismo con otra convención tipográfica.
+que sí es un estimador insesgado de $\sigma^2$: la demostración está en el apéndice (sección 7.2), y es la cuenta de coordenadas del párrafo anterior. Merece la pena subrayar que el motivo último de cada uno de los tres divisores es distinto. El divisor $1$ no obedece a ningún motivo particular (es la geometría euclídea sin más). El divisor $n$ se eligió, en la lección 4, para que $\|\boldsymbol1\|_s=1$: un motivo puramente geométrico. El divisor $n-k$ se elige aquí por un motivo /estadístico/, lograr insesgadez, y la lectura geométrica no es un añadido sino la razón: es la dimensión del subespacio donde vive $\boldsymbol{\mathop{\widehat e}}$, el número de coordenadas del ruido que entran en $\mathrm{SRC}$. El símbolo $\mathfrak s^2$ (con la ese gótica) se reserva para esta cantidad, para no confundirla con la varianza muestral $S^2$ (introducida hoy) ni con la $s^2$ de los manuales clásicos de estadística, que suele denotar esto mismo con otra convención tipográfica.
 
 La expresión $n-k$ recibe, en la terminología habitual de la estadística, el nombre de /grados de libertad/ del modelo: el número de observaciones menos el número de parámetros ya estimados. En esta sesión, con dos regresores en total, $k=2$, así que $\mathfrak s^2=\mathrm{SRC}/(n-2)$. Volveremos sobre los grados de libertad, con más detalle, en la próxima sesión teórica.
 
@@ -603,7 +610,7 @@ Todo lo demostrado en esta sesión se ha limitado, deliberadamente, al caso con 
 \[
 E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\,\mathit1,\qquad Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}.
 \]
-Aquí $\boldsymbol X$ es la misma matriz aleatoria de regresores que fijamos al abrir la sesión, solo que ahora con $k$ columnas en lugar de dos; $\boldsymbol{\mathsf X}$ sigue denotando, como en la lección 10, la matriz de datos /observados/. La primera igualdad generaliza la insesgadez de la sección ``Insesgadez'': $\boldsymbol\beta\,\mathit1$ denota el vector cuyas componentes son las variables aleatorias constantes $\beta_1\,\mathit1,\ldots,\beta_k\,\mathit1$, el análogo, para un vector de parámetros, de la constante $\beta_2\,\mathit1$ que obtuvimos en la sección ``Insesgadez''. La segunda generaliza la varianza de la sección ``Varianza'': es una matriz $k\times k$ que ocupa el lugar que antes ocupaba el escalar $1/\sum_i(X_i-{\overline{X}})^2$; en su diagonal contiene las varianzas $Var[\hat\beta_1\mid\boldsymbol X],\ldots,Var[\hat\beta_k\mid\boldsymbol X]$ (con $Var[\hat\beta_2\mid\boldsymbol X]$ como caso particular, ya conocido, en la posición $(2,2)$), y fuera de la diagonal, las covarianzas $Cov[\hat\beta_i,\hat\beta_j\mid\boldsymbol X]$ entre cada par de coeficientes.
+Aquí $\boldsymbol X$ es la misma matriz aleatoria de regresores que fijamos al abrir la sesión, solo que ahora con $k$ columnas en lugar de dos; $\boldsymbol{\mathsf X}$ sigue denotando, como en la lección 10, la matriz de datos /observados/. La primera igualdad generaliza la insesgadez de la sección ``Insesgadez'': $\boldsymbol\beta\,\mathit1$ denota el vector cuyas componentes son las variables aleatorias constantes $\beta_1\,\mathit1,\ldots,\beta_k\,\mathit1$, el análogo, para un vector de parámetros, de la constante $\beta_2\,\mathit1$ que obtuvimos en la sección ``Insesgadez''. La segunda generaliza la varianza de la sección ``Varianza'': es una matriz $k\times k$ que ocupa el lugar que antes ocupaba el escalar $1/\sum_i(X_i-{\overline{X}})^2$; en su diagonal contiene las varianzas $Var[\hat\beta_1\mid\boldsymbol X],\ldots,Var[\hat\beta_k\mid\boldsymbol X]$ (con $Var[\hat\beta_2\mid\boldsymbol X]$ como caso particular, ya conocido, en la posición $(2,2)$), y fuera de la diagonal, las covarianzas $Cov[\hat\beta_i,\hat\beta_j\mid\boldsymbol X]$ entre cada par de coeficientes. Para cada coeficiente por separado, la insesgadez y la varianza con $k$ regresores sí se demuestran con material del curso, una vez que la lección 14 define la parte propia del regresor: apéndice, secciones 5.4, 6.5 y 7.1. La fórmula matricial completa sigue enunciada; su diagonal, no.
 
 Al evaluar esta fórmula en una muestra ya observada, sustituimos la matriz aleatoria $\boldsymbol X$ por la matriz de datos $\boldsymbol{\mathsf X}$, con lo que queda por calcular $(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$. Multiplicada por $\mathfrak s^2$ (la estimación de $\sigma^2$ de ``MCO es BLUE; estimando $\sigma^2$'', pues $\sigma^2$ sigue siendo desconocido) da $\mathfrak s^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$: la fórmula que Gretl (y cualquier otro programa estadístico) usa internamente para calcular los errores estándar que veremos en la próxima sesión teórica.
 
@@ -634,7 +641,7 @@ exactamente la fórmula de la sección ``Varianza''. Además, la misma matriz da
 |------------+-----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------|
 | Insesgadez | $\mathrm{E}(\hat\beta_2)=\beta_2$                                                 | Linealidad + $\mathrm{Var}(X)\neq0$ + muestreo aleatorio                                |
 | Varianza   | $Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-{\overline{X}})^2}$ | + Homocedasticidad (+ $Cov[U_i,U_j\mid\boldsymbol X]=\mathit0$, del muestreo aleatorio) |
-| Eficiencia | MCO es BLUE (mejor entre los lineales e insesgados)                               | Los tres + muestreo aleatorio (Gauss–Markov, sin demostrar)                             |
+| Eficiencia | MCO es BLUE (mejor entre los lineales e insesgados)                               | Los tres + muestreo aleatorio (Gauss–Markov, demostrado en el apéndice)                 |
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 Casi nada nuevo: la vía alternativa (lección 7), la esperanza condicional y la independencia entre observaciones (lección 9). Lo único nuevo: evaluar la fórmula sobre variables aleatorias, no sobre datos; eso, y solo eso, convierte $\hat\beta_2$ en un estimador.
@@ -666,272 +673,11 @@ Queda, sin embargo, una limitación importante que esta sesión no resuelve. Sab
 
 * Apéndice: lanzar una moneda infinitas veces
 :PROPERTIES:
-:metadata: (slideshow . ((slide_type . skip)))
 :CUSTOM_ID: apendice-copias
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-/Material complementario/. Este apéndice no forma parte de la sesión; responde a una pregunta que la lección 9 dejó abierta y que esta lección ha usado sin discutir: de dónde salen las copias idénticas e independientes de una variable aleatoria.
-
-** La pregunta
-:PROPERTIES:
-:metadata: (slideshow . ((slide_type . skip)))
-:UNNUMBERED: notoc
-:END:
-
-#+attr_ipynb: (slideshow . ((slide_type . skip)))
-
-La lección 9 dijo que interpretamos los $n$ datos como la realización de $n$
-copias idénticas e independientes de una variable aleatoria. Esta lección
-ha convertido esa frase en el marco de la muestra aleatoria y la ha usado de dos
-maneras: para elevar la exogeneidad al condicionamiento en toda la matriz
-$\boldsymbol X$ y para anular las covarianzas entre perturbaciones de
-observaciones distintas. En ningún momento se dijo de dónde salen esas
-copias. ¿Cabe en un mismo espacio de sucesos $\Omega$ un número ilimitado de
-variables aleatorias con la misma distribución e independientes entre sí?
-¿Y qué significa, en el lenguaje geométrico del curso, que sean
-independientes?
-
-Este apéndice responde a las dos preguntas con el ejemplo más sencillo, el
-lanzamiento de una moneda, y deja enunciada la generalización.
-
-** El espacio: el intervalo $[0,1]$
-:PROPERTIES:
-:metadata: (slideshow . ((slide_type . skip)))
-:UNNUMBERED: notoc
-:END:
-
-#+attr_ipynb: (slideshow . ((slide_type . skip)))
-
-Tomemos como conjunto de sucesos elementales el intervalo $\Omega=[0,1]$.
-Un suceso elemental $\omega$ es un número entre $0$ y $1$; un suceso es un
-subconjunto del intervalo; y la probabilidad de un suceso es su /longitud/:
-el intervalo $[a,b]$ tiene probabilidad $b-a$. Con esa regla, $\Omega$ entero
-tiene probabilidad $1$, un punto aislado tiene probabilidad $0$, y la
-probabilidad de una unión de intervalos disjuntos es la suma de sus
-longitudes.[fn::Es la probabilidad /uniforme/ sobre $[0,1]$. No hace falta
-definirla para subconjuntos arbitrarios: en todo lo que sigue solo aparecen
-uniones finitas de intervalos.]
-
-Una variable aleatoria es, como en la lección 9, una función definida sobre
-$\Omega$. Aquí son funciones del intervalo $[0,1]$ en los números reales, y
-la constante $\mathit1$ es la función que vale $1$ en todo el intervalo.
-
-** La primera moneda
-:PROPERTIES:
-:metadata: (slideshow . ((slide_type . skip)))
-:UNNUMBERED: notoc
-:END:
-
-#+attr_ipynb: (slideshow . ((slide_type . skip)))
-
-La moneda que sale cara ($1$) o cruz ($0$) con la misma probabilidad es la
-función que vale $0$ en la primera mitad del intervalo y $1$ en la segunda:
-\[
-X_1(\omega)=\begin{cases}0 & \text{si } 0\leq\omega<\tfrac12,\\[2pt] 1 & \text{si } \tfrac12\leq\omega\leq1.\end{cases}
-\]
-Los dos sucesos $\{X_1=0\}$ y $\{X_1=1\}$ son intervalos de longitud
-$\tfrac12$, así que cada resultado tiene probabilidad $\tfrac12$. Y
-$\mathrm{E}(X_1)=\langle X_1,\mathit1\rangle_P=0\cdot\tfrac12+1\cdot\tfrac12=\tfrac12$.
-
-** La segunda moneda: repetir la operación dentro de cada mitad
-:PROPERTIES:
-:metadata: (slideshow . ((slide_type . skip)))
-:UNNUMBERED: notoc
-:END:
-
-#+attr_ipynb: (slideshow . ((slide_type . skip)))
-
-Para la segunda copia dividimos cada mitad en dos y volvemos a alternar:
-\[
-X_2(\omega)=\begin{cases}0 & \text{si } \omega\in[0,\tfrac14)\cup[\tfrac12,\tfrac34),\\[2pt] 1 & \text{si } \omega\in[\tfrac14,\tfrac12)\cup[\tfrac34,1].\end{cases}
-\]
-Es decir, $X_2$ vale $0$ en los cuartos primero y tercero y $1$ en los
-cuartos segundo y cuarto. Dos comprobaciones.
-
-/Idéntica distribución./ El suceso $\{X_2=0\}$ es la unión de dos cuartos,
-de longitud total $\tfrac12$; lo mismo $\{X_2=1\}$. La segunda moneda tiene la
-misma distribución que la primera.
-
-/Independencia./ Los cuatro resultados posibles del par $(X_1,X_2)$
-corresponden a los cuatro cuartos del intervalo, cada uno de longitud
-$\tfrac14$:
-
-| $(X_1,X_2)$ | suceso                    | probabilidad  |
-|-------------+---------------------------+---------------|
-| $(0,0)$     | $[0,\tfrac14)$            | $\tfrac14$    |
-| $(0,1)$     | $[\tfrac14,\tfrac12)$     | $\tfrac14$    |
-| $(1,0)$     | $[\tfrac12,\tfrac34)$     | $\tfrac14$    |
-| $(1,1)$     | $[\tfrac34,1]$            | $\tfrac14$    |
-
-En los cuatro casos $\mathrm P(X_1=a,\,X_2=b)=\tfrac14=\mathrm P(X_1=a)\,\mathrm P(X_2=b)$.
-Eso es, por definición, que $X_1$ y $X_2$ sean independientes: saber cómo ha
-salido la primera moneda no cambia las probabilidades de la segunda.
-
-Fíjese en que $X_1$ y $X_2$ /no son la misma función/: en $\omega=0{,}3$ la
-primera vale $0$ y la segunda vale $1$. Son dos funciones distintas sobre el
-mismo $\Omega$ con la misma distribución. Es lo que la sección ``El marco: muestra aleatoria'' advertía en
-una nota al pie: dos copias independientes suelen asignar valores distintos
-al mismo suceso elemental.
-
-** La moneda número \(n\): la cifra \(n\)-ésima
-:PROPERTIES:
-:metadata: (slideshow . ((slide_type . skip)))
-:UNNUMBERED: notoc
-:END:
-
-#+attr_ipynb: (slideshow . ((slide_type . skip)))
-
-El procedimiento no se agota. La tercera moneda divide cada cuarto en dos
-octavos y asigna $0$ a los octavos impares y $1$ a los pares; la cuarta hace
-lo mismo con los dieciseisavos; y así indefinidamente. La moneda número $n$
-es la función que vale $0$ en los intervalos de longitud $2^{-n}$ de orden
-impar y $1$ en los de orden par.
-
-Hay una manera de decirlo de una vez. Escriba $\omega$ en base dos,
-$\omega=0{,}a_1a_2a_3\ldots$ con cada $a_j$ igual a $0$ o a $1$. Entonces
-\[
-X_n(\omega)=a_n:\quad\text{la moneda \(n\)-ésima es la cifra binaria \(n\)-ésima de \(\omega\).}
-\]
-En efecto, la primera cifra es $0$ exactamente cuando $\omega<\tfrac12$; la
-segunda es $0$ en los cuartos primero y tercero; y en general la cifra $n$
-alterna entre $0$ y $1$ cada $2^{-n}$.[fn::Los números con dos desarrollos
-binarios, como $\tfrac12=0{,}1000\ldots=0{,}0111\ldots$, son los extremos de
-los intervalos: un conjunto numerable, de probabilidad cero. Da igual qué
-convenio se tome para ellos, y este es el mismo «casi seguro» de la lección
-9.]
-
-#+attr_latex: :width .85\textwidth
-#+attr_html: :width 700px
-#+NAME: FiguraMonedas
-#+CAPTION: Las tres primeras monedas como funciones sobre $\Omega=[0,1]$. Cada una vale $0$ en los intervalos impares de longitud $2^{-n}$ y $1$ en los pares; el punto relleno marca el extremo que pertenece al intervalo. La línea de puntos es el suceso elemental $\omega=0{,}3$, que en base dos empieza $0{,}010\ldots$: la primera moneda sale cruz, la segunda cara y la tercera cruz. Un $\omega$ es una tirada infinita.
-file:img/S15-Lecc11/Monedas.png
-
-Con esa descripción las dos propiedades se ven de golpe para cualquier
-número de copias. Fijados $n$ resultados $(a_1,\ldots,a_n)$, el suceso
-$\{X_1=a_1,\ldots,X_n=a_n\}$ es el conjunto de los $\omega$ cuyas $n$
-primeras cifras son esas: un intervalo de longitud $2^{-n}$. Luego
-\[
-\mathrm P(X_1=a_1,\ldots,X_n=a_n)=2^{-n}=\mathrm P(X_1=a_1)\cdots\mathrm P(X_n=a_n),
-\]
-que es la independencia de las $n$ monedas a la vez, no solo dos a dos; y
-cada $X_n$ por separado vale $0$ con probabilidad $\tfrac12$. En el intervalo
-$[0,1]$ caben, por tanto, infinitas copias idénticas e independientes de la
-moneda.
-
-Merece la pena leer la construcción al revés. Un $\omega$ es una sucesión
-infinita de cifras binarias, es decir, el resultado de lanzar la moneda
-infinitas veces. Elegir un suceso elemental al azar en $[0,1]$ es lo mismo
-que lanzar la moneda una y otra vez sin parar. El espacio de sucesos que
-parecía demasiado pequeño para una muestra contiene, de hecho, todas las
-muestras posibles de todos los tamaños.
-
-** Lectura geométrica: independientes es «a escuadra»
-:PROPERTIES:
-:metadata: (slideshow . ((slide_type . skip)))
-:UNNUMBERED: notoc
-:END:
-
-#+attr_ipynb: (slideshow . ((slide_type . skip)))
-
-La lección 9 dio a las variables aleatorias un producto escalar,
-$\langle X,Y\rangle_P=\mathrm E(XY)$, y con él la ortogonalidad y la
-proyección. ¿Cómo se lee la independencia en ese lenguaje?
-
-Empecemos por las dos primeras monedas. Sus versiones centradas son
-$X_1-\tfrac12\mathit1$ y $X_2-\tfrac12\mathit1$, que valen $-\tfrac12$ o
-$+\tfrac12$. Su producto escalar se calcula cuarto a cuarto:
-\[
-\Big\langle X_1-\tfrac12\mathit1,\;X_2-\tfrac12\mathit1\Big\rangle_P
-=\tfrac14\Big[(-\tfrac12)(-\tfrac12)+(-\tfrac12)(+\tfrac12)+(+\tfrac12)(-\tfrac12)+(+\tfrac12)(+\tfrac12)\Big]=0.
-\]
-Las dos monedas centradas son ortogonales. Y no solo la primera y la
-segunda: el mismo cálculo, intervalo a intervalo, da cero para cualquier par
-$X_i-\tfrac12\mathit1$ y $X_j-\tfrac12\mathit1$ con $i\neq j$, porque dentro de
-cada intervalo donde $X_i$ es constante, $X_j$ vale $0$ en la mitad y $1$ en
-la otra mitad.
-
-Ese cero es una covarianza nula, y para variables que solo toman dos valores
-la covarianza nula equivale a la independencia: de
-$\mathrm E(X_1X_2)=\mathrm E(X_1)\,\mathrm E(X_2)$ sale
-$\mathrm P(X_1=1,X_2=1)=\tfrac14$, y los otros tres casos se obtienen
-restando de las probabilidades marginales. Para variables con más de dos
-valores la covarianza no basta, y la caracterización correcta es la
-siguiente, que enunciamos sin demostrar:
-
-#+begin_quote
-/Independencia como ortogonalidad./ Dos variables aleatorias $X$ e $Y$ son
-independientes si y solo si toda función centrada de $X$ es ortogonal a toda
-función de $Y$:
-\[
-\big\langle f(X)-\mathrm E\big(f(X)\big)\,\mathit1,\;g(Y)\big\rangle_P=0
-\qquad\text{para todas las funciones $f$ y $g$.}
-\]
-#+end_quote
-
-Dicho con los subespacios de la lección 9: las funciones de $X$ forman un
-subespacio, y las funciones de $Y$ otro. Los dos contienen la recta
-$\mathcal L(\mathit1)$ de las constantes, así que no pueden ser
-perpendiculares del todo. Lo que dice la independencia es que, quitada esa
-recta común, lo que queda de cada uno es perpendicular a todo el otro: los
-dos subespacios están /a escuadra/ sobre la recta de las constantes. Con
-las monedas la imagen es exacta. Las funciones de $X_1$ son las
-combinaciones $a\,\mathit1+b\,X_1$, un plano que contiene la recta de las
-constantes; su parte centrada es la recta $\mathcal L(X_1-\tfrac12\mathit1)$;
-y las rectas centradas de dos monedas distintas son ortogonales, como se ha
-calculado.
-
-Esta es la traducción que la sección ``El marco: muestra aleatoria'' usó, en una nota al pie,
-para obtener $E[U_i\mid\boldsymbol X]=\mathit0$ a partir del muestreo
-aleatorio: «la parte centrada de cualquier función de $X_{-i}$ es ortogonal a
-cualquier función de $(X_i,U_i)$». Allí se apeló al hecho de que variables
-independientes están incorreladas; aquí se ve que la incorrelación de
-/todas/ las funciones es la independencia misma, y que en el ejemplo de la
-moneda se puede comprobar con una suma de cuatro términos.
-
-Una precisión, para no leer de más. Que las rectas centradas de las monedas
-sean ortogonales dos a dos dice que las monedas son independientes dos a
-dos. Que sean independientes /todas a la vez/ se ha comprobado en la sección
-anterior con los intervalos de longitud $2^{-n}$; en el lenguaje geométrico
-corresponde a que cada $X_n$ centrada sea ortogonal a todas las funciones de
-$(X_1,\ldots,X_{n-1})$, y no solo a cada $X_j$ por separado. Con la moneda
-también se cumple, porque las funciones de las $n-1$ primeras cifras son
-constantes en cada intervalo de longitud $2^{-(n-1)}$, y $X_n$ vale $0$ en
-una mitad de cada uno de esos intervalos y $1$ en la otra.
-
-** Más allá de la moneda
-:PROPERTIES:
-:metadata: (slideshow . ((slide_type . skip)))
-:UNNUMBERED: notoc
-:END:
-
-#+attr_ipynb: (slideshow . ((slide_type . skip)))
-
-La construcción anterior parece atada a la moneda, pero da mucho más, y lo
-enunciamos sin demostrar. Si $F$ es la función de distribución de una
-variable cualquiera $Y$ y $U$ es una variable uniforme en $[0,1]$, entonces
-$F^{-1}(U)$ tiene la distribución de $Y$.[fn::Con $F^{-1}(u)$ definida como
-el menor $y$ tal que $F(y)\geq u$; para distribuciones continuas es la
-inversa habitual.] Y en el intervalo $[0,1]$ hay infinitas uniformes
-independientes: basta repartir las cifras binarias de $\omega$ en infinitas
-listas infinitas (las cifras de lugar impar, las de lugar par que no son
-múltiplo de cuatro, y así sucesivamente) y leer cada lista como un número de
-$[0,1]$. Cada uno de esos números es una uniforme, son independientes entre
-sí porque usan cifras distintas, y aplicando $F^{-1}$ a cada uno se obtienen
-infinitas copias idénticas e independientes de $Y$.
-
-Así que la frase de la lección 9, «$n$ copias idénticas e independientes de
-$Y$», no es un supuesto sobre el mundo, sino una construcción: dado
-cualquier $Y$, existe un espacio $\Omega$, el intervalo $[0,1]$ con la
-longitud como probabilidad, en el que caben tantas copias como se quiera. Lo
-que sí es un supuesto es que /nuestros datos/ sean una realización de esas
-copias. Ese supuesto es el muestreo aleatorio de esta lección.
-
-/Para profundizar/: Williams, D. (1991), /Probability with Martingales/,
-cap. 4 (la construcción de sucesiones independientes en $[0,1]$ a partir de
-las cifras binarias); Wooldridge, J. M. (2020), apéndice B.1 (variables
-aleatorias e independencia).
-
+/Material complementario/. Este apartado respondía a una pregunta que la lección 9 dejó abierta y que esta lección ha usado sin discutir: de dónde salen las copias idénticas e independientes de una variable aleatoria, y qué significa, en el lenguaje geométrico del curso, que sean independientes. La respuesta, con el ejemplo de la moneda (el intervalo $[0,1]$ con la longitud como probabilidad, y la moneda \(n\)-ésima como la cifra binaria \(n\)-ésima de $\omega$), está ahora en el apéndice ``Estructura geométrica de la probabilidad y de la inferencia en el modelo de regresión'', secciones 1.5 (independientes es ``a escuadra''), 2 (la moneda) y 3 (la matriz de copias: filas, columnas y vectores de $\mathbb R^n$). Lo esencial cabe en dos frases: ``$n$ copias idénticas e independientes'' no es un supuesto sobre el mundo, sino una construcción, porque dada cualquier variable existe un $\Omega$ en el que caben tantas copias como se quiera; lo que sí es un supuesto es que /nuestros datos/ sean una realización de esas copias, y ese supuesto es el muestreo aleatorio de esta lección.
 
 * Preguntas de repaso (sesión 15)                                  :htmlonly:
    :PROPERTIES:
