@@ -16,28 +16,39 @@
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
 
-nulldata 8 --preserve
-setobs 1 1 --cross-section
+outfile --quiet datos.txt
+    nulldata 8 --preserve
+    setobs 1 1 --cross-section
+    
+    matrix medad = {7;7;8;10;10;11;12;14}
+    matrix mpeso = {39;40;42;49;51;54;56;58}
+    series edad = medad
+    series peso = mpeso
+    
+    setinfo peso -d "Peso (kg)" -n "Peso (kg)"
+    setinfo edad -d "Edad (anios)" -n "Edad (anios)"
+    
+    print edad peso --byobs
+end outfile
 
-matrix medad = {7;7;8;10;10;11;12;14}
-matrix mpeso = {39;40;42;49;51;54;56;58}
-series edad = medad
-series peso = mpeso
+outfile --quiet modeloLineal.txt
+    ols peso const edad
+end outfile
 
-setinfo peso -d "Peso (kg)" -n "Peso (kg)"
-setinfo edad -d "Edad (anios)" -n "Edad (anios)"
-
-print edad peso --byobs
-
-ols peso const edad
 gnuplot peso edad --output="peso_edad_lineal.png"
 
-series edad2 = edad^2
-ols peso const edad edad2
+outfile --quiet modeloCuadratico.txt
+    series edad2 = edad^2
+    ols peso const edad edad2
+end outfile
+
 gnuplot peso edad --fit=quadratic --output="peso_edad_cuadratico.png"
 
-series edad3 = edad^3
-ols peso const edad edad2 edad3
+outfile --quiet modeloCubico.txt
+    series edad3 = edad^3
+    ols peso const edad edad2 edad3
+end outfile
+
 gnuplot peso edad --fit=cubic --output="peso_edad_cubico.png"
 
 outfile --quiet comparacionTresModelosR2.txt

@@ -17,12 +17,14 @@ string directory = getenv("DIRECTORIO")
 set workdir "@directory"
 
 open hprice2.gdt --quiet
-setinfo price   -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
-setinfo rooms   -d "Número medio de habitaciones" -n "Habitaciones"
-setinfo nox     -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
-setinfo stratio -d "Ratio alumnos/profesor en la zona" -n "Ratio alumnos/profesor"
-
-summary price rooms nox stratio
+outfile --quiet resumen.txt
+    setinfo price   -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+    setinfo rooms   -d "Número medio de habitaciones" -n "Habitaciones"
+    setinfo nox     -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
+    setinfo stratio -d "Ratio alumnos/profesor en la zona" -n "Ratio alumnos/profesor"
+    
+    summary price rooms nox stratio
+end outfile
 
 outfile --quiet Ols_rooms_nox_simple_y_conjunto.txt
     ols price const rooms
@@ -54,7 +56,7 @@ outfile --quiet comparacionR2cuatroModelos.txt
     printf "R2 price~rooms+nox+stratio    = %.4f\n", r2_todos
 end outfile
 
-outfile --quiet r2AjustadoCuatroModelos.txt
+outfile --quiet r2AjustadoTresModelos.txt
     ols price const rooms nox --quiet
     scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
     printf "Modelo price~rooms+nox\n"

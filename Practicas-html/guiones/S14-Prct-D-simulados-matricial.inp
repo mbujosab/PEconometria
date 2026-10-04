@@ -16,19 +16,21 @@
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
 
-nulldata 40 --preserve
-set seed 97531
-
-series x2 = uniform(0,10)
-series x3 = 0.6*x2 + normal(0,2)
-series u  = normal(0,3)
-
-scalar b1 = 5
-scalar b2 = 2
-scalar b3 = -1
-series y = b1 + b2*x2 + b3*x3 + u
-
-printf "Correlacion entre x2 y x3 = %.4f  (no son ortogonales)\n", corr(x2,x3)
+outfile --quiet datosSimulados.txt
+    nulldata 40 --preserve
+    set seed 97531
+    
+    series x2 = uniform(0,10)
+    series x3 = 0.6*x2 + normal(0,2)
+    series u  = normal(0,3)
+    
+    scalar b1 = 5
+    scalar b2 = 2
+    scalar b3 = -1
+    series y = b1 + b2*x2 + b3*x3 + u
+    
+    printf "Correlacion entre x2 y x3 = %.4f  (no son ortogonales en desviaciones)\n", corr(x2,x3)
+end outfile
 
 outfile --quiet matrizXyEcuacionesNormales.txt
     list Xlist = const x2 x3
@@ -113,4 +115,38 @@ outfile --quiet colinealidadExacta.txt
     printf "determinante de X'X con C y F = %g   (una matriz invertible tiene determinante distinto de cero)\n", det(Xc'Xc)
     
     ols y const C F
+end outfile
+
+outfile --quiet coordenadasBaseOrtonormal.txt
+    ols y const x2 x3 --quiet
+    scalar n = $nobs
+    scalar k = 3
+    
+    series d2  = x2 - mean(x2)
+    series b_1 = d2 / sqrt(sum(d2^2))
+    series d3  = x3 - mean(x3)
+    series e3  = d3 - sum(d3*b_1)*b_1
+    series b_2 = e3 / sqrt(sum(e3^2))
+    matrix BE  = {b_1} ~ {b_2}
+    
+    matrix M   = I(n) - ones(n,n)/n
+    matrix PR  = M - BE*BE'
+    matrix V
+    matrix lam = eigensym(PR, &V)
+    matrix BR  = selifc(V, (lam .> 0.5)')
+    printf "vectores de la base: %d en E, %d en R, total %d = n-1\n", cols(BE), cols(BR), cols(BE)+cols(BR)
+    printf "ortonormalidad: max|B'B - I| = %g ; media cero: max|B'1| = %g\n", max(abs(vec((BE~BR)'(BE~BR) - I(n-1)))), max(abs((BE~BR)'ones(n,1)))
+    
+    matrix v  = {y} - mean(y)
+    matrix cE = BE'v
+    matrix cR = BR'v
+    printf "\ncoordenadas en E: c1 = %.4f, c2 = %.4f\n", cE[1], cE[2]
+    printf "primeras coordenadas en R: %.4f, %.4f, %.4f, ...\n", cR[1], cR[2], cR[3]
+    
+    scalar STC = sum((y - mean(y))^2)
+    printf "\nsuma de cuadrados de las coordenadas de E = %10.4f   SEC = %10.4f\n", cE'cE, STC - $ess
+    printf "suma de cuadrados de las coordenadas de R = %10.4f   SRC = %10.4f\n", cR'cR, $ess
+    printf "suma de todas                             = %10.4f   STC = %10.4f\n", cE'cE + cR'cR, STC
+    printf "\n(SEC/(k-1)) / (SRC/(n-k)) = %.4f    F de Gretl = %.4f\n", (cE'cE/(k-1)) / (cR'cR/(n-k)), $Fstat
+    printf "c2 / ||parte propia de x3|| = %.6f    beta3 de Gretl = %.6f\n", cE[2]/sqrt(sum(e3^2)), $coeff(x3)
 end outfile

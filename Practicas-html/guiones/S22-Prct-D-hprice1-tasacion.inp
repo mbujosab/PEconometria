@@ -66,9 +66,19 @@ restrict --quiet
     b[colonial] = 0
 end restrict
 scalar Frac = $test
+restrict --quiet
+    b[const] = 0
+    b[assess] = 1
+    b[bdrms] = 0
+    b[lotsize] = 0
+    b[sqrft] = 0
+    b[colonial] = 0
+end restrict
+scalar Fseis = $test
 series dif = price - assess
 outfile --quiet racionalidad.txt
     printf "Tasacion racional (coef. de assess = 1 y caracteristicas = 0): F(5,%d) = %.3f   F_c = %.3f   valor p = %.3f\n\n", df, Frac, critical(F, 5, df, 0.05), pvalue(F, 5, df, Frac)
     ols dif const
     printf "media(price - assess) = %.2f   ee = %.2f   t = %.2f   (%.1f%% del precio medio, %.1f)\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), 100*$coeff(const)/mean(price), mean(price)
+    printf "Con la sexta restriccion, constante = 0: F(6,%d) = %.3f   valor p = %.4f\n", df, Fseis, pvalue(F, 6, df, Fseis)
 end outfile
