@@ -1,0 +1,122 @@
+#+TITLE: Nota: qué significa «la suma de cuadrados de las perturbaciones se reparte, en esperanza, por igual entre las dimensiones»
+#+DATE: 2026-10-02
+#+LANGUAGE: es
+#+OPTIONS: toc:nil
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage{polyglossia}
+#+LATEX_HEADER: \setmainlanguage{spanish}
+#+LATEX_HEADER: \usepackage{amsmath,amssymb}
+#+LATEX_HEADER: \usepackage[indent]{parskip}
+#+LATEX_HEADER: \usepackage{fullpage}
+
+# Nota de trabajo para decidir la primera decisión pendiente de la segunda
+# pasada (abreviaturas «el ruido reparte su longitud» en transparencias y
+# recapitulaciones de L13). Escrita con las convenciones de §4.2 del Plan:
+# listas de variables aleatorias no son vectores de R^n; las esperanzas
+# condicionales son variables aleatorias; identidades algebraicas válidas
+# para cualquier valor de los regresores.
+
+* El objeto
+
+Bajo $H_0$, el modelo poblacional es $Y_i=\beta_1\,\mathit1+U_i$ para cada $i$, y en la lección 12 se vio que, al restar a cada $Y_i$ la media muestral $\overline Y$, la constante se cancela:
+\[
+Y_i-\overline Y=U_i-\overline U,\qquad i=1,\ldots,n .
+\]
+El vector de datos en desviaciones, $\boldsymbol y-\boldsymbol{\mathop{\overline y}}$, es por tanto la realización de la lista de perturbaciones centradas $(U_1-\overline U,\ldots,U_n-\overline U)$. Cada realización es un punto de $\mathcal L(\boldsymbol 1)^\perp$, el subespacio de $\mathbb R^n$ de los vectores de media cero, que tiene dimensión $n-1$ (lección 4).
+
+* Las coordenadas en una base ortonormal
+
+Aquí hay que distinguir dos planos, y conviene hacerlo desde el principio. En el plano de los datos, los regresores son los vectores $\boldsymbol x_2,\ldots,\boldsymbol x_k$ de $\mathbb R^n$, las columnas de la matriz de datos $\boldsymbol{\mathsf X}$. La lección 13 toma en $\mathcal L(\boldsymbol 1)^\perp$ una base ortonormal $\boldsymbol b_1,\ldots,\boldsymbol b_{n-1}$ cuyos $k-1$ primeros vectores generan el subespacio de los regresores en desviaciones. Esa base se obtiene con una /regla de cálculo/ que toma los vectores de datos $\boldsymbol x_2,\ldots,\boldsymbol x_k$ y devuelve $n-1$ vectores de $\mathbb R^n$: por ejemplo, ortogonalizar los regresores en desviaciones (práctica D de la sesión 14) y completar con una base del resto de $\mathcal L(\boldsymbol 1)^\perp$. Es una fórmula de datos, como la de $\hat\beta_2$ en la lección 7.
+
+En el plano aleatorio, los regresores son la muestra aleatoria $\boldsymbol X$ de la lección 11, la versión aleatoria de $\boldsymbol{\mathsf X}$. La misma regla de cálculo, evaluada sobre $\boldsymbol X$ en lugar de sobre $\boldsymbol{\mathsf X}$, ya no devuelve números sino variables aleatorias: las componentes de los vectores de la base pasan a ser las variables aleatorias $B_{ji}$, funciones de $\boldsymbol X$, igual que los pesos $W_i$ de la lección 11 son la fórmula de los $w_i$ evaluada sobre $\boldsymbol X$. Para cada realización de $\boldsymbol X$ la regla da una base concreta de $\mathbb R^n$; vista como función de $\omega$, da la lista de variables aleatorias $B_{ji}$. Todo lo que sigue usa la base en los dos planos: las identidades (Pitágoras, norma uno, ortogonalidad a $\boldsymbol 1$) se demuestran en el plano de los datos para cualquier valor de los regresores, y por eso valen también como igualdades entre variables aleatorias.
+
+Para un punto $\boldsymbol v$ de $\mathcal L(\boldsymbol 1)^\perp$, Pitágoras generalizado (lección 13) dice que su longitud al cuadrado es la suma de los cuadrados de sus coordenadas en esa base:
+\[
+\Vert\boldsymbol v\Vert_e^2=\sum_{j=1}^{n-1}c_j^2,\qquad c_j=\langle\boldsymbol v,\boldsymbol b_j\rangle_e=\sum_{i=1}^n b_{ji}\,v_i .
+\]
+Esto es una identidad de $\mathbb R^n$: vale para cualquier punto y cualquier base ortonormal.
+
+Evaluemos ahora esa fórmula sobre la muestra aleatoria, como hace la lección 11 con las fórmulas de datos: las componentes $b_{ji}$ pasan a ser las $B_{ji}$ del párrafo anterior, y la fórmula de cada coordenada, evaluada sobre la muestra aleatoria, da las variables aleatorias
+\[
+C_j=\sum_{i=1}^n B_{ji}\,(U_i-\overline U),\qquad j=1,\ldots,n-1 .
+\]
+Conviene ser preciso con lo que es $C_j$: no es una coordenada de ningún vector, porque en el plano aleatorio no hay vectores ni bases. Es una variable aleatoria, la que a cada $\omega$ le asigna el número $c_j(\omega)$, que sí es la coordenada $j$-ésima del punto $(U_1(\omega)-\overline U(\omega),\ldots,U_n(\omega)-\overline U(\omega))$ en la base $\boldsymbol b_1(\omega),\ldots,\boldsymbol b_{n-1}(\omega)$ construida con esa realización de los regresores. Es el mismo estatus que tiene $\hat\beta_2(\boldsymbol X,\boldsymbol Y)$ en la lección 11: una fórmula de datos aplicada a variables aleatorias.
+Como cada $\boldsymbol b_j$ es ortogonal a $\boldsymbol 1$, sus componentes suman cero para cualquier valor de los regresores, $\sum_iB_{ji}=\mathit0$, y el término en $\overline U$ desaparece:
+\[
+C_j=\sum_{i=1}^n B_{ji}\,U_i .
+\]
+Es la misma estructura que $\hat\beta_2-\beta_2\,\mathit1=\sum_iW_iU_i$: una ``suma ponderada'' de las perturbaciones con pesos que son funciones de $\boldsymbol X$. La identidad de Pitágoras, evaluada sobre la muestra aleatoria, es una igualdad entre variables aleatorias:
+\[
+\sum_{i=1}^n(U_i-\overline U)^2=\sum_{j=1}^{n-1}C_j^2 .
+\]
+
+* El cálculo (donde antes me equivoqué)
+
+Queremos la esperanza condicional del cuadrado de cada $C_j$. Es una variable aleatoria, no un número; en el mensaje anterior la igualé a $\sigma^2$, y eso era la confusión que usted señaló. El cálculo correcto es el de la varianza de $\hat\beta_2$ en la lección 11, paso a paso.
+
+Desarrollando el cuadrado,
+\[
+C_j^2=\sum_{i}\sum_{l}B_{ji}B_{jl}\,U_iU_l .
+\]
+Las $B_{ji}$ son funciones de $\boldsymbol X$; por el Lema de la lección 11 salen fuera de $E[\,\cdot\mid\boldsymbol X]$ (sin dejar de ser variables aleatorias):
+\[
+E[C_j^2\mid\boldsymbol X]=\sum_{i}\sum_{l}B_{ji}B_{jl}\,E[U_iU_l\mid\boldsymbol X].
+\]
+Con homocedasticidad, $E[U_i^2\mid\boldsymbol X]=\sigma^2\,\mathit1$, y con la incorrelación del muestreo aleatorio, $E[U_iU_l\mid\boldsymbol X]=\mathit0$ para $i\neq l$, solo quedan los términos de la diagonal:
+\[
+E[C_j^2\mid\boldsymbol X]=\sigma^2\sum_{i=1}^nB_{ji}^2 .
+\]
+Hasta aquí, el lado derecho es una variable aleatoria, función de $\boldsymbol X$. Y aquí entra la identidad algebraica: cualquiera que sea el valor de los regresores, el vector $\boldsymbol b_j$ tiene norma uno, $\sum_ib_{ji}^2=1$. Evaluada sobre la muestra aleatoria, esa identidad dice que $\sum_iB_{ji}^2=\mathit1$, la variable aleatoria constante igual a $1$ (como $\sum_iW_iX_i=\mathit1$ en la lección 11). Por tanto
+\[
+E[C_j^2\mid\boldsymbol X]=\sigma^2\,\mathit1\qquad\text{para todo }j=1,\ldots,n-1 .
+\]
+La esperanza condicional del cuadrado de cada $C_j$ es la misma variable aleatoria constante, $\sigma^2\,\mathit1$. Dos observaciones sobre este resultado. Primera: no depende de $j$. La fórmula de la coordenada $j$-ésima, evaluada sobre la muestra aleatoria y elevada al cuadrado, tiene la misma esperanza condicional sea cual sea el vector $\boldsymbol b_j$ de la base del que proceda; lo único que ha intervenido de $\boldsymbol b_j$ es que tiene norma uno. Esto es lo que, abreviando y en el lenguaje del plano de los datos, se dice ``ninguna dirección se lleva, en esperanza, más que otra''. Segunda: de la variable aleatoria constante se pasa al número con la ley de las esperanzas iteradas (lección 11), $\mathrm E(Z)=\mathrm E\big(E[Z\mid\boldsymbol X]\big)$, aplicada a $Z=C_j^2$:
+\[
+\mathrm E(C_j^2)=\mathrm E\big(E[C_j^2\mid\boldsymbol X]\big)=\mathrm E(\sigma^2\,\mathit1)=\sigma^2 .
+\]
+
+Eso es lo que resume la frase ``la suma de cuadrados de las perturbaciones centradas se reparte, en esperanza, por igual entre las dimensiones'': no habla de una realización concreta, en la que el reparto es desigual, sino de que ninguna dirección de $\mathcal L(\boldsymbol 1)^\perp$ se lleva, en esperanza, más que otra. Solo usa homocedasticidad e incorrelación; con normalidad se tiene algo más fuerte, que la distribución entera de las coordenadas (y no solo su esperanza) es la misma en todas las direcciones: la isotropía de la lección 12.
+
+* La lectura geométrica correcta: en el espacio de las variables aleatorias
+
+``Más que otra'' se refiere a la suma de cuadrados de las perturbaciones centradas: evaluada sobre la muestra aleatoria, $\sum_i(U_i-\overline U)^2=\sum_{j=1}^{n-1}C_j^2$, y cada sumando tiene esperanza $\sigma^2$, de modo que a cada una de las $n-1$ direcciones le corresponde, en esperanza, la misma parte, $\sigma^2$ de un total $(n-1)\sigma^2$.
+
+Pero la esperanza $\mathrm E(C_j^2)$ admite una lectura geométrica legítima, en el espacio adecuado. La lección 9 dio a las variables aleatorias el producto escalar $\langle Z,W\rangle_P=\mathrm E(ZW)$ y la norma $\Vert Z\Vert_P=\sqrt{\mathrm E(Z^2)}$. Con él, $\mathrm E(C_j^2)=\Vert C_j\Vert_P^2$: el número $\sigma^2$ es la longitud al cuadrado de la variable aleatoria $C_j$ (y, como $\mathrm E(C_j)=0$, su varianza). La misma cuenta del apartado anterior da el producto escalar de dos de ellas: para $j\neq l$,
+\[
+E[C_jC_l\mid\boldsymbol X]=\sum_i\sum_mB_{ji}B_{lm}\,E[U_iU_m\mid\boldsymbol X]=\sigma^2\sum_iB_{ji}B_{li}=\mathit0,
+\]
+porque dos vectores distintos de la base son ortogonales para cualquier valor de los regresores, $\sum_ib_{ji}b_{li}=0$, y esa identidad evaluada sobre la muestra aleatoria es $\sum_iB_{ji}B_{li}=\mathit0$. Por la ley de las esperanzas iteradas, $\langle C_j,C_l\rangle_P=\mathrm E(C_jC_l)=0$. En resumen:
+
+#+begin_quote
+Bajo $H_0$, las $n-1$ variables aleatorias $C_1,\ldots,C_{n-1}$ (las fórmulas de las coordenadas evaluadas sobre la muestra aleatoria) son ortogonales dos a dos y tienen todas la misma longitud, $\sigma$, en el producto escalar de la lección 9.
+#+end_quote
+
+Esta sí es una afirmación geométrica, pero sobre variables aleatorias y con $\langle\cdot,\cdot\rangle_P$, no sobre listas de variables aleatorias en $\mathbb R^n$. Con ella, el reparto de las sumas de cuadrados es el teorema de Pitágoras en ese espacio: bajo $H_0$, $\mathrm{SEC}=\sum_{j\le k-1}C_j^2$ y
+\[
+\mathrm E(\mathrm{SEC})=\Vert C_1\Vert_P^2+\cdots+\Vert C_{k-1}\Vert_P^2=\Vert C_1+\cdots+C_{k-1}\Vert_P^2=(k-1)\sigma^2,
+\]
+y lo mismo para $\mathrm{SRC}$ con las $n-k$ restantes. Numerador y denominador del $F$ son, divididos por su número de sumandos, dos medias de longitudes al cuadrado de variables aleatorias ortogonales e iguales entre sí. (Con normalidad, además, esas variables son independientes, y no solo ortogonales: es lo que el ensayo sobre la $t$ y la $F$ demuestra.)
+
+* La consecuencia para el $F$
+
+Para cada realización, $\mathrm{SEC}$ es la suma de los cuadrados de las $k-1$ primeras coordenadas (las del subespacio de los regresores en desviaciones) y $\mathrm{SRC}$ la de las $n-k$ restantes. Evaluadas sobre la muestra aleatoria son las variables aleatorias $\sum_{j\le k-1}C_j^2$ y $\sum_{j\ge k}C_j^2$, y bajo $H_0$,
+\[
+E[\mathrm{SEC}\mid\boldsymbol X]=\sum_{j=1}^{k-1}E[C_j^2\mid\boldsymbol X]=(k-1)\,\sigma^2\,\mathit1,
+\qquad
+E[\mathrm{SRC}\mid\boldsymbol X]=\sum_{j=k}^{n-1}E[C_j^2\mid\boldsymbol X]=(n-k)\,\sigma^2\,\mathit1 .
+\]
+Divididas por sus dimensiones, las dos tienen esperanza condicional $\sigma^2\,\mathit1$: numerador y denominador de $F$ estiman ambos $\sigma^2$, y por eso $F$ ronda $1$ cuando $H_0$ es cierta. La segunda igualdad no necesita $H_0$ (es la insesgadez de $\mathfrak s^2$ enunciada en la lección 11); la primera sí, porque sin $H_0$ el cateto explicado contiene además la parte de $\beta_2X_{i2}+\cdots+\beta_kX_{ik}$ que no se cancela.
+
+Es exactamente lo que la nota al pie de ``El estadístico $F$'' (lección 13) ya dice en forma incondicional, $\mathrm E(\mathrm{SEC})=(k-1)\sigma^2$ y $\mathrm E(\mathrm{SRC})=(n-k)\sigma^2$.
+
+* Lo que se decide
+
+Las abreviaturas que quedan en L13 (transparencia 3: ``la longitud al cuadrado del ruido se reparte, en promedio, por igual entre las dimensiones''; recapitulación y pregunta 12: ``el ruido reparte su longitud al cuadrado por igual entre dimensiones'') atribuyen una longitud a la lista aleatoria. La frase propuesta en un primer momento, ``la suma de cuadrados de las perturbaciones se reparte, en esperanza, por igual entre las dimensiones'', nombra el resultado sin esa atribución, pero sigue hablando el lenguaje de $\mathbb R^n$. La formulación que es verdad en el espacio correcto, y que propongo para transparencias y recapitulación, es: ``bajo $H_0$, las $n-1$ coordenadas evaluadas sobre la muestra aleatoria son variables aleatorias ortogonales dos a dos y de la misma longitud $\sigma$ (lección 9); $\mathrm{SEC}$ suma $k-1$ de sus cuadrados y $\mathrm{SRC}$ las otras $n-k$''. En las dos de L12 (``la normalidad hace el ruido isótropo''; ``si el ruido es isótropo, tampoco lo que queda prefiere dirección alguna'') bastaría ``hace isótropa la distribución del ruido''.

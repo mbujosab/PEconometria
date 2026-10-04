@@ -1,0 +1,337 @@
+#+TITLE: Dos espacios, una base: de Pitágoras a la $t$ y la $F$
+#+DATE: 2026-10-03
+#+LANGUAGE: es
+# +OPTIONS: toc:nil
+#+LATEX_CLASS_OPTIONS: [11pt,table]
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+LATEX_HEADER: \usepackage{iftex}
+#+LATEX_HEADER: \ifXeTeX
+#+LATEX_HEADER: \usepackage{fontspec}\usepackage{lmodern}\setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage{polyglossia}\setmainlanguage{spanish}
+#+LATEX_HEADER: \else
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage{lmodern}
+#+LATEX_HEADER: \RequirePackage[spanish,es-noquoting,es-noshorthands]{babel}
+#+LATEX_HEADER: \fi
+#+LATEX_HEADER: \PassOptionsToPackage{table}{xcolor}\usepackage{xcolor}
+#+LATEX_HEADER: \usepackage{amsmath,amssymb}
+#+LATEX_HEADER: \usepackage[indent]{parskip}
+#+LATEX_HEADER: \usepackage{fullpage}
+#+LATEX_HEADER: \usepackage{array,booktabs}
+#+LATEX_HEADER: \usepackage{float}
+
+# Documento único (3-10-2026) que reúne Nota-2026-10-02-dos-espacios.org y
+# Ensayo-2026-10-01-independencia-t-F.org (ambos se conservan). Notación
+# nueva acordada con el usuario: E y R para los dos subespacios de
+# L(1)^perp (explicado y residual), E_r y Q para el modelo restringido;
+# esperanza siempre en redonda, \mathrm E; sumas por subespacio,
+# \sum_{\mathcal E}. Es documentación de trabajo del usuario: cómo
+# aprovecharlo en las lecciones es una decisión posterior.
+
+#+LATEX: \maketitle
+
+* Regla del juego
+
+Hay dos espacios con producto escalar, y nada de lo que se diga en uno se traslada al otro sin pasar por una fórmula evaluada.
+
+- *$\mathbb R^n$, el espacio de los datos*: vectores en negrita minúscula ($\boldsymbol y$, $\boldsymbol x_2$, $\boldsymbol u$), producto escalar euclídeo $\langle\cdot,\cdot\rangle_e$, proyecciones, bases, Pitágoras (lecciones 2 a 10). Aquí viven los datos observados y, para cada resultado $\omega$, las realizaciones de las variables aleatorias de la muestra.
+- *El espacio de las variables aleatorias*: funciones de $\omega$ en mayúscula ($Y_i$, $U_i$, $\hat\beta_2$), producto escalar $\langle Z,W\rangle_P=\mathrm E(ZW)$, norma $\Vert Z\Vert_P=\sqrt{\mathrm E(Z^2)}$, ortogonalidad $\mathrm E(ZW)=0$, proyecciones (esperanza condicional) (lección 9). Aquí viven los estimadores y sus propiedades.
+
+Una lista de variables aleatorias, como $(U_1,\ldots,U_n)$, no es un vector de ninguno de los dos espacios: no tiene producto escalar euclídeo (sus componentes no son números) ni es una variable aleatoria (es $n$ de ellas). Lo único que se puede hacer con ella es (i) tomar una fórmula de $\mathbb R^n$ y evaluarla sobre la lista, lo que da una variable aleatoria (lección 11), o (ii) mirar cada componente como un elemento del espacio de las variables aleatorias.
+
+Lo primero (i) da los /estadísticos/. Una operación con las componentes de un vector de datos, al sustituir esas componentes por las variables aleatorias de un muestreo, crea una variable aleatoria nueva: un estadístico (lección 11). Su distribución depende de la de las variables del muestreo, y se simplifica cuando son copias idénticas e independientes. Por ejemplo, la media muestral $\overline X=\frac1n\sum_{i=1}^nX_i$: como la esperanza es lineal y todas las $X_i$ tienen la misma esperanza $\mu$, $\mathrm E(\overline X)=\frac1n\,n\mu=\mu$, y la media muestral es un estimador insesgado. 
+# Por la misma linealidad, las variables centradas $X_i-\overline X$ tienen esperanza cero. Pero esperanza cero no es ser la variable aleatoria cero: $X_i-\overline X$ toma valores distintos de cero en sucesos de probabilidad positiva, y $\mathrm E(X_i-\overline X)=0$ es una afirmación probabilística, no una identidad.
+
+El puente entre los dos espacios es otra cosa, y conviene decir exactamente qué transfiere y qué no. Si una fórmula $f(x_1,\ldots,x_n)=g(x_1,\ldots,x_n)$ es una /identidad/ de $\mathbb R^n$, es decir, se cumple para todas las listas de números, entonces para cada $\omega$ la lista $X_1(\omega),\ldots,X_n(\omega)$ es una de esas listas, y $f(X_1(\omega),\ldots,X_n(\omega))=g(X_1(\omega),\ldots,X_n(\omega))$. Como ocurre para todo $\omega$, los dos estadísticos $f(X_1,\ldots,X_n)$ y $g(X_1,\ldots,X_n)$ son la misma función de $\omega$: una igualdad entre variables aleatorias, en todo punto. No interviene la probabilidad; es composición de funciones. Es lo que hace la lección 11 en ``Dos propiedades de los pesos'': $\sum_{i=1}^nW_i=\mathit0$ y $\sum_{i=1}^nW_iX_i=\mathit1$ son identidades algebraicas, válidas para cualquier elección de $n$ números, y por eso siguen siendo ciertas al sustituir $x_i$ por $X_i$.
+
+El ejemplo de la media muestral muestra la diferencia. Lo que es identidad de $\mathbb R^n$ es $\sum_{i=1}^n(x_i-\bar x)=0$ para toda lista; el puente da, por tanto, $\sum_{i=1}^n(X_i-\overline X)=\mathit0$: la /suma/ de las variables centradas es la variable aleatoria cero, en todo $\omega$. En este documento el puente se usa solo con identidades de $\mathbb R^n$ enunciadas en la sección 2; todo lo probabilístico se obtiene después con el Lema de la lección 11 y la ley de las esperanzas iteradas.[fn::Con la salvedad de la lección 11: la construcción de la base exige regresores linealmente independientes, y las identidades valen en el suceso en que la base está definida, igual que los pesos $W_i$ exigen $\sum_{i=1}^n(X_i-\overline X)^2\neq\mathit0$.]
+# El puente no dice, ni podría decir, que cada $X_i-\overline X$ sea la variable cero, porque $x_i-\bar x=0$ no es una identidad: falla para casi todas las listas. 
+
+Dos convenciones tipográficas. Como en las lecciones, la esperanza no condicional se escribe en redonda, $\mathrm E(\cdot)$, y la condicional en cursiva, $E[\,\cdot\mid\boldsymbol X]$; ninguna de las dos se confunde con la letra caligráfica $\mathcal E$ que nombra un subespacio. Y los índices se reparten así: $i$ e $i'$ para observaciones ($1,\ldots,n$), $j$ y $l$ para vectores de una base, $m$ para el regresor cuyo coeficiente se contrasta; los demás regresores se nombran sin índice.
+
+* En $\mathbb R^n$: dos subespacios, una base y tres triángulos
+
+** Los dos subespacios
+
+$\mathcal L(\boldsymbol 1)^\perp$ es el subespacio de los vectores de media cero, de dimensión $n-1$ (lección 4). Dentro de él distinguimos dos subespacios complementarios:
+\begin{equation}\label{eq:descomposicion}
+\mathcal L(\boldsymbol 1)^\perp=\mathcal E\oplus\mathcal R,\qquad \mathcal E\perp\mathcal R,\qquad \dim\mathcal E=k-1,\quad \dim\mathcal R=n-k .
+\end{equation}
+$\mathcal E$ es el subespacio de los regresores en desviaciones, $\mathcal L(\boldsymbol x_2-\boldsymbol{\mathop{\overline x}}_2,\ldots,\boldsymbol x_k-\boldsymbol{\mathop{\overline x}}_k)$, donde vive el cateto explicado (lección 13); $\mathcal R$ es su complemento ortogonal /dentro de/ $\mathcal L(\boldsymbol 1)^\perp$, donde vive el residuo. Que $\dim\mathcal E=k-1$ exige regresores linealmente independientes (supuesto 2 del modelo, lección 10). Las iniciales son las de $\mathrm{SEC}$ y $\mathrm{SRC}$.
+
+** Una base adaptada
+
+Tomemos una base ortonormal $\boldsymbol b_1,\ldots,\boldsymbol b_{n-1}$ de $\mathcal L(\boldsymbol 1)^\perp$ /adaptada/ a \eqref{eq:descomposicion}: los $k-1$ primeros vectores en $\mathcal E$ y los $n-k$ restantes en $\mathcal R$. Se construye a partir de los vectores de datos $\boldsymbol x_2,\ldots,\boldsymbol x_k$ por una regla fija, por ejemplo ortogonalizando (práctica D de la sesión 14). Que la base sea ortonormal y esté en $\mathcal L(\boldsymbol 1)^\perp$ son tres identidades entre sus componentes:
+\begin{equation}\label{eq:base}
+\Vert\boldsymbol b_j\Vert_e^2=\sum_{i=1}^nb_{ji}^2=1,\qquad \langle\boldsymbol b_j,\boldsymbol b_l\rangle_e=\sum_{i=1}^nb_{ji}b_{li}=0\ (j\neq l),\qquad \langle\boldsymbol b_j,\boldsymbol 1\rangle_e=\sum_{i=1}^nb_{ji}=0 .
+\end{equation}
+Las coordenadas de un vector $\boldsymbol v$ de $\mathcal L(\boldsymbol 1)^\perp$ en esa base son los números
+\begin{equation}\label{eq:coord}
+c_j=\langle\boldsymbol v,\boldsymbol b_j\rangle_e=\sum_{i=1}^nb_{ji}\,v_i,\qquad j=1,\ldots,n-1,
+\end{equation}
+y Pitágoras generalizado dice
+\begin{equation}\label{eq:pitagoras}
+\Vert\boldsymbol v\Vert_e^2=\sum_{j=1}^{n-1}\langle\boldsymbol v,\boldsymbol b_j\rangle_e^2=\sum_{j=1}^{n-1}c_j^2=\sum_{\mathcal E}c_j^2+\sum_{\mathcal R}c_j^2 ,
+\end{equation}
+la longitud al cuadrado es la suma de los cuadrados de las proyecciones sobre los vectores de la base, donde $\sum_{\mathcal E}$ abrevia la suma sobre los vectores de la base que están en $\mathcal E$ (los índices $j=1,\ldots,k-1$) y $\sum_{\mathcal R}$ la suma sobre los que están en $\mathcal R$ ($j=k,\ldots,n-1$). Usaremos esa abreviatura en todo el documento: el número de sumandos de cada una es la dimensión del subespacio.
+
+Hay un hecho de $\mathbb R^n$ que se usará varias veces. Si un vector está en $\mathcal E$, es combinación lineal de $\boldsymbol b_1,\ldots,\boldsymbol b_{k-1}$, y su coordenada sobre cualquier $\boldsymbol b_j$ de $\mathcal R$ es
+\begin{equation}\label{eq:coord-nula}
+\langle a_1\boldsymbol b_1+\cdots+a_{k-1}\boldsymbol b_{k-1},\boldsymbol b_j\rangle_e=a_1\langle\boldsymbol b_1,\boldsymbol b_j\rangle_e+\cdots+a_{k-1}\langle\boldsymbol b_{k-1},\boldsymbol b_j\rangle_e=0,
+\end{equation}
+por la segunda identidad de \eqref{eq:base}. Un vector de $\mathcal E$ no tiene coordenadas en $\mathcal R$, y recíprocamente. Y en una base ortonormal adaptada, proyectar sobre $\mathcal E$ es quedarse con las coordenadas de $\mathcal E$ y anular las de $\mathcal R$ (lección 10).
+
+** Primer triángulo: el ajuste
+
+Sea $\boldsymbol y$ un vector de datos y su ajuste MCO sobre $\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k$, los mismos regresores con los que se ha construido la base. La lección 10 dio el triángulo: el vector de datos en desviaciones, $\boldsymbol v=\boldsymbol y-\boldsymbol{\mathop{\overline y}}$, es la hipotenusa; el ajuste en desviaciones, $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}$, es la proyección de $\boldsymbol v$ sobre $\mathcal E$; y el residuo, $\boldsymbol{\mathop{\widehat e}}=\boldsymbol v-(\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}})$, es la componente de $\boldsymbol v$ en $\mathcal R$. Con las coordenadas $c_j$ de $\boldsymbol v$, las tres sumas de cuadrados de la lección 8 son las dos mitades de \eqref{eq:pitagoras} y su suma:
+\begin{equation}\label{eq:sumas}
+\mathrm{STC}=\Vert\boldsymbol v\Vert_e^2=\sum_{\mathcal E}c_j^2+\sum_{\mathcal R}c_j^2,\qquad
+\mathrm{SEC}=\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\Vert_e^2=\sum_{\mathcal E}c_j^2,\qquad
+\mathrm{SRC}=\Vert\boldsymbol{\mathop{\widehat e}}\Vert_e^2=\sum_{\mathcal R}c_j^2 .
+\end{equation}
+
+#+NAME: fig:fig1-dos-subespacios
+#+CAPTION: Los dos subespacios de $\mathcal L(\boldsymbol 1)^\perp$, la base adaptada y el primer triángulo. El plano representa $\mathcal E$ (de dimensión $k-1$) y la vertical $\mathcal R$ (de dimensión $n-k$); $\boldsymbol b_1,\boldsymbol b_2$ son vectores de la base en $\mathcal E$ y $\boldsymbol b_k$ en $\mathcal R$. El vector de datos en desviaciones $\boldsymbol v$, de longitud $\Vert\boldsymbol v\Vert_e=\sqrt{\sum_{\mathcal E}c_j^2+\sum_{\mathcal R}c_j^2}$, se descompone en su proyección sobre $\mathcal E$, el ajuste en desviaciones, de longitud $\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\Vert_e=\sqrt{\sum_{\mathcal E}c_j^2}$, y su componente en $\mathcal R$, el residuo, de longitud $\Vert\boldsymbol{\mathop{\widehat e}}\Vert_e=\sqrt{\sum_{\mathcal R}c_j^2}$. Todo son vectores de datos: ninguna variable aleatoria.
+#+ATTR_LATEX: :width 0.72\textwidth :placement [H]
+[[file:Ensayo-2026-10-03-figuras/fig1-dos-subespacios.pdf]]
+
+** Segundo triángulo: un coeficiente
+
+Para el coeficiente del regresor $m$ elegimos la base adaptada con una condición más: su primer vector apunta en la dirección de la parte propia $\tilde{\boldsymbol x}_m$ (lección 14), el residuo de $\boldsymbol x_m$ sobre $\boldsymbol 1$ y los demás regresores,
+\[
+\boldsymbol b_1=\frac{\tilde{\boldsymbol x}_m}{\Vert\tilde{\boldsymbol x}_m\Vert_e}\in\mathcal E ,
+\]
+que está en $\mathcal E$ (es combinación de los regresores en desviaciones) y es ortogonal a $\boldsymbol 1$ y a cada uno de los demás regresores. La nota al pie de la lección 14 da $\hat\beta_m=\langle\tilde{\boldsymbol x}_m,\boldsymbol y\rangle_e/\Vert\tilde{\boldsymbol x}_m\Vert_e^2=\langle\boldsymbol w,\boldsymbol y\rangle_e$, con el vector de pesos $\boldsymbol w=\tilde{\boldsymbol x}_m/\Vert\tilde{\boldsymbol x}_m\Vert_e^2$. Como $\tilde{\boldsymbol x}_m=\Vert\tilde{\boldsymbol x}_m\Vert_e\,\boldsymbol b_1$,
+\begin{equation}\label{eq:pesos}
+\boldsymbol w=\frac{\boldsymbol b_1}{\Vert\tilde{\boldsymbol x}_m\Vert_e},\qquad\text{luego}\qquad \hat\beta_m=\frac{\langle\boldsymbol b_1,\boldsymbol y\rangle_e}{\Vert\tilde{\boldsymbol x}_m\Vert_e} .
+\end{equation}
+El producto escalar $\langle\boldsymbol b_1,\boldsymbol y\rangle_e$ se parece a la primera coordenada de $\boldsymbol y$, pero $\boldsymbol y$ no está en $\mathcal L(\boldsymbol 1)^\perp$ y la base es de ese subespacio; la coordenada que hace falta es la del vector de datos en desviaciones, $c_1=\langle\boldsymbol b_1,\boldsymbol y-\boldsymbol{\mathop{\overline y}}\rangle_e$. Las dos coinciden porque $\boldsymbol b_1$ es ortogonal a $\boldsymbol 1$ (tercera identidad de \eqref{eq:base}), así que la componente de $\boldsymbol y$ en la dirección de $\boldsymbol 1$, su media, no cuenta en el producto escalar con $\boldsymbol b_1$ (lección 10):
+\[
+\langle\boldsymbol b_1,\boldsymbol y\rangle_e=\langle\boldsymbol b_1,\boldsymbol y-\boldsymbol{\mathop{\overline y}}\rangle_e+\mu_{\boldsymbol y}\langle\boldsymbol b_1,\boldsymbol 1\rangle_e=c_1+0 .
+\]
+Por tanto
+\begin{equation}\label{eq:beta-coord}
+\hat\beta_m=\frac{c_1}{\Vert\tilde{\boldsymbol x}_m\Vert_e}:
+\end{equation}
+la primera coordenada del vector de datos en desviaciones dividida por la longitud de la parte propia. El error estándar es $\mathrm{ee}(\hat\beta_m)=\mathfrak s/\Vert\tilde{\boldsymbol x}_m\Vert_e$ con $\mathfrak s^2=\mathrm{SRC}/(n-k)$ (lección 14), y la longitud de la parte propia se cancela en el cociente:
+\begin{equation}\label{eq:t-datos}
+\frac{\hat\beta_m}{\mathrm{ee}(\hat\beta_m)}=\frac{c_1}{\mathfrak s}
+=\frac{c_1}{\sqrt{\sum_{\mathcal R}c_j^2\big/\dim\mathcal R}} .
+\end{equation}
+El estadístico $t$ es, en $\mathbb R^n$, la coordenada sobre la parte propia dividida por la media cuadrática de las coordenadas de $\mathcal R$.
+
+#+NAME: fig:fig2-parte-propia
+#+CAPTION: El plano $\mathcal E$ visto de frente, con $k=3$: dos regresores en desviaciones, no ortogonales entre sí. La parte propia $\tilde{\boldsymbol x}_m$ es la componente de $\boldsymbol x_m-\boldsymbol{\mathop{\overline x}}_m$ ortogonal al otro regresor; está dibujada desplazada, como residuo, desde la proyección hasta la punta, pero como vector parte del origen, en la dirección de $\boldsymbol b_1$, que es su dirección normalizada; $\boldsymbol b_2$ es la dirección del otro regresor. La coordenada del ajuste en desviaciones sobre $\boldsymbol b_1$ es $c_1=\hat\beta_m\Vert\tilde{\boldsymbol x}_m\Vert_e$, de donde \eqref{eq:beta-coord}.
+#+ATTR_LATEX: :width 0.62\textwidth :placement [H]
+[[file:Ensayo-2026-10-03-figuras/fig2-parte-propia.pdf]]
+
+** Tercer triángulo: restricciones
+
+Para $q$ restricciones lineales homogéneas sobre $\beta_2,\ldots,\beta_k$ (coeficientes nulos o combinaciones lineales nulas, las de la lección 13)[fn::Una restricción no homogénea, como $\beta_2+\beta_3=1$, se reduce a este caso restando de $\boldsymbol y$ la parte conocida, como hace la lección 13 con el ajuste restringido.], el modelo restringido tiene su propio subespacio de regresores en desviaciones, $\mathcal E_r\subset\mathcal E$, de dimensión $k-1-q$. Partimos $\mathcal E$ como antes partimos $\mathcal L(\boldsymbol 1)^\perp$:
+\begin{equation}\label{eq:descomposicion-r}
+\mathcal E=\mathcal E_r\oplus\mathcal Q,\qquad \mathcal E_r\perp\mathcal Q,\qquad \dim\mathcal Q=q ,
+\end{equation}
+donde $\mathcal Q$ son las $q$ direcciones de $\mathcal E$ que las restricciones suprimen. La base adaptada se afina: los $k-1-q$ primeros vectores en $\mathcal E_r$, los $q$ siguientes en $\mathcal Q$, los $n-k$ últimos en $\mathcal R$. El ajuste restringido $\boldsymbol{\mathop{\widehat y}}_r$ es la proyección sobre $\mathcal E_r$ (en desviaciones), y por el Pitágoras anidado de la lección 13, para cualquier vector de datos,
+\begin{equation}\label{eq:anidado}
+\mathrm{SRC}_r-\mathrm{SRC}=\sum_{\mathcal Q}c_j^2,\qquad \mathrm{SRC}=\sum_{\mathcal R}c_j^2 :
+\end{equation}
+lo que el modelo restringido deja de explicar vive en las $q$ direcciones suprimidas. Y el estadístico de la lección 13 es, en $\mathbb R^n$,
+\begin{equation}\label{eq:F-datos}
+F=\frac{(\mathrm{SRC}_r-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)}=\frac{\sum_{\mathcal Q}c_j^2\big/\dim\mathcal Q}{\sum_{\mathcal R}c_j^2\big/\dim\mathcal R} :
+\end{equation}
+el cociente entre las medias cuadráticas de las coordenadas de $\mathcal Q$ y de $\mathcal R$. El $F$ de significación conjunta es el caso $\mathcal E_r=\{\boldsymbol 0\}$, $\mathcal Q=\mathcal E$, $q=k-1$.
+
+#+NAME: fig:fig3-restricciones
+#+CAPTION: El tercer triángulo. Los tres ejes parten del origen: dentro de $\mathcal E$, la recta azul es $\mathcal E_r$ y la perpendicular a ella dentro del plano es $\mathcal Q$; la vertical es $\mathcal R$. El ajuste restringido en desviaciones es la proyección de $\boldsymbol v$ sobre $\mathcal E_r$. El triángulo está dibujado desplazado, con el vértice en la punta de $\boldsymbol{\mathop{\widehat y}}_r-\boldsymbol{\mathop{\overline y}}$: sus lados son vectores que en realidad parten del origen, y las líneas a guiones son los ejes $\mathcal Q$ y $\mathcal R$ trasladados en paralelo hasta él. Lo que el modelo completo añade, $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r$, vive en $\mathcal Q$ y tiene longitud $\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e=\sqrt{\sum_{\mathcal Q}c_j^2}=\sqrt{\mathrm{SRC}_r-\mathrm{SRC}}$; el residuo vive en $\mathcal R$ y tiene longitud $\Vert\boldsymbol{\mathop{\widehat e}}\Vert_e=\sqrt{\sum_{\mathcal R}c_j^2}=\sqrt{\mathrm{SRC}}$; la hipotenusa es el residuo restringido, de longitud $\Vert\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\Vert_e=\sqrt{\mathrm{SRC}_r}$. Es la figura del Pitágoras anidado de la lección 13 con los subespacios nombrados.
+#+ATTR_LATEX: :width 0.72\textwidth :placement [H]
+[[file:Ensayo-2026-10-03-figuras/fig3-restricciones.pdf]]
+
+Todo lo anterior es álgebra de $\mathbb R^n$: vale para cualquier vector de datos $\boldsymbol y$ y cualquier muestra de regresores linealmente independientes. No hay probabilidad.
+
+* Evaluar sobre la muestra aleatoria
+
+** Lo que suponemos
+
+El modelo es $Y_i=\beta_1\,\mathit1+\beta_2X_{i2}+\cdots+\beta_kX_{ik}+U_i$, con los supuestos de la lección 11 condicionando en la muestra aleatoria de regresores $\boldsymbol X$:
+\[
+E[U_i\mid\boldsymbol X]=\mathit0,\qquad E[U_i^2\mid\boldsymbol X]=\sigma^2\,\mathit1,\qquad E[U_iU_{i'}\mid\boldsymbol X]=\mathit0\ (i\neq i').
+\]
+Las esperanzas condicionales son variables aleatorias (funciones de $\boldsymbol X$); los números salen por la ley de las esperanzas iteradas: $\mathrm E(U_iU_{i'})=\mathrm E\big(E[U_iU_{i'}\mid\boldsymbol X]\big)=0$, $\mathrm E(U_i^2)=\sigma^2$. Dicho con el producto escalar de la lección 9: las $n$ perturbaciones son una /familia ortogonal/ de variables aleatorias, todas de longitud $\Vert U_i\Vert_P=\sigma$. La normalidad no se supone todavía.
+
+** La base evaluada
+
+Las componentes $b_{ji}$ de la base y la longitud $\Vert\tilde{\boldsymbol x}_m\Vert_e$ son fórmulas de los regresores; sobre $\boldsymbol X$ dan variables aleatorias $B_{ji}$ y $L_m$, funciones de $\boldsymbol X$ (como los pesos $W_i$ de las lecciones 11 y 14; de hecho, por \eqref{eq:pesos}, las componentes del vector de pesos son $w_i=b_{1i}/\Vert\tilde{\boldsymbol x}_m\Vert_e$, y evaluadas sobre $\boldsymbol X$ dan los pesos de la lección 14, $W_i=B_{1i}/L_m$). Las tres identidades \eqref{eq:base}, válidas para cualquier valor de los regresores, pasan por el puente y son igualdades entre variables aleatorias:
+\begin{equation}\label{eq:base-va}
+\sum_{i=1}^nB_{ji}^2=\mathit1,\qquad \sum_{i=1}^nB_{ji}B_{li}=\mathit0\ (j\neq l),\qquad \sum_{i=1}^nB_{ji}=\mathit0 .
+\end{equation}
+
+** Las coordenadas del ruido: la familia $\{C_j\}$
+
+La fórmula de las coordenadas, \eqref{eq:coord}, es una suma de productos de números. Sustituyamos los números por las variables del muestreo: en el lugar de $v_i$, la perturbación centrada $U_i-\overline U$ (una variable aleatoria, como vimos en la sección 1), y en el lugar de $b_{ji}$, la variable aleatoria $B_{ji}$. Productos y sumas de variables aleatorias son variables aleatorias, así que la fórmula define $n-1$ estadísticos nuevos,
+\[
+C_j=\sum_{i=1}^nB_{ji}\,(U_i-\overline U),\qquad j=1,\ldots,n-1 ,
+\]
+que se simplifican con la tercera identidad de \eqref{eq:base-va}: $\overline U$ es la misma variable aleatoria en todos los sumandos, sale factor común, y lo que la multiplica es $\sum_iB_{ji}=\mathit0$, que es el producto escalar $\langle\boldsymbol b_j,\boldsymbol 1\rangle_e=0$ evaluado sobre la muestra,
+\begin{equation}\label{eq:C}
+C_j=\sum_{i=1}^nB_{ji}\,U_i-\overline U\sum_{i=1}^nB_{ji}=\sum_{i=1}^nB_{ji}\,U_i .
+\end{equation}
+Las $C_j$ son sumas ponderadas de las perturbaciones sin centrar, con pesos $B_{ji}$ que son funciones de $\boldsymbol X$: la misma estructura que $\hat\beta_2-\beta_2\,\mathit1=\sum_{i=1}^nW_iU_i$ en la lección 11. $C_j$ no es la coordenada de nada: es una variable aleatoria, la que a cada $\omega$ le asigna la coordenada \(j\)-ésima, en la base realizada, del punto de $\mathbb R^n$ realizado por las perturbaciones centradas. Llamamos a $C_j$ la /coordenada del ruido/ sobre $\boldsymbol b_j$, evaluada sobre la muestra.
+
+** Las coordenadas de la parte sistemática: $D_j$
+
+Al restar la media muestral en el modelo,
+\[
+Y_i-\overline Y=\underbrace{\beta_2(X_{i2}-\overline X_2)+\cdots+\beta_k(X_{ik}-\overline X_k)}_{S_i}+(U_i-\overline U),\qquad i=1,\ldots,n ,
+\]
+donde $S_i$ es la componente \(i\)-ésima de la parte sistemática en desviaciones, una función de los regresores. En $\mathbb R^n$, para cada realización, la lista $(S_1,\ldots,S_n)$ es el vector $\boldsymbol s=\beta_2(\boldsymbol x_2-\boldsymbol{\mathop{\overline x}}_2)+\cdots+\beta_k(\boldsymbol x_k-\boldsymbol{\mathop{\overline x}}_k)$, un vector de $\mathcal E$. Evaluemos la fórmula de las coordenadas, \eqref{eq:coord}, sobre la lista $(Y_i-\overline Y)_i$. Como $Y_i-\overline Y=S_i+(U_i-\overline U)$, la suma se parte en dos:
+\begin{equation}\label{eq:D+C}
+\sum_{i=1}^nB_{ji}(Y_i-\overline Y)=\underbrace{\sum_{i=1}^nB_{ji}S_i}_{D_j}+\underbrace{\sum_{i=1}^nB_{ji}(U_i-\overline U)}_{C_j},\qquad j=1,\ldots,n-1 .
+\end{equation}
+El segundo sumando es la $C_j$ de \eqref{eq:C}. El primero, $D_j$, es la misma fórmula \eqref{eq:coord} evaluada sobre los $S_i$: la /coordenada de la parte sistemática/ sobre $\boldsymbol b_j$, evaluada sobre la muestra; es una variable aleatoria que es función solo de los regresores, porque tanto los $S_i$ como los $B_{ji}$ lo son. Y aquí interviene \eqref{eq:coord-nula}: para cada realización, $D_j(\omega)=\langle\boldsymbol s,\boldsymbol b_j\rangle_e$ es la coordenada de un vector de $\mathcal E$ sobre $\boldsymbol b_j$, que es cero para todo $\boldsymbol b_j$ de $\mathcal R$, sea cual sea la realización. Por tanto
+\begin{equation}\label{eq:casos}
+\sum_{i=1}^nB_{ji}(Y_i-\overline Y)=\begin{cases}D_j+C_j & \boldsymbol b_j\in\mathcal E,\\[2pt] C_j & \boldsymbol b_j\in\mathcal R:\end{cases}
+\end{equation}
+sobre las direcciones de $\mathcal R$, la coordenada de la parte sistemática es nula y solo queda la del ruido; sobre las direcciones de $\mathcal E$, la coordenada es la suma de la de la parte sistemática y la del ruido.
+
+#+NAME: fig:fig4-realizacion
+#+CAPTION: Una realización $\omega$, dibujada en $\mathbb R^n$. Los tres vectores parten del origen: $\boldsymbol s$ es la realización de $(S_1,\ldots,S_n)$ y está en $\mathcal E$; $\boldsymbol u-\boldsymbol{\mathop{\overline u}}$ es la realización de las perturbaciones centradas, con componente en $\mathcal E$ (su proyección, en línea de puntos) y en $\mathcal R$; $\boldsymbol v$ es su suma, y la copia a guiones de $\boldsymbol u-\boldsymbol{\mathop{\overline u}}$ trasladada a la punta de $\boldsymbol s$ solo muestra la regla del paralelogramo. La proyección de $\boldsymbol v$ sobre $\mathcal E$ es $\boldsymbol s$ más la proyección del ruido; su componente en $\mathcal R$ es solo la del ruido, porque $\boldsymbol s$ no tiene. Por eso las coordenadas de $\boldsymbol v$ sobre los vectores de la base de $\mathcal R$ son $c_j$ y sobre los de $\mathcal E$ son $d_j+c_j$, donde $d_j$ y $c_j$ son los valores en $\omega$ de $D_j$ y $C_j$. Bajo $H_0\colon\beta_2=\cdots=\beta_k=0$, $\boldsymbol s=\boldsymbol 0$ y $\boldsymbol v$ es el ruido centrado.
+#+ATTR_LATEX: :width 0.72\textwidth :placement [H]
+[[file:Ensayo-2026-10-03-figuras/fig4-realizacion.pdf]]
+
+Dos casos particulares de $D_j$ que necesitaremos:
+
+- /Bajo una hipótesis nula./ Si $H_0$ son las $q$ restricciones del tercer triángulo, entonces bajo $H_0$ el vector $\boldsymbol s$ está en $\mathcal E_r$, y por \eqref{eq:coord-nula} aplicado a la partición de $\mathcal E$, $D_j=\mathit0$ también para todo $\boldsymbol b_j$ de $\mathcal Q$. Para $H_0\colon\beta_2=\cdots=\beta_k=0$, $\boldsymbol s=\boldsymbol 0$ y $D_j=\mathit0$ para todo $j$. El recíproco necesita la independencia lineal de los regresores: $\boldsymbol s$ es una combinación lineal de vectores linealmente independientes, y solo es el vector nulo si todos sus coeficientes son cero; si los regresores fuesen linealmente dependientes, habría coeficientes no nulos con $\boldsymbol s=\boldsymbol 0$, y $H_0$ falsa sería indistinguible de $H_0$ cierta.
+- /Sobre la parte propia./ Con la base del segundo triángulo, $D_1(\omega)=\langle\boldsymbol s,\tilde{\boldsymbol x}_m\rangle_e/\Vert\tilde{\boldsymbol x}_m\Vert_e$. Como $\tilde{\boldsymbol x}_m$ es ortogonal a $\boldsymbol 1$ y a los demás regresores, de los $k-1$ sumandos de $\boldsymbol s$ solo sobrevive el de $\boldsymbol x_m$, y $\langle\boldsymbol x_m-\boldsymbol{\mathop{\overline x}}_m,\tilde{\boldsymbol x}_m\rangle_e=\langle\boldsymbol x_m,\tilde{\boldsymbol x}_m\rangle_e=\Vert\tilde{\boldsymbol x}_m\Vert_e^2$ (lección 14). Luego $D_1=\beta_m\,L_m$.
+
+** Los tres triángulos evaluados
+
+Las identidades \eqref{eq:sumas}, \eqref{eq:beta-coord} y \eqref{eq:anidado} pasan por el puente con las coordenadas \eqref{eq:casos}. Las sumas de cuadrados de la lección 8, ahora variables aleatorias (las fórmulas evaluadas sobre la muestra, no los números de una tabla), son
+\begin{equation}\label{eq:sumas-va}
+\mathrm{SEC}=\sum_{\mathcal E}(D_j+C_j)^2,\qquad
+\mathrm{SRC}=\sum_{\mathcal R}C_j^2,\qquad
+\mathrm{SRC}_r-\mathrm{SRC}=\sum_{\mathcal Q}(D_j+C_j)^2\ \ \big(=\sum_{\mathcal Q}C_j^2\ \text{bajo }H_0\big).
+\end{equation}
+$\mathrm{SRC}$ no ve la parte sistemática, con o sin hipótesis sobre los $\beta$: la parte sistemática vive en $\mathcal E$ y el residuo en $\mathcal R$. Y el coeficiente, por \eqref{eq:beta-coord} y $D_1=\beta_mL_m$,
+\begin{equation}\label{eq:beta-va}
+\hat\beta_m=\frac{D_1+C_1}{L_m}=\beta_m\,\mathit1+\frac{C_1}{L_m},
+\end{equation}
+que es la descomposición $\hat\beta_m=\beta_m\,\mathit1+\sum_iW_iU_i$ de la lección 14, con $\sum_iW_iU_i=C_1/L_m$.
+
+** Fijar $\omega$: de vuelta a $\mathbb R^n$
+
+Conviene cerrar la sección con la síntesis de lo hecho. Las fórmulas de la sección 2 son fórmulas de $\mathbb R^n$ y solo tienen lectura en $\mathbb R^n$: operan con las componentes de vectores de datos. En esta sección se han reutilizado esas mismas expresiones, escritas como sumas de componentes, sustituyendo los números por las variables aleatorias de la muestra; el resultado, $B_{ji}$, $C_j$, $D_j$, $\mathrm{SRC}$, $\hat\beta_m$, son estadísticos, y ya no estamos en $\mathbb R^n$ sino en el espacio de las variables aleatorias. El camino de vuelta es fijar un resultado $\omega$: evaluar la muestra en $\omega$ arroja una lista de números, un vector de $\mathbb R^n$, y cada estadístico toma en $\omega$ el valor que su fórmula da en ese vector, con la base realizada. En ese punto todas las identidades de la sección 2 se cumplen con igualdad; es lo que muestra la figura 4. Los datos observados son una de esas realizaciones: los números de una tabla de Gretl, el $F=251{,}5$ de la lección 13 por ejemplo, son los valores de los estadísticos en ese $\omega$. Las secciones que siguen no hablan de ese valor, sino de qué valores tomaría cada estadístico sobre el conjunto de los $\omega$, y es ahí, y solo ahí, donde entra la probabilidad.
+
+* La familia ortogonal y lo que da sin normalidad
+
+** Ortogonalidad de las $C_j$
+
+La geometría de las $C_j$ es la del espacio de las variables aleatorias, y se calcula como la varianza de $\hat\beta_2$ en la lección 11. Para $j$ y $l$ cualesquiera,
+\[
+E[C_jC_l\mid\boldsymbol X]=\sum_{i=1}^n\sum_{i'=1}^nB_{ji}B_{li'}\,E[U_iU_{i'}\mid\boldsymbol X]
+=\sigma^2\sum_{i=1}^nB_{ji}B_{li}
+=\begin{cases}\sigma^2\,\mathit1 & j=l,\\ \mathit0 & j\neq l,\end{cases}
+\]
+donde el primer paso es el Lema de la lección 11 (las $B$ son funciones de $\boldsymbol X$ y salen fuera), el segundo usa homocedasticidad e incorrelación, y el tercero las identidades \eqref{eq:base-va}: la suma $\sum_iB_{ji}B_{li}$ es el producto escalar $\langle\boldsymbol b_j,\boldsymbol b_l\rangle_e$ evaluado sobre la muestra, y vale $\mathit1$ o $\mathit0$ según la base sea ortonormal. Es el único punto en que la geometría de $\mathbb R^n$ entra en esta cuenta, y entra como suma de componentes, no como producto escalar: lo que se evalúa es la fórmula. También $E[C_j\mid\boldsymbol X]=\sum_iB_{ji}\,E[U_i\mid\boldsymbol X]=\mathit0$. Tomando esperanzas:
+\[
+\langle C_j,C_l\rangle_P=\mathrm E(C_jC_l)=\begin{cases}\sigma^2 & j=l,\\ 0 & j\neq l.\end{cases}
+\]
+
+#+begin_quote
+*Resultado 1.* Con los supuestos de la lección 11, y para cualquier base ortonormal de $\mathcal L(\boldsymbol 1)^\perp$ construida con los regresores, las $n-1$ coordenadas del ruido $C_1,\ldots,C_{n-1}$ forman una familia ortogonal de variables aleatorias centradas, todas de la misma longitud $\Vert C_j\Vert_P=\sigma$. No depende de los $\beta$ ni de ninguna hipótesis nula.
+#+end_quote
+
+Ese es el contenido de la frase que las lecciones abrevian como ``el ruido reparte su longitud por igual entre las dimensiones''. No habla de longitudes en $\mathbb R^n$; habla de longitudes de variables aleatorias, y la igualdad entre direcciones es que los $n-1$ elementos de la familia miden lo mismo.
+
+#+NAME: fig:fig5-familia-ortogonal
+#+CAPTION: El Resultado 1 en el otro espacio. Las $C_j$ son elementos del espacio de las variables aleatorias, con el producto escalar $\langle Z,W\rangle_P=\mathrm E(ZW)$ de la lección 9: una familia ortogonal cuyos $n-1$ miembros miden lo mismo, $\sigma$. Las $k-1$ de $\mathcal E$ y las $n-k$ de $\mathcal R$ se distinguen solo por el vector de la base al que corresponden. Aquí no hay datos ni vectores de $\mathbb R^n$: la figura es un esquema de tres de las $n-1$ variables.
+#+ATTR_LATEX: :width 0.5\textwidth :placement [H]
+[[file:Ensayo-2026-10-03-figuras/fig5-familia-ortogonal.pdf]]
+
+** Esperanzas de las sumas de cuadrados
+
+De \eqref{eq:sumas-va} y el Resultado 1 salen las esperanzas condicionales. Para $\mathrm{SRC}$, sin hipótesis:
+\[
+E[\mathrm{SRC}\mid\boldsymbol X]=\sum_{\mathcal R}E[C_j^2\mid\boldsymbol X]=\dim\mathcal R\;\sigma^2\,\mathit1=(n-k)\,\sigma^2\,\mathit1 .
+\]
+Es la insesgadez de $\mathfrak s^2=\mathrm{SRC}/(n-k)$ que la lección 11 enunció, y se ve por qué no depende de los $\beta$: el residuo solo contiene las coordenadas del ruido en $\mathcal R$. Para $\mathrm{SEC}$, cada sumando lleva $D_j$; como $D_j$ es función de $\boldsymbol X$, sale fuera de la esperanza condicional (Lema), y como $E[C_j\mid\boldsymbol X]=\mathit0$, el término cruzado desaparece:
+\[
+E[(D_j+C_j)^2\mid\boldsymbol X]=D_j^2+2D_j\,E[C_j\mid\boldsymbol X]+E[C_j^2\mid\boldsymbol X]=D_j^2+\sigma^2\,\mathit1 ,
+\]
+y sumando sobre $\mathcal E$ (o sobre $\mathcal Q$),
+\begin{equation}\label{eq:esperanzas}
+E[\mathrm{SEC}\mid\boldsymbol X]=\dim\mathcal E\;\sigma^2\,\mathit1+\sum_{\mathcal E}D_j^2,\qquad
+E[\mathrm{SRC}_r-\mathrm{SRC}\mid\boldsymbol X]=\dim\mathcal Q\;\sigma^2\,\mathit1+\sum_{\mathcal Q}D_j^2 .
+\end{equation}
+El sumando añadido es, para cada realización, la longitud al cuadrado de $\boldsymbol s$ (o de su componente en $\mathcal Q$), por Pitágoras en $\mathbb R^n$ evaluado sobre la muestra: no es negativo, y es nulo exactamente bajo la hipótesis nula correspondiente.
+
+#+begin_quote
+*Resultado 2.* Sin normalidad: dividiendo cada suma de cuadrados por la dimensión del subespacio donde vive, el denominador de $F$ tiene siempre esperanza $\sigma^2$, y el numerador tiene esperanza $\sigma^2$ bajo $H_0$ y $\sigma^2$ más algo positivo fuera de $H_0$, tanto mayor cuanto más larga sea la parte de $\boldsymbol s$ que $H_0$ suprime en relación con el ruido. Por eso $F$ ronda $1$ cuando $H_0$ es cierta y un $F$ mucho mayor que $1$ habla contra $H_0$.
+#+end_quote
+
+Hasta aquí no se ha usado la normalidad, y el Resultado 2 es lo que justifica $F$ como estadístico de contraste. Lo que no da es su distribución: para eso hay que saber cómo se reparte la probabilidad entre los valores de cada $C_j$, y cómo se relacionan unas con otras más allá de la ortogonalidad.
+
+* Qué añade la normalidad: de ortogonal a independiente
+
+La lectura geométrica de la independencia (apéndice de la lección 11) dice que dos variables aleatorias son independientes cuando toda función centrada de una es ortogonal a toda función de la otra: sus espacios de funciones están /a escuadra/ sobre la recta de las constantes. Se extiende a familias: una familia de variables aleatorias es independiente cuando, para cualquier partición en dos subfamilias, los espacios de funciones de una y de otra están a escuadra. De ahí sale lo que necesitamos:
+
+#+begin_quote
+*Si dos estadísticos son funciones de dos subfamilias disjuntas de una familia independiente, los dos estadísticos son independientes*, porque cada uno vive en uno de los dos espacios a escuadra.
+#+end_quote
+
+La ortogonalidad $\langle C_j,C_l\rangle_P=0$ del Resultado 1 es solo la parte lineal de la escuadra: dice que $C_j\perp C_l$, no que $C_j^2$ sea ortogonal a $C_l^2-\mathrm E(C_l^2)\,\mathit1$, que es lo que haría falta para que las sumas de cuadrados de dos grupos fuesen independientes. Lo que convierte la ortogonalidad en escuadra es la normalidad, y conviene ver dónde entra exactamente. Hasta aquí, de las perturbaciones solo se ha usado que, dadas $\boldsymbol X$, son una familia ortogonal de la misma longitud $\sigma$ (incorrelación y homocedasticidad): es la lectura geométrica débil, y basta para los Resultados 1 y 2. Ahora se supone lo fuerte: que, dadas $\boldsymbol X$, las $U_i$ son una familia /a escuadra/ (independientes) con la /misma/ distribución $N(0,\sigma^2)$. La escuadra aparece así dos veces, como hipótesis sobre las $U_i$ y como conclusión sobre las $C_j$; lo que hace la normalidad es que el cambio de base, un giro en $\mathbb R^n$ evaluado sobre la muestra, conserve la escuadra y la distribución. Es una propiedad de la distribución normal que enunciamos sin demostrar:
+
+#+begin_quote
+*Propiedad de la normal.* Si $U_1,\ldots,U_n$ son, condicionando en $\boldsymbol X$, variables $N(0,\sigma^2)$ independientes, y $C_1,\ldots,C_{n-1}$ son sumas ponderadas $C_j=\sum_iB_{ji}U_i$ con pesos función de $\boldsymbol X$ que cumplen las identidades \eqref{eq:base-va}, entonces, condicionando en $\boldsymbol X$, las $C_j$ son variables $N(0,\sigma^2)$ /independientes/: la familia ortogonal es, además, una familia a escuadra.[fn::La razón, para quien quiera verla: la densidad conjunta de $n$ normales independientes de media cero y varianza $\sigma^2$, como función sobre $\mathbb R^n$, es $(2\pi\sigma^2)^{-n/2}e^{-\Vert\boldsymbol u\Vert_e^2/2\sigma^2}$, y depende del punto solo por su longitud euclídea. Las identidades \eqref{eq:base} dicen que pasar de $\boldsymbol u$ a sus coordenadas en la base (completada con $\boldsymbol 1/\sqrt n$) es un giro de ejes, que conserva longitudes y volúmenes; la densidad de las coordenadas es por tanto la misma función, que se factoriza en un producto de densidades normales, una por coordenada. Y una densidad conjunta que es producto de marginales es la de variables independientes. Sin normalidad el argumento falla: la densidad de $n$ uniformes independientes, por ejemplo, no depende solo de la longitud (llena un cubo), y las coordenadas en una base girada no son independientes.]
+#+end_quote
+
+Es la propiedad que las lecciones 12 y 13 llaman /isotropía/, formulada sin vectores aleatorios:
+
+#+begin_quote
+*Resultado 3 (isotropía).* Con normalidad, para cualquier base ortonormal de $\mathcal L(\boldsymbol 1)^\perp$ construida con los regresores, las coordenadas del ruido evaluadas sobre la muestra, $C_1,\ldots,C_{n-1}$, son, condicionando en $\boldsymbol X$, variables aleatorias independientes con la misma distribución $N(0,\sigma^2)$. Es una propiedad de la familia $\{C_j\}$, no de un vector.
+#+end_quote
+
+Un corolario que las lecciones usan: bajo $H_0\colon\beta_2=\cdots=\beta_k=0$, $R^2$ evaluado sobre la muestra es $\sum_{\mathcal E}C_j^2\big/\sum_{j=1}^{n-1}C_j^2$, y como las $n-1$ variables son independientes con la misma distribución, cada cuadrado contribuye lo mismo en promedio al cociente: $\mathrm E(R^2)=\dim\mathcal E/(n-1)=(k-1)/(n-1)$, el $R^2$ que regala el azar (lección 13). Aquí sí hace falta más que la ortogonalidad: la esperanza de un cociente no se calcula sumando esperanzas, y lo que la fija es que los $n-1$ sumandos sean intercambiables.
+
+* La $t$
+
+Juntemos las piezas. De \eqref{eq:beta-va}, $\hat\beta_m-\beta_m\,\mathit1=C_1/L_m$, y el error estándar evaluado sobre la muestra es $\mathfrak s/L_m$ con $\mathfrak s^2=\mathrm{SRC}/(n-k)=\sum_{\mathcal R}C_j^2/\dim\mathcal R$. Es \eqref{eq:t-datos} evaluada sobre la muestra, con el parámetro restado y $L_m$ cancelada:
+\[
+\frac{\hat\beta_m-\beta_m\,\mathit1}{\mathrm{ee}(\hat\beta_m)}=\frac{C_1/\sigma}{\sqrt{\dfrac{\sum_{\mathcal R}(C_j/\sigma)^2}{\dim\mathcal R}}} .
+\]
+Condicionando en $\boldsymbol X$ y con el Resultado 3: el numerador $C_1/\sigma$ es $N(0,1)$; el denominador es la raíz de una suma de $\dim\mathcal R=n-k$ cuadrados de variables $N(0,1)$ independientes, una $\chi^2_{n-k}$, dividida por $n-k$; y numerador y denominador son independientes, porque el primero es función de $C_1$ y el segundo de las $C_j$ de $\mathcal R$, dos subfamilias disjuntas de una familia a escuadra. Es la definición de la $t_{n-k}$: cociente de una $N(0,1)$ y la raíz de una $\chi^2_{n-k}/(n-k)$ independiente de ella. La distribución obtenida es la misma para cualquier valor de $\boldsymbol X$, y por eso es también la distribución sin condicionar. Los grados de libertad son $\dim\mathcal R$: las coordenadas del ruido que entran en el residuo.
+
+Con un solo regresor ($k=2$, $\mathcal E=\mathcal L(\boldsymbol b_1)$) el mismo cociente es el ángulo de la lección 12: $\cos\theta$ es la fórmula $c_1/\sqrt{\sum_{j=1}^{n-1}c_j^2}$ evaluada sobre la muestra, $C_1\big/\sqrt{\sum_{j=1}^{n-1}C_j^2}$, y su distribución bajo $H_0$ no depende de cuál sea la dirección de $\boldsymbol b_1$, porque todas las $C_j$ tienen la misma; solo depende de $n-1$, el tamaño de la familia, y de ahí que el valor crítico dependa de $n-k$.
+
+* La $F$
+
+Bajo $H_0$ (las $q$ restricciones), \eqref{eq:sumas-va} da el numerador sin parte sistemática, y \eqref{eq:F-datos} evaluada sobre la muestra es
+\[
+F=\frac{\sum_{\mathcal Q}(C_j/\sigma)^2\big/\dim\mathcal Q}{\sum_{\mathcal R}(C_j/\sigma)^2\big/\dim\mathcal R} .
+\]
+Numerador y denominador son sumas de cuadrados de dos subfamilias disjuntas (las $C_j$ de $\mathcal Q$ y las de $\mathcal R$) de una familia a escuadra de variables $N(0,1)$: una $\chi^2_q$ y una $\chi^2_{n-k}$ independientes, divididas por sus grados de libertad. Es la definición de la $F_{q,\,n-k}$, y de nuevo no depende de $\boldsymbol X$. El $F$ de significación conjunta es el caso $\mathcal Q=\mathcal E$, $q=k-1$. Si $H_0$ es falsa, las coordenadas de $\mathcal Q$ llevan sumadas las $D_j$ de la parte sistemática (Resultado 2) y el numerador tiende a ser mayor: es la razón por la que valores grandes de $F$ hablan contra $H_0$.
+
+* Las piezas y dónde opera cada una
+
+#+LATEX: {\rowcolors{2}{gray!10}{white}
+#+ATTR_LATEX: :align >{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{5.3cm} :font \small
+| Pieza                                                              | Espacio                     | Qué usa                                              | Qué da                                                                                                      |
+|--------------------------------------------------------------------+-----------------------------+------------------------------------------------------+-------------------------------------------------------------------------------------------------------------|
+| $\mathcal L(\boldsymbol 1)^\perp=\mathcal E\oplus\mathcal R$ y base adaptada \eqref{eq:base} | $\mathbb R^n$               | Regresores linealmente independientes                | Identidades válidas para toda muestra; $\dim\mathcal E=k-1$, $\dim\mathcal R=n-k$                            |
+| Coordenadas \eqref{eq:coord}, Pitágoras \eqref{eq:pitagoras}, \eqref{eq:coord-nula} | $\mathbb R^n$               | Ortonormalidad                                       | $\mathrm{SEC}$, $\mathrm{SRC}$, $\mathrm{SRC}_r-\mathrm{SRC}$ como sumas de coordenadas por subespacio       |
+| Parte propia, \eqref{eq:beta-coord}–\eqref{eq:t-datos}            | $\mathbb R^n$               | FWL (lección 14), $\boldsymbol b_1\perp\boldsymbol 1$ | $t$ = coordenada sobre $\tilde{\boldsymbol x}_m$ / media cuadrática de las de $\mathcal R$                 |
+| El puente                                                          | de $\mathbb R^n$ a las v.a. | Solo identidades                                     | \eqref{eq:base-va}, $C_j$, $D_j$, \eqref{eq:casos}, \eqref{eq:sumas-va}, \eqref{eq:beta-va}                 |
+| $D_j=\mathit0$ en $\mathcal R$ (y en $\mathcal Q$ bajo $H_0$)      | $\mathbb R^n$, evaluado     | \eqref{eq:coord-nula}; $H_0$ para $\mathcal Q$       | $\mathrm{SRC}$ sin parte sistemática; numerador de $F$ sin ella bajo $H_0$                                  |
+| Resultado 1: familia ortogonal                                     | v.a.                        | Lema, $E[U_i\mid\boldsymbol X]=\mathit0$, homocedasticidad, incorrelación | $\langle C_j,C_l\rangle_P=\sigma^2\delta_{jl}$                                             |
+| Resultado 2: esperanzas \eqref{eq:esperanzas}                      | v.a.                        | Resultado 1, Lema                                    | Insesgadez de $\mathfrak s^2$; $F$ ronda $1$ bajo $H_0$ y crece fuera                                        |
+| Propiedad de la normal                                             | v.a. (vía densidad en $\mathbb R^n$) | Las $U_i$ dadas $\boldsymbol X$ a escuadra y con la misma $N(0,\sigma^2)$ | Resultado 3: las $C_j$ a escuadra y con la misma $N(0,\sigma^2)$; el giro conserva la escuadra |
+| Subfamilias disjuntas                                              | v.a.                        | Escuadra (apéndice lección 11)                       | Numerador y denominador independientes; $t_{n-k}$, $F_{q,n-k}$                                              |
+| Fijar $\omega$                                                     | de las v.a. a $\mathbb R^n$ | Nada                                                 | Cada estadístico toma el valor de su fórmula en el punto realizado; los datos observados son un $\omega$   |
+#+LATEX: }
+
+Demostrado con material del curso: todo lo de $\mathbb R^n$; el puente; los Resultados 1 y 2; y que, si la familia es a escuadra, los dos estadísticos tienen por definición las distribuciones $t_{n-k}$ y $F_{q,n-k}$. Enunciado sin demostrar: la propiedad de la normal, con su razón en nota al pie. Es el único lugar donde el supuesto de normalidad trabaja, y por eso sin él la $t_{n-k}$ y la $F_{q,n-k}$ dejan de ser las distribuciones exactas de los estadísticos, mientras que el Resultado 2 (y con él la lectura ``$F$ ronda $1$ bajo $H_0$'') sigue en pie.
+
+Y el retorno a los datos. Lo que la sección 2 garantiza para toda realización es lo que permite leer una tabla de resultados con las fórmulas de las lecciones 8, 10, 13 y 14 sin probabilidad alguna: $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$, $\hat\beta_m=\langle\tilde{\boldsymbol x}_m,\boldsymbol y\rangle_e/\Vert\tilde{\boldsymbol x}_m\Vert_e^2$, $F=(\mathrm{SRC}_r-\mathrm{SRC})/q\big/\mathrm{SRC}/(n-k)$ son identidades en los números observados. Lo que las secciones 4 y 5 añaden es qué parte de esos números sería ruido si el modelo fuese cierto, y con qué distribución: la que se consulta en la tabla de la $t_{n-k}$ o de la $F_{q,n-k}$ para decidir si datos como estos serían raros bajo $H_0$.

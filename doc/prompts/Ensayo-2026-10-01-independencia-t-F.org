@@ -1,10 +1,8 @@
-#+TITLE: Por qué numerador y denominador de la $t$ y de la $F$ son independientes: la geometría de Fisher
-#+DATE: 2026-10-01
+#+TITLE: Por qué numerador y denominador de la $t$ y de la $F$ son independientes: dos espacios, dos geometrías
+#+DATE: 2026-10-03
 #+LANGUAGE: es
-# +OPTIONS: toc:nil
+#+OPTIONS: toc:nil
 
-# Cabecera de exportación: la misma cadena que las prácticas (xelatex con
-# Latin Modern y polyglossia), para que «», ¿ y las cursivas salgan bien.
 #+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
 (setq org-latex-pdf-process
       '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
@@ -19,146 +17,120 @@
 #+LATEX_HEADER: \usepackage[indent]{parskip}
 #+LATEX_HEADER: \usepackage{fullpage}
 
-# Borrador de apéndice, EN MADURACIÓN (1-10-2026): no se incluye en el
-# material hasta que el usuario lo juzgue.
+# Cuarta versión (3-10-2026). Reescrita sobre la nota
+# Nota-2026-10-02-dos-espacios.org, tras tres versiones corregidas por el
+# usuario: (1) no confundir variables aleatorias con números ni listas de
+# variables aleatorias con vectores de R^n; (2) los regresores son
+# variables aleatorias y se condiciona en X sin convertirlos en números;
+# (3) separar por completo R^n del espacio de variables aleatorias, usar
+# que la esperanza del producto es un producto escalar (lección 9) y la
+# lectura geométrica de la independencia («a escuadra», apéndice de la
+# lección 11): dos estadísticos que son funciones de dos familias de
+# variables cuyos espacios están a escuadra son independientes.
+# Versiones anteriores: en el historial de git.
 #
-# Origen: pregunta del usuario (1-10-2026). En las lecciones 12 y 13 la t y la
-# F se enuncian sin demostrar, y en particular se declara sin prueba que
-# numerador y denominador son independientes. El apéndice de la lección 11
-# («Lectura geométrica: independientes es a escuadra») caracteriza la
-# independencia por ortogonalidad de las funciones centradas. ¿Hay una
-# explicación geométrica de esa independencia que encaje con el curso?
-#
-# Tercera versión (1-10-2026, noche), tras dos correcciones del usuario:
-# (1) NO confundir variables aleatorias (funciones de Omega) con números,
-# ni listas de variables aleatorias con vectores de R^n; (2) los regresores
-# son variables aleatorias, X_{il}, y el modelo es
-# Y_i = beta_1 1 + beta_2 X_{i2} + ... + U_i; condicionar en la muestra de
-# regresores NO los convierte en números. Por eso: todo lo construido con los
-# regresores (subespacio, matriz de proyección, base) es función de la
-# muestra aleatoria de regresores, como los pesos W_i de la lección 11; las
-# identidades son algebraicas, válidas para cualquier valor que tomen los
-# regresores; las afirmaciones sobre distribuciones son condicionales en
-# $\boldsymbol X$. Notación de matrices del curso: $\boldsymbol{\mathsf X}$ y
-# el selector de fila ${}_{i|}$ (lección 10); $\boldsymbol X$ es la versión
-# aleatoria de $\boldsymbol{\mathsf X}$ (lección 11).
-#
-# Destino previsto: apéndice de la lección 12 (S17-Lecc12), donde se enuncia
-# la t_{n-k}, con una nota desde la lección 13 para la F.
-#
-# Lo que usa del curso: proyección y complemento ortogonal (L10), bases
-# ortogonales de norma uno y Pitágoras generalizado (L13), isotropía (L12),
-# hat beta_j - beta_j = sum_l W_l U_l con W_l = x~_{lj}/||x~_j||^2 (L14),
-# la caracterización de la independencia (apéndice L11), la densidad
-# conjunta de variables independientes como producto.
-# Lo que acepta sin demostrar: que un giro de ejes no cambia volúmenes
-# (cambio de variables ortogonal en una densidad) y que una combinación
-# lineal de normales independientes es normal (ya aceptado en L12).
+# Destino previsto: apéndice de la lección 12 (donde se enuncia la t_{n-k})
+# con nota desde la lección 13 para la F. Depende de la nota de los dos
+# espacios (familia ortogonal {C_j}); si esa nota pasa a las lecciones 12 y
+# 13, este apéndice puede citarla en lugar de repetirla.
 
-* Lo que hay que demostrar, y en qué plano
+* Lo que hay que demostrar
 
 La lección 12 enunció que, bajo los supuestos del Modelo Clásico con normalidad,
 \[
 \frac{\hat\beta_j-\beta_j}{\mathrm{ee}(\hat\beta_j)}\sim t_{n-k},
 \]
-y advirtió que su prueba exige la distribución $\chi^2$ y un argumento de independencia entre $\hat\beta_j$ y $\mathfrak s^2$ que el curso no desarrolla. La lección 13 dijo lo mismo de la $F$. Este apéndice da ese argumento, y resulta que es geometría de la que el curso ya tiene: una base ortogonal bien elegida y el teorema de Pitágoras.
+y advirtió que su prueba exige la distribución $\chi^2$ y un argumento de independencia entre $\hat\beta_j$ y $\mathfrak s^2$ que el curso no desarrolla. La lección 13 dijo lo mismo de la $F$. Este apéndice da ese argumento con dos ingredientes que el curso ya tiene: la familia ortogonal de la nota sobre los dos espacios, y la lectura geométrica de la independencia del apéndice de la lección 11.
 
-Antes de empezar conviene fijar en qué plano se mueve cada objeto, porque la demostración pasa continuamente de uno a otro y es fácil confundirlos. Hay tres clases de objetos. Listas de números, puntos de $\mathbb R^n$: los datos observados, como la matriz $\boldsymbol{\mathsf X}$ de la lección 10 y sus columnas $\boldsymbol x_j$. Variables aleatorias de la muestra, funciones del resultado $\omega$: los regresores $X_{il}$, cuya versión en bloque es $\boldsymbol X$ (lección 11), y las perturbaciones $U_i$. Y objetos construidos a partir de los regresores: el subespacio que generan, la matriz de la proyección sobre él, una base ortonormal adaptada. Estos últimos son, como los pesos $W_i$ de la lección 11, /funciones de la muestra aleatoria de regresores/: para cada $\omega$, con los valores $\boldsymbol X(\omega)=\boldsymbol{\mathsf X}$ se calcula un objeto numérico, y la regla de cálculo es la misma para cualquier valor que tomen los regresores. La geometría (proyecciones, bases, Pitágoras) se aplica a listas de números; cada identidad que escribamos es una identidad algebraica válida para cualquier valor de los regresores y de las perturbaciones, y por eso, evaluada sobre la muestra aleatoria, es una igualdad entre variables aleatorias. Las afirmaciones sobre distribuciones, en cambio, se hacen /condicionando en $\boldsymbol X$/, como en la lección 11: bajo los supuestos del Modelo Clásico con normalidad, dada la muestra de regresores, $U_1,\ldots,U_n$ son variables $N(0,\sigma^2)$ independientes. Condicionar no convierte en números ni a los regresores ni a las perturbaciones; dice respecto de qué distribución se habla. Al final se verá que las distribuciones obtenidas no dependen de la muestra de regresores, de modo que valen también sin condicionar.
+Fijemos las definiciones. Una variable $\chi^2_m$ es, por definición, una suma de $m$ cuadrados de variables $N(0,1)$ independientes. Una $t_m$ es un cociente $Z/\sqrt{Q/m}$ con $Z\sim N(0,1)$, $Q\sim\chi^2_m$ y $Z$ y $Q$ independientes. Una $F_{q,m}$ es un cociente $(Q_1/q)/(Q_2/m)$ de dos $\chi^2$ independientes divididas por sus grados de libertad. La demostración consiste en escribir cada estadístico en esa forma.
 
-Fijemos ahora las definiciones. Una variable $\chi^2_m$ es, por definición, una suma de $m$ cuadrados de variables $N(0,1)$ independientes. Una $t_m$ es un cociente
+Se sigue la regla de la nota: en $\mathbb R^n$, vectores de datos y álgebra, sin probabilidad; en el espacio de las variables aleatorias, el producto escalar $\langle Z,W\rangle_P=\mathrm E(ZW)$ de la lección 9; y entre los dos, un único puente: una identidad de $\mathbb R^n$, válida para toda lista de números, evaluada sobre la muestra aleatoria es una igualdad entre variables aleatorias. Todas las afirmaciones probabilísticas se hacen condicionando en la muestra aleatoria de regresores $\boldsymbol X$ (lección 11), y los números se obtienen al final por la ley de las esperanzas iteradas.
+
+* En $\mathbb R^n$: una base adaptada al regresor $j$
+
+Sea $\mathcal L(\boldsymbol 1)^\perp$ el subespacio de los vectores de media cero, de dimensión $n-1$. Dentro de él está el subespacio de los regresores en desviaciones, de dimensión $k-1$, y dentro de este la dirección de la parte propia $\tilde{\boldsymbol x}_j$ del regresor $j$ (lección 14): el residuo de $\boldsymbol x_j$ sobre los demás regresores, que es ortogonal a $\boldsymbol 1$ y a cada uno de ellos. Tomemos una base ortonormal $\boldsymbol b_1,\ldots,\boldsymbol b_{n-1}$ de $\mathcal L(\boldsymbol 1)^\perp$ en tres tramos:
+\begin{align*}
+\boldsymbol b_1&=\frac{\tilde{\boldsymbol x}_j}{\Vert\tilde{\boldsymbol x}_j\Vert_e};\\
+\boldsymbol b_2,\ldots,\boldsymbol b_{k-1}&\ \text{ completan el subespacio de los regresores en desviaciones};\\
+\boldsymbol b_k,\ldots,\boldsymbol b_{n-1}&\ \text{ completan }\mathcal L(\boldsymbol 1)^\perp .
+\end{align*}
+Se construye con una regla fija a partir de los vectores de datos $\boldsymbol x_2,\ldots,\boldsymbol x_k$ (ortogonalizar, como en la práctica D de la sesión 14). Que sea ortonormal y esté en $\mathcal L(\boldsymbol 1)^\perp$ son tres identidades entre sus componentes, válidas para cualquier muestra de regresores linealmente independientes:
+\begin{equation}\label{eq:base}
+\sum_{i=1}^nb_{ji}^2=1,\qquad \sum_{i=1}^nb_{ji}b_{li}=0\ (j\neq l),\qquad \sum_{i=1}^nb_{ji}=0 .
+\end{equation}
+Las coordenadas de un punto $\boldsymbol v$ de $\mathcal L(\boldsymbol 1)^\perp$ son $c_j=\sum_{i=1}^nb_{ji}v_i$, y Pitágoras generalizado da $\Vert\boldsymbol v\Vert_e^2=\sum_{j=1}^{n-1}c_j^2$.
+
+Dos hechos más de $\mathbb R^n$, de las lecciones 10 y 14. Primero, el residuo del ajuste de $\boldsymbol y$ sobre $\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k$ es la componente de $\boldsymbol y-\boldsymbol{\mathop{\overline y}}$ ortogonal al subespacio de los regresores en desviaciones, es decir, su proyección sobre el generado por $\boldsymbol b_k,\ldots,\boldsymbol b_{n-1}$: $\mathrm{SRC}=\sum_{j=k}^{n-1}c_j^2$, con $c_j$ las coordenadas de $\boldsymbol y-\boldsymbol{\mathop{\overline y}}$. Segundo, la nota al pie de la lección 14: $\hat\beta_j=\sum_{i=1}^nw_iy_i$ con pesos $w_i=\tilde x_{ij}/\Vert\tilde{\boldsymbol x}_j\Vert_e^2$. Como $\boldsymbol b_1$ es $\tilde{\boldsymbol x}_j$ dividido por su longitud, cada componente de la parte propia es $\tilde x_{ij}=\Vert\tilde{\boldsymbol x}_j\Vert_e\,b_{1i}$, y los pesos son
+\begin{equation}\label{eq:pesos}
+w_i=\frac{b_{1i}}{\Vert\tilde{\boldsymbol x}_j\Vert_e},\qquad\text{luego}\qquad \hat\beta_j=\frac{1}{\Vert\tilde{\boldsymbol x}_j\Vert_e}\sum_{i=1}^nb_{1i}\,y_i .
+\end{equation}
+La suma $\sum_ib_{1i}\,y_i$ se parece a la primera coordenada de $\boldsymbol y$, pero $\boldsymbol y$ no está en $\mathcal L(\boldsymbol 1)^\perp$ y la base es de ese subespacio; la coordenada que hace falta es la del vector de datos en desviaciones, $c_1=\sum_ib_{1i}(y_i-\mu_{\boldsymbol y})$. Las dos sumas coinciden por la tercera identidad de \eqref{eq:base}: restar la media a todas las componentes resta $\mu_{\boldsymbol y}\sum_ib_{1i}=\mu_{\boldsymbol y}\cdot0$, es decir, nada,
 \[
-t_m=\frac{Z}{\sqrt{Q/m}},\qquad Z\sim N(0,1),\quad Q\sim\chi^2_m,\quad Z\text{ y }Q\text{ independientes},
+\sum_{i=1}^nb_{1i}\,y_i=\sum_{i=1}^nb_{1i}\,(y_i-\mu_{\boldsymbol y})+\mu_{\boldsymbol y}\sum_{i=1}^nb_{1i}=c_1 .
 \]
-y una $F_{q,m}$ es un cociente $\dfrac{Q_1/q}{Q_2/m}$ de dos $\chi^2$ independientes divididas por sus grados de libertad. Para la $t$ hay que comprobar tres cosas: que el numerador, bien normalizado, es $N(0,1)$; que el denominador, bien normalizado, es una $\chi^2_{n-k}$; y que son independientes. Las tres salen del mismo argumento.
+Es la misma simplificación que en la nota sobre los dos espacios eliminaba $\overline U$ de las $C_j$, y la razón geométrica es la de la lección 10: $\boldsymbol b_1$ es ortogonal a $\boldsymbol 1$, así que la componente de $\boldsymbol y$ en la dirección de $\boldsymbol 1$ (su media) no cuenta en el producto escalar con $\boldsymbol b_1$. Por tanto $\hat\beta_j=c_1/\Vert\tilde{\boldsymbol x}_j\Vert_e$: la primera coordenada del vector de datos en desviaciones dividida por la longitud de la parte propia. Y el error estándar es $\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$ con $\mathfrak s^2=\mathrm{SRC}/(n-k)$. Por tanto, para cualquier vector de datos,
+\begin{equation}\label{eq:t-datos}
+\frac{\hat\beta_j}{\mathrm{ee}(\hat\beta_j)}=\frac{c_1}{\mathfrak s}
+=\frac{c_1}{\sqrt{\sum_{j=k}^{n-1}c_j^2\big/(n-k)}} .
+\end{equation}
+El estadístico $t$ es, en $\mathbb R^n$, la primera coordenada dividida por la media cuadrática de las últimas $n-k$. Hasta aquí no hay probabilidad.
 
-Escribamos los dos ingredientes del estadístico como funciones de las perturbaciones. El modelo es
+* En el espacio de las variables aleatorias: la familia $\{C_j\}$
+
+Evaluemos sobre la muestra aleatoria. Las componentes $b_{ji}$, la longitud $\Vert\tilde{\boldsymbol x}_j\Vert_e$ y los pesos $w_i$ son fórmulas de los regresores; sobre $\boldsymbol X$ dan variables aleatorias $B_{ji}$, $L_j$ y $W_i=B_{1i}/L_j$, funciones de $\boldsymbol X$. Las identidades \eqref{eq:base} pasan a ser igualdades entre variables aleatorias: $\sum_iB_{ji}^2=\mathit1$, $\sum_iB_{ji}B_{li}=\mathit0$, $\sum_iB_{ji}=\mathit0$.
+
+Con el modelo $Y_i=\beta_1\,\mathit1+\beta_2X_{i2}+\cdots+\beta_kX_{ik}+U_i$, la nota sobre los dos espacios mostró que la fórmula de la coordenada \(j\)-ésima, evaluada sobre $(Y_i-\overline Y)_i$, es $D_j+C_j$ para $j\le k-1$ y $C_j$ para $j\ge k$, con
 \[
-Y_i=\beta_1\,\mathit1+\beta_2X_{i2}+\cdots+\beta_kX_{ik}+U_i,\qquad i=1,\ldots,n .
+C_j=\sum_{i=1}^nB_{ji}\,U_i\qquad\text{y}\qquad D_j=\sum_{i=1}^nB_{ji}\,S_i,
 \]
-Para cada valor $\boldsymbol{\mathsf X}$ de la muestra de regresores, sus columnas generan el subespacio $\mathcal M=\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$ de $\mathbb R^n$, de dimensión $k$, y la proyección ortogonal sobre $\mathcal M$ (lección 10) es una aplicación lineal de $\mathbb R^n$ en sí mismo; llamemos $\boldsymbol{\mathsf P}$ a su matriz, de modo que la proyección de una lista $\boldsymbol u$ es $\boldsymbol{\mathsf P}\boldsymbol u$ y su componente $i$-ésima es ${}_{i|}\boldsymbol{\mathsf P}\,\boldsymbol u$, la fila $i$ de $\boldsymbol{\mathsf P}$ por $\boldsymbol u$. Las entradas de $\boldsymbol{\mathsf P}$ se calculan a partir de $\boldsymbol{\mathsf X}$; evaluadas sobre la muestra aleatoria son funciones de $\boldsymbol X$, y escribiremos $\boldsymbol{\mathsf P}(\boldsymbol X)$ cuando convenga recordarlo. La lista $\big(\beta_1\,\mathit1+\beta_2X_{i2}+\cdots+\beta_kX_{ik}\big)_{i}$ es, para cada $\omega$, un punto del subespacio generado por las columnas de $\boldsymbol X(\omega)$, así que proyectar la deja como está; y el ajuste del modelo es la proyección de $\boldsymbol Y$. Luego, como igualdad entre variables aleatorias,
+donde $S_i$ es la componente \(i\)-ésima de la parte sistemática en desviaciones y $D_j$, función solo de los regresores, es la coordenada de esa parte sobre $\boldsymbol b_j$. Aquí la base está adaptada al regresor $j$, y conviene mirar $D_1$: la parte sistemática en desviaciones es $\beta_2(\boldsymbol x_2-\boldsymbol{\mathop{\overline x}}_2)+\cdots+\beta_k(\boldsymbol x_k-\boldsymbol{\mathop{\overline x}}_k)$ en cada realización, y su coordenada sobre $\boldsymbol b_1=\tilde{\boldsymbol x}_j/\Vert\tilde{\boldsymbol x}_j\Vert_e$ es $\beta_j\Vert\tilde{\boldsymbol x}_j\Vert_e$, porque $\tilde{\boldsymbol x}_j$ es ortogonal a todos los regresores salvo a $\boldsymbol x_j$ y $\langle\boldsymbol x_j-\boldsymbol{\mathop{\overline x}}_j,\tilde{\boldsymbol x}_j\rangle_e=\Vert\tilde{\boldsymbol x}_j\Vert_e^2$ (lección 14). Así que $D_1=\beta_j\,L_j$ y, evaluando \eqref{eq:pesos},
+\begin{equation}\label{eq:beta-C}
+\hat\beta_j=\frac{D_1+C_1}{L_j}=\beta_j\,\mathit1+\frac{C_1}{L_j},\qquad
+\mathrm{SRC}=\sum_{j=k}^{n-1}C_j^2 ,
+\end{equation}
+que es la descomposición $\hat\beta_j=\beta_j\,\mathit1+\sum_iW_iU_i$ de la lección 14, con $\sum_iW_iU_i=C_1/L_j$; y la $\mathrm{SRC}$ no ve la parte sistemática (las coordenadas $D_j$ con $j\ge k$ son nulas), con o sin hipótesis sobre los $\beta$.
+
+La geometría de la familia $\{C_1,\ldots,C_{n-1}\}$ es la de la nota. Con los supuestos de la lección 11 ($E[U_i\mid\boldsymbol X]=\mathit0$, $E[U_i^2\mid\boldsymbol X]=\sigma^2\,\mathit1$, $E[U_iU_l\mid\boldsymbol X]=\mathit0$ para $i\neq l$), el Lema y las identidades de la base dan
 \[
-\widehat Y_i=\beta_1\,\mathit1+\beta_2X_{i2}+\cdots+\beta_kX_{ik}+{}_{i|}\boldsymbol{\mathsf P}(\boldsymbol X)\,\boldsymbol U,
-\qquad
-\widehat e_i=Y_i-\widehat Y_i={}_{i|}\big(\boldsymbol{\mathsf I}-\boldsymbol{\mathsf P}(\boldsymbol X)\big)\boldsymbol U .
+E[C_j\mid\boldsymbol X]=\mathit0,\qquad E[C_jC_l\mid\boldsymbol X]=\sigma^2\sum_{i=1}^nB_{ji}B_{li}=\begin{cases}\sigma^2\,\mathit1 & j=l,\\ \mathit0 & j\neq l:\end{cases}
 \]
-Cada residuo es una combinación lineal de las perturbaciones, $\widehat e_i=\sum_l\,{}_{i|}(\boldsymbol{\mathsf I}-\boldsymbol{\mathsf P})_{|l}\,U_l$, con coeficientes que son funciones de los regresores: los de la fila $i$ de la matriz de la proyección sobre el complemento ortogonal $\mathcal M^\perp$, de dimensión $n-k$. Y la cuasivarianza residual es una suma de cuadrados de variables aleatorias:
+condicionando en $\boldsymbol X$, las $C_j$ son una familia ortogonal de variables aleatorias centradas, todas de la misma longitud $\sigma$. Esto no usa la normalidad.
+
+* Lo que añade la normalidad: de ortogonal a independiente
+
+La lectura geométrica de la independencia (apéndice de la lección 11) dice que dos variables aleatorias son independientes cuando toda función centrada de una es ortogonal a toda función de la otra: sus espacios de funciones están /a escuadra/ sobre la recta de las constantes. Y se extiende a familias: una familia de variables aleatorias es independiente cuando los espacios de funciones de cualquier subfamilia y de su complementaria están a escuadra. De ahí sale lo que necesitamos, y es lo que usted señaló: *si dos estadísticos son funciones de dos subfamilias disjuntas de una familia independiente, los dos estadísticos son independientes*, porque cada uno vive en uno de los dos espacios a escuadra.
+
+La ortogonalidad $\langle C_j,C_l\rangle_P=0$ es solo la parte lineal de la escuadra: dice que $C_j\perp C_l$, no que toda función centrada de $C_j$ sea ortogonal a toda función de $C_l$. Lo que convierte la ortogonalidad en escuadra es la normalidad, por una propiedad de la distribución normal que enunciamos sin demostrar:
+
+#+begin_quote
+/Propiedad de la normal./ Si $U_1,\ldots,U_n$ son, condicionando en $\boldsymbol X$, variables $N(0,\sigma^2)$ independientes, y $C_1,\ldots,C_{n-1}$ son sumas ponderadas $C_j=\sum_iB_{ji}U_i$ con pesos función de $\boldsymbol X$ que cumplen las identidades \eqref{eq:base}, entonces, condicionando en $\boldsymbol X$, las $C_j$ son variables $N(0,\sigma^2)$ /independientes/: la familia ortogonal es, además, una familia a escuadra.[fn::La razón, para quien quiera verla: la densidad conjunta de $n$ normales independientes de media cero y varianza $\sigma^2$, como función sobre $\mathbb R^n$, es $(2\pi\sigma^2)^{-n/2}e^{-\Vert\boldsymbol u\Vert_e^2/2\sigma^2}$, y depende del punto solo por su longitud euclídea. Las identidades \eqref{eq:base} dicen que pasar de $\boldsymbol u$ a sus coordenadas en la base es un giro de ejes, que conserva longitudes y volúmenes; la densidad de las coordenadas es por tanto la misma función, que se factoriza en un producto de densidades normales, una por coordenada. Y una densidad conjunta que es producto de marginales es la de variables independientes. Sin normalidad el argumento falla: la densidad de $n$ uniformes independientes, por ejemplo, no depende solo de la longitud (llena un cubo), y las coordenadas en una base girada no son independientes.]
+#+end_quote
+
+Es la propiedad que las lecciones 12 y 13 llaman /isotropía/, formulada sin vectores aleatorios: para cualquier base ortonormal construida con los regresores, las fórmulas de las coordenadas evaluadas sobre la muestra aleatoria son variables aleatorias independientes con la misma distribución $N(0,\sigma^2)$.
+
+* La $t$
+
+Juntemos las piezas. De \eqref{eq:beta-C}, $\hat\beta_j-\beta_j\,\mathit1=C_1/L_j$, y el error estándar evaluado sobre la muestra es $\mathfrak s/L_j$ con $\mathfrak s^2=\mathrm{SRC}/(n-k)=\sum_{j=k}^{n-1}C_j^2/(n-k)$. Es \eqref{eq:t-datos} evaluada sobre la muestra aleatoria, con el parámetro restado:
 \[
-\mathfrak s^2=\frac{1}{n-k}\sum_{i=1}^n\widehat e_i^{\,2}.
+\frac{\hat\beta_j-\beta_j\,\mathit1}{\mathrm{ee}(\hat\beta_j)}=\frac{C_1/\sigma}{\sqrt{\dfrac{(C_k/\sigma)^2+\cdots+(C_{n-1}/\sigma)^2}{n-k}}} .
 \]
-Para el numerador, la nota al pie de la lección 14 demostró que $\hat\beta_j-\beta_j=\sum_lW_lU_l$ con $W_l=\tilde x_{lj}/\Vert\tilde{\boldsymbol x}_j\Vert_e^2$, donde $\tilde{\boldsymbol x}_j$ es la parte propia del regresor $j$; también una combinación lineal de las perturbaciones con pesos que son funciones de los regresores. Los pesos $W_l$ forman, para cada valor de los regresores, un vector de $\mathcal M$ (la parte propia es $\boldsymbol x_j$ menos una combinación de los demás regresores); los coeficientes de cada residuo forman un vector de $\mathcal M^\perp$. Numerador y denominador son, pues, funciones de las perturbaciones a través de combinaciones lineales cuyos vectores de coeficientes viven en dos subespacios ortogonales de $\mathbb R^n$. Eso es lo que hay que explotar.
+Condicionando en $\boldsymbol X$: el numerador $C_1/\sigma$ es $N(0,1)$; el denominador es la raíz de una suma de $n-k$ cuadrados de variables $N(0,1)$ independientes, una $\chi^2_{n-k}$, dividida por $n-k$; y numerador y denominador son independientes, porque el primero es función de $C_1$ y el segundo de $C_k,\ldots,C_{n-1}$, dos subfamilias disjuntas de una familia a escuadra. Es la definición de la $t_{n-k}$. La longitud $L_j$, que dependía de los regresores, se ha cancelado, y la distribución obtenida es la misma para cualquier valor de $\boldsymbol X$: por eso es también la distribución sin condicionar.
 
-* La densidad condicional de las perturbaciones solo depende de una longitud
+Los grados de libertad son $n-k$ porque esas son las variables de la familia que entran en el residuo: la dimensión del subespacio donde vive, como la lección 12 anunció.
 
-Condicionando en $\boldsymbol X$, $U_1,\ldots,U_n$ son independientes y cada una es $N(0,\sigma^2)$, y esa distribución condicional es la misma cualquiera que sea el valor de los regresores. La densidad conjunta de variables independientes es el producto de las densidades. Es una función sobre $\mathbb R^n$: a cada lista de números $\boldsymbol u=(u_1,\ldots,u_n)$ le asigna
+* La $F$
+
+Para $q$ restricciones lineales se parte el tramo central de la base. Sea $\mathcal M_R$ el subespacio del modelo restringido; el subespacio de sus regresores en desviaciones tiene dimensión $k-1-q$, y elegimos $\boldsymbol b_1,\ldots,\boldsymbol b_{k-1-q}$ en él, $\boldsymbol b_{k-q},\ldots,\boldsymbol b_{k-1}$ completando el subespacio de todos los regresores en desviaciones (son las $q$ direcciones que las restricciones suprimen), y $\boldsymbol b_k,\ldots,\boldsymbol b_{n-1}$ como antes. Por el Pitágoras anidado de la lección 13, para cualquier vector de datos
 \[
-f(\boldsymbol u)=\prod_{l=1}^n\frac{1}{\sqrt{2\pi\sigma^2}}\,e^{-u_l^2/2\sigma^2}
-=\frac{1}{(2\pi\sigma^2)^{n/2}}\,e^{-(u_1^2+\cdots+u_n^2)/2\sigma^2}
-=\frac{1}{(2\pi\sigma^2)^{n/2}}\,e^{-\Vert\boldsymbol u\Vert_e^2/2\sigma^2},
+\mathrm{SRC}_R-\mathrm{SRC}=\sum_{j=k-q}^{k-1}c_j^2,\qquad \mathrm{SRC}=\sum_{j=k}^{n-1}c_j^2 ,
 \]
-y la probabilidad condicional, dada la muestra de regresores, de que la lista $(U_1,\ldots,U_n)$ caiga en una región $A$ de $\mathbb R^n$, es decir, del suceso $\{\omega:(U_1(\omega),\ldots,U_n(\omega))\in A\}$, es la integral de $f$ sobre $A$. La densidad depende del punto $\boldsymbol u$ solo a través de su longitud euclídea. Es la /isotropía/ de la lección 12 escrita en una fórmula: dos puntos a la misma distancia del origen tienen la misma densidad, se mire en la dirección que se mire, y por eso girar los ejes no cambia la distribución.
-
-* Girar los ejes: una base adaptada a los dos subespacios
-
-La lección 13 usó que en cada subespacio se puede tomar una base de vectores ortogonales de norma uno. Tomemos una para todo $\mathbb R^n$, adaptada al problema: $\boldsymbol v_1,\ldots,\boldsymbol v_k$ ortonormales que generen $\mathcal M$, y $\boldsymbol v_{k+1},\ldots,\boldsymbol v_n$ ortonormales que generen $\mathcal M^\perp$. Juntos son una base ortonormal de $\mathbb R^n$. Se construye a partir de $\boldsymbol{\mathsf X}$ con una regla fija (ortogonalizando las columnas, como en la práctica D de la sesión 14), de modo que sus componentes $v_{il}$ son, como las entradas de $\boldsymbol{\mathsf P}$, funciones de la muestra de regresores. Definamos las variables aleatorias
-\[
-Z_i=\sum_{l=1}^n v_{il}\,U_l,\qquad i=1,\ldots,n .
-\]
-Para cada $\omega$, $Z_i(\omega)$ es la coordenada $i$-ésima del punto $(U_1(\omega),\ldots,U_n(\omega))$ en la base construida con $\boldsymbol X(\omega)$. Las identidades que siguen son identidades de $\mathbb R^n$ válidas para cualquier base ortonormal y cualquier punto, y por tanto igualdades entre variables aleatorias. Primero, un punto es la suma de sus coordenadas por los vectores de la base, y la proyección sobre $\mathcal M$ se queda con las $k$ primeras:
-\[
-U_l=\sum_{i=1}^n Z_i\,v_{il},\qquad
-{}_{l|}\boldsymbol{\mathsf P}(\boldsymbol X)\,\boldsymbol U=\sum_{i=1}^k Z_i\,v_{il},\qquad
-\widehat e_l={}_{l|}\big(\boldsymbol{\mathsf I}-\boldsymbol{\mathsf P}(\boldsymbol X)\big)\boldsymbol U=\sum_{i=k+1}^n Z_i\,v_{il}.
-\]
-Segundo, Pitágoras generalizado en una base ortonormal (lección 13): la longitud al cuadrado de un punto es la suma de sus coordenadas al cuadrado, y lo mismo para cada proyección,
-\[
-\sum_{l=1}^n U_l^2=\sum_{i=1}^n Z_i^2,\qquad
-\sum_{l=1}^n\widehat e_l^{\,2}=\sum_{i=k+1}^n Z_i^2 .
-\]
-La suma de cuadrados de los residuos es la suma de cuadrados de las $n-k$ últimas coordenadas.
-
-¿Cuál es la distribución conjunta de $(Z_1,\ldots,Z_n)$, condicionada en $\boldsymbol X$? Fijado un valor de los regresores, la base es una base ortonormal concreta, y pasar de un punto $\boldsymbol u$ a sus coordenadas $\boldsymbol z$ en ella es girar los ejes (o girarlos y reflejar alguno). Un giro conserva las longitudes, $\Vert\boldsymbol z\Vert_e=\Vert\boldsymbol u\Vert_e$, y conserva los volúmenes: una región de $\mathbb R^n$ y su imagen girada tienen el mismo volumen.[fn::Esto es lo único que el apéndice usa sin demostrar. En el lenguaje de las matrices, la matriz de cambio de base es ortogonal y su determinante vale $\pm1$; en el del cálculo, es la fórmula del cambio de variables en una integral múltiple con jacobiano de valor absoluto $1$.] La probabilidad condicional de que la lista $(Z_1,\ldots,Z_n)$ caiga en una región $B$ es la de que $(U_1,\ldots,U_n)$ caiga en la región girada correspondiente, que es la integral de $f$ sobre ella; esa región tiene el mismo volumen que $B$ y en ella $f$ toma los mismos valores, porque $f$ solo depende de la longitud. Luego la densidad condicional de $(Z_1,\ldots,Z_n)$ es la misma función:
-\[
-f(\boldsymbol z)=\frac{1}{(2\pi\sigma^2)^{n/2}}\,e^{-\Vert\boldsymbol z\Vert_e^2/2\sigma^2}
-=\prod_{i=1}^n\frac{1}{\sqrt{2\pi\sigma^2}}\,e^{-z_i^2/2\sigma^2}.
-\]
-Y una densidad conjunta que es producto de densidades marginales es, por definición, la de variables independientes. Conclusión: /condicionando en $\boldsymbol X$, las coordenadas $Z_1,\ldots,Z_n$ de las perturbaciones en la base adaptada son de nuevo variables $N(0,\sigma^2)$ independientes/, y esto para cualquier valor de los regresores, aunque la base cambie con ellos. Girar los ejes no cambia nada: ni la distribución de cada coordenada ni la independencia entre ellas. Eso es lo que la lección 12 llamó isotropía, y aquí se ve por qué la normalidad la produce.
-
-* Las tres consecuencias
-
-/Independencia./ $\hat\beta_j-\beta_j=\sum_lW_lU_l$ es una combinación lineal de las perturbaciones cuyo vector de pesos está en $\mathcal M$; escrito en la base adaptada, ese vector solo tiene componentes sobre $\boldsymbol v_1,\ldots,\boldsymbol v_k$, así que, dada la muestra de regresores, $\hat\beta_j$ es una función de $(Z_1,\ldots,Z_k)$. Cada residuo $\widehat e_l$, y con ellos $\mathfrak s^2$, es una función de $(Z_{k+1},\ldots,Z_n)$. Dos grupos disjuntos de variables independientes: toda función del primer grupo es independiente de toda función del segundo. En particular $\hat\beta_j$ y $\mathfrak s^2$ son independientes condicionando en $\boldsymbol X$. En el lenguaje del apéndice de la lección 11: toda función centrada de $(Z_1,\ldots,Z_k)$ es ortogonal, en $\langle\cdot,\cdot\rangle_P$, a toda función de $(Z_{k+1},\ldots,Z_n)$; los dos subespacios de variables aleatorias están a escuadra sobre la recta de las constantes. Lo que este apéndice añade es /de dónde sale esa escuadra/: de la escuadra en $\mathbb R^n$ entre $\mathcal M$ y $\mathcal M^\perp$, que son subespacios de listas de números, trasladada al espacio de las variables aleatorias por la isotropía de la normal. Son dos ortogonalidades distintas, en dos espacios distintos, y la normalidad es el puente entre ambas.
-
-/El denominador./ $\dfrac{1}{\sigma^2}\displaystyle\sum_{l}\widehat e_l^{\,2}=\Big(\frac{Z_{k+1}}{\sigma}\Big)^2+\cdots+\Big(\frac{Z_n}{\sigma}\Big)^2$ es una suma de $n-k$ cuadrados de variables $N(0,1)$ independientes: una $\chi^2_{n-k}$ por definición. Los grados de libertad son el número de coordenadas que hacen falta para describir los residuos, es decir, la dimensión del subespacio $\mathcal M^\perp$; la lección 12 lo dijo como lectura geométrica, y aquí es literal.
-
-/El numerador./ La base adaptada se puede elegir con más cuidado todavía: como $\tilde{\boldsymbol x}_j$ está en $\mathcal M$, tomemos $\boldsymbol v_1=\tilde{\boldsymbol x}_j/\Vert\tilde{\boldsymbol x}_j\Vert_e$ como primer vector de la base de $\mathcal M$ (los otros $k-1$ completan una base ortonormal del subespacio). Entonces $\sum_l\tilde x_{lj}U_l=\Vert\tilde{\boldsymbol x}_j\Vert_e\,Z_1$ y
-\[
-\hat\beta_j-\beta_j=\frac{Z_1}{\Vert\tilde{\boldsymbol x}_j\Vert_e},\qquad
-\frac{\hat\beta_j-\beta_j}{\mathrm{ee}(\hat\beta_j)}
-=\frac{Z_1/\Vert\tilde{\boldsymbol x}_j\Vert_e}{\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e}
-=\frac{Z_1/\sigma}{\sqrt{\dfrac{(Z_{k+1}/\sigma)^2+\cdots+(Z_n/\sigma)^2}{n-k}}}.
-\]
-El numerador es una $N(0,1)$, el denominador la raíz de una $\chi^2_{n-k}$ dividida por $n-k$, y son independientes porque $Z_1$ no está entre $Z_{k+1},\ldots,Z_n$. Es la definición de la $t_{n-k}$. La longitud $\Vert\tilde{\boldsymbol x}_j\Vert_e$, que depende de los regresores, se ha cancelado, y la distribución obtenida es la misma para cualquier valor de la muestra de regresores; por eso es también la distribución sin condicionar. De paso se recupera, sin cálculo, que, dada la muestra de regresores, $\hat\beta_j$ es normal con varianza $\sigma^2/\Vert\tilde{\boldsymbol x}_j\Vert_e^2$ (lección 14): es $\beta_j$ más una variable $N(0,\sigma^2)$ dividida por una longitud.
-
-* La $F$ de la lección 13
-
-El mismo argumento, con la base partida en tres trozos en lugar de dos, da la $F$. Sea $H_0$ un conjunto de $q$ restricciones lineales y $\mathcal M_R\subset\mathcal M$ el subespacio del modelo restringido, de dimensión $k-q$; sea $\boldsymbol{\mathsf P}_R$ la matriz de la proyección sobre él, también función de los regresores. Bajo $H_0$, la lista $\big(\beta_1\,\mathit1+\beta_2X_{i2}+\cdots+\beta_kX_{ik}\big)_i$ es, para cada $\omega$, un punto de $\mathcal M_R$, de modo que las dos proyecciones la dejan como está y se cancela en la diferencia de los dos ajustes:
-\[
-\widehat Y_i-\widehat Y_{R,i}={}_{i|}\big(\boldsymbol{\mathsf P}-\boldsymbol{\mathsf P}_R\big)\boldsymbol U,
-\qquad
-\mathrm{SRC}_R-\mathrm{SRC}=\sum_i\big(\widehat Y_i-\widehat Y_{R,i}\big)^2 ,
-\]
-donde la segunda igualdad es Pitágoras en el triángulo de la lección 13, válido punto a punto y por tanto como igualdad entre variables aleatorias ($\widehat e_{R,i}=\widehat e_i+(\widehat Y_i-\widehat Y_{R,i})$, con vectores de coeficientes ortogonales). $\boldsymbol{\mathsf P}-\boldsymbol{\mathsf P}_R$ es la matriz de la proyección sobre $\mathcal M\cap\mathcal M_R^\perp$, el trozo de $\mathcal M$ que las restricciones suprimen, de dimensión $q$. Tomemos ahora la base ortonormal con $\boldsymbol v_1,\ldots,\boldsymbol v_{k-q}$ en $\mathcal M_R$, $\boldsymbol v_{k-q+1},\ldots,\boldsymbol v_k$ en $\mathcal M\cap\mathcal M_R^\perp$ y $\boldsymbol v_{k+1},\ldots,\boldsymbol v_n$ en $\mathcal M^\perp$, y las coordenadas $Z_i=\sum_lv_{il}U_l$ como antes. Entonces
+con $c_j$ las coordenadas de $\boldsymbol y-\boldsymbol{\mathop{\overline y}}$: la diferencia de los dos ajustes vive en las $q$ direcciones suprimidas. Evaluado sobre la muestra aleatoria, y bajo $H_0$, la parte sistemática en desviaciones está en el subespacio de $\mathcal M_R$, de modo que sus coordenadas sobre $\boldsymbol b_{k-q},\ldots,\boldsymbol b_{n-1}$ son nulas (el mismo argumento que en la nota para $j\ge k$); las coordenadas de $(Y_i-\overline Y)_i$ en esas direcciones son solo las $C_j$, y
 \[
 F=\frac{(\mathrm{SRC}_R-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)}
-=\frac{\big[(Z_{k-q+1}/\sigma)^2+\cdots+(Z_k/\sigma)^2\big]/q}{\big[(Z_{k+1}/\sigma)^2+\cdots+(Z_n/\sigma)^2\big]/(n-k)}:
+=\frac{\big[(C_{k-q}/\sigma)^2+\cdots+(C_{k-1}/\sigma)^2\big]/q}{\big[(C_k/\sigma)^2+\cdots+(C_{n-1}/\sigma)^2\big]/(n-k)} .
 \]
-una $\chi^2_q$ y una $\chi^2_{n-k}$ divididas por sus grados de libertad, independientes porque usan coordenadas distintas. Es la definición de la $F_{q,\,n-k}$, y de nuevo la distribución no depende del valor de los regresores. El $F$ de significación conjunta de la lección 13 es el caso $\mathcal M_R=\mathcal L(\boldsymbol 1)$, $q=k-1$, y sus grados de libertad, $k-1$ y $n-k$, son las dimensiones de los dos catetos del triángulo, como allí se dijo. También se ve por qué la distribución vale solo bajo $H_0$: si $H_0$ es falsa, la lista $\big(\beta_1\,\mathit1+\beta_2X_{i2}+\cdots+\beta_kX_{ik}\big)_i$ tiene una componente fuera de $\mathcal M_R$ que no se cancela en la diferencia de ajustes; el numerador deja de ser una suma de cuadrados de variables centradas y tiende a ser mayor, mientras que el denominador no cambia. Es la razón por la que valores grandes de $F$ hablan contra $H_0$.
+Numerador y denominador son sumas de cuadrados de dos subfamilias disjuntas de una familia a escuadra de variables $N(0,\sigma^2)$: una $\chi^2_q$ y una $\chi^2_{n-k}$ independientes, divididas por sus grados de libertad. Es la definición de la $F_{q,\,n-k}$, y de nuevo no depende de $\boldsymbol X$. El $F$ de significación conjunta es el caso $q=k-1$ ($\mathcal M_R=\mathcal L(\boldsymbol 1)$). Si $H_0$ es falsa, las coordenadas del numerador llevan sumadas las $D_j$ de la parte sistemática, que no son nulas, y el numerador tiende a ser mayor: es la razón por la que valores grandes de $F$ hablan contra $H_0$.
 
-* Lo que no es geometría
+* Resumen de lo demostrado y lo enunciado
 
-El argumento tiene un único punto en que la geometría no basta, y conviene señalarlo porque es justo donde el supuesto de normalidad hace su trabajo. Sin normalidad, que un vector de pesos $\boldsymbol a$ esté en $\mathcal M$ y otro $\boldsymbol b$ en $\mathcal M^\perp$ solo da que las combinaciones $\sum_la_lU_l$ y $\sum_lb_lU_l$ están incorreladas, dada la muestra de regresores:
-\[
-\mathrm{Cov}\Big[\sum_la_lU_l,\sum_lb_lU_l\;\Big|\;\boldsymbol X\Big]=\sigma^2\sum_la_lb_l=\sigma^2\langle\boldsymbol a,\boldsymbol b\rangle_e=0,
-\]
-por homocedasticidad e incorrelación de las $U_l$. Incorrelación no es independencia (apéndice de la lección 11), y de hecho la normal es la única distribución para la que las coordenadas en toda base ortonormal son, además de incorreladas, independientes.[fn::Es el teorema de Kac–Bernstein: si $U_1$ y $U_2$ son independientes y $U_1+U_2$ y $U_1-U_2$ también lo son, entonces $U_1$ y $U_2$ son normales. Con perturbaciones independientes pero no normales, $\hat\beta_j$ y $\mathfrak s^2$ están incorreladas pero no son independientes, y el cociente no sigue una $t_{n-k}$ exacta, aunque se le parezca cuando $n-k$ es grande (son las perturbaciones uniformes y $\chi^2$ que la práctica C de la sesión 16 simuló).] Lo que la normalidad aporta es que la densidad conjunta dependa solo de una longitud, y con ello que Pitágoras, que separa longitudes al cuadrado, separe también la densidad en un producto. La geometría de los subespacios de $\mathbb R^n$ es la misma con cualquier distribución; la normal es la que la convierte en independencia entre variables aleatorias.
-
-/Para profundizar/: Fisher, R. A. (1925), ``Applications of Student's distribution'', /Metron/ 5, 90–104 (el argumento geométrico original); Wooldridge, J. M. (2020), apéndice B (definiciones de $\chi^2$, $t$ y $F$); Seber, G. A. F. y Lee, A. J. (2003), /Linear Regression Analysis/, cap. 2 y 4 (la versión matricial del mismo argumento).
+Demostrado con material del curso: que $t$ y $F$ son, en $\mathbb R^n$, cocientes de coordenadas de los datos en desviaciones en una base ortonormal adaptada; que, evaluadas sobre la muestra aleatoria, esas coordenadas forman una familia ortogonal de variables centradas de longitud $\sigma$; y que, si la familia es además a escuadra, los dos estadísticos tienen por definición las distribuciones $t_{n-k}$ y $F_{q,n-k}$, con numerador y denominador independientes por ser funciones de subfamilias disjuntas. Enunciado sin demostrar: la propiedad de la normal que convierte la ortogonalidad de la familia en escuadra, con su razón en nota al pie. Es el único lugar donde el supuesto de normalidad trabaja, y por eso sin él la $t_{n-k}$ y la $F_{q,n-k}$ dejan de ser las distribuciones exactas de los estadísticos.
