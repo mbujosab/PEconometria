@@ -19,13 +19,27 @@
 #+LATEX_HEADER: \fi
 #+LATEX_HEADER: \PassOptionsToPackage{table}{xcolor}\usepackage{xcolor}
 #+LATEX_HEADER: \usepackage{amsmath,amssymb}
+#+LATEX_HEADER: \usepackage{dsfont}
+#+LATEX_HEADER: \let\amsmathbb\mathbb
+#+LATEX_HEADER: \renewcommand{\mathbb}[1]{\ifx1#1\mathds{1}\else\amsmathbb{#1}\fi}
 #+LATEX_HEADER: \usepackage[indent]{parskip}
 #+LATEX_HEADER: \usepackage{fullpage}
 #+LATEX_HEADER: \usepackage{array,booktabs}
 #+LATEX_HEADER: \usepackage{float}
 
 # Documento único (3-10-2026) que reúne Nota-2026-10-02-dos-espacios.org y
-# Ensayo-2026-10-01-independencia-t-F.org (ambos se conservan). Notación
+# Ensayo-2026-10-01-independencia-t-F.org (ambos se conservan). El 4-10-2026
+# se añade la primera parte (secciones 1-4): el espacio de las v.a. (producto
+# escalar solo por sus propiedades, esperanza como proyección, probabilidad
+# como esperanza de la indicadora, escuadra), las copias i.i.d. (condensado
+# del apéndice de la lección 11, que pasará a este documento) y la matriz de
+# copias (filas = copias, columnas = omega). Sin integrales ni áreas; sin
+# identificar R^n con variables aleatorias; indicadoras como vectores.
+# El mismo día se añaden: 1.3 condicionar es proyectar (Lema, esperanzas
+# iteradas, varianza condicional), probabilidad condicional, independencia
+# como sombras constantes, deducción de los tres supuestos de L11 (6.1),
+# Gauss–Markov (7.3), el divisor n-1, y al final el mapa de las lecciones y
+# la tabla de notación. Notación
 # nueva acordada con el usuario: E y R para los dos subespacios de
 # L(1)^perp (explicado y residual), E_r y Q para el modelo restringido;
 # esperanza siempre en redonda, \mathrm E; sumas por subespacio,
@@ -34,22 +48,151 @@
 
 #+LATEX: \maketitle
 
-* Regla del juego
+* El espacio de las variables aleatorias
 
-Hay dos espacios con producto escalar, y nada de lo que se diga en uno se traslada al otro sin pasar por una fórmula evaluada.
+** Funciones sobre $\Omega$
 
-- *$\mathbb R^n$, el espacio de los datos*: vectores en negrita minúscula ($\boldsymbol y$, $\boldsymbol x_2$, $\boldsymbol u$), producto escalar euclídeo $\langle\cdot,\cdot\rangle_e$, proyecciones, bases, Pitágoras (lecciones 2 a 10). Aquí viven los datos observados y, para cada resultado $\omega$, las realizaciones de las variables aleatorias de la muestra.
-- *El espacio de las variables aleatorias*: funciones de $\omega$ en mayúscula ($Y_i$, $U_i$, $\hat\beta_2$), producto escalar $\langle Z,W\rangle_P=\mathrm E(ZW)$, norma $\Vert Z\Vert_P=\sqrt{\mathrm E(Z^2)}$, ortogonalidad $\mathrm E(ZW)=0$, proyecciones (esperanza condicional) (lección 9). Aquí viven los estimadores y sus propiedades.
+Una variable aleatoria es una función definida sobre un conjunto $\Omega$ de sucesos elementales (lección 9): a cada $\omega$ le asigna un número. Es la misma noción de función del curso de matemáticas, con otro dominio: allí el dominio era un intervalo de la recta real y aquí es $\Omega$. En los ejemplos de este documento $\Omega$ será de hecho un intervalo, $[0,1]$, de modo que las variables aleatorias se dibujan como las funciones de siempre; pero nada de lo que sigue depende de ello. Las operaciones entre variables aleatorias se hacen punto a punto: $X+Y$ es la función que en $\omega$ vale $X(\omega)+Y(\omega)$, $XY$ la que vale $X(\omega)Y(\omega)$, y una igualdad $X=Y$ entre variables aleatorias significa $X(\omega)=Y(\omega)$ para todo $\omega$. La constante $\mathit1$ es la función que vale $1$ en todo $\Omega$, y $\mathit0$ la que vale $0$.
 
-Una lista de variables aleatorias, como $(U_1,\ldots,U_n)$, no es un vector de ninguno de los dos espacios: no tiene producto escalar euclídeo (sus componentes no son números) ni es una variable aleatoria (es $n$ de ellas). Lo único que se puede hacer con ella es (i) tomar una fórmula de $\mathbb R^n$ y evaluarla sobre la lista, lo que da una variable aleatoria (lección 11), o (ii) mirar cada componente como un elemento del espacio de las variables aleatorias.
+Lo que convierte ese conjunto de funciones en un espacio con geometría es el producto escalar de la lección 9,
+\[
+\langle X,Y\rangle_P=\mathrm E(XY),
+\]
+del que en todo este documento solo se usan sus propiedades: es bilineal, simétrico y positivo ($\langle X,X\rangle_P\ge0$), y $\Vert\mathit1\Vert_P=1$. No hace falta saber cómo se calcula; con esas propiedades, las demostraciones de la lección 3 (Pitágoras, Cauchy–Schwarz, proyección sobre un subespacio) valen palabra por palabra, y de ellas se sirve el curso. La única diferencia con $\mathbb R^n$ es que la positividad no es estricta: $\Vert X\Vert_P=0$ no obliga a que $X$ sea la función $\mathit0$, sino solo a que lo sea salvo en un conjunto de probabilidad cero (``casi seguro'', lección 9). El espacio es semieuclídeo, y eso no estorba a ninguno de los argumentos que siguen.[fn::La relación entre un espacio euclídeo y uno semieuclídeo, y lo que comparten, es un asunto aparte que este documento no aborda: aquí los dos mundos se mantienen separados a propósito.]
 
-Lo primero (i) da los /estadísticos/. Una operación con las componentes de un vector de datos, al sustituir esas componentes por las variables aleatorias de un muestreo, crea una variable aleatoria nueva: un estadístico (lección 11). Su distribución depende de la de las variables del muestreo, y se simplifica cuando son copias idénticas e independientes. Por ejemplo, la media muestral $\overline X=\frac1n\sum_{i=1}^nX_i$: como la esperanza es lineal y todas las $X_i$ tienen la misma esperanza $\mu$, $\mathrm E(\overline X)=\frac1n\,n\mu=\mu$, y la media muestral es un estimador insesgado. 
-# Por la misma linealidad, las variables centradas $X_i-\overline X$ tienen esperanza cero. Pero esperanza cero no es ser la variable aleatoria cero: $X_i-\overline X$ toma valores distintos de cero en sucesos de probabilidad positiva, y $\mathrm E(X_i-\overline X)=0$ es una afirmación probabilística, no una identidad.
+** La esperanza: las dos caras
 
-El puente entre los dos espacios es otra cosa, y conviene decir exactamente qué transfiere y qué no. Si una fórmula $f(x_1,\ldots,x_n)=g(x_1,\ldots,x_n)$ es una /identidad/ de $\mathbb R^n$, es decir, se cumple para todas las listas de números, entonces para cada $\omega$ la lista $X_1(\omega),\ldots,X_n(\omega)$ es una de esas listas, y $f(X_1(\omega),\ldots,X_n(\omega))=g(X_1(\omega),\ldots,X_n(\omega))$. Como ocurre para todo $\omega$, los dos estadísticos $f(X_1,\ldots,X_n)$ y $g(X_1,\ldots,X_n)$ son la misma función de $\omega$: una igualdad entre variables aleatorias, en todo punto. No interviene la probabilidad; es composición de funciones. Es lo que hace la lección 11 en ``Dos propiedades de los pesos'': $\sum_{i=1}^nW_i=\mathit0$ y $\sum_{i=1}^nW_iX_i=\mathit1$ son identidades algebraicas, válidas para cualquier elección de $n$ números, y por eso siguen siendo ciertas al sustituir $x_i$ por $X_i$.
+La recta de las constantes, $\mathcal L(\mathit1)$, es un subespacio de dimensión uno, y proyectar sobre ella es lo mismo que en $\mathbb R^n$ proyectar sobre $\mathcal L(\boldsymbol 1)$ para obtener el vector de medias. La proyección de $X$ sobre $\mathcal L(\mathit1)$ es $\langle X,\mathit1\rangle_P\,\mathit1$ (porque $\Vert\mathit1\Vert_P=1$). Son las dos caras de la esperanza de la lección 9: el número $\mathrm E(X)=\langle X,\mathit1\rangle_P$, el valor esperado, es el escalar por el que hay que multiplicar $\mathit1$ para acercarse a $X$ cuanto permite la recta de las constantes; y la variable aleatoria constante $\mathrm E(X)\,\mathit1$ es la proyección misma. La diferencia $X-\mathrm E(X)\,\mathit1$ es la variable centrada, ortogonal a $\mathit1$, y Pitágoras da $\Vert X\Vert_P^2=\mathrm E(X)^2+\Vert X-\mathrm E(X)\,\mathit1\Vert_P^2$: la varianza es la longitud al cuadrado de la parte centrada.
 
-El ejemplo de la media muestral muestra la diferencia. Lo que es identidad de $\mathbb R^n$ es $\sum_{i=1}^n(x_i-\bar x)=0$ para toda lista; el puente da, por tanto, $\sum_{i=1}^n(X_i-\overline X)=\mathit0$: la /suma/ de las variables centradas es la variable aleatoria cero, en todo $\omega$. En este documento el puente se usa solo con identidades de $\mathbb R^n$ enunciadas en la sección 2; todo lo probabilístico se obtiene después con el Lema de la lección 11 y la ley de las esperanzas iteradas.[fn::Con la salvedad de la lección 11: la construcción de la base exige regresores linealmente independientes, y las identidades valen en el suceso en que la base está definida, igual que los pesos $W_i$ exigen $\sum_{i=1}^n(X_i-\overline X)^2\neq\mathit0$.]
-# El puente no dice, ni podría decir, que cada $X_i-\overline X$ sea la variable cero, porque $x_i-\bar x=0$ no es una identidad: falla para casi todas las listas. 
+** Condicionar es proyectar
+
+Las funciones de una variable aleatoria $X$ (todas las $f(X)$) forman un subespacio que contiene a $\mathcal L(\mathit1)$, porque las constantes son funciones de $X$; con varias variables, el subespacio de sus funciones es mayor aún. La esperanza condicional $E[Y\mid X]$ es la proyección de $Y$ sobre ese subespacio (lección 9), y como toda proyección queda caracterizada por la ortogonalidad del resto:
+\begin{equation}\label{eq:cond}
+E[Y\mid X]\ \text{es función de }X,\qquad\text{y}\qquad \big\langle Y-E[Y\mid X],\,h(X)\big\rangle_P=0\ \text{ para toda función }h .
+\end{equation}
+Que esa proyección exista se admite, como lo admite el curso: el subespacio no tiene dimensión finita, y la lección 3 solo construyó proyecciones sobre subespacios con base finita. En el otro extremo, condicionar a nada es proyectar sobre $\mathcal L(\mathit1)$, y la esperanza condicional es la constante $\mathrm E(Y)\,\mathit1$. En todos los casos la esperanza condicional es una variable aleatoria, no un número; el número aparece solo al proyectar sobre las constantes.
+
+De \eqref{eq:cond} y de las propiedades del producto escalar salen las tres reglas que el curso usa desde la lección 11, y que allí se enuncian:
+
+- /Linealidad./ $E[aY+bZ\mid X]=a\,E[Y\mid X]+b\,E[Z\mid X]$: la proyección es lineal (lección 3).
+- /Lo que es función de $X$ sale fuera/ (el Lema de la lección 11): $E[g(X)\,Z\mid X]=g(X)\,E[Z\mid X]$. Hay que comprobar que $g(X)\,E[Z\mid X]$ cumple \eqref{eq:cond} para $g(X)Z$. Es función de $X$; y el resto, $g(X)Z-g(X)E[Z\mid X]=g(X)\big(Z-E[Z\mid X]\big)$, es ortogonal a toda $h(X)$, porque
+  \[
+  \big\langle g(X)\big(Z-E[Z\mid X]\big),\,h(X)\big\rangle_P=\big\langle Z-E[Z\mid X],\,g(X)h(X)\big\rangle_P=0 ,
+  \]
+  al ser $g(X)h(X)$ una función de $X$. Como la proyección es única, es esa.
+- /Esperanzas iteradas./ $\mathrm E\big(E[Y\mid X]\big)=\mathrm E(Y)$. Es proyectar en dos pasos sobre subespacios anidados, $\mathcal L(\mathit1)\subset\{\text{funciones de }X\}$: como $\mathit1$ es función de $X$, \eqref{eq:cond} da $\langle Y-E[Y\mid X],\mathit1\rangle_P=0$, es decir, $\langle Y,\mathit1\rangle_P=\langle E[Y\mid X],\mathit1\rangle_P$. La proyección de $Y$ sobre la recta de las constantes se obtiene proyectando primero sobre las funciones de $X$ y después sobre la recta. Es la misma figura del Pitágoras anidado de la lección 13, con la recta de las constantes en el papel del subespacio restringido.
+
+La varianza condicional es la longitud al cuadrado del resto, medida con la esperanza condicional: $Var[Y\mid X]=E\big[(Y-E[Y\mid X])^2\mid X\big]$, una variable aleatoria. Y Pitágoras en el triángulo que la lección 9 dibuja, de vértices $Y$, $E[Y\mid X]$ y $\mathrm E(Y)\,\mathit1$, da la descomposición de la varianza: la hipotenusa $Y-\mathrm E(Y)\,\mathit1$ se parte en los catetos $Y-E[Y\mid X]$ y $E[Y\mid X]-\mathrm E(Y)\,\mathit1$, ortogonales por \eqref{eq:cond} (el segundo es función de $X$), luego
+\[
+\mathrm{Var}(Y)=\mathrm E\big(Var[Y\mid X]\big)+\mathrm{Var}\big(E[Y\mid X]\big),
+\]
+donde el primer sumando es $\Vert Y-E[Y\mid X]\Vert_P^2$ escrito con esperanzas iteradas.
+
+** La probabilidad: la esperanza de la indicadora
+
+Un suceso es un subconjunto $A$ de $\Omega$, y su /indicadora/ $\mathbb 1_A$ es la variable aleatoria que vale $1$ en los $\omega$ de $A$ y $0$ fuera. Como cualquier variable aleatoria, es un vector del espacio, y tiene esperanza. Esa esperanza es la probabilidad del suceso:
+\[
+\mathrm P(A)=\mathrm E(\mathbb 1_A)=\langle\mathbb 1_A,\mathit1\rangle_P .
+\]
+Es una definición, y de ella y de las propiedades del producto escalar salen las propiedades de la probabilidad que suelen presentarse como axiomas. Todo descansa en identidades entre indicadoras que se comprueban $\omega$ a $\omega$: $\mathbb 1_A\mathbb 1_A=\mathbb 1_A$, $\mathbb 1_A\mathbb 1_B=\mathbb 1_{A\cap B}$, $\mathbb 1_{A^c}=\mathit1-\mathbb 1_A$, y $\mathbb 1_{A\cup B}=\mathbb 1_A+\mathbb 1_B$ cuando $A$ y $B$ son disjuntos.
+
+- /No negativa, y es una longitud./ Como $\mathbb 1_A\mathbb 1_A=\mathbb 1_A$, $\Vert\mathbb 1_A\Vert_P^2=\langle\mathbb 1_A,\mathbb 1_A\rangle_P=\langle\mathbb 1_A,\mathit1\rangle_P=\mathrm P(A)$. La probabilidad de un suceso es la longitud al cuadrado de su indicadora, y por tanto $\mathrm P(A)\ge0$.
+- /El total vale uno./ $\mathbb 1_\Omega=\mathit1$ y $\mathrm P(\Omega)=\Vert\mathit1\Vert_P^2=1$.
+- /Aditiva./ Si $A$ y $B$ son disjuntos, $\mathrm P(A\cup B)=\langle\mathbb 1_A+\mathbb 1_B,\mathit1\rangle_P=\mathrm P(A)+\mathrm P(B)$, por linealidad.[fn::Solo para uniones finitas, que es lo que este documento necesita. La aditividad para uniones infinitas es otro axioma, y no se trata aquí.]
+- /Complementario y monotonía./ $\mathrm P(A^c)=\langle\mathit1-\mathbb 1_A,\mathit1\rangle_P=1-\mathrm P(A)$; y si $A\subset B$, $\mathbb 1_B-\mathbb 1_A$ es la indicadora de $B\setminus A$, luego $\mathrm P(B)-\mathrm P(A)\ge0$.
+- /Intersección./ $\mathrm P(A\cap B)=\langle\mathbb 1_{A\cap B},\mathit1\rangle_P=\langle\mathbb 1_A\mathbb 1_B,\mathit1\rangle_P=\langle\mathbb 1_A,\mathbb 1_B\rangle_P$: la probabilidad de la intersección es el producto escalar de las dos indicadoras.
+- /Probabilidad cero./ $\mathrm P(A)=0$ es $\Vert\mathbb 1_A\Vert_P=0$ sin que $\mathbb 1_A$ sea $\mathit0$: es el ``casi seguro'' de la lección 9, y la razón de que el espacio sea semieuclídeo.
+
+Condicionar una probabilidad es lo mismo hecho con la indicadora: $P[A\mid X]=E[\mathbb 1_A\mid X]$, la proyección de $\mathbb 1_A$ sobre las funciones de $X$, su ``sombra'' (lección 12). Es una variable aleatoria, no un número; el número $\mathrm P(A)$ se recupera por esperanzas iteradas. Y hereda de la linealidad las reglas de una probabilidad: para sucesos disjuntos, $P[A\cup B\mid X]=P[A\mid X]+P[B\mid X]$; y $P[\Omega\mid X]=E[\mathit1\mid X]=\mathit1$, porque $\mathit1$ ya es función de $X$ y su proyección es ella misma. Es lo que la lección 12 usa para hablar de la distribución de una perturbación condicionada a los regresores: una sombra por cada suceso $\{U_i\le u\}$.
+
+#+NAME: fig:figA-probabilidad-proyeccion
+#+CAPTION: Las dos caras de la esperanza y la probabilidad como proyección, con las variables aleatorias dibujadas como vectores. Izquierda: la proyección de $X$ sobre la recta de las constantes es $\mathrm E(X)\,\mathit1$; el número $\mathrm E(X)$ es el escalar por el que se multiplica $\mathit1$; la parte centrada $X-\mathrm E(X)\,\mathit1$ es ortogonal a $\mathit1$ y su longitud es la desviación típica. Derecha: lo mismo para una indicadora: su proyección es $\mathrm P(A)\,\mathit1$ y su longitud es $\sqrt{\mathrm P(A)}$. Un dibujo así no dice dónde vale qué la función; dice cómo se sitúa respecto de las constantes, que es lo único que usa el argumento.
+#+ATTR_LATEX: :width 0.8\textwidth :placement [H]
+[[file:Ensayo-2026-10-03-figuras/figA-probabilidad-proyeccion.pdf]]
+
+** Independencia: sucesos, variables y escuadra
+
+Dos sucesos son independientes cuando $\mathrm P(A\cap B)=\mathrm P(A)\,\mathrm P(B)$. Con lo anterior, eso es
+\[
+\langle\mathbb 1_A,\mathbb 1_B\rangle_P=\langle\mathbb 1_A,\mathit1\rangle_P\,\langle\mathbb 1_B,\mathit1\rangle_P ,
+\]
+y desarrollando el producto escalar de las indicadoras centradas,
+\[
+\big\langle\mathbb 1_A-\mathrm P(A)\,\mathit1,\;\mathbb 1_B-\mathrm P(B)\,\mathit1\big\rangle_P=\langle\mathbb 1_A,\mathbb 1_B\rangle_P-\mathrm P(A)\,\mathrm P(B),
+\]
+se obtiene la lectura geométrica: /dos sucesos son independientes exactamente cuando sus indicadoras centradas son ortogonales/.
+
+De los sucesos a las variables aleatorias. Dos variables $X$ e $Y$ son independientes cuando lo son todos los sucesos $\{X\in A\}$ y $\{Y\in B\}$ que cada una define. Para una variable con un número finito de valores, las funciones $f(X)$ son exactamente las combinaciones lineales de las indicadoras $\mathbb 1_{\{X=a\}}$, así que ``todos los sucesos de $X$ son independientes de todos los de $Y$'' equivale a ``toda función centrada de $X$ es ortogonal a toda función de $Y$''. Es la caracterización que el curso usa (apéndice de la lección 11), y que para variables cualesquiera enunciamos sin demostrar:
+
+#+begin_quote
+/Independencia como ortogonalidad./ $X$ e $Y$ son independientes si y solo si $\big\langle f(X)-\mathrm E\big(f(X)\big)\,\mathit1,\;g(Y)\big\rangle_P=0$ para todas las funciones $f$ y $g$.
+#+end_quote
+
+Dicho con subespacios: las funciones de $X$ forman un subespacio y las de $Y$ otro; los dos contienen la recta $\mathcal L(\mathit1)$, así que no pueden ser perpendiculares del todo; la independencia dice que, quitada esa recta común, lo que queda de cada uno es perpendicular a todo el otro. Los dos subespacios están /a escuadra/ sobre la recta de las constantes. La ortogonalidad de $X-\mathrm E(X)\,\mathit1$ e $Y-\mathrm E(Y)\,\mathit1$ (covarianza nula, incorrelación) es solo una parte de esa condición, la de las funciones lineales; para variables con dos valores coincide con la independencia, y en general no. Y la noción se extiende a familias: una familia de variables aleatorias es independiente cuando, para cualquier partición de la familia en dos grupos, los subespacios de funciones de uno y otro están a escuadra; es decir, cuando cada variable centrada, y cada función centrada de cualquier grupo, es ortogonal a todas las funciones del grupo complementario.
+
+Hay una tercera forma de decirlo, con proyecciones, y es la que usa la lección 12: /$U$ es independiente de $X$ si y solo si toda función de $U$ tiene sombra constante sobre las funciones de $X$/, $E[f(U)\mid X]=\mathrm E\big(f(U)\big)\,\mathit1$ para toda $f$. Es la escuadra dicha de otro modo. Si la parte centrada $f(U)-\mathrm E(f(U))\,\mathit1$ es ortogonal a toda función de $X$, entonces $\mathrm E(f(U))\,\mathit1$, que es función de $X$, cumple \eqref{eq:cond} para $f(U)$ y es su proyección; y al revés, si la proyección es una constante $c\,\mathit1$, el resto $f(U)-c\,\mathit1$ es ortogonal a toda $h(X)$, en particular a $\mathit1$, lo que fuerza $c=\mathrm E(f(U))$ y deja la parte centrada ortogonal a todas las funciones de $X$. Con $f$ la indicadora de $\{u\le t\}$ se obtiene la lectura de la lección 12: la distribución condicionada de $U$ no depende de $X$, $P[U\le t\mid X]=\mathrm P(U\le t)\,\mathit1$ para todo $t$.
+
+* Copias idénticas e independientes: la moneda
+
+La lección 9 dijo que interpretamos los $n$ datos como la realización de $n$ copias idénticas e independientes de una variable aleatoria, y la lección 11 lo convirtió en el marco de la muestra aleatoria. ¿Cabe en un mismo $\Omega$ un número ilimitado de variables aleatorias con la misma distribución e independientes entre sí? La respuesta es sí, y se ve con la moneda.
+
+** El espacio $[0,1]$ y las monedas
+
+Tomemos $\Omega=[0,1]$, y como probabilidad de un suceso su longitud: $\mathrm P([a,b])=b-a$. La moneda que sale cara ($1$) o cruz ($0$) con la misma probabilidad es la función que vale $0$ en la primera mitad del intervalo y $1$ en la segunda; la segunda moneda divide cada mitad en dos y vuelve a alternar; la tercera hace lo mismo con los octavos; y así indefinidamente. Hay una manera de decirlo de una vez: escribiendo $\omega$ en base dos, $\omega=0{,}a_1a_2a_3\ldots$, la moneda \(n\)-ésima es la cifra \(n\)-ésima,
+\[
+X_n(\omega)=a_n .
+\]
+
+#+NAME: fig:monedas
+#+CAPTION: Las cuatro primeras monedas como funciones sobre $\Omega=[0,1]$ (la figura del apéndice de la lección 11, con una moneda más). Cada una vale $0$ en los intervalos impares de longitud $2^{-n}$ y $1$ en los pares. La línea de puntos es el suceso elemental $\omega=0{,}3$, que en base dos empieza $0{,}0100\ldots$: cruz, cara, cruz, cruz. Un $\omega$ es una tirada infinita. Es la única figura del documento que dibuja dónde vale qué una variable aleatoria, y muestra por qué no se insiste en ello: cada fila es más apretada que la anterior, y pocas más abajo la función ya no se lee. Por eso las demás figuras dibujan las variables aleatorias como vectores.
+#+ATTR_LATEX: :width 0.8\textwidth :placement [tbh]
+[[file:Ensayo-2026-10-03-figuras/Monedas4.pdf]]
+
+Dos comprobaciones. /Idéntica distribución/: el suceso $\{X_n=0\}$ es una unión de intervalos de longitud total $\tfrac12$, para todo $n$. /Independencia de todas a la vez/: fijados $n$ resultados $(a_1,\ldots,a_n)$, el suceso $\{X_1=a_1,\ldots,X_n=a_n\}$ es el conjunto de los $\omega$ cuyas $n$ primeras cifras son esas, un intervalo de longitud $2^{-n}$, luego $\mathrm P(X_1=a_1,\ldots,X_n=a_n)=2^{-n}=\mathrm P(X_1=a_1)\cdots\mathrm P(X_n=a_n)$. Y $X_1$ y $X_2$ /no son la misma función/: en $\omega=0{,}3$ la primera vale $0$ y la segunda $1$. Dos copias independientes suelen asignar valores distintos al mismo suceso elemental.
+
+En el lenguaje de la sección anterior: las monedas centradas, $X_i-\tfrac12\mathit1$, son ortogonales dos a dos (el producto escalar se calcula intervalo a intervalo y da cero, porque dentro de cada intervalo donde $X_i$ es constante, $X_j$ vale $0$ en una mitad y $1$ en la otra); las funciones de $X_i$ son el plano $a\,\mathit1+b\,X_i$, y los planos de dos monedas distintas están a escuadra sobre la recta de las constantes. Para la independencia de todas a la vez hace falta más que la ortogonalidad dos a dos, y también se cumple: cada $X_n$ centrada es ortogonal a todas las funciones de $(X_1,\ldots,X_{n-1})$, que son constantes en cada intervalo de longitud $2^{-(n-1)}$.
+
+Leída al revés, la construcción dice algo más. Un $\omega$ es una sucesión infinita de cifras binarias, es decir, el resultado de lanzar la moneda infinitas veces. Elegir un suceso elemental al azar en $[0,1]$ es lanzar la moneda sin parar. El espacio de sucesos que parecía demasiado pequeño para una muestra contiene todas las muestras posibles de todos los tamaños.
+
+** Más allá de la moneda
+
+La construcción da mucho más, y lo enunciamos sin demostrar. Si $F$ es la función de distribución de una variable cualquiera $Y$ y $U$ es uniforme en $[0,1]$, entonces $F^{-1}(U)$ tiene la distribución de $Y$. Y en $[0,1]$ hay infinitas uniformes independientes: basta repartir las cifras binarias de $\omega$ en infinitas listas infinitas y leer cada lista como un número de $[0,1]$. Aplicando $F^{-1}$ a cada uno se obtienen infinitas copias idénticas e independientes de $Y$. Así que ``$n$ copias idénticas e independientes de $Y$'' no es un supuesto sobre el mundo, sino una construcción: dado cualquier $Y$, existe un $\Omega$ en el que caben tantas copias como se quiera. Lo que sí es un supuesto es que /nuestros datos/ sean una realización de esas copias: el muestreo aleatorio de la lección 11.[fn::Para profundizar: Williams, D. (1991), /Probability with Martingales/, cap. 4; Wooldridge, J. M. (2020), apéndice B.1. En lo que sigue, las perturbaciones normales del modelo no se construyen: sus propiedades se enuncian donde hacen falta.]
+
+* La matriz de copias: filas, columnas y vectores de $\mathbb R^n$
+
+La figura de las monedas admite una lectura que organiza todo lo que sigue. Imagínela prolongada hacia abajo indefinidamente, una fila por copia: $X_1,X_2,X_3,\ldots$. Es una matriz con infinitas filas, una por variable aleatoria, y una columna por cada $\omega$ de $\Omega$. En esa matriz:
+
+- *Una muestra de tamaño $n$ es elegir $n$ filas.* Cada fila es una variable aleatoria entera, una función sobre $\Omega$; la lista $(X_1,\ldots,X_n)$ son $n$ filas, y no es un vector de nada: es $n$ funciones.
+- *Fijar un $\omega$ es elegir una columna.* La columna contiene el valor de todas las copias en ese suceso elemental: una tirada infinita de la moneda, un resultado completo del experimento.
+- *$n$ filas y una columna a la vez dan un vector de $\mathbb R^n$:* $\big(X_1(\omega),\ldots,X_n(\omega)\big)$, la realización de la muestra en $\omega$. Ese es el único lugar donde una muestra se convierte en un punto de $\mathbb R^n$, y por tanto el único lugar donde la geometría euclídea del curso se aplica a ella.
+
+#+NAME: fig:figB-matriz-copias
+#+CAPTION: La matriz de copias. Cada fila es una copia de la variable, una función sobre $\Omega$; la matriz continúa hacia abajo indefinidamente. Elegir $n$ filas es tomar una muestra; elegir una columna es fijar un $\omega$; las dos cosas a la vez dan el vector $\big(X_1(\omega),\ldots,X_n(\omega)\big)$ de $\mathbb R^n$. Los datos observados son una columna; una simulación Monte Carlo recorre otras columnas, $\omega',\omega'',\ldots$, con las mismas filas.
+#+ATTR_LATEX: :width 0.9\textwidth :placement [H]
+[[file:Ensayo-2026-10-03-figuras/figB-matriz-copias.pdf]]
+
+Tres consecuencias. Primera: los datos observados son una columna, la que ocurrió; una tabla de Gretl es $\big(X_1(\omega),\ldots,X_n(\omega)\big)$ para ese $\omega$ y nada más. Segunda: una simulación Monte Carlo (prácticas de las sesiones 16, 21 y 22) es recorrer columnas con las mismas $n$ filas: cada réplica es otro $\omega$, y el histograma de un estadístico a lo largo de las réplicas es su distribución vista columna a columna. Tercera: en el modelo de regresión cada fila es una observación completa, $(Y_i,X_{i2},\ldots,X_{ik})$, copia de la variable vectorial que describe a un individuo (lección 11), y la columna $\omega$ da la tabla de datos entera, con sus $n$ filas y sus $k$ columnas de variables.
+
+* Los dos espacios y el puente entre ellos
+
+** Regla del juego
+
+Hay, pues, dos espacios con producto escalar, y nada de lo que se diga en uno se traslada al otro sin pasar por una fórmula evaluada.
+
+- *$\mathbb R^n$, el espacio de los datos*: vectores en negrita minúscula ($\boldsymbol y$, $\boldsymbol x_2$, $\boldsymbol u$), producto escalar euclídeo $\langle\cdot,\cdot\rangle_e$, proyecciones, bases, Pitágoras (lecciones 2 a 10). Aquí viven los datos observados y, para cada $\omega$, las columnas de la matriz de copias.
+- *El espacio de las variables aleatorias*: funciones de $\omega$ en mayúscula ($Y_i$, $U_i$, $\hat\beta_2$), producto escalar $\langle Z,W\rangle_P=\mathrm E(ZW)$, norma $\Vert Z\Vert_P$, ortogonalidad, proyecciones (esperanza condicional) (lección 9 y sección 1). Aquí viven las filas de la matriz, los estimadores y sus propiedades.
+
+Los dos comparten el esquema geométrico de la lección 3, porque ambos tienen un producto escalar, pero son espacios distintos y aquí se mantienen separados a propósito. En particular, una lista de variables aleatorias, como $(U_1,\ldots,U_n)$, no es un vector de ninguno de los dos: no tiene producto escalar euclídeo (sus componentes no son números, son filas) ni es una variable aleatoria (es $n$ de ellas). Lo único que se puede hacer con ella es (i) tomar una fórmula de $\mathbb R^n$ y evaluarla sobre la lista, lo que da una variable aleatoria (lección 11), o (ii) mirar cada componente como un elemento del espacio de las variables aleatorias.
+
+** Los estadísticos
+
+Lo primero da los /estadísticos/. Una operación con las componentes de un vector de datos, al sustituir esas componentes por las filas de una muestra, crea una variable aleatoria nueva: un estadístico (lección 11). Su distribución depende de la de las variables del muestreo, y se simplifica cuando son copias idénticas e independientes. Por ejemplo, la media muestral $\overline X=\frac1n\sum_{i=1}^nX_i$: como la esperanza es lineal y todas las $X_i$ tienen la misma esperanza $\mu$, $\mathrm E(\overline X)=\frac1n\,n\mu=\mu$, y la media muestral es un estimador insesgado. Por la misma linealidad, las variables centradas $X_i-\overline X$ tienen esperanza cero. Pero esperanza cero no es ser la variable aleatoria cero: $X_i-\overline X$ toma valores distintos de cero en sucesos de probabilidad positiva, y $\mathrm E(X_i-\overline X)=0$ es una afirmación probabilística, no una identidad.
+
+** El puente
+
+El puente entre los dos espacios es otra cosa, y conviene decir exactamente qué transfiere y qué no. Si una fórmula $f(x_1,\ldots,x_n)=g(x_1,\ldots,x_n)$ es una /identidad/ de $\mathbb R^n$, es decir, se cumple para todas las listas de números, entonces para cada $\omega$ la columna $X_1(\omega),\ldots,X_n(\omega)$ es una de esas listas, y $f(X_1(\omega),\ldots,X_n(\omega))=g(X_1(\omega),\ldots,X_n(\omega))$. Como ocurre para todo $\omega$, los dos estadísticos $f(X_1,\ldots,X_n)$ y $g(X_1,\ldots,X_n)$ son la misma función de $\omega$: una igualdad entre variables aleatorias, en todo punto. No interviene la probabilidad; es composición de funciones. Es lo que hace la lección 11 en ``Dos propiedades de los pesos'': $\sum_{i=1}^nW_i=\mathit0$ y $\sum_{i=1}^nW_iX_i=\mathit1$ son identidades algebraicas, válidas para cualquier elección de $n$ números, y por eso siguen siendo ciertas al sustituir $x_i$ por $X_i$.
+
+El ejemplo de la media muestral muestra la diferencia. Lo que es identidad de $\mathbb R^n$ es $\sum_{i=1}^n(x_i-\bar x)=0$ para toda lista; el puente da, por tanto, $\sum_{i=1}^n(X_i-\overline X)=\mathit0$: la /suma/ de las variables centradas es la variable aleatoria cero, en todo $\omega$. El puente no dice, ni podría decir, que cada $X_i-\overline X$ sea la variable cero, porque $x_i-\bar x=0$ no es una identidad: falla para casi todas las listas. En este documento el puente se usa solo con identidades de $\mathbb R^n$ enunciadas en la sección 5; todo lo probabilístico se obtiene después con el Lema de la lección 11 y la ley de las esperanzas iteradas.[fn::Con la salvedad de la lección 11: la construcción de la base exige regresores linealmente independientes, y las identidades valen en el suceso en que la base está definida, igual que los pesos $W_i$ exigen $\sum_{i=1}^n(X_i-\overline X)^2\neq\mathit0$.]
 
 Dos convenciones tipográficas. Como en las lecciones, la esperanza no condicional se escribe en redonda, $\mathrm E(\cdot)$, y la condicional en cursiva, $E[\,\cdot\mid\boldsymbol X]$; ninguna de las dos se confunde con la letra caligráfica $\mathcal E$ que nombra un subespacio. Y los índices se reparten así: $i$ e $i'$ para observaciones ($1,\ldots,n$), $j$ y $l$ para vectores de una base, $m$ para el regresor cuyo coeficiente se contrasta; los demás regresores se nombran sin índice.
 
@@ -162,6 +305,12 @@ E[U_i\mid\boldsymbol X]=\mathit0,\qquad E[U_i^2\mid\boldsymbol X]=\sigma^2\,\mat
 \]
 Las esperanzas condicionales son variables aleatorias (funciones de $\boldsymbol X$); los números salen por la ley de las esperanzas iteradas: $\mathrm E(U_iU_{i'})=\mathrm E\big(E[U_iU_{i'}\mid\boldsymbol X]\big)=0$, $\mathrm E(U_i^2)=\sigma^2$. Dicho con el producto escalar de la lección 9: las $n$ perturbaciones son una /familia ortogonal/ de variables aleatorias, todas de longitud $\Vert U_i\Vert_P=\sigma$. La normalidad no se supone todavía.
 
+*De dónde salen los tres supuestos.* No se imponen a la muestra: se deducen del modelo poblacional y del muestreo aleatorio, como hace la lección 11 en una nota al pie, y con las piezas de la sección 1 el argumento cabe en un párrafo. Escribamos $X_{-i}$ por las copias distintas de la $i$. Por definición de la perturbación (lección 9), $E[U_i\mid X_i]=\mathit0$: $U_i$ es ortogonal a toda función de $X_i$. Por el muestreo aleatorio, la copia $(X_i,U_i)$ es independiente de $X_{-i}$: sus espacios de funciones están a escuadra, es decir, toda función centrada de $(X_i,U_i)$ es ortogonal a toda función de $X_{-i}$. Toda función de $\boldsymbol X$ es combinación lineal de productos $a(X_i)\,b(X_{-i})$ o límite de tales combinaciones (lo segundo es el único paso que, como en la lección 11, se admite sin demostración), y para cada producto,
+\[
+\big\langle U_i,\,a(X_i)\,b(X_{-i})\big\rangle_P=\big\langle U_i\,a(X_i),\,b(X_{-i})\big\rangle_P=0 ,
+\]
+porque $U_ia(X_i)$ es una función de la copia $i$ y está centrada ($\mathrm E(U_ia(X_i))=\mathrm E\big(E[U_i\mid X_i]\,a(X_i)\big)=0$, por el Lema y las esperanzas iteradas), luego es ortogonal a $b(X_{-i})$. Así $U_i$ es ortogonal a toda función de $\boldsymbol X$, que por \eqref{eq:cond} es $E[U_i\mid\boldsymbol X]=\mathit0$. El segundo supuesto sale igual, con $U_i^2-\sigma^2\,\mathit1$ en el lugar de $U_i$ y la homocedasticidad poblacional $E[U_i^2\mid X_i]=\sigma^2\,\mathit1$ en el lugar de $E[U_i\mid X_i]=\mathit0$. Y el tercero, con $i\neq i'$: $\langle U_iU_{i'},\,a(X_i)b(X_{-i})\rangle_P=\langle U_ia(X_i),\,U_{i'}b(X_{-i})\rangle_P=0$, porque el primer factor es una función centrada de la copia $i$ y el segundo una función de las demás copias.
+
 ** La base evaluada
 
 Las componentes $b_{ji}$ de la base y la longitud $\Vert\tilde{\boldsymbol x}_m\Vert_e$ son fórmulas de los regresores; sobre $\boldsymbol X$ dan variables aleatorias $B_{ji}$ y $L_m$, funciones de $\boldsymbol X$ (como los pesos $W_i$ de las lecciones 11 y 14; de hecho, por \eqref{eq:pesos}, las componentes del vector de pesos son $w_i=b_{1i}/\Vert\tilde{\boldsymbol x}_m\Vert_e$, y evaluadas sobre $\boldsymbol X$ dan los pesos de la lección 14, $W_i=B_{1i}/L_m$). Las tres identidades \eqref{eq:base}, válidas para cualquier valor de los regresores, pasan por el puente y son igualdades entre variables aleatorias:
@@ -171,7 +320,7 @@ Las componentes $b_{ji}$ de la base y la longitud $\Vert\tilde{\boldsymbol x}_m\
 
 ** Las coordenadas del ruido: la familia $\{C_j\}$
 
-La fórmula de las coordenadas, \eqref{eq:coord}, es una suma de productos de números. Sustituyamos los números por las variables del muestreo: en el lugar de $v_i$, la perturbación centrada $U_i-\overline U$ (una variable aleatoria, como vimos en la sección 1), y en el lugar de $b_{ji}$, la variable aleatoria $B_{ji}$. Productos y sumas de variables aleatorias son variables aleatorias, así que la fórmula define $n-1$ estadísticos nuevos,
+La fórmula de las coordenadas, \eqref{eq:coord}, es una suma de productos de números. Sustituyamos los números por las variables del muestreo: en el lugar de $v_i$, la perturbación centrada $U_i-\overline U$ (una variable aleatoria, como vimos en la sección 4), y en el lugar de $b_{ji}$, la variable aleatoria $B_{ji}$. Productos y sumas de variables aleatorias son variables aleatorias, así que la fórmula define $n-1$ estadísticos nuevos,
 \[
 C_j=\sum_{i=1}^nB_{ji}\,(U_i-\overline U),\qquad j=1,\ldots,n-1 ,
 \]
@@ -223,7 +372,7 @@ que es la descomposición $\hat\beta_m=\beta_m\,\mathit1+\sum_iW_iU_i$ de la lec
 
 ** Fijar $\omega$: de vuelta a $\mathbb R^n$
 
-Conviene cerrar la sección con la síntesis de lo hecho. Las fórmulas de la sección 2 son fórmulas de $\mathbb R^n$ y solo tienen lectura en $\mathbb R^n$: operan con las componentes de vectores de datos. En esta sección se han reutilizado esas mismas expresiones, escritas como sumas de componentes, sustituyendo los números por las variables aleatorias de la muestra; el resultado, $B_{ji}$, $C_j$, $D_j$, $\mathrm{SRC}$, $\hat\beta_m$, son estadísticos, y ya no estamos en $\mathbb R^n$ sino en el espacio de las variables aleatorias. El camino de vuelta es fijar un resultado $\omega$: evaluar la muestra en $\omega$ arroja una lista de números, un vector de $\mathbb R^n$, y cada estadístico toma en $\omega$ el valor que su fórmula da en ese vector, con la base realizada. En ese punto todas las identidades de la sección 2 se cumplen con igualdad; es lo que muestra la figura 4. Los datos observados son una de esas realizaciones: los números de una tabla de Gretl, el $F=251{,}5$ de la lección 13 por ejemplo, son los valores de los estadísticos en ese $\omega$. Las secciones que siguen no hablan de ese valor, sino de qué valores tomaría cada estadístico sobre el conjunto de los $\omega$, y es ahí, y solo ahí, donde entra la probabilidad.
+Conviene cerrar la sección con la síntesis de lo hecho. Las fórmulas de la sección 5 son fórmulas de $\mathbb R^n$ y solo tienen lectura en $\mathbb R^n$: operan con las componentes de vectores de datos. En esta sección se han reutilizado esas mismas expresiones, escritas como sumas de componentes, sustituyendo los números por las variables aleatorias de la muestra; el resultado, $B_{ji}$, $C_j$, $D_j$, $\mathrm{SRC}$, $\hat\beta_m$, son estadísticos, y ya no estamos en $\mathbb R^n$ sino en el espacio de las variables aleatorias. El camino de vuelta es fijar un resultado $\omega$: evaluar la muestra en $\omega$ arroja una lista de números, un vector de $\mathbb R^n$, y cada estadístico toma en $\omega$ el valor que su fórmula da en ese vector, con la base realizada. En ese punto todas las identidades de la sección 5 se cumplen con igualdad; es lo que muestra la figura 4. Los datos observados son una de esas realizaciones, una columna de la matriz de copias de la sección 3: los números de una tabla de Gretl, el $F=251{,}5$ de la lección 13 por ejemplo, son los valores de los estadísticos en ese $\omega$. Las secciones que siguen no hablan de ese valor, sino de qué valores tomaría cada estadístico sobre el conjunto de los $\omega$, y es ahí, y solo ahí, donde entra la probabilidad.
 
 * La familia ortogonal y lo que da sin normalidad
 
@@ -257,7 +406,7 @@ De \eqref{eq:sumas-va} y el Resultado 1 salen las esperanzas condicionales. Para
 \[
 E[\mathrm{SRC}\mid\boldsymbol X]=\sum_{\mathcal R}E[C_j^2\mid\boldsymbol X]=\dim\mathcal R\;\sigma^2\,\mathit1=(n-k)\,\sigma^2\,\mathit1 .
 \]
-Es la insesgadez de $\mathfrak s^2=\mathrm{SRC}/(n-k)$ que la lección 11 enunció, y se ve por qué no depende de los $\beta$: el residuo solo contiene las coordenadas del ruido en $\mathcal R$. Para $\mathrm{SEC}$, cada sumando lleva $D_j$; como $D_j$ es función de $\boldsymbol X$, sale fuera de la esperanza condicional (Lema), y como $E[C_j\mid\boldsymbol X]=\mathit0$, el término cruzado desaparece:
+Es la insesgadez de $\mathfrak s^2=\mathrm{SRC}/(n-k)$ que la lección 11 enunció, y se ve por qué no depende de los $\beta$: el residuo solo contiene las coordenadas del ruido en $\mathcal R$. Un caso particular conocido: sin regresores ($k=1$, solo la constante), $\mathcal R$ es todo $\mathcal L(\boldsymbol 1)^\perp$, de dimensión $n-1$, el residuo es el vector en desviaciones y $\mathrm{SRC}=\sum_i(U_i-\overline U)^2$ tiene esperanza $(n-1)\sigma^2$: de ahí el divisor $n-1$ de la varianza muestral insesgada. Es el mismo mecanismo. Para $\mathrm{SEC}$, cada sumando lleva $D_j$; como $D_j$ es función de $\boldsymbol X$, sale fuera de la esperanza condicional (Lema), y como $E[C_j\mid\boldsymbol X]=\mathit0$, el término cruzado desaparece:
 \[
 E[(D_j+C_j)^2\mid\boldsymbol X]=D_j^2+2D_j\,E[C_j\mid\boldsymbol X]+E[C_j^2\mid\boldsymbol X]=D_j^2+\sigma^2\,\mathit1 ,
 \]
@@ -272,7 +421,31 @@ El sumando añadido es, para cada realización, la longitud al cuadrado de $\bol
 *Resultado 2.* Sin normalidad: dividiendo cada suma de cuadrados por la dimensión del subespacio donde vive, el denominador de $F$ tiene siempre esperanza $\sigma^2$, y el numerador tiene esperanza $\sigma^2$ bajo $H_0$ y $\sigma^2$ más algo positivo fuera de $H_0$, tanto mayor cuanto más larga sea la parte de $\boldsymbol s$ que $H_0$ suprime en relación con el ruido. Por eso $F$ ronda $1$ cuando $H_0$ es cierta y un $F$ mucho mayor que $1$ habla contra $H_0$.
 #+end_quote
 
-Hasta aquí no se ha usado la normalidad, y el Resultado 2 es lo que justifica $F$ como estadístico de contraste. Lo que no da es su distribución: para eso hay que saber cómo se reparte la probabilidad entre los valores de cada $C_j$, y cómo se relacionan unas con otras más allá de la ortogonalidad.
+** Gauss–Markov: ningún estimador lineal insesgado tiene menos varianza
+
+La lección 11 enuncia sin demostrar que $\hat\beta_m$ tiene la menor varianza entre los estimadores lineales e insesgados (MCO es BLUE), y remite a una maquinaria matricial que el curso no desarrolla. Con las piezas de este documento no hace falta: es una identidad de $\mathbb R^n$, el puente y el Resultado 1.
+
+/En $\mathbb R^n$./ Un estimador lineal es $\langle\boldsymbol c,\boldsymbol y\rangle_e=\sum_ic_iy_i$ con un vector de pesos $\boldsymbol c$ construido con los regresores. Para que, evaluado sobre el modelo, dé $\beta_m\,\mathit1+\sum_iC_iU_i$ sea cual sea el valor de los parámetros (que es lo que la insesgadez exige), los pesos han de cumplir en cada realización, como en ``Dos propiedades de los pesos'' de la lección 11,
+\[
+\langle\boldsymbol c,\boldsymbol 1\rangle_e=0,\qquad \langle\boldsymbol c,\boldsymbol x_j\rangle_e=\begin{cases}1 & j=m,\\ 0 & j\neq m,\end{cases}\qquad j=2,\ldots,k .
+\]
+Los pesos MCO, $\boldsymbol w=\tilde{\boldsymbol x}_m/\Vert\tilde{\boldsymbol x}_m\Vert_e^2$, las cumplen: $\tilde{\boldsymbol x}_m$ es ortogonal a $\boldsymbol 1$ y a los demás regresores, y $\langle\boldsymbol x_m,\tilde{\boldsymbol x}_m\rangle_e=\Vert\tilde{\boldsymbol x}_m\Vert_e^2$ (lección 14). Luego la diferencia $\boldsymbol c-\boldsymbol w$ es ortogonal a $\boldsymbol 1$ y a todos los regresores, y en particular a $\tilde{\boldsymbol x}_m$, que es combinación de ellos: es ortogonal a $\boldsymbol w$. Pitágoras:
+\begin{equation}\label{eq:GM}
+\Vert\boldsymbol c\Vert_e^2=\Vert\boldsymbol w\Vert_e^2+\Vert\boldsymbol c-\boldsymbol w\Vert_e^2\ \ge\ \Vert\boldsymbol w\Vert_e^2 ,
+\end{equation}
+con igualdad solo si $\boldsymbol c=\boldsymbol w$. Es una identidad entre números, válida para todo vector de pesos que cumpla las dos condiciones.
+
+/Evaluado sobre la muestra./ Los pesos pasan a ser $C_i$ y $W_i$, funciones de $\boldsymbol X$; el estimador es $\beta_m\,\mathit1+\sum_iC_iU_i$; y la cuenta del Resultado 1 (Lema, homocedasticidad, incorrelación) da $Var\big[\sum_iC_iU_i\mid\boldsymbol X\big]=\sigma^2\sum_iC_i^2$. La identidad \eqref{eq:GM} pasa por el puente, $\sum_iC_i^2=\sum_iW_i^2+\sum_i(C_i-W_i)^2$, y como $\sum_iW_i^2=1/L_m^2$,
+\[
+Var\Big[\sum_iC_iY_i\,\Big|\,\boldsymbol X\Big]=\sigma^2\sum_iC_i^2\ \ge\ \sigma^2\sum_iW_i^2=\frac{\sigma^2}{L_m^2}=Var[\hat\beta_m\mid\boldsymbol X] ,
+\]
+con igualdad solo si $C_i=W_i$ para todo $i$.
+
+#+begin_quote
+*Resultado 2 bis (Gauss–Markov).* Con los supuestos de la lección 11, y sin normalidad, $\hat\beta_m$ tiene la menor varianza condicional entre los estimadores lineales e insesgados de $\beta_m$. Es Pitágoras en $\mathbb R^n$, evaluado sobre la muestra, más el Resultado 1.
+#+end_quote
+
+Hasta aquí no se ha usado la normalidad, y los Resultados 1, 2 y 2 bis son todo lo que el curso dice de los estimadores sin ella: insesgadez, varianza, varianza mínima, y la justificación de $F$ como estadístico de contraste. Lo que no dan es ninguna distribución: para eso hay que saber cómo se reparte la probabilidad entre los valores de cada $C_j$, y cómo se relacionan unas con otras más allá de la ortogonalidad.
 
 * Qué añade la normalidad: de ortogonal a independiente
 
@@ -320,18 +493,83 @@ Numerador y denominador son sumas de cuadrados de dos subfamilias disjuntas (las
 #+ATTR_LATEX: :align >{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{5.3cm} :font \small
 | Pieza                                                              | Espacio                     | Qué usa                                              | Qué da                                                                                                      |
 |--------------------------------------------------------------------+-----------------------------+------------------------------------------------------+-------------------------------------------------------------------------------------------------------------|
+| Producto escalar $\langle\cdot,\cdot\rangle_P$ por sus propiedades; esperanza como proyección; $\mathrm P(A)=\langle\mathbb 1_A,\mathit1\rangle_P$ | v.a. | Lección 9 | Propiedades de la probabilidad; independencia = indicadoras centradas ortogonales; escuadra |
+| Condicionar = proyectar sobre las funciones de $X$, \eqref{eq:cond} | v.a. | Ortogonalidad del resto | Linealidad, Lema, esperanzas iteradas, varianza condicional; $P[A\mid X]$; independencia = sombras constantes |
+| Copias i.i.d. en $\Omega=[0,1]$ (la moneda) | v.a. | Probabilidad = longitud | Infinitas copias idénticas e independientes en un mismo $\Omega$; una construcción, no un supuesto |
+| La matriz de copias | de las v.a. a $\mathbb R^n$ | Nada | $n$ filas = muestra; columna = $\omega$; ambas = vector de $\mathbb R^n$; datos = una columna; Monte Carlo = otras columnas |
 | $\mathcal L(\boldsymbol 1)^\perp=\mathcal E\oplus\mathcal R$ y base adaptada \eqref{eq:base} | $\mathbb R^n$               | Regresores linealmente independientes                | Identidades válidas para toda muestra; $\dim\mathcal E=k-1$, $\dim\mathcal R=n-k$                            |
 | Coordenadas \eqref{eq:coord}, Pitágoras \eqref{eq:pitagoras}, \eqref{eq:coord-nula} | $\mathbb R^n$               | Ortonormalidad                                       | $\mathrm{SEC}$, $\mathrm{SRC}$, $\mathrm{SRC}_r-\mathrm{SRC}$ como sumas de coordenadas por subespacio       |
 | Parte propia, \eqref{eq:beta-coord}–\eqref{eq:t-datos}            | $\mathbb R^n$               | FWL (lección 14), $\boldsymbol b_1\perp\boldsymbol 1$ | $t$ = coordenada sobre $\tilde{\boldsymbol x}_m$ / media cuadrática de las de $\mathcal R$                 |
 | El puente                                                          | de $\mathbb R^n$ a las v.a. | Solo identidades                                     | \eqref{eq:base-va}, $C_j$, $D_j$, \eqref{eq:casos}, \eqref{eq:sumas-va}, \eqref{eq:beta-va}                 |
+| Los tres supuestos de la lección 11 | v.a. | Modelo poblacional, escuadra entre copias, Lema | $E[U_i\mid\boldsymbol X]=\mathit0$, $E[U_i^2\mid\boldsymbol X]=\sigma^2\mathit1$, $E[U_iU_{i'}\mid\boldsymbol X]=\mathit0$ |
 | $D_j=\mathit0$ en $\mathcal R$ (y en $\mathcal Q$ bajo $H_0$)      | $\mathbb R^n$, evaluado     | \eqref{eq:coord-nula}; $H_0$ para $\mathcal Q$       | $\mathrm{SRC}$ sin parte sistemática; numerador de $F$ sin ella bajo $H_0$                                  |
 | Resultado 1: familia ortogonal                                     | v.a.                        | Lema, $E[U_i\mid\boldsymbol X]=\mathit0$, homocedasticidad, incorrelación | $\langle C_j,C_l\rangle_P=\sigma^2\delta_{jl}$                                             |
 | Resultado 2: esperanzas \eqref{eq:esperanzas}                      | v.a.                        | Resultado 1, Lema                                    | Insesgadez de $\mathfrak s^2$; $F$ ronda $1$ bajo $H_0$ y crece fuera                                        |
+| Resultado 2 bis: Gauss–Markov, \eqref{eq:GM}                      | $\mathbb R^n$, evaluado     | Pitágoras, puente, Resultado 1                       | $\hat\beta_m$ de varianza mínima entre los lineales insesgados, sin normalidad                             |
 | Propiedad de la normal                                             | v.a. (vía densidad en $\mathbb R^n$) | Las $U_i$ dadas $\boldsymbol X$ a escuadra y con la misma $N(0,\sigma^2)$ | Resultado 3: las $C_j$ a escuadra y con la misma $N(0,\sigma^2)$; el giro conserva la escuadra |
 | Subfamilias disjuntas                                              | v.a.                        | Escuadra (apéndice lección 11)                       | Numerador y denominador independientes; $t_{n-k}$, $F_{q,n-k}$                                              |
 | Fijar $\omega$                                                     | de las v.a. a $\mathbb R^n$ | Nada                                                 | Cada estadístico toma el valor de su fórmula en el punto realizado; los datos observados son un $\omega$   |
 #+LATEX: }
 
-Demostrado con material del curso: todo lo de $\mathbb R^n$; el puente; los Resultados 1 y 2; y que, si la familia es a escuadra, los dos estadísticos tienen por definición las distribuciones $t_{n-k}$ y $F_{q,n-k}$. Enunciado sin demostrar: la propiedad de la normal, con su razón en nota al pie. Es el único lugar donde el supuesto de normalidad trabaja, y por eso sin él la $t_{n-k}$ y la $F_{q,n-k}$ dejan de ser las distribuciones exactas de los estadísticos, mientras que el Resultado 2 (y con él la lectura ``$F$ ronda $1$ bajo $H_0$'') sigue en pie.
+Demostrado con material del curso: todo lo de $\mathbb R^n$; las reglas del condicionamiento y las de la probabilidad a partir del producto escalar; los tres supuestos de la lección 11 a partir del modelo poblacional y el muestreo aleatorio; el puente; los Resultados 1, 2 y 2 bis (Gauss–Markov); y que, si la familia es a escuadra, los dos estadísticos tienen por definición las distribuciones $t_{n-k}$ y $F_{q,n-k}$. Enunciado sin demostrar: la existencia de la proyección sobre las funciones de $X$, la caracterización de la independencia por funciones, la construcción de copias de cualquier distribución, y la propiedad de la normal, con su razón en nota al pie. Es el único lugar donde el supuesto de normalidad trabaja, y por eso sin él la $t_{n-k}$ y la $F_{q,n-k}$ dejan de ser las distribuciones exactas de los estadísticos, mientras que el Resultado 2 (y con él la lectura ``$F$ ronda $1$ bajo $H_0$'') sigue en pie.
 
-Y el retorno a los datos. Lo que la sección 2 garantiza para toda realización es lo que permite leer una tabla de resultados con las fórmulas de las lecciones 8, 10, 13 y 14 sin probabilidad alguna: $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$, $\hat\beta_m=\langle\tilde{\boldsymbol x}_m,\boldsymbol y\rangle_e/\Vert\tilde{\boldsymbol x}_m\Vert_e^2$, $F=(\mathrm{SRC}_r-\mathrm{SRC})/q\big/\mathrm{SRC}/(n-k)$ son identidades en los números observados. Lo que las secciones 4 y 5 añaden es qué parte de esos números sería ruido si el modelo fuese cierto, y con qué distribución: la que se consulta en la tabla de la $t_{n-k}$ o de la $F_{q,n-k}$ para decidir si datos como estos serían raros bajo $H_0$.
+Y el retorno a los datos. Lo que la sección 5 garantiza para toda realización es lo que permite leer una tabla de resultados con las fórmulas de las lecciones 8, 10, 13 y 14 sin probabilidad alguna: $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$, $\hat\beta_m=\langle\tilde{\boldsymbol x}_m,\boldsymbol y\rangle_e/\Vert\tilde{\boldsymbol x}_m\Vert_e^2$, $F=(\mathrm{SRC}_r-\mathrm{SRC})/q\big/\mathrm{SRC}/(n-k)$ son identidades en los números observados. Lo que las secciones 7 y 8 añaden es qué parte de esos números sería ruido si el modelo fuese cierto, y con qué distribución: la que se consulta en la tabla de la $t_{n-k}$ o de la $F_{q,n-k}$ para decidir si datos como estos serían raros bajo $H_0$.
+
+* Mapa de las lecciones
+
+Qué sección sostiene qué pasaje del curso. Las lecciones enuncian y leen; aquí está la demostración o la definición.
+
+#+LATEX: {\rowcolors{2}{gray!10}{white}
+#+ATTR_LATEX: :align >{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{6.6cm}>{\raggedright\arraybackslash}p{6.0cm} :font \small
+| Lección | Pasaje | Sección de este documento |
+|---------+--------+---------------------------|
+| 9 | Variable aleatoria como función; $\langle X,Y\rangle_P$ y sus propiedades; semiproducto escalar | 1.1 |
+| 9 | Las dos caras de la esperanza; la esperanza condicional como proyección; descomposición de la varianza | 1.2, 1.3 |
+| 9 | «$n$ copias idénticas e independientes»; los datos como realización | 2, 3 |
+| 11 | El marco de la muestra aleatoria; estimador frente a estimación | 3, 4.2, 6.6 |
+| 11 | «La misma fórmula, aplicada a variables aleatorias»; «Dos propiedades de los pesos» | 4.3 |
+| 11 | Los tres supuestos condicionando en $\boldsymbol X$ a partir del muestreo aleatorio | 6.1 |
+| 11 | El Lema («lo que es función de $\boldsymbol X$ sale fuera») y las esperanzas iteradas | 1.3 |
+| 11 | Insesgadez y varianza de $\hat\beta_2$; con $k$ regresores, de cada $\hat\beta_m$ | 6.5, 7.1 |
+| 11 | $\mathfrak s^2=\mathrm{SRC}/(n-k)$ insesgado; el divisor $n-1$ de la varianza muestral | 7.2 |
+| 11 | Gauss–Markov (MCO es BLUE) | 7.3 |
+| 11 | Apéndice de la moneda; independencia como «a escuadra» | 2, 1.5 |
+| 12 | Distribución condicionada; sombras constantes; probabilidad como esperanza de la indicadora | 1.4, 1.5 |
+| 12 | «La normalidad hace el ruido isótropo» | 8 (Resultado 3) |
+| 12 | La $t_{n-k}$; por qué el valor crítico depende de $n-k$; la distribución del ángulo | 9 |
+| 12 | «Dos direcciones al azar son casi ortogonales» | 8 (corolario del $R^2$) |
+| 13 | «El ruido reparte su longitud por igual entre las dimensiones»; $F$ ronda $1$ bajo $H_0$ | 7 (Resultados 1 y 2) |
+| 13 | El $R^2$ que regala el azar, $(k-1)/(n-1)$ | 8 (corolario) |
+| 13 | Pitágoras anidado; la $F_{q,n-k}$ de $q$ restricciones | 5.5, 10 |
+| 14 | Parte propia; $\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$ | 5.4, 6.5 |
+| S14-D | Ortogonalizar: la base adaptada | 5.2 |
+| S16-A, S21-C, S22-A | Monte Carlo: recorrer columnas de la matriz de copias | 3 |
+| S16-C | Perturbaciones no normales: qué se conserva y qué no | 7, 8 |
+#+LATEX: }
+
+* Notación
+
+#+LATEX: {\rowcolors{2}{gray!10}{white}
+#+ATTR_LATEX: :align >{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{10.6cm} :font \small
+| Símbolo | Significado |
+|---------+-------------|
+| $\boldsymbol y$, $\boldsymbol x_j$, $\boldsymbol u$, $\boldsymbol b_j$ | Vectores de datos, en $\mathbb R^n$ (negrita minúscula) |
+| $\boldsymbol{\mathsf X}$ | Matriz de datos de los regresores (lección 10) |
+| $Y_i$, $U_i$, $X_{ij}$, $C_j$, $\hat\beta_m$ | Variables aleatorias (mayúscula): funciones sobre $\Omega$ |
+| $\boldsymbol X$ | La muestra aleatoria de regresores: la lista de las $n$ copias (lección 11); no es un vector de $\mathbb R^n$ |
+| $\mathit1$, $\mathit0$ | Las variables aleatorias constantes $1$ y $0$ |
+| $\mathbb 1_A$ | La indicadora del suceso $A$ |
+| $\langle\cdot,\cdot\rangle_e$, $\Vert\cdot\Vert_e$ | Producto escalar euclídeo y norma en $\mathbb R^n$ (lección 2) |
+| $\langle\cdot,\cdot\rangle_s=\frac1n\langle\cdot,\cdot\rangle_e$ | Producto escalar estadístico (lección 4); $\langle\cdot,\cdot\rangle_{n-k}$, el de la cuasivarianza (lección 11) |
+| $\langle Z,W\rangle_P=\mathrm E(ZW)$, $\Vert Z\Vert_P$ | Producto escalar y norma de las variables aleatorias (lección 9) |
+| $\mathrm E(Z)$ | Valor esperado: un número, $\langle Z,\mathit1\rangle_P$ |
+| $E[Z\mid X]$, $Var[Z\mid X]$, $P[A\mid X]$ | Esperanza, varianza y probabilidad condicionales: variables aleatorias, proyecciones sobre las funciones de $X$ |
+| $\mathcal L(\cdot)$ | Subespacio generado por los vectores indicados; $\mathcal L(\boldsymbol 1)^\perp$, los vectores de media cero |
+| $\mathcal E$, $\mathcal R$ | Subespacio de los regresores en desviaciones y su complemento ortogonal en $\mathcal L(\boldsymbol 1)^\perp$ (sección 5.1) |
+| $\mathcal E_r$, $\mathcal Q$ | Subespacio del modelo restringido y las $q$ direcciones suprimidas (sección 5.5) |
+| $\sum_{\mathcal E}$, $\sum_{\mathcal R}$, $\sum_{\mathcal Q}$ | Suma sobre los vectores de la base que están en ese subespacio |
+| $\tilde{\boldsymbol x}_m$, $L_m$ | Parte propia del regresor $m$ (lección 14) y su longitud evaluada sobre la muestra |
+| $c_j$, $C_j$, $D_j$ | Coordenada \(j\)-ésima de un vector de datos; coordenada del ruido y de la parte sistemática, evaluadas sobre la muestra |
+| $S_i$, $\boldsymbol s$ | Parte sistemática en desviaciones: componente \(i\)-ésima, y su realización |
+| $i$, $i'$; $j$, $l$; $m$ | Índices de observación; de vectores de la base; del regresor contrastado |
+#+LATEX: }
