@@ -1,52 +1,34 @@
-#+TITLE: Dos espacios, una base: de Pitágoras a la $t$ y la $F$
-#+DATE: 2026-10-03
+#    -*- mode: org -*-
+
+#+TITLE: Apéndice. Estructura geométrica de la probabilidad y de la inferencia en el modelo de regresión
+#+author: Marcos Bujosa
 #+LANGUAGE: es
-# +OPTIONS: toc:nil
-#+LATEX_CLASS_OPTIONS: [11pt,table]
+#+DESCRIPTION: Apéndice del curso: la columna vertebral formal de las lecciones 9 a 14. Dos espacios con producto escalar (R^n y las variables aleatorias), el puente entre ellos, y de ahí la insesgadez, Gauss–Markov y las distribuciones t y F, con demostraciones.
 
-#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
-(setq org-latex-pdf-process
-      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
-#+end_src
+#+include: 00preambulo_lecciones.txt
+#+LATEX_HEADER: \usepackage{amssymb,array,float}
 
-#+LATEX_HEADER: \usepackage{iftex}
-#+LATEX_HEADER: \ifXeTeX
-#+LATEX_HEADER: \usepackage{fontspec}\usepackage{lmodern}\setmainfont{Latin Modern Roman}
-#+LATEX_HEADER: \usepackage{polyglossia}\setmainlanguage{spanish}
-#+LATEX_HEADER: \else
-#+LATEX_HEADER: \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage{lmodern}
-#+LATEX_HEADER: \RequirePackage[spanish,es-noquoting,es-noshorthands]{babel}
-#+LATEX_HEADER: \fi
-#+LATEX_HEADER: \PassOptionsToPackage{table}{xcolor}\usepackage{xcolor}
-#+LATEX_HEADER: \usepackage{amsmath,amssymb}
-#+LATEX_HEADER: \usepackage{dsfont}
-#+LATEX_HEADER: \let\amsmathbb\mathbb
-#+LATEX_HEADER: \renewcommand{\mathbb}[1]{\ifx1#1\mathds{1}\else\amsmathbb{#1}\fi}
-#+LATEX_HEADER: \usepackage[indent]{parskip}
-#+LATEX_HEADER: \usepackage{fullpage}
-#+LATEX_HEADER: \usepackage{array,booktabs}
-#+LATEX_HEADER: \usepackage{float}
+#+BEGIN_SRC emacs-lisp :exports none :results silent
+(use-package htmlize)
+#+END_SRC
 
 # Documento único (3-10-2026) que reúne Nota-2026-10-02-dos-espacios.org y
-# Ensayo-2026-10-01-independencia-t-F.org (ambos se conservan). El 4-10-2026
-# se añade la primera parte (secciones 1-4): el espacio de las v.a. (producto
-# escalar solo por sus propiedades, esperanza como proyección, probabilidad
-# como esperanza de la indicadora, escuadra), las copias i.i.d. (condensado
-# del apéndice de la lección 11, que pasará a este documento) y la matriz de
-# copias (filas = copias, columnas = omega). Sin integrales ni áreas; sin
-# identificar R^n con variables aleatorias; indicadoras como vectores.
-# El mismo día se añaden: 1.3 condicionar es proyectar (Lema, esperanzas
-# iteradas, varianza condicional), probabilidad condicional, independencia
-# como sombras constantes, deducción de los tres supuestos de L11 (6.1),
-# Gauss–Markov (7.3), el divisor n-1, y al final el mapa de las lecciones y
-# la tabla de notación. Notación
-# nueva acordada con el usuario: E y R para los dos subespacios de
-# L(1)^perp (explicado y residual), E_r y Q para el modelo restringido;
-# esperanza siempre en redonda, \mathrm E; sumas por subespacio,
-# \sum_{\mathcal E}. Es documentación de trabajo del usuario: cómo
-# aprovecharlo en las lecciones es una decisión posterior.
+# Ensayo-2026-10-01-independencia-t-F.org (ambos se conservan en doc/prompts).
+# Trasladado a org-lessons el 4-10-2026 (decisión D1 del plan de revisión):
+# se compila como una lección (PDF y HTML, sin transparencias) y figura en
+# index.org como lectura complementaria del Tema III. Sus figuras están en
+# img/Apendice-geometria/. Notación acordada: E y R para los dos subespacios
+# de L(1)^perp (explicado y residual), E_r y Q para el modelo restringido;
+# esperanza condicional E[·|X] en cursiva y no condicional en redonda; sumas
+# por subespacio \sum_{\mathcal E}; indicadoras como vectores; sin integrales.
 
 #+LATEX: \maketitle
+
+#+LATEX: \blfootnote{Esta obra está bajo una licencia \href{https://creativecommons.org/licenses/by-sa/4.0/deed.es}{Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)}.}
+
+- ([[https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html][html]]) --- ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf][pdf]])
+
+*Alcance.* Este documento es la columna vertebral formal de las lecciones 9 a 14 del curso: reúne, con demostraciones, lo que esas lecciones enuncian y leen. De la probabilidad toma solo lo que el curso usa, y lo construye desde un único ingrediente, el producto escalar $\langle X,Y\rangle_P=\mathrm E(XY)$ de la lección 9: la esperanza y la esperanza condicional como proyecciones, la probabilidad como esperanza de la indicadora, la independencia como ortogonalidad, y la existencia de copias idénticas e independientes; no trata la aditividad numerable, las distribuciones ni los teoremas límite. De la inferencia trata la del modelo de regresión lineal: insesgadez, varianza y varianza mínima de los coeficientes, la insesgadez de $\mathfrak s^2$, y las distribuciones $t_{n-k}$ y $F_{q,n-k}$ de los contrastes, con el intervalo de confianza y el valor $p$. Todo descansa en una regla que se mantiene de principio a fin: $\mathbb R^n$, donde viven los datos, y el espacio de las variables aleatorias, donde viven los estimadores, son dos espacios distintos, y lo único que los comunica es evaluar una fórmula de datos sobre la muestra. Las secciones 1 a 4 preparan los dos espacios y el puente; la 5 es álgebra de $\mathbb R^n$; la 6 evalúa; las 7 a 10 obtienen los resultados, primero sin normalidad y después con ella; las 11 a 13 recogen las piezas, el mapa de las lecciones y la notación. Lo que se admite sin demostrar se dice cada vez, y se lista al final de la sección 11.
 
 * El espacio de las variables aleatorias
 
@@ -108,7 +90,8 @@ Condicionar una probabilidad es lo mismo hecho con la indicadora: $P[A\mid X]=E[
 #+NAME: fig:figA-probabilidad-proyeccion
 #+CAPTION: Las dos caras de la esperanza y la probabilidad como proyección, con las variables aleatorias dibujadas como vectores. Izquierda: la proyección de $X$ sobre la recta de las constantes es $\mathrm E(X)\,\mathit1$; el número $\mathrm E(X)$ es el escalar por el que se multiplica $\mathit1$; la parte centrada $X-\mathrm E(X)\,\mathit1$ es ortogonal a $\mathit1$ y su longitud es la desviación típica. Derecha: lo mismo para una indicadora: su proyección es $\mathrm P(A)\,\mathit1$ y su longitud es $\sqrt{\mathrm P(A)}$. Un dibujo así no dice dónde vale qué la función; dice cómo se sitúa respecto de las constantes, que es lo único que usa el argumento.
 #+ATTR_LATEX: :width 0.8\textwidth :placement [H]
-[[file:Ensayo-2026-10-03-figuras/figA-probabilidad-proyeccion.pdf]]
+#+attr_html: :width 700px
+[[file:img/Apendice-geometria/figA-probabilidad-proyeccion.png]]
 
 ** Independencia: sucesos, variables y escuadra
 
@@ -146,7 +129,8 @@ X_n(\omega)=a_n .
 #+NAME: fig:monedas
 #+CAPTION: Las cuatro primeras monedas como funciones sobre $\Omega=[0,1]$ (la figura del apéndice de la lección 11, con una moneda más). Cada una vale $0$ en los intervalos impares de longitud $2^{-n}$ y $1$ en los pares. La línea de puntos es el suceso elemental $\omega=0{,}3$, que en base dos empieza $0{,}0100\ldots$: cruz, cara, cruz, cruz. Un $\omega$ es una tirada infinita. Es la única figura del documento que dibuja dónde vale qué una variable aleatoria, y muestra por qué no se insiste en ello: cada fila es más apretada que la anterior, y pocas más abajo la función ya no se lee. Por eso las demás figuras dibujan las variables aleatorias como vectores.
 #+ATTR_LATEX: :width 0.8\textwidth :placement [tbh]
-[[file:Ensayo-2026-10-03-figuras/Monedas4.pdf]]
+#+attr_html: :width 700px
+[[file:img/Apendice-geometria/Monedas4.png]]
 
 Dos comprobaciones. /Idéntica distribución/: el suceso $\{X_n=0\}$ es una unión de intervalos de longitud total $\tfrac12$, para todo $n$. /Independencia de todas a la vez/: fijados $n$ resultados $(a_1,\ldots,a_n)$, el suceso $\{X_1=a_1,\ldots,X_n=a_n\}$ es el conjunto de los $\omega$ cuyas $n$ primeras cifras son esas, un intervalo de longitud $2^{-n}$, luego $\mathrm P(X_1=a_1,\ldots,X_n=a_n)=2^{-n}=\mathrm P(X_1=a_1)\cdots\mathrm P(X_n=a_n)$. Y $X_1$ y $X_2$ /no son la misma función/: en $\omega=0{,}3$ la primera vale $0$ y la segunda $1$. Dos copias independientes suelen asignar valores distintos al mismo suceso elemental.
 
@@ -169,7 +153,8 @@ La figura de las monedas admite una lectura que organiza todo lo que sigue. Imag
 #+NAME: fig:figB-matriz-copias
 #+CAPTION: La matriz de copias. Cada fila es una copia de la variable, una función sobre $\Omega$; la matriz continúa hacia abajo indefinidamente. Elegir $n$ filas es tomar una muestra; elegir una columna es fijar un $\omega$; las dos cosas a la vez dan el vector $\big(X_1(\omega),\ldots,X_n(\omega)\big)$ de $\mathbb R^n$. Los datos observados son una columna; una simulación Monte Carlo recorre otras columnas, $\omega',\omega'',\ldots$, con las mismas filas.
 #+ATTR_LATEX: :width 0.9\textwidth :placement [H]
-[[file:Ensayo-2026-10-03-figuras/figB-matriz-copias.pdf]]
+#+attr_html: :width 700px
+[[file:img/Apendice-geometria/figB-matriz-copias.png]]
 
 Tres consecuencias. Primera: los datos observados son una columna, la que ocurrió; una tabla de Gretl es $\big(X_1(\omega),\ldots,X_n(\omega)\big)$ para ese $\omega$ y nada más. Segunda: una simulación Monte Carlo (prácticas de las sesiones 16, 21 y 22) es recorrer columnas con las mismas $n$ filas: cada réplica es otro $\omega$, y el histograma de un estadístico a lo largo de las réplicas es su distribución vista columna a columna. Tercera: en el modelo de regresión cada fila es una observación completa, $(Y_i,X_{i2},\ldots,X_{ik})$, copia de la variable vectorial que describe a un individuo (lección 11), y la columna $\omega$ da la tabla de datos entera, con sus $n$ filas y sus $k$ columnas de variables.
 
@@ -240,7 +225,8 @@ Sea $\boldsymbol y$ un vector de datos y su ajuste MCO sobre $\boldsymbol 1,\bol
 #+NAME: fig:fig1-dos-subespacios
 #+CAPTION: Los dos subespacios de $\mathcal L(\boldsymbol 1)^\perp$, la base adaptada y el primer triángulo. El plano representa $\mathcal E$ (de dimensión $k-1$) y la vertical $\mathcal R$ (de dimensión $n-k$); $\boldsymbol b_1,\boldsymbol b_2$ son vectores de la base en $\mathcal E$ y $\boldsymbol b_k$ en $\mathcal R$. El vector de datos en desviaciones $\boldsymbol v$, de longitud $\Vert\boldsymbol v\Vert_e=\sqrt{\sum_{\mathcal E}c_j^2+\sum_{\mathcal R}c_j^2}$, se descompone en su proyección sobre $\mathcal E$, el ajuste en desviaciones, de longitud $\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\Vert_e=\sqrt{\sum_{\mathcal E}c_j^2}$, y su componente en $\mathcal R$, el residuo, de longitud $\Vert\boldsymbol{\mathop{\widehat e}}\Vert_e=\sqrt{\sum_{\mathcal R}c_j^2}$. Todo son vectores de datos: ninguna variable aleatoria.
 #+ATTR_LATEX: :width 0.72\textwidth :placement [H]
-[[file:Ensayo-2026-10-03-figuras/fig1-dos-subespacios.pdf]]
+#+attr_html: :width 700px
+[[file:img/Apendice-geometria/fig1-dos-subespacios.png]]
 
 ** Segundo triángulo: un coeficiente
 
@@ -270,7 +256,8 @@ El estadístico $t$ es, en $\mathbb R^n$, la coordenada sobre la parte propia di
 #+NAME: fig:fig2-parte-propia
 #+CAPTION: El plano $\mathcal E$ visto de frente, con $k=3$: dos regresores en desviaciones, no ortogonales entre sí. La parte propia $\tilde{\boldsymbol x}_m$ es la componente de $\boldsymbol x_m-\boldsymbol{\mathop{\overline x}}_m$ ortogonal al otro regresor; está dibujada desplazada, como residuo, desde la proyección hasta la punta, pero como vector parte del origen, en la dirección de $\boldsymbol b_1$, que es su dirección normalizada; $\boldsymbol b_2$ es la dirección del otro regresor. La coordenada del ajuste en desviaciones sobre $\boldsymbol b_1$ es $c_1=\hat\beta_m\Vert\tilde{\boldsymbol x}_m\Vert_e$, de donde \eqref{eq:beta-coord}.
 #+ATTR_LATEX: :width 0.62\textwidth :placement [H]
-[[file:Ensayo-2026-10-03-figuras/fig2-parte-propia.pdf]]
+#+attr_html: :width 700px
+[[file:img/Apendice-geometria/fig2-parte-propia.png]]
 
 ** Tercer triángulo: restricciones
 
@@ -291,7 +278,8 @@ el cociente entre las medias cuadráticas de las coordenadas de $\mathcal Q$ y d
 #+NAME: fig:fig3-restricciones
 #+CAPTION: El tercer triángulo. Los tres ejes parten del origen: dentro de $\mathcal E$, la recta azul es $\mathcal E_r$ y la perpendicular a ella dentro del plano es $\mathcal Q$; la vertical es $\mathcal R$. El ajuste restringido en desviaciones es la proyección de $\boldsymbol v$ sobre $\mathcal E_r$. El triángulo está dibujado desplazado, con el vértice en la punta de $\boldsymbol{\mathop{\widehat y}}_r-\boldsymbol{\mathop{\overline y}}$: sus lados son vectores que en realidad parten del origen, y las líneas a guiones son los ejes $\mathcal Q$ y $\mathcal R$ trasladados en paralelo hasta él. Lo que el modelo completo añade, $\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r$, vive en $\mathcal Q$ y tiene longitud $\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\widehat y}}_r\Vert_e=\sqrt{\sum_{\mathcal Q}c_j^2}=\sqrt{\mathrm{SRC}_r-\mathrm{SRC}}$; el residuo vive en $\mathcal R$ y tiene longitud $\Vert\boldsymbol{\mathop{\widehat e}}\Vert_e=\sqrt{\sum_{\mathcal R}c_j^2}=\sqrt{\mathrm{SRC}}$; la hipotenusa es el residuo restringido, de longitud $\Vert\boldsymbol y-\boldsymbol{\mathop{\widehat y}}_r\Vert_e=\sqrt{\mathrm{SRC}_r}$. Es la figura del Pitágoras anidado de la lección 13 con los subespacios nombrados.
 #+ATTR_LATEX: :width 0.72\textwidth :placement [H]
-[[file:Ensayo-2026-10-03-figuras/fig3-restricciones.pdf]]
+#+attr_html: :width 700px
+[[file:img/Apendice-geometria/fig3-restricciones.png]]
 
 Todo lo anterior es álgebra de $\mathbb R^n$: vale para cualquier vector de datos $\boldsymbol y$ y cualquier muestra de regresores linealmente independientes. No hay probabilidad.
 
@@ -349,7 +337,8 @@ sobre las direcciones de $\mathcal R$, la coordenada de la parte sistemática es
 #+NAME: fig:fig4-realizacion
 #+CAPTION: Una realización $\omega$, dibujada en $\mathbb R^n$. Los tres vectores parten del origen: $\boldsymbol s$ es la realización de $(S_1,\ldots,S_n)$ y está en $\mathcal E$; $\boldsymbol u-\boldsymbol{\mathop{\overline u}}$ es la realización de las perturbaciones centradas, con componente en $\mathcal E$ (su proyección, en línea de puntos) y en $\mathcal R$; $\boldsymbol v$ es su suma, y la copia a guiones de $\boldsymbol u-\boldsymbol{\mathop{\overline u}}$ trasladada a la punta de $\boldsymbol s$ solo muestra la regla del paralelogramo. La proyección de $\boldsymbol v$ sobre $\mathcal E$ es $\boldsymbol s$ más la proyección del ruido; su componente en $\mathcal R$ es solo la del ruido, porque $\boldsymbol s$ no tiene. Por eso las coordenadas de $\boldsymbol v$ sobre los vectores de la base de $\mathcal R$ son $c_j$ y sobre los de $\mathcal E$ son $d_j+c_j$, donde $d_j$ y $c_j$ son los valores en $\omega$ de $D_j$ y $C_j$. Bajo $H_0\colon\beta_2=\cdots=\beta_k=0$, $\boldsymbol s=\boldsymbol 0$ y $\boldsymbol v$ es el ruido centrado.
 #+ATTR_LATEX: :width 0.72\textwidth :placement [H]
-[[file:Ensayo-2026-10-03-figuras/fig4-realizacion.pdf]]
+#+attr_html: :width 700px
+[[file:img/Apendice-geometria/fig4-realizacion.png]]
 
 Dos casos particulares de $D_j$ que necesitaremos:
 
@@ -398,7 +387,8 @@ Ese es el contenido de la frase que las lecciones abrevian como ``el ruido repar
 #+NAME: fig:fig5-familia-ortogonal
 #+CAPTION: El Resultado 1 en el otro espacio. Las $C_j$ son elementos del espacio de las variables aleatorias, con el producto escalar $\langle Z,W\rangle_P=\mathrm E(ZW)$ de la lección 9: una familia ortogonal cuyos $n-1$ miembros miden lo mismo, $\sigma$. Las $k-1$ de $\mathcal E$ y las $n-k$ de $\mathcal R$ se distinguen solo por el vector de la base al que corresponden. Aquí no hay datos ni vectores de $\mathbb R^n$: la figura es un esquema de tres de las $n-1$ variables.
 #+ATTR_LATEX: :width 0.5\textwidth :placement [H]
-[[file:Ensayo-2026-10-03-figuras/fig5-familia-ortogonal.pdf]]
+#+attr_html: :width 700px
+[[file:img/Apendice-geometria/fig5-familia-ortogonal.png]]
 
 *Primer corolario: insesgadez y varianza de $\hat\beta_m$.* De \eqref{eq:beta-va}, $\hat\beta_m=\beta_m\,\mathit1+C_1/L_m$ con $L_m$ función de $\boldsymbol X$. Por el Lema y el Resultado 1,
 \[

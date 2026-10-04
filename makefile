@@ -13,8 +13,9 @@ PRACT_DIR     := org-pract
 LESSONS_ORG    := $(wildcard $(LESSONS_DIR)/*.org)
 LESSONS_PDF    := $(LESSONS_ORG:.org=.pdf)
 LESSONS_HTML   := $(LESSONS_ORG:.org=.html)
-LESSONS_IPYNB  := $(LESSONS_ORG:.org=.ipynb)
-LESSONS_SLIDES := $(LESSONS_ORG:.org=.slides.html)
+# Los apéndices (Apendice-*.org) se exportan a PDF y HTML, pero no a cuaderno ni a transparencias.
+LESSONS_IPYNB  := $(filter-out $(LESSONS_DIR)/Apendice-%,$(LESSONS_ORG:.org=.ipynb))
+LESSONS_SLIDES := $(filter-out $(LESSONS_DIR)/Apendice-%,$(LESSONS_ORG:.org=.slides.html))
 
 # ficheros auxiliares que deja la exportación LaTeX
 LESSONS_TEXAUX := $(LESSONS_ORG:.org=.tex) $(LESSONS_ORG:.org=.aux) \
