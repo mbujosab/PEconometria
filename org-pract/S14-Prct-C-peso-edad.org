@@ -115,7 +115,7 @@ Conjunto vacío de 8 observaciones de sección cruzada. Las dos matrices contien
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: DatosPesoEdad
-#+begin_src gretl :tangle ./guiones/S14-Prct-C-peso-edad.inp :eval no
+#+begin_src gretl :eval no
 nulldata 8 --preserve
 setobs 1 1 --cross-section
 
@@ -131,6 +131,16 @@ print edad peso --byobs
 #+end_src
 #+latex: }
 
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
+outfile --quiet datos.txt
+    <<DatosPesoEdad>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-C-peso-edad/datos.txt example
+#+latex: }
+
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
 /Con solo 8 observaciones, este ejemplo no pretende describir el crecimiento infantil: es, deliberadamente, un caso de laboratorio para poner a prueba nuestra confianza en $R^2$ y $\bar R^2$./
 #+latex: }
@@ -142,11 +152,31 @@ print edad peso --byobs
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: ModeloLinealPesoEdad
-#+begin_src gretl :tangle ./guiones/S14-Prct-C-peso-edad.inp :eval no
+#+begin_src gretl :eval no
 ols peso const edad
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
+outfile --quiet modeloLineal.txt
+    <<ModeloLinealPesoEdad>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-C-peso-edad/modeloLineal.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: GraficoLinealPesoEdad
+#+begin_src gretl :eval no
 gnuplot peso edad --output="peso_edad_lineal.png"
 #+end_src
 #+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
+<<GraficoLinealPesoEdad>>
+#+end_src
 
 #+BEGIN_EXPORT latex
 \begin{figure}[H]
@@ -176,12 +206,32 @@ Añadimos edad al cuadrado como segundo regresor.
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: ModeloCuadraticoPesoEdad
-#+begin_src gretl :tangle ./guiones/S14-Prct-C-peso-edad.inp :eval no
+#+begin_src gretl :eval no
 series edad2 = edad^2
 ols peso const edad edad2
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
+outfile --quiet modeloCuadratico.txt
+    <<ModeloCuadraticoPesoEdad>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-C-peso-edad/modeloCuadratico.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: GraficoCuadraticoPesoEdad
+#+begin_src gretl :eval no
 gnuplot peso edad --fit=quadratic --output="peso_edad_cuadratico.png"
 #+end_src
 #+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
+<<GraficoCuadraticoPesoEdad>>
+#+end_src
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
 (Si su versión de Gretl no admite la opción =--fit=quadratic= en =gnuplot=, genere el gráfico desde el menú //~Gráfico X-Y~// y seleccione, en el diálogo, un ajuste cuadrático.)
@@ -215,12 +265,32 @@ Igual que antes: =edad^3= es el tercer regresor y =--fit=cubic= dibuja la cúbic
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: ModeloCubicoPesoEdad
-#+begin_src gretl :tangle ./guiones/S14-Prct-C-peso-edad.inp :eval no
+#+begin_src gretl :eval no
 series edad3 = edad^3
 ols peso const edad edad2 edad3
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
+outfile --quiet modeloCubico.txt
+    <<ModeloCubicoPesoEdad>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-C-peso-edad/modeloCubico.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: GraficoCubicoPesoEdad
+#+begin_src gretl :eval no
 gnuplot peso edad --fit=cubic --output="peso_edad_cubico.png"
 #+end_src
 #+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-C-peso-edad.inp :eval no :exports none :noweb yes
+<<GraficoCubicoPesoEdad>>
+#+end_src
 
 #+BEGIN_EXPORT latex
 \begin{figure}[H]
@@ -243,7 +313,7 @@ gnuplot peso edad --fit=cubic --output="peso_edad_cubico.png"
 
 * Actividad 5 - Los tres modelos, uno al lado del otro
 
-Tres =ols= con =--quiet=; tras cada uno, un escalar con $\bar R^2$ calculado como en la práctica B (=$rsq=, =$nobs=, =$ncoeff=) y un =printf= con los dos índices.
+Tres =ols= con =--quiet=; tras cada uno, un escalar con $\bar R^2$ calculado como en la práctica B ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-B-hprice2-r2ajustado.pdf#page=5][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-B-hprice2-r2ajustado.html#r2-ajustado][html]])) (=$rsq=, =$nobs=, =$ncoeff=) y un =printf= con los dos índices.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -383,7 +453,7 @@ En los tres modelos de esta práctica hay una única /variable explicativa/: la 
 
 * Respuestas
 
-1. ¿Por qué crecen $R^2$ y $\bar R^2$ sin excepción aquí, si $\bar R^2$ en general puede bajar? La propiedad de la lección 8 (``$R^2$ nunca baja'') es universal: se cumple siempre. La de $\bar R^2$ (``puede bajar'') es solo una posibilidad, no una certeza: baja únicamente cuando el regresor añadido aporta muy poco a la reducción de SRC. En este ejemplo concreto, con solo 8 observaciones y una relación no lineal genuina entre peso y edad, cada potencia adicional de la edad reduce sustancialmente los residuos, lo suficiente como para que también $\bar R^2$ suba. Que $\bar R^2$ suba aquí no contradice que en otros casos (como pudo ocurrir con =radial= en la práctica anterior) pueda bajar: ambos comportamientos son compatibles con la misma fórmula.
+1. ¿Por qué crecen $R^2$ y $\bar R^2$ sin excepción aquí, si $\bar R^2$ en general puede bajar? La propiedad de la lección 8 (``$R^2$ nunca baja'') es universal: se cumple siempre. La de $\bar R^2$ (``puede bajar'') es solo una posibilidad, no una certeza: baja únicamente cuando el regresor añadido aporta muy poco a la reducción de SRC. En este ejemplo concreto, con solo 8 observaciones y una relación no lineal genuina entre peso y edad, cada potencia adicional de la edad reduce sustancialmente los residuos, lo suficiente como para que también $\bar R^2$ suba. Que $\bar R^2$ suba aquí no contradice que en otros casos (como ocurrió con =radial= en la práctica B de esta sesión, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-B-hprice2-r2ajustado.pdf#page=5][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-B-hprice2-r2ajustado.html#r2-ajustado][html]])) pueda bajar: ambos comportamientos son compatibles con la misma fórmula.
 
 2. ¿Qué modelo elegiría solo con $\bar R^2$, y después de la Actividad 6? Mirando únicamente la tabla de la Actividad 5, la elección ``mecánica'' sería el Modelo 3, por tener el $\bar R^2$ más alto. Sin embargo, tras la Actividad 6, esa elección se revela problemática: un modelo que predice pérdida de peso con la edad, para niños en pleno crecimiento, no es creíble. Ahora bien, la Actividad 6 muestra algo más grave que eso: el Modelo 2 /tampoco es aceptable/. Su parábola también gira, a los 16,0 años, y también predice pérdida de peso a partir de ahí; solo lo hace más tarde que la cúbica, lo suficiente para pasar inadvertido si se extrapola poco. El único de los tres sin punto de giro es el Modelo 1, que es precisamente el de menor $\bar R^2$. Dicho de otro modo: en este ejemplo, el orden de los modelos según $\bar R^2$ es el orden inverso de su credibilidad, y la elección razonable, la recta, es la que el criterio mecánico coloca en último lugar.
 
@@ -391,4 +461,4 @@ En los tres modelos de esta práctica hay una única /variable explicativa/: la 
 
 4. ¿Por qué edad, edad² y edad³ son tres regresores distintos de una sola variable? Porque un regresor, en el sentido técnico fijado en la lección 6, es cada vector concreto que multiplica a un coeficiente en la combinación lineal ajustada; edad, edad² y edad³ son tres vectores distintos de $\mathbb{R}^8$ (no son proporcionales entre sí), así que cuentan como tres regresores independientes a efectos del cálculo de $\boldsymbol{\mathop{\widehat{\beta}}}$, aunque los tres se calculen a partir de una sola magnitud medida (la edad) y respondan, en conjunto, a una única pregunta sustantiva: ``¿cómo varía el peso con la edad?''.
 
-5. ¿Es esto exclusivo de los polinomios? No: cualquier modelo, lineal o no en sus parámetros, puede producir predicciones absurdas si se extrapola suficientemente lejos del rango de datos con el que fue estimado. Los polinomios de grado alto son especialmente propensos a este problema porque su comportamiento fuera del rango muestral puede cambiar de forma muy brusca (curvaturas que crecen rápidamente hacia arriba o hacia abajo), pero el principio general, ``un modelo ajustado a un rango de datos no garantiza nada fuera de ese rango'', es válido para cualquier forma funcional, lineal o logarítmica incluida. Tampoco es exclusivo de modelos poco razonables; un modelo adecuado a un rango muestral, puede funcionar de manera insatisfactoria fuera del rango en el que se estimó. Por otra parte, la extrapolación a valores irreales tampoco tiene sentido (por ejemplo, piense si tiene sentido interpretar el valor estimado para la constante en el modelo del precio de la vivienda de la Práctica A de hoy... sería lo mismo que preguntarse qué precio tiene una vivienda cuya superficie es cero). 
+5. ¿Es esto exclusivo de los polinomios? No: cualquier modelo, lineal o no en sus parámetros, puede producir predicciones absurdas si se extrapola suficientemente lejos del rango de datos con el que fue estimado. Los polinomios de grado alto son especialmente propensos a este problema porque su comportamiento fuera del rango muestral puede cambiar de forma muy brusca (curvaturas que crecen rápidamente hacia arriba o hacia abajo), pero el principio general, ``un modelo ajustado a un rango de datos no garantiza nada fuera de ese rango'', es válido para cualquier forma funcional, lineal o logarítmica incluida. Tampoco es exclusivo de modelos poco razonables; un modelo adecuado a un rango muestral, puede funcionar de manera insatisfactoria fuera del rango en el que se estimó. Por otra parte, la extrapolación a valores irreales tampoco tiene sentido (por ejemplo, piense si tiene sentido interpretar el valor estimado para la constante en el modelo del precio de la vivienda de la práctica A de hoy, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#recta-sqft][html]]))... sería lo mismo que preguntarse qué precio tiene una vivienda cuya superficie es cero). 

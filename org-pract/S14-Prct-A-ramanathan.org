@@ -130,7 +130,7 @@ Además, siempre conviene examinar los estadísticos descriptivos principales de
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /en línea de comandos/:
   #+NAME: EtiquetasCastellano
-  #+begin_src gretl :tangle ./guiones/S14-Prct-A-ramanathan.inp :eval no
+  #+begin_src gretl :eval no
 setinfo price -d "Precio de la vivienda (miles de dólares)" -n "Precio (miles $)"
 setinfo sqft   -d "Superficie habitable (pies cuadrados)" -n "Superficie (sqft)"
 setinfo bedrms -d "Número de dormitorios" -n "Dormitorios"
@@ -139,6 +139,16 @@ setinfo baths  -d "Número de cuartos de baño" -n "Baños"
 summary price sqft bedrms baths --simple
   #+end_src
   #+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-A-ramanathan.inp :eval no :exports none :noweb yes
+outfile --quiet resumen.txt
+    <<EtiquetasCastellano>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-A-ramanathan/resumen.txt example
+#+latex: }
 
 Son solo 14 observaciones: puede inspeccionarlas todas en una sola tabla con =print= y la opción =--byobs=, que muestra varias series en una tabla con una fila por observación (sesión 11):
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
@@ -161,6 +171,9 @@ end outfile
 Un conjunto de datos tan pequeño no es representativo de ningún mercado real, pero sirve como primer ejemplo de regresión múltiple.
 
 * Actividad 2 - Recordatorio: la regresión simple =price~sqft=
+:PROPERTIES:
+:CUSTOM_ID: recta-sqft
+:END:
 
 Antes de añadir regresores, recordamos el punto de partida: la regresión simple ya vista en la lección 6.
 
@@ -428,7 +441,7 @@ smpl full                       # recuperamos siempre la muestra completa
 #+end_src
 #+latex: }
 
-Una tabla con =printf=, como en la práctica C de la sesión 7: una fila por estimación, con el valor de =sqft= y el residuo de la vivienda excluida (=sqft[1]= y =resid[1]= son sus primeras componentes; =[12]= y =[14]=, la duodécima y la decimocuarta) y los dos coeficientes. =%5.0f= es un número sin decimales en cinco caracteres; =%10.4f=, cuatro decimales en diez.
+Una tabla con =printf=, como en la práctica C de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-C-momentos-no-bastan.pdf#page=5][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-C-momentos-no-bastan.html#estadisticos-adicionales][html]])): una fila por estimación, con el valor de =sqft= y el residuo de la vivienda excluida (=sqft[1]= y =resid[1]= son sus primeras componentes; =[12]= y =[14]=, la duodécima y la decimocuarta) y los dos coeficientes. =%5.0f= es un número sin decimales en cinco caracteres; =%8.2f=, dos decimales en ocho (el residuo); =%10.3f= y =%10.4f=, tres y cuatro decimales en diez (la constante y la pendiente).
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /y ahora los comparamos/:

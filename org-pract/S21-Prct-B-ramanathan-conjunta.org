@@ -108,13 +108,13 @@ Volvemos a =data4-1= de Ramanathan, el fichero de catorce viviendas de la [[http
 - =restrict --quiet= :: hace el contraste sin imprimir las estimaciones restringidas. Sirve cuando solo queremos el estadístico.
 - =$test= :: tras un contraste, el valor de su estadístico; aquí, el $F$ que =restrict= acaba de calcular. Guardarlo en un escalar permite compararlo con el valor crítico o pasarlo a =pvalue=.
 - Escalares en una restricción :: a la derecha del igual, en lugar de un número, puede ir el nombre de un escalar: =b[bedrms] = iL=.
-- =$vcv= :: la matriz de varianzas y covarianzas de los coeficientes del último modelo. Entre corchetes, =$vcv[3,4]=, se toma el elemento de la fila $3$ y la columna $4$: la covarianza entre el tercer y el cuarto coeficiente. Aparece en el guion completo de la Actividad 3.
+- =$vcv= :: la matriz de varianzas y covarianzas de los coeficientes del último modelo. Entre corchetes, =$vcv[3,4]=, se toma el elemento de la fila $3$ y la columna $4$: la covarianza entre el tercer y el cuarto coeficiente. Está en el bloque =Esquinas= de la Actividad 3.
 
 * Actividad 1 - El modelo completo y los regresores uno a uno
 
 Abra =data4-1= (//~Archivo -> Abrir archivo de datos -> Archivo de muestra~//, pestaña //~Ramanathan~//) y estime =price= sobre =sqft=, =bedrms= y =baths= con //~Modelo -> Mínimos cuadrados ordinarios~//. Después omita =baths=, y después también =bedrms=, anotando en cada paso el $t$ de lo que queda y la $\mathrm{SRC}$.
 
-Tres estimaciones seguidas con =ols=, sin =--quiet= para ver las tres tablas: el modelo completo, el modelo sin =baths= y el modelo con =sqft= solo. Cada =ols= sustituye al anterior como último modelo, así que los accesores se refieren siempre a la tabla que acaba de imprimirse. Tras la primera estimación se guardan tres escalares que harán falta en la Actividad 2: =SRC= (=$ess=), =df= (los grados de libertad, =$df=) y =s2=, la cuasivarianza =SRC/df=; tras la tercera, =SRCr=. El guion completo calcula además los $t$ como cociente de =$coeff= y =$stderr=.
+Tres estimaciones seguidas con =ols=, sin =--quiet= para ver las tres tablas: el modelo completo, el modelo sin =baths= y el modelo con =sqft= solo. Cada =ols= sustituye al anterior como último modelo, así que los accesores se refieren siempre a la tabla que acaba de imprimirse. Tras la primera estimación se guardan tres escalares que harán falta en la Actividad 2: =SRC= (=$ess=), =df= (los grados de libertad, =$df=) y =s2=, la cuasivarianza =SRC/df=; tras la tercera, =SRCr=. El =printf= imprime el valor crítico $t_c$ con esos grados de libertad, y la última línea, =corr bedrms baths=, la correlación entre los dos regresores.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -132,6 +132,7 @@ printf "t_c al 5%% (%d g.l.) = %.3f\n", df, critical(t, df, 0.025)
 ols price const sqft bedrms
 ols price const sqft
 scalar SRCr = $ess
+corr bedrms baths
 #+end_src
 #+latex: }
 
@@ -156,7 +157,7 @@ Fíjese también en =sqft=: su coeficiente pasa de $0{,}155$ a $0{,}139$ y su er
 
 Estime el $F$ de $H_0\!:\beta_{\text{bedrms}}=\beta_{\text{baths}}=0$ con las dos $\mathrm{SRC}$ que ya tiene, y compruébelo con =restrict= (//~Contrastes -> Restricciones lineales~// en la ventana del modelo completo).
 
-La primera línea construye el $F$ con $q=2$ a partir de los escalares =SRC=, =SRCr=, =s2= y =df= guardados en la actividad anterior. El =printf= imprime el $F$, el valor crítico y el valor $p$. Después se vuelve a estimar el modelo completo, porque =restrict= actúa sobre el último modelo estimado, y se imponen las dos restricciones.
+La primera línea construye el $F$ con $q=2$ a partir de los escalares =SRC=, =SRCr=, =s2= y =df= guardados en la actividad anterior. Dos =printf=: el primero imprime las dos $\mathrm{SRC}$ y el aumento; el segundo, el $F$, el valor crítico y el valor $p$. Después se vuelve a estimar el modelo completo, porque =restrict= actúa sobre el último modelo estimado, y se imponen las dos restricciones.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -185,7 +186,7 @@ end outfile
 
 *** Lo que debe observar
 
-$F=0{,}47$ con $F_c(2,10)=4{,}10$: quitar los dos regresores a la vez sube la $\mathrm{SRC}$ en $1573$, es decir, $787$ por cada una de las dos dimensiones que se quitan: menos de la mitad de lo que vale una dimensión de ruido, $\mathfrak s^2=1670$. Aquí los dos veredictos coinciden: uno a uno, no significativos; a la vez, tampoco. La práctica A de esta sesión terminó con el caso contrario ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S21-Prct-A-hprice2-restricciones.pdf#page=5][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S21-Prct-A-hprice2-restricciones.html#nox-lnox][html]])). La coincidencia de hoy ocurre porque los dos regresores solo comparten parte de su variación (correlación $0{,}53$).
+$F=0{,}47$ con $F_c(2,10)=4{,}10$: quitar los dos regresores a la vez sube la $\mathrm{SRC}$ en $1573$, es decir, $787$ por cada una de las dos dimensiones que se quitan: menos de la mitad de lo que vale una dimensión de ruido, $\mathfrak s^2=1670$. Aquí los dos veredictos coinciden: uno a uno, no significativos; a la vez, tampoco. La práctica A de esta sesión terminó con el caso contrario ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S21-Prct-A-hprice2-restricciones.pdf#page=5][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S21-Prct-A-hprice2-restricciones.html#nox-lnox][html]])). La coincidencia de hoy ocurre porque los dos regresores solo comparten parte de su variación (correlación $0{,}532$, la última línea de la salida de la Actividad 1).
 
 * Actividad 3 - El rectángulo y las esquinas
 :PROPERTIES:
@@ -285,11 +286,11 @@ La elipse está inclinada porque los dos estimadores están correlados: $-0{,}31
 
 * Respuestas
 
-1. /Qué cambia en el $t$ al quitar un regresor./ Numerador y denominador. El coeficiente de =bedrms= es una coordenada, y cambia porque cambia la base: pasa de $-21{,}6$ a $-23{,}9$ al quitar =baths=. El error estándar es $\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$ y cambia por dos vías: la parte propia de =bedrms= se alarga al no descontar lo que compartía con =baths=, y $\mathfrak s$ se recalcula con un grado de libertad más: el error estándar baja de $27{,}0$ a $24{,}6$. El efecto neto es pequeño, porque =bedrms= y =baths= comparten poco.
+1. /Qué cambia en el $t$ al quitar un regresor./ Numerador y denominador. El coeficiente de =bedrms= es una coordenada, y cambia porque cambia la base: pasa de $-21{,}6$ a $-23{,}9$ al quitar =baths=. El error estándar es $\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$ y cambia por dos vías: la parte propia de =bedrms= se alarga al no descontar lo que compartía con =baths=, y $\mathfrak s$ se recalcula con un grado de libertad más: el error estándar baja de $27{,}0$ a $24{,}6$. El efecto neto es pequeño, porque =bedrms= y =baths= solo comparten parte de su variación (correlación $0{,}532$).
 
 2. /Un $F$ menor que uno./ Por dimensión, el aumento de la $\mathrm{SRC}$ al imponer $H_0$ es menor que lo que aporta una dimensión de ruido. Bajo $H_0$ cierta, el numerador y el denominador del $F$ estiman lo mismo, $\sigma^2$, y el $F$ oscila en torno a $1$ (la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S21-Prct-C-distribucion-F.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S21-Prct-C-distribucion-F.html#bajo-h0][html]]) de la práctica C lo comprueba). Un $F$ de $0{,}47$ es de los que salen cuando $H_0$ es cierta, no de los que exigen explicación.
 
-3. /``No influye''./ No es correcto: el intervalo contiene valores tan distintos como $-80$ y $+30$ miles de dólares por dormitorio, y cualquiera de ellos es compatible con los datos. Lo que sí se puede decir es que, con la superficie ya en el modelo, catorce viviendas no permiten medir el efecto de un dormitorio adicional, y que ese efecto podría ser cero. No rechazar no es demostrar.
+3. /``No influye''./ No es correcto: el intervalo contiene valores tan distintos como $-80$ y $+30$ miles de dólares por dormitorio, y datos como estos no serían raros si el coeficiente valiese cualquiera de ellos. Lo que sí se puede decir es que, con la superficie ya en el modelo, catorce viviendas no permiten medir el efecto de un dormitorio adicional, y que ese efecto podría ser cero. No rechazar no es demostrar.
 
 4. /La elipse y los intervalos./ No son la misma región ni una es la sombra de la otra. Un par puede estar dentro de los dos intervalos y fuera de la elipse: las esquinas rechazadas de la Actividad 3. Y al revés: la elipse se extiende sobre cada eje hasta $\pm\sqrt{2F_c}\cdot\mathrm{ee}=\pm2{,}86\,\mathrm{ee}$, más allá del $\pm2{,}23\,\mathrm{ee}$ del intervalo, así que hay pares que el $F$ no rechaza aunque una de las coordenadas se salga de su intervalo, porque la otra compensa. El intervalo responde a una pregunta sobre un coeficiente; la elipse, a una pregunta sobre los dos a la vez.
 

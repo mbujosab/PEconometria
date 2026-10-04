@@ -110,9 +110,12 @@ Retomamos =hprice2=, ya usado en la práctica de regresión simple con datos rea
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
-#+NAME: ReaperturaEtiquetas
-#+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no
+#+NAME: Reapertura
+#+begin_src gretl :eval no
 open hprice2.gdt --quiet
+#+end_src
+#+NAME: EtiquetasResumen
+#+begin_src gretl :eval no
 setinfo price   -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
 setinfo rooms   -d "Número medio de habitaciones" -n "Habitaciones"
 setinfo nox     -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
@@ -120,6 +123,17 @@ setinfo stratio -d "Ratio alumnos/profesor en la zona" -n "Ratio alumnos/profeso
 
 summary price rooms nox stratio
 #+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
+<<Reapertura>>
+outfile --quiet resumen.txt
+    <<EtiquetasResumen>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S14-Prct-B-hprice2-r2ajustado/resumen.txt example
 #+latex: }
 
 #+latex: {\vspace{3pt} \footnotesize \color{gray!70!black}
@@ -148,8 +162,6 @@ corr rooms nox
 #+end_src
 #+latex: }
 
-/Lo que debe observar/: compare $\hat\beta_{\text{rooms}}$ en =price~rooms= frente a =price~rooms+nox=, y $\hat\beta_{\text{nox}}$ en =price~nox= frente a =price~rooms+nox=. 
-
 #+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
 outfile --quiet Ols_rooms_nox_simple_y_conjunto.txt
     <<OlsRoomsNoxSimplesYConjunto>>
@@ -160,12 +172,14 @@ end outfile
 #+include: ./S14-Prct-B-hprice2-r2ajustado/Ols_rooms_nox_simple_y_conjunto.txt example
 #+latex: }
 
+/Lo que debe observar/: compare $\hat\beta_{\text{rooms}}$ en =price~rooms= frente a =price~rooms+nox=, y $\hat\beta_{\text{nox}}$ en =price~nox= frente a =price~rooms+nox=.
+
 Aquí conviene mirar los dos coeficientes por separado, porque no cambian igual:
 
 - =rooms= apenas cambia: pasa de $9119{,}55$ a $8178{,}56$, un descenso de aproximadamente el $10\%$.
 - =nox=, en cambio, se reduce /casi a la mitad/: de $-3386{,}85$ a $-1884{,}68$.
 
-Es decir, el mismo par de regresores, estimado conjuntamente, apenas altera un coeficiente y modifica sustancialmente el otro. Conviene no explicarlo únicamente por la correlación entre ambos: la correlación que acaba de imprimir el guion es $-0{,}3028$, /menor/ en valor absoluto que el $+0{,}4647$ entre =sqft= y =bedrms= de la práctica de Ramanathan, y sin embargo aquí uno de los dos desplazamientos es mucho mayor.
+Es decir, el mismo par de regresores, estimado conjuntamente, apenas altera un coeficiente y modifica sustancialmente el otro. Conviene no explicarlo únicamente por la correlación entre ambos: la correlación que acaba de imprimir el guion es $-0{,}3028$, /menor/ en valor absoluto que el $+0{,}4647$ entre =sqft= y =bedrms= de la práctica de Ramanathan ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms][html]])), y sin embargo aquí uno de los dos desplazamientos es mucho mayor.
 
 La razón es que el desplazamiento del coeficiente de $\boldsymbol{x}_2$ al añadir $\boldsymbol{x}_3$ no depende solo de cuán correlacionados estén, sino del producto
 \[
@@ -173,7 +187,7 @@ La razón es que el desplazamiento del coeficiente de $\boldsymbol{x}_2$ al aña
 \]
 donde interviene también la /magnitud/ del coeficiente del regresor añadido y la escala de cada variable. La correlación indica si habrá desplazamiento; no indica cuánto.
 
-Fíjese que $R^2$ no es la suma de los dos $R^2$ simples: $0{,}4841+0{,}1815=0{,}666$ frente a $0{,}535$, porque =rooms= y =nox= no son ortogonales (lección 10).
+Fíjese que $R^2$ no es la suma de los dos $R^2$ simples: $0{,}4841+0{,}1815=0{,}666$ frente a $0{,}535$, porque sus vectores en desviaciones no son ortogonales (correlación $-0{,}30$; lección 10).
 
 * Actividad 3 - Un tercer regresor: stratio
 :PROPERTIES:
@@ -184,6 +198,8 @@ Añadimos el ratio alumnos/profesor de la zona, una variable que cabe esperar re
 
 Un regresor más en la lista de =ols=.
 
+/Antes de mirar el resultado/: ¿qué signo espera para el coeficiente de =stratio=?
+
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: OlsConStratio
@@ -191,8 +207,6 @@ Un regresor más en la lista de =ols=.
 ols price const rooms nox stratio
 #+end_src
 #+latex: }
-
-/Antes de mirar el resultado/: ¿qué signo espera para el coeficiente de =stratio=?
 
 #+begin_src gretl :tangle ./guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
 outfile --quiet Ols_multiple_con_stratio.txt
@@ -287,13 +301,13 @@ printf "  R2 ajustado = %.4f\n", Rbarsq
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S14-Prct-B-hprice2-r2ajustado.inp :eval no :exports none :noweb yes
-outfile --quiet r2AjustadoCuatroModelos.txt
+outfile --quiet r2AjustadoTresModelos.txt
     <<R2AjustadoTresModelos>>
 end outfile
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S14-Prct-B-hprice2-r2ajustado/r2AjustadoCuatroModelos.txt example
+#+include: ./S14-Prct-B-hprice2-r2ajustado/r2AjustadoTresModelos.txt example
 #+latex: }
 
 Lea la salida en dos pasos, porque contiene los dos comportamientos posibles.
@@ -320,7 +334,7 @@ Recordemos (lección 8) que $R^2=1-\mathrm{SRC}/\mathrm{STC}$, con $\mathrm{STC}
 \[
 \bar R^2 \;=\; 1-\frac{\mathrm{SRC}/(n-k)}{\mathrm{STC}/(n-1)},
 \]
-donde $k$ es el número /total/ de regresores del modelo (incluida la constante; convención fijada en la lección 10) y $n-k$ son los grados de libertad de los residuos ($k$ parámetros ``beta'' estimados). El denominador $\mathrm{STC}/(n-1)$ es la cuasivarianza de $\boldsymbol{y}$: el estimador insesgado de la varianza de la variable $Y$ del modelo teórico.[fn::La propiedad de /insesgadez/ que ya conoce del curso de estadística y probabilidad, y que abordaremos en la próxima lección teórica.] El numerador $\mathrm{SRC}/(n-k)$ es la cuasivarianza de $\boldsymbol{\mathop{\widehat{e}}}$: el estimador insesgado de la varianza de las perturbaciones $U$ del modelo teórico.
+donde $k$ es el número /total/ de regresores del modelo (incluida la constante; convención fijada en la lección 10) y $n-k$ son los grados de libertad de los residuos ($k$ parámetros ``beta'' estimados). El denominador $\mathrm{STC}/(n-1)$ es la cuasivarianza de $\boldsymbol{y}$: el valor, sobre estos datos, del estimador insesgado de la varianza de la variable $Y$ del modelo teórico.[fn::La propiedad de /insesgadez/ que ya conoce del curso de estadística y probabilidad, y que abordaremos en la próxima lección teórica.] El numerador $\mathrm{SRC}/(n-k)$ es la cuasivarianza de $\boldsymbol{\mathop{\widehat{e}}}$: el valor, sobre estos datos, del estimador insesgado de la varianza de las perturbaciones $U$ del modelo teórico.
 
 Conviene no pasar por alto que numerador y denominador estiman /dos cosas distintas/: el numerador, la dispersión de las perturbaciones alrededor de la recta; el denominador, la dispersión total de $Y$ alrededor de su media. $\bar R^2$ no es, por tanto, el cociente de dos estimaciones de la misma cantidad, sino, igual que $R^2$, una comparación entre lo que queda sin explicar y lo que había que explicar, esta vez con cada suma de cuadrados dividida por sus propios grados de libertad.
 
@@ -368,7 +382,7 @@ end outfile
 
 * Preguntas de interpretación para la clase
 
-1. ¿Por qué los coeficientes de =rooms= y =nox= cambian de forma tan desigual entre el modelo simple y el múltiple (el de =rooms= apenas, el de =nox= casi a la mitad), si su correlación es menor que la de =sqft= y =bedrms= en la práctica de Ramanathan?
+1. ¿Por qué los coeficientes de =rooms= y =nox= cambian de forma tan desigual entre el modelo simple y el múltiple (el de =rooms= apenas, el de =nox= casi a la mitad), si su correlación es menor que la de =sqft= y =bedrms= en la práctica de Ramanathan ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms][html]]))?
 2. ¿Cómo interpreta el signo obtenido para =stratio=? ¿Es coherente con lo que cabría esperar económicamente?
 3. Explique, sin usar la fórmula, por qué $R^2$ no puede bajar nunca al añadir un regresor, mientras que $\bar R^2$ sí puede hacerlo.
 4. Si al añadir =stratio= el $R^2$ ajustado hubiera bajado ligeramente, ¿qué le diría eso sobre el aporte de esa variable al modelo?

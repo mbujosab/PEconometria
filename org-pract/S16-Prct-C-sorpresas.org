@@ -95,19 +95,19 @@ set verbose off
 
 Cerramos la sesión con tres experimentos que responden a dos preguntas.
 
-La primera se planteó al final de la práctica A: el histograma de $\hat\beta_2$ tenía forma de campana, y dijimos que no debíamos sacar conclusiones de ello porque habíamos /impuesto/ esa forma al generar las perturbaciones con una normal. Ahora lo comprobamos: ¿qué ocurre si las generamos con distribuciones muy alejadas de la normal?
+La primera se planteó al final de la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=6][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#histograma-b2][html]])): el histograma de $\hat\beta_2$ tenía forma de campana, y dijimos que no debíamos sacar conclusiones de ello porque habíamos /impuesto/ esa forma al generar las perturbaciones con una normal. Ahora lo comprobamos: ¿qué ocurre si las generamos con distribuciones muy alejadas de la normal?
 
-La segunda es más antigua. En el ejemplo de juguete de la lección 7, aquel $\boldsymbol u=(1,-2,0,2,-1)$, MCO recuperaba los coeficientes verdaderos /exactamente/, y advertimos que era una casualidad de diseño. La lección 11 explicó por qué: porque $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$, y aquel $\boldsymbol u$ estaba construido para que el segundo término se anulase. Vamos a fabricar esa casualidad a propósito, miles de veces seguidas, y ver qué le ocurre al histograma.
+La segunda es más antigua. En el ejemplo de juguete de la lección 7, aquel $\boldsymbol u=(1,-2,0,2,-1)$, MCO recuperaba los coeficientes verdaderos /exactamente/, y advertimos que era una casualidad de diseño. La lección 11 explicó por qué: porque $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$, y aquel $\boldsymbol u$ estaba construido para que ese segundo término, evaluado sobre los datos ($\sum_iw_iu_i$), se anulase. Vamos a fabricar esa casualidad a propósito, miles de veces seguidas, y ver qué le ocurre al histograma.
 
 /Objetivos/
 
 1. Comprobar que la insesgadez y la fórmula de la varianza se cumplen con perturbaciones uniformes y con perturbaciones muy asimétricas, igual que con perturbaciones normales.
 2. Entender por qué eso tenía que ocurrir: repasar la demostración de la lección 11 y localizar en qué paso se usa la distribución de $U$ (en ninguno).
 3. Ver que la /forma/ de la distribución de $\hat\beta_2$, en cambio, sí depende de la distribución de $U$, y averiguar qué papel juegan, además, el tamaño muestral y el /diseño del regresor/, separando un efecto del otro.
-4. Forzar a la muestra de perturbaciones a cumplir los supuestos de forma /exacta/, no solo en esperanza, y observar el resultado.
+4. Forzar a la muestra de perturbaciones a ser /exactamente/ ortogonal al regresor, no solo en esperanza, y observar el resultado.
 5. Dejar planteada, con datos delante, la pregunta que abre la lección 12.
 
-/Comandos nuevos de esta práctica/. Seguimos con el aparato de las prácticas A y B: mundo artificial, =loop --progressive=, =store=, apertura del fichero de réplicas con =open "@workdir/…"= justo antes de cada bloque que calcula sobre ellas, y =smpl 12 --random=. Lo nuevo:
+/Comandos nuevos de esta práctica/. Seguimos con el aparato de las prácticas A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop][html]])) y B ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#doce-viviendas][html]])): mundo artificial, =loop --progressive=, =store=, apertura del fichero de réplicas con =open "@workdir/…"= justo antes de cada bloque que calcula sobre ellas, y =smpl 12 --random=. Lo nuevo:
 - =randgen(X, k)= :: serie de sorteos de una distribución chi-cuadrado con =k= grados de libertad; la letra del primer argumento indica la distribución (=X= es la chi-cuadrado).
 - =uniform(0,1)= reescalada :: =-a + 2*a*uniform(0,1)= convierte un sorteo uniforme en $[0,1]$ en uno uniforme en $[-a,a]$.
 - =series x = 6= y =x[1] = 14= :: la primera da el valor 6 a todas las observaciones; la segunda cambia solo la primera: =x[1]= es la observación número 1 de la serie =x=.
@@ -120,13 +120,13 @@ La segunda es más antigua. En el ejemplo de juguete de la lección 7, aquel $\b
 :CUSTOM_ID: tres-perturbaciones
 :END:
 
-Vamos a repetir el experimento de la práctica A tres veces en paralelo, cambiando únicamente cómo se sortea la perturbación. Las tres tendrán media cero y varianza $\sigma^2$; en todo lo demás son muy diferentes:
+Vamos a repetir el experimento de la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop][html]])) tres veces en paralelo, cambiando únicamente cómo se sortea la perturbación. Las tres tendrán media cero y varianza $\sigma^2$; en todo lo demás son muy diferentes:
 
 - /Normal/: la de la práctica A, simétrica y con colas ligeras.
 - /Uniforme/: simétrica también, pero sin colas en absoluto; todos los valores de un intervalo son igual de probables. Para que su varianza sea $\sigma^2$ hay que tomar el intervalo $[-\sigma\sqrt3,\;\sigma\sqrt3]$.
 - /Chi-cuadrado centrada/: marcadamente /asimétrica/. Una $\chi^2$ con 4 grados de libertad tiene media 4 y varianza 8; restándole su media y dividiendo por $\sqrt8$ queda con media cero y varianza uno, y basta multiplicar por $\sigma$.
 
-Un solo bucle que hace tres experimentos por vuelta. Antes del bucle: el mundo artificial de la práctica A y =a_unif=, la semiamplitud del intervalo de la uniforme. Dentro, tres perturbaciones: la normal, como en la práctica A; la uniforme, =-a_unif + 2*a_unif*uniform(0,1)=, un sorteo en $[0,1]$ reescalado al intervalo $[-a,a]$; y la chi-cuadrado, =randgen(X,4)=, a la que se resta su media $4$, se divide por su desviación típica $\sqrt8$ y se multiplica por =sigma=. Cada perturbación da su regresando, su regresión y su coeficiente, y =store= guarda los tres por réplica en =repC.gdt=.
+Un solo bucle que hace tres experimentos por vuelta. Antes del bucle: el mundo artificial de la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#mundo-artificial][html]])) y =a_unif=, la semiamplitud del intervalo de la uniforme. Dentro, tres perturbaciones: la normal, como en la práctica A; la uniforme, =-a_unif + 2*a_unif*uniform(0,1)=, un sorteo en $[0,1]$ reescalado al intervalo $[-a,a]$; y la chi-cuadrado, =randgen(X,4)=, a la que se resta su media $4$, se divide por su desviación típica $\sqrt8$ y se multiplica por =sigma=. Cada perturbación da su regresando, su regresión y su coeficiente, y =store= guarda los tres por réplica en =repC.gdt=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -168,7 +168,7 @@ endloop
 <<BucleTresPerturbaciones>>
 #+end_src
 
-Los dos bloques siguientes imprimen la teoría, con los escalares aún disponibles, y después, tras abrir =repC.gdt=, la media y la varianza (divisor $n$) de las tres series de estimaciones. Los formatos =%10.2f= y =%12.2f= reservan campos de anchura fija para que las columnas queden alineadas.
+Los tres bloques siguientes imprimen la teoría, con los escalares aún disponibles; abren =repC.gdt= (=AbrirRepC=); e imprimen la media y la varianza (divisor $n$) de las tres series de estimaciones. Los formatos =%10.2f= y =%12.2f= reservan campos de anchura fija para que las columnas queden alineadas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /y ahora comparamos los tres casos con lo que predice la lección 11/:
@@ -233,7 +233,7 @@ En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su media
 :CUSTOM_ID: forma
 :END:
 
-Que la media y la varianza no dependan de la distribución de $U$ no significa que /nada/ dependa de ella. Veamos los histogramas. =freq b_chi --normal= dibuja, como en la práctica A, el histograma de las estimaciones obtenidas con perturbación chi-cuadrado, con la normal superpuesta y el contraste de normalidad.
+Que la media y la varianza no dependan de la distribución de $U$ no significa que /nada/ dependa de ella. Veamos los histogramas. =freq b_chi --normal= dibuja, como en la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=6][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#histograma-b2][html]])), el histograma de las estimaciones obtenidas con perturbación chi-cuadrado, con la normal superpuesta y el contraste de normalidad.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -243,9 +243,16 @@ freq b_chi --normal
 #+end_src
 #+latex: }
 
-#+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none
+#+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
+outfile --quiet histChiGrande.txt
+    <<HistogramaChiGrande>>
+end outfile
 freq b_chi --normal --plot="@workdir/hist_chi_grande.png"
 #+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-C-sorpresas/histChiGrande.txt example
+#+latex: }
 
 #+attr_latex: :width 0.7\textwidth
 #+attr_html: :width 560px
@@ -256,7 +263,7 @@ Con las 506 observaciones de =hprice2=, el histograma de $\hat\beta_2$ sigue par
 
 Antes de sacar conclusiones, probemos con una muestra pequeña y una asimetría mayor: doce viviendas y perturbaciones $\chi^2$ con /un/ grado de libertad.
 
-Tres bloques. El primero reabre =hprice2=, recupera los parámetros y se queda con doce viviendas: con =set seed 160= y =smpl 12 --random=, las mismas doce de la práctica B. El segundo es el bucle: 4000 réplicas con una perturbación chi-cuadrado de un grado de libertad, centrada (se le resta su media, $1$) y reescalada (se divide por su desviación típica, $\sqrt2$, y se multiplica por =sigma=), guardando =b_peq=. El tercero, tras abrir =repCpeq.gdt=, calcula la media, la desviación típica y el coeficiente de asimetría escrito con sumas: la media de los cubos de las desviaciones dividida por el cubo de la desviación típica.
+Cuatro bloques, y un quinto para el histograma. El primero reabre =hprice2=, recupera los parámetros y se queda con doce viviendas: con =set seed 160= y =smpl 12 --random=, las mismas doce de la práctica B ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#doce-viviendas][html]])). El segundo es el bucle: 4000 réplicas con una perturbación chi-cuadrado de un grado de libertad, centrada (se le resta su media, $1$) y reescalada (se divide por su desviación típica, $\sqrt2$, y se multiplica por =sigma=), guardando =b_peq=. El tercero, =AbrirRepCpeq=, abre =repCpeq.gdt=, y el cuarto calcula la media, la desviación típica y el coeficiente de asimetría escrito con sumas: la media de los cubos de las desviaciones dividida por el cubo de la desviación típica. El quinto, =freq b_peq --normal=, dibuja el histograma e imprime la tabla de frecuencias y el contraste de normalidad.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -307,11 +314,28 @@ printf "  asimetria = %.3f\n", (sum((b_peq-m_p)^3)/$nobs)/s_p^3
 outfile --quiet chiPequeno.txt
     <<ChiPequenoResultado>>
 end outfile
-freq b_peq --normal --plot="@workdir/hist_chi_peq.png"
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
 #+include: ./S16-Prct-C-sorpresas/chiPequeno.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: HistogramaChiPequeno
+#+begin_src gretl :eval no
+freq b_peq --normal
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
+outfile --quiet histChiPequeno.txt
+    <<HistogramaChiPequeno>>
+end outfile
+freq b_peq --normal --plot="@workdir/hist_chi_peq.png"
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-C-sorpresas/histChiPequeno.txt example
 #+latex: }
 
 #+attr_latex: :width 0.7\textwidth
@@ -335,7 +359,7 @@ Hay dos causas posibles y todavía no las hemos separado. Cuando el histograma s
 
 Para separarlos hace falta cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y $\chi^2$ con un grado de libertad) con dos regresores: uno /equilibrado/ (las mismas doce viviendas reales de antes) y otro con una /observación dominante/, en el que once viviendas comparten el mismo valor y una toma un valor muy alejado de ellas.
 
-Tres bloques. El primero recupera las mismas doce viviendas y define los dos regresores: =x_eq= es una copia de =rooms=; =series x_pal = 6= da el valor 6 a las doce observaciones y =x_pal[1] = 14= cambia solo la primera. El segundo es un bucle de 8000 vueltas con dos perturbaciones por réplica, normal y chi-cuadrado de un grado de libertad, y cuatro regresiones, una por cada combinación de perturbación y regresor; =store= guarda los cuatro coeficientes en =repDD.gdt=. El tercero, tras abrir ese fichero, calcula la media y la desviación típica de cada serie y la tabla de asimetrías, con =%8.3f= para alinear las columnas.
+Cuatro bloques. El primero recupera las mismas doce viviendas y define los dos regresores: =x_eq= es una copia de =rooms=; =series x_pal = 6= da el valor 6 a las doce observaciones y =x_pal[1] = 14= cambia solo la primera. El segundo es un bucle de 8000 vueltas con dos perturbaciones por réplica, normal y chi-cuadrado de un grado de libertad, y cuatro regresiones, una por cada combinación de perturbación y regresor; =store= guarda los cuatro coeficientes en =repDD.gdt=. El tercero, =AbrirRepDD=, abre ese fichero, y el cuarto calcula la media y la desviación típica de cada serie y la tabla de asimetrías, con =%8.3f= para alinear las columnas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -410,8 +434,6 @@ printf "perturbacion CHI2(1)               %8.3f               %8.3f\n", (sum((e
 outfile --quiet dosPorDos.txt
     <<DosPorDosResultado>>
 end outfile
-freq pal_nor --normal --plot="@workdir/hist_pal_nor.png"
-freq pal_chi --normal --plot="@workdir/hist_pal_chi.png"
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -419,6 +441,26 @@ freq pal_chi --normal --plot="@workdir/hist_pal_chi.png"
 #+latex: }
 
 Y los dos histogramas de la columna de la derecha, los dos con el regresor de observación dominante, que es donde cabría esperar la asimetría:
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: HistogramasPalanca
+#+begin_src gretl :eval no
+freq pal_nor --normal
+freq pal_chi --normal
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-C-sorpresas.inp :eval no :exports none :noweb yes
+outfile --quiet histPalanca.txt
+    <<HistogramasPalanca>>
+end outfile
+freq pal_nor --normal --plot="@workdir/hist_pal_nor.png"
+freq pal_chi --normal --plot="@workdir/hist_pal_chi.png"
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-C-sorpresas/histPalanca.txt example
+#+latex: }
 
 #+attr_latex: :width 0.62\textwidth
 #+attr_html: :width 520px
@@ -449,7 +491,7 @@ Que el regresor no pueda crearla se ve en la fórmula de la lección 11. En esto
 \]
 es, ahora sí, una auténtica /combinación lineal/ de las perturbaciones, con coeficientes que son números.[fn::Conviene no generalizar este paso. En la lección 11 el regresor es aleatorio, los pesos $W_i$ son variables aleatorias, y no se convierten en números por condicionar en $\boldsymbol X$: lo que autoriza allí a sacarlos fuera de la esperanza es el Lema. Aquí el paso es legítimo por otro motivo: el regresor está fijado de antemano, así que los $w_i$ son números desde el principio.] Si esas perturbaciones son normales, cualquier combinación lineal suya vuelve a ser normal, sean cuales sean los pesos. Por eso la fila de arriba es prácticamente nula: el diseño del regresor no puede introducir asimetría.
 
-Lo que el regresor sí controla es /cuánta/ de la asimetría de $U$ llega al resultado. Con pesos repartidos, la suma mezcla muchas perturbaciones y sus asimetrías se compensan; con un peso que domina a los demás, $\hat\beta_2\approx\beta_2+W_1U_1$ y el estimador reproduce casi exactamente la forma de una sola perturbación.
+Lo que el regresor sí controla es /cuánta/ de la asimetría de $U$ llega al resultado. Con pesos repartidos, la suma mezcla muchas perturbaciones y sus asimetrías se compensan; con un peso que domina a los demás, $\hat\beta_2\approx\beta_2\,\mathit1+w_1U_1$ (fijado el regresor, el peso es el número $w_1$) y el estimador reproduce casi exactamente la forma de una sola perturbación.
 
 *** Recapitulando las dos preguntas
 
@@ -471,7 +513,7 @@ Tanto los supuestos del modelo como el corolario de la exogeneidad se enuncian /
 
 ¿Y si lo forzáramos? Podemos construir un vector de perturbaciones a medida: se sortea al azar, se le quita su proyección sobre los regresores, con lo que queda /exactamente/ ortogonal a $\boldsymbol 1$ y a $\boldsymbol x$, y se reescala para que su varianza sea exactamente $\sigma^2$. El truco es el mismo que usamos en el ejemplo de juguete de la lección 7, ahora automatizado.
 
-Antes del bucle, el mundo artificial. En cada vuelta: =u0= es un sorteo normal estándar; =ols u0 const rooms --quiet= lo regresa sobre la constante y el regresor, y =$uhat= devuelve el residuo de esa regresión, que por construcción es ortogonal a $\boldsymbol 1$ y a =rooms=; la línea siguiente divide ese residuo por su norma estadística, $\sqrt{\sum_i u_i^2/n}$, y lo multiplica por =sigma=, con lo que su varianza con divisor $n$ es exactamente $\sigma^2$. Con esa perturbación se construye =y_e=, se estima y se guarda =b_exa=. Los dos bloques finales imprimen $\beta_2$ y, tras abrir =repExacta.gdt=, la media, la varianza y el recorrido (=min= y =max=) de las estimaciones.
+Antes del bucle, el mundo artificial. En cada vuelta: =u0= es un sorteo normal estándar; =ols u0 const rooms --quiet= lo regresa sobre la constante y el regresor, y =$uhat= devuelve el residuo de esa regresión, que por construcción es ortogonal a $\boldsymbol 1$ y a =rooms=; la línea siguiente divide ese residuo por su norma estadística, $\sqrt{\sum_i u_i^2/n}$, y lo multiplica por =sigma=, con lo que su varianza con divisor $n$ es exactamente $\sigma^2$. Con esa perturbación se construye =y_e=, se estima y se guarda =b_exa=. Los tres bloques finales imprimen $\beta_2$, abren =repExacta.gdt= (=AbrirRepExacta=) e imprimen la media, la varianza y el recorrido (=min= y =max=) de las estimaciones.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

@@ -109,15 +109,14 @@ Esta práctica /fabrica/ ese conjunto de muestras posibles. Inventamos un mundo 
 4. Comprobar que la media de las estimaciones se acerca a $\beta_2$ (insesgadez) y que su varianza se acerca a la fórmula de la lección 11.
 5. Ver el histograma de $\hat\beta_2$ y empezar a preguntarse por su /forma/, una pregunta que esta práctica deja sin responder a propósito.
 
-/Nota sobre el =loop=/. Ya hemos usado este comando varias veces, en la práctica de verificación geométrica de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html#tamano-distribucion][html]])), en la del cuarteto de Anscombe de la sesión 11 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-D-anscombe.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-D-anscombe.html#regresiones-anscombe][html]])) y en la del peso y la edad de la sesión 14 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-C-peso-edad.pdf#page=4][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-C-peso-edad.html#extrapolar][html]])), pero siempre como una ``caja negra'': servía para repetir un bloque varias veces, sin explicar su mecánica. Hoy explicamos esa mecánica.
+/Nota sobre el =loop=/. Ya hemos usado este comando varias veces, en la práctica de verificación geométrica de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html#tamano-distribucion][html]])), en la del cuarteto de Anscombe de la sesión 11 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-D-anscombe.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-D-anscombe.html#regresiones-anscombe][html]])) y en la del peso y la edad de la sesión 14 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-C-peso-edad.pdf#page=5][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-C-peso-edad.html#extrapolar][html]])), pero siempre como una ``caja negra'': servía para repetir un bloque varias veces, sin explicar su mecánica. Hoy explicamos esa mecánica.
 
-/Comandos nuevos de esta práctica/. Seguimos usando =open=, =ols= con la opción =--quiet= y los accesores =$coeff= y =$ess= (práctica A de la sesión 11, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#ejemplo-leccion-7][html]]), y práctica B de la sesión 14, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-B-hprice2-r2ajustado.pdf#page=5][apéndice]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-B-hprice2-r2ajustado.html#apendice-r2-ajustado][html]])), y =series=, =scalar=, =printf=, =normal= y =set seed= (sesión 7). Lo nuevo:
+/Comandos nuevos de esta práctica/. Seguimos usando =open=, =ols= con la opción =--quiet= y los accesores =$coeff= y =$ess= (práctica A de la sesión 11, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#ejemplo-leccion-7][html]]), y práctica B de la sesión 14, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-B-hprice2-r2ajustado.pdf#page=6][apéndice]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-B-hprice2-r2ajustado.html#apendice-r2-ajustado][html]])), y =series=, =scalar=, =printf= con el hueco =%d= para enteros, =normal= y =set seed= (sesión 7). Lo nuevo:
 - =$df= :: los grados de libertad del último modelo estimado, $n-k$. Actividad 1.
 - =loop R --progressive --quiet= … =endloop= :: repite =R= veces las instrucciones que van entre las dos líneas. Se explica en la Actividad 3.
 - =store "@workdir/fichero.gdt" a b= :: dentro de un bucle progresivo, guarda una fila por repetición con los escalares indicados. Actividad 3.
-- =open "@workdir/fichero.gdt"= :: abre ese fichero de réplicas como un conjunto de datos normal, en el que cada observación es una repetición. =@workdir= se sustituye por la ruta del directorio de trabajo de Gretl, de modo que el fichero se guarda y se vuelve a abrir en el mismo directorio. Cuando un bloque calcula sobre las réplicas, antes hay que haber abierto el fichero; en el guion completo del final se ve dónde va cada =open=.
+- =open "@workdir/fichero.gdt"= :: abre ese fichero de réplicas como un conjunto de datos normal, en el que cada observación es una repetición. =@workdir= se sustituye por la ruta del directorio de trabajo de Gretl, de modo que el fichero se guarda y se vuelve a abrir en el mismo directorio. Cuando un bloque calcula sobre las réplicas, antes hay que haber abierto el fichero; cada =open= está en su propio bloque, justo antes del bloque que calcula.
 - =freq x --normal= :: histograma con la densidad normal superpuesta y un contraste de normalidad. Actividad 5.
-- =%d= :: en =printf=, hueco para un número entero.
 - =matrix=, =invpd=, =mcov= :: solo en el Apéndice; las dos primeras se usaron en la práctica D de la sesión 14 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#matriz-regresores][html]])).
 
 
@@ -148,7 +147,7 @@ scalar var_teo = sigma^2 / Sxx          # formula de la leccion 11
 
 #+end_src
 
-El segundo bloque solo imprime esos escalares; =%d= es el hueco para un número entero.
+El segundo bloque solo imprime esos escalares; =%d= es el hueco para un número entero (sesión 7).
 
 #+NAME: ImprimirMundo
 #+begin_src gretl :eval no
@@ -177,12 +176,12 @@ end outfile
 
 En el código aparece un nombre que no hemos usado en ninguna lección teórica: =Sxx=. No es un concepto nuevo, solo una abreviatura cómoda para el denominador de la fórmula de la varianza:
 \[
-\mathrm{Sxx}\;=\;\sum_i(X_i-\overline{X})^2.
+\mathrm{Sxx}\;=\;\sum_i(x_i-\mu_{\boldsymbol x})^2.
 \]
 Conviene reconocerla en sus otras dos expresiones, que sí son del curso:
 
 - Es el /cuadrado de la norma euclídea del vector en desviaciones del regresor/, $\|\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\|_e^2$, la lectura geométrica que daba la nota a pie de página de la lección 11.
-- Y es $n$ veces la varianza del regresor con el convenio del curso: $\mathrm{Sxx}=n\,S^2$, con $S^2=\frac1n\sum_i(X_i-\overline{X})^2$. Por eso la fórmula de la lección 11 se puede escribir indistintamente $\sigma^2/\mathrm{Sxx}$ o $\sigma^2/(nS^2)$.
+- Y es $n$ veces la varianza del regresor con el convenio del curso: $\mathrm{Sxx}=n\,S^2$, con $S^2=\frac1n\sum_i(x_i-\mu_{\boldsymbol x})^2$. Es la fórmula de datos; evaluada sobre la muestra aleatoria del regresor es el $\sum_i(X_i-\overline X)^2$ de la lección 11, cuya fórmula se puede escribir por eso indistintamente $\sigma^2/\mathrm{Sxx}$ o $\sigma^2/(nS^2)$.
 
 La usamos aquí porque en un guion resulta más legible que cualquiera de las dos expresiones completas, pero no es notación del curso: fuera de estas prácticas, escriba $\sum_i(X_i-\overline{X})^2$ o $nS^2$.
 
@@ -376,6 +375,9 @@ Compare las dos salidas, línea por línea:
 
 
 * Actividad 5 - El histograma de $\hat\beta_2$
+:PROPERTIES:
+:CUSTOM_ID: histograma-b2
+:END:
 
 Tenemos 2000 estimaciones. Veamos cómo se reparten. =freq b2hat= dibuja el histograma de la serie (sesión 4). La opción =--normal= superpone la densidad de una normal con la misma media y la misma varianza que los datos, y añade el contraste de normalidad de Doornik y Hansen; en la consola, el gráfico se abre en una ventana.
 
@@ -419,7 +421,7 @@ Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol
 \]
 Podemos verificarla numéricamente con el mismo experimento, guardando también $\hat\beta_1$ y comparando la matriz de varianzas y covarianzas /empírica/ de las réplicas con la que predice la fórmula.
 
-Tres bloques. Al abrir el fichero de réplicas se perdieron los datos de =hprice2= y los escalares, así que el primero vuelve a abrirlo, reestima y recupera =sigma=. El segundo construye la matriz de datos con el comando =matrix= (práctica D de la sesión 14, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#matriz-regresores][html]])): ={const, rooms}= coloca las dos series como columnas, =X'X= es el producto de la traspuesta de =X= por =X=, =invpd= invierte una matriz simétrica definida positiva y =print Vteo= muestra el resultado. El tercero va precedido de la reapertura del fichero de réplicas; después, ={b1hat}~{b2hat}= forma una matriz de 2000 filas y dos columnas (el operador =~= yuxtapone dos matrices por columnas) y =mcov= calcula su matriz de varianzas y covarianzas tratando cada columna como una variable, con divisor $n-1$; con 2000 réplicas la diferencia con el divisor $n$ es despreciable.
+Cuatro bloques. Al abrir el fichero de réplicas se perdieron los datos de =hprice2= y los escalares, así que el primero vuelve a abrirlo, reestima y recupera =sigma=. El segundo construye la matriz de datos con el comando =matrix= (práctica D de la sesión 14, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#matriz-regresores][html]])): ={const, rooms}= coloca las dos series como columnas, =X'X= es el producto de la traspuesta de =X= por =X=, =invpd= invierte una matriz simétrica definida positiva y =print Vteo= muestra el resultado. El tercero, =ReabrirReplicasVCV=, vuelve a abrir el fichero de réplicas. En el cuarto, ={b1hat}~{b2hat}= forma una matriz de 2000 filas y dos columnas (el operador =~= yuxtapone dos matrices por columnas) y =mcov= calcula su matriz de varianzas y covarianzas tratando cada columna como una variable, con divisor $n-1$; con 2000 réplicas la diferencia con el divisor $n$ es despreciable.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:

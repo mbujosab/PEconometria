@@ -105,7 +105,7 @@ Los datos son =hprice1= de Wooldridge: ochenta y ocho viviendas unifamiliares co
 4. Sustituir =assess= por esa parte propia y comprobar qué cambia y qué no.
 5. Contrastar si las tasaciones son racionales y si, en media, están por encima o por debajo del precio.
 
-/Comandos nuevos de esta práctica/. No hay ninguno: =open= y =labels= (sesión 4), =summary --simple= y el comando =corr= (sesión 7), =ols= y sus accesores (sesiones 11 a 18), =list= y =series= con =$uhat= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=4][actividad 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#construir-ortogonal][html]]) de la práctica D de la sesión 14), =restrict= y =$test= (sesión 21) y =vif= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-B-hprice2-vif.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-B-hprice2-vif.html#comando-vif][html]]) de la práctica B de hoy).
+/Comandos nuevos de esta práctica/. No hay ninguno: =open= y =labels= (sesión 4), =summary --simple= y el comando =corr= (sesión 7), =ols= y sus accesores (sesiones 11 a 18), =series= con =$uhat= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=4][actividad 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#construir-ortogonal][html]]) de la práctica D de la sesión 14), =restrict= y =$test= (sesión 21) y =vif= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-B-hprice2-vif.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-B-hprice2-vif.html#comando-vif][html]]) de la práctica B de hoy).
 
 * Actividad 1 - Los datos y el modelo con la tasación
 
@@ -215,7 +215,7 @@ El ajuste sin la tasación es peor: $R^2=0{,}676$ y $\mathfrak s=59{,}9$, frente
 
 Estime la regresión auxiliar de =assess= sobre las cuatro características y guarde sus residuos como =otrosTasac=.
 
-La primera línea estima la regresión auxiliar y la segunda guarda sus residuos, =$uhat=, en la serie =otrosTasac= (en los menús, en la ventana de la regresión, //~Guardar -> Residuos~//). =corr= comprueba que la nueva serie no está correlada con ninguna característica.
+La primera línea estima la regresión auxiliar y la segunda guarda sus residuos, =$uhat=, en la serie =otrosTasac= (en los menús, en la ventana de la regresión, //~Guardar -> Residuos~//). El =printf= imprime la longitud de =assess= en desviaciones y la de =otrosTasac=. =corr= comprueba que la nueva serie no está correlada con ninguna característica.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -285,7 +285,7 @@ Los VIF están ahora entre $1{,}0$ y $1{,}6$. La regresión auxiliar no ha cread
 
 Contraste, sobre el modelo de la Actividad 1, que la tasación recoge toda la información de las características y que cada mil dólares de tasación son mil dólares de precio. Después mida la diferencia media entre precio y tasación.
 
-Wooldridge plantea la pregunta así: si la inmobiliaria tasa bien, una vez conocida la tasación las características no deberían añadir nada (sus cuatro coeficientes son cero) y el coeficiente de =assess= debería ser $1$. Son cinco restricciones a la vez, y el bloque =restrict= las contrasta con un $F$ de cinco grados de libertad en el numerador (sesión 21); =$test= recoge el estadístico y el primer =printf= lo imprime con su valor crítico y su valor $p$. La segunda parte define la serie =dif=, precio menos tasación, y la regresa sobre la constante: el coeficiente es la media de =dif= y su error estándar el de esa media, lo que permite contrastar que la diferencia media sea cero; el siguiente =printf= la expresa también como porcentaje del precio medio. Un segundo bloque =restrict= añade a las cinco la sexta restricción, constante nula, y el último =printf= imprime su $F$.
+Wooldridge plantea la pregunta así: si la inmobiliaria tasa bien, una vez conocida la tasación las características no deberían añadir nada (sus cuatro coeficientes son cero) y el coeficiente de =assess= debería ser $1$. El bloque =ContrasteRacional= estima el modelo de la Actividad 1 sin imprimir la tabla y guarda sus grados de libertad en =df=; un primer bloque =restrict= contrasta esas cinco restricciones a la vez, con un $F$ de cinco grados de libertad en el numerador (sesión 21), que =$test= recoge en =Frac=; un segundo bloque =restrict= añade la sexta restricción, constante nula, y guarda su $F$ en =Fseis=; la última línea define la serie =dif=, precio menos tasación. El bloque =DiferenciaMedia= imprime primero el $F$ de las cinco restricciones con su valor crítico y su valor $p$; después regresa =dif= sobre la constante (el coeficiente es la media de =dif= y su error estándar el de esa media, lo que permite contrastar que la diferencia media sea cero), y un =printf= expresa esa media también como porcentaje del precio medio; el último =printf= imprime el $F$ de las seis restricciones con su valor $p$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -336,7 +336,7 @@ end outfile
 
 El $F$ de las cinco restricciones es $1{,}15$, con un valor crítico de $2{,}33$ y un valor $p$ de $0{,}34$: datos como estos no serían raros si la tasación recogiera toda la información de las características y cada mil dólares de tasación fueran mil de precio. A la luz del contraste, el modelo con la tasación como único regresor y pendiente $1$ es una descripción aceptable de estos datos; es la versión de la lección 13 en la que la restricción no se rechaza y el modelo restringido es más simple y más preciso.
 
-La constante de ese modelo restringido es la diferencia media entre precio y tasación: $-22{,}2$ mil dólares, el $7{,}6\%$ del precio medio, con un error estándar de $4{,}7$ y un $t$ de $-4{,}8$. Datos como estos serían muy raros si precio y tasación coincidieran en media: en esta muestra las viviendas se venden, en media, por debajo de su tasación. Las dos conclusiones son compatibles: la tasación ordena bien las viviendas (un dólar más de tasación es un dólar más de precio esperado, y nada de lo que recoge el fichero añade información), pero su nivel está, en media, unos veintidós mil dólares por encima del precio de venta.
+La constante de ese modelo restringido es la diferencia media entre precio y tasación: $-22{,}2$ mil dólares, el $7{,}6\%$ del precio medio, con un error estándar de $4{,}7$ y un $t$ de $-4{,}8$. Datos como estos serían muy raros si precio y tasación coincidieran en media: en esta muestra las viviendas se venden, en media, por debajo de su tasación. Las dos conclusiones son compatibles: la tasación ordena bien las viviendas (a la luz del contraste, un dólar más de tasación va con un dólar más de precio esperado, sin que las características añadan información), pero su nivel está, en media, unos veintidós mil dólares por encima del precio de venta.
 
 * Preguntas de interpretación para la clase
 
@@ -346,7 +346,7 @@ La constante de ese modelo restringido es la diferencia media entre precio y tas
 4. ¿Qué modelo usaría para decidir cuánto vale, en el mercado, un pie cuadrado más de vivienda? ¿Y para predecir el precio de una vivienda de la que se conoce la tasación?
 5. Un comprador ve una vivienda tasada en cincuenta mil dólares más de lo que corresponde a sus características. ¿Qué dice el modelo de la Actividad 4 sobre su precio? ¿Qué no puede decir?
 6. Si en lugar de =assess= se sustituyera =sqrft= por su residuo sobre la tasación y las otras tres características, ¿qué coeficientes cambiarían? ¿Tendría esa asignación una justificación económica?
-7. En la Actividad 5, el contraste de racionalidad no rechaza y, a la vez, la diferencia media entre precio y tasación es claramente distinta de cero. ¿Hay contradicción? ¿Qué restricción adicional habría que añadir a las cinco para contrastar que la tasación es el precio salvo ruido?
+7. En la Actividad 5, el contraste de racionalidad no rechaza y, a la vez, el contraste rechaza que la diferencia media entre precio y tasación sea cero. ¿Hay contradicción? ¿Qué restricción adicional habría que añadir a las cinco para contrastar que la tasación es el precio salvo ruido?
 
 * Para profundizar
 
@@ -368,7 +368,7 @@ La constante de ese modelo restringido es la diferencia media entre precio y tas
 
 1. /El coeficiente de =sqrft= con la tasación./ No. El coeficiente mide la diferencia de precio, en el ajuste, entre dos viviendas con la misma tasación y las mismas otras características y distinta superficie. La inmobiliaria ya ha tenido en cuenta la superficie al tasar: dos viviendas con la misma tasación y distinta superficie difieren en otras cosas que compensan la superficie en la tasación, y la muestra no asocia a esa diferencia ningún precio adicional. La influencia de la superficie en el precio está en el modelo, pero pasa por la tasación.
 
-2. /Frente a =nox= y =lnox=./ Con =nox= y =lnox= el $F$ conjunto era grande y los $t$ pequeños: los dos regresores juntos mejoraban el ajuste, pero la muestra no permitía atribuir esa mejora a uno u otro. Aquí el $F$ de omitir las características también es pequeño: una vez incluida la tasación, las características apenas mejoran el ajuste, porque su información ya está en la tasación. El VIF moderado (4,5) confirma que el problema no es la precisión: es que la pregunta ``efecto a igual tasación'' tiene una respuesta próxima a cero.
+2. /Frente a =nox= y =lnox=./ Con =nox= y =lnox= el $F$ conjunto era grande y los $t$ pequeños: los dos regresores juntos mejoraban el ajuste, pero la muestra no permitía atribuir esa mejora a uno u otro. Aquí el $F$ de omitir las características también es pequeño: una vez incluida la tasación, las características apenas mejoran el ajuste, porque su información ya está en la tasación. El VIF moderado ($4{,}5$) confirma que el problema no es la precisión: es que la pregunta ``efecto a igual tasación'' tiene una respuesta próxima a cero.
 
 3. /Las coincidencias./ El coeficiente de un regresor en la regresión múltiple se calcula con su parte propia respecto a los demás. La parte propia de =assess= respecto a las características es =otrosTasac=, y la de =otrosTasac= es ella misma, porque ya es ortogonal a las características: mismo coeficiente y mismo error estándar. Las características, a su vez, son ortogonales a =otrosTasac=, y un regresor ortogonal no altera los coeficientes de los demás (familia ortogonal): los coeficientes son los de la Actividad 2. Los errores estándar difieren porque $\mathfrak s$ es menor.
 
