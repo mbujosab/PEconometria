@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-10-05 lun 16:38 -->
+<!-- 2026-10-05 lun 17:04 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Lección 9. El puente: de los datos a las variables aleatorias</title>
+<title>Lección 15. Formas funcionales con logaritmos: qué dice cada coeficiente</title>
 <meta name="author" content="Marcos Bujosa" />
-<meta name="description" content="Lección 9: el puente entre la geometría de los datos y las variables aleatorias. Esperanza condicional, perturbación y supuestos del modelo clásico de regresión." />
+<meta name="description" content="Lección 15: logaritmos en el regresando y en los regresores. Cambio absoluto, cambio porcentual y elasticidad; Cobb–Douglas; previsión en niveles desde un modelo en logaritmos." />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
   #content { max-width: 60em; margin: auto; }
@@ -247,280 +247,45 @@ $(function() {    $('.note').before("<p class='admonition-title note'>Note</p>")
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Lección 9. El puente: de los datos a las variables aleatorias</h1>
+<h1 class="title">Lección 15. Formas funcionales con logaritmos: qué dice cada coeficiente</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgd904d17">1. El puente epistemológico: entre Eros y los datos</a></li>
-<li><a href="#org44eb7de">2. Un vector es una función; y una variable aleatoria también</a></li>
-<li><a href="#orgb511f9c">3. El producto escalar de la probabilidad</a></li>
-<li><a href="#org6e2b326">4. La esperanza: dos caras de la misma moneda</a></li>
-<li><a href="#orge0887fc">5. Esperanza condicional: proyección sobre un espacio ENORME</a></li>
-<li><a href="#org118c2e5">6. El Modelo Clásico de Regresión Lineal (MCRL)</a></li>
-<li><a href="#org5a15228">7. Cuidado: Esta descomposición ortogonal no implica causalidad</a></li>
-<li><a href="#org0c26185">8. El salto: método de los momentos</a></li>
-<li><a href="#org172b9ea">9. Recapitulación y guiño a la lección siguiente</a></li>
-<li><a href="#orgb378c40">10. Preguntas de repaso (sesión 12)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
-<li><a href="#org81e6778">11. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#orge999bd8">1. De dónde venimos: <code>nox</code> y <code>lnox</code> eran dos formas funcionales</a></li>
+<li><a href="#org100476d">2. Variable explicativa y regresor: lineal en los regresores</a></li>
+<li><a href="#orgf8821c7">3. Cuatro formas, cuatro lecturas del coeficiente</a></li>
+<li><a href="#orgcbe14e7">4. Log-nivel: salarios y educación</a></li>
+<li><a href="#org748baea">5. Nivel-log y log-log: la contaminación</a></li>
+<li><a href="#orge532773">6. La elasticidad: una decisión del modelo</a></li>
+<li><a href="#org69d0560">7. Cobb–Douglas: elasticidades y rendimientos a escala</a></li>
+<li><a href="#org42f27d0">8. Previsión con y sin logaritmos</a></li>
+<li><a href="#org29ed309">9. Lo que cambia y lo que no</a></li>
+<li><a href="#orgb40ee8f">10. Recapitulación y guiño a la lección siguiente</a></li>
+<li><a href="#orga048fd1">11. Preguntas de repaso (sesión 23)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#orga575757">12. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
 </ul>
 </div>
 </div>
-<div class="abstract" id="org5578a11">
+<div class="abstract" id="org7e8f4c7">
 <p>
-``Ninguno de los dioses filosofa ni desea hacerse sabio, porque ya lo es [&#x2026;] Tampoco los ignorantes filosofan ni desean hacerse sabios [&#x2026;] Eros está en el medio de la sabiduría y de la ignorancia.'' (Platón, <i>El Banquete</i>, 203e–204a)
+Las lecciones 13 y 14 usaron <code>nox</code> y su logaritmo como dos regresores casi alineados. Hoy los leemos como dos formas funcionales de una misma variable explicativa. El modelo sigue siendo lineal en los regresores y la geometría del curso se aplica sin cambios; lo que cambia es qué significa cada coeficiente: un cambio absoluto, un cambio porcentual o una elasticidad. Cierran la función de producción de Cobb–Douglas y la previsión en niveles desde un modelo en logaritmos.
 </p>
 
 <p>
-La econometría habita en ese mismo espacio intermedio: entre la ignorancia absoluta y el conocimiento total de la población. Esta lección da el salto desde la geometría de las muestras (lo que vemos) al espacio de las variables aleatorias (el modelo subyacente que queremos inferir).
+<i>``La geometría opera sobre los regresores; la lectura, sobre las variables.''</i>
 </p>
 
 </div>
 
 <ul class="org-ul">
-<li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S12-Lecc09.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S12-Lecc09.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S12-Lecc09.pdf">pdf</a>)</li>
+<li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S23-Lecc15.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S23-Lecc15.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S23-Lecc15.pdf">pdf</a>)</li>
 </ul>
-<div id="outline-container-orgd904d17" class="outline-2">
-<h2 id="orgd904d17"><span class="section-number-2">1.</span> El puente epistemológico: entre Eros y los datos</h2>
+<div id="outline-container-orge999bd8" class="outline-2">
+<h2 id="orge999bd8"><span class="section-number-2">1.</span> De dónde venimos: <code>nox</code> y <code>lnox</code> eran dos formas funcionales</h2>
 <div class="outline-text-2" id="text-1">
-<blockquote>
 <p>
-``Ninguno de los dioses filosofa ni desea hacerse sabio, porque ya lo es [&#x2026;] Tampoco los ignorantes filosofan ni desean hacerse sabios [&#x2026;] Eros está en el medio de la sabiduría y de la ignorancia.'' 
-— Diotima a Sócrates (Platón, <i>El Banquete</i>)
-</p>
-</blockquote>
-<p>
-\(\mbox{ }\)
-</p>
-
-<ul class="org-ul">
-<li><i>El Dios</i>: Conoce toda la población (certeza absoluta). No necesita inferir nada.</li>
-<li><i>El Ignorante</i>: No tiene datos (\(n = 0\)). No puede afirmar nada.</li>
-<li><i>El Econometrista</i>: Como Eros, habita el espacio intermedio. Tiene una <i>muestra imperfecta</i> (\(n < N\)) y el <i>deseo de inferir</i> la estructura verdadera del mundo.</li>
-</ul>
-
-<p>
-Hasta ahora: <i>geometría exacta</i> sobre una muestra finita \(\boldsymbol{y} \in \mathbb{R}^n\).
-A partir de hoy: la muestra \(\boldsymbol{y}\) se concibe como <i>una realización particular</i> (una ``sombra sensible'') de un modelo abstracto superior: una <i>variable aleatoria</i> \(Y\).
-</p>
-
-<p>
-<i>Advertencia previa</i>: lo que sigue es una <b>analogía</b>, no una demostración. Y solo es válida para variables aleatorias con esperanza y varianza definidas, y no todas las tienen.
-</p>
-</div>
-<div id="outline-container-org3fd9a94" class="outline-4">
-<h4 id="org3fd9a94">El puente epistemológico: entre Eros y los datos</h4>
-<div class="outline-text-4" id="text-org3fd9a94">
-<p>
-Esta analogía platónica encierra el problema epistemológico de la econometría. En las primeras lecciones de este curso nos hemos dedicado a describir muestras: hemos calculado medias, varianzas y rectas de regresión para conjuntos de datos concretos (\(\boldsymbol{y} \in \mathbb{R}^n\)). En ese nivel, no había incertidumbre: si medimos la covarianza de nuestra muestra, el número que obtenemos es un hecho geométrico exacto. 
-</p>
-
-<p>
-Sin embargo, en economía y política rara vez nos interesa la muestra por sí misma. Si analizamos una muestra de 1000 salarios, no lo hacemos porque nos importen exclusivamente esos 1000 trabajadores concretos; lo hacemos porque queremos descubrir el mecanismo subyacente que determina los salarios en <i>toda la población</i> o en el <i>proceso de generación de salarios</i>. Queremos descubrir la idea abstracta detrás de los datos concretos.
-</p>
-
-<p>
-El dios que conociera el mecanismo exacto no necesitaría la estadística. El ignorante absoluto sin datos no podría aplicarla. El econometrista actúa en el medio: usa datos contingentes (la muestra) para aproximarse racionalmente al mecanismo subyacente (el modelo poblacional).
-</p>
-
-<p>
-Del vector de datos \(\boldsymbol y\in\mathbb{R}^n\) lo sabemos todo: cada \(y_i\), y con ellos \(\mu_{\boldsymbol y}\), \(\sigma_{\boldsymbol y}^2\) y cualquier otra cantidad. Pero ese conocimiento se limita a la muestra. Cuando aspiramos a decir algo sobre el salario o el precio de la vivienda ``en general'', no estamos en la posición del sabio, y tampoco en la del ignorante: tenemos una muestra, un vector concreto y una teoría económica que orienta la búsqueda. Estamos, como Eros, en el medio.
-</p>
-
-<p>
-La <i>variable aleatoria</i> es el objeto matemático que formaliza esa posición intermedia. 
-A partir de esta lección, el vector de datos \(\boldsymbol{y}\) deja de ser nuestro único objeto de estudio. Pasaremos a considerarlo una <i>realización</i> de una <i>variable aleatoria</i> \(Y\). Asumiremos que nuestros \(n\) datos son el resultado de observar la realización de \(n\) copias idénticas e independientes de esa variable \(Y\).<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> Conviene imaginarlo como una tabla con infinitas filas, una por copia, y una columna por cada suceso elemental: tomar una muestra es elegir \(n\) filas, y los datos observados son una columna. De dónde salen las copias, y por qué caben infinitas en un mismo \(\Omega\), lo explica el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice ``Estructura geométrica de la probabilidad y de la inferencia en el modelo de regresión''</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-2">html</a>) (secciones <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=7">2</a> y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=9">3</a>), que puede leer cuando quiera profundizar. Y la esperanza matemática \(\mathrm{E}(Y)\) no es, como veremos, algo que calculemos con exactitud a partir de una tabla de números: es un número teórico, generalmente desconocido, que solo podemos <i>inferir</i>, nunca poseer del todo, a partir de nuestra muestra. Esa es la posición del econometrista: no tiene la certeza del sabio (no conoce \(\mathrm{E}(Y)\)), pero tampoco actúa sin información, como el ignorante (tiene un vector de datos y un método, la geometría que hemos construido, para intentar acercarse a esa certeza inalcanzable).
-</p>
-
-<p>
-Al dar este paso, la intuición geométrica que hemos construido en \(\mathbb{R}^n\) no desaparece; todo lo que sigue en esta sesión es una <i>analogía</i>, deliberadamente construida en paralelo con la geometría de las lecciones 4 a 8, pero <i>no</i> es una demostración de que las variables aleatorias se comporten como los vectores de \(\mathbb{R}^n\). Hay claras diferencias y excepciones, que iremos señalando conforme aparezcan. 
-Y hay, además, una restricción teórica muy importante que conviene enunciar explícitamente desde el principio: no todas las variables aleatorias tienen esperanza matemática definida, y entre las que la tienen, no todas tienen varianza definida. Aquí trabajaremos exclusivamente con variables aleatorias con esperanza y varianza definidas, pues son solo estas las que permiten replicar la estructura geométrica de las lecciones anteriores.
-</p>
-
-<p>
-Para quien quiera ver hasta qué punto la intuición cotidiana sobre ``el valor esperado'' puede fallar cuando la esperanza no está bien definida, recomiendo el vídeo <a href="https://youtu.be/_NGPncypY68">``The Two Envelope Problem — a Mystifying Probability Paradox''</a>: un ejercicio mental sencillo de enunciar, y sorprendentemente difícil de resolver, porque la esperanza matemática involucrada no está bien definida.
-</p>
-
-<p>
-<i>Para profundizar</i>:
-</p>
-<ul class="org-ul">
-<li>Platón, <i>Banquete</i>, 203e–204a (discurso de Diotima sobre la naturaleza de Eros).</li>
-<li>Wooldridge, J. M. (2020), Apéndice B, secciones B.1–B.3: repaso de variable aleatoria, función de distribución y esperanza matemática desde la estadística clásica.</li>
-</ul>
-</div>
-</div>
-</div>
-<div id="outline-container-org44eb7de" class="outline-2">
-<h2 id="org44eb7de"><span class="section-number-2">2.</span> Un vector es una función; y una variable aleatoria también</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-Un vector \(\boldsymbol{y}\in\mathbb{R}^n\) (<span class="underline">lista ordenada de números</span>, lección 2) es literalmente una <i>función</i> que asigna un número a cada índice \(i\in\{1,\ldots,n\}\).
-</p>
-
-<p>
-Una <i>variable aleatoria</i> \(Y\) es también una función, pero definida sobre un conjunto \(\Omega\) (de ``sucesos elementales''), generalmente más grande y sin una descripción explícita.
-</p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-left" />
-
-<col  class="org-left" />
-</colgroup>
-<thead>
-<tr>
-<th scope="col" class="org-left">\(\mathbb{R}^n\)</th>
-<th scope="col" class="org-left">Variables aleatorias</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="org-left">dominio \(\{1,\ldots,n\}\)</td>
-<td class="org-left">dominio \(\Omega\)</td>
-</tr>
-
-<tr>
-<td class="org-left">\(\boldsymbol{y}(i)=y_i;\quad i\in\{1,\ldots,n\}\)</td>
-<td class="org-left">\(Y(\omega)=y;\quad \omega\in\Omega\)</td>
-</tr>
-
-<tr>
-<td class="org-left">vector = lista de \(n\) números</td>
-<td class="org-left">v.a. = función sobre \(\Omega\)</td>
-</tr>
-</tbody>
-</table>
-
-<p>
-Lo que <i>sobrevive</i> al cambio:
-</p>
-
-<p>
-La <i>combinación lineal</i> (lección 2) de variables aleatorias \(\beta_1\,\mathit{1}+\beta_2X\) sigue siendo una variable aleatoria, exactamente como \(\beta_1\boldsymbol{1}+\beta_2\boldsymbol{x}\) era un vector.
-</p>
-
-<p>
-<b>Nota</b>: \(\mathit{1}\) es la variable aleatoria constante que asigna \(1\) a todo suceso elemental de \(\Omega\).
-</p>
-</div>
-<div id="outline-container-orgea77036" class="outline-4">
-<h4 id="orgea77036">Un vector es una función; y una variable aleatoria también</h4>
-<div class="outline-text-4" id="text-orgea77036">
-<p>
-En la lección 2 definimos un vector \(\boldsymbol{y}=(y_1,\ldots,y_n)\) como una lista ordenada de números; pero esta definición nos permite afirmar que un vector de \(\mathbb{R}^n\) es, sencillamente, una <i>función</i> que asigna a cada índice \(i\), del conjunto \(\{1,2,\ldots,n\}\), un número real \(y_i\).
-</p>
-
-<p>
-Una <i>variable aleatoria</i> \(Y\) es, formalmente, el mismo tipo de objeto: una función que asigna un número real a cada elemento de un conjunto. La diferencia está en el dominio. En \(\mathbb{R}^n\), el dominio es el conjunto finito y perfectamente conocido \(\{1,\ldots,n\}\) (los índices de nuestras \(n\) observaciones). En el caso de una variable aleatoria, el dominio es un conjunto \(\Omega\), llamado convencionalmente ``espacio de sucesos elementales'', que puede ser enorme, incluso infinito, y cuyos elementos concretos casi nunca se describen (salvo en los cursos de probabilidad para presentar ejemplos triviales como el lanzamiento de un dado o una moneda). \(Y(\omega)\) denota el valor numérico que la variable aleatoria \(Y\) asigna al elemento \(\omega\in\Omega\). Como las variables aleatorias pueden sumarse y multiplicarse por escalares para obtener nuevas variables aleatorias, también forman un espacio vectorial (aunque ya no es el espacio \(\mathbb{R}^n\) de las primeras lecciones).
-</p>
-
-<p>
-Aquí aparece ya la primera diferencia real entre ambos mundos: mientras que en \(\mathbb{R}^n\) conocemos perfectamente el dominio (los índices \(1,\ldots,n\)), en el caso de las variables aleatorias casi nunca sabemos, ni necesitamos saber, qué es \(\Omega\). Cuando decimos ``el precio de una vivienda, \(P\), es una variable aleatoria'', no estamos pensando en un \(\Omega\) concreto con sucesos elementales identificables uno a uno; estamos usando la maquinaria matemática de las variables aleatorias para modelizar de manera abstracta nuestra incertidumbre sobre ese precio, sin necesidad de precisar más.
-</p>
-
-<p>
-Pese a esta diferencia importante, lo que sobrevive intacto a este cambio es lo que permite mantener la maquinaria que hemos usado hasta hoy: la <i>combinación lineal</i>, introducida ya en la lección 2. Del mismo modo que \(\beta_1\boldsymbol{1}+\beta_2\boldsymbol{x}\) era, en \(\mathbb{R}^n\), otro vector (obtenido sumando dos vectores tras multiplicarlos por escalares), la expresión \(\beta_1\,\mathit{1}+\beta_2X\) es otra variable aleatoria, donde \(X\) es una variable aleatoria y \(\mathit{1}\) denota la variable aleatoria <i>constante</i> igual a \(1\) para todo suceso<sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup>. Esta es la observación que permitirá, en unas transparencias, escribir el modelo de regresión \(Y=\beta_1\,\mathit{1}+\beta_2X+U\) con total naturalidad: es la misma operación algebraica de las lecciones anteriores, solo que ahora los objetos que combinamos ya no son listas de \(n\) números, sino funciones sobre un dominio \(\Omega\) (casi nunca especificado explícitamente).
-</p>
-
-<p>
-<i>Para profundizar</i>:
-</p>
-<ul class="org-ul">
-<li>Wooldridge, J. M. (2020), Apéndice B.3: propiedades de linealidad de la esperanza matemática.</li>
-</ul>
-</div>
-</div>
-</div>
-<div id="outline-container-orgb511f9c" class="outline-2">
-<h2 id="orgb511f9c"><span class="section-number-2">3.</span> El producto escalar de la probabilidad</h2>
-<div class="outline-text-2" id="text-3">
-<p>
-En \(\mathbb{R}^n\): \(\;\langle\boldsymbol{x},\boldsymbol{y}\rangle_s=\sum\limits_{j=1}^n\frac{x_jy_j}{n}\).
-</p>
-
-<p>
-Con variables aleatorias, el papel de \(\langle\cdot,\cdot\rangle_s\) lo juega la <i>esperanza del producto</i>:
-\[
-\langle X,Y\rangle_P \;=\; \mathrm{E}(XY).
-\]
-</p>
-
-<blockquote>
-<p>
-<i>Advertencia</i>: \(\langle\cdot,\cdot\rangle_P\) es solo un <i>semi</i>-producto escalar. \(\mathrm{E}(X^2)=\|X\|_P^2=0\) NO implica \(X=\mathit{0}\) (podría ser solo cero ``casi seguro''; no lo desarrollaremos).
-</p>
-</blockquote>
-<p>
-\(\mbox{ }\)
-</p>
-
-<p>
-<b>Nota</b>: \(\mathit{0}\) es la variable aleatoria constante que asigna \(0\) a todo suceso elemental de \(\Omega\).
-</p>
-
-<p>
-Pero Pitágoras, Cauchy–Schwarz y la desigualdad triangular (lección 3) solo exigían simetría, linealidad y positividad, <i>no</i> positividad estricta. Así que <i>siguen siendo válidos</i>, sin ninguna modificación.
-</p>
-</div>
-<div id="outline-container-orgdd9f35e" class="outline-4">
-<h4 id="orgdd9f35e">El producto escalar de la probabilidad</h4>
-<div class="outline-text-4" id="text-orgdd9f35e">
-<p>
-Toda la geometría que hemos construido desde la lección 3 (ortogonalidad, ángulos, Pitágoras, proyecciones) dependía de un único ingrediente: un producto escalar \(\langle\cdot,\cdot\rangle\) con tres propiedades abstractas (simetría, linealidad en cada argumento, positividad). En la lección 4 vimos que, para hacer estadística en \(\mathbb{R}^n\), se usa el producto escalar \(\langle\boldsymbol x,\boldsymbol y\rangle_s=\frac1n\langle\boldsymbol x,\boldsymbol y\rangle_e\), con el factor \(\frac1n\) elegido precisamente para que \(\|\boldsymbol 1\|_s=1\).
-</p>
-
-<p>
-Para dar el salto de hoy necesitamos el mismo tipo de ingrediente: un producto escalar entre variables aleatorias. La elección natural, y la que hace que todo el paralelismo funcione, es la <i>esperanza del producto</i>:
-\[
-\langle X,Y\rangle_P \;=\; \mathrm{E}(XY),
-\]
-donde \(XY\) denota el producto <i>punto a punto</i> de las dos funciones \(X\) y \(Y\), es decir, la función que a cada \(\omega\in\Omega\) le asigna \(X(\omega)Y(\omega)\). Es el análogo, en el mundo de las variables aleatorias, del producto componente a componente \(\boldsymbol x\odot\boldsymbol y\) que en la lección 7 usamos para escribir la ``fórmula de cálculo'' de la varianza y la covarianza. 
-Como en \(\mathbb{R}^n\), la norma asociada a este producto escalar se define del mismo modo: \(\|X\|_P=\sqrt{\langle X,X\rangle_P}=\sqrt{\mathrm{E}(X^2)}\).
-</p>
-
-<ul class="org-ul">
-<li>En cuanto a las propiedades relacionadas con la probabilidad, si denotamos con \(\mathit{1}\) la variable aleatoria constante 1 (aquella que asigna el valor 1 a todo suceso \(\omega\): \(\;\mathit{1}(\omega)=1\)), también ocurre que \(\|\mathit{1}\|_P=1\), puesto que \(\|\mathit{1}\|_P^2 = \langle \mathit{1},\mathit{1}\rangle_P \;=\; \mathrm{E}(\mathit{1}^2) = \mathrm{E}(\mathit{1}) = 1\).<sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup></li>
-
-<li><p>
-En cuanto a las propiedades relevantes que permiten replicar el esquema geométrico: \(\langle\cdot,\cdot\rangle_P\) hereda (aquí solo las enunciamos sin demostración alguna):
-</p>
-
-<ul class="org-ul">
-<li><i>Simetría</i>: \(\mathrm{E}(XY)=\mathrm{E}(YX)\), ya que, como el producto de números reales es conmutativo: \(X(\omega)Y(\omega)=Y(\omega)X(\omega)\).</li>
-<li><i>Linealidad</i>: \(\mathrm{E}\Big((aX+bZ)Y\Big)=a\mathrm{E}(XY)+b\mathrm{E}(ZY)\), pues la esperanza matemática es una operación lineal.</li>
-<li><i>Positividad</i>: \(\mathrm{E}(X^2)\geq0\), porque \(X^2(\omega)\geq0\) para todo \(\omega\), y la esperanza de una función no negativa no puede ser negativa.</li>
-</ul>
-
-<p>
-Las tres se cumplen, pero hay una diferencia real que conviene señalar. En \(\mathbb{R}^n\), un producto escalar propio exige además que \(\langle\boldsymbol x,\boldsymbol x\rangle=0\) si y solo si \(\boldsymbol x=\boldsymbol 0\) (positividad <i>estricta</i>); y en efecto, \(\langle\boldsymbol x,\boldsymbol x\rangle_s=\frac1n\sum x_i^2=0\) obliga a que cada componente de \(\boldsymbol x\) sea cero. Con \(\langle\cdot,\cdot\rangle_P\) esto ya no es cierto: \(\mathrm{E}(X^2)=0\) no implica que \(X\) sea la variable aleatoria nula en todo \(\Omega\); solo implica que \(X\) vale cero <i>con probabilidad uno</i>. Es decir, el conjunto de \(\omega\) para los que \(X(\omega)\neq0\) tiene, en el sentido de la probabilidad, ``tamaño'' cero, aunque pudiera no estar vacío. A un objeto así, que cumple simetría, linealidad y positividad pero no positividad estricta, se le llama <i>semi</i>-producto escalar (o semi-norma, cuando hablamos de \(\sqrt{\mathrm{E}(X^2)}\)). No desarrollaremos esta sutileza, que pertenece a un curso de probabilidad más formal, pero es importante saber que existe, para no dar por sentado que el paralelismo con \(\mathbb{R}^n\) es perfecto en todos sus detalles.
-</p></li>
-</ul>
-
-<p>
-¿Qué se conserva, entonces, de todos los resultados de la lección 3? Se conserva <i>todo</i>. Repasando las demostraciones de la lección 3 (Pitágoras, la desigualdad de Cauchy–Schwarz, la desigualdad triangular), ninguna de ellas usó en ningún momento la propiedad de positividad <i>estricta</i>. Todas se apoyaban únicamente en simetría, linealidad y positividad (no estricta). Por tanto, esas tres demostraciones siguen siendo válidas, palabra por palabra, con \(\langle\cdot,\cdot\rangle_P\) en lugar de \(\langle\cdot,\cdot\rangle_s\): seguiremos pudiendo hablar de vectores ortogonales (\(\langle X,Y\rangle_P=\mathrm{E}(XY)=0\)), de la norma de una variable aleatoria (\(\|X\|_P=\sqrt{\mathrm{E}(X^2)}\)), y de proyecciones ortogonales, con el mismo aparato geométrico.
-</p>
-
-<p>
-Para no sobrecargar la notación, se suele escribir sencillamente \(\mathrm{E}(XY)\) en lugar de \(\langle X,Y\rangle_P\) (así lo hace, de hecho, toda la literatura econométrica): pero conviene tener presente que la operación \(\mathrm{E}(XY)\) tiene el mismo papel que \(\langle\boldsymbol x,\boldsymbol y\rangle_s\) en \(\mathbb{R}^n\). Esas tres propiedades, y \(\|\mathit1\|_P=1\), son todo lo que el curso usa de este producto escalar; el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=3">apéndice (sección 1)</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-1">html</a>) muestra que de ellas salen también la probabilidad de un suceso y sus reglas, sin necesidad de decir cómo se calcula la esperanza.
-</p>
-
-<p>
-<i>Para profundizar</i>:
-</p>
-<ul class="org-ul">
-<li>Wooldridge, J. M. (2020), Apéndice B.3: propiedades de linealidad de la esperanza.</li>
-</ul>
-</div>
-</div>
-</div>
-<div id="outline-container-org6e2b326" class="outline-2">
-<h2 id="org6e2b326"><span class="section-number-2">4.</span> La esperanza: dos caras de la misma moneda</h2>
-<div class="outline-text-2" id="text-4">
-<p>
-En \(\mathbb{R}^n\), el vector constante uno, \(\boldsymbol{1}\), tuvo un papel especial; ahora lo tiene la v.a. cte. \(\mathit{1}\).
+Las lecciones 13 y 14 pusieron <code>nox</code> y <code>lnox</code> juntos en un modelo para ver qué pasa con dos regresores casi alineados. Hoy los separamos: cada uno, con <code>rooms</code>, es un modelo distinto del precio (<code>hprice2</code>, \(n=506\)).
 </p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
@@ -532,582 +297,150 @@ En \(\mathbb{R}^n\), el vector constante uno, \(\boldsymbol{1}\), tuvo un papel 
 <col  class="org-left" />
 
 <col  class="org-left" />
-</colgroup>
-<thead>
-<tr>
-<th scope="col" class="org-left">&#xa0;</th>
-<th scope="col" class="org-left">\(\mathbb{R}^n\)</th>
-<th scope="col" class="org-left">Variables aleatorias</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="org-left">Escalar</td>
-<td class="org-left">\(\mu_{\boldsymbol y}=\langle\boldsymbol y,\boldsymbol 1\rangle_s\)</td>
-<td class="org-left">\(\mathrm{E}(Y)=\langle Y,\mathit{1}\rangle_P\)</td>
-</tr>
 
-<tr>
-<td class="org-left">Proyección</td>
-<td class="org-left">\(\boldsymbol{\mathop{\overline y}}=\mu_{\boldsymbol y}\boldsymbol 1\) (vector <i>constante</i>)</td>
-<td class="org-left">\(E[Y\mid \mathit{1}]=\mathrm{E}(Y)\,\mathit{1}\) (función <i>constante</i>)</td>
-</tr>
-</tbody>
-</table>
+<col  class="org-left" />
 
-
-<div id="orge99ccbd" class="figure">
-<p><img src="./img/S12-Lecc09/EspMatematicayCondicional_ancho.png" alt="EspMatematicayCondicional_ancho.png" width="650px" />
-</p>
-<p><span class="figure-number">Figura 1: </span>Proyección de la variable aleatoria \(Y\) sobre el subespacio generado por la variable constante \(\mathit{1}\). El escalar de la proyección es \(\mathrm{E}(Y)\) (la esperanza matemática o valor esperado), y el vector proyectado es la v.a. constante \(E[Y|\mathit{1}] = \mathrm{E}(Y)\,\mathit{1}\) (la esperanza condicional).</p>
-</div>
-
-
-<p>
-Por Pitágoras (como lección 5): \(\quad \mathrm{Var}(Y) = \Big\|Y - E[Y|\mathit{1}]\Big\|_P^2 = \mathrm{E}(Y^2) - (\mathrm{E}(Y))^2\).
-</p>
-</div>
-<div id="outline-container-org1784ebc" class="outline-4">
-<h4 id="org1784ebc">La esperanza: dos caras de la misma moneda</h4>
-<div class="outline-text-4" id="text-org1784ebc">
-<p>
-Empecemos por el concepto más simple: la proyección sobre las variables aleatorias constantes. 
-</p>
-
-<p>
-En la lección 4 proyectamos el vector de datos \(\boldsymbol{y}\) sobre la recta generada por \(\boldsymbol{1}\). Aquí hacemos lo mismo: proyectamos la variable aleatoria \(Y\) sobre el subespacio unidimensional generado por \(\mathit{1}\) (la variable aleatoria que siempre toma el valor 1). 
-</p>
-
-<p>
-<i>Cuidado con la notación:</i> En muchos manuales de estadística se usa el símbolo \(\mathrm{E}(Y)\) tanto para referirse al <i>número</i> (el valor esperado, un escalar) como a la <i>variable aleatoria constante</i> (el vector proyectado). Para no perder el rigor geométrico, haremos una distinción crucial:
-</p>
-<ul class="org-ul">
-<li>Usaremos \(\mathrm{E}(Y)\) estrictamente como <i>un número</i> (el escalar que resulta del producto escalar \(\langle Y, \mathit{1} \rangle_P\)).</li>
-<li>Usaremos \(E[Y|\mathit{1}]\) como la <i>variable aleatoria proyectada</i> (el vector en el espacio).</li>
-</ul>
-
-<p>
-La relación algebraica es idéntica a la que teníamos en el espacio euclídeo (\(\boldsymbol{\mathop{\overline{y}}} = \mu_{\boldsymbol{y}}\boldsymbol{1}\)): la variable proyectada es igual al escalar multiplicado por el vector generador; es decir, es una variable aleatoria constante:
-\[E[Y|\mathit{1}] = \mathrm{E}(Y) \,\mathit{1}\]
-</p>
-
-<p>
-La diferencia entre el vector \(Y\) y su proyección es ortogonal al vector constante \(\mathit{1}\), lo que significa que <i>su esperanza es cero</i><sup><a id="fnr.4" class="footref" href="#fn.4" role="doc-backlink">4</a></sup>: \(\;\mathrm{E}\big(Y - E[Y|\mathit{1}]\big)=0\).
-</p>
-
-<p>
-E igual que hicimos en las lecciones 4 y 5, si aplicamos el teorema de Pitágoras a este triángulo rectángulo, vemos que el cuadrado de la hipotenusa, \(\mathrm{E}(Y^2)\), es la suma de los cuadrados de los catetos, \((\mathrm{E}(Y))^2 + \mathrm{Var}(Y)\). Despejando, obtenemos la fórmula clásica de la varianza de la variable aleatoria \(Y\) (también llamada varianza poblacional): \(\mathrm{Var}(Y) = \mathrm{E}(Y^2) - (\mathrm{E}(Y))^2\). 
-</p>
-
-<p>
-La geometría no ha cambiado; solo hemos cambiado de espacio (ahora los objetos son variables aleatorias en lugar de listas de números).
-</p>
-
-<p>
-<i>Para profundizar</i>:
-</p>
-<ul class="org-ul">
-<li>Wooldridge, J. M. (2020), Apéndice B.3: definición y propiedades básicas de \(\mathrm{E}(Y)\).</li>
-</ul>
-</div>
-</div>
-</div>
-<div id="outline-container-orge0887fc" class="outline-2">
-<h2 id="orge0887fc"><span class="section-number-2">5.</span> Esperanza condicional: proyección sobre un espacio ENORME</h2>
-<div class="outline-text-2" id="text-5">
-<p>
-La <i>Esperanza Condicional</i>, \(E[Y|X]\), es la proyección ortogonal de \(Y\) sobre el subespacio generado por las funciones de la variable \(X\) (un espacio de dimensión infinita).
-</p>
-
-
-<div id="orgb08cdbd" class="figure">
-<p><img src="./img/S12-Lecc09/ECond_fila_ancho.png" alt="ECond_fila_ancho.png" width="700px" />
-</p>
-<p><span class="figure-number">Figura 2: </span>Proyección de \(Y\) sobre el espacio vectorial generado por las funciones de \(\mathit{1}\) y \(X\). La perturbación \(U\) es ortogonal a dichas funciones. A la izquierda, el triángulo rectángulo de Pitágoras para las varianzas.</p>
-</div>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
 <col  class="org-left" />
 
 <col  class="org-left" />
 </colgroup>
 <thead>
 <tr>
-<th scope="col" class="org-left">Descomposición del vector de datos \(\boldsymbol{y}\)</th>
-<th scope="col" class="org-left">Descomposición variable aleatoria \(Y\)</th>
+<th scope="col" class="org-left">Regresando</th>
+<th scope="col" class="org-left">Contaminación</th>
+<th scope="col" class="org-left">coef.</th>
+<th scope="col" class="org-left">\(\mathrm{ee}\)</th>
+<th scope="col" class="org-left">\(t\)</th>
+<th scope="col" class="org-left">\(R^2\)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="org-left"><i>Vector ajustado</i>: \(\boldsymbol{\mathop{\widehat{y}}}\)</td>
-<td class="org-left"><i>Esperanza Condicional</i>: \(E[Y\mid X]\)</td>
+<td class="org-left"><code>price</code></td>
+<td class="org-left"><code>nox</code></td>
+<td class="org-left">\(-1884{,}7\)</td>
+<td class="org-left">\(253{,}6\)</td>
+<td class="org-left">\(-7{,}43\)</td>
+<td class="org-left">\(0{,}535\)</td>
 </tr>
 
 <tr>
-<td class="org-left"><i>Residuo</i>: \(\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{y}-\boldsymbol{\mathop{\widehat{y}}}\)</td>
-<td class="org-left"><i>Perturbación</i>: \(U = Y - E[Y\mid X]\)</td>
+<td class="org-left"><code>price</code></td>
+<td class="org-left"><code>lnox</code></td>
+<td class="org-left">\(-10951{,}4\)</td>
+<td class="org-left">\(1457{,}9\)</td>
+<td class="org-left">\(-7{,}51\)</td>
+<td class="org-left">\(0{,}536\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>lprice</code></td>
+<td class="org-left"><code>nox</code></td>
+<td class="org-left">\(-0{,}1233\)</td>
+<td class="org-left">\(0{,}0116\)</td>
+<td class="org-left">\(-10{,}67\)</td>
+<td class="org-left">\(0{,}511\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>lprice</code></td>
+<td class="org-left"><code>lnox</code></td>
+<td class="org-left">\(-0{,}7177\)</td>
+<td class="org-left">\(0{,}0663\)</td>
+<td class="org-left">\(-10{,}82\)</td>
+<td class="org-left">\(0{,}514\)</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div id="outline-container-org0805668" class="outline-4">
-<h4 id="org0805668">La esperanza condicional: proyección sobre un espacio ENORME</h4>
-<div class="outline-text-4" id="text-org0805668">
-<p>
-La regresión lineal simple que vimos en las lecciones 6, 7 y 8 consistía en proyectar los datos sobre el plano \(\mathcal{L}(\boldsymbol{1}, \boldsymbol{x})\). El análogo poblacional es proyectar la variable \(Y\) sobre el espacio de funciones de las variables aleatorias \(X\) (y la variable aleatoria \(\mathit{1}\) es, trivialmente, una de ellas). El vector resultante es la <i>Esperanza Condicional</i>, \(E[Y|X]\); es decir, la variable aleatoria (de dicho espacio) más próxima a \(Y\).
-</p>
 
 <p>
-A la diferencia, \(Y - E[Y|X]\), la llamaremos <i>perturbación</i> \(U\) (la componente de \(Y\) ortogonal a las funciones de \(X\)), y la interpretaremos en los modelos econométricos como ``el resto de factores que afectan a \(Y\) pero que son ortogonales a las funciones de \(X\)''. 
-</p>
-
-<p>
-En las primeras lecciones solo teníamos dos vectores de \(\mathbb{R}^n\) (\(\boldsymbol{1}\) y \(\boldsymbol{x}\)) que formaban un plano de solo dos dimensiones. 
-Pero en el mundo de las variables aleatorias, <span class="underline">el subespacio sobre el que proyectamos</span> no contiene únicamente las combinaciones lineales de \(\mathit{1}\) y \(X\) correspondientes al plano bidimensional \(\mathcal{L}(\mathit{1},X)\).<sup><a id="fnr.5" class="footref" href="#fn.5" role="doc-backlink">5</a></sup> También incluye todas las combinaciones lineales de una familia infinita de funciones que incluye: \(X^2\), \(\log(X)\), \(e^X\), \(-\frac{1}{2}\exp\Big(\sqrt{\mathit{1}+\frac{\pi}{7}\ln X+5\sin^3(e^X)}\Big)\), funciones a trozos, o cualquier otra transformación punto a punto de \(X\), siempre y cuando tenga varianza finita&#x2026; En los cursos de probabilidad se dice que contiene <i>cualquier ``función medible''</i> de \(X\). 
-</p>
-
-
-<p>
-Consecuentemente, el subespacio sobre el que proyectamos para obtener \(E[Y|X]\) no es un plano: tiene dimensión infinita.
-</p>
-
-<p>
-La <i>esperanza condicional</i> \(E[Y|X]\) (la ``sombra'' de \(Y\) sobre dicho espacio) es, por definición, la función \(g(X)\) (de entre todas las de ese enorme espacio) que resulta más próxima a \(Y\) en la norma \(\|\cdot\|_P\), es decir, la que hace mínima \(\mathrm{E}\Big(\big(Y-g(X)\big)^2\Big)\) entre todas las funciones \(g\) posibles. La consecuencia: como el espacio sobre el que proyectamos es tan vasto, <i>no hay ninguna razón, en general, para que esa función más próxima sea una recta</i>. \(E[Y|X]\) puede ser, en principio, cualquier curva: puede subir y luego bajar, puede tener escalones, puede curvarse de maneras arbitrariamente complicadas. La única propiedad que le exigimos, por definición, es ser la función de \(X\) que minimiza la distancia a \(Y\), no que sea una combinación lineal de \(\mathit{1}\) y \(X\).
-</p>
-
-<p>
-La figura de la transparencia ilustra esta idea con el lenguaje visual de las lecciones 6 y 8. La variable aleatoria \(Y\) (verde) se descompone en dos partes ortogonales: su proyección \(E[Y|X]\) (rojo) sobre el espacio de funciones de \(X\), y \(U=Y-E[Y|X]\) (gris), la componente perpendicular a dicha proyección (marcada, como en aquellas figuras, con un ángulo recto), que llamamos <i>perturbación</i>. La diferencia esencial respecto a aquellas figuras es que aquí el ``plano'' sobre el que proyectamos ya no es un plano de dos direcciones. Es un espacio de dimensión infinita, que no se puede dibujar; la figura debe leerse como un esquema conceptual, no como una representación literal. Que esa proyección exista se admite; lo que de ella se deduce, con la sola ortogonalidad del resto, está en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=4">apéndice (sección 1.3)</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-1-3">html</a>): las reglas con que la lección 11 operará con esperanzas condicionales y la descomposición de la varianza de la recapitulación.
-</p>
-
-<p>
-Esta observación da sentido al <i>primer supuesto</i> del Modelo Clásico de Regresión, que presentaremos en la próxima transparencia. Decir que ``\(E[Y|X]\) es una función <i>lineal</i> de \(X\)'', es decir, que \(E[Y|X]=\beta_1\,\mathit{1}+\beta_2X\), no es una trivialidad, como podría parecer si pensáramos (erróneamente) que \(E[Y|X]\) vive por definición en el plano \(\mathcal{L}(\mathit{1},X)\) de las combinaciones lineales \(\mathit{1}\) y \(X\). Es, por el contrario, un supuesto sustantivo: estamos afirmando que, de entre todas las infinitas formas funcionales posibles que \(E[Y|X]\) podría tener, la función de \(X\) y \(\mathit{1}\) que mejor se aproxima a \(Y\) resulta ser la recta \(\beta_1\,\mathit{1}+\beta_2X\).
-</p>
-
-<p>
-<i>Para profundizar</i>:
-</p>
-<ul class="org-ul">
-<li>Bujosa, M., sección <a href="https://mbujosab.github.io/Ectr/apuntes-Ectr-print.pdf#section.7">``Esperanza condicional''</a>: definición de \(E[Y|X]\) como proyección ortogonal sobre el subespacio probabilístico generado por \(X\), con la advertencia (que aquí simplificamos) de que dicha proyección es una <i>clase de equivalencia</i> de variables aleatorias.</li>
-<li>Wooldridge, J. M. (2020), Apéndice B.4 y capítulo 2, sección 2.6: introducción intuitiva a la esperanza condicional y su papel en la especificación del modelo de regresión.</li>
-</ul>
-</div>
-</div>
-</div>
-<div id="outline-container-org118c2e5" class="outline-2">
-<h2 id="org118c2e5"><span class="section-number-2">6.</span> El Modelo Clásico de Regresión Lineal (MCRL)</h2>
-<div class="outline-text-2" id="text-6">
-<p>
-El MCRL consiste en <i>imponer tres supuestos</i> para que el modelo sea manejable:
-</p>
-
-<ul class="org-ul">
-<li><p>
-<i>Linealidad de la esperanza condicional</i>: \(E[Y|X]\) cae en el plano \(\mathcal{L}(\mathit{1},X)\):
-\[ E[Y|X] = \beta_1\,\mathit{1} + \beta_2 X. \]
-</p>
-
-<p>
-<i>Exogeneidad sin supuesto adicional</i>: \(U = Y - E[Y|X]\) es, <b>por definición</b>, ortogonal a toda función de \(X\). Así que aquí \(E[U|X]=\mathit{0}\) no es un supuesto: es un <b>corolario</b>.
-</p>
-
-<p>
-Por tanto \(\;Y=\beta_1\,\mathit{1} + \beta_2 X+U\), con \(\mathrm{E}(U)=0\) y \(\mathrm{Cov}(U,X) = 0\).
-</p></li>
-<li><p>
-<i>Independencia lineal de los regresores \((\mathrm{Var}(X)\neq0)\):</i> \(X\) no es constante con probabilidad 1.
-</p></li>
-<li><i>Homocedasticidad (varianza condicional constante)</i>:
-la ``dispersión'' de \(U\) no depende de \(X\).
-\[ Var[U | X] = E[U^2|X] = \sigma^2\,\mathit{1} \]</li>
-</ul>
-
-<p>
-<b>Nomenclatura</b>: 
-</p>
-<ul class="org-ul">
-<li>\(Y\) regresando</li>
-<li>\(X\) y \(\mathit{1}\) regresores</li>
-<li>\(U\) perturbación (``otros factores'').</li>
-</ul>
-
-<p>
-<b>Parámetros</b>: Nótese que en el modelo no hay ``sombreros''
-</p>
-<ul class="org-ul">
-<li>\(\beta_1\) y \(\beta_2\) son parámetros poblacionales desconocidos</li>
-</ul>
-<p>
-(no son los \(\hat\beta_1\) y \(\hat\beta_2\) de la lección 7).
-</p>
-</div>
-<div id="outline-container-orgfe10b6b" class="outline-4">
-<h4 id="orgfe10b6b">El Modelo Clásico de Regresión Lineal (MCRL)</h4>
-<div class="outline-text-4" id="text-orgfe10b6b">
-<p>
-El ``Modelo Clásico de Regresión Lineal'' es un conjunto de restricciones geométricas que imponemos sobre un mecanismo poblacional que en realidad es desconocido.
-</p>
-
-<p>
-Hemos definido la <i>perturbación</i> \(U=Y-E[Y|X]\) como la diferencia entre \(Y\) y su proyección sobre el (enorme) espacio de las funciones de \(X\). Por construcción, \(U\) es ortogonal (en el sentido de \(\langle\cdot,\cdot\rangle_P\)) a \(E[Y|X]\), y a cualquier función de \(X\). Con esta definición, podemos escribir siempre, sin ningún supuesto adicional:
-\[
-Y \;=\; E[Y|X]+U.
-\]
-Esta descomposición es, como todas las que hemos hecho en \(\mathbb{R}^n\), puramente algebraica: se cumple <i>siempre</i>, sea \(E[Y|X]\) una recta, una curva o cualquier otra función. Ahora bien, el <i>Modelo Clásico de Regresión Lineal</i> consiste en añadir tres supuestos que, cuando se cumplen, simplifican radicalmente esta descomposición general y la reducen a algo mucho más manejable.
-</p>
-
-<p>
-Antes de enunciarlos, conviene advertir que <i>tres</i> son menos de los que encontrará en casi cualquier manual (Wooldridge enumera cinco para la regresión simple). La diferencia es consecuencia de haber definido \(U\) como lo que queda al proyectar. Al final de esta sección explicamos la equivalencia con detalle (apéndice ``Tres supuestos aquí, cinco en Wooldridge'').
-</p>
-
-<ol class="org-ol">
-<li><p>
-<i>Linealidad:</i> Suponemos que
-\[
-   E[Y|X] = \beta_1\,\mathit{1}+\beta_2X,
-   \]
-para ciertos números \(\beta_1,\beta_2\). Con esto la descomposición \(Y=E[Y|X]+U\) se convierte en
-\[
-   Y \;=\; \beta_1\,\mathit{1}+\beta_2X+U.
-   \]
-</p>
-
-<p>
-Adviértase la ausencia de sombrero sobre \(\beta_1\) y \(\beta_2\). En la lección 7 calculamos \(\hat\beta_1,\hat\beta_2\) a partir de un vector de datos concreto \(\boldsymbol y,\boldsymbol x\in\mathbb{R}^n\), mediante las condiciones de ortogonalidad muestrales. Aquí, \(\beta_1\) y \(\beta_2\) son <i>parámetros poblacionales</i>: números fijos, pero <i>desconocidos</i>, que describen la relación teórica subyacente entre las variables aleatorias \(X\) e \(Y\).
-</p>
-
-<p>
-<i>¿Cómo de realista es este supuesto?</i>: Recuerde que el espacio sobre el que se proyecta \(Y\) es de dimensión infinita, así que la esperanza condicional \(E[Y|X]\) podría ser casi cualquier función de \(X\) (por muy extraña o complicada que fuera). El Supuesto 1 impone que la sombra de \(Y\) (la variable aleatoria función de \(X\) más próxima a \(Y\)) cae sobre el plano formado por la constante \(\mathit{1}\) y la variable \(X\). Es decir, que \(E[Y|X]\) es sencillamente la combinación lineal \(\beta_1\,\mathit{1} + \beta_2 X\). ¿Es esto realista? Depende. Si sabemos (teorema en los cursos de probabilidad) que \(X\) e \(Y\) provienen de una distribución conjunta Normal, la matemática garantiza que la esperanza condicional siempre es lineal. Si no lo son, este supuesto supone una restricción fortísima (estamos imponiendo una restricción lineal a la realidad, pues estamos imponiendo que, de todas las funciones posibles de \(X\), la que mejor se aproxima a \(Y\) es una combinación lineal de los regresores).
-</p>
-
-<p>
-<i>Corolario inmediato: la exogeneidad estricta \((E[U|X] = \mathit{0})\)<sup><a id="fnr.6" class="footref" href="#fn.6" role="doc-backlink">6</a></sup></i>. No la enumeramos entre los supuestos porque no hay nada que suponer: es una consecuencia de cómo hemos definido \(U\).
-</p>
-
-<p>
-\(U = Y - E[Y|X]\) es lo que queda tras proyectar \(Y\) sobre el espacio de <i>todas</i> las funciones de \(X\). Por tanto \(U\) es ortogonal a cualquier función de \(X\), y en particular a \(\mathit{1}\) y a \(X\).
-</p>
-
-<p>
-De esa doble ortogonalidad se siguen dos consecuencias que usaremos en el resto del curso:
-</p>
-<ul class="org-ul">
-<li>Que \(U \perp \mathit{1}\) implica \(\mathrm{E}(U\,\mathit{1})=\mathrm{E}(U)=0\).</li>
-<li>Que \(U \perp X\), junto con \(\mathrm{E}(U)=0\), implica \(\mathrm{Cov}(U,X)=\mathrm{E}(UX)-\mathrm{E}(U)\mathrm{E}(X)=0\): es el truco del vector de media nula de la lección 6, ahora con variables aleatorias. La perturbación no está correlada con el regresor.</li>
-</ul></li>
-
-<li><p>
-<i>Independencia lineal de los regresores con probabilidad \(1\;\) (\(\mathrm{Var}(X)\neq0\)):</i> Este supuesto impone que, con probabilidad \(1\), \(X\) no toma un único valor, es decir, que \(X\) en desviaciones no es cero, y por tanto \(\|X-\mathrm{E}(X)\,\mathit{1}\|_P^2=\mathrm{Var}(X)\neq0\)<sup><a id="fnr.7" class="footref" href="#fn.7" role="doc-backlink">7</a></sup>
-</p>
-
-<p>
-Con un único regresor, esta es toda la sustancia del segundo supuesto: una condición sobre la varianza de una sola variable. En la lección 10, al generalizar el modelo a varios regresores, significará algo más que eso, pues: dos o más regresores pueden tener cada uno varianza no nula por separado y, aun así, ser linealmente dependientes entre sí.
-</p></li>
-
-<li><p>
-<i>Homocedasticidad:</i> Asumimos que la varianza de \(U\), condicionada a \(X\), es una función constante \(\sigma^2\,\mathit{1}\). Por tanto, la dispersión de \(U\) no depende de \(X\). Este supuesto no es estrictamente necesario para encontrar la recta que define a la esperanza condicional (como veremos), pero será fundamental más adelante para poder hacer inferencia y construir intervalos de confianza de forma sencilla. 
-</p>
-
-<p>
-Fíjese que, usando \(E[U|X]=\mathit{0}\) (el corolario del supuesto 1), tenemos que \(Var[U|X]=E\big[\big(U-E[U|X]\big)^2\big|X\big]=E[U^2|X]\), que es lo que aparece en la transparencia.
-</p>
-
-<p>
-Conviene notar, además, que al enunciar este tercer supuesto estamos asumiendo <i>implícitamente</i> algo que NO está garantizado en general: que la variable aleatoria \(U^2\) tiene esperanza (recuerde que no toda variable aleatoria tiene esperanza definida). Que \(U\) tenga norma finita (es decir, que \(\mathrm{E}(U^2)\) exista, lo que ya necesitábamos para poder hablar de \(\|U\|_P\)) no es una propiedad que se herede sin más al multiplicar variables aleatorias entre sí. No entraremos en el detalle, que pertenece a un curso de probabilidad más formal; basta con saber que el supuesto de homocedasticidad da por sentada esa existencia.
-</p></li>
-</ol>
-</div>
-<ul class="org-ul">
-<li><a id="orge33f08e"></a>Apéndice: tres supuestos aquí, cinco en Wooldridge<br />
-<div class="outline-text-5" id="text-orge33f08e">
-<p>
-Si abre el manual de Wooldridge por el capítulo 2 encontrará <i>cinco</i> supuestos
-donde nosotros hemos puesto tres. Conviene entender por qué, porque no se trata
-de que uno de los dos textos omita algo: son dos formas distintas de escribir
-el mismo modelo, y cada una tiene una limitación distinta.
-</p>
-
-<p>
-Los cinco supuestos de Wooldridge para la regresión simple (los llama SLR, por
-<i>Simple Linear Regression</i>) son, traducidos a <i>nuestra</i> notación (mayúsculas
-para las variables aleatorias, minúsculas para los datos, corchetes y cursiva
-para los momentos condicionales, y la constante numerada como \(\beta_1\), que en el
-manual es \(\beta_0\)):
-</p>
-
-<ul class="org-ul">
-<li><i>SLR.1 — Lineal en los parámetros</i>: en la población,
-\(Y=\beta_1\,\mathit{1}+\beta_2X+U\).</li>
-<li><i>SLR.2 — Muestreo aleatorio</i>: se dispone de \(n\) copias idénticas e
-independientes \((X_i,Y_i)\), \(i=1,\ldots,n\), de esa pareja poblacional; los
-datos \((x_i,y_i)\) son sus realizaciones.</li>
-<li><i>SLR.3 — Variación muestral en el regresor</i>: los datos \(x_1,\ldots,x_n\) no son
-todos iguales.</li>
-<li><i>SLR.4 — Media condicional nula</i>: \(E[U|X]=\mathit{0}\).</li>
-<li><i>SLR.5 — Homocedasticidad</i>: \(Var[U|X]=\sigma^2\,\mathit{1}\).</li>
-</ul>
-
-<p>
-(En regresión múltiple los renombra MLR.1 a MLR.5, con MLR.3 convertido en ``no
-colinealidad perfecta''; añade además MLR.6, normalidad, cuando llega a la
-inferencia. Volveremos sobre ello en las lecciones 10 y 12.)
-</p>
-
-<p>
-La correspondencia con los nuestros es casi inmediata: nuestro supuesto 2
-(\(\mathrm{Var}(X)\neq0\)) es SLR.3, y nuestro supuesto 3 (homocedasticidad) es
-SLR.5. SLR.2 no aparece en nuestra lista porque en este curso el muestreo
-aleatorio no es un supuesto <i>del modelo poblacional</i>, sino el marco que
-introduciremos en la lección 11, cuando pasemos de la población a la muestra.
-Queda, pues, una sola diferencia real: Wooldridge escribe <i>dos</i> supuestos,
-SLR.1 y SLR.4, donde nosotros escribimos <i>uno</i>, el de linealidad.
-</p>
-
-<p>
-Y la razón es la definición de la perturbación. Wooldridge <i>postula</i> la ecuación
-\(Y=\beta_1\,\mathit{1}+\beta_2X+U\) con unos \(\beta\) que tienen un significado previo,
-típicamente causal o estructural, y define \(U\) como ``todo lo demás''. Con esa
-definición, nada garantiza que \(U\) sea ortogonal a \(X\): hay que <i>exigirlo</i>, y ese
-es el contenido de SLR.4. Nosotros hacemos el camino inverso:
-primero proyectamos, definimos \(U=Y-E[Y|X]\), y solo después preguntamos si esa
-proyección resulta ser una recta. Con nuestra definición, la ortogonalidad de \(U\)
-frente a toda función de \(X\) es un teorema, no una exigencia; y todo el contenido
-sustantivo se concentra en un único sitio: que la <i>mejor</i> función de \(X\) resulte
-ser lineal.
-</p>
-
-<p>
-En resumen: <b>SLR.1 + SLR.4 juntos equivalen a nuestro supuesto 1</b>. No
-hemos suprimido nada; hemos reagrupado.
-</p>
-
-<p>
-<i>¿Qué se pierde al reagrupar?</i> La presentación de
-Wooldridge tiene una ventaja que la nuestra no tiene: como su \(U\) no está
-definido por proyección, la condición \(E[U|X]=\mathit{0}\) <i>puede fallar</i>, y
-poder enunciar su fallo es justamente lo que permite hablar de <b>endogeneidad</b>:
-variable relevante omitida, simultaneidad entre \(Y\) y \(X\), error de medida en el
-regresor. Son los problemas que motivan las <i>variables instrumentales</i> y buena
-parte de la econometría aplicada moderna. En nuestro marco esos fenómenos no se
-pueden ni siquiera formular: con \(U\) definido como el residuo de la proyección,
-\(\mathrm{Cov}(U,X)=0\) se cumple <i>siempre</i>, y decir ``la perturbación está
-correlada con el regresor'' sería una contradicción en los términos.
-</p>
-
-<p>
-Asumimos ese coste deliberadamente, porque este curso no estudia endogeneidad,
-variable omitida, simultaneidad ni variables instrumentales. Si los estudiara,
-la simplificación no compensaría: habría que volver a separar SLR.1 de SLR.4 y,
-además, redefinir \(U\). Quien continúe con un curso de econometría avanzada
-encontrará allí esa separación, y le convendrá recordar esta página para saber
-que no hay contradicción entre ambos textos, sino dos puntos de partida
-distintos.
-</p>
-
-<p>
-<i>Para profundizar</i>:
-</p>
-<ul class="org-ul">
-<li>Wooldridge, J. M. (2020), capítulo 2, secciones 2.1 y 2.5: presentación clásica del modelo de regresión simple y sus supuestos (SLR.1 a SLR.5).</li>
-<li>Wooldridge, J. M. (2020), capítulo 15: variables instrumentales, el capítulo que este curso no recorre y que es el que exige SLR.4 como supuesto separado.</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-</div>
-<div id="outline-container-org5a15228" class="outline-2">
-<h2 id="org5a15228"><span class="section-number-2">7.</span> Cuidado: Esta descomposición ortogonal no implica causalidad</h2>
-<div class="outline-text-2" id="text-7">
-<p>
-La descomposición \(Y = E[Y|X] + U\) <i>es un hecho algebraico</i> (una proyección ortogonal). 
-<i>Siempre existe</i> (si las varianzas de \(X\) e \(Y\) son finitas).
-</p>
-
-<p>
-<i>Que el álgebra permita proyectar \(Y\) sobre las funciones de \(X\) NO significa que \(X\) cause o ``explique'' \(Y\).</i>
-</p>
-
-<ul class="org-ul">
-<li><i>Sentido económico razonable:</i> \(\mathit{Consumo} = f(\mathit{Renta}) + U\). Tiene sentido pensar que la Renta determina el Consumo, y que \(U\) agrupa otros factores (gustos, necesidades).</li>
-<li><i>Causalidad absurda (pero aceptable algebraicamente):</i> \(\mathit{Superficie} = f(\mathit{Precio}) + U\). Podemos proyectar la superficie de una casa sobre su precio. El cálculo es perfectamente válido. Pero asumir que ``variaciones del precio cambian el tamaño de la casa'' es absurdo.</li>
-</ul>
-
-<p>
-<i>La causalidad NO emana de los datos ni de la geometría.</i>
-Debe provenir de una Teoría (Económica, Política, Sociológica, etc.) previa.
-</p>
-</div>
-<div id="outline-container-orgd6ef741" class="outline-4">
-<h4 id="orgd6ef741">Cuidado: Esta descomposición ortogonal no implica causalidad</h4>
-<div class="outline-text-4" id="text-orgd6ef741">
-<p>
-Por la advertencia de esta transparencia, que la descomposición ortogonal no implica causalidad, hemos pospuesto hablar de modelos y causalidad hasta esta lección.
-</p>
-
-<p>
-La descomposición de una variable aleatoria en su proyección ortogonal \(E[Y|X]\) y la perturbación \(U\) es un <i>hecho geométrico</i>, que se da siempre y no dice nada sobre la dirección de la causalidad.
-</p>
-
-<p>
-En econometría se utilizan nombres muy sugerentes que pueden llevar a engaño: a \(Y\) se la llama ``variable explicada'' y a \(X\) ``variable explicativa''. Los nombres <i>regresando</i> y <i>regresor</i> son mejores, porque son neutros. Y la probabilidad está llena de términos con el mismo sesgo. <i>Esperanza</i> sugiere que desvela lo que cabe esperar, cuando es solo la función de los regresores más cercana al regresando. <i>Variable aleatoria</i> no es una variable, sino una regla fija que asigna un número a cada elemento de \(\Omega\); y el <i>suceso elemental</i> no tiene nada que ver con que suceda algo. No se deje engañar por los nombres. Si hacemos una regresión del Consumo sobre la Renta Disponible, los nombres encajan con nuestra intuición macroeconómica: la renta ``causa'' (explica) el consumo. 
-</p>
-
-<p>
-Pero si invertimos el papel de las variables (buscando, por ejemplo, explicar la superficie de una vivienda en función de su precio, en lugar de al revés), la maquinaria de proyección ortogonal calculará igualmente una recta, hallará un residuo perfectamente ortogonal al precio, y nos devolverá un \(R^2\) positivo. Sin embargo, defender la relación causal en esa dirección (implicando que las alteraciones en el precio modifican la superficie de la vivienda) carece de sentido. Es, de hecho, el mismo ejemplo, deliberadamente absurdo pero algebraicamente correcto, que ya vimos en la lección 8.
-</p>
-
-<p>
-La estadística no distingue la dirección de la causalidad. Consideremos cualquiera de estos cuatro casos:
-</p>
-<ul class="org-ul">
-<li>\(X\) ``causa'' \(Y\);</li>
-<li>\(Y\) ``causa'' \(X\);</li>
-<li>una tercera variable causa ambas;</li>
-<li>o no hay ninguna relación sustantiva entre \(X\) e \(Y\).</li>
-</ul>
-<p>
-Pues bien, la descomposición algebraica, por sí sola, es completamente indiferente a cuál de esos escenarios describe realmente el fenómeno que estamos estudiando.
-</p>
-
-<p>
-Esta es la razón por la que en la lección 6 pospusimos deliberadamente la distinción entre ``regresor'' (una noción que atañe a la estructura del modelo, pero sin ningún compromiso causal) y ``variable explicativa'' (un concepto que sí lleva, implícita, la pretensión de que \(X\) desempeña algún papel explicativo o causal, aunque sea parcial, en la generación de \(Y\)). Cumplimos hoy lo prometido: podemos llamar a \(X\) ``regresor'' sin reservas, en cualquier circunstancia, porque es una etiqueta puramente algebraica; pero solo deberíamos llamarlo ``variable explicativa'', con esa carga causal, cuando dispongamos de alguna razón, <i>externa a la propia matemática</i>, que justifique semejante lectura.
-</p>
-
-<p>
-¿De dónde puede venir dicha lectura? No de la geometría, ni del álgebra: únicamente de una <i>teoría económica previa</i>. Si tenemos razones teóricas para pensar que la renta influye en el consumo, podemos leer causalmente \(\mathit{Consumo}=E[\mathit{Consumo}\mid \mathit{Renta}]+U\). Si no tenemos ninguna teoría que distinga qué variable hace de \(X\) y cuál de \(Y\) (como al regresar la superficie de una vivienda sobre su precio), la descomposición sigue siendo válida, pero no tiene lectura causal.
-</p>
-
-<p>
-Conviene, además, prevenir una lectura equivocada de ``El Modelo Clásico de Regresión Lineal (MCRL)''. Que hayamos enunciado <i>tres</i> supuestos en lugar de los cinco habituales, y que la exogeneidad haya resultado ser un corolario, sin supuesto adicional, NO significa que el modelo clásico exija menos de la realidad, ni que se cumpla más a menudo. Significa exactamente lo contrario de lo que podría parecer: todo el peso, todo lo que puede fallar, se ha concentrado en un único punto, el supuesto 1. Es ahí, y solo ahí, donde afirmamos algo fuerte sobre el mundo: que de entre las infinitas funciones de \(X\) que podríamos haber usado para aproximar \(Y\), la mejor resulta ser precisamente una recta. Cuando, en la última parte del curso, pongamos a prueba la <i>especificación</i> de un modelo, será ese supuesto el que estemos contrastando.
-</p>
-
-<p>
-Cerramos esta advertencia recuperando, de forma explícita, la advertencia con la que abrimos el curso en la lección 1: <i>correlación no implica causalidad</i>. Hoy, con el aparato construido en esta sesión, podemos precisar esa advertencia con mayor rigor: tampoco la existencia de una esperanza condicional bien definida, ni el cumplimiento de los tres supuestos del modelo clásico, implica, por sí sola, ninguna relación causal. Los tres supuestos garantizan que \(\beta_1\,\mathit1+\beta_2X\) es una buena <i>aproximación probabilística</i> de la variable \(Y\) en función de la variable \(X\); no garantizan, en ningún caso, que esa aproximación sea el reflejo de una relación causa-efecto.
-</p>
-
-<p>
-La econometría proporciona el método para <i>cuantificar</i> la magnitud de un efecto, pero dicho método solo es útil si el efecto corresponde a una relación teóricamente válida. La justificación sobre la dirección causal del efecto solo puede provenir de un modelo teórico previo.
-</p>
-
-<p>
-<i>Para profundizar</i>:
-</p>
-<ul class="org-ul">
-<li>Angrist, J. y Pischke, J.-S. (2014), <i>Mastering `Metrics'</i>, capítulo 1: discusión accesible sobre la distinción entre asociación estadística y causalidad, con ejemplos económicos.</li>
-<li>Bujosa, M., sección <a href="https://mbujosab.github.io/Ectr/apuntes-Ectr-print.pdf#subsection.7.5">``Regresión como descomposición ortogonal''</a>: discusión, con los mismos ejemplos, de por qué la descomposición ortogonal por sí sola no valida ninguna teoría causal.</li>
-</ul>
-</div>
-</div>
-</div>
-<div id="outline-container-org0c26185" class="outline-2">
-<h2 id="org0c26185"><span class="section-number-2">8.</span> El salto: método de los momentos</h2>
-<div class="outline-text-2" id="text-8">
-<p>
-En el modelo poblacional, los verdaderos parámetros \(\beta_2\) y \(\beta_1\) dependen de la geometría de la <i>población</i> (del producto escalar probabilístico \(\langle \cdot, \cdot \rangle_P\)):
-\[
-\beta_2 \;=\; \frac{\mathrm{Cov}(X,Y)}{\mathrm{Var}(X)}, \qquad\qquad \beta_1 \;=\; \mathrm{E}(Y)-\beta_2\mathrm{E}(X).
-\]
-</p>
-
-<p>
-<i>Problema</i>: Eros no conoce la población entera, pero conoce algunos datos.
-</p>
-
-<p>
-<i>Solución (El Método de los Momentos)</i>: 
-Sustituir los momentos poblacionales desconocidos (\(\mathrm{E}(\cdot)\)) por sus análogos muestrales (\(\frac{1}{n}\sum\), es decir, usando el producto escalar estadístico \(\langle \cdot, \cdot \rangle_s\) sobre los datos).
-</p>
-
-<p>
-\[
-\hat\beta_2 \;=\; \frac{\sigma_{\boldsymbol x\boldsymbol y}}{\sigma_{\boldsymbol x}^2}, \qquad\qquad \hat\beta_1 \;=\; \mu_{\boldsymbol y}-\hat\beta_2\mu_{\boldsymbol x}.
-\]
+Cuatro modelos, cuatro coeficientes de distinto tamaño y las mismas conclusiones estadísticas: la contaminación acompaña precios menores, con \(t\) entre \(-7{,}4\) y \(-10{,}8\). Los cuatro números dicen cosas distintas.
 </p>
 
 <div class="org-center">
 <p>
-<i>Son las fórmulas que derivamos en la lección 7.</i>
-Mínimos Cuadrados Ordinarios (MCO) equivale al Método de los Momentos en el Modelo Clásico de Regresión Lineal.
+Hoy: qué significa cada coeficiente, por qué el logaritmo convierte cambios absolutos en porcentuales, y cómo se prevé en niveles con un modelo en logaritmos. Sin geometría nueva.
 </p>
 </div>
 </div>
-<div id="outline-container-org4473246" class="outline-4">
-<h4 id="org4473246">El salto: método de los momentos</h4>
-<div class="outline-text-4" id="text-org4473246">
+<div id="outline-container-orged5c76e" class="outline-4">
+<h4 id="orged5c76e">De dónde venimos: <code>nox</code> y <code>lnox</code> eran dos formas funcionales</h4>
+<div class="outline-text-4" id="text-orged5c76e">
 <p>
-Lo construido hoy sirve para entender de otro modo las fórmulas que ya calculamos en la lección 7.
+La lección 13 abrió con una tabla de tres regresiones del precio mediano de la vivienda sobre <code>rooms</code> y la contaminación, medida en niveles (<code>nox</code>), en logaritmos (<code>lnox</code>) o de las dos formas a la vez. La lección 14 explicó la tercera fila: dos regresores que forman un ángulo de \(6^\circ\) comparten casi toda su variación, así que la variación propia de cada uno es muy corta, y los dos errores estándar se multiplican. Las dos primeras filas quedaron sin comentar, y hoy son el punto de partida. A ellas añadimos otras dos, con el logaritmo del precio como regresando.
 </p>
 
 <p>
-Bajo el Modelo Clásico de Regresión, hemos asumido que la ``sombra'' cae en el plano: \(E[Y|X] = \beta_1\,\mathit{1} + \beta_2 X\). Partamos de las dos condiciones poblacionales que obtuvimos como corolario en la transparencia del MCRL, a partir de \(E[U\mid X]=\mathit0\): \(\mathrm{E}(U)=0\) y \(\mathrm{Cov}(U,X)=0\). Sustituyamos en ellas \(U=Y-\beta_1\,\mathit{1}-\beta_2X\) (el primer supuesto del modelo, despejando \(U\)) y resolvamos el sistema resultante<sup><a id="fnr.8" class="footref" href="#fn.8" role="doc-backlink">8</a></sup> para \(\beta_1,\beta_2\).
+La tabla de la transparencia recoge las cuatro estimaciones. Los cuatro modelos tienen la misma variable explicativa de contaminación, la concentración de óxidos de nitrógeno, y el mismo segundo regresor, <code>rooms</code>. Difieren en la forma funcional: el precio o su logaritmo, la contaminación o su logaritmo. Los cuatro ajustan los datos de manera parecida en lo que cada uno mide, y en los cuatro el coeficiente de la contaminación es negativo y se separa con claridad de cero. Pero los cuatro coeficientes están en unidades distintas: dólares por unidad de <code>nox</code>, dólares por unidad de logaritmo, logaritmos por unidad de <code>nox</code> y logaritmos por logaritmo. Leerlos exige saber qué unidad es cada una.
 </p>
 
 <p>
-De \(\mathrm{Cov}(U,X)=0\), usando la linealidad de la covarianza y que \(\mathrm{Cov}(\beta_1\,\mathit{1},X)=0\) (la covarianza de una variable aleatoria constante con cualquier otra es nula):
-\[
-\mathrm{Cov}(U,X)=\mathrm{Cov}(Y-\beta_1\,\mathit{1}-\beta_2X,\,X)=\mathrm{Cov}(Y,X)-\beta_2\mathrm{Var}(X)=0,
-\]
-de donde
-\[
-\beta_2 = \frac{\mathrm{Cov}(X,Y)}{\mathrm{Var}(X)}.
-\]
-Y de \(\mathrm{E}(U)=0\):
-\[
-\mathrm{E}(U)=\mathrm{E}(Y)-\beta_1-\beta_2\mathrm{E}(X)=0
-\quad\Longrightarrow\quad
-\beta_1 = \mathrm{E}(Y)-\beta_2\mathrm{E}(X).
-\]
+Conviene decir desde el principio qué no cambia. El modelo de regresión lineal del curso es \(\boldsymbol y=\beta_1\boldsymbol 1+\beta_2\boldsymbol x_2+\cdots+\beta_k\boldsymbol x_k+\boldsymbol u\), y lo que hace mínimos cuadrados es proyectar el vector \(\boldsymbol y\) sobre el subespacio generado por las columnas. Que una columna sea el logaritmo de una variable, o que el vector proyectado sea el logaritmo del precio, no altera nada de lo demostrado en las lecciones 8 a 14: el ajuste, los residuos, \(R^2\), los errores estándar, los contrastes \(t\) y \(F\) se calculan igual y significan lo mismo para las columnas que se le han dado. La ficha de esta lección en el plan del curso dice ``sin anclaje geométrico fuerte'', y es así: hoy no hay un triángulo nuevo. Hay una tabla de lecturas.
 </p>
 
 <p>
-Estas dos fórmulas son, letra por letra, el análogo poblacional exacto de las que obtuvimos en la lección 7: \(\hat\beta_2=\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol x}^2\) y \(\hat\beta_1=\mu_{\boldsymbol y}-\hat\beta_2\mu_{\boldsymbol x}\), con \(\mathrm{E}(\cdot)\), \(\mathrm{Cov}(\cdot,\cdot)\) y \(\mathrm{Var}(\cdot)\) en el lugar de \(\mu_{\boldsymbol\cdot}\), \(\sigma_{\boldsymbol\cdot\boldsymbol\cdot}\) y \(\sigma_{\boldsymbol\cdot}^2\).
+Una precisión de notación: en todo lo que sigue, \(\log\) es el logaritmo natural, el único que se usa en econometría para estas transformaciones. Gretl lo llama <code>log</code> y antepone <code>l_</code> al nombre de la variable transformada; en <code>hprice2</code> las variables <code>lprice</code> y <code>lnox</code> vienen ya calculadas.
 </p>
 
 <p>
-Aquí aparece el problema que motiva esta transparencia. Las cantidades \(\mathrm{Cov}(X,Y)\), \(\mathrm{Var}(X)\), \(\mathrm{E}(Y)\) y \(\mathrm{E}(X)\) son <i>momentos poblacionales</i>: describen a las variables aleatorias \(X\) e \(Y\) en su totalidad, no a ninguna muestra concreta. Y, en general, <i>no los conocemos</i>; citando a Platón, no somos dioses ni sabios: no conocemos ni \(X\) ni \(Y\) ni sus valores esperados, no conocemos la covarianza poblacional \(\mathrm{Cov}(X,Y)\) ni la varianza poblacional \(\mathrm{Var}(X)\). Pero tampoco somos completos ignorantes: tenemos una muestra de tamaño \(n\).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.4 (``Units of measurement and functional form'') y cap. 6, sección 6.2 (``More on functional form'').
 </p>
-
-<p>
-Así pues, esta es la situación filosófica que anunciamos al abrir la sesión con la cita de Diotima. No poseemos \(\beta_1,\beta_2\) (la ``verdad'' poblacional, que sería el conocimiento del sabio); pero tampoco carecemos de todo (no somos el ignorante que no sabe ni que le falta algo). Tenemos una muestra, un vector concreto, con el que podemos intentar <i>aproximarnos</i> a esos parámetros desconocidos.
-</p>
-
-<p>
-El ``salto'' que da nombre a esta transparencia consiste en resolver este problema: <i>sustituir cada momento poblacional (desconocido) por su análogo muestral (calculable)</i>. Donde aparecía \(\mathrm{E}(X)\) (desconocido), escribimos \(\mu_{\boldsymbol x}\) (calculable a partir de la muestra); donde aparecía \(\mathrm{Cov}(X,Y)\), escribimos \(\sigma_{\boldsymbol x\boldsymbol y}\); donde aparecía \(\mathrm{Var}(X)\), escribimos \(\sigma_{\boldsymbol x}^2\); y donde aparecía \(\mathrm{E}(Y)\), escribimos \(\mu_{\boldsymbol y}\). El resultado de esta sustitución, aplicada a las dos fórmulas de más arriba, es:
-\[
-\hat\beta_2 = \frac{\sigma_{\boldsymbol x\boldsymbol y}}{\sigma_{\boldsymbol x}^2},
-\qquad\qquad
-\hat\beta_1 = \mu_{\boldsymbol y}-\hat\beta_2\mu_{\boldsymbol x}.
-\]
-</p>
-
-<p>
-Estas son las fórmulas que ya obtuvimos en la lección 7, porque la ruta que hemos seguido (resolver las condiciones poblacionales y sustituir momentos poblacionales por muestrales) reproduce, paso a paso, la misma estructura algebraica que allí seguimos (resolver las dos condiciones de ortogonalidad muestral directamente sobre \(\boldsymbol{\mathop{\widehat e}}\)). Esta estrategia general, de sustituir momentos teóricos desconocidos por sus análogos muestrales para obtener un estimador, se llama <i>método de los momentos</i>, y es, en este caso concreto, exactamente equivalente a la estimación por mínimos cuadrados ordinarios.
-</p>
-
-<p>
-Lo que ha cambiado entre la lección 7 y hoy no es la fórmula, que es idéntica, sino su <i>interpretación</i>. En la lección 7, \(\hat\beta_2\) era, sencillamente, la pendiente de la recta que mejor se ajustaba a un vector de datos concreto: un hecho geométrico sobre ese vector, sin ninguna pretensión más allá de él. Hoy, con el modelo poblacional \(Y=\beta_1\,\mathit1+\beta_2X+U\) ya construido, \(\hat\beta_2\) pasa a ser algo distinto: un <i>estimador</i> del parámetro poblacional (desconocido) \(\beta_2\): una aproximación, calculada a partir de nuestra muestra, a una cantidad que presumimos que existe en el mundo económico subyacente pero que nunca observaremos directamente.
-</p>
-
-<p>
-Un ejemplo concreto, para no perder el contacto con el laboratorio de regresión simple con datos reales (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf#page=2">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-B-hprice2-ajuste.html#price-rooms">html</a>) de la práctica B de la sesión 11). Escribamos el modelo poblacional \(\mathit{Price}=\beta_1\,\mathit{1}+\beta_2\,\mathit{Rooms}+U\), con la interpretación, bajo el primer supuesto y con las reservas causales de ``Cuidado: esta descomposición ortogonal no implica causalidad'', de que \(\beta_2\) mide cómo varía, en promedio, el precio de una vivienda cualquiera ante un incremento de una habitación; no solo de las 506 del Boston metropolitano que observamos. Entonces el coeficiente \(\hat\beta_2\) que Gretl calculó en aquella práctica no es solo ``la pendiente de la recta que mejor se ajusta a esos 506 puntos''. Es, además, nuestra mejor <i>estimación</i>, con los datos disponibles, de ese parámetro poblacional desconocido.
-</p>
-
-<p>
-<i>Para profundizar</i>:
-</p>
-<ul class="org-ul">
-<li>Bujosa, M., sección <a href="https://mbujosab.github.io/Ectr/apuntes-Ectr-print.pdf#section.11">``Estimación del Modelo Clásico de Regresión Lineal''</a>: discusión extensa (con el ejemplo detallado del precio de la vivienda) de por qué sustituir momentos poblacionales por muestrales constituye ``un salto audaz'', y de la relación exacta entre \((\mathbb{R}^n,\langle\cdot,\cdot\rangle_s)\) y un espacio de probabilidad.</li>
-<li>Wooldridge, J. M. (2020), Apéndice C, sección C.4: introducción al método de los momentos como principio general de estimación.</li>
-</ul>
 </div>
 </div>
 </div>
-<div id="outline-container-org172b9ea" class="outline-2">
-<h2 id="org172b9ea"><span class="section-number-2">9.</span> Recapitulación y guiño a la lección siguiente</h2>
-<div class="outline-text-2" id="text-9">
+<div id="outline-container-org100476d" class="outline-2">
+<h2 id="org100476d"><span class="section-number-2">2.</span> Variable explicativa y regresor: lineal en los regresores</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+<i>Variable explicativa</i>: una magnitud observada (<code>nox</code>, <code>educ</code>, el capital). <i>Regresor</i>: una columna del modelo, función de una o varias variables explicativas: <code>nox</code>, \(\log(\text{nox})\), \(\text{nox}^2\), además de la constante.
+</p>
+
+<p>
+El modelo es <i>lineal en los regresores</i>: \(\boldsymbol y=\beta_1\boldsymbol 1+\beta_2\boldsymbol x_2+\cdots+\beta_k\boldsymbol x_k+\boldsymbol u\). Esa linealidad en las columnas es lo único que mínimos cuadrados y la inferencia necesitan; toda la geometría del curso opera sobre las columnas.
+</p>
+
+<p>
+Puede no ser <i>lineal en las variables explicativas</i>: \(\log(\text{price})\) sobre \(\log(\text{nox})\) describe una curva entre precio y contaminación. La lectura del coeficiente habla de la variable, y por eso depende de la forma funcional.
+</p>
+
+<div class="org-center">
+<p>
+Mínimos cuadrados ve columnas. El economista lee variables.
+</p>
+</div>
+</div>
+<div id="outline-container-orgb400ffb" class="outline-4">
+<h4 id="orgb400ffb">Variable explicativa y regresor: lineal en los regresores</h4>
+<div class="outline-text-4" id="text-orgb400ffb">
+<p>
+Hasta ahora el curso ha usado ``regresor'' y ``variable'' casi como sinónimos, porque en casi todos los ejemplos cada columna del modelo era una variable observada tal cual. Hoy conviene separarlos. Una <i>variable explicativa</i> es una magnitud que se observa en cada unidad de la muestra y que se cree relacionada con el regresando: la concentración de contaminantes de un barrio, los años de educación de un trabajador, el capital de una industria. Un <i>regresor</i> es una columna de la matriz \(\boldsymbol{\mathsf X}\): un vector de \(\mathbb R^n\) que entra en el modelo con un coeficiente. Un regresor puede ser una variable explicativa sin transformar, su logaritmo, su cuadrado, el producto de dos variables, o la constante, que no proviene de ninguna. De una misma variable explicativa pueden salir varios regresores, y la lección 14 lo vio con <code>nox</code> y <code>lnox</code>.
+</p>
+
+<p>
+El modelo del curso, \(\boldsymbol y=\beta_1\boldsymbol 1+\beta_2\boldsymbol x_2+\cdots+\beta_k\boldsymbol x_k+\boldsymbol u\), es lineal en los regresores: el regresando es una combinación lineal de las columnas más la perturbación, con los \(\beta_j\) como coeficientes. Esa linealidad es la que usa todo el curso. Mínimos cuadrados proyecta \(\boldsymbol y\) sobre el subespacio generado por las columnas (lecciones 8 y 10); la insesgadez, la varianza y las distribuciones \(t\) y \(F\) (lecciones 11 a 13) se refieren a los coeficientes de las columnas; la colinealidad (lección 14) es un ángulo entre columnas. Nada de eso pregunta de qué variable salió cada columna.
+</p>
+
+<p>
+Que el modelo sea lineal en los regresores no obliga a que sea lineal en las variables explicativas. \(\log(\text{price})=\beta_1+\beta_2\log(\text{nox})+\beta_3\,\text{rooms}+u\) es lineal en sus tres columnas y describe, entre el precio y la contaminación, una relación curva: el precio es proporcional a una potencia de <code>nox</code>. La distinción importa para la lectura. El coeficiente \(\beta_2\) multiplica a la columna \(\log(\text{nox})\), y por tanto mide el efecto de una unidad más de <i>logaritmo</i> de contaminación. Traducirlo a la variable explicativa, a un 1 % más de contaminación, es el trabajo de esta lección.
+</p>
+
+<p>
+Queda un tercer caso, fuera del curso: modelos que no son lineales en los parámetros, como \(y=\beta_1x^{\beta_2}+u\), donde ninguna transformación de las variables deja los \(\beta\) como coeficientes de una suma. Esos modelos no se estiman con la proyección de la lección 8. El caso de Cobb–Douglas, \(Q=AL^\alpha K^\gamma e^{u}\), parece de este tipo y no lo es: tomando logaritmos se convierte en un modelo lineal en los regresores, y lo estimaremos con mínimos cuadrados en la transparencia ``Cobb–Douglas: elasticidades y rendimientos a escala''.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.4, apartado ``Meaning of linear regression''; cap. 3, sección 3.1 (el modelo con \(k\) regresores y la interpretación <i>ceteris paribus</i>).
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf8821c7" class="outline-2">
+<h2 id="orgf8821c7"><span class="section-number-2">3.</span> Cuatro formas, cuatro lecturas del coeficiente</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+La herramienta es una aproximación: para un cambio relativo pequeño \(p\), \(\log(1+p)\approx p\). Un cambio de \(\Delta\) en \(\log y\) es un cambio relativo de \(y\) de aproximadamente \(\Delta\), es decir, de \(100\,\Delta\) por ciento.
+</p>
+
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -1115,447 +448,823 @@ Un ejemplo concreto, para no perder el contacto con el laboratorio de regresión
 <col  class="org-left" />
 
 <col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
 </colgroup>
 <thead>
 <tr>
-<th scope="col" class="org-left">\(\mathbb{R}^n\) (dato conocido)</th>
-<th scope="col" class="org-left">Variables aleatorias (a inferir)</th>
+<th scope="col" class="org-left">Forma</th>
+<th scope="col" class="org-left">Modelo</th>
+<th scope="col" class="org-left">\(\beta_2\) es…</th>
+<th scope="col" class="org-left">Lectura de \(\beta_2\) (con lo demás fijo)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="org-left">vector de datos \(\boldsymbol y\)</td>
-<td class="org-left">variable aleatoria \(Y\)</td>
+<td class="org-left">nivel-nivel</td>
+<td class="org-left">\(y=\beta_1+\beta_2x+\cdots\)</td>
+<td class="org-left">cambio absoluto</td>
+<td class="org-left">una unidad más de \(x\), \(\beta_2\) unidades más de \(y\)</td>
 </tr>
 
 <tr>
-<td class="org-left">\(\mu_{\boldsymbol y}=\langle\boldsymbol y,\boldsymbol1\rangle_s\)</td>
-<td class="org-left">\(\mathrm{E}(Y)=\langle Y,\mathit{1}\rangle_P\)</td>
+<td class="org-left">log-nivel</td>
+<td class="org-left">\(\log y=\beta_1+\beta_2x+\cdots\)</td>
+<td class="org-left">semielasticidad</td>
+<td class="org-left">una unidad más de \(x\), un \(100\beta_2\) % más de \(y\)</td>
 </tr>
 
 <tr>
-<td class="org-left">\(\boldsymbol{\mathop{\overline y}}\) (vector constante)</td>
-<td class="org-left">\(E[Y\mid \mathit{1}]\) (función constante)</td>
+<td class="org-left">nivel-log</td>
+<td class="org-left">\(y=\beta_1+\beta_2\log x+\cdots\)</td>
+<td class="org-left">efecto del 1 %</td>
+<td class="org-left">un 1 % más de \(x\), \(\beta_2/100\) unidades más de \(y\)</td>
 </tr>
 
 <tr>
-<td class="org-left">\(\boldsymbol{\mathop{\widehat y}}\) (proyección sobre \(\mathcal L(\boldsymbol{1},\boldsymbol{x})\))</td>
-<td class="org-left">\(E[Y\mid X]\) (proyección sobre las func. de \(X\) y \(\mathit{1}\))</td>
+<td class="org-left">log-log</td>
+<td class="org-left">\(\log y=\beta_1+\beta_2\log x+\cdots\)</td>
+<td class="org-left">elasticidad</td>
+<td class="org-left">un 1 % más de \(x\), un \(\beta_2\) % más de \(y\)</td>
+</tr>
+</tbody>
+</table>
+<p>
+Con <code>hprice2</code> y <code>rooms</code> fijo: una unidad más de <code>nox</code> resta \(1885\) dólares (nivel-nivel) o un \(12{,}3\) % (log-nivel); un 1 % más de <code>nox</code> resta \(110\) dólares (nivel-log) o un \(0{,}72\) % (log-log).
+</p>
+</div>
+<div id="outline-container-org8e82bcd" class="outline-4">
+<h4 id="org8e82bcd">Cuatro formas, cuatro lecturas del coeficiente</h4>
+<div class="outline-text-4" id="text-org8e82bcd">
+<p>
+Toda la lectura de los modelos con logaritmos se apoya en una propiedad del logaritmo natural: para un número \(p\) pequeño, \(\log(1+p)\) es aproximadamente \(p\). Con \(p=0{,}01\), \(\log(1{,}01)=0{,}00995\); con \(p=0{,}05\), \(\log(1{,}05)=0{,}0488\); con \(p=0{,}10\), \(\log(1{,}10)=0{,}0953\). La aproximación es buena por debajo del 10 % y empeora deprisa después. Si una magnitud pasa de \(y\) a \(y'\), su logaritmo cambia en \(\log y'-\log y=\log(y'/y)=\log(1+p)\), donde \(p=(y'-y)/y\) es el cambio relativo. Luego un cambio de \(\Delta\) en el logaritmo es, aproximadamente, un cambio relativo de \(\Delta\), o de \(100\,\Delta\) por ciento.
+</p>
+
+<p>
+La tabla de la transparencia aplica esa aproximación a las cuatro combinaciones de niveles y logaritmos. En todas, ``con lo demás fijo'' significa lo mismo que en la lección 10: los otros regresores del modelo no cambian, y la lectura es la del efecto parcial.
+</p>
+
+<p>
+<i>Nivel-nivel</i>. Es el modelo de las lecciones 7 a 14. \(\beta_2\) está en unidades de \(y\) por unidad de \(x\): con <code>price</code> sobre <code>rooms</code> y <code>nox</code>, \(\hat\beta_{\text{nox}}=-1884{,}7\) dólares por cada parte por cien millones de óxidos de nitrógeno. El efecto de una unidad más es el mismo en un barrio limpio que en uno contaminado.
+</p>
+
+<p>
+<i>Log-nivel</i>. El regresando es \(\log y\), así que \(\beta_2\) es el cambio en \(\log y\) por unidad de \(x\), y por la aproximación, el cambio relativo de \(y\): \(100\beta_2\) por ciento por unidad de \(x\). Con <code>lprice</code> sobre <code>rooms</code> y <code>nox</code>, \(\hat\beta_{\text{nox}}=-0{,}1233\): una unidad más de <code>nox</code> va con un precio un \(12{,}3\) % menor. Esta cantidad se llama <i>semielasticidad</i>: un cambio porcentual de \(y\) por un cambio absoluto de \(x\).
+</p>
+
+<p>
+<i>Nivel-log</i>. El regresor es \(\log x\), así que \(\beta_2\) es el cambio de \(y\) por unidad de \(\log x\). Un 1 % más de \(x\) sube \(\log x\) en \(0{,}01\) aproximadamente, y por tanto \(y\) en \(0{,}01\,\beta_2=\beta_2/100\) unidades. Con <code>price</code> sobre <code>rooms</code> y <code>lnox</code>, \(\hat\beta_{\text{lnox}}=-10951{,}4\): un 1 % más de contaminación va con \(109{,}5\) dólares menos de precio mediano, sea cual sea el nivel de partida.
+</p>
+
+<p>
+<i>Log-log</i>. Las dos en logaritmos: un 1 % más de \(x\) sube \(\log x\) en \(0{,}01\), \(\log y\) en \(0{,}01\beta_2\), e \(y\) en un \(\beta_2\) por ciento. \(\beta_2\) es la <i>elasticidad</i> de \(y\) respecto de \(x\), la cantidad que la teoría económica usa para la demanda, la oferta o la producción. Con <code>lprice</code> sobre <code>rooms</code> y <code>lnox</code>, \(\hat\beta_{\text{lnox}}=-0{,}7177\): un 1 % más de contaminación va con un \(0{,}72\) % menos de precio.
+</p>
+
+<p>
+Los cuatro coeficientes se refieren a la misma relación entre precio y contaminación, y ninguno es ``el verdadero''. Cada modelo impone una forma a esa relación y su coeficiente la resume en una unidad distinta. La transparencia ``La elasticidad: una decisión del modelo'' vuelve sobre esa idea: la forma funcional se impone, no se descubre.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.4 (``Incorporating nonlinearities in simple regression'', con la tabla de las cuatro formas) y cap. 6, sección 6.2.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgcbe14e7" class="outline-2">
+<h2 id="orgcbe14e7"><span class="section-number-2">4.</span> Log-nivel: salarios y educación</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<code>wage1</code> (Wooldridge; \(526\) trabajadores, salario por hora en dólares de 1976):
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Modelo</th>
+<th scope="col" class="org-left">coef. de <code>educ</code></th>
+<th scope="col" class="org-left">\(\mathrm{ee}\)</th>
+<th scope="col" class="org-left">\(R^2\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>wage</code> sobre <code>educ</code></td>
+<td class="org-left">\(0{,}541\)</td>
+<td class="org-left">\(0{,}053\)</td>
+<td class="org-left">\(0{,}165\)</td>
 </tr>
 
 <tr>
-<td class="org-left">\(\boldsymbol{\mathop{\widehat e}}=\boldsymbol y-\boldsymbol{\mathop{\widehat y}}\)</td>
-<td class="org-left">\(U=Y-E[Y\mid X]\)</td>
-</tr>
-
-<tr>
-<td class="org-left">\(\sigma_{\boldsymbol y}^2=\Vert\boldsymbol y-\mu_{\boldsymbol y}\boldsymbol{1}\Vert_s^2\)</td>
-<td class="org-left">\(\mathrm{Var}(Y)=\Vert Y-\mathrm{E}(Y)\,\mathit{1}\Vert_P^2\)</td>
-</tr>
-
-<tr>
-<td class="org-left">\(\sigma_{\boldsymbol y}^2=\sigma_{\boldsymbol{\mathop{\widehat y}}}^2+\sigma_{\boldsymbol{\mathop{\widehat e}}}^2\)</td>
-<td class="org-left">\(\mathrm{Var}(Y)=\mathrm{Var}(E[Y\mid X])+\mathrm{Var}(U)\)</td>
-</tr>
-
-<tr>
-<td class="org-left">\(\hat\beta_1,\hat\beta_2\) (ajuste de una muestra)</td>
-<td class="org-left">\(\beta_1,\beta_2\) (parámetros poblacionales, a estimar)</td>
+<td class="org-left"><code>lwage</code> sobre <code>educ</code></td>
+<td class="org-left">\(0{,}0827\)</td>
+<td class="org-left">\(0{,}0076\)</td>
+<td class="org-left">\(0{,}186\)</td>
 </tr>
 </tbody>
 </table>
 
+<p>
+En niveles: un año más de educación, \(54\) centavos más por hora, igual para quien gana \(3\) que para quien gana \(20\) dólares. En log-nivel: un año más, un \(8{,}3\) % más de salario. El rendimiento de la educación se enuncia en porcentaje, con esta forma.
+</p>
 
 <p>
-<i>Próximos pasos:</i>
+Exacto: \(100\,(e^{\hat\beta_2}-1)=8{,}63\) %. Con cuatro años más: aproximado \(33\) %, exacto \(e^{4\cdot0{,}0827}-1=39{,}2\) %. La aproximación sirve para cambios pequeños.
 </p>
-<ul class="org-ul">
-<li>Hasta ahora la variable \(X\) era un único regresor (Regresión Simple).</li>
-<li>En economía real intervienen múltiples factores a la vez (\(X_1, X_2, \dots, X_k\)).</li>
-<li><i>Lección 10 (Regresión Múltiple)</i>: Ampliaremos la proyección del plano 2D a subespacios de mayor dimensión. Para manejar tantas condiciones de ortogonalidad, introduciremos las <i>matrices</i>.</li>
-</ul>
+
+<p>
+Los dos \(R^2\) no son comparables: miden el ajuste a variables distintas, <code>wage</code> y <code>lwage</code>.
+</p>
 </div>
-<div id="outline-container-orgb7683da" class="outline-4">
-<h4 id="orgb7683da">Recapitulación y guiño a la lección siguiente</h4>
-<div class="outline-text-4" id="text-orgb7683da">
+<div id="outline-container-org91a633f" class="outline-4">
+<h4 id="org91a633f">Log-nivel: salarios y educación</h4>
+<div class="outline-text-4" id="text-org91a633f">
 <p>
-Cerramos esta lección con la tabla-diccionario que resume todo el camino recorrido. Cada fila resume una transparencia de la sesión.
+El ejemplo clásico del modelo log-nivel es la ecuación de salarios. El fichero <code>wage1</code> de Wooldridge recoge \(526\) trabajadores de la encuesta de población de Estados Unidos de 1976, con el salario por hora, los años de educación, de experiencia y de antigüedad en la empresa, y una serie de características del puesto que la lección 16 usará como variables ficticias.
 </p>
 
 <p>
-La primera fila recoge la idea de partida (``Un vector es una función; y una variable aleatoria también''): tanto el vector de datos \(\boldsymbol y\) como la variable aleatoria \(Y\) son, ambos, funciones, solo que definidas sobre dominios de naturaleza distinta: uno finito y perfectamente conocido (\(\{1,\ldots,n\}\)), el otro potencialmente inmenso y, en la práctica, nunca descrito en detalle (\(\Omega\)).
+El modelo en niveles, <code>wage</code> sobre <code>educ</code>, da una pendiente de \(0{,}541\): cada año de educación va con \(54\) centavos más por hora, con un intervalo al 95 % que va de \(0{,}44\) a \(0{,}65\). La lectura es la de la lección 12 y es la misma para todos: el modelo impone que el año decimotercero de educación aporte lo mismo que el octavo, en dólares, y que lo aporte igual a quien gana \(3\) dólares por hora que a quien gana \(20\).
 </p>
 
 <p>
-La segunda y tercera filas recogen la distinción, mantenida durante toda la sesión, entre el valor esperado como número y la esperanza condicional como función constante (``La esperanza: dos caras de la misma moneda''). \(\mathrm{E}(Y)\) es un escalar, como lo era \(\mu_{\boldsymbol y}\). \(E[Y|\mathit{1}]\) es una función constante, la variable aleatoria constante más próxima a \(Y\), como lo era \(\boldsymbol{\mathop{\overline y}}\), el vector constante más próximo a \(\boldsymbol y\).
+El modelo log-nivel, <code>lwage</code> sobre <code>educ</code>, da \(0{,}0827\) con error estándar \(0{,}0076\), intervalo de \(0{,}068\) a \(0{,}098\). La lectura es porcentual: cada año de educación va con un salario un \(8{,}3\) % mayor, en todos los niveles salariales. Es la forma en que la economía del trabajo enuncia el rendimiento de la educación, porque un porcentaje es comparable entre países, décadas y monedas, y porque la hipótesis de que la educación multiplica el salario por un factor constante es más verosímil que la de que le suma una cantidad fija. El \(8{,}3\) % es la aproximación; el cambio exacto es \(100\,(e^{0{,}0827}-1)=8{,}63\) %. La diferencia es pequeña para un año, pero crece con el tamaño del cambio: para cuatro años más de educación, la aproximación da \(4\times8{,}27=33\) %, y el cálculo exacto, \(e^{4\times0{,}0827}-1=0{,}392\), un \(39{,}2\) %. El modelo predice un salario mediano de \(4{,}84\) dólares para doce años de educación y de \(6{,}74\) para dieciséis, y el cociente es \(1{,}392\). Cuando el coeficiente, o el cambio en \(x\) que interesa, es grande, la lectura exacta es la que hay que dar.
 </p>
 
 <p>
-La cuarta fila recoge la diferencia principal (``Esperanza condicional: proyección sobre un espacio ENORME''). \(\boldsymbol{\mathop{\widehat y}}\) era la proyección sobre un plano de solo dos direcciones linealmente independientes; \(E[Y|X]\) es la proyección sobre un espacio de funciones que, en general, tiene infinitas. Por eso la linealidad de \(E[Y|X]\) es un supuesto sustantivo, y no una consecuencia automática de la definición.
+La constante también se lee: \(e^{\hat\beta_1}=e^{0{,}584}=1{,}79\) dólares por hora es el salario predicho para cero años de educación, el nivel de escala del modelo. En los modelos con logaritmo en el regresando la constante es un factor multiplicativo, no una cantidad que se suma.
 </p>
 
 <p>
-La quinta fila es la descomposición fundamental que ambos mundos comparten: en \(\mathbb{R}^n\), \(\boldsymbol y=\boldsymbol{\mathop{\widehat y}}+\boldsymbol{\mathop{\widehat e}}\); con variables aleatorias, \(Y=E[Y|X]+U\). Ambas son descomposiciones ortogonales que existen <i>siempre</i>, sin necesidad de ningún supuesto adicional, y por eso mismo ninguna de las dos implica, por sí sola, ninguna relación de causalidad (``Cuidado: esta descomposición ortogonal no implica causalidad'').
+El último punto de la transparencia, que los dos \(R^2\) no se pueden comparar, es un aviso que vale para toda la lección. El \(R^2\) del modelo en niveles, \(0{,}165\), y el del modelo en logaritmos, \(0{,}186\), no se pueden comparar, por la definición de la lección 8: \(R^2\) es la fracción de la variación del regresando que recoge el ajuste, y el regresando es distinto en los dos modelos. Un \(R^2\) mayor con <code>lwage</code> no dice que el modelo en logaritmos prediga mejor el salario. Cómo comparar los dos modelos sobre la misma variable es el tema de la transparencia ``Previsión con y sin logaritmos''.
 </p>
 
 <p>
-La sexta fila recuerda que la varianza, en ambos mundos, mide lo mismo: la dispersión como el cuadrado del tamaño de la componente no constante.
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, ejemplo 2.10 (la ecuación de salarios en log-nivel) y cap. 6, sección 6.2, apartado ``More on using logarithmic functional forms''; Mincer, J. (1974), <i>Schooling, Experience, and Earnings</i>, el origen de esta especificación.
 </p>
-
-<p>
-La séptima fila recuerda que la identidad pitagórica permite descomponer la varianza (cuadrado de la hipotenusa \(Y-E[Y|\mathit{1}]\)), como suma de varianzas (cuadrados de los catetos horizontal: \(E[Y|X]-E[Y|\mathit{1}]\) y vertical: \(U\)); véase la figura de ``Esperanza condicional: proyección sobre un espacio ENORME''.
-</p>
-
-<p>
-Y la octava, finalmente, recoge la diferencia que ilustra la imagen de Diotima. \(\hat\beta_1,\hat\beta_2\) son cantidades <i>exactas</i>, conocidas sin margen de error para un vector de datos concreto, el de nuestra muestra incompleta (lección 7). \(\beta_1,\beta_2\) son cantidades características de la <i>población</i> completa, desconocidas para nosotros, que solo podemos tratar de <i>estimar</i>, nunca conocer con certeza, a partir de una muestra incompleta. El salto de ``El salto: método de los momentos'' consistió en mostrar que ambas cantidades, la exacta y la inferida, comparten la misma fórmula.
-</p>
-
-<p>
-El mensaje que debe quedar de esta sesión, por encima de cualquier fórmula concreta, es el siguiente: el lenguaje geométrico construido en las lecciones 1 a 8 (vectores, producto escalar, proyección ortogonal, ángulos) no era exclusivo de \(\mathbb{R}^n\). Es, más bien, un lenguaje general para la <i>aproximación óptima</i>, que se puede trasladar, con las advertencias que hemos ido señalando en cada paso, a cualquier conjunto de objetos donde exista una noción razonable de producto escalar. Las variables aleatorias, con la esperanza del producto como su propio producto escalar, son uno de esos conjuntos; y por eso la esperanza condicional \(E[Y|X]\) hereda, con toda naturalidad, el papel que en \(\mathbb{R}^n\) jugaba la proyección \(\boldsymbol{\mathop{\widehat y}}\). Trasladar el lenguaje no es identificar los objetos: \(\mathbb{R}^n\) y el espacio de las variables aleatorias son dos espacios distintos, y una lista de \(n\) variables aleatorias no es un vector de \(\mathbb{R}^n\). Lo único que los comunica es evaluar una fórmula de datos sobre la muestra, que es lo que hará la lección 11 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=10">apéndice, sección 4</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-4">html</a>)).
-</p>
-
-<p>
-Quedan, sin embargo, varias tareas pendientes que las próximas lecciones deberán resolver. La primera, inmediata: hasta ahora hemos trabajado con un único regresor \(X\) (si la Renta influye en el Consumo, también lo hacen los tipos de interés, las expectativas de inflación, la edad de los consumidores o su número de hijos). 
-En la <i>Lección 10 (Regresión Múltiple)</i> proyectaremos sobre subespacios generados por \(k\) regresores a la vez. La lógica geométrica será <i>la misma</i> (una condición de ortogonalidad por cada regresor), pero escribir un sistema de \(k\) ecuaciones con sus sumatorios correspondientes resultaría muy laborioso. Para comprimir esa información y hacerla manejable introduciremos el uso de <i>matrices</i> (\(\boldsymbol{\mathsf{X}}\)). Las matrices, como verá, son una notación para expresar múltiples productos escalares de una sola vez.
-</p>
-
-
-
-<p>
-<i>Para profundizar</i>:
-</p>
-<ul class="org-ul">
-<li>Wooldridge, J. M. (2020), capítulo 2, sección 2.6: resumen de los supuestos del modelo de regresión simple.</li>
-</ul>
 </div>
 </div>
 </div>
-<div id="outline-container-orgb378c40" class="outline-2">
-<h2 id="orgb378c40"><span class="section-number-2">10.</span> Preguntas de repaso (sesión 12)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div id="outline-container-org748baea" class="outline-2">
+<h2 id="org748baea"><span class="section-number-2">5.</span> Nivel-log y log-log: la contaminación</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Nivel-log: <code>price</code> sobre <code>rooms</code> y <code>lnox</code>, \(\hat\beta_{\text{lnox}}=-10951\): un 1 % más de contaminación, \(109{,}5\) dólares menos de precio mediano. El coeficiente se divide por \(100\).
+</p>
+
+<p>
+Log-log: <code>lprice</code> sobre <code>rooms</code> y <code>lnox</code>, \(\hat\beta_{\text{lnox}}=-0{,}718\) (\(\mathrm{ee}\) \(0{,}066\)): elasticidad del precio respecto de la contaminación. Un 1 % más de <code>nox</code>, un \(0{,}72\) % menos de precio. El coeficiente se lee tal cual, sin dividir ni multiplicar por \(100\).
+</p>
+
+<p>
+El modelo de Wooldridge (ejemplo 4.5): <code>lprice</code> sobre <code>lnox</code>, \(\log(\text{dist})\), <code>rooms</code> y <code>stratio</code>. Elasticidad \(-0{,}954\) (\(\mathrm{ee}\) \(0{,}117\)), intervalo al 95 % de \(-1{,}18\) a \(-0{,}72\); <code>rooms</code>: \(0{,}255\), un \(25{,}5\) % más por habitación (\(29{,}0\) % exacto).
+</p>
+
+<p>
+La pregunta económica es \(H_0\!:\beta_{\text{lnox}}=-1\) (elasticidad unitaria), no \(\beta_{\text{lnox}}=0\): \(t=\dfrac{-0{,}954-(-1)}{0{,}117}=0{,}40\). Datos como estos no serían raros si la elasticidad fuese \(-1\).
+</p>
+</div>
+<div id="outline-container-org8452b06" class="outline-4">
+<h4 id="org8452b06">Nivel-log y log-log: la contaminación</h4>
+<div class="outline-text-4" id="text-org8452b06">
+<p>
+Volvemos a <code>hprice2</code> para las dos formas con el regresor en logaritmos. El modelo nivel-log, <code>price</code> sobre <code>rooms</code> y <code>lnox</code>, es la segunda fila de la tabla de apertura. Su coeficiente, \(-10951{,}4\) dólares por unidad de \(\log(\text{nox})\), no se lee directamente, porque nadie piensa en unidades de logaritmo. Se divide por \(100\): un 1 % más de contaminación va con un precio mediano \(109{,}5\) dólares menor. La lección 14 lo dijo con otras palabras al comparar los remedios para la colinealidad: con <code>nox</code> en niveles, cada unidad más resta lo mismo al precio; con <code>lnox</code>, resta cada vez menos, porque un aumento de una unidad es un porcentaje grande cuando <code>nox</code> vale \(4\) y pequeño cuando vale \(8\).
+</p>
+
+<p>
+El modelo log-log, <code>lprice</code> sobre <code>rooms</code> y <code>lnox</code>, es el más usado cuando la teoría habla de elasticidades. Su coeficiente, \(-0{,}7177\) con error estándar \(0{,}0663\), es la elasticidad del precio respecto de la contaminación: un 1 % más de <code>nox</code> va con un \(0{,}72\) % menos de precio, con <code>rooms</code> fijo. El intervalo al 95 % va de \(-0{,}85\) a \(-0{,}59\). Esta elasticidad es la misma en todos los barrios: el modelo lo impone.
+</p>
+
+<p>
+Wooldridge estima, en su ejemplo 4.5, un modelo log-log algo más completo: el logaritmo del precio sobre el logaritmo de <code>nox</code>, el logaritmo de la distancia a los centros de empleo (<code>dist</code>), el número de habitaciones y la ratio alumnos-profesor (<code>stratio</code>). Con \(n=506\), el \(R^2\) es \(0{,}584\) y los cuatro coeficientes se leen con la tabla de la transparencia ``Cuatro formas, cuatro lecturas del coeficiente''. La elasticidad respecto de la contaminación es \(-0{,}954\), con error estándar \(0{,}117\) e intervalo de \(-1{,}18\) a \(-0{,}72\). La elasticidad respecto de la distancia es \(-0{,}134\). El coeficiente de <code>rooms</code> es una semielasticidad, porque <code>rooms</code> entra en niveles: \(0{,}255\), una habitación más va con un precio un \(25{,}5\) % mayor según la aproximación, y un \(29{,}0\) % mayor según el cálculo exacto, \(e^{0{,}255}-1\). Aquí la aproximación ya se queda corta en más de tres puntos. El de <code>stratio</code> es otra semielasticidad: un alumno más por profesor, un \(5{,}2\) % menos de precio.
+</p>
+
+<p>
+La transparencia termina cobrando una promesa de la lección 12: contrastar un coeficiente contra un valor distinto de cero. Allí se dijo que, cuando \(\beta_2\) es una elasticidad, la pregunta interesante rara vez es si vale cero, sino si es compatible con un valor concreto que la teoría sugiere; y que el estadístico \(t\) sirve para cualquier valor hipotético, no solo para el cero. Con el modelo de Wooldridge la pregunta natural es si la elasticidad es unitaria: si un 1 % más de contaminación va con un 1 % menos de precio. El estadístico es \(t=(\hat\beta_{\text{lnox}}-(-1))/\mathrm{ee}(\hat\beta_{\text{lnox}})=(-0{,}954+1)/0{,}117=0{,}40\), muy por debajo del valor crítico \(1{,}96\), y el valor \(p\) ronda \(0{,}69\). Datos como estos no serían raros si la elasticidad fuese \(-1\); a la luz del contraste, no se rechaza. En cambio, \(H_0\!:\beta_{\text{lnox}}=0\) se rechaza con un \(t\) de \(-8{,}2\), y ese rechazo es el poco informativo: nadie esperaba que la contaminación no afectase al precio.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 4, ejemplo 4.5 (``Housing prices and air pollution'') y sección 4.2, apartado ``Testing other hypotheses about \(\beta_j\)''; Harrison, D. y Rubinfeld, D. L. (1978), ``Hedonic housing prices and the demand for clean air'', <i>Journal of Environmental Economics and Management</i> 5, 81–102, el artículo del que proceden los datos.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orge532773" class="outline-2">
+<h2 id="orge532773"><span class="section-number-2">6.</span> La elasticidad: una decisión del modelo</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+En el modelo en niveles la elasticidad existe, pero cambia con \(x\): \(\eta=\beta_2\,x/\hat y\). Con <code>price</code> sobre <code>nox</code> (regresión simple): \(-0{,}47\) en un barrio con <code>nox</code> \(3{,}9\); \(-0{,}82\) con \(5{,}5\); \(-2{,}5\) con \(8{,}7\). En el modelo log-log es la misma en todos los barrios: \(-1{,}04\).
+</p>
+
+
+<div id="org3ad17ce" class="figure">
+<p><img src="img/S23-Lecc15/NubeNox_fila.png" alt="NubeNox_fila.png" width="700px" />
+</p>
+<p><span class="figure-number">Figura 1: </span>Los \(506\) barrios de <code>hprice2</code>. Izquierda: precio mediano (miles de dólares) frente a <code>nox</code>, con la recta del modelo nivel-nivel (<code>price</code> sobre <code>nox</code>, en azul) y la curva del modelo nivel-log (<code>price</code> sobre <code>lnox</code>, en rojo). Donde hay muchos barrios, entre \(4\) y \(7\), la recta y la curva casi coinciden; se separan en los extremos, donde hay pocos datos: para <code>nox</code> \(8{,}7\) la recta predice \(11{,}8\) mil dólares y la curva \(13{,}3\). Derecha: logaritmo del precio frente a logaritmo de <code>nox</code>, con la recta del modelo log-log (en verde); su pendiente, \(-1{,}04\), es la elasticidad, y es la misma en toda la nube. Los tres ajustes son regresiones simples, sin <code>rooms</code>, para que la figura sea plana.</p>
+</div>
+
+<div class="org-center">
+<p>
+Qué forma elegir lo decide la pregunta económica y el comportamiento esperado fuera de lo habitual, no el \(R^2\): los ajustes son casi iguales donde hay datos.
+</p>
+</div>
+</div>
+<div id="outline-container-orgeb83298" class="outline-4">
+<h4 id="orgeb83298">La elasticidad: una decisión del modelo</h4>
+<div class="outline-text-4" id="text-orgeb83298">
+<p>
+La elasticidad de \(y\) respecto de \(x\) es el cambio porcentual de \(y\) por cada 1 % de cambio en \(x\). En el modelo log-log es el coeficiente, y es constante. Pero la elasticidad se puede calcular en cualquier modelo: en el nivel-nivel, un cambio de una unidad en \(x\) cambia \(y\) en \(\beta_2\) unidades, luego un cambio del 1 % en \(x\), que son \(0{,}01x\) unidades, cambia \(y\) en \(0{,}01\beta_2x\), y en términos relativos en \(0{,}01\beta_2x/y\). La elasticidad en el punto \((x,y)\) es \(\eta=\beta_2\,x/y\), evaluada habitualmente en el valor ajustado \(\hat y\). Depende del punto: crece con \(x\) y decrece con \(y\).
+</p>
+
+<p>
+La transparencia lo muestra con la regresión simple de <code>price</code> sobre <code>nox</code> (la de la figura, sin <code>rooms</code>): \(\widehat{\text{price}}=41308-3387\,\text{nox}\). En un barrio con <code>nox</code> igual a \(3{,}9\) el precio ajustado es \(28099\) dólares y la elasticidad \(-3387\times3{,}9/28099=-0{,}47\); con <code>nox</code> igual a \(5{,}5\), el precio ajustado es \(22680\) y la elasticidad \(-0{,}82\); con \(8{,}7\), el precio ajustado baja a \(11842\) y la elasticidad llega a \(-2{,}5\). El mismo modelo dice que la demanda de aire limpio es inelástica en los barrios limpios y muy elástica en los contaminados. El modelo log-log de la misma figura, <code>lprice</code> sobre <code>lnox</code>, dice que la elasticidad es \(-1{,}04\) en todos. Con <code>rooms</code> en el modelo las cifras cambian (\(-0{,}29\), \(-0{,}46\) y \(-0{,}99\) en el modelo en niveles, frente a la elasticidad constante \(-0{,}72\) del log-log), pero el contraste es el mismo: una elasticidad que varía frente a una elasticidad fija.
+</p>
+
+<p>
+Ninguno de los dos modelos descubre la elasticidad: cada uno la impone con su forma funcional, y después estima su tamaño. Que la forma de la relación se impone y no se descubre es la idea central de la lección. Elegir entre niveles y logaritmos es elegir qué tipo de relación se supone entre las variables, y esa elección la hace el economista antes de estimar, con dos criterios. El primero es la pregunta: si la teoría habla de elasticidades, o si el efecto que interesa se enuncia en porcentaje, el modelo en logaritmos la responde directamente. El segundo es el comportamiento fuera del rango habitual de los datos. La figura muestra por qué el ajuste no sirve de guía: entre <code>nox</code> \(4\) y \(7\), donde están casi todos los barrios, la recta y la curva pasan por los mismos puntos y los \(R^2\) son \(0{,}18\) en los dos casos. Se separan en los extremos, donde hay pocos datos: para el barrio más contaminado la recta predice \(11{,}8\) mil dólares y la curva \(13{,}3\), y si se extrapolara a <code>nox</code> \(12\), la recta daría un precio de \(0{,}7\) mil dólares y la curva, \(7{,}0\). La muestra apenas distingue las dos formas; lo que las distingue es lo que dicen fuera de la muestra, y eso es una decisión de modelización, no un resultado estadístico. La lección 14 ya dijo, al comparar <code>nox</code> y <code>lnox</code> como remedios para la colinealidad, que las dos descripciones ajustan casi igual y se separan fuera de lo habitual.
+</p>
+
+<p>
+Hay un tercer criterio, de forma del error, que se verá en la transparencia ``Lo que cambia y lo que no''. Y hay un criterio que no sirve: el \(R^2\), cuando los regresandos son distintos.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 6, sección 6.2, apartado ``Models with quadratics'' (otra forma funcional en que el efecto depende del punto) y cap. 2, sección 2.4.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org69d0560" class="outline-2">
+<h2 id="org69d0560"><span class="section-number-2">7.</span> Cobb–Douglas: elasticidades y rendimientos a escala</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+\(Q=A\,L^{\alpha}K^{\gamma}e^{u}\) no es lineal en nada. En logaritmos sí: \(\log Q=\beta_1+\alpha\log L+\gamma\log K+u\), con \(\beta_1=\log A\). Es un modelo log-log con dos regresores: \(\alpha\) y \(\gamma\) son las <i>elasticidades parciales</i> del producto; \(\alpha+\gamma\) mide los <i>rendimientos a escala</i>.
+</p>
+
+<p>
+Datos de Zellner y Revankar (<code>greene9_1</code>): valor añadido, trabajo y capital de la industria del equipo de transporte en \(25\) estados de EE. UU., 1957.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Regresor</th>
+<th scope="col" class="org-left">coef.</th>
+<th scope="col" class="org-left">\(\mathrm{ee}\)</th>
+<th scope="col" class="org-left">\(t\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">constante</td>
+<td class="org-left">\(1{,}844\)</td>
+<td class="org-left">\(0{,}234\)</td>
+<td class="org-left">\(7{,}90\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(\log(\text{labor})\)</td>
+<td class="org-left">\(0{,}805\)</td>
+<td class="org-left">\(0{,}126\)</td>
+<td class="org-left">\(6{,}37\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(\log(\text{capital})\)</td>
+<td class="org-left">\(0{,}245\)</td>
+<td class="org-left">\(0{,}107\)</td>
+<td class="org-left">\(2{,}30\)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+\(R^2=0{,}973\); \(\hat\alpha+\hat\gamma=1{,}051\). \(H_0\!:\alpha+\gamma=1\) es una restricción lineal (lección 13): \(F(1,22)=1{,}54\), valor \(p=0{,}23\). Datos como estos no serían raros con rendimientos constantes.
+</p>
+</div>
+<div id="outline-container-org7fe8262" class="outline-4">
+<h4 id="org7fe8262">Cobb–Douglas: elasticidades y rendimientos a escala</h4>
+<div class="outline-text-4" id="text-org7fe8262">
+<p>
+La función de producción de Cobb–Douglas es el ejemplo canónico del modelo log-log, y el que enlaza esta lección con la teoría económica. En su forma estocástica, \(Q=A\,L^{\alpha}K^{\gamma}e^{u}\): el producto \(Q\) depende del trabajo \(L\) y del capital \(K\) a través de dos exponentes, de una constante de escala \(A\) y de un factor aleatorio \(e^{u}\) que recoge lo que la función no explica. Escrita así no es lineal en los parámetros (\(\alpha\) y \(\gamma\) son exponentes) ni en las variables. Tomando logaritmos, \(\log Q=\log A+\alpha\log L+\gamma\log K+u\), que es el modelo del curso con regresando \(\log Q\), regresores \(\boldsymbol 1\), \(\log L\) y \(\log K\), y perturbación \(u\). Mínimos cuadrados lo estima como cualquier otro, y la inferencia de las lecciones 11 a 13 se aplica a \(\alpha\) y \(\gamma\). Cobb–Douglas muestra por qué importa la distinción entre regresor y variable explicativa: la función es muy no lineal en las variables, y el modelo estimado es lineal en los regresores.
+</p>
+
+<p>
+La lectura de los coeficientes es la del modelo log-log. \(\alpha\) es la elasticidad del producto respecto del trabajo con el capital fijo: un 1 % más de trabajo, un \(\alpha\) % más de producto. \(\gamma\) es la elasticidad respecto del capital con el trabajo fijo. Son <i>elasticidades parciales</i>, y en la teoría de la producción con competencia perfecta coinciden con las participaciones del trabajo y del capital en el producto. La suma \(\alpha+\gamma\) mide los rendimientos a escala: si los dos factores aumentan un 1 %, el producto aumenta un \((\alpha+\gamma)\) %. Si la suma es \(1\), los rendimientos son constantes; mayor que \(1\), crecientes; menor, decrecientes.
+</p>
+
+<p>
+Los datos de la transparencia son los que Zellner y Revankar usaron en 1969 y que Greene reproduce en su manual: el valor añadido, el trabajo y el capital de la industria del equipo de transporte en \(25\) estados de Estados Unidos en 1957. Gretl los incluye como <code>greene9_1</code> en la pestaña <i><i><code>Greene</code></i></i> de los ficheros de muestra. El modelo estimado es \(\widehat{\log Q}=1{,}844+0{,}805\log L+0{,}245\log K\), con \(R^2=0{,}973\) y \(\mathfrak s=0{,}236\). La elasticidad respecto del trabajo es \(0{,}81\) con error estándar \(0{,}13\); la del capital, \(0{,}25\) con error estándar \(0{,}11\), y su \(t\) de \(2{,}30\) la separa de cero al 5 % con poco margen, porque con \(25\) observaciones y dos factores correlacionados la parte propia de cada regresor es corta (lección 14). La constante, \(e^{1{,}844}=6{,}3\), es el factor de escala \(A\).
+</p>
+
+<p>
+La pregunta de la teoría es si los rendimientos son constantes: \(H_0\!:\alpha+\gamma=1\). Es una restricción lineal sobre dos coeficientes, de las que la lección 13 enseñó a contrastar, y Gretl la contrasta con <code>restrict</code>. La suma estimada es \(1{,}051\), con error estándar \(0{,}041\); el estadístico \(F(1,22)\) vale \(1{,}54\), frente a un valor crítico de \(4{,}30\) al 5 %, y el valor \(p\) es \(0{,}23\). Datos como estos no serían raros si los rendimientos fuesen constantes; a la luz del contraste, no se rechaza. El modelo restringido se construye como en la lección 13: con \(\gamma=1-\alpha\), \(\log Q-\log L=\log A+\gamma\,(\log K-\log L)+u\), la regresión del logaritmo del producto por trabajador sobre el logaritmo del capital por trabajador. Su coeficiente es \(0{,}289\), y las estimaciones restringidas quedan en \(\hat\alpha=0{,}711\) y \(\hat\gamma=0{,}289\): al imponer la escala constante, el reparto entre trabajo y capital se desplaza hacia el capital. La \(\mathrm{SRC}\) sube de \(1{,}222\) a \(1{,}308\), y esa diferencia, dividida por \(\mathfrak s^2\), es el \(F\).
+</p>
+
+<p>
+Dos cautelas. La primera: con \(25\) observaciones el contraste tiene poca potencia, y ``no se rechaza'' no es ``los rendimientos son constantes''. La segunda: en una regresión de corte transversal entre estados, la elasticidad estimada compara industrias de tamaños distintos en un mismo año, no el efecto de aumentar los factores en una misma industria; su lectura causal exige los supuestos de la lección 9 sobre la perturbación.
+</p>
+
+<p>
+<i>Para profundizar</i>: Zellner, A. y Revankar, N. S. (1969), ``Generalized production functions'', <i>Review of Economic Studies</i> 36, 241–250; Greene, W. H., <i>Econometric Analysis</i> (los datos figuran en la tabla 9.1 de la 4.ª edición, y el ejemplo de Cobb–Douglas con el contraste de rendimientos constantes se repite en las ediciones posteriores); Wooldridge, J. M. (2020), cap. 4, sección 4.4 (contrastes de una combinación lineal de parámetros).
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org42f27d0" class="outline-2">
+<h2 id="org42f27d0"><span class="section-number-2">8.</span> Previsión con y sin logaritmos</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+Con <code>lprice</code> sobre <code>rooms</code> y <code>lnox</code>, un barrio con \(6\) habitaciones y <code>nox</code> \(5{,}5\) tiene \(\widehat{\log(\text{price})}=9{,}846\). Deshacer el logaritmo, \(e^{9{,}846}=18879\) dólares, <i>subestima</i> el precio medio: \(e^{\hat y}\) predice la mediana, no la media.
+</p>
+
+<p>
+Con perturbación normal (lección 12), \(\mathrm{E}(y\mid\text{regresores})=e^{\boldsymbol x^\top\boldsymbol\beta}\,e^{\sigma^2/2}\). Previsión corregida: \(e^{\hat y}\,e^{\mathfrak s^2/2}\); aquí \(\mathfrak s=0{,}286\) y el factor es \(1{,}042\): \(19667\) dólares. Enunciado, no demostrado.
+</p>
+
+<p>
+En toda la muestra: la media de <code>price</code> es \(22512\); la media de \(e^{\hat y}\), \(21672\); la de la previsión corregida, \(22576\).
+</p>
+
+<p>
+Para comparar con un modelo en niveles hay que medir sobre la misma variable: el cuadrado de la correlación entre <code>price</code> y la previsión en niveles del modelo log-log es \(0{,}595\); el \(R^2\) de <code>price</code> sobre <code>rooms</code> y <code>lnox</code>, \(0{,}536\).
+</p>
+</div>
+<div id="outline-container-org387464c" class="outline-4">
+<h4 id="org387464c">Previsión con y sin logaritmos</h4>
+<div class="outline-text-4" id="text-org387464c">
+<p>
+Un modelo con el logaritmo del precio como regresando predice logaritmos. Para dar un precio hay que deshacer la transformación, y ese paso tiene una trampa. Tomemos el modelo log-log <code>lprice</code> sobre <code>rooms</code> y <code>lnox</code>, \(\widehat{\log(\text{price})}=9{,}234+0{,}306\,\text{rooms}-0{,}718\log(\text{nox})\), y un barrio con seis habitaciones por vivienda y una concentración de \(5{,}5\): la previsión en logaritmos es \(9{,}846\). Lo inmediato es deshacer el logaritmo y tomar \(e^{9{,}846}=18879\) dólares como previsión del precio. Pero \(e^{\hat y}\) no predice el precio medio de los barrios con esas características, sino algo menor.
+</p>
+
+<p>
+La razón está en la forma de la perturbación. El modelo dice \(\log(\text{price})=\boldsymbol x^\top\boldsymbol\beta+u\), es decir, \(\text{price}=e^{\boldsymbol x^\top\boldsymbol\beta}e^{u}\). Si \(u\) es simétrica alrededor de cero, la mitad de los barrios tiene \(e^{u}>1\) y la otra mitad \(e^{u}<1\), así que \(e^{\boldsymbol x^\top\boldsymbol\beta}\) es la mediana del precio para esos regresores. Pero la media de \(e^{u}\) es mayor que \(1\): los valores de \(u\) por encima de cero multiplican el precio por más de lo que los valores por debajo lo dividen. Con \(u\) normal de varianza \(\sigma^2\), condicionando en los regresores, la media de \(e^{u}\) es \(e^{\sigma^2/2}\), y por tanto \(\mathrm{E}(\text{price}\mid\text{regresores})=e^{\boldsymbol x^\top\boldsymbol\beta}e^{\sigma^2/2}\). Es una propiedad de la distribución normal que enunciamos sin demostrar; el apéndice de geometría tampoco la cubre. La previsión de la media se obtiene multiplicando \(e^{\hat y}\) por \(e^{\mathfrak s^2/2}\), con \(\mathfrak s^2=\mathrm{SRC}/(n-k)\) la cuasivarianza de los residuos de la lección 11. Aquí \(\mathfrak s=0{,}286\), el factor es \(e^{0{,}0409}=1{,}042\), y la previsión corregida del barrio es \(18879\times1{,}042=19667\) dólares. El modelo nivel-log, <code>price</code> sobre <code>rooms</code> y <code>lnox</code>, da para el mismo barrio \(20065\). Las tres cifras, \(18879\), \(19667\) y \(20065\), son previsiones razonables del precio de ese barrio; lo que no es razonable es tomar \(e^{\hat y}\) por la media sin corregirlo.
+</p>
+
+<p>
+La corrección se nota en el conjunto de la muestra. El precio medio de los \(506\) barrios es \(22512\) dólares. La media de \(e^{\hat y}\) es \(21672\), un \(3{,}7\) % menos; la media de las previsiones corregidas, \(22576\), casi igual a la observada. Si la perturbación no fuese normal, el factor \(e^{\sigma^2/2}\) no sería el correcto, pero el problema sería el mismo, y hay una corrección sin supuesto de normalidad: multiplicar por la media muestral de \(e^{\hat e_i}\), los residuos exponenciados. Con estos datos ese factor vale \(1{,}043\), frente al \(1{,}042\) de la fórmula con normalidad.
+</p>
+
+<p>
+Con la previsión en niveles se puede responder la pregunta que la transparencia ``Log-nivel: salarios y educación'' dejó abierta: cómo comparar el ajuste de un modelo en logaritmos con el de uno en niveles. El \(R^2\) no sirve, porque mide ajustes a regresandos distintos. Lo que sí se puede comparar es cuánto se parecen las previsiones del precio, en dólares, al precio observado. Una medida es el cuadrado de la correlación entre <code>price</code> y la previsión en niveles, que para el modelo en niveles coincide con su \(R^2\) (lecciones 5 y 8: \(R^2\) es el coseno al cuadrado del ángulo entre el regresando y su ajuste en desviaciones, es decir, su correlación al cuadrado). Con el modelo log-log, la correlación al cuadrado entre <code>price</code> y \(e^{\hat y}\) es \(0{,}595\), y multiplicar por el factor de corrección no la cambia, porque una constante multiplicativa no altera la correlación. El modelo nivel-log, <code>price</code> sobre <code>rooms</code> y <code>lnox</code>, tiene \(R^2=0{,}536\). Medidos sobre la misma variable, el modelo en logaritmos predice algo mejor el precio en dólares. No es una regla general: en otros datos el resultado se invierte, y por eso hay que calcularlo.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 6, sección 6.4, apartado ``Predicting \(y\) when \(\log(y)\) is the dependent variable'' (incluye la corrección sin normalidad de Duan y la comparación de \(R^2\) entre modelos); Duan, N. (1983), ``Smearing estimate: a nonparametric retransformation method'', <i>Journal of the American Statistical Association</i> 78, 605–610.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org29ed309" class="outline-2">
+<h2 id="org29ed309"><span class="section-number-2">9.</span> Lo que cambia y lo que no</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+<i>Unidades</i>: si <code>price</code> pasa a miles de dólares, \(\log(\text{price}/1000)=\log(\text{price})-6{,}908\): solo cambia la constante (\(9{,}234\to2{,}326\)); pendientes, \(R^2\) y \(\mathfrak s\), iguales. En niveles, cambiar las unidades de \(y\) o de \(x\) reescala los coeficientes (lección 5).
+</p>
+
+<p>
+<i>Solo variables positivas</i>: el logaritmo no admite ceros ni negativos. Con ceros, se deja la variable en niveles o se usa \(\log(1+x)\) para \(x\ge0\). Las variables que ya son porcentajes o tasas suelen entrar en niveles; las dicotómicas, siempre (lección 16).
+</p>
+
+<p>
+<i>La forma de la perturbación</i>: los precios y los salarios tienen asimetría a la derecha y una dispersión que crece con el nivel; el logaritmo los simetriza y estabiliza su varianza. Esa es la razón estadística para preferir <code>lprice</code> y <code>lwage</code>, y vuelve en la lección 17.
+</p>
+
+<div class="org-center">
+<p>
+Lo que no cambia nunca: la geometría. Columnas, proyección, residuos, \(t\) y \(F\) son los mismos para cualquier forma funcional lineal en los regresores.
+</p>
+</div>
+</div>
+<div id="outline-container-orgf23a46b" class="outline-4">
+<h4 id="orgf23a46b">Lo que cambia y lo que no</h4>
+<div class="outline-text-4" id="text-orgf23a46b">
+<p>
+Tres observaciones prácticas cierran la parte de lectura.
+</p>
+
+<p>
+<i>Unidades.</i> La lección 5 estudió qué pasa con la media, la varianza y la correlación al trasladar o reescalar un vector, y la lección 12 avisó de que el tamaño de un coeficiente depende de las unidades. En un modelo en niveles, medir el precio en miles de dólares divide por mil todos los coeficientes y la constante; medir <code>nox</code> en partes por millón en lugar de por cien millones multiplica su coeficiente por cien. Las conclusiones no cambian, pero las cifras sí, y hay que saber en qué unidades está cada una. Con logaritmos la situación es más simple: \(\log(cx)=\log c+\log x\), así que cambiar las unidades de una variable en logaritmos suma una constante a su columna, y eso solo mueve la constante del modelo. Con <code>lprice</code> sobre <code>rooms</code> y <code>lnox</code>, si el precio se mide en miles de dólares la constante pasa de \(9{,}234\) a \(9{,}234-\log(1000)=2{,}326\), y las dos pendientes, el \(R^2\), \(\mathfrak s\) y todos los \(t\) quedan iguales. Lo mismo ocurre si se cambian las unidades de <code>nox</code>: su coeficiente, la elasticidad, no tiene unidades. Esta invariancia es una de las razones por las que las elasticidades son la forma habitual de enunciar resultados comparables entre estudios.
+</p>
+
+<p>
+<i>Variables positivas.</i> El logaritmo de cero no existe, y el de un número negativo tampoco. Las variables candidatas a entrar en logaritmos son cantidades positivas con rango amplio: precios, salarios, rentas, producción, población, superficies. Cuando una variable positiva toma el valor cero en parte de la muestra (horas de formación, gasto en un bien que muchos no compran), se puede dejar en niveles o usar \(\log(1+x)\), que vale cero en \(x=0\) y se parece a \(\log x\) para \(x\) grande; en ese caso la lectura porcentual es solo aproximada. Las variables que ya son tasas o porcentajes, como una tasa de paro o la ratio alumnos-profesor, suelen entrar en niveles: su coeficiente se lee por puntos porcentuales y no hace falta transformarlas. Las variables dicotómicas, que valen cero o uno, nunca se transforman; la lección 16 explicará cómo se leen, y en un modelo con el regresando en logaritmos su coeficiente será una diferencia porcentual.
+</p>
+
+<p>
+<i>La forma de la perturbación.</i> Hay una razón estadística, además de la económica, para preferir el logaritmo en el regresando cuando se trata de precios, salarios o rentas. Estas variables tienen distribuciones asimétricas, con una cola larga a la derecha, y su dispersión crece con el nivel: entre viviendas caras hay más diferencias en dólares que entre viviendas baratas. En un modelo en niveles eso se traslada a la perturbación, que deja de tener la misma varianza en todas las observaciones, en contra del supuesto de homocedasticidad de la lección 11. El logaritmo comprime la cola derecha y convierte las diferencias en dólares en diferencias relativas, que suelen ser más parecidas entre niveles; con frecuencia el modelo en logaritmos cumple mejor los supuestos de las lecciones 11 y 12. La lección 17 tratará la heterocedasticidad y sus remedios; el cambio a logaritmos es el primero que se suele probar.
+</p>
+
+<p>
+Y lo que no cambia. Toda esta lección ha hablado de lectura, y ninguna transparencia ha necesitado una figura nueva de \(\mathbb R^n\). El modelo con logaritmos es el mismo modelo lineal en los regresores de las lecciones 8 a 14, con otras columnas. La proyección, el residuo, la descomposición de Pitágoras, el \(R^2\), los errores estándar, los contrastes \(t\) y \(F\) y la colinealidad son los que eran. La forma funcional decide qué columnas se construyen y cómo se leen sus coeficientes; una vez construidas, la geometría no distingue un logaritmo de un nivel.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.4 (``The effects of changing units of measurement on OLS statistics'') y cap. 6, sección 6.2 (ventajas y límites de los logaritmos, incluida la cuestión de los ceros); cap. 8 para la heterocedasticidad.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb40ee8f" class="outline-2">
+<h2 id="orgb40ee8f"><span class="section-number-2">10.</span> Recapitulación y guiño a la lección siguiente</h2>
 <div class="outline-text-2" id="text-10">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Pieza</th>
+<th scope="col" class="org-left">Fórmula</th>
+<th scope="col" class="org-left">Lectura</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Regresor frente a variable</td>
+<td class="org-left">\(\boldsymbol x_j\) es función de las variables</td>
+<td class="org-left">la geometría ve columnas; la lectura, variables</td>
+</tr>
+
+<tr>
+<td class="org-left">Aproximación</td>
+<td class="org-left">\(\log(1+p)\approx p\)</td>
+<td class="org-left">un \(\Delta\) en \(\log y\) es un \(100\Delta\) % en \(y\)</td>
+</tr>
+
+<tr>
+<td class="org-left">Las tres lecturas</td>
+<td class="org-left">\(100\beta_2\) %; \(\beta_2/100\); \(\beta_2\) %</td>
+<td class="org-left">semielasticidad; efecto del 1 %; elasticidad</td>
+</tr>
+
+<tr>
+<td class="org-left">Cobb–Douglas</td>
+<td class="org-left">\(\log Q=\beta_1+\alpha\log L+\gamma\log K+u\)</td>
+<td class="org-left">elasticidades parciales; \(\alpha+\gamma=1\) es un <code>restrict</code></td>
+</tr>
+
+<tr>
+<td class="org-left">Previsión en niveles</td>
+<td class="org-left">\(e^{\hat y}\,e^{\mathfrak s^2/2}\)</td>
+<td class="org-left">\(e^{\hat y}\) es la mediana; el factor corrige la media</td>
+</tr>
+</tbody>
+</table>
+<p>
+Demostrado: las lecturas, a partir de \(\log(1+p)\approx p\). Enunciado: \(\mathrm{E}(e^{u})=e^{\sigma^2/2}\) con \(u\) normal. Sin geometría nueva.
+</p>
+
+<p>
+<i>Lección 16</i>: variables dicotómicas e interacciones; en log-nivel, el coeficiente de una dicotómica es una diferencia porcentual.
+</p>
+</div>
+<div id="outline-container-org378e429" class="outline-4">
+<h4 id="org378e429">Recapitulación y guiño a la lección siguiente</h4>
+<div class="outline-text-4" id="text-org378e429">
+<p>
+La sesión no ha añadido ningún resultado geométrico ni probabilístico. Ha añadido una distinción, entre variable explicativa y regresor, y una tabla de lecturas. La distinción dice que el modelo del curso es lineal en los regresores y que eso es todo lo que mínimos cuadrados y la inferencia necesitan; los regresores pueden ser transformaciones de las variables explicativas, y entonces el modelo describe entre las variables una relación no lineal. La tabla dice cómo se lee el coeficiente en cada combinación de niveles y logaritmos: cambio absoluto, semielasticidad, efecto de un 1 % o elasticidad, siempre con la aproximación \(\log(1+p)\approx p\) y con la versión exacta \(100(e^{\Delta}-1)\) cuando el cambio es grande.
+</p>
+
+<p>
+Lo que se ha demostrado es esa tabla, con la propiedad del logaritmo y las definiciones. Lo único que se ha enunciado sin demostrar es la media de \(e^{u}\) para \(u\) normal, \(e^{\sigma^2/2}\), que sostiene la corrección de la previsión en niveles; no está en el apéndice de geometría, porque no es un resultado sobre proyecciones sino sobre la distribución normal. La lección 12 enunció también la propiedad de la normal de la que dependen las distribuciones \(t\) y \(F\); con esta son dos.
+</p>
+
+<p>
+Dos cosas conviene retener para las lecciones siguientes. La primera es la idea de que la forma funcional es una decisión del economista: el modelo impone la forma de la relación y después estima su tamaño, y los datos ayudan poco a elegir entre formas que ajustan igual donde hay observaciones. La segunda es el aviso sobre el \(R^2\): no compara modelos con regresandos distintos, y la comparación hay que hacerla sobre las previsiones en la misma variable.
+</p>
+
+<p>
+La lección 16 continúa con la lectura de coeficientes en otro tipo de regresor: las variables dicotómicas, que valen cero o uno y que señalan a qué grupo pertenece cada observación. Su coeficiente es un desplazamiento del intercepto entre grupos; en un modelo con el regresando en logaritmos, ese desplazamiento es una diferencia porcentual, por la misma aproximación de hoy. Y las interacciones, producto de una dicotómica por otro regresor, permiten que una pendiente cambie de un grupo a otro. La lección 14 dejó para entonces una advertencia: dos indicadoras complementarias junto con la constante son colinealidad exacta, y la lección 16 dirá cómo se evita.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 6, sección 6.2 (resumen de las formas funcionales con logaritmos) y cap. 7, sección 7.1 (anticipo de las variables dicotómicas).
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orga048fd1" class="outline-2">
+<h2 id="orga048fd1"><span class="section-number-2">11.</span> Preguntas de repaso (sesión 23)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div class="outline-text-2" id="text-11">
 <p>
 Le propongo 12 preguntas.
 Las marco con un nivel orientativo: [B] básica, [M] media, [D] discriminadora.
 </p>
 </div>
-<div id="outline-container-org9debf1f" class="outline-4">
-<h4 id="org9debf1f">Comentario</h4>
-<div class="outline-text-4" id="text-org9debf1f">
+<div id="outline-container-org19172e3" class="outline-4">
+<h4 id="org19172e3">Comentario</h4>
+<div class="outline-text-4" id="text-org19172e3">
 <p>
-Las preguntas que más le conviene trabajar son la 5 (<i>por qué</i> la linealidad de \(E[Y|X]\) es un supuesto sustantivo, dado que el espacio de proyección tiene dimensión infinita) y la 9 (fija la advertencia causal central de la sesión con un ejemplo concreto). La 8 es la más exigente en lo algebraico: le pide reconstruir el mecanismo del ``truco del vector de media nula'', y no solo recordar su conclusión (probada en la pregunta 7). Repase también la 6 (alcance de la analogía): es la advertencia sobre los límites de la analogía que sostiene toda la sesión.
+Las preguntas que más le conviene trabajar son la 2 (la distinción entre lineal en los regresores y lineal en las variables, que es la idea que organiza la lección), la 7 (la elasticidad como decisión del modelo: el mismo dato da elasticidades distintas según la forma funcional) y la 10 (por qué \(e^{\hat y}\) no predice la media). Repase también la 4 y la 5, que fijan la mecánica de la lectura, y la 9, que distingue la pregunta económica de la pregunta estadística en un contraste.
 </p>
 </div>
 </div>
-<div id="outline-container-org9b5c33d" class="outline-4">
-<h4 id="org9b5c33d">Pregunta 1 [B] — La diferencia entre \(\boldsymbol{y}\) y \(Y\)</h4>
-<div class="outline-text-4" id="text-org9b5c33d">
+<div id="outline-container-orgade4fb6" class="outline-4">
+<h4 id="orgade4fb6">Pregunta 1 [B] — Variable y regresor</h4>
+<div class="outline-text-4" id="text-orgade4fb6">
 <p>
-Según lo visto en la sesión, ¿cuál es la principal diferencia conceptual entre el vector de datos \(\boldsymbol{y}\) y la variable aleatoria \(Y\) de un modelo econométrico?
+En el modelo <code>lprice</code> sobre <code>rooms</code> y <code>lnox</code>, ¿cuántas variables explicativas y cuántos regresores hay?
 </p>
-
 <ol class="org-ol">
-<li>\(\boldsymbol{y}\) tiene varianza infinita, mientras que \(Y\) tiene varianza finita.</li>
-<li>\(\boldsymbol{y}\) es una matriz, mientras que \(Y\) es un vector columna.</li>
-<li>\(\boldsymbol{y}\) es una lista finita de números observados (una muestra), mientras que \(Y\) es el modelo abstracto poblacional que generó esos datos.</li>
-<li>No hay ninguna diferencia conceptual importante; son esencialmente lo mismo.</li>
+<li>Dos variables explicativas y dos regresores.</li>
+<li>Dos variables explicativas (<code>rooms</code> y <code>nox</code>) y tres regresores (la constante, <code>rooms</code> y \(\log(\text{nox})\)).</li>
+<li>Tres variables explicativas y tres regresores.</li>
+<li>Una variable explicativa, porque <code>rooms</code> entra sin transformar.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgf9c395f" class="outline-4">
-<h4 id="orgf9c395f">Pregunta 2 [B] — El diccionario: la media</h4>
-<div class="outline-text-4" id="text-orgf9c395f">
+<div id="outline-container-orga7a732d" class="outline-4">
+<h4 id="orga7a732d">Pregunta 2 [M] — Lineal en qué</h4>
+<div class="outline-text-4" id="text-orga7a732d">
 <p>
-¿Cuál es el equivalente poblacional (en el espacio de variables aleatorias) del vector de medias muestral \(\boldsymbol{\mathop{\overline{y}}}\)?
+¿Cuál de estos modelos NO puede estimarse con mínimos cuadrados tal como lo ha hecho el curso?
 </p>
-
 <ol class="org-ol">
-<li>El escalar \(\mathrm{E}(Y)\).</li>
-<li>La variable aleatoria proyectada \(E[Y|\mathit{1}] = \mathrm{E}(Y)\,\mathit{1}\).</li>
-<li>La perturbación \(U\).</li>
-<li>El escalar \(\mu_{\boldsymbol{y}}\).</li>
+<li>\(\log y=\beta_1+\beta_2\log x+u\).</li>
+<li>\(y=\beta_1+\beta_2x+\beta_3x^2+u\).</li>
+<li>\(y=\beta_1+\beta_2\,x^{\beta_3}+u\).</li>
+<li>\(y=\beta_1+\beta_2\log x+u\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org7f0fbdf" class="outline-4">
-<h4 id="org7f0fbdf">Pregunta 3 [B] — El diccionario: la regresión</h4>
-<div class="outline-text-4" id="text-org7f0fbdf">
+<div id="outline-container-orgebace6e" class="outline-4">
+<h4 id="orgebace6e">Pregunta 3 [B] — La aproximación</h4>
+<div class="outline-text-4" id="text-orgebace6e">
 <p>
-Al pasar de la muestra a la población, el equivalente conceptual del ajuste muestral (la proyección) \(\boldsymbol{\mathop{\widehat{y}}}\) es:
+Si \(\log y\) aumenta en \(0{,}04\), \(y\) aumenta aproximadamente:
 </p>
-
 <ol class="org-ol">
-<li>El vector \(\boldsymbol{\mathop{\widehat{e}}}\).</li>
-<li>El escalar \(\beta_2\).</li>
-<li>La variable aleatoria \(U\).</li>
-<li>La esperanza condicional \(E[Y|X]\).</li>
+<li>Un \(0{,}04\) %.</li>
+<li>Un \(4\) %.</li>
+<li>\(0{,}04\) unidades.</li>
+<li>\(4\) unidades.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org9c2aa38" class="outline-4">
-<h4 id="org9c2aa38">Pregunta 4 [M] — El espacio sobre el que se proyecta</h4>
-<div class="outline-text-4" id="text-org9c2aa38">
+<div id="outline-container-org44546d9" class="outline-4">
+<h4 id="org44546d9">Pregunta 4 [M] — Log-nivel</h4>
+<div class="outline-text-4" id="text-org44546d9">
 <p>
-\(E[Y\mid X]\) es la proyección de \(Y\) sobre:
+En <code>lwage</code> sobre <code>educ</code>, el coeficiente de <code>educ</code> es \(0{,}0827\). Un trabajador con tres años más de educación que otro tiene, según el modelo, un salario:
 </p>
-
 <ol class="org-ol">
-<li>El plano de las combinaciones lineales \(\beta_1\,\mathit{1}+\beta_2X\), exclusivamente.</li>
-<li>El conjunto de TODAS las funciones de \(X\) con varianza finita.</li>
-<li>El conjunto de todas las variables aleatorias, sin restricción alguna.</li>
-<li>La recta \(\mathcal L(\mathit{1})\).</li>
+<li>\(0{,}25\) dólares por hora mayor.</li>
+<li>Un \(8{,}27\) % mayor.</li>
+<li>Un \(24{,}8\) % mayor según la aproximación y un \(28{,}2\) % mayor según el cálculo exacto.</li>
+<li>\(3\times0{,}0827\) dólares mayor.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org647e516" class="outline-4">
-<h4 id="org647e516">Pregunta 5 [D] — El supuesto de Linealidad</h4>
-<div class="outline-text-4" id="text-org647e516">
+<div id="outline-container-orgd2a9b50" class="outline-4">
+<h4 id="orgd2a9b50">Pregunta 5 [M] — Nivel-log</h4>
+<div class="outline-text-4" id="text-orgd2a9b50">
 <p>
-En el Modelo Clásico de Regresión Lineal, ¿por qué necesitamos imponer el supuesto de que \(E[Y|X] = \beta_1\,\mathit{1} + \beta_2 X\)?
+En <code>price</code> sobre <code>rooms</code> y <code>lnox</code>, el coeficiente de <code>lnox</code> es \(-10951\). Un barrio con un 10 % más de contaminación que otro, con las mismas habitaciones, tiene un precio mediano:
 </p>
-
 <ol class="org-ol">
-<li>Porque si no, \(X\) e \(Y\) no tendrían varianza.</li>
-<li>Porque sin ese supuesto, no podríamos calcular los sumatorios en la muestra.</li>
-<li>Porque en el espacio de variables aleatorias, la esperanza condicional verdadera podría ser una curva compleja en un subespacio de dimensión infinita, y necesitamos restringirla al plano generado por \(\mathit{1}\) y \(X\) para disponer de un modelo manejable (<i>aunque posiblemente incorrecto</i>).</li>
-<li>Porque lo exige el teorema de Pitágoras.</li>
+<li>\(10951\) dólares menor.</li>
+<li>Unos \(1095\) dólares menor.</li>
+<li>Un \(10{,}9\) % menor.</li>
+<li>\(109{,}5\) dólares menor.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org2957d98" class="outline-4">
-<h4 id="org2957d98">Pregunta 6 [D] — Alcance de la analogía</h4>
-<div class="outline-text-4" id="text-org2957d98">
+<div id="outline-container-org856e7c3" class="outline-4">
+<h4 id="org856e7c3">Pregunta 6 [B] — Elasticidad</h4>
+<div class="outline-text-4" id="text-org856e7c3">
 <p>
-La analogía entre \(\mathbb{R}^n\) y el espacio de variables aleatorias, tal como se ha presentado en esta sesión:
+En el modelo de Wooldridge, el coeficiente de <code>lnox</code> es \(-0{,}954\). Significa que:
 </p>
-
 <ol class="org-ol">
-<li>Es una demostración rigurosa de que ambos espacios son idénticos.</li>
-<li>Es válida para cualquier variable aleatoria, sin excepción.</li>
-<li>Es una analogía deliberada, válida solo para variables aleatorias con esperanza y varianza definidas, y no todas las variables aleatorias las tienen.</li>
-<li>Solo es válida bajo el supuesto de normalidad conjunta.</li>
+<li>Una unidad más de <code>nox</code> va con un precio \(0{,}954\) dólares menor.</li>
+<li>Un 1 % más de <code>nox</code> va con un precio un \(0{,}954\) % menor, con los demás regresores fijos.</li>
+<li>Un 1 % más de <code>nox</code> va con un precio \(0{,}954\) dólares menor.</li>
+<li>Una unidad más de <code>nox</code> va con un precio un \(95{,}4\) % menor.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org3c86f4b" class="outline-4">
-<h4 id="org3c86f4b">Pregunta 7 [M] — Consecuencia de \(E[U\mid X]=\mathit{0}\)</h4>
-<div class="outline-text-4" id="text-org3c86f4b">
+<div id="outline-container-org38dc948" class="outline-4">
+<h4 id="org38dc948">Pregunta 7 [D] — La elasticidad en el modelo en niveles</h4>
+<div class="outline-text-4" id="text-org38dc948">
 <p>
-Si \(E[U\mid X]=\mathit{0}\), entonces necesariamente:
+Con <code>price</code> sobre <code>nox</code> (regresión simple), la elasticidad calculada en un barrio con <code>nox</code> \(3{,}9\) es \(-0{,}47\), y en uno con <code>nox</code> \(8{,}7\), \(-2{,}5\). ¿Qué dice eso?
 </p>
-
 <ol class="org-ol">
-<li>\(U\) es independiente de \(X\).</li>
-<li>\(\mathrm{E}(U)=0\) y \(\mathrm{Cov}(U,X)=0\).</li>
-<li>\(Var[U\mid X]=\mathit{0}\).</li>
-<li>\(U=\mathit{0}\) en todo \(\Omega\).</li>
+<li>Que el modelo en niveles está mal especificado, porque la elasticidad debería ser constante.</li>
+<li>Que el modelo en niveles impone un efecto absoluto constante, y por tanto una elasticidad que crece con \(x\) y decrece con \(\hat y\); el modelo log-log impone lo contrario. Cuál de los dos describe mejor la relación no lo dice el ajuste, que es casi igual en los dos.</li>
+<li>Que la elasticidad verdadera está entre \(-0{,}47\) y \(-2{,}5\).</li>
+<li>Que hay colinealidad entre <code>nox</code> y su logaritmo.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgd4ad81c" class="outline-4">
-<h4 id="orgd4ad81c">Pregunta 8 [D] — El truco del vector de media nula</h4>
-<div class="outline-text-4" id="text-orgd4ad81c">
+<div id="outline-container-orgd06e1e6" class="outline-4">
+<h4 id="orgd06e1e6">Pregunta 8 [M] — Cobb–Douglas</h4>
+<div class="outline-text-4" id="text-orgd06e1e6">
 <p>
-¿Por qué \(\mathrm{E}(UX)\) coincide con \(\mathrm{Cov}(U,X)\)?
+En \(\log Q=\beta_1+\alpha\log L+\gamma\log K+u\) se estima \(\hat\alpha=0{,}805\) y \(\hat\gamma=0{,}245\). Si trabajo y capital aumentan los dos un 1 %, el producto aumenta aproximadamente:
 </p>
-
 <ol class="org-ol">
-<li>Porque \(X\) y \(U\) son independientes.</li>
-<li>Porque \(\mathrm{Cov}(U,X)=\mathrm{E}(UX)-\mathrm{E}(U)\mathrm{E}(X)\), y como \(\mathrm{E}(U)=0\), el segundo término se anula.</li>
-<li>Porque ambas cantidades son, por definición, la misma cosa en cualquier caso.</li>
-<li>Porque \(U\) tiene varianza igual a \(\sigma^2\).</li>
+<li>Un \(0{,}805\) %.</li>
+<li>Un \(1{,}05\) %.</li>
+<li>\(1{,}05\) unidades.</li>
+<li>Un \(0{,}245\) %.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org3e056aa" class="outline-4">
-<h4 id="org3e056aa">Pregunta 9 [M] — Causalidad y Ortogonalidad</h4>
-<div class="outline-text-4" id="text-org3e056aa">
+<div id="outline-container-orgf72f9c8" class="outline-4">
+<h4 id="orgf72f9c8">Pregunta 9 [D] — Qué hipótesis contrastar</h4>
+<div class="outline-text-4" id="text-orgf72f9c8">
 <p>
-Supongamos que proyectamos algebraicamente la superficie de una casa (\(Y\)) sobre su precio (\(X\)) y que la perturbación \(U\) es perfectamente ortogonal a \(X\). ¿Podemos afirmar que un aumento en el precio causa que la casa gane metros cuadrados?
+Con el modelo de Wooldridge, \(\hat\beta_{\text{lnox}}=-0{,}954\) y \(\mathrm{ee}=0{,}117\). ¿Cuál de estas afirmaciones es correcta?
 </p>
-
 <ol class="org-ol">
-<li>Sí, porque la ortogonalidad de \(U\) garantiza la relación causa-efecto.</li>
-<li>Sí, siempre que se cumpla el supuesto de homocedasticidad.</li>
-<li>No. La proyección ortogonal y el álgebra de la regresión siempre existen, pero no implican causalidad por sí mismas; la dirección causal debe provenir de un modelo o teoría previa.</li>
-<li>No, pero si tuviéramos una muestra más grande la causalidad sí estaría garantizada.</li>
+<li>\(H_0\!:\beta_{\text{lnox}}=0\) se rechaza y por tanto la elasticidad es \(-1\).</li>
+<li>\(H_0\!:\beta_{\text{lnox}}=-1\) no se rechaza (\(t=0{,}40\)), luego queda demostrado que la elasticidad es unitaria.</li>
+<li>\(H_0\!:\beta_{\text{lnox}}=0\) se rechaza (\(t=-8{,}2\)) y \(H_0\!:\beta_{\text{lnox}}=-1\) no se rechaza (\(t=0{,}40\)); datos como estos no serían raros con elasticidad unitaria, pero el intervalo, de \(-1{,}18\) a \(-0{,}72\), deja un margen amplio.</li>
+<li>Las dos hipótesis se contrastan con el mismo estadístico \(t\), así que no puede rechazarse una y no la otra.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org0952fb2" class="outline-4">
-<h4 id="org0952fb2">Pregunta 10 [B] — Homocedasticidad</h4>
-<div class="outline-text-4" id="text-org0952fb2">
+<div id="outline-container-orgec20eda" class="outline-4">
+<h4 id="orgec20eda">Pregunta 10 [D] — Deshacer el logaritmo</h4>
+<div class="outline-text-4" id="text-orgec20eda">
 <p>
-En el contexto del Modelo Clásico de Regresión Lineal, el supuesto de homocedasticidad significa que:
+Un modelo con \(\log y\) como regresando da \(\hat y=9{,}846\) para unas características. ¿Por qué \(e^{9{,}846}\) no es la previsión de la media de \(y\) para esas características?
 </p>
-
 <ol class="org-ol">
-<li>\(X\) e \(Y\) tienen la misma esperanza.</li>
-<li>El tamaño de la muestra \(n\) es constante.</li>
-<li>La perturbación poblacional \(U\) no tiene correlación con \(X\).</li>
-<li>La varianza de la perturbación \(U\), condicionada a \(X\), es un valor constante \(\sigma^2\).</li>
+<li>Porque \(e^{\hat y}\) predice la mediana: con perturbación simétrica, la mitad de las observaciones queda por encima de \(e^{\boldsymbol x^\top\boldsymbol\beta}\), pero la media de \(e^{u}\) es mayor que \(1\) y la media de \(y\) queda por encima.</li>
+<li>Porque el logaritmo no se puede deshacer una vez estimado el modelo.</li>
+<li>Porque \(\hat y\) es insesgado solo en logaritmos, y \(e^{\hat y}\) sobreestima la media.</li>
+<li>Porque falta multiplicar por \(\mathfrak s^2\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orge3b3e96" class="outline-4">
-<h4 id="orge3b3e96">Pregunta 11 [M] — El salto del método de los momentos</h4>
-<div class="outline-text-4" id="text-orge3b3e96">
+<div id="outline-container-orgb91a68e" class="outline-4">
+<h4 id="orgb91a68e">Pregunta 11 [M] — Comparar ajustes</h4>
+<div class="outline-text-4" id="text-orgb91a68e">
 <p>
-El método de los momentos consiste en:
+<code>wage</code> sobre <code>educ</code> tiene \(R^2=0{,}165\) y <code>lwage</code> sobre <code>educ</code>, \(R^2=0{,}186\). ¿Qué se puede concluir?
 </p>
-
 <ol class="org-ol">
-<li>Calcular \(\mathrm{E}(X)\) y \(\mathrm{E}(Y)\) exactamente, sin necesidad de datos.</li>
-<li>Sustituir cada momento poblacional (desconocido) por su análogo muestral (calculable a partir de los datos).</li>
-<li>Suponer que \(\beta_1=\hat\beta_1\) y \(\beta_2=\hat\beta_2\) por definición.</li>
-<li>Ignorar la perturbación \(U\) por completo.</li>
+<li>Que el modelo en logaritmos predice mejor el salario.</li>
+<li>Nada sobre cuál predice mejor el salario: los dos \(R^2\) miden el ajuste a variables distintas. Para comparar hay que pasar las previsiones del modelo en logaritmos a dólares y medir, por ejemplo, el cuadrado de la correlación con <code>wage</code>.</li>
+<li>Que el modelo en logaritmos tiene menos ruido, porque \(\mathfrak s\) es menor.</li>
+<li>Que la diferencia de \(0{,}021\) es significativa al 5 %.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgec02ae7" class="outline-4">
-<h4 id="orgec02ae7">Pregunta 12 [D] — Fórmulas y su interpretación</h4>
-<div class="outline-text-4" id="text-orgec02ae7">
+<div id="outline-container-org2281a41" class="outline-4">
+<h4 id="org2281a41">Pregunta 12 [M] — Unidades</h4>
+<div class="outline-text-4" id="text-org2281a41">
 <p>
-\(\hat\beta_2=\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol x}^2\) (en la lección 7) y \(\hat\beta_2=\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol x}^2\) (en esta sesión, tras el método de los momentos):
+En <code>lprice</code> sobre <code>rooms</code> y <code>lnox</code> se cambia el precio de dólares a miles de dólares. ¿Qué cambia en la estimación?
 </p>
-
 <ol class="org-ol">
-<li>Son fórmulas distintas que, por casualidad, coinciden numéricamente.</li>
-<li>Son la misma fórmula; lo que cambia es su interpretación: de coeficiente de un ajuste muestral a estimador de un parámetro poblacional.</li>
-<li>Solo la segunda es válida cuando se cumplen los tres supuestos del modelo clásico.</li>
-<li>La primera requiere normalidad; la segunda, no.</li>
+<li>Todos los coeficientes se dividen por mil.</li>
+<li>Solo la constante, que disminuye en \(\log(1000)=6{,}908\); pendientes, \(R^2\), \(\mathfrak s\) y contrastes quedan iguales.</li>
+<li>La elasticidad se divide por mil y la constante no cambia.</li>
+<li>Nada, porque mínimos cuadrados no depende de las unidades.</li>
 </ol>
 </div>
 </div>
 </div>
-<div id="outline-container-org81e6778" class="outline-2">
-<h2 id="org81e6778"><span class="section-number-2">11.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
-<div class="outline-text-2" id="text-11">
+<div id="outline-container-orga575757" class="outline-2">
+<h2 id="orga575757"><span class="section-number-2">12.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div class="outline-text-2" id="text-12">
 </div>
 <ul class="org-ul">
-<li><a id="org27d7442"></a>Pregunta 1 [B] — La diferencia entre \(\boldsymbol{y}\) y \(Y\)<br />
-<div class="outline-text-5" id="text-org27d7442">
+<li><a id="org24ed73f"></a>Pregunta 1 [B] — Variable y regresor<br />
+<div class="outline-text-5" id="text-org24ed73f">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la distinción con la que abre la sesión. La constante es un regresor que no proviene de ninguna variable; \(\log(\text{nox})\) es un regresor construido a partir de la variable <code>nox</code>.
+</p>
+</div>
+</li>
+<li><a id="org3a0a5f4"></a>Pregunta 2 [M] — Lineal en qué<br />
+<div class="outline-text-5" id="text-org3a0a5f4">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: comprensión del ``salto'' de la muestra (\(\mathbb{R}^n\)) a la población.
+<i>Evalúa</i>: que la condición es la linealidad en los regresores, no en las variables. Los modelos 1, 2 y 4 son lineales en sus columnas (\(\log x\); \(x\) y \(x^2\); \(\log x\)). En el 3, \(\beta_3\) es un exponente y ninguna transformación de \(x\) lo convierte en el coeficiente de una columna.
 </p>
 </div>
 </li>
-<li><a id="org2cc3baa"></a>Pregunta 2 [B] — El diccionario: la media<br />
-<div class="outline-text-5" id="text-org2cc3baa">
+<li><a id="org99f9489"></a>Pregunta 3 [B] — La aproximación<br />
+<div class="outline-text-5" id="text-org99f9489">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: asimilación de la distinción notacional entre el escalar (valor esperado) y el vector constante de la proyección (esperanza condicionada a la constante).
+<i>Evalúa</i>: la propiedad \(\log(1+p)\approx p\): un cambio de \(0{,}04\) en el logaritmo es un cambio relativo de \(0{,}04\), un \(4\) %. El cambio exacto es \(e^{0{,}04}-1=4{,}08\) %.
 </p>
 </div>
 </li>
-<li><a id="orgae3e6a8"></a>Pregunta 3 [B] — El diccionario: la regresión<br />
-<div class="outline-text-5" id="text-orgae3e6a8">
-<p>
-<i>Respuesta correcta: 4.</i>
-<i>Evalúa</i>: conocimiento del mapeo fundamental de la regresión de \(\mathbb{R}^n\) al espacio probabilístico.
-</p>
-</div>
-</li>
-<li><a id="org1c885bf"></a>Pregunta 4 [M] — El espacio sobre el que se proyecta<br />
-<div class="outline-text-5" id="text-org1c885bf">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión de que el espacio de proyección de \(E[Y\mid X]\) es mucho más amplio que el plano usado en regresión lineal simple.
-</p>
-</div>
-</li>
-<li><a id="orgc05f202"></a>Pregunta 5 [D] — El supuesto de Linealidad<br />
-<div class="outline-text-5" id="text-orgc05f202">
+<li><a id="org119664f"></a>Pregunta 4 [M] — Log-nivel<br />
+<div class="outline-text-5" id="text-org119664f">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: comprensión de por qué el espacio de proyección es mucho mayor (dimensión infinita de funciones de \(X\)) y exige un supuesto fuerte para que funcione el ajuste lineal simple.
+<i>Evalúa</i>: la lectura porcentual del log-nivel y el uso de la versión exacta cuando el cambio es grande: \(3\times8{,}27=24{,}8\) % por la aproximación y \(e^{3\times0{,}0827}-1=28{,}2\) % exacto. Las opciones 1 y 4 leen el coeficiente en dólares.
 </p>
 </div>
 </li>
-<li><a id="org9607183"></a>Pregunta 6 [D] — Alcance de la analogía<br />
-<div class="outline-text-5" id="text-org9607183">
+<li><a id="orgd0b3185"></a>Pregunta 5 [M] — Nivel-log<br />
+<div class="outline-text-5" id="text-orgd0b3185">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la lectura del nivel-log: un 1 % más de \(x\), \(\beta_2/100\) unidades de \(y\); un 10 % más, unas \(10\times109{,}5=1095\) dólares menos (con la aproximación, que para un 10 % ya tiene un error apreciable: \(\log(1{,}10)=0{,}0953\) da \(1044\) dólares). La opción 3 lee el modelo como si fuese log-log.
+</p>
+</div>
+</li>
+<li><a id="org123c5fe"></a>Pregunta 6 [B] — Elasticidad<br />
+<div class="outline-text-5" id="text-org123c5fe">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la definición de elasticidad y la cláusula ``con lo demás fijo'' de la lección 10, que en el modelo de Wooldridge incluye la distancia, las habitaciones y la ratio alumnos-profesor.
+</p>
+</div>
+</li>
+<li><a id="orgfc1e07f"></a>Pregunta 7 [D] — La elasticidad en el modelo en niveles<br />
+<div class="outline-text-5" id="text-orgfc1e07f">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la idea central de la sesión: cada forma funcional impone un tipo de relación y después estima su tamaño; ninguna descubre ``la'' elasticidad. La opción 1 confunde una decisión de modelización con un error, y la 3 trata las dos cifras como estimaciones de una misma cantidad.
+</p>
+</div>
+</li>
+<li><a id="org57d8978"></a>Pregunta 8 [M] — Cobb–Douglas<br />
+<div class="outline-text-5" id="text-org57d8978">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la lectura de \(\alpha+\gamma\) como rendimientos a escala: si los dos factores suben un 1 %, \(\log Q\) sube \(\alpha+\gamma\) centésimas, un \(1{,}05\) %. La opción 3 confunde un porcentaje con unidades.
+</p>
+</div>
+</li>
+<li><a id="orgb66b3b9"></a>Pregunta 9 [D] — Qué hipótesis contrastar<br />
+<div class="outline-text-5" id="text-orgb66b3b9">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: la advertencia de honestidad epistemológica planteada ya en la primera transparencia y recordada durante toda la sesión.
+<i>Evalúa</i>: que el \(t\) sirve para cualquier valor hipotético (lección 12), que rechazar el cero y no rechazar el \(-1\) son dos contrastes distintos con un mismo estimador, y el lenguaje de las decisiones: no rechazar no demuestra (opción 2), rechazar el cero no prueba otro valor (opción 1).
 </p>
 </div>
 </li>
-<li><a id="org939cb6d"></a>Pregunta 7 [M] — Consecuencia de \(E[U\mid X]=\mathit{0}\)<br />
-<div class="outline-text-5" id="text-org939cb6d">
+<li><a id="org4cc6314"></a>Pregunta 10 [D] — Deshacer el logaritmo<br />
+<div class="outline-text-5" id="text-org4cc6314">
+<p>
+<i>Respuesta correcta: 1.</i>
+<i>Evalúa</i>: la razón de la corrección: \(y=e^{\boldsymbol x^\top\boldsymbol\beta}e^{u}\), y la media de \(e^{u}\) supera a \(1\) aunque la de \(u\) sea cero. La opción 3 invierte el sentido del sesgo; la 4 confunde el factor \(e^{\mathfrak s^2/2}\) con \(\mathfrak s^2\).
+</p>
+</div>
+</li>
+<li><a id="org4bf0bff"></a>Pregunta 11 [M] — Comparar ajustes<br />
+<div class="outline-text-5" id="text-org4bf0bff">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: las dos consecuencias concretas de la exogeneidad estricta (ortogonalidad frente a \(1\) y frente a \(X\)).
+<i>Evalúa</i>: el aviso sobre el \(R^2\) con regresandos distintos y el procedimiento de la transparencia ``Previsión con y sin logaritmos''. La opción 3 compara dos \(\mathfrak s\) en unidades distintas (dólares y logaritmos).
 </p>
 </div>
 </li>
-<li><a id="org4882e8a"></a>Pregunta 8 [D] — El truco del vector de media nula<br />
-<div class="outline-text-5" id="text-org4882e8a">
+<li><a id="orge927781"></a>Pregunta 12 [M] — Unidades<br />
+<div class="outline-text-5" id="text-orge927781">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: reconstrucción explícita del ``truco'', ya usado en la lección 6 con vectores, ahora aplicado a esperanzas.
-</p>
-</div>
-</li>
-<li><a id="org1d6a3b8"></a>Pregunta 9 [M] — Causalidad y Ortogonalidad<br />
-<div class="outline-text-5" id="text-org1d6a3b8">
-<p>
-<i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: retención de la advertencia central de la sesión: la matemática no distingue la dirección de la causalidad.
-</p>
-</div>
-</li>
-<li><a id="org65232a3"></a>Pregunta 10 [B] — Homocedasticidad<br />
-<div class="outline-text-5" id="text-org65232a3">
-<p>
-<i>Respuesta correcta: 4.</i>
-<i>Evalúa</i>: conocimiento de la definición formal del tercer supuesto del MCRL.
-</p>
-</div>
-</li>
-<li><a id="org870ffd6"></a>Pregunta 11 [M] — El salto del método de los momentos<br />
-<div class="outline-text-5" id="text-org870ffd6">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión de la operación central de la transparencia ``El salto: método de los momentos''.
-</p>
-</div>
-</li>
-<li><a id="orga346450"></a>Pregunta 12 [D] — Fórmulas y su interpretación<br />
-<div class="outline-text-5" id="text-orga346450">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: el mismo cálculo, dos lecturas.
+<i>Evalúa</i>: \(\log(cx)=\log c+\log x\): un cambio de unidades en una variable en logaritmos suma una constante a su columna, y la lección 4 mostró que sumar una constante solo afecta a la proyección sobre \(\boldsymbol 1\), es decir, a la constante del modelo. La opción 1 es lo que ocurre en niveles.
 </p>
 </div>
 </li>
 </ul>
 </div>
-<div id="footnotes">
-<h2 class="footnotes">Notas al pie de p&aacute;gina: </h2>
-<div id="text-footnotes">
-
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">por realización de una variable aleatoria entenderemos observar un único valor tomado por dicha variable aleatoria de entre todos los que puede tomar.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">es decir, \(\mathit{1}(\omega)=1\) para todo \(\omega\) del dominio \(\Omega\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">usted ya conocía esta condición porque la ha visto en los cursos de probabilidad: <i>la integral de la función de densidad es igual a</i> \(1\) y, por tanto, \(\mathrm{E}(\mathit{1}) = \int 1\cdot f(x)\,dx = \int f(x)\,dx = 1\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">puesto que \(\big\langle (Y - E[Y|\mathit{1}]),\mathit{1}\big\rangle_P \;=\; \mathrm{E}\big((Y - E[Y|\mathit{1}])\,\mathit{1}\big) \;=\; \mathrm{E}\big(Y - E[Y|\mathit{1}]\big) = 0\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5" role="doc-backlink">5</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Al escribir \(\mathcal{L}(\mathit{1},X)\) estamos reutilizando la misma notación de lecciones anteriores, \(\mathcal{L}(\cdot)\); pero ahora para denotar el subespacio vectorial formado por las combinaciones lineales de las variables aleatorias \(\mathit{1}\) y \(X\) (en lugar de por vectores de \(\mathbb{R}^n\)).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6" role="doc-backlink">6</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Donde \(\mathit{0}\) es la variable aleatoria constante cero: \(\mathit{0}=0\,\mathit{1}\) (es decir, a todo suceso elemental le asigna el valor \(0\)).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.7" class="footnum" href="#fnr.7" role="doc-backlink">7</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Conviene precisar qué significa esta condición, porque aquí es fácil cometer un error. La condición no es ``\(X\) no es literalmente un múltiplo de \(\mathit{1}\)'', sino \(\mathrm{Var}(X)\neq0\): que \(X\) no sea igual, con probabilidad uno, a ningún valor fijo. Recuerde la advertencia sobre variables aleatorias iguales ``casi seguro'' pero no idénticas en todo punto (transparencia ``El producto escalar de la probabilidad'').</p></div></div>
-
-<div class="footdef"><sup><a id="fn.8" class="footnum" href="#fnr.8" role="doc-backlink">8</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Es <i>exactamente</i> la misma álgebra que hicimos en la lección 7 para obtener \(\hat\beta_1,\hat\beta_2\) a partir de las dos condiciones de ortogonalidad muestrales, solo que ahora con esperanzas en lugar de medias muestrales.</p></div></div>
-
-
 </div>
-</div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-10-05 lun 16:38</p>
+<p class="date">Created: 2026-10-05 lun 17:04</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
