@@ -79,3 +79,25 @@ outfile --quiet esquinas.txt
     printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jR, F_RR, pvalue(F, 2, 10, F_RR)
     printf "Correlacion entre los estimadores de bedrms y baths (de la matriz de varianzas): %.3f\n", corrEst
 end outfile
+
+ols price const sqft bedrms baths --quiet
+scalar Fc = critical(F, 2, $df, 0.05)
+matrix b = $coeff[3:4]
+matrix V = $vcv[3:4,3:4]
+matrix L = cholesky(V)
+matrix th = seq(0, 360)' * $pi/180
+matrix E = ones(rows(th), 1)*b' + sqrt(2*Fc) * (L * (cos(th) ~ sin(th))')'
+matrix EP = E[,2] ~ E[,1]
+set force_decpoint on
+string rect = sprintf("set object 1 rect from %g,%g to %g,%g fs empty border lc rgb 'gray40' dt 2", iL, jL, iR, jR)
+string est  = sprintf("set label 'estimacion' at %g,%g point pt 7 lc rgb 'red' offset 1,1", b[1], b[2])
+plot EP
+    options with-lines fit=none
+    literal set title "Elipse de confianza al 95% y rectangulo de los dos intervalos"
+    literal set xlabel "coeficiente de bedrms"
+    literal set ylabel "coeficiente de baths"
+    literal set key off
+    literal @rect
+    literal @est
+    literal set label "(0,0)" at 0,0 point pt 7 lc rgb "black" offset 1,1
+end plot --output="elipse_bedrms_baths.png"

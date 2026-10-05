@@ -83,3 +83,42 @@ outfile --quiet apertura.txt
         b[lnox] = 0
     end restrict
 end outfile
+
+outfile --quiet elipse.txt
+    ols price const rooms nox lnox --quiet
+    scalar tc = critical(t, $df, 0.025)
+    scalar Fc = critical(F, 2, $df, 0.05)
+    scalar gl = $df
+    matrix b = $coeff[3:4]
+    matrix V = $vcv[3:4,3:4]
+    scalar corrEst = V[1,2]/sqrt(V[1,1]*V[2,2])
+    scalar iL = b[1] - tc*sqrt(V[1,1])
+    scalar iR = b[1] + tc*sqrt(V[1,1])
+    scalar jL = b[2] - tc*sqrt(V[2,2])
+    scalar jR = b[2] + tc*sqrt(V[2,2])
+    restrict --quiet
+        b[nox] = 0
+        b[lnox] = 0
+    end restrict
+    printf "IC 95%% nox: [%.1f ; %.1f]    IC 95%% lnox: [%.1f ; %.1f]\n", iL, iR, jL, jR
+    printf "Correlacion entre los estimadores de nox y lnox: %.3f\n", corrEst
+    printf "El par (0,0): F = %.3f    F_c(2,%d) = %.3f    valor p = %.3g\n", $test, gl, Fc, $pvalue
+end outfile
+
+matrix L = cholesky(V)
+matrix th = seq(0, 360)' * $pi/180
+matrix E = ones(rows(th), 1)*b' + sqrt(2*Fc) * (L * (cos(th) ~ sin(th))')'
+matrix EP = E[,2] ~ E[,1]
+set force_decpoint on
+string rect = sprintf("set object 1 rect from %g,%g to %g,%g fs empty border lc rgb 'gray40' dt 2", iL, jL, iR, jR)
+string est  = sprintf("set label 'estimacion' at %g,%g point pt 7 lc rgb 'red' offset 1,1", b[1], b[2])
+plot EP
+    options with-lines fit=none
+    literal set title "Elipse de confianza al 95% y rectangulo de los dos intervalos"
+    literal set xlabel "coeficiente de nox"
+    literal set ylabel "coeficiente de lnox"
+    literal set key off
+    literal @rect
+    literal @est
+    literal set label "(0,0)" at 0,0 point pt 7 lc rgb "black" offset 1,1
+end plot --output="elipse_nox_lnox.png"

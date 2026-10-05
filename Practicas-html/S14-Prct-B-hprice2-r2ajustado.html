@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-10-04 dom 22:55 -->
+<!-- 2026-10-05 lun 13:41 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 14 (B) &#x2014; Del R² al R² ajustado: coeficientes parciales en hprice2</title>
@@ -287,14 +287,14 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgc363ed0">Descripción de la práctica</a></li>
-<li><a href="#org1cc2740">Actividad 1 - Reapertura de hprice2 y etiquetas</a></li>
+<li><a href="#org9ed0980">Descripción de la práctica</a></li>
+<li><a href="#org72019a7">Actividad 1 - Reapertura de hprice2 y etiquetas</a></li>
 <li><a href="#rooms-nox">Actividad 2 - Dos regresores no constantes a la vez: price~rooms+nox</a></li>
 <li><a href="#tercer-regresor">Actividad 3 - Un tercer regresor: stratio</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org5b8d081">Lo que debe observar</a></li>
+<li><a href="#org403d8ae">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
@@ -302,15 +302,15 @@ org_html_manager.setup();  // activate after the parameters are set
 <li><a href="#r2-nunca-disminuye">Actividad 4 - \(R^2\) nunca disminuye: los cuatro modelos a la vez</a></li>
 <li><a href="#r2-ajustado">Actividad 5 - Del \(R^2\) al \(R^2\) ajustado</a></li>
 <li><a href="#apendice-r2-ajustado">Apéndice - De dónde sale la fórmula del \(R^2\) ajustado</a></li>
-<li><a href="#orge40d9c1">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org7ddd310">Código completo de la práctica</a></li>
-<li><a href="#org2041247">Respuestas</a></li>
+<li><a href="#org17dd7c5">Preguntas de interpretación para la clase</a></li>
+<li><a href="#orgfd134a6">Código completo de la práctica</a></li>
+<li><a href="#org95ac22b">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgc363ed0" class="outline-2">
-<h2 id="orgc363ed0">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-orgc363ed0">
+<div id="outline-container-org9ed0980" class="outline-2">
+<h2 id="org9ed0980">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org9ed0980">
 <p>
 Retomamos <code>hprice2</code>, ya usado en la práctica de regresión simple con datos reales, y damos el paso a la regresión <i>múltiple</i>: primero con dos regresores (<code>rooms</code> y <code>nox</code> a la vez), y después con un tercero (<code>stratio</code>, la proporción alumnos/profesor de cada zona). El hilo conductor es doble: por un lado, observar cómo cambia el coeficiente de <code>rooms</code> al pasar del modelo simple al múltiple (efecto parcial, lección 10); por otro, comprobar con datos reales una propiedad algebraica de MCO anunciada en la lección 8 (el \(R^2\) nunca disminuye al añadir un regresor) y ver por qué esto exige corregirlo con el <i>\(R^2\) ajustado</i> (\(\bar R^2\)), que sí puede bajar.
 </p>
@@ -337,9 +337,9 @@ Retomamos <code>hprice2</code>, ya usado en la práctica de regresión simple co
 </dl>
 </div>
 </div>
-<div id="outline-container-org1cc2740" class="outline-2">
-<h2 id="org1cc2740">Actividad 1 - Reapertura de hprice2 y etiquetas</h2>
-<div class="outline-text-2" id="text-org1cc2740">
+<div id="outline-container-org72019a7" class="outline-2">
+<h2 id="org72019a7">Actividad 1 - Reapertura de hprice2 y etiquetas</h2>
+<div class="outline-text-2" id="text-org72019a7">
 <p>
 <code>open</code>, cuatro <code>setinfo</code> con la descripción y el nombre para los gráficos, y un <code>summary</code> de las cuatro variables, como en la sesión 4. <code>stratio</code> es nueva en el curso, por eso la etiquetamos.
 </p>
@@ -348,11 +348,11 @@ Retomamos <code>hprice2</code>, ya usado en la práctica de regresión simple co
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgbc7f542">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="org07532ba">open hprice2.gdt --quiet
 </pre>
 </div>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org50cbb08">setinfo price   -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
+<pre class="src src-gretl" id="orga5ca3f8">setinfo price   -d "Precio mediano de la vivienda ($)" -n "Precio ($)"
 setinfo rooms   -d "Número medio de habitaciones" -n "Habitaciones"
 setinfo nox     -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx)"
 setinfo stratio -d "Ratio alumnos/profesor en la zona" -n "Ratio alumnos/profesor"
@@ -360,7 +360,7 @@ setinfo stratio -d "Ratio alumnos/profesor en la zona" -n "Ratio alumnos/profeso
 summary price rooms nox stratio
 </pre>
 </div>
-<pre class="example" id="org6594599">
+<pre class="example" id="org9a3d9e6">
                     Media        Mediana         Mínimo         Máximo
 price               22512          21200         5000,0          50001
 rooms              6,2841         6,2100         3,5600         8,7800
@@ -403,13 +403,13 @@ Tres <code>ols</code> y un <code>corr</code>. Los dos primeros son las regresion
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgbbed47c">ols price const rooms
+<pre class="src src-gretl" id="org0dc4706">ols price const rooms
 ols price const nox
 ols price const rooms nox
 corr rooms nox
 </pre>
 </div>
-<pre class="example" id="org6455d1a">
+<pre class="example" id="org0612779">
 Modelo 1: MCO, usando las observaciones 1-506
 Variable dependiente: price
 
@@ -512,10 +512,10 @@ Un regresor más en la lista de <code>ols</code>.
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org7e4da85">ols price const rooms nox stratio
+<pre class="src src-gretl" id="org80a5dd3">ols price const rooms nox stratio
 </pre>
 </div>
-<pre class="example" id="org343fa43">
+<pre class="example" id="org25d7cc7">
 Modelo 4: MCO, usando las observaciones 1-506
 Variable dependiente: price
 
@@ -534,9 +534,9 @@ Log-verosimilitud      -5104,059   Criterio de Akaike      10216,12
 Criterio de Schwarz     10233,02   Crit. de Hannan-Quinn   10222,75
 </pre>
 </div>
-<div id="outline-container-org5b8d081" class="outline-4">
-<h4 id="org5b8d081">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org5b8d081">
+<div id="outline-container-org403d8ae" class="outline-4">
+<h4 id="org403d8ae">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org403d8ae">
 <p>
 El coeficiente de <code>stratio</code> es \(-1\,167\): un alumno más por profesor en la zona se asocia, manteniendo fijas habitaciones y contaminación, con unos \(1\,200\) dólares menos de precio mediano. Compare de nuevo los coeficientes de <code>rooms</code> y <code>nox</code> con los de la Actividad 2: <code>rooms</code> baja de \(8\,179\) a \(7\,001\) y <code>nox</code> de \(-1\,885\) a \(-1\,693\). Vuelven a cambiar, porque <code>stratio</code> está correlacionada con ambos; cada coeficiente responde a la pregunta ``manteniendo fijos <i>los demás regresores del modelo</i>'', y esa lista acaba de cambiar.
 </p>
@@ -558,7 +558,7 @@ Cuatro <code>ols</code> con <code>--quiet</code> y, tras cada uno, el accesor <c
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org614ceea">ols price const rooms --quiet
+<pre class="src src-gretl" id="orgef0fb25">ols price const rooms --quiet
 scalar r2_rooms = $rsq
 
 ols price const nox --quiet
@@ -576,7 +576,7 @@ printf "R2 price~rooms+nox            = %.4f\n", r2_rooms_nox
 printf "R2 price~rooms+nox+stratio    = %.4f\n", r2_todos
 </pre>
 </div>
-<pre class="example" id="orgf546a73">
+<pre class="example" id="org938fc3e">
 R2 price~rooms                = 0,4841
 R2 price~nox                  = 0,1815
 R2 price~rooms+nox            = 0,5352
@@ -602,7 +602,7 @@ Tres modelos con el mismo esquema: <code>ols --quiet</code>, un escalar <code>Rb
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgc7ef950">ols price const rooms nox --quiet
+<pre class="src src-gretl" id="org116799f">ols price const rooms nox --quiet
 scalar Rbarsq = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
 printf "Modelo price~rooms+nox\n"
 printf "  R2          = %.4f\n", $rsq
@@ -621,7 +621,7 @@ printf "  R2          = %.4f\n", $rsq
 printf "  R2 ajustado = %.4f\n", Rbarsq
 </pre>
 </div>
-<pre class="example" id="orgd321035">
+<pre class="example" id="org2c97c0d">
 Modelo price~rooms+nox
   R2          = 0,5352
   R2 ajustado = 0,5333
@@ -705,7 +705,7 @@ Estimamos el modelo con tres regresores, guardamos \(n\) y \(k\) con <code>$nobs
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org824d54d">ols price const rooms nox stratio --quiet
+<pre class="src src-gretl" id="org2b51e0c">ols price const rooms nox stratio --quiet
 scalar n_obs = $nobs
 scalar k_reg = $ncoeff
 
@@ -717,16 +717,16 @@ printf "R2 ajustado (formula original: 1-(SRC/(n-k))/(STC/(n-1)) ) = %.6f\n", Rb
 printf "R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = %.6f\n", Rbarsq
 </pre>
 </div>
-<pre class="example" id="orge3e212c">
+<pre class="example" id="orgdd67a17">
 n = 506,  k = 4 (incluida la constante)
 R2 ajustado (formula original: 1-(SRC/(n-k))/(STC/(n-1)) ) = 0,598133
 R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = 0,598133
 </pre>
 </div>
 </div>
-<div id="outline-container-orge40d9c1" class="outline-2">
-<h2 id="orge40d9c1">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-orge40d9c1">
+<div id="outline-container-org17dd7c5" class="outline-2">
+<h2 id="org17dd7c5">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org17dd7c5">
 <ol class="org-ol">
 <li>¿Por qué los coeficientes de <code>rooms</code> y <code>nox</code> cambian de forma tan desigual entre el modelo simple y el múltiple (el de <code>rooms</code> apenas, el de <code>nox</code> casi a la mitad), si su correlación es menor que la de <code>sqft</code> y <code>bedrms</code> en la práctica de Ramanathan (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms">html</a>))?</li>
 <li>¿Cómo interpreta el signo obtenido para <code>stratio</code>? ¿Es coherente con lo que cabría esperar económicamente?</li>
@@ -745,9 +745,9 @@ R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = 0,598133
 </ul>
 </div>
 </div>
-<div id="outline-container-org7ddd310" class="outline-2">
-<h2 id="org7ddd310">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org7ddd310">
+<div id="outline-container-orgfd134a6" class="outline-2">
+<h2 id="orgfd134a6">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-orgfd134a6">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -765,9 +765,9 @@ R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = 0,598133
 </table>
 </div>
 </div>
-<div id="outline-container-org2041247" class="outline-2">
-<h2 id="org2041247">Respuestas</h2>
-<div class="outline-text-2" id="text-org2041247">
+<div id="outline-container-org95ac22b" class="outline-2">
+<h2 id="org95ac22b">Respuestas</h2>
+<div class="outline-text-2" id="text-org95ac22b">
 <ol class="org-ol">
 <li>¿Cambian <code>rooms</code> y <code>nox</code> al pasar del modelo simple al múltiple? De forma muy desigual: <code>rooms</code> baja alrededor de un \(10\%\) y <code>nox</code> se reduce casi a la mitad. La correlación entre ambos, \(-0{,}3028\), no basta para explicarlo: el desplazamiento de \(\hat\beta_2\) al incorporar \(\boldsymbol{x}_3\) vale \(\hat\beta_3\,\sigma_{\boldsymbol{x}_2\boldsymbol{x}_3}/\sigma^2_{\boldsymbol{x}_2}\), e intervienen también el tamaño del coeficiente del regresor añadido y las escalas de ambas variables. La correlación anticipa <i>si</i> habrá desplazamiento, no <i>cuánto</i>.</li>
 
@@ -792,7 +792,7 @@ R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = 0,598133
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-10-04 dom 22:55</p>
+<p class="date">Created: 2026-10-05 lun 13:41</p>
 </div>
 </body>
 </html>
