@@ -104,11 +104,15 @@ Retomamos =hprice2= con el modelo de la lección 13, =price ~ rooms + nox + stra
 3. Ver que con $q=1$ el $F$ es el cuadrado del $t$, y el valor crítico $F_c$ el cuadrado de $t_c$.
 4. Imponer una igualdad entre dos coeficientes construyendo la suma de los regresores como regresor único.
 5. Reencontrar el caso =nox= y =lnox= de la lección 13, que la práctica B de la sesión 22 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-B-hprice2-vif.pdf#page=1][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-B-hprice2-vif.html#modelo-auxiliar][html]])) explicará.
+6. Dibujar la elipse de confianza de los coeficientes de =nox= y =lnox= y compararla con el rectángulo de sus dos intervalos: el intervalo de confianza en dos dimensiones y el efecto de la correlación entre los estimadores.
 
 /Comandos nuevos de esta práctica/. Seguimos usando =ols= con la opción =--quiet=, los accesores =$ess=, =$coeff= y =$stderr= (sesiones 11 a 18), las funciones =critical= y =pvalue= y el bloque =restrict ... end restrict= (práctica A de la sesión 18, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-A-hprice2-inferencia.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-A-hprice2-inferencia.html#identidad-F][html]])). Lo nuevo:
 - =b[nox]= :: dentro de =restrict=, un coeficiente puede nombrarse por su posición en la lista de regresores, =b[3]=, como en la sesión 18, o por el nombre de su variable, =b[nox]=. Cada línea del bloque es una restricción: una combinación lineal de coeficientes a la izquierda del igual y un número a la derecha.
 - =critical(F, q, gl, 0.05)= :: el valor de la $F$ de Fisher con =q= y =gl= grados de libertad que deja una probabilidad $0{,}05$ a su derecha; =pvalue(F, q, gl, x)= es la probabilidad de que esa $F$ supere =x=. Son las funciones de la sesión 18 con la letra =F= en lugar de =t=, y con dos grados de libertad en lugar de uno.
 - =%.4e= :: un formato más de =printf=: notación científica con cuatro decimales, cómoda para las sumas de cuadrados. Los otros dos que se usan, =%d= (un número entero) y =%.3g= (tres cifras significativas, en notación decimal o científica según su tamaño), ya aparecieron en las sesiones 7, 11, 16 y 18.
+- =$vcv= :: la matriz de varianzas y covarianzas de los coeficientes del último modelo. Entre corchetes, =$vcv[3:4,3:4]=, se toma el bloque de las filas y columnas $3$ y $4$: las varianzas de los coeficientes tercero y cuarto en la diagonal y su covarianza fuera de ella. =$coeff[3:4]= toma del mismo modo las dos estimaciones. Están en la Actividad 6.
+- =matrix=, =cholesky=, =seq=, =ones=, =~= :: en la Actividad 6, para recorrer la elipse punto a punto: =matrix= declara una matriz; =cholesky(V)= devuelve la matriz triangular =L= con =L*L' = V=; =seq(0, 360)= es la fila de los enteros de $0$ a $360$; =ones(r, 1)= una columna de =r= unos; =~= pega dos matrices lado a lado; y el apóstrofo traspone.
+- =plot= con una matriz :: el bloque =plot ... end plot= de la sesión 11 admite una matriz en lugar de una lista de series: dibuja sus columnas, la última en el eje horizontal. =set force_decpoint on= hace que =sprintf= escriba los decimales con punto, como exige gnuplot, y =@rect= dentro de una línea =literal= inserta el contenido de la cadena =rect=.
 
 * Actividad 1 - El modelo completo
 
@@ -346,6 +350,93 @@ end outfile
 
 Ningún $t$ llega a $1{,}05$ en valor absoluto; el $F$ de excluir las dos a la vez vale $28$. Uno a uno, ninguno de los dos regresores parece necesario; juntos, el contraste rechaza con claridad que sobren los dos. No es una contradicción del contraste: es que las dos preguntas son distintas, y la lección 14 explicó por qué esta pareja las separa tanto. La práctica B de la sesión 22 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-B-hprice2-vif.pdf#page=1][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-B-hprice2-vif.html#modelo-auxiliar][html]])) le pondrá números.
 
+* Actividad 6 - La elipse de confianza de =nox= y =lnox=
+:PROPERTIES:
+:CUSTOM_ID: elipse-confianza
+:END:
+
+Los dos intervalos al $95\%$ de la Actividad 5 contienen el cero y el $F$ rechaza el par $(0,0)$. Dibuje la región de pares $(\beta_{\text{nox}},\beta_{\text{lnox}})$ que el $F$ no rechaza al $5\%$ y compárela con el rectángulo de los dos intervalos.
+
+Esa región es una elipse centrada en las estimaciones: el intervalo de confianza en dos dimensiones. Gretl la dibuja desde la ventana del modelo, //~Análisis -> Elipse de confianza~//, eligiendo los dos coeficientes. En línea de comandos hay que construirla, y para eso hacen falta las varianzas y la covarianza de los dos estimadores.
+
+El bloque =Elipse= estima de nuevo el modelo con =--quiet=, guarda $t_c$ y el valor crítico $F_c$ de la $F$ con $2$ y $n-k$ grados de libertad, y toma de la tabla de coeficientes y de =$vcv= (la matriz de varianzas y covarianzas de los coeficientes) las filas y columnas $3$ y $4$, las de =nox= y =lnox=: =b= es la pareja de estimaciones y =V= su matriz de varianzas, $2\times2$. =corrEst= es la correlación entre los dos estimadores, la covarianza dividida por el producto de las dos desviaciones típicas. Los cuatro escalares =iL=, =iR=, =jL= y =jR= son los extremos de los dos intervalos. Después, =restrict --quiet= contrasta el par $(0,0)$ (imprime el estadístico, no las estimaciones restringidas) y =$test= recoge su $F$. Tres =printf=: los intervalos, la correlación, y el $F$ del par $(0,0)$ con su valor crítico y su valor $p$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Elipse
+#+begin_src gretl :eval no
+ols price const rooms nox lnox --quiet
+scalar tc = critical(t, $df, 0.025)
+scalar Fc = critical(F, 2, $df, 0.05)
+scalar gl = $df
+matrix b = $coeff[3:4]
+matrix V = $vcv[3:4,3:4]
+scalar corrEst = V[1,2]/sqrt(V[1,1]*V[2,2])
+scalar iL = b[1] - tc*sqrt(V[1,1])
+scalar iR = b[1] + tc*sqrt(V[1,1])
+scalar jL = b[2] - tc*sqrt(V[2,2])
+scalar jR = b[2] + tc*sqrt(V[2,2])
+restrict --quiet
+    b[nox] = 0
+    b[lnox] = 0
+end restrict
+printf "IC 95%% nox: [%.1f ; %.1f]    IC 95%% lnox: [%.1f ; %.1f]\n", iL, iR, jL, jR
+printf "Correlacion entre los estimadores de nox y lnox: %.3f\n", corrEst
+printf "El par (0,0): F = %.3f    F_c(2,%d) = %.3f    valor p = %.3g\n", $test, gl, Fc, $pvalue
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :eval no :exports none :noweb yes
+outfile --quiet elipse.txt
+    <<Elipse>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S21-Prct-A-hprice2-restricciones/elipse.txt example
+#+latex: }
+
+La elipse es el conjunto de pares $\boldsymbol c$ con $(\boldsymbol c-\boldsymbol b)^\top\boldsymbol V^{-1}(\boldsymbol c-\boldsymbol b)\le 2F_c$: el $F$ de contrastar $\beta_{\text{nox}}=c_1,\ \beta_{\text{lnox}}=c_2$ es el lado izquierdo dividido por $2$, y no se rechaza mientras no supere $F_c$. El bloque =ElipseFigura= la recorre punto a punto: =cholesky(V)= devuelve una matriz triangular =L= con $\boldsymbol L\boldsymbol L^\top=\boldsymbol V$, y los puntos $\boldsymbol b+\sqrt{2F_c}\,\boldsymbol L\,(\cos\theta,\sin\theta)^\top$, con $\theta$ de $0$ a $360$ grados, están todos sobre el borde de la elipse. =seq(0, 360)= genera los ángulos, =ones= repite =b= en cada fila, =~= pega dos columnas y el apóstrofo traspone. =EP= pone en la última columna la variable del eje horizontal, como pide =plot=. Como =gnuplot= escribe los decimales con punto, =set force_decpoint on= cambia el separador antes de componer, con =sprintf=, las dos órdenes de gnuplot que dibujan el rectángulo de los intervalos y marcan la estimación; dentro del bloque =plot= (práctica C de la sesión 11, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-C-graficos-informes.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-C-graficos-informes.html#personalizar][html]])), =@rect= y =@est= insertan esas cadenas, y la última =literal= marca el origen.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: ElipseFigura
+#+begin_src gretl :eval no
+matrix L = cholesky(V)
+matrix th = seq(0, 360)' * $pi/180
+matrix E = ones(rows(th), 1)*b' + sqrt(2*Fc) * (L * (cos(th) ~ sin(th))')'
+matrix EP = E[,2] ~ E[,1]
+set force_decpoint on
+string rect = sprintf("set object 1 rect from %g,%g to %g,%g fs empty border lc rgb 'gray40' dt 2", iL, jL, iR, jR)
+string est  = sprintf("set label 'estimacion' at %g,%g point pt 7 lc rgb 'red' offset 1,1", b[1], b[2])
+plot EP
+    options with-lines fit=none
+    literal set title "Elipse de confianza al 95% y rectangulo de los dos intervalos"
+    literal set xlabel "coeficiente de nox"
+    literal set ylabel "coeficiente de lnox"
+    literal set key off
+    literal @rect
+    literal @est
+    literal set label "(0,0)" at 0,0 point pt 7 lc rgb "black" offset 1,1
+end plot --output="elipse_nox_lnox.png"
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S21-Prct-A-hprice2-restricciones.inp :eval no :exports none :noweb yes
+<<ElipseFigura>>
+#+end_src
+
+#+attr_latex: :width 0.72\textwidth :placement [H]
+#+attr_html: :width 560px
+#+CAPTION: La elipse de confianza al $95\%$ para $(\beta_{\text{nox}},\beta_{\text{lnox}})$ y, en trazo discontinuo, el rectángulo de los dos intervalos al $95\%$. El origen está dentro del rectángulo y fuera de la elipse.
+[[file:./S21-Prct-A-hprice2-restricciones/elipse_nox_lnox.png]]
+
+*** Lo que debe observar
+
+El origen está dentro del rectángulo, porque cada intervalo contiene el cero, y fuera de la elipse, porque el $F$ del par $(0,0)$ es $28{,}2$ frente a un valor crítico de $3{,}0$. Es la Actividad 5 dibujada: dos $t$ pequeños y un $F$ grande no se contradicen, porque el rectángulo y la elipse son regiones distintas.
+
+La elipse es una aguja inclinada hacia abajo. La correlación entre los dos estimadores es $-0{,}993$, de signo contrario a la correlación entre los dos regresores, $0{,}994$. Los datos casi no distinguen =nox= de =lnox=, y por eso solo fijan una combinación de los dos coeficientes: aceptan los pares en los que, si uno sube, el otro baja en la proporción de la pendiente del eje mayor, y rechazan casi todos los demás. Es ``Por qué oscilan los coeficientes'' de la lección 14, ahora como región de confianza: lo que una coordenada gana lo pierde la otra. La práctica B de esta sesión ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S21-Prct-B-ramanathan-conjunta.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S21-Prct-B-ramanathan-conjunta.html#rectangulo][html]])) dibuja la misma figura con una correlación de $-0{,}31$: una elipse apenas inclinada, en la que dos esquinas del rectángulo caen dentro y dos fuera.
+
 * Preguntas de interpretación para la clase
 
 1. En la Actividad 2, $\mathrm{SRC}_r-\mathrm{SRC}$ vale $4{,}99\cdot10^9$. ¿Qué longitud al cuadrado es esa, en la figura de la proyección en dos pasos de la lección 13? ¿Por qué no puede ser negativa?
@@ -353,6 +444,7 @@ Ningún $t$ llega a $1{,}05$ en valor absoluto; el $F$ de excluir las dos a la v
 3. En la Actividad 3 el $F$ y el $t^2$ coinciden. ¿Qué información tiene el $t$ que el $F$ no tiene? ¿Y en qué situación el $t$ no sirve y el $F$ sí?
 4. En la Actividad 4 el valor $p$ es $0{,}060$. Un compañero concluye ``queda demostrado que los dos coeficientes son iguales''. Diga dos razones por las que esa frase es incorrecta.
 5. Con la restricción de la Actividad 4, ¿cuánto vale el error estándar del coeficiente común, y por qué es menor que los errores estándar de =nox= y =stratio= en el modelo completo?
+6. En la Actividad 6, =nox= y =lnox= crecen juntos (correlación $0{,}994$) y la elipse se inclina hacia abajo (correlación entre los estimadores $-0{,}993$). ¿Por qué los signos son opuestos? ¿Qué pares de valores acepta la elipse y cuáles rechaza?
 
 * Para profundizar
 
@@ -381,6 +473,8 @@ Ningún $t$ llega a $1{,}05$ en valor absoluto; el $F$ de excluir las dos a la v
 4. /``Queda demostrado que son iguales''./ Primera razón: no rechazar no es demostrar; datos como estos no serían raros si los dos coeficientes fuesen iguales, y tampoco lo serían con muchas otras diferencias entre ellos, y $p=0{,}060$ está muy cerca del umbral. Segunda razón: la igualdad que se contrasta es entre coeficientes de variables medidas en unidades sin relación, así que ni siquiera tiene contenido económico que demostrar. Un intervalo para $\beta_{\text{nox}}-\beta_{\text{stratio}}$ informaría más que el veredicto.
 
 5. /El error estándar del coeficiente común./ Es $108{,}9$ en la salida de =restrict=, frente a $236{,}3$ y $128{,}8$ en el modelo completo. Al fundir los dos regresores en uno, la parte propia de la suma es más larga que la de cada sumando: la dirección que =nox= y =stratio= compartían deja de restar longitud. Es el segundo remedio de la lección 14, imponer una restricción que la muestra no rechaza, visto en acción.
+
+6. /Signos opuestos./ Si =nox= y =lnox= son casi el mismo vector, el ajuste depende casi solo de la suma de sus dos contribuciones: subir el coeficiente de uno y bajar el del otro en la proporción adecuada deja el ajuste casi igual, y los datos no distinguen esos pares. Por eso la muestra acepta una franja estrecha de pares con desvíos de signo contrario y rechaza los desvíos del mismo signo, que sí cambian el ajuste. Esa franja es la elipse, y su inclinación negativa es la correlación negativa entre los dos estimadores: en réplicas de la muestra, cuando una coordenada sale alta la otra sale baja, como en ``Por qué oscilan los coeficientes'' de la lección 14 (la práctica A de la sesión 22 lo mostrará con dos mil réplicas alineadas sobre una recta de pendiente negativa). La elipse contiene el origen solo si la franja pasa por él, y aquí no pasa: el $F$ rechaza $(0,0)$ aunque cada intervalo, que es la sombra de la elipse sobre su eje, contenga el cero.
 
 * COMMENT Banco de preguntas de reserva
 
