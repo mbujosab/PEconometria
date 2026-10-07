@@ -1,0 +1,81 @@
+# Cifras de la lección 15 (Formas funcionales con logaritmos).
+# Reproduce con gretlcli -b todos los números de transparencias y apuntes.
+# Ejecutar desde cualquier directorio: los datos son de muestra de Gretl.
+
+# --- Transparencia 1 y subdiapositiva de la 3: cuatro formas con hprice2 ---
+open hprice2.gdt --quiet
+ols price const rooms nox --quiet
+printf "t1 price~rooms+nox   : b_nox=%.1f ee=%.1f t=%.2f R2=%.3f\n", $coeff(nox), $stderr(nox), $coeff(nox)/$stderr(nox), $rsq
+ols price const rooms lnox --quiet
+printf "t1 price~rooms+lnox  : b_lnox=%.1f ee=%.1f t=%.2f R2=%.3f\n", $coeff(lnox), $stderr(lnox), $coeff(lnox)/$stderr(lnox), $rsq
+ols lprice const rooms nox --quiet
+printf "t1 lprice~rooms+nox  : b_nox=%.4f ee=%.4f t=%.2f R2=%.3f\n", $coeff(nox), $stderr(nox), $coeff(nox)/$stderr(nox), $rsq
+ols lprice const rooms lnox --quiet
+printf "t1 lprice~rooms+lnox : b_lnox=%.4f ee=%.4f t=%.2f R2=%.3f\n", $coeff(lnox), $stderr(lnox), $coeff(lnox)/$stderr(lnox), $rsq
+
+# --- Transparencia 4: wage1 ---
+open wage1.gdt --quiet
+ols wage const educ --quiet
+printf "t4 wage~educ  : const=%.3f b=%.3f ee=%.3f R2=%.3f\n", $coeff(const), $coeff(educ), $stderr(educ), $rsq
+ols lwage const educ --quiet
+printf "t4 lwage~educ : const=%.3f b=%.4f ee=%.4f R2=%.3f ; exacto 1 anio=%.4f, 4 anios=%.3f\n", $coeff(const), $coeff(educ), $stderr(educ), $rsq, exp($coeff(educ))-1, exp(4*$coeff(educ))-1
+
+# --- Transparencia 5: hprice1, superficie ---
+open hprice1.gdt --quiet
+logs sqrft
+ols price const sqrft --quiet
+printf "t5 price~sqrft  : b=%.4f ee=%.4f R2=%.3f\n", $coeff(sqrft), $stderr(sqrft), $rsq
+ols price const l_sqrft --quiet
+scalar bNL = $coeff(l_sqrft)
+printf "t5 price~lsqrft : b=%.1f ee=%.1f R2=%.3f ; 100 pies en 1000: exacto %.1f aprox %.1f ; en 4000: %.1f\n", bNL, $stderr(l_sqrft), $rsq, bNL*log(1.1), bNL*0.1, bNL*log(1.025)
+printf "t5 por pie en casa de 1000 pies: 10 pies %.0f, 100 pies %.0f, 500 pies %.0f dolares\n", 1000*bNL*log(1.01)/10, 1000*bNL*log(1.1)/100, 1000*bNL*log(1.5)/500
+
+# --- Transparencia 6: elasticidades con hprice2, regresiones simples ---
+open hprice2.gdt --quiet
+ols price const nox --quiet
+scalar a = $coeff(const)
+scalar b = $coeff(nox)
+printf "t6 price~nox : %.0f %+.0f nox ; R2=%.3f\n", a, b, $rsq
+loop foreach i 3.9 5.5 8.7
+    printf "t6 elasticidad en nox=%s: yhat=%.0f eta=%.2f\n", "$i", a+b*$i, b*$i/(a+b*$i)
+endloop
+printf "t6 extrapolacion nox=12: recta %.1f mil\n", (a+b*12)/1000
+ols price const lnox --quiet
+printf "t6 price~lnox : %.1f %+.1f lnox (miles) ; R2=%.3f ; en nox=8.7: %.1f mil ; nox=12: %.1f mil\n", $coeff(const)/1000, $coeff(lnox)/1000, $rsq, ($coeff(const)+$coeff(lnox)*log(8.7))/1000, ($coeff(const)+$coeff(lnox)*log(12))/1000
+ols lprice const lnox --quiet
+printf "t6 lprice~lnox : elasticidad=%.2f\n", $coeff(lnox)
+# subdiapositiva: Wooldridge, ejemplo 4.5
+logs dist
+ols lprice const lnox l_dist rooms stratio --quiet
+scalar t1 = ($coeff(lnox)+1)/$stderr(lnox)
+printf "t6 Wooldridge 4.5: b_lnox=%.3f ee=%.3f IC95=[%.2f, %.2f] R2=%.3f ; t(H0:-1)=%.2f p=%.2f ; l_dist=%.3f rooms=%.3f stratio=%.3f\n", $coeff(lnox), $stderr(lnox), $coeff(lnox)-critical(t,$df,0.025)*$stderr(lnox), $coeff(lnox)+critical(t,$df,0.025)*$stderr(lnox), $rsq, t1, 2*pvalue(t,$df,abs(t1)), $coeff(l_dist), $coeff(rooms), $coeff(stratio)
+
+# --- Transparencia 7: Cobb-Douglas, greene9_1 ---
+open greene9_1.gdt --quiet
+logs valadd labor capital
+ols l_valadd const l_labor l_capital --quiet
+printf "t7 CD: const=%.3f (ee %.3f, t %.2f) alpha=%.3f (ee %.3f, t %.2f, p %.2g) gamma=%.3f (ee %.3f, t %.2f, p %.4f) R2=%.3f s=%.3f SRC=%.3f A=%.1f\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), $coeff(l_labor), $stderr(l_labor), $coeff(l_labor)/$stderr(l_labor), 2*pvalue(t,$df,abs($coeff(l_labor)/$stderr(l_labor))), $coeff(l_capital), $stderr(l_capital), $coeff(l_capital)/$stderr(l_capital), 2*pvalue(t,$df,abs($coeff(l_capital)/$stderr(l_capital))), $rsq, $sigma, $ess, exp($coeff(const))
+matrix V = $vcv
+printf "t7 alpha+gamma=%.3f ee=%.3f\n", $coeff(l_labor)+$coeff(l_capital), sqrt(V[2,2]+V[3,3]+2*V[2,3])
+restrict --quiet
+    b[l_labor] + b[l_capital] = 1
+end restrict
+printf "t7 F(1,%d)=%.2f p=%.2f Fc=%.2f\n", $df, $test, $pvalue, critical(F,1,$df,0.05)
+series lq_l = l_valadd - l_labor
+series lk_l = l_capital - l_labor
+ols lq_l const lk_l --quiet
+printf "t7 restringido: gamma=%.3f alpha=%.3f SRC_r=%.3f\n", $coeff(lk_l), 1-$coeff(lk_l), $ess
+
+# --- Transparencia 8: prevision ---
+open hprice2.gdt --quiet
+ols lprice const rooms lnox --quiet
+scalar s = $sigma
+scalar yhat0 = $coeff(const) + $coeff(rooms)*6 + $coeff(lnox)*log(5.5)
+series eyhat = exp($yhat)
+series eres = exp($uhat)
+printf "t8 modelo: %.3f %+.3f rooms %+.3f lnox ; s=%.3f ; yhat0=%.3f e^yhat0=%.0f factor=%.4f corregida=%.0f Duan=%.4f\n", $coeff(const), $coeff(rooms), $coeff(lnox), s, yhat0, exp(yhat0), exp(s^2/2), exp(yhat0)*exp(s^2/2), mean(eres)
+printf "t8 medias: price %.0f, e^yhat %.0f (%.1f%% menos), corregida %.0f ; corr2(price,e^yhat)=%.3f\n", mean(price), mean(eyhat), 100*(1-mean(eyhat)/mean(price)), mean(eyhat)*exp(s^2/2), corr(price,eyhat)^2
+ols price const rooms lnox --quiet
+printf "t8 nivel-log: R2=%.3f ; prevision barrio=%.0f\n", $rsq, $coeff(const)+$coeff(rooms)*6+$coeff(lnox)*log(5.5)
+# --- Transparencia 9: unidades ---
+printf "t9 log(1000)=%.3f ; 9.234-6.908=%.3f\n", log(1000), 9.234-log(1000)

@@ -1,0 +1,69 @@
+#+title: Informe: «matriz de datos» pasa a «matriz de regresores» (2026-10-07)
+
+Respuesta al encargo =doc/prompts/Revision-2026-10-07-matriz-de-regresores.org=. Ejecutado en la sesión de las lecciones el 2026-10-07. Commit propio: =2352197=.
+
+* 1. Presentación de la lección 10 (=S13-Lecc10.org:188=), literal
+
+Para evitar los sumatorios, agrupamos todos los regresores. Una matriz no es más que una tabla, una lista de vectores-columna del mismo tamaño puestos uno al lado del otro. Si agrupamos nuestra constante y todos nuestros regresores, construimos la matriz de regresores $\boldsymbol{\mathsf{X}}$ (también llamada /matriz de diseño/): sus columnas son los regresores, la constante $\boldsymbol 1$ incluida, y el regresando $\boldsymbol y$ no forma parte de ella. Las matrices las denotaremos siempre con letras mayúsculas de palo seco en negrita, para distinguirlas visualmente de los vectores.
+
+La transparencia correspondiente (=:161=) dice: «En lugar de tener $k$ vectores sueltos, los agrupamos como /columnas/ en una matriz de regresores $\boldsymbol{\mathsf{X}}$. Las matrices se escriben en palo seco negrita ($\boldsymbol{\mathsf{X}}$).» El título de la sección (transparencia =:156= y apuntes =:181=) es ahora «La matriz de regresores y el operador selector». No había ningún enlace ni ancla (=CUSTOM_ID= o =#sec-=) que dependiera del título antiguo: el apéndice y las prácticas enlazan la lección 10 solo por página y por fichero; comprobado con =grep= y con =doc/tools/comprobar-paginas.py= (todos los =#page== correctos).
+
+* 2. Lección 11, frases finales literales
+
+=S15-Lecc11.org:107= (reescrita ligeramente, porque «los regresores observados en la matriz de regresores» repetía la palabra):
+
+Formalicemos esa idea. Desde la lección 4 venimos usando $\boldsymbol x=(x_1,\ldots,x_n)$ para el vector de datos observados (y, desde la lección 6, para el vector de datos observados de un /regresor/), y en la lección 10 los agrupamos como columnas de la matriz de regresores $\boldsymbol{\mathsf X}$ (en el modelo lineal simple, $\boldsymbol{\mathsf X}=[\boldsymbol1;\;\boldsymbol x]$, dos columnas). Hoy introducimos su análogo aleatorio: la matriz[fn::Denotada en negrita cursiva pero sin letra de palo seco (reservada para las matrices de regresores observadas).] $\boldsymbol X$. …
+
+=S15-Lecc11.org:597=:
+
+Sustituyendo $\boldsymbol X$ por la matriz de regresores observada $\boldsymbol{\mathsf X}$, y $\sigma^2$ por su estimación $\mathfrak s^2$ (transparencia anterior), obtenemos la fórmula que calculan los programas estadísticos:
+
+=S15-Lecc11.org:614=:
+
+Aquí $\boldsymbol X$ es la misma matriz aleatoria de regresores que fijamos al abrir la sesión, solo que ahora con $k$ columnas en lugar de dos; $\boldsymbol{\mathsf X}$ sigue denotando, como en la lección 10, la matriz de regresores /observada/. La primera igualdad generaliza la insesgadez de la sección ``Insesgadez'': …
+
+=S15-Lecc11.org:616=:
+
+Al evaluar esta fórmula en una muestra ya observada, sustituimos la matriz aleatoria $\boldsymbol X$ por la matriz de regresores observada $\boldsymbol{\mathsf X}$, con lo que queda por calcular $(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}$. …
+
+Las palabras que el banco debe usar: *matriz aleatoria de regresores* $\boldsymbol X$ frente a *matriz de regresores observada* $\boldsymbol{\mathsf X}$.
+
+* 3. Ficheros cambiados y commit
+
+Commit =2352197= («“Matriz de regresores” en lugar de “matriz de datos” en lecciones 10-11, apéndice, prácticas S14/S16 y Plan; “matriz de diseño” queda como alias»), 34 líneas en 9 ficheros fuente:
+
+- =org-lessons/S13-Lecc10.org=: 156, 161, 181, 188 (presentación con alias y cláusula), 266 («matriz de diseño» → «matriz de regresores»), 889, 1191, 1199 («matriz de diseño múltiple» → «matriz de regresores»).
+- =org-lessons/S15-Lecc11.org=: 107 (y su nota al pie: «matrices de regresores observadas»), 597, 614, 616.
+- =org-lessons/Apendice-geometria.org=: 676 (tabla de notación: «Matriz de regresores (lección 10)»).
+- =org-pract/S14-Prct-A-ramanathan.org=: 104.
+- =org-pract/S14-Prct-D-simulados-matricial.org=: 92, 96, 105, 157.
+- =org-pract/S16-Prct-A-montecarlo.org=: 424 (leída: se refiere a $\boldsymbol{\mathsf X}=\{\text{const},\text{rooms}\}$; cambiada).
+- =org-pract/S16-Prct-B-condicionar.org=: 464 (leída: «la matriz de regresores efectivamente observada»; se refiere a $\boldsymbol{\mathsf X}$; cambiada).
+- =doc/prompts/PlanDeEscritura.org=: la regla de §4.2.1 pasa a «Matriz de regresores: observada vs. aleatoria», con la nota «no se dice “matriz de datos”, y “matriz de diseño” solo como alias en la presentación de la lección 10»; entrada nueva en el glosario operativo; las citas del título de sección (§7.14 y §10) y las menciones de §4.2.1 y §7.18 actualizadas.
+- =doc/prompts/PreparacionLeccion.org=: las seis apariciones.
+
+Regenerados y comprobados: PDF, HTML, transparencias e =.ipynb= de las lecciones 10 y 11; PDF y HTML del apéndice y de las cuatro prácticas. Ninguna pantalla supera los 700 px (lección 10, máximo 691; lección 11, por debajo de 690). Los =.ipynb= salen del mismo =make=, no se editaron a mano. Barrido final:
+
+#+begin_src sh
+grep -r -n -i -E "matriz de datos|matriz de diseño" --include="*.org" \
+  org-lessons org-pract CuadernosElectronicos \
+  doc/prompts/PlanDeEscritura.org doc/prompts/PreparacionLeccion.org | grep -v "/kk/"
+#+end_src
+
+deja tres líneas: el alias de la presentación de la lección 10 (=S13-Lecc10.org:188=) y las dos frases del Plan que enuncian la regla («no se dice “matriz de datos”», §4.2.1 y glosario). Las lecciones 12 a 15, los cuadernos y =index.org= no contenían el término.
+
+* 4. Apariciones que no se cambiaron, y por qué
+
+Ninguna de la lista. Las dos que el encargo pedía leer antes (=S16-Prct-A:424= y =S16-Prct-B:464=) se refieren a $\boldsymbol{\mathsf X}$ y se cambiaron. Las únicas menciones que quedan son el alias (una vez, lección 10) y el enunciado de la propia regla en el Plan.
+
+* 5. Visto de paso, sin corregir
+
+- =S15-Lecc11.org:107=: el mismo párrafo escribe el vector de datos como $\boldsymbol x$ y, en la nota al pie, distingue negrita cursiva (aleatoria) de palo seco (observada). Con el nombre nuevo, «vector de datos observados de un regresor» (columna) y «matriz de regresores observada» (matriz) conviven; es coherente, pero si el banco quiere una pareja de términos para las columnas, la lección usa «vector de datos de un regresor», no «vector regresor».
+- =S13-Lecc10.org:266=: la frase «el vector de residuos es ortogonal a cada una de las columnas (regresores) de la matriz de regresores» tiene ahora «regresores» dos veces; se puede dejar en «a cada una de las columnas de la matriz de regresores». No se ha tocado por la regla «un solo cambio».
+- =S13-Lecc10.org:1191= (pregunta 9 del banco de reserva de la lección): «En la matriz de regresores $\boldsymbol{\mathsf{X}}$, la inclusión del vector constante $\boldsymbol{1}$ como primer…»: coherente con la cláusula nueva de la presentación; el banco externo puede reutilizar esa formulación.
+- En el Plan, la regla de §4.2.1 sigue diciendo «(lecciones 10, 13)» para la matriz observada; la lección 15 también la usa (regresor = columna de $\boldsymbol{\mathsf X}$ en la muestra). No afecta al banco.
+- Al aplicar el cambio con una sustitución global, la propia frase nueva del Plan («no se dice “matriz de datos”») quedó sustituida y hubo que reponerla; está comprobado en el barrido. Lo anoto por si el banco hace la misma sustitución mecánica en sus preguntas: excluir las frases que citan el término viejo a propósito.
+
+* 6. Estado del repositorio
+
+El commit =2352197= contiene solo este cambio. El trabajo pendiente de la lección 15 (revisión A–F del 7 de octubre) se apartó con =git stash= antes y se restauró después; sigue sin commitear. El commit no se ha empujado a GitHub: el encargo pedía commit propio, no push.
