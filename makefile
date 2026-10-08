@@ -90,10 +90,11 @@ $(LESSONS_DIR)/%.slides.html: $(LESSONS_DIR)/%.ipynb
 	    --execute $(notdir $<)
 	# MathJax 2 (el de las slides) no tiene el dígito 1 en blackboard bold y pinta
 	# \mathbb 1 como un 1 normal; el PDF lo resuelve con dsfont y el HTML usa MathJax 3.
-	# Aquí se sustituye por dos unos superpuestos (1\!\!1), que solo usa órdenes
-	# básicas de TeX y no depende de las fuentes del navegador (\unicode{x1D7D9}
-	# fallaba con la copia de cdnjs que usa el medidor de transparencias).
-	sed -i -E 's/\\mathbb *(\{1\}|1)/{1\\!\\!1}/g' $@
+	# Aquí se sustituye por un 1 y una l de palo seco superpuestos, de trazo fino
+	# (\mathsf{1}\mkern-3.5mu\mathsf{l}), que solo usa órdenes básicas de TeX y no
+	# depende de las fuentes del navegador (\unicode{x1D7D9} fallaba con la copia
+	# de cdnjs que usa el medidor de transparencias; 1\!\!1 salía demasiado grueso).
+	sed -i -E 's/\\mathbb *(\{1\}|1)/{\\mathsf{1}\\mkern-3.5mu\\mathsf{l}}/g' $@
 
 # ==================== CuadernosElectronicos ====================
 $(CUADERNOS_DIR)/%.ipynb: $(CUADERNOS_DIR)/%.org
