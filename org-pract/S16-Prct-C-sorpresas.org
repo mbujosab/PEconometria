@@ -115,18 +115,18 @@ La segunda es más antigua. En el ejemplo de juguete de la lección 7, aquel $\b
 - =%10.2f=, =%8.3f= :: en =printf=, un número con dos (o tres) decimales dentro de un campo de diez (u ocho) caracteres, para que las columnas queden alineadas.
 
 
-* Actividad 1 - Tres perturbaciones muy distintas, la misma media y la misma varianza
+* Actividad 1 - Tres perturbaciones muy distintas, la misma esperanza y la misma varianza
 :PROPERTIES:
 :CUSTOM_ID: tres-perturbaciones
 :END:
 
-Vamos a repetir el experimento de la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop][html]])) tres veces en paralelo, cambiando únicamente cómo se sortea la perturbación. Las tres tendrán media cero y varianza $\sigma^2$; en todo lo demás son muy diferentes:
+Vamos a repetir el experimento de la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop][html]])) tres veces en paralelo, cambiando únicamente cómo se sortea la perturbación. Las tres tendrán esperanza cero y varianza $\sigma^2$; en todo lo demás son muy diferentes:
 
 - /Normal/: la de la práctica A, simétrica y con colas ligeras.
 - /Uniforme/: simétrica también, pero sin colas en absoluto; todos los valores de un intervalo son igual de probables. Para que su varianza sea $\sigma^2$ hay que tomar el intervalo $[-\sigma\sqrt3,\;\sigma\sqrt3]$.
-- /Chi-cuadrado centrada/: marcadamente /asimétrica/. Una $\chi^2$ con 4 grados de libertad tiene media 4 y varianza 8; restándole su media y dividiendo por $\sqrt8$ queda con media cero y varianza uno, y basta multiplicar por $\sigma$.
+- /Chi-cuadrado centrada/: marcadamente /asimétrica/. Una $\chi^2$ con 4 grados de libertad tiene esperanza 4 y varianza 8; restándole su esperanza y dividiendo por $\sqrt8$ queda con esperanza cero y varianza uno, y basta multiplicar por $\sigma$.
 
-Un solo bucle que hace tres experimentos por vuelta. Antes del bucle: el mundo artificial de la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#mundo-artificial][html]])) y =a_unif=, la semiamplitud del intervalo de la uniforme. Dentro, tres perturbaciones: la normal, como en la práctica A; la uniforme, =-a_unif + 2*a_unif*uniform(0,1)=, un sorteo en $[0,1]$ reescalado al intervalo $[-a,a]$; y la chi-cuadrado, =randgen(X,4)=, a la que se resta su media $4$, se divide por su desviación típica $\sqrt8$ y se multiplica por =sigma=. Cada perturbación da su regresando, su regresión y su coeficiente, y =store= guarda los tres por réplica en =repC.gdt=.
+Un solo bucle que hace tres experimentos por vuelta. Antes del bucle: el mundo artificial de la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#mundo-artificial][html]])) y =a_unif=, la semiamplitud del intervalo de la uniforme. Dentro, tres perturbaciones: la normal, como en la práctica A; la uniforme, =-a_unif + 2*a_unif*uniform(0,1)=, un sorteo en $[0,1]$ reescalado al intervalo $[-a,a]$; y la chi-cuadrado, =randgen(X,4)=, a la que se resta su esperanza $4$, se divide por su desviación típica $\sqrt8$ y se multiplica por =sigma=. Cada perturbación da su regresando, su regresión y su coeficiente, y =store= guarda los tres por réplica en =repC.gdt=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -218,14 +218,14 @@ end outfile
 
 *** Lo que debe observar
 
-Las tres medias quedan cerca de $\beta_2$ y las tres varianzas cerca de $\sigma^2/\mathrm{Sxx}$. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a marcadamente asimétrica) no cambia ni la media ni la varianza.
+Las tres medias quedan cerca de $\beta_2$ y las tres varianzas cerca de $\sigma^2/\mathrm{Sxx}$. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a marcadamente asimétrica) no cambia ni el valor esperado ni la varianza.
 
 Es lo que la lección 11 demostró. Merece la pena volver sobre aquella demostración y comprobar qué se usó en cada paso.
 
 - Para la insesgadez se usó $E[U_i\mid\boldsymbol X]=\mathit 0$ (exogeneidad estricta) y el lema para sacar los $W_i$ fuera de la esperanza condicionada.
 - Para la varianza se usó, además, $Var[U_i\mid\boldsymbol X]=\sigma^2\,\mathit 1$ (homocedasticidad) y $Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0$ para $i\neq j$.
 
-En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su media condicional, su varianza condicional y la ausencia de covarianzas cruzadas. Y esas tres condiciones las cumplen por igual una normal, una uniforme y una chi-cuadrado centrada. La demostración era más general de lo que parecía.
+En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su esperanza condicional, su varianza condicional y la ausencia de covarianzas cruzadas. Y esas tres condiciones las cumplen por igual una normal, una uniforme y una chi-cuadrado centrada. La demostración era más general de lo que parecía.
 
 
 * Actividad 2 - La forma sí depende de la distribución de $U$
@@ -233,7 +233,7 @@ En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su media
 :CUSTOM_ID: forma
 :END:
 
-Que la media y la varianza no dependan de la distribución de $U$ no significa que /nada/ dependa de ella. Veamos los histogramas. =freq b_chi --normal= dibuja, como en la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=6][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#histograma-b2][html]])), el histograma de las estimaciones obtenidas con perturbación chi-cuadrado, con la normal superpuesta y el contraste de normalidad.
+Que el valor esperado y la varianza no dependan de la distribución de $U$ no significa que /nada/ dependa de ella. Veamos los histogramas. =freq b_chi --normal= dibuja, como en la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=6][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#histograma-b2][html]])), el histograma de las estimaciones obtenidas con perturbación chi-cuadrado, con la normal superpuesta y el contraste de normalidad.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -263,7 +263,7 @@ Con las 506 observaciones de =hprice2=, el histograma de $\hat\beta_2$ sigue par
 
 Antes de sacar conclusiones, probemos con una muestra pequeña y una asimetría mayor: doce viviendas y perturbaciones $\chi^2$ con /un/ grado de libertad.
 
-Cuatro bloques, y un quinto para el histograma. El primero reabre =hprice2=, recupera los parámetros y se queda con doce viviendas: con =set seed 160= y =smpl 12 --random=, las mismas doce de la práctica B ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#doce-viviendas][html]])). El segundo es el bucle: 4000 réplicas con una perturbación chi-cuadrado de un grado de libertad, centrada (se le resta su media, $1$) y reescalada (se divide por su desviación típica, $\sqrt2$, y se multiplica por =sigma=), guardando =b_peq=. El tercero, =AbrirRepCpeq=, abre =repCpeq.gdt=, y el cuarto calcula la media, la desviación típica y el coeficiente de asimetría escrito con sumas: la media de los cubos de las desviaciones dividida por el cubo de la desviación típica. El quinto, =freq b_peq --normal=, dibuja el histograma e imprime la tabla de frecuencias y el contraste de normalidad.
+Cuatro bloques, y un quinto para el histograma. El primero reabre =hprice2=, recupera los parámetros y se queda con doce viviendas: con =set seed 160= y =smpl 12 --random=, las mismas doce de la práctica B ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#doce-viviendas][html]])). El segundo es el bucle: 4000 réplicas con una perturbación chi-cuadrado de un grado de libertad, centrada (se le resta su esperanza, $1$) y reescalada (se divide por su desviación típica, $\sqrt2$, y se multiplica por =sigma=), guardando =b_peq=. El tercero, =AbrirRepCpeq=, abre =repCpeq.gdt=, y el cuarto calcula la media, la desviación típica y el coeficiente de asimetría escrito con sumas: la media de los cubos de las desviaciones dividida por el cubo de la desviación típica. El quinto, =freq b_peq --normal=, dibuja el histograma e imprime la tabla de frecuencias y el contraste de normalidad.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -497,19 +497,19 @@ Lo que el regresor sí controla es /cuánta/ de la asimetría de $U$ llega al re
 
 Conviene no confundir lo que hemos establecido con lo que solo hemos observado:
 
-| Propiedad de $\hat\beta_2$ | ¿Depende de la distribución de $U$? | ¿Depende del regresor? |
-|----------------------------+-------------------------------------+------------------------|
-| Media (insesgadez)         | No                                  | No                     |
-| Varianza                   | No                                  | Sí (a través de Sxx)   |
-| Forma                      | Sí                                  | Solo en qué medida     |
+| Propiedad de $\hat\beta_2$  | ¿Depende de la distribución de $U$? | ¿Depende del regresor? |
+|-----------------------------+-------------------------------------+------------------------|
+| Valor esperado (insesgadez) | No                                  | No                     |
+| Varianza                    | No                                  | Sí (a través de Sxx)   |
+| Forma                       | Sí                                  | Solo en qué medida     |
 
-Las dos primeras filas están /demostradas/ en la lección 11 y verificadas en la Actividad 1. La tercera es lo que acabamos de explorar experimentalmente, y es también la razón por la que la lección 11 se detuvo en la media y la varianza: demostró exactamente lo que se podía demostrar sin suponer nada sobre la distribución de $U$. Todo lo que dependa de la forma, y los intervalos de confianza y los contrastes de hipótesis dependen de ella, exige un supuesto adicional. Ese supuesto, y lo que se puede hacer con él, es el asunto de la lección 12.
+Las dos primeras filas están /demostradas/ en la lección 11 y verificadas en la Actividad 1. La tercera es lo que acabamos de explorar experimentalmente, y es también la razón por la que la lección 11 se detuvo en el valor esperado y la varianza: demostró exactamente lo que se podía demostrar sin suponer nada sobre la distribución de $U$. Todo lo que dependa de la forma, y los intervalos de confianza y los contrastes de hipótesis dependen de ella, exige un supuesto adicional. Ese supuesto, y lo que se puede hacer con él, es el asunto de la lección 12.
 
 /Una observación/. Habrá notado una regularidad: la asimetría se atenúa cuando hay muchas observaciones, o cuando ninguna domina. Hay un resultado general detrás de ese comportamiento, y explica por qué la econometría aplicada puede a menudo prescindir de supuestos sobre la distribución de $U$. No lo vamos a abordar aquí: anótelo como pregunta pendiente para la próxima lección.
 
 * Actividad 3 - Forzar la ortogonalidad exactamente
 
-Tanto los supuestos del modelo como el corolario de la exogeneidad se enuncian /en esperanza/: $E[U_i\mid\boldsymbol X]=\mathit 0$ dice que la perturbación vale cero /en promedio/, no que valga cero en ninguna muestra concreta. En cualquier muestra real, el vector de perturbaciones tendrá una media muestral que no será cero y no será ortogonal al regresor.
+Tanto los supuestos del modelo como el corolario de la exogeneidad se enuncian /en esperanza/: $E[U_i\mid\boldsymbol X]=\mathit 0$ dice que la perturbación vale cero /en promedio/, no que valga cero en ninguna muestra concreta. En cualquier muestra real, el vector de perturbaciones tendrá una media que no será cero y no será ortogonal al regresor.
 
 ¿Y si lo forzáramos? Podemos construir un vector de perturbaciones a medida: se sortea al azar, se le quita su proyección sobre los regresores, con lo que queda /exactamente/ ortogonal a $\boldsymbol 1$ y a $\boldsymbol x$, y se reescala para que su varianza sea exactamente $\sigma^2$. El truco es el mismo que usamos en el ejemplo de juguete de la lección 7, ahora automatizado.
 
@@ -626,7 +626,7 @@ Es el caso del ejemplo de la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ era
 
 * Respuestas
 
-1. /¿Hace falta normalidad para la insesgadez?/ No, y el experimento lo confirma: con perturbaciones uniformes y con perturbaciones muy asimétricas la media de las estimaciones sigue quedando en $\beta_2$. La razón está en la demostración de la lección 11: la insesgadez sale de tomar esperanza condicional en $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$, usar el lema para sacar los $W_i$ fuera, y aplicar $E[U_i\mid\boldsymbol X]=\mathit 0$. Ese supuesto habla de la /media condicional/ de $U$, no de su distribución. Una uniforme y una chi-cuadrado centrada tienen media condicional cero igual que una normal, y eso es cuanto se necesita.
+1. /¿Hace falta normalidad para la insesgadez?/ No, y el experimento lo confirma: con perturbaciones uniformes y con perturbaciones muy asimétricas la media de las estimaciones sigue quedando en $\beta_2$. La razón está en la demostración de la lección 11: la insesgadez sale de tomar esperanza condicional en $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$, usar el lema para sacar los $W_i$ fuera, y aplicar $E[U_i\mid\boldsymbol X]=\mathit 0$. Ese supuesto habla de la /esperanza condicional/ de $U$, no de su distribución. Una uniforme y una chi-cuadrado centrada tienen esperanza condicional cero igual que una normal, y eso es cuanto se necesita.
 
 2. /¿Es irrelevante la normalidad?/ Hay que separar dos cosas. Lo que la práctica /demuestra/ es que la insesgadez y la fórmula de la varianza no requieren normalidad: se cumplen con las tres distribuciones ensayadas. Lo que la práctica solo /sugiere/, y no prueba, es algo sobre la forma: con muchas observaciones el histograma de $\hat\beta_2$ tiende a parecer una campana aunque $U$ no sea normal, mientras que con pocas observaciones el contraste de normalidad puede rechazar (en la Actividad 2 lo hace por la curtosis, aunque el histograma siga pareciendo simétrico) y, cuando una observación domina el regresor, el histograma hereda la asimetría de $U$. De ahí no se puede concluir que la normalidad sea innecesaria. Puede concluirse, como mucho, que el papel de ese supuesto es más sutil de lo que parecía, y que hace falta un resultado teórico, que aquí no tenemos, para saber cuándo cabe prescindir de él. El [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf][apéndice]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html][html]]) separa las dos cosas en dos resultados: insesgadez y varianza solo usan que las coordenadas del ruido son ortogonales y de la misma longitud (Resultados 1 y 2), y eso vale para la uniforme y para la $\chi^2$; la forma exacta $t_{n-k}$ o $F_{q,n-k}$ usa que sean independientes (Resultado 3), y eso solo lo da la normal.
 
@@ -642,16 +642,16 @@ Es el caso del ejemplo de la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ era
 ** Pregunta R1 — Qué supuestos usa la demostración
 La demostración de la insesgadez de $\hat\beta_2$ en la lección 11 usa:
 a) Que la perturbación sea normal.
-b) Que la media condicional de la perturbación sea nula.
+b) Que la esperanza condicional de la perturbación sea nula.
 c) Que la perturbación sea homocedástica.
 d) Que la muestra sea grande.
 /Respuesta correcta: b./
 /Evalúa/: identificación de la condición mínima, confirmada experimentalmente en la práctica.
 
-** Pregunta R2 — Media, varianza y forma
+** Pregunta R2 — Valor esperado, varianza y forma
 Del experimento con perturbaciones uniformes y chi-cuadrado se concluye que:
 a) La distribución de la perturbación no afecta a nada.
-b) La media y la varianza de $\hat\beta_2$ no dependen de la distribución de la perturbación, pero su forma sí.
+b) El valor esperado y la varianza de $\hat\beta_2$ no dependen de la distribución de la perturbación, pero su forma sí.
 c) MCO deja de ser insesgado si la perturbación no es normal.
 d) La varianza de $\hat\beta_2$ crece si la perturbación es asimétrica.
 /Respuesta correcta: b./
