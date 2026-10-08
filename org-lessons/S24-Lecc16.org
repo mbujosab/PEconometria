@@ -1,0 +1,741 @@
+#    -*- mode: org -*-
+
+#+TITLE: Lección 16. Variables indicadoras e interacciones: leer las diferencias entre grupos
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+DESCRIPTION: Lección 16: la indicadora de un grupo como regresor. Desplazamiento del intercepto, diferencia porcentual en log-nivel, trampa de las ficticias, interacciones y contraste de Chow.
+
+#+include: 00preambulo_lecciones.txt
+
+#+BEGIN_SRC emacs-lisp :exports none :results silent
+(use-package ox-ipynb
+  :load-path (lambda () (expand-file-name "ox-ipynb" scimax-dir)))
+(use-package htmlize)
+#+END_SRC
+
+#+LATEX: \maketitle
+
+#+LATEX: \blfootnote{Esta obra está bajo una licencia \href{https://creativecommons.org/licenses/by-sa/4.0/deed.es}{Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)}.}
+
+#+begin_abstract
+La indicadora de un suceso, $\mathbb 1_A$ de la lección 12, entra hoy en el modelo como un regresor más: el suceso es pertenecer a un grupo. Su coeficiente es una diferencia entre grupos, en unidades del regresando o porcentual si está en logaritmos. Dos indicadoras complementarias suman la constante, y de ahí la trampa de las variables ficticias. Una interacción permite que una pendiente cambie de grupo, y el contraste de Chow pregunta si los parámetros $\beta$ del modelo son iguales en dos muestras distintas.
+
+/``El coeficiente de una indicadora no es un efecto por unidad: es un salto entre grupos.''/
+#+end_abstract
+
+- ([[https://mbujosab.github.io/PEconometria/Transparencias/S24-Lecc16.slides.html][slides]]) --- ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S24-Lecc16.html][html]]) --- ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S24-Lecc16.pdf][pdf]])
+
+
+* De dónde venimos: la indicadora de un suceso como regresor
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+La lección 12 definió la /indicadora/ de un suceso $A$: $\mathbb 1_A(\omega)=1$ si $\omega\in A$ y $0$ si no; su esperanza es $\mathrm P(A)$, y la constante es la indicadora del suceso seguro, $\mathit 1=\mathbb 1_\Omega$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Hoy el suceso es pertenecer a un grupo: ser mujer, que el barrio limite con el río Charles. Su indicadora es un regresor más del modelo de la lección 10:
+$$\log(\text{wage})=\beta_1\,\mathit 1+\beta_2\,\mathbb 1_{\text{mujer}}+\beta_3\,\text{educ}+\cdots+U.$$
+En la muestra, la columna $\boldsymbol d_{\text{mujer}}$ de ceros y unos, como $\boldsymbol x_j$ es la columna de los $n$ valores de $X_j$. En los ficheros: =female=, =chas=.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Se llama también variable /dicotómica/, /binaria/, /ficticia/ o /dummy/. Mínimos cuadrados no la distingue de otra columna; lo que cambia es la lectura de $\beta_2$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+Hoy: qué dice el coeficiente de una indicadora, en niveles y en logaritmos; qué ocurre con dos indicadoras complementarias; cómo una interacción cambia una pendiente. Geometría nueva: solo una observación sobre dos indicadoras ortogonales.
+#+end_center
+
+
+*** De dónde venimos: la indicadora de un suceso como regresor
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Muchas variables explicativas de interés no son cantidades sino categorías: el sexo de un trabajador, si está casado, si una vivienda tiene piscina, si un barrio limita con el río, la región, el sector de actividad. Para que una categoría entre en un modelo de regresión hay que convertirla en números, y la forma de hacerlo ya está en el curso. La lección 12, al definir la probabilidad condicional, introdujo la /indicadora/ de un suceso $A$: la variable aleatoria $\mathbb 1_A$ que vale $1$ en los sucesos elementales de $A$ y $0$ en los demás, con $\mathrm E(\mathbb 1_A)=\mathrm P(A)$. Allí el suceso era $\{U_i\le u\}$; hoy el suceso es que la unidad observada pertenezca a un grupo. Si $A$ es el suceso ``la persona es mujer'', $\mathbb 1_{\text{mujer}}$ vale $1$ para cada mujer y $0$ para cada hombre, y su esperanza es la proporción de mujeres en la población.
+
+Esa indicadora es una variable aleatoria como cualquier otro regresor, y entra en el modelo poblacional de la lección 10 multiplicada por su coeficiente: $\log(\text{wage})=\beta_1\,\mathit 1+\beta_2\,\mathbb 1_{\text{mujer}}+\beta_3\,\text{educ}+\beta_4\,\text{exper}+\beta_5\,\text{tenure}+U$. En la muestra, la columna correspondiente de la matriz de regresores $\boldsymbol{\mathsf X}$ es el vector $\boldsymbol d_{\text{mujer}}\in\mathbb R^n$ con un $1$ en las filas de las mujeres y un $0$ en las de los hombres, de la misma manera que $\boldsymbol x_j$ es el vector de los $n$ valores observados de $X_j$. En los ficheros de datos esa columna lleva el nombre de la categoría que vale $1$: =female= en =wage1=, =chas= en el Boston original. La constante del modelo, $\mathit 1$, es también una indicadora, la del suceso seguro $\Omega$: vale $1$ para todas las unidades, y en la muestra es el vector $\boldsymbol 1$. Este hecho, señalado ya en la lección 12, es el que explica la trampa de las variables ficticias de la transparencia ``La trampa de las variables ficticias''.
+
+Los nombres son varios. Esta lección dice /variable indicadora/, que es el término del curso; en los manuales y en los programas se encuentra también /dicotómica/ o /binaria/, por tomar dos valores, /ficticia/, porque no mide una cantidad, que es el término de Gretl en español, y /dummy/, el término inglés. Todos designan lo mismo: una columna de ceros y unos que señala un grupo. Para mínimos cuadrados es una columna más de $\boldsymbol{\mathsf X}$: la proyección, los residuos, el $R^2$, los errores estándar y los contrastes $t$ y $F$ se calculan igual, y todo lo demostrado en las lecciones 8 a 14 sigue en pie. Lo que esta lección añade es la lectura de su coeficiente, que no es un efecto por unidad, porque una indicadora no tiene unidades, sino una diferencia entre dos grupos. Hay una única pieza de geometría nueva, y es pequeña: dos indicadoras de grupos complementarios son vectores ortogonales que suman $\boldsymbol 1$, y eso explica a la vez por qué sus coeficientes son medias de grupo y por qué no pueden convivir las dos con la constante.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, sección 7.1 (``Describing qualitative information''); lección 12 de este curso, apuntes de ``El supuesto nuevo: normalidad'', donde se definió $\mathbb 1_A$.
+
+
+* Una indicadora desplaza el intercepto: la vivienda junto al río
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Boston original ($506$ barrios; =medv=, precio mediano en miles de dólares; =chas=, $1$ en los $35$ barrios que limitan con el río Charles): $\widehat{\text{medv}}=22{,}09+6{,}35\,\text{chas}$, con $\mathrm{ee}(\hat\beta_2)=1{,}59$ y $t=4{,}00$. Dos valores ajustados, $22{,}09$ sin río y $22{,}09+6{,}35=28{,}44$ junto al río: las medias de cada grupo, y el coeficiente es su diferencia.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+attr_latex: :width \textwidth
+#+attr_html: :width 700px
+#+NAME: FiguraMedvChas
+#+CAPTION: Los $506$ barrios del Boston original. En el eje horizontal, la indicadora =chas= (con un desplazamiento horizontal aleatorio para que los puntos no se superpongan); en el vertical, el precio mediano en miles de dólares. El segmento azul es la media de los $471$ barrios sin río, $22{,}09$, y el rojo la media de los $35$ barrios junto al río, $28{,}44$. La recta discontinua es el ajuste de =medv= sobre la constante y =chas=: pasa por las dos medias, su ordenada en el origen es la media del grupo con =chas= igual a $0$ y su pendiente, $6{,}35$, es la diferencia entre las dos medias. Entre $0$ y $1$ la recta no tiene datos: la ``pendiente'' de una indicadora es un salto entre dos grupos, no un efecto por unidad.
+file:img/S24-Lecc16/MedvChas.png
+
+#+attr_ipynb: (slideshow . ((slide_type . subslide)))
+*La geometría*: $\boldsymbol d_{\text{no río}}=\boldsymbol 1-\boldsymbol d_{\text{río}}$, así que $\mathcal L(\boldsymbol 1,\boldsymbol d_{\text{río}})=\mathcal L(\boldsymbol d_{\text{río}},\boldsymbol d_{\text{no río}})$: el mismo subespacio con otra base.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Las dos indicadoras son ortogonales, $\langle\boldsymbol d_{\text{río}},\boldsymbol d_{\text{no río}}\rangle_s=0$, porque ningún barrio está en los dos grupos. Como en la familia ortogonal de la lección 10, cada coeficiente se calcula por separado con la fórmula de la proyección sobre un generador, $\langle\boldsymbol y,\boldsymbol d\rangle_s/\langle\boldsymbol d,\boldsymbol d\rangle_s$, que aquí es la media de su grupo:
+$$\boldsymbol{\mathop{\widehat y}}=28{,}44\,\boldsymbol d_{\text{río}}+22{,}09\,\boldsymbol d_{\text{no río}}=22{,}09\,\boldsymbol 1+6{,}35\,\boldsymbol d_{\text{río}}.$$
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Con más regresores, =medv= sobre =rm= y =chas=: el coeficiente de =chas= pasa a $4{,}08$ ($\mathrm{ee}$ $1{,}15$). Ya no es una diferencia de medias, sino la diferencia entre barrios con el mismo número de habitaciones.
+
+
+*** Una indicadora desplaza el intercepto: la vivienda junto al río
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El Boston original es el fichero =boston.csv= que se importó en la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S04-Prct-B-boston.pdf#page=2][actividad 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S04-Prct-B-boston.html#dicotomica-chas][html]]) de la práctica B de la sesión 4, porque contiene una variable que =hprice2= no tiene: =chas=, la indicadora de los barrios que limitan con el río Charles. Allí se calculó su media, $35/506=0{,}069$, y se vio que la media de una indicadora es la proporción de unidades del grupo: es la versión muestral de $\mathrm E(\mathbb 1_A)=\mathrm P(A)$.
+
+La regresión más simple con una indicadora es la del precio mediano sobre la constante y =chas=: $\widehat{\text{medv}}=22{,}09+6{,}35\,\text{chas}$. Como =chas= solo toma los valores $0$ y $1$, el modelo solo produce dos valores ajustados: $22{,}09$ para los barrios sin río y $22{,}09+6{,}35=28{,}44$ para los barrios junto al río. Y esos dos valores son las medias muestrales de =medv= en cada grupo. Por eso el coeficiente de la indicadora, $6{,}35$ mil dólares, es la diferencia entre las dos medias, y el contraste $t$ de ese coeficiente, con $t=4{,}00$, es el contraste de igualdad de medias entre los dos grupos. La figura dibuja los $506$ barrios con la indicadora en el eje horizontal. La recta ajustada pasa por las dos medias, pero entre $0$ y $1$ no hay ningún dato: hablar de ``una unidad más de =chas='' no tiene sentido. El coeficiente de una indicadora es un salto entre grupos, un desplazamiento del intercepto, y no un efecto por unidad.
+
+Que los coeficientes sean medias de grupo tiene una explicación geométrica, la única de esta lección. Sea $\boldsymbol d_{\text{río}}$ la columna =chas= y $\boldsymbol d_{\text{no río}}=\boldsymbol 1-\boldsymbol d_{\text{río}}$ la indicadora del grupo complementario. El subespacio generado por la constante y =chas= es el mismo que el generado por las dos indicadoras, porque cada vector de una pareja es combinación lineal de los de la otra: $\mathcal L(\boldsymbol 1,\boldsymbol d_{\text{río}})=\mathcal L(\boldsymbol d_{\text{río}},\boldsymbol d_{\text{no río}})$. La proyección de $\boldsymbol y$ sobre ese subespacio es la misma con cualquiera de las dos bases; lo que cambia son los coeficientes. En la base de las dos indicadoras los coeficientes se calculan sin resolver ningún sistema: $\boldsymbol d_{\text{río}}$ y $\boldsymbol d_{\text{no río}}$ son ortogonales, $\langle\boldsymbol d_{\text{río}},\boldsymbol d_{\text{no río}}\rangle_s=0$, porque en cada fila una de las dos vale cero. En las ecuaciones normales de la lección 10 el producto escalar de cada regresor con el otro es cero, así que cada ecuación contiene un solo coeficiente, y ese coeficiente es el de la proyección sobre un generador de las lecciones 3 y 4, $\langle\boldsymbol y,\boldsymbol d\rangle_s/\langle\boldsymbol d,\boldsymbol d\rangle_s$. Es la misma situación que la familia ortogonal de la lección 10, con dos generadores que no están centrados pero sí son ortogonales entre sí. Para $\boldsymbol d_{\text{río}}$ el cociente es la suma de los precios de los $35$ barrios junto al río dividida por $35$, porque el factor $1/n$ del producto escalar estadístico se cancela: la media del grupo. Cambiar a la base $\{\boldsymbol 1,\boldsymbol d_{\text{río}}\}$ reescribe el mismo vector ajustado, $\boldsymbol{\mathop{\widehat y}}=28{,}44\,\boldsymbol d_{\text{río}}+22{,}09\,\boldsymbol d_{\text{no río}}=22{,}09\,\boldsymbol 1+6{,}35\,\boldsymbol d_{\text{río}}$, y la constante y la diferencia de medias aparecen como coeficientes.
+
+Con más regresores el coeficiente de la indicadora deja de ser una diferencia de medias. En =medv= sobre =rm= y =chas=, el coeficiente de =chas= es $4{,}08$ con error estándar $1{,}15$: es la diferencia de precio entre dos barrios con el mismo número medio de habitaciones por vivienda, uno junto al río y otro no. Es la lectura /ceteris paribus/ de la lección 10, aplicada a un salto entre grupos. La diferencia bruta de medias, $6{,}35$, recoge además que los barrios junto al río tienen viviendas algo mayores; al fijar =rm=, parte de esa diferencia se atribuye a las habitaciones y el salto se reduce. La transparencia ``Con más regresores: la diferencia con lo demás fijo'' vuelve sobre esta distinción con los salarios.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, sección 7.2 (``A single dummy independent variable''); Harrison, D. y Rubinfeld, D. L. (1978), ``Hedonic housing prices and the demand for clean air'', /Journal of Environmental Economics and Management/ 5, 81–102, origen de los datos.
+
+
+* Con más regresores: la diferencia con lo demás fijo
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+=wage1= ($526$ trabajadores, salario por hora en dólares de 1976; $274$ hombres y $252$ mujeres). Medias: $7{,}10$ dólares los hombres, $4{,}59$ las mujeres. =wage= sobre la constante y =female=: coeficiente $-2{,}51$, la diferencia de medias.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+ATTR_LATEX: :align |l|r|r|r|
+| =wage= sobre… | coef.      | $\mathrm{ee}$ | $t$       |
+|---------------+------------+---------------+-----------|
+| constante     | $-1{,}568$ | $0{,}725$     | $-2{,}16$ |
+| =female=      | $-1{,}811$ | $0{,}265$     | $-6{,}84$ |
+| =educ=        | $0{,}572$  | $0{,}049$     | $11{,}58$ |
+| =exper=       | $0{,}025$  | $0{,}012$     | $2{,}20$  |
+| =tenure=      | $0{,}141$  | $0{,}021$     | $6{,}66$  |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*Lectura*: entre un hombre y una mujer con la misma educación, experiencia y antigüedad, el salario de la mujer es $1{,}81$ dólares por hora menor, en media. De la diferencia bruta de $2{,}51$, los $0{,}70$ restantes corresponden a diferencias en esas tres variables (antigüedad media: $6{,}5$ años los hombres, $3{,}6$ las mujeres).
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+``Lo demás fijo'' solo cubre lo que está en el modelo.
+#+end_center
+
+
+*** Con más regresores: la diferencia con lo demás fijo
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El fichero =wage1= de Wooldridge es el de la transparencia ``Log-nivel: salarios y educación'' de la lección 15: $526$ trabajadores de la encuesta de población de Estados Unidos de 1976, con el salario por hora en dólares, los años de educación (=educ=), de experiencia potencial (=exper=) y de antigüedad en la empresa (=tenure=), y varias indicadoras, entre ellas =female=, que vale $1$ para las $252$ mujeres y $0$ para los $274$ hombres, y =married=, que vale $1$ para los casados.
+
+El salario medio es $7{,}10$ dólares por hora entre los hombres y $4{,}59$ entre las mujeres. La regresión de =wage= sobre la constante y =female= devuelve esas dos cifras: constante $7{,}10$ y coeficiente de =female= $-2{,}51$, con error estándar $0{,}30$. Es la misma situación que la de los barrios junto al río: con una sola indicadora, el coeficiente es la diferencia de medias entre grupos.
+
+La tabla de la transparencia añade los tres regresores cuantitativos. El coeficiente de =female= pasa a $-1{,}81$, con error estándar $0{,}27$. La lectura es la de la lección 10: con lo demás fijo, es decir, entre un hombre y una mujer con los mismos años de educación, de experiencia y de antigüedad, el salario de la mujer es $1{,}81$ dólares por hora menor, en media. El intervalo al 95 % va de $-2{,}33$ a $-1{,}29$: datos como estos serían muy raros si no hubiera diferencia salarial entre sexos con las tres variables fijas. Los otros coeficientes se leen como en la lección 12: un año más de educación se acompaña de $57$ centavos más por hora, y un año más de antigüedad, de $14$.
+
+La diferencia entre las dos cifras, $-2{,}51$ y $-1{,}81$, dice algo sobre los datos. La diferencia bruta de medias mezcla dos cosas: la diferencia salarial entre hombres y mujeres comparables, y el hecho de que los dos grupos no son comparables en las variables del modelo. Las mujeres de la muestra tienen una antigüedad media de $3{,}6$ años frente a $6{,}5$ los hombres, algo menos de experiencia ($16{,}4$ frente a $17{,}6$) y casi la misma educación ($12{,}3$ frente a $12{,}8$). Como la antigüedad se acompaña de un salario mayor, parte de la diferencia bruta se atribuye a ella, y el salto que queda al fijar las tres variables es menor. Esta es la mecánica de la lección 10 de nuevo: la indicadora se ortogonaliza frente a los demás regresores, y su coeficiente recoge solo la parte de la diferencia salarial que no corresponde a las diferencias de educación, experiencia y antigüedad entre los dos grupos.
+
+Hay que ser preciso con lo que el coeficiente no dice. ``Lo demás fijo'' se refiere a lo que el modelo incluye: tres variables. Hay muchas otras que difieren entre hombres y mujeres y que el modelo no contiene, como la ocupación, el sector, las horas trabajadas o las interrupciones de la carrera laboral. El coeficiente $-1{,}81$ mide la diferencia salarial entre hombres y mujeres con igual educación, experiencia y antigüedad observadas; no mide la discriminación, que exigiría comparar trabajadores iguales en todo lo relevante, ni dice qué parte de la diferencia se debe a cada causa. La transparencia ``Qué dice y qué no dice el coeficiente de una indicadora'' recoge esta cautela entre las lecturas incorrectas más frecuentes.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, sección 7.2, ejemplo 7.1 (``Hourly wage equation'') y la discusión sobre la interpretación del coeficiente de =female=.
+
+
+* En log-nivel: una diferencia porcentual
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+El mismo modelo con el logaritmo del salario (=lwage=) como regresando:
+
+#+ATTR_LATEX: :align |l|r|r|r|
+| =lwage= sobre… | coef.       | $\mathrm{ee}$ | $t$       |
+|----------------+-------------+---------------+-----------|
+| constante      | $0{,}501$   | $0{,}102$     | $4{,}92$  |
+| =female=       | $-0{,}301$  | $0{,}037$     | $-8{,}09$ |
+| =educ=         | $0{,}0875$  | $0{,}0069$    | $12{,}60$ |
+| =exper=        | $0{,}0046$  | $0{,}0016$    | $2{,}85$  |
+| =tenure=       | $0{,}0174$  | $0{,}0030$    | $5{,}84$  |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*Aproximación* (lección 15): con lo demás fijo, el salario de una mujer es menor en la fracción $0{,}30$, un $30$ %. *Cálculo exacto*: $e^{-0{,}301}-1=-0{,}260$, un $26$ % menor; para un cambio grande, la aproximación se queda lejos. Intervalo al 95 %: $\beta_{\text{female}}\in[-0{,}374,\,-0{,}228]$, del $-31$ % al $-20$ % en diferencia exacta.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*La lectura depende de la base*: un hombre respecto de una mujer comparable cobra más en $e^{0{,}301}-1=0{,}351$, un $35$ %. El mismo coeficiente, dos porcentajes, porque las bases son distintas.
+
+
+*** En log-nivel: una diferencia porcentual
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La lección 15 explicó por qué la ecuación de salarios se estima con el logaritmo del salario como regresando: el rendimiento de la educación se enuncia en porcentaje, y la hipótesis de que cada año multiplica el salario por un factor es más verosímil que la de que le suma una cantidad fija. Lo mismo vale para la diferencia entre sexos: es más natural pensar que las mujeres cobran un cierto porcentaje menos que los hombres comparables que una cantidad fija de dólares, sea el salario de $3$ o de $20$ dólares por hora. La tabla de la transparencia estima el modelo de la transparencia ``Con más regresores: la diferencia con lo demás fijo'' con =lwage= en lugar de =wage=.
+
+El coeficiente de =female= es $-0{,}301$. La aproximación de la lección 15, $\log(1+p)\approx p$, da la lectura rápida: con la misma educación, experiencia y antigüedad, el salario de una mujer es menor en la fracción $0{,}30$, un $30$ %. Pero el coeficiente es grande, y para cambios grandes la aproximación se queda lejos, como se vio con los cuatro años de educación en la lección 15. El cálculo exacto se hace como allí, deshaciendo el logaritmo: el modelo predice para una mujer un salario $e^{-0{,}301}=0{,}740$ veces el de un hombre con los mismos regresores, es decir, menor en $e^{-0{,}301}-1=-0{,}260$, un $26$ %. En general, si el coeficiente de una indicadora en un modelo log-nivel es $\beta$, el salario del grupo señalado es $e^{\beta}$ veces el del otro grupo, con lo demás fijo, y la diferencia porcentual exacta es $e^{\beta}-1$. La aproximación $\beta$ sirve cuando el coeficiente es pequeño, por debajo de $0{,}1$ en valor absoluto; para $0{,}3$ la diferencia entre $30$ % y $26$ % ya importa al informar.
+
+Con la versión exacta aparece una asimetría que con la aproximación pasa inadvertida. La misma estimación dice que una mujer cobra un $26$ % menos que un hombre comparable y que un hombre cobra un $35$ % más que una mujer comparable, porque $e^{0{,}301}-1=0{,}351$. Las dos frases son correctas y describen el mismo cociente de salarios, $0{,}740$ o su inverso $1{,}351$; difieren en la base sobre la que se calcula el porcentaje. Con la aproximación las dos lecturas darían $30$ %, lo que oculta la diferencia. Al informar una diferencia porcentual entre grupos hay que decir respecto de qué grupo se calcula, y la indicadora lo fija: el coeficiente de =female= compara a las mujeres con los hombres, que son el grupo con valor $0$, la /categoría base/ o de referencia. La transparencia ``La trampa de las variables ficticias'' muestra que la categoría base se puede cambiar sin cambiar el modelo.
+
+El intervalo de confianza se construye como en la lección 12 para el coeficiente, de $-0{,}374$ a $-0{,}228$, y después se transforma: los extremos de la diferencia exacta son $e^{-0{,}374}-1=-0{,}312$ y $e^{-0{,}228}-1=-0{,}204$, así que la diferencia porcentual entre sexos, con las tres variables fijas, está entre el $20$ % y el $31$ % con una confianza del 95 %. La transformación se aplica a los extremos y no al error estándar, porque la exponencial no es lineal; el intervalo transformado deja de ser simétrico alrededor de la estimación puntual, $-0{,}260$.
+
+Los demás coeficientes se leen como en la lección 15. Un año más de educación se acompaña de un salario mayor en la fracción $0{,}0875$, un $8{,}75$ % aproximado y un $9{,}1$ % exacto; un año más de antigüedad, en un $1{,}7$ %. Son cifras algo distintas de las de la lección 15, donde el modelo tenía =educ= como único regresor; al añadir =female=, =exper= y =tenure=, el coeficiente de =educ= cambia, por el mecanismo de la lección 10.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, sección 7.2, apartado ``Interpreting coefficients on dummy explanatory variables when the dependent variable is log(y)'', con el ejemplo 7.4; Halvorsen, R. y Palmquist, R. (1980), ``The interpretation of dummy variables in semilogarithmic equations'', /American Economic Review/ 70, 474–475, el artículo que fijó la lectura exacta $e^{\beta}-1$.
+
+
+* La trampa de las variables ficticias
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+La indicadora de ser hombre es $\mathbb 1_{\text{hombre}}=\mathit 1-\mathbb 1_{\text{mujer}}$: las dos suman la indicadora del suceso seguro, $\mathbb 1_{\text{mujer}}+\mathbb 1_{\text{hombre}}=\mathbb 1_\Omega=\mathit 1$. En la muestra, $\boldsymbol d_{\text{mujer}}+\boldsymbol d_{\text{hombre}}=\boldsymbol 1$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Poner las tres columnas en $\boldsymbol{\mathsf X}$ es la colinealidad exacta de la lección 10: tres columnas que generan un subespacio de dimensión dos. Gretl avisa: «Omitidas debido a colinealidad exacta: =male=».
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Tres escrituras del mismo modelo, =lwage= sobre el sexo (sin otros regresores):
+
+#+ATTR_LATEX: :align |l|l|l|
+| Regresores               | Coeficientes                                           | Lectura                                                |
+|--------------------------+--------------------------------------------------------+--------------------------------------------------------|
+| constante, =female=      | $1{,}814$; $-0{,}397$                                  | media de los hombres; diferencia mujeres $-$ hombres   |
+| constante, =male=        | $1{,}416$; $+0{,}397$                                  | media de las mujeres; diferencia hombres $-$ mujeres   |
+| =female=, =male=         | $1{,}416$; $1{,}814$                                   | media de cada grupo                                    |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+El mismo subespacio y el mismo ajuste ($\mathrm{SRC}=127{,}6$) con otra base: cambia la categoría base de la lectura. En la tercera, $\boldsymbol 1$ no es columna, pero está en el subespacio (lección 10).
+#+end_center
+
+
+*** La trampa de las variables ficticias
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La lección 14 dejó anunciada esta transparencia: si se incluyen en el modelo una indicadora de mujer, otra de hombre y la constante, hay colinealidad exacta. La razón está en la definición de la lección 12. La indicadora del suceso ``ser hombre'' es la del complementario de ``ser mujer'', $\mathbb 1_{\text{hombre}}=\mathit 1-\mathbb 1_{\text{mujer}}$, de modo que las dos indicadoras suman la indicadora del suceso seguro: $\mathbb 1_{\text{mujer}}+\mathbb 1_{\text{hombre}}=\mathbb 1_\Omega=\mathit 1$, que es la constante del modelo. En la muestra, cada fila tiene un $1$ en una de las dos columnas y un $0$ en la otra, y $\boldsymbol d_{\text{mujer}}+\boldsymbol d_{\text{hombre}}=\boldsymbol 1$. Si $\boldsymbol{\mathsf X}$ contiene las tres columnas, una de ellas es combinación lineal de las otras dos: es la colinealidad exacta de la lección 10, y la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=6][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#colinealidad-exacta][html]]) de la práctica D de la sesión 14 la construyó a propósito. Las tres columnas generan un subespacio de dimensión dos, la proyección de $\boldsymbol y$ sobre él existe y es única, pero hay infinitas maneras de escribirla como combinación lineal de tres vectores que no son linealmente independientes, y las ecuaciones normales no tienen solución única. Gretl lo detecta al estimar y elimina una de las columnas, con el aviso «Omitidas debido a colinealidad exacta: =male=» en la cabecera de la tabla de resultados. Este error recibe en los manuales el nombre de /trampa de las variables ficticias/.
+
+La solución es omitir una de las tres columnas, y las tres opciones estiman el mismo modelo. La tabla de la transparencia lo muestra con =lwage= sobre el sexo, sin otros regresores, para que los coeficientes sean medias. Con la constante y =female=, la constante es la media del logaritmo del salario de los hombres, $1{,}814$, y el coeficiente de =female= es la diferencia entre la media de las mujeres y la de los hombres, $-0{,}397$. Con la constante y =male=, la constante es la media de las mujeres, $1{,}416$, y el coeficiente de =male= la misma diferencia con el signo cambiado. Con las dos indicadoras y sin constante, cada coeficiente es la media de su grupo, por la ortogonalidad de las dos indicadoras que explicó la transparencia ``Una indicadora desplaza el intercepto: la vivienda junto al río''. Los tres ajustes son el mismo vector $\boldsymbol{\mathop{\widehat y}}$, con la misma suma de cuadrados de los residuos, $127{,}6$, porque las tres parejas de columnas generan el mismo subespacio de dimensión dos: $\mathcal L(\boldsymbol 1,\boldsymbol d_{\text{mujer}})=\mathcal L(\boldsymbol 1,\boldsymbol d_{\text{hombre}})=\mathcal L(\boldsymbol d_{\text{mujer}},\boldsymbol d_{\text{hombre}})$. Lo que cambia es la base y, con ella, el significado de cada coeficiente.
+
+La tercera escritura cobra una observación que la lección 10 hizo al presentar la matriz de regresores: lo que necesita el ajuste no es que $\boldsymbol 1$ sea una de las columnas de $\boldsymbol{\mathsf X}$, sino que $\boldsymbol 1$ pertenezca al subespacio que generan. En el modelo con =female= y =male= ninguna columna es constante, pero su suma es $\boldsymbol 1$, así que $\boldsymbol 1\in\mathcal L(\boldsymbol d_{\text{mujer}},\boldsymbol d_{\text{hombre}})$ y todo lo que depende de ello sigue valiendo: los residuos suman cero, la media de los valores ajustados es la media de $\boldsymbol y$ y el $R^2$ se calcula como en la lección 8. Gretl lo tiene en cuenta: si se estima un modelo sin la constante pero con las dos indicadoras, el $R^2$ que imprime es el habitual.
+
+En la práctica, la escritura que se usa es la primera, con la constante y una indicadora por cada grupo menos uno. El grupo sin indicadora es la /categoría base/, y todos los coeficientes de indicadoras se leen como diferencias respecto de ella. Elegir la base es una decisión de presentación, no de modelo: cambiarla no mueve el ajuste ni ningún contraste sobre el modelo completo, solo reordena qué diferencias aparecen directamente como coeficientes, con su error estándar y su $t$. La transparencia ``Varias categorías: una indicadora menos que grupos'' usa este recurso para comparar dos grupos que no son la base.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, sección 7.2 (``the dummy variable trap'') y cap. 3, sección 3.3 (colinealidad perfecta); lección 10 de este curso, apuntes de ``La matriz de regresores y el operador selector''.
+
+
+* Varias categorías: una indicadora menos que grupos
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Sexo y estado civil definen cuatro grupos excluyentes en =wage1=: $86$ hombres solteros, $188$ casados, $120$ mujeres solteras y $132$ casadas. Cuatro indicadoras que suman $\boldsymbol 1$: con la constante entran tres. Base: hombres solteros.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+ATTR_LATEX: :align |l|r|r|r|r|
+| =lwage= sobre…        | coef.      | $\mathrm{ee}$ | $t$       | $e^{\beta}-1$ |
+|-----------------------+------------+---------------+-----------+---------------|
+| hombre casado         | $0{,}292$  | $0{,}055$     | $5{,}27$  | $+34$ %       |
+| mujer casada          | $-0{,}120$ | $0{,}058$     | $-2{,}07$ | $-11$ %       |
+| mujer soltera         | $-0{,}097$ | $0{,}058$     | $-1{,}68$ | $-9$ %        |
+| =educ=, =exper=, =tenure= | $0{,}0835$; $0{,}0032$; $0{,}0157$ | | | |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*Lectura*: con lo demás fijo, un hombre casado cobra un $34$ % más que un hombre soltero; una mujer casada, un $11$ % menos; una mujer soltera, un $9$ % menos.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*Comparar dos grupos que no son la base*: mujeres casadas frente a solteras, $-0{,}120-(-0{,}097)=-0{,}024$. Su $\mathrm{ee}$ se obtiene cambiando la base a mujeres solteras: $-0{,}024$ con $\mathrm{ee}$ $0{,}053$ y $t=-0{,}45$. Datos como estos no serían raros si las dos cobrasen lo mismo.
+
+
+*** Varias categorías: una indicadora menos que grupos
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Una variable cualitativa puede tener más de dos categorías: la región, el sector, el nivel de estudios por tramos. La regla es la misma que con dos. Si los $g$ grupos son excluyentes y cubren toda la muestra, sus $g$ indicadoras suman $\boldsymbol 1$, por la misma razón que $\mathbb 1_{\text{mujer}}+\mathbb 1_{\text{hombre}}=\mathit 1$: cada unidad está en un grupo y solo en uno, así que la suma de las indicadoras vale $1$ en todas las filas. Con la constante en el modelo solo pueden entrar $g-1$ indicadoras, y el grupo que se queda sin ella es la categoría base. También se pueden incluir las $g$ indicadoras sin la constante, con coeficientes que son el nivel de cada grupo; las dos escrituras generan el mismo subespacio, como en la transparencia ``La trampa de las variables ficticias''.
+
+El ejemplo combina dos variables de dos categorías, el sexo y el estado civil, en una de cuatro: hombres solteros, hombres casados, mujeres solteras y mujeres casadas, con $86$, $188$, $120$ y $132$ trabajadores. Las indicadoras se construyen como productos: =married*(1-female)= vale $1$ solo para los hombres casados, y así con las demás. Con los hombres solteros como base, el modelo tiene tres indicadoras, más =educ=, =exper= y =tenure=. Cada coeficiente de indicadora es la diferencia, en logaritmos, entre su grupo y los hombres solteros con la misma educación, experiencia y antigüedad, y la columna $e^{\beta}-1$ de la tabla la convierte en diferencia porcentual exacta. Un hombre casado cobra, con lo demás fijo, un $34$ % más que un hombre soltero; una mujer casada, un $11$ % menos; una mujer soltera, un $9$ % menos. Con $t=5{,}27$, datos como estos serían muy raros si los hombres casados cobrasen lo mismo que los solteros; para las mujeres casadas el $t$ es $-2{,}07$, y para las solteras $-1{,}68$, de modo que el contraste al 5 % rechaza en el primer caso y no en el segundo.
+
+La tabla da directamente las tres diferencias con la base, pero no las diferencias entre dos grupos que no son la base. La diferencia entre mujeres casadas y solteras es la resta de los dos coeficientes, $-0{,}120-(-0{,}097)=-0{,}024$, y su error estándar no es la resta de los errores estándar: los dos estimadores están correlacionados, porque comparten la base, y la varianza de la diferencia necesita su covarianza. Hay una forma de evitar el cálculo: cambiar la categoría base. Si se estima el mismo modelo con las mujeres solteras como base, es decir, con las indicadoras de hombres solteros, hombres casados y mujeres casadas, el coeficiente de mujeres casadas es directamente la diferencia buscada, $-0{,}024$, con su error estándar, $0{,}053$, y su $t$, $-0{,}45$. Datos como estos no serían raros si las mujeres casadas y las solteras cobrasen lo mismo, con lo demás fijo. El ajuste y los demás coeficientes no cambian al cambiar la base; solo cambia qué diferencias se leen directamente.
+
+Hay otra forma de poner el sexo y el estado civil en el modelo: dos indicadoras, =female= y =married=, en lugar de tres. Ese modelo es más restrictivo: impone que la diferencia entre casados y solteros sea la misma para hombres y para mujeres, $0{,}126$ en logaritmos. Los cuatro grupos dicen que no lo es: $0{,}292$ entre los hombres y $-0{,}024$ entre las mujeres. El modelo de los cuatro grupos es el de las dos indicadoras más su producto, =female*married=, y ese producto es una /interacción/: el efecto de estar casado depende del sexo. Es la idea de la transparencia ``Interacciones: la pendiente cambia de grupo'', aplicada a dos indicadoras.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, sección 7.3 (``Using dummy variables for multiple categories''), con el ejemplo 7.6, que es este modelo con dos regresores cuadráticos más; sección 7.4 para la interacción entre dos indicadoras.
+
+
+* Interacciones: la pendiente cambia de grupo
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Una indicadora desplaza el intercepto; su producto por otro regresor, la /interacción/, desplaza una pendiente:
+$$\log(\text{wage})=\beta_1\,\mathit 1+\beta_2\,\mathbb 1_{\text{mujer}}+\beta_3\,\text{educ}+\beta_4\,\text{exper}+\beta_5\,\mathbb 1_{\text{mujer}}\cdot\text{exper}+\beta_6\,\text{tenure}+U.$$
+Pendiente de =exper=: $\beta_4$ para los hombres, $\beta_4+\beta_5$ para las mujeres. Diferencia de interceptos: $\beta_2$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+ATTR_LATEX: :align |l|r|r|r|
+| =lwage= sobre…    | coef.       | $\mathrm{ee}$ | $t$       |
+|-------------------+-------------+---------------+-----------|
+| =female=          | $-0{,}190$  | $0{,}059$     | $-3{,}25$ |
+| =exper=           | $0{,}0084$  | $0{,}0022$    | $3{,}76$  |
+| =female*exper=    | $-0{,}0067$ | $0{,}0027$    | $-2{,}44$ |
+| =educ=, =tenure=  | $0{,}0896$; $0{,}0158$ | | |
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*Lectura*: un año más de experiencia se acompaña de un salario mayor en un $0{,}84$ % para los hombres y en un $0{,}17$ % para las mujeres. La diferencia entre sexos, en logaritmos, es $-0{,}19$ sin experiencia y crece $0{,}0067$ por año: $-0{,}26$ a los diez años y $-0{,}32$ a los veinte (del $17$ % al $23$ % y al $28$ % en diferencia exacta). Con $t=-2{,}44$, datos como estos serían raros si las dos pendientes fuesen iguales.
+
+#+attr_ipynb: (slideshow . ((slide_type . subslide)))
+#+attr_latex: :width \textwidth
+#+attr_html: :width 700px
+#+NAME: FiguraRectasExper
+#+CAPTION: Los $526$ trabajadores de =wage1=: logaritmo del salario por hora frente a los años de experiencia, los hombres en azul y las mujeres en rojo. Las dos rectas son el ajuste de =lwage= sobre la constante, =female=, =exper= y su producto, sin =educ= ni =tenure= para que la figura sea plana: la de los hombres tiene ordenada en el origen $1{,}698$ y pendiente $0{,}0066$; la de las mujeres, $1{,}404$ y $0{,}0007$. La indicadora separa las dos ordenadas en el origen y la interacción separa las dos pendientes: la distancia vertical entre las rectas crece con la experiencia. Los coeficientes de la tabla de la transparencia, con =educ= y =tenure=, son algo distintos de los de la figura.
+file:img/S24-Lecc16/RectasExper.png
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+Una indicadora: dos rectas paralelas. Una indicadora y una interacción: dos rectas distintas. Sin ninguna de las dos: una sola recta para todos.
+#+end_center
+
+
+*** Interacciones: la pendiente cambia de grupo
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El modelo de la transparencia ``En log-nivel: una diferencia porcentual'' impone que la diferencia salarial entre sexos sea la misma a cualquier nivel de experiencia: la indicadora desplaza el intercepto y nada más, así que las dos rectas del salario frente a la experiencia, una para cada sexo, son paralelas. Es una restricción, y los datos pueden no cumplirla. Para permitir que la pendiente de =exper= sea distinta en cada grupo se añade al modelo el producto de la indicadora por el regresor, $\mathbb 1_{\text{mujer}}\cdot\text{exper}$, que se llama /interacción/ entre las dos variables. En la muestra es una columna más de $\boldsymbol{\mathsf X}$: vale =exper= en las filas de las mujeres y $0$ en las de los hombres; Gretl la construye con =series femexper = female*exper=. Es un regresor en el sentido de la lección 15, una función de dos variables explicativas, y mínimos cuadrados lo trata como a cualquier otro.
+
+La lectura se obtiene escribiendo el modelo por grupos. Para un hombre, $\mathbb 1_{\text{mujer}}=0$, y la parte sistemática es $\beta_1+\beta_3\,\text{educ}+\beta_4\,\text{exper}+\beta_6\,\text{tenure}$: la pendiente de la experiencia es $\beta_4$. Para una mujer, $\mathbb 1_{\text{mujer}}=1$, y queda $(\beta_1+\beta_2)+\beta_3\,\text{educ}+(\beta_4+\beta_5)\,\text{exper}+\beta_6\,\text{tenure}$: el intercepto se desplaza en $\beta_2$ y la pendiente de la experiencia pasa a ser $\beta_4+\beta_5$. El coeficiente de la interacción, $\beta_5$, es por tanto la diferencia entre las pendientes de los dos grupos, y la hipótesis de que las dos rectas son paralelas es $H_0\!:\beta_5=0$, que se contrasta con el $t$ de la lección 12.
+
+Con los datos, la pendiente de la experiencia es $0{,}0084$ para los hombres: un año más de experiencia se acompaña de un salario mayor en un $0{,}84$ %, con lo demás fijo. Para las mujeres es $0{,}0084-0{,}0067=0{,}0017$, un $0{,}17$ % por año. El $t$ de la interacción es $-2{,}44$: datos como estos serían raros si las dos pendientes fuesen iguales, y el contraste al 5 % rechaza que lo sean. El coeficiente de =female=, $-0{,}190$, es ahora la diferencia de interceptos, es decir, la diferencia entre sexos para una experiencia de cero años, $-0{,}190$ en logaritmos, y esa diferencia crece con la experiencia: a los diez años es $-0{,}190-10\cdot0{,}0067=-0{,}257$, y a los veinte, $-0{,}324$. En diferencia porcentual exacta, del $17$ % al $23$ % y al $28$ %. La figura dibuja esta situación con el modelo simple sin =educ= ni =tenure=: la recta de los hombres sube con la experiencia y la de las mujeres apenas, y la distancia entre las dos crece de izquierda a derecha.
+
+La misma construcción se aplica a cualquier regresor, y el resultado no siempre es una pendiente distinta. Con la interacción =female*educ= en lugar de =female*exper=, el coeficiente de la interacción es $-0{,}0072$ con error estándar $0{,}0136$ y $t=-0{,}53$: datos como estos no serían raros si el rendimiento de la educación fuese el mismo para hombres y mujeres, y el modelo con las rectas paralelas en =educ= basta. Al añadir una interacción cambia también la lectura del coeficiente de la indicadora, que pasa a ser la diferencia entre grupos en el punto en que el regresor vale cero; en ese modelo, el coeficiente de =female= es $-0{,}21$ con error estándar $0{,}17$, porque compara a hombres y mujeres con cero años de educación, donde apenas hay datos. Cuando interesa la diferencia entre grupos en un punto con datos, se centra el regresor restándole su media antes de construir la interacción, y el coeficiente de la indicadora pasa a ser la diferencia entre grupos en la media del regresor.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, sección 7.4 (``Interactions involving dummy variables''), apartados ``Interactions among dummy variables'' y ``Allowing for different slopes'', con el ejemplo 7.10 (=female*educ=) y la observación sobre centrar el regresor.
+
+
+* ¿La misma ecuación para los dos grupos? El contraste de Chow
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+Si todos los coeficientes pueden diferir entre sexos, el modelo tiene la indicadora y una interacción por cada regresor; su ajuste es el de dos regresiones separadas, una por grupo. $H_0$: la indicadora y todas las interacciones valen cero, $q=4$ restricciones. Es el $F$ de la lección 13:
+$$F=\frac{(\mathrm{SRC}_r-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)},\qquad \mathrm{SRC}=\mathrm{SRC}_{\text{hombres}}+\mathrm{SRC}_{\text{mujeres}}.$$
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+=lwage= sobre =educ=, =exper= y =tenure=: modelo común, $\mathrm{SRC}_r=101{,}46$; hombres ($n=274$), $49{,}55$; mujeres ($n=252$), $39{,}04$. Así, $F=\dfrac{(101{,}46-88{,}58)/4}{88{,}58/518}=18{,}8$, frente a $F_c=2{,}39$ al 5 %.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*Lectura*: por dimensión, el cateto que ganan las cuatro columnas nuevas es $18{,}8$ veces más largo al cuadrado que el residuo; con una ecuación común rondaría $1$. Datos como estos serían muy raros si hombres y mujeres compartiesen la ecuación. El contraste dice que algo difiere, no qué: en el modelo con las ocho columnas ningún $t$ supera $2$, porque la indicadora y sus interacciones están casi alineadas (lección 14).
+
+#+attr_ipynb: (slideshow . ((slide_type . subslide)))
+*En Gretl*, tras estimar el modelo común: =chow female --dummy=. El programa construye las interacciones, estima el modelo ampliado e imprime el $F$ con su valor $p$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*Casos particulares*: con $q=1$, solo el intercepto, el $F$ es el $t$ de =female= al cuadrado, $8{,}09^2=65{,}4$. Con =--limit-to=lista= solo se interaccionan los regresores de la lista. Para dejar libre el intercepto y contrastar solo las pendientes, =restrict= sobre las tres interacciones: $F(3,518)=3{,}05$, valor $p$ $0{,}029$.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*El uso original*: datos ordenados en el tiempo y la pregunta de si la relación cambia a partir de una fecha, un /cambio estructural/; los dos grupos son el antes y el después (=chow 1982= con una serie anual).
+
+
+*** ¿La misma ecuación para los dos grupos? El contraste de Chow
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Las transparencias ``En log-nivel: una diferencia porcentual'' e ``Interacciones: la pendiente cambia de grupo'' han dejado que difieran entre sexos primero el intercepto y después una pendiente. El caso general es dejar que difieran todos los coeficientes: el intercepto y las pendientes de =educ=, =exper= y =tenure=. El modelo que lo permite tiene la constante, los tres regresores, la indicadora =female= y las tres interacciones =female*educ=, =female*exper= y =female*tenure=, ocho columnas. Escrito por grupos, es una ecuación con cuatro coeficientes para los hombres y otra, con otros cuatro, para las mujeres, sin nada en común. Por eso su ajuste coincide con el de dos regresiones separadas, una con los $274$ hombres y otra con las $252$ mujeres: la suma de cuadrados de los residuos del modelo con las interacciones, $88{,}58$, es la suma de las de las dos regresiones separadas, $49{,}55$ y $39{,}04$. Las ocho columnas generan el mismo subespacio que las dos matrices de regresores por grupo puestas una debajo de la otra.
+
+La pregunta de si hombres y mujeres comparten la ecuación es la hipótesis nula de que la indicadora y las tres interacciones tienen coeficiente cero, cuatro restricciones lineales. Es el contraste $F$ de la lección 13 sin ningún cambio: el modelo restringido es el modelo común, =lwage= sobre la constante, =educ=, =exper= y =tenure=, con $\mathrm{SRC}_r=101{,}46$; el modelo completo es el de las ocho columnas, con $\mathrm{SRC}=88{,}58$ y $n-k=526-8=518$ grados de libertad. El estadístico es $F=\frac{(101{,}46-88{,}58)/4}{88{,}58/518}=18{,}8$, frente a un valor crítico al 5 % de $2{,}39$; el valor $p$ es del orden de $10^{-14}$. La lectura es la de la lección 13. Las cuatro columnas nuevas alargan el cateto explicado en $12{,}88$ unidades cuadradas, y repartidas entre sus cuatro dimensiones son $3{,}22$ por dimensión, frente a $0{,}171$ por dimensión del residuo; el cociente es $18{,}8$, y si las cuatro columnas no aportasen nada rondaría $1$. Datos como estos serían muy raros si hombres y mujeres compartiesen la ecuación. Este uso del $F$, con un modelo restringido común y uno sin restringir que equivale a dos regresiones separadas, se llama /contraste de Chow/, por Chow (1960).
+
+El contraste dice que la ecuación no es la misma, pero no dice en qué difiere. Y los $t$ del modelo con las ocho columnas tampoco lo dicen: ninguno supera $2$ en valor absoluto (=female=, $0{,}17$; las interacciones con =educ=, =exper= y =tenure=, $-1{,}15$, $-1{,}80$ y $-1{,}21$), y sin embargo el $F$ conjunto es $18{,}8$. Es el caso de la lección 13, dos $t$ pequeños no son un $F$ pequeño, y la causa es la de la lección 14: la indicadora y sus tres interacciones están casi alineadas. La columna =female*educ= vale =educ= para las mujeres y cero para los hombres, y como =educ= varía poco entre personas, esa columna es casi proporcional a =female=, con correlación $0{,}96$; el VIF de =female= en ese modelo es $30$. Cada una de las cuatro columnas tiene poca variación propia y su $t$ es pequeño, aunque entre las cuatro aporten mucho al ajuste. Para averiguar qué difiere hay que preguntar una cosa cada vez, como hizo la transparencia ``Interacciones: la pendiente cambia de grupo'' con la pendiente de =exper=, cuya interacción, sola, tiene $t=-2{,}44$. Una variante útil deja libre el intercepto y contrasta solo las pendientes: se estima el modelo con las ocho columnas y se imponen con =restrict=, como en la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S21-Prct-A-hprice2-restricciones.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S21-Prct-A-hprice2-restricciones.html#excluir-dos][html]]) de la práctica A de la sesión 21, las tres restricciones de que las interacciones valgan cero. Con estos datos, $F(3,518)=3{,}05$ y valor $p$ $0{,}029$: datos como estos serían raros al 5 % si las tres pendientes fuesen comunes. Y el caso más simple, $q=1$, es el de la transparencia ``En log-nivel: una diferencia porcentual'': si solo puede diferir el intercepto, el $F$ con una restricción es el cuadrado del $t$ de =female=, $8{,}09^2=65{,}4$, como se vio en la lección 13.
+
+En Gretl el contraste se pide tras estimar el modelo común con =chow female --dummy=; el programa construye las interacciones, estima el modelo ampliado e imprime el $F$ con sus grados de libertad y su valor $p$. La orden no admite que =female= esté ya en el modelo común, porque entonces la indicadora no sería una columna nueva; la opción =--limit-to=lista= limita las interacciones a los regresores de una lista definida antes. El uso original del contraste de Chow es con datos ordenados en el tiempo: la pregunta es si la relación cambia a partir de una fecha, un /cambio estructural/, y los dos grupos son las observaciones anteriores y posteriores a esa fecha; en Gretl, =chow 1982= con una serie temporal anual parte la muestra en ese año. La mecánica es la misma, con la indicadora del periodo posterior en lugar de la del sexo.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, sección 7.4, apartado ``Testing for differences in regression functions across groups'' (el contraste de Chow como $F$ de las interacciones); Chow, G. C. (1960), ``Tests of equality between sets of coefficients in two linear regressions'', /Econometrica/ 28, 591–605; lección 13 de este curso, ``El contraste $F$''.
+
+
+* Qué dice y qué no dice el coeficiente de una indicadora
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+#+LATEX: {\rowcolors{2}{gray!10}{white}
+#+ATTR_LATEX: :align |p{3.4cm}|p{4.4cm}|p{6.0cm}|
+| Modelo                          | El coeficiente $\beta$ de la indicadora es…           | Lectura, con lo demás fijo                                                          |
+|---------------------------------+-------------------------------------------------------+-------------------------------------------------------------------------------------|
+| $y$ en niveles                  | diferencia de interceptos                             | el grupo señalado difiere en $\beta$ unidades de $y$                                |
+| $\log y$                        | diferencia en logaritmos                              | difiere en la fracción $e^{\beta}-1$ (aproximación $\beta$); la base importa        |
+| varias categorías               | diferencia con la categoría base                      | para comparar dos grupos no base, cambiar la base                                   |
+| interacción con $x$             | diferencia de pendientes                              | el efecto de $x$ en el grupo señalado es $\beta_x+\beta$                            |
+#+LATEX: }
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+*Lo que no dice*. No hay ``una unidad más'' de una indicadora: es un salto entre grupos. Cuál de los dos grupos vale $1$ es una decisión de quien codifica: cambiarla cambia el signo y la base, no el ajuste. Una indicadora nunca se transforma: $\log 0$ no existe (lección 15).
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+#+begin_center
+``Lo demás fijo'' es lo que está en el modelo. El $26$ % entre sexos es una diferencia entre trabajadores con igual educación, experiencia y antigüedad observadas, no una medida de discriminación.
+#+end_center
+
+
+*** Qué dice y qué no dice el coeficiente de una indicadora
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La tabla de la transparencia reúne las cuatro lecturas de la lección. Las tres primeras son la misma idea en tres formas: el coeficiente de una indicadora es la diferencia entre el grupo señalado y la categoría base, con los demás regresores fijos. En un modelo en niveles, la diferencia está en las unidades del regresando: $1{,}81$ dólares por hora, $4{,}08$ mil dólares. En un modelo con el regresando en logaritmos, la diferencia es relativa: la fracción $e^{\beta}-1$, que para coeficientes pequeños se aproxima por $\beta$, y que se calcula respecto de la categoría base, de modo que el porcentaje cambia al cambiar la base. Con varias categorías, cada coeficiente compara su grupo con la base, y la comparación entre dos grupos que no son la base se obtiene cambiando la base. La cuarta lectura es distinta: el coeficiente de una interacción es una diferencia de pendientes, y el efecto del regresor en el grupo señalado es la suma de la pendiente común y la interacción.
+
+Las lecturas incorrectas más frecuentes son tres. La primera es tratar la indicadora como una variable con unidades y hablar de ``una unidad más de =female=''. Una indicadora solo toma dos valores, y su coeficiente compara los dos grupos; no hay nada entre $0$ y $1$. La segunda es olvidar que la codificación es una decisión. Que las mujeres valgan $1$ y los hombres $0$, y no al revés, lo decidió quien preparó el fichero; con la codificación contraria el coeficiente sería $+0{,}301$, el ajuste sería el mismo y la lectura, la misma diferencia vista desde la otra base. Lo que se compara son grupos, no valores de una variable. Relacionado con esto, una indicadora nunca se transforma: no tiene sentido su logaritmo, que no existe en cero, ni su cuadrado, que es ella misma. La tercera lectura incorrecta es la que la transparencia ``Con más regresores: la diferencia con lo demás fijo'' ya señaló. ``Con lo demás fijo'' quiere decir con los regresores del modelo fijos, y nada más. La diferencia del $26$ % entre sexos de la transparencia ``En log-nivel: una diferencia porcentual'' es una diferencia entre hombres y mujeres con la misma educación, experiencia y antigüedad observadas. No es una medida de la discriminación salarial, porque el modelo no contiene la ocupación, el sector, la jornada ni otras variables en las que los dos grupos difieren, y no dice qué parte de la diferencia se debe a cada una. Lo que un modelo con indicadoras puede decir es cuánto cambia la diferencia entre grupos al fijar las variables que incluye: de $-2{,}51$ a $-1{,}81$ dólares al fijar tres variables. Atribuir lo que queda a una causa concreta exige un argumento que la regresión no proporciona.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, sección 7.2, la discusión del ejemplo 7.1 sobre lo que el coeficiente de =female= mide y lo que no; cap. 3, sección 3.3 (``omitted variable bias'') para el papel de las variables que faltan.
+
+
+* Recapitulación y guiño a la lección siguiente
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . slide)))
+:END:
+
+#+LATEX: {\rowcolors{2}{gray!10}{white}
+#+ATTR_LATEX: :align |p{3.4cm}|p{5.0cm}|p{5.4cm}|
+| Pieza                       | Fórmula                                                                                 | Lectura                                                      |
+|-----------------------------+-----------------------------------------------------------------------------------------+--------------------------------------------------------------|
+| Indicadora como regresor    | $\mathbb 1_A$ en la población, $\boldsymbol d$ en la muestra                             | su coeficiente es un salto entre grupos                      |
+| Dos grupos complementarios  | $\mathbb 1_A+\mathbb 1_{A^c}=\mathit 1$; $\boldsymbol d_A+\boldsymbol d_{A^c}=\boldsymbol 1$ | ortogonales: coeficientes = medias; con $\boldsymbol 1$, trampa |
+| Log-nivel                   | $e^{\beta}-1$                                                                           | diferencia porcentual exacta respecto de la base             |
+| Interacción                 | pendiente del grupo señalado: $\beta_4+\beta_5$ en el ejemplo de =exper=             | la pendiente común más la diferencia de pendientes           |
+| Contraste de Chow           | $F$ de la lección 13 con $\mathrm{SRC}=\mathrm{SRC}_{\text{grupo 1}}+\mathrm{SRC}_{\text{grupo 2}}$ | ¿la misma ecuación en los dos grupos?                        |
+#+LATEX: }
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Geometría nueva: solo la ortogonalidad de dos indicadoras complementarias. Nada enunciado sin demostrar. /Lección 17/: los residuos de =wage= tienen desviación típica $3{,}42$ entre los hombres y $2{,}32$ entre las mujeres; con =lwage=, $0{,}43$ y $0{,}40$. Una varianza que cambia con el grupo es heterocedasticidad.
+
+
+*** Recapitulación y guiño a la lección siguiente
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . skip)))
+:UNNUMBERED: notoc
+:END:
+
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La lección ha añadido un tipo de regresor y una tabla de lecturas. El regresor es la indicadora de un grupo, $\mathbb 1_A$ en la población y el vector $\boldsymbol d$ de ceros y unos en la muestra, que la lección 12 ya había definido para otro fin. Para mínimos cuadrados es una columna más; su coeficiente es una diferencia entre el grupo señalado y la categoría base, con los demás regresores fijos: en unidades del regresando si está en niveles, en fracción $e^{\beta}-1$ si está en logaritmos, y respecto de la base en los dos casos. El producto de una indicadora por otro regresor, la interacción, convierte la diferencia de interceptos en diferencia de pendientes. Y la pregunta de si dos grupos comparten la ecuación entera es un contraste $F$ de la lección 13, el contraste de Chow, cuyo modelo sin restringir equivale a dos regresiones separadas.
+
+La única geometría nueva ha sido pequeña: dos indicadoras de grupos complementarios son ortogonales y suman $\boldsymbol 1$. De lo primero sale que sus coeficientes son las medias de grupo; de lo segundo, que no pueden entrar las dos junto con la constante, la trampa de las variables ficticias, y también que la constante no necesita ser una columna de $\boldsymbol{\mathsf X}$ para que el ajuste tenga sus propiedades, como la lección 10 había anticipado. Nada se ha enunciado sin demostrar: las lecturas son álgebra sobre el modelo, y el contraste de Chow es el $F$ de la lección 13 con un modelo restringido y otro sin restringir.
+
+Lo que hay que retener para leer resultados es la cautela de la transparencia ``Qué dice y qué no dice el coeficiente de una indicadora'': el coeficiente compara grupos, no unidades; la base es una decisión; y ``lo demás fijo'' se limita a lo que el modelo contiene. Un $26$ % de diferencia salarial entre sexos con tres variables fijas es un hecho de la muestra; qué lo produce es otra pregunta.
+
+La lección 17 parte de una observación que los datos de hoy ya permiten hacer. En el modelo en niveles de la transparencia ``Con más regresores: la diferencia con lo demás fijo'', los residuos de los hombres tienen una desviación típica de $3{,}42$ dólares y los de las mujeres de $2{,}32$: la dispersión del salario alrededor de la recta no es la misma en los dos grupos, en contra del supuesto de homocedasticidad de la lección 11, que pide la misma varianza para todas las observaciones. En el modelo con el logaritmo del salario las dos desviaciones típicas se acercan, $0{,}43$ y $0{,}40$, que es lo que la lección 15 anunció: el logaritmo es el primer remedio. La lección 17 tratará cómo detectar la heterocedasticidad, qué consecuencias tiene para los errores estándar y cómo corregirlos. Y el laboratorio integrador volverá al Boston original con =chas= para estimar, con datos reales y de una vez, un modelo con logaritmos, indicadoras e interacciones, y diagnosticarlo.
+
+/Para profundizar/: Wooldridge, J. M. (2020), cap. 7, secciones 7.1 a 7.4 (resumen de la lección) y cap. 8, sección 8.1 (anticipo de la heterocedasticidad).
+
+
+* Preguntas de repaso (sesión 24)                                  :htmlonly:
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Le propongo 12 preguntas.
+Las marco con un nivel orientativo: [B] básica, [M] media, [D] discriminadora.
+
+*** Comentario
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Las preguntas que más le conviene trabajar son la 4 (la lectura exacta en log-nivel y la asimetría según la base, que es lo que hay que hacer al informar un resultado), la 6 (por qué dos indicadoras complementarias no pueden entrar con la constante, y qué cambia al omitir una u otra) y la 9 (qué es el coeficiente de la indicadora cuando hay una interacción). Repase también la 2, que fija la relación entre el coeficiente y las medias de grupo, y la 11, que distingue lo que el contraste de Chow dice de lo que no dice.
+
+*** Pregunta 1 [B] — La indicadora
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+En una muestra de $200$ trabajadores hay $80$ mujeres. ¿Cuánto vale la media del vector $\boldsymbol d_{\text{mujer}}$ y qué estima?
+1) $80$; el número de mujeres de la población.
+2) $0{,}4$; la proporción de mujeres en la población, $\mathrm P(\text{mujer})=\mathrm E(\mathbb 1_{\text{mujer}})$.
+3) $0{,}5$; la probabilidad de que una persona sea mujer, que siempre es un medio.
+4) No tiene media, porque una indicadora no es una variable numérica.
+
+*** Pregunta 2 [B] — Una sola indicadora
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Se estima =medv= sobre la constante y =chas= y se obtiene $\widehat{\text{medv}}=22{,}09+6{,}35\,\text{chas}$. ¿Cuál es la media de =medv= entre los barrios junto al río?
+1) $6{,}35$.
+2) $22{,}09$.
+3) $28{,}44$.
+4) No se puede saber sin conocer cuántos barrios hay en cada grupo.
+
+*** Pregunta 3 [M] — Con más regresores
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+La diferencia bruta de salario medio entre hombres y mujeres es de $2{,}51$ dólares; al añadir =educ=, =exper= y =tenure=, el coeficiente de =female= es $-1{,}81$. ¿Qué explica la diferencia entre las dos cifras?
+1) Un error de estimación: las dos deberían coincidir.
+2) Que los dos grupos difieren en las variables añadidas, y parte de la diferencia bruta se atribuye a ellas.
+3) Que el modelo con más regresores tiene menos grados de libertad.
+4) Que el coeficiente de una indicadora siempre se reduce al añadir regresores.
+
+*** Pregunta 4 [M] — Log-nivel y la base
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+En un modelo con $\log(\text{wage})$ como regresando, el coeficiente de =female= es $-0{,}30$. ¿Cuál de las siguientes lecturas es la exacta?
+1) Las mujeres cobran un $30$ % menos que los hombres comparables, y los hombres un $30$ % más que las mujeres comparables.
+2) Las mujeres cobran un $26$ % menos que los hombres comparables, y los hombres un $35$ % más que las mujeres comparables.
+3) Las mujeres cobran $0{,}30$ dólares menos por hora.
+4) Las mujeres cobran un $26$ % menos y los hombres un $26$ % más.
+
+*** Pregunta 5 [B] — Intervalo transformado
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El intervalo al 95 % para el coeficiente de una indicadora en un modelo log-nivel es $[-0{,}374,\,-0{,}228]$. ¿Cuál es el intervalo para la diferencia porcentual exacta?
+1) $[-37{,}4\ \%,\,-22{,}8\ \%]$.
+2) $[e^{-0{,}374}-1,\,e^{-0{,}228}-1]=[-31{,}2\ \%,\,-20{,}4\ \%]$.
+3) $[-26{,}0\ \%\pm3{,}7\ \%]$.
+4) No se puede transformar un intervalo; hay que recalcular el error estándar.
+
+*** Pregunta 6 [D] — La trampa
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Se incluyen en $\boldsymbol{\mathsf X}$ la constante, $\boldsymbol d_{\text{mujer}}$ y $\boldsymbol d_{\text{hombre}}$. ¿Qué ocurre?
+1) Las tres columnas generan un subespacio de dimensión dos y las ecuaciones normales no tienen solución única; hay que omitir una de las tres.
+2) El ajuste es imposible porque la proyección de $\boldsymbol y$ no existe.
+3) No ocurre nada: las tres columnas son distintas y el modelo se estima sin problema.
+4) El modelo se estima, pero el $R^2$ sale mayor que $1$.
+
+*** Pregunta 7 [M] — Cambiar la base
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Con la constante y =female=, el ajuste es $\widehat{\log(\text{wage})}=1{,}814-0{,}397\,\text{female}$. Si se estima con la constante y =male= en su lugar, ¿qué se obtiene?
+1) $1{,}814+0{,}397\,\text{male}$.
+2) $1{,}416+0{,}397\,\text{male}$.
+3) $1{,}416-0{,}397\,\text{male}$.
+4) Otro ajuste, con distinta suma de cuadrados de los residuos.
+
+*** Pregunta 8 [M] — Varias categorías
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Una variable de región tiene cinco categorías excluyentes. En un modelo con constante, ¿cuántas indicadoras de región se incluyen y qué mide cada coeficiente?
+1) Cinco; cada coeficiente es el nivel medio de su región.
+2) Cuatro; cada coeficiente es la diferencia entre su región y la región omitida, con lo demás fijo.
+3) Cuatro; cada coeficiente es la diferencia entre su región y la media de todas.
+4) Una, con valores $1$ a $5$; su coeficiente es el efecto de pasar a la región siguiente.
+
+*** Pregunta 9 [D] — La interacción
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+En $\log(\text{wage})=\beta_1\,\mathit 1+\beta_2\,\mathbb 1_{\text{mujer}}+\beta_4\,\text{exper}+\beta_5\,\mathbb 1_{\text{mujer}}\cdot\text{exper}+U$, ¿qué miden $\beta_2$ y $\beta_5$?
+1) $\beta_2$ es la diferencia entre sexos para cualquier experiencia; $\beta_5$ es el efecto de la experiencia para las mujeres.
+2) $\beta_2$ es la diferencia entre sexos con cero años de experiencia; $\beta_5$ es la diferencia entre la pendiente de las mujeres y la de los hombres.
+3) $\beta_2$ es la pendiente de los hombres; $\beta_5$ la de las mujeres.
+4) $\beta_2$ y $\beta_5$ miden lo mismo, porque las dos columnas son colineales.
+
+*** Pregunta 10 [M] — Dos rectas
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Se estima $\log(\text{wage})$ sobre la constante, =female=, =exper= y =female*exper=, y el $t$ de la interacción es $-0{,}4$. ¿Qué modelo sugieren los datos?
+1) Dos rectas distintas, una por sexo.
+2) Dos rectas paralelas: la indicadora sin la interacción.
+3) Una sola recta para todos.
+4) Ninguno: el contraste no permite decidir nada sin conocer el $t$ de =female=.
+
+*** Pregunta 11 [D] — El contraste de Chow
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+Un contraste de Chow entre dos grupos, con tres regresores, da $F(4,518)=18{,}8$. ¿Qué se concluye?
+1) Que las cuatro interacciones son distintas de cero.
+2) Que datos como estos serían muy raros si los dos grupos compartiesen la ecuación; cuáles son los coeficientes que difieren lo dicen los $t$ del modelo con interacciones.
+3) Que difieren los interceptos y no las pendientes.
+4) Que el modelo común tiene mejor ajuste que las dos regresiones separadas.
+
+*** Pregunta 12 [M] — Lo que no dice
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+El coeficiente de =female= en el modelo log-nivel con =educ=, =exper= y =tenure= es $-0{,}30$. ¿Cuál de estas afirmaciones es correcta?
+1) Las mujeres sufren una discriminación salarial del $26$ %.
+2) Entre trabajadores con la misma educación, experiencia y antigüedad observadas, el salario de las mujeres es un $26$ % menor en media; el modelo no dice a qué se debe.
+3) Una unidad más de =female= reduce el salario un $30$ %.
+4) El resultado cambiaría si se codificase a los hombres con $1$, porque la diferencia sería distinta.
+
+
+* Respuestas                                                       :htmlonly:
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :END:
+
+**** Pregunta 1 [B] — La indicadora
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: la definición de la lección 12 aplicada a un grupo: la media muestral de la indicadora es la proporción del grupo y estima $\mathrm E(\mathbb 1_A)=\mathrm P(A)$.
+
+**** Pregunta 2 [B] — Una sola indicadora
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 3./
+/Evalúa/: que con una sola indicadora los dos valores ajustados son las medias de grupo: la constante es la media del grupo con =chas= igual a $0$ y la suma $22{,}09+6{,}35$ la del grupo con =chas= igual a $1$.
+
+**** Pregunta 3 [M] — Con más regresores
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: la lectura /ceteris paribus/ de la lección 10. Las mujeres de la muestra tienen menos antigüedad; al fijarla, parte de la diferencia bruta se atribuye a ella. La opción 4 es falsa: el coeficiente puede aumentar si los grupos difieren en sentido contrario.
+
+**** Pregunta 4 [M] — Log-nivel y la base
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: el cálculo exacto $e^{\beta}-1$ y la asimetría según la base: $e^{-0{,}30}-1=-0{,}26$ y $e^{0{,}30}-1=0{,}35$. La opción 1 es la aproximación, que para un coeficiente de $0{,}30$ se queda lejos.
+
+**** Pregunta 5 [B] — Intervalo transformado
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: que la transformación se aplica a los extremos del intervalo, no al error estándar, y que el intervalo transformado no es simétrico alrededor de $-0{,}26$.
+
+**** Pregunta 6 [D] — La trampa
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 1./
+/Evalúa/: la trampa de las variables ficticias como colinealidad exacta de la lección 10. La proyección existe y es única (la opción 2 es falsa); lo que no es único es el vector de coeficientes. Gretl omite una columna y avisa.
+
+**** Pregunta 7 [M] — Cambiar la base
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: que cambiar la base reescribe el mismo ajuste: la constante pasa a ser la media de las mujeres, $1{,}814-0{,}397=1{,}416$, y el coeficiente de =male= es la diferencia con el signo cambiado. La suma de cuadrados de los residuos no cambia.
+
+**** Pregunta 8 [M] — Varias categorías
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: la regla de una indicadora menos que grupos cuando hay constante, y la lectura respecto de la categoría omitida. La opción 4 trata una variable cualitativa como si fuera cuantitativa, lo que impone que pasar de la región 1 a la 2 tenga el mismo efecto que pasar de la 4 a la 5.
+
+**** Pregunta 9 [D] — La interacción
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: escribir el modelo por grupos. Con una interacción, el coeficiente de la indicadora es la diferencia de interceptos, es decir, la diferencia entre grupos en $\text{exper}=0$, y el de la interacción es la diferencia de pendientes; la pendiente de las mujeres es $\beta_4+\beta_5$, no $\beta_5$.
+
+**** Pregunta 10 [M] — Dos rectas
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: que un $t$ pequeño en la interacción dice que datos como estos no serían raros con pendientes iguales, así que se conserva la indicadora y se omite la interacción. La opción 3 necesitaría además que el $t$ de =female= fuese pequeño, y la 4 confunde los dos contrastes.
+
+**** Pregunta 11 [D] — El contraste de Chow
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: qué contrasta el $F$ conjunto y qué no. Rechazar la hipótesis conjunta no dice que las cuatro restricciones fallen (opción 1) ni cuáles fallan (opción 3); la opción 4 es imposible, porque el modelo común es el restringido y su $\mathrm{SRC}$ nunca es menor.
+
+**** Pregunta 12 [M] — Lo que no dice
+   :PROPERTIES:
+   :metadata: (slideshow . ((slide_type . skip)))
+   :UNNUMBERED: notoc
+   :END:
+#+attr_ipynb: (slideshow . ((slide_type . skip)))
+/Respuesta correcta: 2./
+/Evalúa/: las tres cautelas de la transparencia ``Qué dice y qué no dice el coeficiente de una indicadora'': no hay unidades de una indicadora (opción 3), la codificación no cambia el ajuste ni la diferencia (opción 4) y ``lo demás fijo'' se limita a los regresores del modelo (opción 1).
+
+
+* COMMENT ipynb y slides                                           :noexport:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(require 'ox-ipynb)
+(ox-ipynb-export-org-file-to-ipynb-file "S24-Lecc16.org")
+#+END_SRC
+
+#+BEGIN_SRC sh :results silent
+#jupyter nbconvert --config ../mycfg-GitHubPages.py --to slides --reveal-prefix "https://unpkg.com/reveal.js@5.2.1" --execute --embed-images S24-Lecc16.ipynb
+#+END_SRC
+
+#+BEGIN_SRC sh :results silent
+#jupyter nbconvert S24-Lecc16.ipynb --to slides --embed-images
+#+END_SRC

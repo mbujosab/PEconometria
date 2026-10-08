@@ -1,0 +1,115 @@
+# Cifras de la lección 16 (Variables indicadoras e interacciones).
+# Reproduce con gretlcli -b todos los números de transparencias y apuntes.
+# Ejecutar desde org-lessons/ (boston.csv se lee de ../data/).
+
+# --- Transparencia 2: Boston original, medv sobre chas ---
+open ../data/boston.csv --quiet
+ols medv const chas --quiet
+printf "t2 medv~chas : const=%.3f chas=%.3f ee=%.3f t=%.2f R2=%.4f n=%d\n", $coeff(const), $coeff(chas), $stderr(chas), $coeff(chas)/$stderr(chas), $rsq, $nobs
+printf "t2 medias por grupo: sin rio %.3f (n=%d), con rio %.3f (n=%d)\n", sum(medv*(1-chas))/sum(1-chas), sum(1-chas), sum(medv*chas)/sum(chas), sum(chas)
+series norio = 1 - chas
+ols medv chas norio --quiet
+printf "t2 medv~chas+norio (sin constante): chas=%.3f norio=%.3f ; <d_rio,d_norio>=%g\n", $coeff(chas), $coeff(norio), sum(chas*norio)
+ols medv const rm chas --quiet
+printf "t2 medv~rm+chas : rm=%.3f chas=%.3f ee=%.3f t=%.2f\n", $coeff(rm), $coeff(chas), $stderr(chas), $coeff(chas)/$stderr(chas)
+
+# --- Transparencias 3 y 4: wage1 ---
+open wage1.gdt --quiet
+printf "t3 medias salario: hombres %.3f (n=%d), mujeres %.3f (n=%d)\n", sum(wage*(1-female))/sum(1-female), sum(1-female), sum(wage*female)/sum(female), sum(female)
+ols wage const female --quiet
+printf "t3 wage~female : const=%.3f female=%.3f ee=%.3f\n", $coeff(const), $coeff(female), $stderr(female)
+ols wage const female educ exper tenure --quiet
+printf "t3 wage~female+educ+exper+tenure : const=%.3f female=%.3f (ee %.3f, t %.2f) educ=%.3f (ee %.3f) exper=%.4f (ee %.4f) tenure=%.3f (ee %.3f) R2=%.3f\n", $coeff(const), $coeff(female), $stderr(female), $coeff(female)/$stderr(female), $coeff(educ), $stderr(educ), $coeff(exper), $stderr(exper), $coeff(tenure), $stderr(tenure), $rsq
+printf "t3 medias de educ, exper, tenure: hombres %.2f %.2f %.2f ; mujeres %.2f %.2f %.2f\n", sum(educ*(1-female))/sum(1-female), sum(exper*(1-female))/sum(1-female), sum(tenure*(1-female))/sum(1-female), sum(educ*female)/sum(female), sum(exper*female)/sum(female), sum(tenure*female)/sum(female)
+ols wage const female educ exper tenure --quiet
+printf "t3 tabla: const %.3f (ee %.3f, t %.2f) female t %.2f educ t %.2f exper t %.2f tenure t %.2f ; IC female [%.2f, %.2f]\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), $coeff(female)/$stderr(female), $coeff(educ)/$stderr(educ), $coeff(exper)/$stderr(exper), $coeff(tenure)/$stderr(tenure), $coeff(female)-critical(t,$df,0.025)*$stderr(female), $coeff(female)+critical(t,$df,0.025)*$stderr(female)
+ols lwage const female educ exper tenure --quiet
+printf "t4 tabla: const %.3f (ee %.3f, t %.2f) female t %.2f educ t %.2f exper t %.2f tenure t %.2f\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), $coeff(female)/$stderr(female), $coeff(educ)/$stderr(educ), $coeff(exper)/$stderr(exper), $coeff(tenure)/$stderr(tenure)
+ols lwage const female educ exper tenure --quiet
+scalar bf = $coeff(female)
+printf "t4 lwage~female+educ+exper+tenure : const=%.3f female=%.4f (ee %.4f, t %.2f) educ=%.4f (ee %.4f) exper=%.4f (ee %.4f) tenure=%.4f (ee %.4f) R2=%.3f ; exacto mujer/hombre %.4f ; hombre/mujer %.4f ; IC female [%.3f, %.3f]\n", $coeff(const), bf, $stderr(female), bf/$stderr(female), $coeff(educ), $stderr(educ), $coeff(exper), $stderr(exper), $coeff(tenure), $stderr(tenure), $rsq, exp(bf)-1, exp(-bf)-1, bf-critical(t,$df,0.025)*$stderr(female), bf+critical(t,$df,0.025)*$stderr(female)
+printf "t4 IC exacto: [%.3f, %.3f]\n", exp(bf-critical(t,$df,0.025)*$stderr(female))-1, exp(bf+critical(t,$df,0.025)*$stderr(female))-1
+
+# --- Transparencia 5: la trampa, tres escrituras del mismo modelo ---
+series male = 1 - female
+ols lwage const female --quiet
+printf "t5 lwage~const+female : const=%.4f female=%.4f ; SRC=%.3f\n", $coeff(const), $coeff(female), $ess
+ols lwage const male --quiet
+printf "t5 lwage~const+male   : const=%.4f male=%.4f ; SRC=%.3f\n", $coeff(const), $coeff(male), $ess
+ols lwage female male --quiet
+printf "t5 lwage~female+male  : female=%.4f male=%.4f ; SRC=%.3f\n", $coeff(female), $coeff(male), $ess
+printf "t5 medias de lwage: hombres %.4f mujeres %.4f\n", sum(lwage*male)/sum(male), sum(lwage*female)/sum(female)
+catch ols lwage const female male --quiet
+printf "t5 con los tres: error %d\n", $error
+
+# --- Transparencia 6: cuatro grupos sexo x estado civil ---
+series marrmale = married*(1-female)
+series marrfem  = married*female
+series singfem  = (1-married)*female
+series singmale = (1-married)*(1-female)
+printf "t6 tamaños: solteros %d casados %d solteras %d casadas %d\n", sum(singmale), sum(marrmale), sum(singfem), sum(marrfem)
+ols lwage const marrmale marrfem singfem educ exper tenure --quiet
+printf "t6 base solteros: marrmale=%.4f (ee %.4f) marrfem=%.4f (ee %.4f) singfem=%.4f (ee %.4f) educ=%.4f exper=%.4f tenure=%.4f R2=%.3f ; exactos %.3f %.3f %.3f\n", $coeff(marrmale), $stderr(marrmale), $coeff(marrfem), $stderr(marrfem), $coeff(singfem), $stderr(singfem), $coeff(educ), $coeff(exper), $coeff(tenure), $rsq, exp($coeff(marrmale))-1, exp($coeff(marrfem))-1, exp($coeff(singfem))-1
+ols lwage const marrmale marrfem singmale educ exper tenure --quiet
+printf "t6 base solteras: marrmale=%.4f marrfem=%.4f (ee %.4f, t %.2f) singmale=%.4f ; exacto marrfem %.3f\n", $coeff(marrmale), $coeff(marrfem), $stderr(marrfem), $coeff(marrfem)/$stderr(marrfem), $coeff(singmale), exp($coeff(marrfem))-1
+ols lwage const female married educ exper tenure --quiet
+printf "t6 aditivo female+married: female=%.4f married=%.4f (ee %.4f) R2=%.3f\n", $coeff(female), $coeff(married), $stderr(married), $rsq
+
+# --- Transparencia 7: interacciones ---
+series femexper = female*exper
+series femeduc  = female*educ
+ols lwage const female educ exper femexper tenure --quiet
+printf "t7 t de exper %.2f\n", $coeff(exper)/$stderr(exper)
+printf "t7 lwage~female+educ+exper+female*exper+tenure : const=%.4f female=%.4f (ee %.4f, t %.2f) educ=%.4f exper=%.4f (ee %.4f) femexper=%.4f (ee %.4f, t %.2f) tenure=%.4f R2=%.3f ; pendiente mujeres %.4f ; brecha a 10 anios %.3f, a 20 %.3f\n", $coeff(const), $coeff(female), $stderr(female), $coeff(female)/$stderr(female), $coeff(educ), $coeff(exper), $stderr(exper), $coeff(femexper), $stderr(femexper), $coeff(femexper)/$stderr(femexper), $coeff(tenure), $rsq, $coeff(exper)+$coeff(femexper), $coeff(female)+10*$coeff(femexper), $coeff(female)+20*$coeff(femexper)
+ols lwage const female educ femeduc exper tenure --quiet
+printf "t7 con female*educ: female=%.4f (ee %.4f) educ=%.4f femeduc=%.4f (ee %.4f, t %.2f)\n", $coeff(female), $stderr(female), $coeff(educ), $coeff(femeduc), $stderr(femeduc), $coeff(femeduc)/$stderr(femeduc)
+# modelo simple para la figura
+ols lwage const female exper femexper --quiet
+printf "t7 figura lwage~female+exper+female*exper : const=%.4f female=%.4f exper=%.5f femexper=%.5f ; rectas hombres %.4f + %.5f exper ; mujeres %.4f + %.5f exper\n", $coeff(const), $coeff(female), $coeff(exper), $coeff(femexper), $coeff(const), $coeff(exper), $coeff(const)+$coeff(female), $coeff(exper)+$coeff(femexper)
+printf "t7 rango exper: %d a %d\n", min(exper), max(exper)
+
+# --- Transparencia 8: Chow ---
+ols lwage const educ exper tenure --quiet
+scalar SRC_R = $ess
+scalar n = $nobs
+printf "t8 modelo comun: SRC_R=%.3f n=%d\n", SRC_R, n
+chow female --dummy --quiet
+printf "t8 chow female: F=%.3f gl %d,%d p=%.2e\n", $test, 4, n-8, $pvalue
+smpl female==0 --restrict
+ols lwage const educ exper tenure --quiet
+scalar SRC_h = $ess
+printf "t8 hombres: n=%d SRC_h=%.3f educ=%.4f exper=%.4f tenure=%.4f\n", $nobs, SRC_h, $coeff(educ), $coeff(exper), $coeff(tenure)
+smpl full
+smpl female==1 --restrict
+ols lwage const educ exper tenure --quiet
+scalar SRC_m = $ess
+printf "t8 mujeres: n=%d SRC_m=%.3f educ=%.4f exper=%.4f tenure=%.4f\n", $nobs, SRC_m, $coeff(educ), $coeff(exper), $coeff(tenure)
+smpl full
+scalar SRC_U = SRC_h + SRC_m
+scalar Fchow = ((SRC_R-SRC_U)/4)/(SRC_U/(n-8))
+printf "t8 a mano: SRC_U=%.3f F=%.3f Fc(4,518)=%.3f\n", SRC_U, Fchow, critical(F,4,n-8,0.05)
+# equivalente: modelo con la indicadora y todas las interacciones
+series femtenure = female*tenure
+ols lwage const female educ exper tenure femeduc femexper femtenure --quiet
+printf "t8 modelo con interacciones: SRC=%.3f (= SRC_U)\n", $ess
+# los t individuales del modelo con las ocho columnas y su colinealidad (apuntes de la 8)
+ols lwage const female educ exper tenure femeduc femexper femtenure --quiet
+printf "t8 ocho columnas: t female %.2f, femeduc %.2f, femexper %.2f, femtenure %.2f ; corr(female,femeduc)=%.3f\n", $coeff(female)/$stderr(female), $coeff(femeduc)/$stderr(femeduc), $coeff(femexper)/$stderr(femexper), $coeff(femtenure)/$stderr(femtenure), corr(female,femeduc)
+vif
+# solo las pendientes (intercepto libre): restrict sobre las tres interacciones
+restrict --quiet
+  b[femeduc] = 0
+  b[femexper] = 0
+  b[femtenure] = 0
+end restrict
+printf "t8 solo pendientes (q=3): F=%.3f p=%.4f\n", $test, $pvalue
+# solo intercepto distinto: q=1, es el t de female al cuadrado
+ols lwage const female educ exper tenure --quiet
+printf "t8 q=1: t(female)^2=%.2f\n", ($coeff(female)/$stderr(female))^2
+
+# --- Transparencia 10: dispersión de los residuos por grupo (guiño a la lección 17) ---
+ols lwage const female educ exper tenure --quiet
+series eh = $uhat
+ols wage const female educ exper tenure --quiet
+series ew = $uhat
+printf "t10 sd residuos lwage: hombres %.3f mujeres %.3f ; wage: hombres %.3f mujeres %.3f\n", sqrt(sum(eh^2*male)/sum(male)), sqrt(sum(eh^2*female)/sum(female)), sqrt(sum(ew^2*male)/sum(male)), sqrt(sum(ew^2*female)/sum(female))
