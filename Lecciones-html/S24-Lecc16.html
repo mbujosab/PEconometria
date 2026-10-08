@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-10-05 lun 16:30 -->
+<!-- 2026-10-08 jue 15:31 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Lección 14. Colinealidad: cuando los regresores casi se alinean</title>
+<title>Lección 16. Variables indicadoras e interacciones: leer las diferencias entre grupos</title>
 <meta name="author" content="Marcos Bujosa" />
-<meta name="description" content="Lección 14: colinealidad. La parte propia de un regresor, el factor de inflación de la varianza (VIF) y por qué los coeficientes se vuelven imprecisos e inestables." />
+<meta name="description" content="Lección 16: la indicadora de un grupo como regresor. Desplazamiento del intercepto, diferencia porcentual en log-nivel, trampa de las ficticias, interacciones y contraste de Chow." />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
   #content { max-width: 60em; margin: auto; }
@@ -247,238 +247,141 @@ $(function() {    $('.note').before("<p class='admonition-title note'>Note</p>")
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Lección 14. Colinealidad: cuando los regresores casi se alinean</h1>
+<h1 class="title">Lección 16. Variables indicadoras e interacciones: leer las diferencias entre grupos</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgc30d419">1. De dónde venimos: el caso <code>nox</code> y <code>lnox</code></a></li>
-<li><a href="#orgfb906a1">2. Colinealidad exacta y colinealidad de grado</a></li>
-<li><a href="#org625a22e">3. La parte propia de un regresor</a></li>
-<li><a href="#org72391fb">4. Cuánto se acorta: el factor de inflación de la varianza</a></li>
-<li><a href="#org4fd109e">5. El caso <code>nox</code> y <code>lnox</code> con números</a></li>
-<li><a href="#org8b0f413">6. Por qué oscilan los coeficientes</a></li>
-<li><a href="#orge0201c7">7. Síntomas y diagnóstico</a></li>
-<li><a href="#orga6778a6">8. Qué es y qué no es</a></li>
-<li><a href="#orgba09f5a">9. Qué hacer y qué no</a></li>
-<li><a href="#orgb7fc4be">10. Recapitulación y guiño a las sesiones siguientes</a></li>
-<li><a href="#orgf6e2334">11. Preguntas de repaso (sesión 20)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
-<li><a href="#orgf51f5bf">12. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#org0906b84">1. De dónde venimos: la indicadora de un suceso como regresor</a></li>
+<li><a href="#orgd39a613">2. Una indicadora desplaza el intercepto: la vivienda junto al río</a></li>
+<li><a href="#orge8316f6">3. Con más regresores: la diferencia con lo demás fijo</a></li>
+<li><a href="#org519651d">4. En log-nivel: una diferencia porcentual</a></li>
+<li><a href="#org808c630">5. La trampa de las variables ficticias</a></li>
+<li><a href="#org2d66fad">6. Varias categorías: una indicadora menos que grupos</a></li>
+<li><a href="#org3497d3f">7. Interacciones: la pendiente cambia de grupo</a></li>
+<li><a href="#org6073939">8. ¿La misma ecuación para los dos grupos? El contraste de Chow</a></li>
+<li><a href="#orgaad6eea">9. Qué dice y qué no dice el coeficiente de una indicadora</a></li>
+<li><a href="#org5b295bf">10. Recapitulación y guiño a la lección siguiente</a></li>
+<li><a href="#org4502276">11. Preguntas de repaso (sesión 24)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#orgb27412c">12. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
 </ul>
 </div>
 </div>
-<div class="abstract" id="org19017c0">
+<div class="abstract" id="orgfabe07e">
 <p>
-La lección 12 dejó enunciado que el error estándar de un coeficiente es \(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\), con \(\tilde{\boldsymbol x}_j\) la parte <i>propia</i> del regresor. Hoy definimos esa parte propia, medimos cuánto se acorta cuando un regresor casi cae en el subespacio de los demás y leemos la consecuencia: coeficientes imprecisos e inestables, con un ajuste que no se mueve.
+La indicadora de un suceso, \(\mathbb 1_A\) de la lección 12, entra hoy en el modelo como un regresor más: el suceso es pertenecer a un grupo. Su coeficiente es una diferencia entre grupos, en unidades del regresando o porcentual si está en logaritmos. Dos indicadoras complementarias suman la constante, y de ahí la trampa de las variables ficticias. Una interacción permite que una pendiente cambie de grupo, y el contraste de Chow pregunta si los parámetros \(\beta\) del modelo son iguales en dos muestras distintas.
 </p>
 
 <p>
-<i>``El subespacio es estable; las coordenadas, no.''</i>
+<i>``El coeficiente de una indicadora no es un efecto por unidad: es un salto entre grupos.''</i>
 </p>
 
 </div>
 
 <ul class="org-ul">
-<li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S20-Lecc14.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S20-Lecc14.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S20-Lecc14.pdf">pdf</a>)</li>
+<li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S24-Lecc16.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S24-Lecc16.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S24-Lecc16.pdf">pdf</a>)</li>
 </ul>
-<div id="outline-container-orgc30d419" class="outline-2">
-<h2 id="orgc30d419"><span class="section-number-2">1.</span> De dónde venimos: el caso <code>nox</code> y <code>lnox</code></h2>
+<div id="outline-container-org0906b84" class="outline-2">
+<h2 id="org0906b84"><span class="section-number-2">1.</span> De dónde venimos: la indicadora de un suceso como regresor</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-La lección 13 dejó un caso sin explicar: en <code>price</code> sobre <code>rooms</code>, <code>nox</code> y <code>lnox</code>, los dos \(t\) de la contaminación eran pequeños y el \(F\) de excluirlas juntas, \(28{,}2\).
+La lección 12 definió la <i>indicadora</i> de un suceso \(A\): \(\mathbb 1_A(\omega)=1\) si \(\omega\in A\) y \(0\) si no; su esperanza es \(\mathrm P(A)\), y la constante es la indicadora del suceso seguro, \(\mathit 1=\mathbb 1_\Omega\).
 </p>
 
 <p>
-Lo que cambia al añadir <code>lnox</code> (<code>hprice2</code>, \(n=506\)):
+Hoy el suceso es pertenecer a un grupo: ser mujer, que el barrio limite con el río Charles. Su indicadora es un regresor más del modelo de la lección 10:
+\[\log(\text{wage})=\beta_1\,\mathit 1+\beta_2\,\mathbb 1_{\text{mujer}}+\beta_3\,\text{educ}+\cdots+U.\]
+En la muestra, la columna \(\boldsymbol d_{\text{mujer}}\) de ceros y unos, como \(\boldsymbol x_j\) es la columna de los \(n\) valores de \(X_j\). En los ficheros: <code>female</code>, <code>chas</code>.
 </p>
 
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-left" />
-
-<col  class="org-left" />
-
-<col  class="org-left" />
-
-<col  class="org-left" />
-</colgroup>
-<thead>
-<tr>
-<th scope="col" class="org-left">Regresores, además de <code>rooms</code></th>
-<th scope="col" class="org-left">coef. de <code>nox</code></th>
-<th scope="col" class="org-left">\(\mathrm{ee}(\hat\beta_{\text{nox}})\)</th>
-<th scope="col" class="org-left">\(\mathfrak s\)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="org-left"><code>nox</code></td>
-<td class="org-left">\(-1884{,}7\)</td>
-<td class="org-left">\(253{,}6\)</td>
-<td class="org-left">\(6291{,}0\)</td>
-</tr>
-
-<tr>
-<td class="org-left"><code>nox</code> y <code>lnox</code></td>
-<td class="org-left">\(404{,}2\)</td>
-<td class="org-left">\(2198{,}9\)</td>
-<td class="org-left">\(6290{,}4\)</td>
-</tr>
-</tbody>
-</table>
-
 <p>
-El coeficiente pasa de \(-1884{,}7\) a \(404{,}2\) y cambia de signo; el error estándar se multiplica por \(8{,}7\); \(\mathfrak s\) apenas cambia. La lección 12 enunció \(\mathrm{ee}(\hat\beta_j)=\frac{\mathfrak s}{\Vert\tilde{\boldsymbol x}_j\Vert_e}\): lo que se ha acortado es \(\tilde{\boldsymbol x}_{\text{nox}}\), la parte <i>propia</i> de <code>nox</code>.
+Se llama también variable <i>dicotómica</i>, <i>binaria</i>, <i>ficticia</i> o <i>dummy</i>. Mínimos cuadrados no la distingue de otra columna; lo que cambia es la lectura de \(\beta_2\).
 </p>
 
 <div class="org-center">
 <p>
-Hoy: qué es \(\tilde{\boldsymbol x}_j\), cuánto mide, qué le pasa al coeficiente y qué hacer.
+Hoy: qué dice el coeficiente de una indicadora, en niveles y en logaritmos; qué ocurre con dos indicadoras complementarias; cómo una interacción cambia una pendiente. Geometría nueva: solo una observación sobre dos indicadoras ortogonales.
 </p>
 </div>
 </div>
-<div id="outline-container-org098d7fb" class="outline-4">
-<h4 id="org098d7fb">De dónde venimos: el caso <code>nox</code> y <code>lnox</code></h4>
-<div class="outline-text-4" id="text-org098d7fb">
+<div id="outline-container-org87abbad" class="outline-4">
+<h4 id="org87abbad">De dónde venimos: la indicadora de un suceso como regresor</h4>
+<div class="outline-text-4" id="text-org87abbad">
 <p>
-La lección 13 terminó con un caso que supimos leer pero no medir. Con <code>rooms</code> y <code>nox</code> en el modelo, la contaminación tiene un \(t\) de \(-7{,}4\); con <code>rooms</code>, <code>nox</code> y <code>lnox</code>, los \(t\) de las dos medidas de contaminación caen a \(0{,}18\) y \(-1{,}05\), mientras que el \(F\) de excluirlas a la vez vale \(28{,}2\). Dijimos que era la firma de la colinealidad y que la lección 14 le pondría números.
+Muchas variables explicativas de interés no son cantidades sino categorías: el sexo de un trabajador, si está casado, si una vivienda tiene piscina, si un barrio limita con el río, la región, el sector de actividad. Para que una categoría entre en un modelo de regresión hay que convertirla en números, y la forma de hacerlo ya está en el curso. La lección 12, al definir la probabilidad condicional, introdujo la <i>indicadora</i> de un suceso \(A\): la variable aleatoria \(\mathbb 1_A\) que vale \(1\) en los sucesos elementales de \(A\) y \(0\) en los demás, con \(\mathrm E(\mathbb 1_A)=\mathrm P(A)\). Allí el suceso era \(\{U_i\le u\}\); hoy el suceso es que la unidad observada pertenezca a un grupo. Si \(A\) es el suceso ``la persona es mujer'', \(\mathbb 1_{\text{mujer}}\) vale \(1\) para cada mujer y \(0\) para cada hombre, y su esperanza es la proporción de mujeres en la población.
 </p>
 
 <p>
-La tabla de la transparencia aísla lo que cambia al añadir <code>lnox</code>. Al añadir <code>lnox</code>, el coeficiente de <code>nox</code> cambia de signo y su error estándar pasa de \(253{,}6\) a \(2198{,}9\). Lo que casi no cambia es \(\mathfrak s\): \(6291{,}0\) frente a \(6290{,}4\). El ruido estimado es similar, así que el cambio no viene del numerador del error estándar.
+Esa indicadora es una variable aleatoria como cualquier otro regresor, y entra en el modelo poblacional de la lección 10 multiplicada por su coeficiente: \(\log(\text{wage})=\beta_1\,\mathit 1+\beta_2\,\mathbb 1_{\text{mujer}}+\beta_3\,\text{educ}+\beta_4\,\text{exper}+\beta_5\,\text{tenure}+U\). En la muestra, la columna correspondiente de la matriz de regresores \(\boldsymbol{\mathsf X}\) es el vector \(\boldsymbol d_{\text{mujer}}\in\mathbb R^n\) con un \(1\) en las filas de las mujeres y un \(0\) en las de los hombres, de la misma manera que \(\boldsymbol x_j\) es el vector de los \(n\) valores observados de \(X_j\). En los ficheros de datos esa columna lleva el nombre de la categoría que vale \(1\): <code>female</code> en <code>wage1</code>, <code>chas</code> en el Boston original. La constante del modelo, \(\mathit 1\), es también una indicadora, la del suceso seguro \(\Omega\): vale \(1\) para todas las unidades, y en la muestra es el vector \(\boldsymbol 1\). Este hecho, señalado ya en la lección 12, es el que explica la trampa de las variables ficticias de la transparencia ``La trampa de las variables ficticias''.
 </p>
 
 <p>
-La lección 12 dejó enunciado, sin demostrar, que con varios regresores
-\[
-\mathrm{ee}(\hat\beta_j)=\frac{\mathfrak s}{\Vert\tilde{\boldsymbol x}_j\Vert_e},
-\]
-donde \(\tilde{\boldsymbol x}_j\) es lo que le queda de propio al regresor \(j\) tras descontar lo que comparte con los demás. Si \(\mathfrak s\) no ha cambiado y el error estándar se ha multiplicado por \(8{,}7\), la parte propia de <code>nox</code> se ha dividido por \(8{,}7\). Queda por entender qué es \(\tilde{\boldsymbol x}_j\), por qué se acorta y cuánto.
+Los nombres son varios. Esta lección dice <i>variable indicadora</i>, que es el término del curso; en los manuales y en los programas se encuentra también <i>dicotómica</i> o <i>binaria</i>, por tomar dos valores, <i>ficticia</i>, porque no mide una cantidad, que es el término de Gretl en español, y <i>dummy</i>, el término inglés. Todos designan lo mismo: una columna de ceros y unos que señala un grupo. Para mínimos cuadrados es una columna más de \(\boldsymbol{\mathsf X}\): la proyección, los residuos, el \(R^2\), los errores estándar y los contrastes \(t\) y \(F\) se calculan igual, y todo lo demostrado en las lecciones 8 a 14 sigue en pie. Lo que esta lección añade es la lectura de su coeficiente, que no es un efecto por unidad, porque una indicadora no tiene unidades, sino una diferencia entre dos grupos. Hay una única pieza de geometría nueva, y es pequeña: dos indicadoras de grupos complementarios son vectores ortogonales que suman \(\boldsymbol 1\), y eso explica a la vez por qué sus coeficientes son medias de grupo y por qué no pueden convivir las dos con la constante.
 </p>
 
 <p>
-La sesión tiene tres partes. Las cuatro primeras transparencias definen la parte propia de un regresor y miden su longitud, con el resultado que hoy se demuestra y el error estándar que se lee a partir de él. Las dos siguientes ponen números al caso <code>nox</code> y <code>lnox</code> y explican por qué los coeficientes oscilan. Las tres últimas son de lectura: síntomas, qué es y qué no es la colinealidad, y qué hacer.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4, apartado ``Multicollinearity'' (el planteamiento del problema con la fórmula de la varianza de \(\hat\beta_j\)).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, sección 7.1 (``Describing qualitative information''); lección 12 de este curso, apuntes de ``El supuesto nuevo: normalidad'', donde se definió \(\mathbb 1_A\).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgfb906a1" class="outline-2">
-<h2 id="orgfb906a1"><span class="section-number-2">2.</span> Colinealidad exacta y colinealidad de grado</h2>
+<div id="outline-container-orgd39a613" class="outline-2">
+<h2 id="orgd39a613"><span class="section-number-2">2.</span> Una indicadora desplaza el intercepto: la vivienda junto al río</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-<i>Exacta</i> (lección 10): un regresor es combinación lineal de los demás. \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) no es invertible; infinitos \(\boldsymbol{\mathop{\widehat\beta}}\) dan el mismo ajuste. Ejemplo: temperatura en Celsius y en Fahrenheit.
+Boston original (\(506\) barrios; <code>medv</code>, precio mediano en miles de dólares; <code>chas</code>, \(1\) en los \(35\) barrios que limitan con el río Charles): \(\widehat{\text{medv}}=22{,}09+6{,}35\,\text{chas}\), con \(\mathrm{ee}(\hat\beta_2)=1{,}59\) y \(t=4{,}00\). Dos valores ajustados, \(22{,}09\) sin río y \(22{,}09+6{,}35=28{,}44\) junto al río: las medias de cada grupo, y el coeficiente es su diferencia.
+</p>
+
+
+<div id="org4c0c359" class="figure">
+<p><img src="img/S24-Lecc16/MedvChas.png" alt="MedvChas.png" width="700px" />
+</p>
+<p><span class="figure-number">Figura 1: </span>Los \(506\) barrios del Boston original. En el eje horizontal, la indicadora <code>chas</code> (con un desplazamiento horizontal aleatorio para que los puntos no se superpongan); en el vertical, el precio mediano en miles de dólares. El segmento azul es la media de los \(471\) barrios sin río, \(22{,}09\), y el rojo la media de los \(35\) barrios junto al río, \(28{,}44\). La recta discontinua es el ajuste de <code>medv</code> sobre la constante y <code>chas</code>: pasa por las dos medias, su ordenada en el origen es la media del grupo con <code>chas</code> igual a \(0\) y su pendiente, \(6{,}35\), es la diferencia entre las dos medias. Entre \(0\) y \(1\) la recta no tiene datos: la ``pendiente'' de una indicadora es un salto entre dos grupos, no un efecto por unidad.</p>
+</div>
+
+<p>
+<b>La geometría</b>: \(\boldsymbol d_{\text{no río}}=\boldsymbol 1-\boldsymbol d_{\text{río}}\), así que \(\mathcal L(\boldsymbol 1,\boldsymbol d_{\text{río}})=\mathcal L(\boldsymbol d_{\text{río}},\boldsymbol d_{\text{no río}})\): el mismo subespacio con otra base.
 </p>
 
 <p>
-<i>De grado</i> (hoy): un regresor forma un ángulo muy pequeño con el subespacio generado por los demás (constante incluida). Solución única, pero imprecisa e inestable.
+Las dos indicadoras son ortogonales, \(\langle\boldsymbol d_{\text{río}},\boldsymbol d_{\text{no río}}\rangle_s=0\), porque ningún barrio está en los dos grupos. Como en la familia ortogonal de la lección 10, cada coeficiente se calcula por separado con la fórmula de la proyección sobre un generador, \(\langle\boldsymbol y,\boldsymbol d\rangle_s/\langle\boldsymbol d,\boldsymbol d\rangle_s\), que aquí es la media de su grupo:
+\[\boldsymbol{\mathop{\widehat y}}=28{,}44\,\boldsymbol d_{\text{río}}+22{,}09\,\boldsymbol d_{\text{no río}}=22{,}09\,\boldsymbol 1+6{,}35\,\boldsymbol d_{\text{río}}.\]
 </p>
 
 <p>
-Con dos regresores no constantes: \(\rho_{\boldsymbol x_2\boldsymbol x_3}\) próximo a \(\pm1\), es decir, \(\cos\theta\) próximo a \(\pm1\) y vectores en desviaciones casi alineados (lección 3). Con más: alguno forma un ángulo muy pequeño con el subespacio de los otros, y las correlaciones por parejas no bastan para verlo (lección 10).
+Con más regresores, <code>medv</code> sobre <code>rm</code> y <code>chas</code>: el coeficiente de <code>chas</code> pasa a \(4{,}08\) (\(\mathrm{ee}\) \(1{,}15\)). Ya no es una diferencia de medias, sino la diferencia entre barrios con el mismo número de habitaciones.
+</p>
+</div>
+<div id="outline-container-org7c9e510" class="outline-4">
+<h4 id="org7c9e510">Una indicadora desplaza el intercepto: la vivienda junto al río</h4>
+<div class="outline-text-4" id="text-org7c9e510">
+<p>
+El Boston original es el fichero <code>boston.csv</code> que se importó en la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S04-Prct-B-boston.pdf#page=2">actividad 4</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S04-Prct-B-boston.html#dicotomica-chas">html</a>) de la práctica B de la sesión 4, porque contiene una variable que <code>hprice2</code> no tiene: <code>chas</code>, la indicadora de los barrios que limitan con el río Charles. Allí se calculó su media, \(35/506=0{,}069\), y se vio que la media de una indicadora es la proporción de unidades del grupo: es la versión muestral de \(\mathrm E(\mathbb 1_A)=\mathrm P(A)\).
 </p>
 
-<div class="org-center">
 <p>
-Es una escala, no una frontera. La pregunta útil no es ``¿hay colinealidad?'' sino ``¿cuánto aumenta el error estándar de cada coeficiente?''.
+La regresión más simple con una indicadora es la del precio mediano sobre la constante y <code>chas</code>: \(\widehat{\text{medv}}=22{,}09+6{,}35\,\text{chas}\). Como <code>chas</code> solo toma los valores \(0\) y \(1\), el modelo solo produce dos valores ajustados: \(22{,}09\) para los barrios sin río y \(22{,}09+6{,}35=28{,}44\) para los barrios junto al río. Y esos dos valores son las medias muestrales de <code>medv</code> en cada grupo. Por eso el coeficiente de la indicadora, \(6{,}35\) mil dólares, es la diferencia entre las dos medias, y el contraste \(t\) de ese coeficiente, con \(t=4{,}00\), es el contraste de igualdad de medias entre los dos grupos. La figura dibuja los \(506\) barrios con la indicadora en el eje horizontal. La recta ajustada pasa por las dos medias, pero entre \(0\) y \(1\) no hay ningún dato: hablar de ``una unidad más de <code>chas</code>'' no tiene sentido. El coeficiente de una indicadora es un salto entre grupos, un desplazamiento del intercepto, y no un efecto por unidad.
+</p>
+
+<p>
+Que los coeficientes sean medias de grupo tiene una explicación geométrica, la única de esta lección. Sea \(\boldsymbol d_{\text{río}}\) la columna <code>chas</code> y \(\boldsymbol d_{\text{no río}}=\boldsymbol 1-\boldsymbol d_{\text{río}}\) la indicadora del grupo complementario. El subespacio generado por la constante y <code>chas</code> es el mismo que el generado por las dos indicadoras, porque cada vector de una pareja es combinación lineal de los de la otra: \(\mathcal L(\boldsymbol 1,\boldsymbol d_{\text{río}})=\mathcal L(\boldsymbol d_{\text{río}},\boldsymbol d_{\text{no río}})\). La proyección de \(\boldsymbol y\) sobre ese subespacio es la misma con cualquiera de las dos bases; lo que cambia son los coeficientes. En la base de las dos indicadoras los coeficientes se calculan sin resolver ningún sistema: \(\boldsymbol d_{\text{río}}\) y \(\boldsymbol d_{\text{no río}}\) son ortogonales, \(\langle\boldsymbol d_{\text{río}},\boldsymbol d_{\text{no río}}\rangle_s=0\), porque en cada fila una de las dos vale cero. En las ecuaciones normales de la lección 10 el producto escalar de cada regresor con el otro es cero, así que cada ecuación contiene un solo coeficiente, y ese coeficiente es el de la proyección sobre un generador de las lecciones 3 y 4, \(\langle\boldsymbol y,\boldsymbol d\rangle_s/\langle\boldsymbol d,\boldsymbol d\rangle_s\). Es la misma situación que la familia ortogonal de la lección 10, con dos generadores que no están centrados pero sí son ortogonales entre sí. Para \(\boldsymbol d_{\text{río}}\) el cociente es la suma de los precios de los \(35\) barrios junto al río dividida por \(35\), porque el factor \(1/n\) del producto escalar estadístico se cancela: la media del grupo. Cambiar a la base \(\{\boldsymbol 1,\boldsymbol d_{\text{río}}\}\) reescribe el mismo vector ajustado, \(\boldsymbol{\mathop{\widehat y}}=28{,}44\,\boldsymbol d_{\text{río}}+22{,}09\,\boldsymbol d_{\text{no río}}=22{,}09\,\boldsymbol 1+6{,}35\,\boldsymbol d_{\text{río}}\), y la constante y la diferencia de medias aparecen como coeficientes.
+</p>
+
+<p>
+Con más regresores el coeficiente de la indicadora deja de ser una diferencia de medias. En <code>medv</code> sobre <code>rm</code> y <code>chas</code>, el coeficiente de <code>chas</code> es \(4{,}08\) con error estándar \(1{,}15\): es la diferencia de precio entre dos barrios con el mismo número medio de habitaciones por vivienda, uno junto al río y otro no. Es la lectura <i>ceteris paribus</i> de la lección 10, aplicada a un salto entre grupos. La diferencia bruta de medias, \(6{,}35\), recoge además que los barrios junto al río tienen viviendas algo mayores; al fijar <code>rm</code>, parte de esa diferencia se atribuye a las habitaciones y el salto se reduce. La transparencia ``Con más regresores: la diferencia con lo demás fijo'' vuelve sobre esta distinción con los salarios.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, sección 7.2 (``A single dummy independent variable''); Harrison, D. y Rubinfeld, D. L. (1978), ``Hedonic housing prices and the demand for clean air'', <i>Journal of Environmental Economics and Management</i> 5, 81–102, origen de los datos.
 </p>
 </div>
 </div>
-<div id="outline-container-orgec1a10b" class="outline-4">
-<h4 id="orgec1a10b">Colinealidad exacta y colinealidad de grado</h4>
-<div class="outline-text-4" id="text-orgec1a10b">
-<p>
-El curso ya conoce el caso extremo. En la lección 10, al deducir las ecuaciones normales, dijimos que si los regresores son linealmente dependientes la matriz \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) no es invertible y el sistema tiene infinitas soluciones: infinitos vectores \(\boldsymbol{\mathop{\widehat\beta}}\) producen el mismo ajuste \(\boldsymbol{\mathop{\widehat y}}\). Lo llamamos <i>colinealidad exacta</i>, y la práctica que siguió a esa lección lo comprobó (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=6">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#colinealidad-exacta">html</a>)) con la temperatura en grados Celsius y en grados Fahrenheit: Gretl omite una de las dos columnas y avisa. Es una situación que se detecta sola, porque no hay nada que estimar.
-</p>
-
-<p>
-La colinealidad de grado es el caso próximo a ese: un regresor no es combinación lineal de los demás, pero forma un ángulo muy pequeño con el subespacio que generan (constante incluida). La solución existe y es única, pero el coeficiente de ese regresor se estima con poca precisión y cambia mucho ante cambios pequeños de los datos. Lo llamaremos <i>colinealidad de grado</i>, y la palabra ``grado'' indica que es una escala continua: lo que hay que medir es cuánto aumenta el error estándar de cada coeficiente por este motivo.
-</p>
-
-<p>
-Con dos regresores no constantes la escala es la correlación. La lección 5 definió \(\rho_{\boldsymbol x_2\boldsymbol x_3}\) como el coseno del ángulo entre los vectores en desviaciones, y la lección 3 mostró que \(\cos\theta=\pm1\) exactamente cuando los vectores están alineados. Colinealidad exacta es \(\rho=\pm1\); colinealidad de grado es \(\rho\) cerca de \(\pm1\), vectores casi alineados. La lección 3 lo anunció: dos regresores muy correlacionados tienen sus vectores en desviaciones casi alineados.
-</p>
-
-<p>
-Con tres o más regresores no constantes la correlación por parejas deja de bastar, por la razón que dio la lección 10: un regresor puede estar cerca del subespacio generado por los demás sin estar cerca de ninguno de ellos en particular. El ejemplo de aquella lección sirve: la renta total de un hogar frente a sus dos componentes, renta del trabajo y renta del capital. Las tres transparencias siguientes construyen la medida que sí sirve en todos los casos: la longitud de la parte propia de cada regresor.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.3 (supuesto MLR.3, no colinealidad perfecta) y sección 3.4 (la distinción con la colinealidad ``imperfecta'').
-</p>
 </div>
-</div>
-</div>
-<div id="outline-container-org625a22e" class="outline-2">
-<h2 id="org625a22e"><span class="section-number-2">3.</span> La parte propia de un regresor</h2>
+<div id="outline-container-orge8316f6" class="outline-2">
+<h2 id="orge8316f6"><span class="section-number-2">3.</span> Con más regresores: la diferencia con lo demás fijo</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-Proyectamos \(\boldsymbol x_j\) sobre el subespacio de <i>los demás</i> regresores (constante incluida), como en la lección 10. El residuo de esa <i>regresión auxiliar</i> es la parte propia:
-\[
-\boldsymbol x_j=\underbrace{\text{(combinación de los demás)}}_{\text{lo que comparte}}+\underbrace{\tilde{\boldsymbol x}_j}_{\text{lo propio}},\quad \tilde{\boldsymbol x}_j\perp\text{ los demás regresores.}
-\]
-</p>
-
-
-<div id="org426854c" class="figure">
-<p><img src="img/S20-Lecc14/PartePropia_fila.png" alt="PartePropia_fila.png" width="700px" />
-</p>
-<p><span class="figure-number">Figura 1: </span>Dos regresores en desviaciones en el plano \(\mathcal L(\boldsymbol 1)^\perp\), con ángulo \(\theta\) de \(60^\circ\), \(20^\circ\) y \(6^\circ\). En azul, \(\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\) y \(\boldsymbol x_3-\mu_{\boldsymbol x_3}\boldsymbol 1\); el vector gris, que va desde la ``sombra'' del primero sobre la recta del segundo hasta la punta del primero, es \(\tilde{\boldsymbol x}_2\), la parte propia de \(\boldsymbol x_2\). Los dos regresores en desviaciones tienen la misma longitud en los tres paneles; la de la parte propia, cateto opuesto al ángulo \(\theta\), es \(\sin\theta\) veces esa longitud: \(0{,}87\), \(0{,}34\) y \(0{,}10\).</p>
-</div>
-
-<p>
-Enunciado en la lección 12 (demostración en el apéndice): \(\;\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\). Con un solo regresor no constante, \(\tilde{\boldsymbol x}_2=\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\) y se recupera la lección 12.
-</p>
-</div>
-<div id="outline-container-org104b2c8" class="outline-4">
-<h4 id="org104b2c8">La parte propia de un regresor</h4>
-<div class="outline-text-4" id="text-org104b2c8">
-<p>
-La lección 12 habló de ``la parte del regresor \(j\) que no se puede reconstruir a partir de los demás''. Hoy le damos definición, y la definición es una proyección ortogonal de las de la lección 10, aplicada a un regresor en lugar de al regresando.
-</p>
-
-<p>
-Tomemos el regresor \(\boldsymbol x_j\) y el subespacio generado por todos los demás, constante incluida: \(\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_{j-1},\boldsymbol x_{j+1},\ldots,\boldsymbol x_k)\). Proyectar \(\boldsymbol x_j\) sobre ese subespacio es hacer una regresión, la <i>regresión auxiliar</i> de \(\boldsymbol x_j\) sobre los demás regresores. Esa regresión descompone \(\boldsymbol x_j\) en dos piezas ortogonales: el ajuste, que es la parte de \(\boldsymbol x_j\) que los demás regresores reproducen, y el residuo, que es la parte que no reproducen. A ese residuo lo llamamos <i>parte propia</i> del regresor y lo denotamos \(\tilde{\boldsymbol x}_j\). Por ser un residuo de la lección 10, \(\tilde{\boldsymbol x}_j\) es ortogonal a todos los generadores del subespacio: a \(\boldsymbol 1\) y a cada uno de los otros regresores. Tiene, en particular, media cero.
-</p>
-
-<p>
-La figura lo muestra con dos regresores no constantes, en el plano de las desviaciones. Si solo hay otro regresor, \(\boldsymbol x_3\), el subespacio de ``los demás'' en desviaciones es la recta de \(\boldsymbol x_3-\mu_{\boldsymbol x_3}\boldsymbol 1\), y la parte propia de \(\boldsymbol x_2\) es la componente de \(\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\) perpendicular a esa recta: el cateto vertical del triángulo. Aquí aparece por primera vez en el curso el seno, y no hace falta nada nuevo para leerlo: en un triángulo rectángulo el cateto opuesto al ángulo \(\theta\) mide la hipotenusa por \(\sin\theta\), igual que el cateto contiguo mide la hipotenusa por \(\cos\theta\) (lección 3), y Pitágoras en ese mismo triángulo da \(\cos^2\theta+\sin^2\theta=1\), es decir, \(\sin\theta=\sqrt{1-\cos^2\theta}\). En los tres paneles los dos regresores en desviaciones tienen la misma longitud; solo cambia el ángulo \(\theta\) entre ellos. Con \(60^\circ\) la parte propia es casi todo el regresor; con \(6^\circ\) es una décima parte. La transparencia siguiente establece la fórmula.
-</p>
-
-<p>
-Con esta definición, el enunciado de la lección 12 se lee así: el error estándar de \(\hat\beta_j\) es la longitud del ruido estimado, \(\mathfrak s\), por unidad de longitud <i>de la parte propia</i> del regresor. Es la misma lectura de la lección 12, ``longitud del ruido estimado por unidad de longitud del regresor en desviaciones'', con una corrección: con varios regresores no cuenta toda la longitud del regresor, solo la que no comparte con los demás. Cuando solo hay un regresor no constante no hay nada que compartir, la regresión auxiliar es la de \(\boldsymbol x_2\) sobre \(\boldsymbol 1\), su residuo es el vector en desviaciones \(\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\), y la fórmula es la de la lección 12. La demostración está en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>) (sección <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=13">5.4</a> para la fórmula de \(\hat\beta_j\) con la parte propia; <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=19">6.5</a> y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=20">7.1</a> para la insesgadez y la varianza con \(k\) regresores; la insesgadez de \(\mathfrak s^2\) con \(k\) regresores, que la lección 11 enunció, en <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=21">7.2</a>); aquí basta con la lectura: con varios regresores no cuenta toda la longitud del regresor, solo la que no comparte con los demás. El resultado, \(\hat\beta_j\) como coeficiente de la regresión de \(\boldsymbol y\) sobre la parte propia de \(\boldsymbol x_j\), se conoce como <i>teorema de Frisch–Waugh–Lovell</i>, y es lo que usa la opción ``Ortogonalizar'' de ``Qué hacer y qué no''. 
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.2, apartado ``A partialling out interpretation of multiple regression'' (la regresión auxiliar y su residuo).
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-org72391fb" class="outline-2">
-<h2 id="org72391fb"><span class="section-number-2">4.</span> Cuánto se acorta: el factor de inflación de la varianza</h2>
-<div class="outline-text-2" id="text-4">
-<p>
-Pitágoras en la regresión auxiliar (lección 8), con \(\mathrm{STC}_j=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\), \(\mathrm{SRC}_j=\Vert\tilde{\boldsymbol x}_j\Vert_e^2\) y \(R_j^2=\cos^2\theta_j\) su coeficiente de determinación, de modo que \(1-R_j^2=1-\cos^2\theta_j=\sin^2\theta_j\):
-\[
-\mathrm{STC}_j=\mathrm{SEC}_j+\mathrm{SRC}_j
-\;\Longrightarrow\;
-\boxed{\;\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\,\sin\theta_j\;}
-\]
-</p>
-
-<p>
-Sustituyendo en el error estándar:
-\[
-\mathrm{ee}(\hat\beta_j)=\underbrace{\frac{\mathfrak s}{\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e}}_{\text{como si estuviera solo}}\cdot\sqrt{\mathrm{VIF}_j},
-\qquad
-\mathrm{VIF}_j=\frac{1}{1-R_j^2}=\frac{1}{\sin^2\theta_j}.
-\]
+<code>wage1</code> (\(526\) trabajadores, salario por hora en dólares de 1976; \(274\) hombres y \(252\) mujeres). Medias: \(7{,}10\) dólares los hombres, \(4{,}59\) las mujeres. <code>wage</code> sobre la constante y <code>female</code>: coeficiente \(-2{,}51\), la diferencia de medias.
 </p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
@@ -495,366 +398,603 @@ Sustituyendo en el error estándar:
 </colgroup>
 <thead>
 <tr>
-<th scope="col" class="org-left">\(\rho_{\boldsymbol x_2\boldsymbol x_3}\) (con \(k=3\), \(R_2^2=\rho_{\boldsymbol x_2\boldsymbol x_3}^2\))</th>
-<th scope="col" class="org-left">\(\theta\)</th>
-<th scope="col" class="org-left">\(\mathrm{VIF}\)</th>
-<th scope="col" class="org-left">\(\sqrt{\mathrm{VIF}}\)</th>
+<th scope="col" class="org-left"><code>wage</code> sobre…</th>
+<th scope="col" class="org-left">coef.</th>
+<th scope="col" class="org-left">\(\mathrm{ee}\)</th>
+<th scope="col" class="org-left">\(t\)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="org-left">\(0{,}5\)</td>
-<td class="org-left">\(60^\circ\)</td>
-<td class="org-left">\(1{,}3\)</td>
-<td class="org-left">\(1{,}2\)</td>
+<td class="org-left">constante</td>
+<td class="org-left">\(-1{,}568\)</td>
+<td class="org-left">\(0{,}725\)</td>
+<td class="org-left">\(-2{,}16\)</td>
 </tr>
 
 <tr>
-<td class="org-left">\(0{,}9\)</td>
-<td class="org-left">\(26^\circ\)</td>
-<td class="org-left">\(5{,}3\)</td>
-<td class="org-left">\(2{,}3\)</td>
+<td class="org-left"><code>female</code></td>
+<td class="org-left">\(-1{,}811\)</td>
+<td class="org-left">\(0{,}265\)</td>
+<td class="org-left">\(-6{,}84\)</td>
 </tr>
 
 <tr>
-<td class="org-left">\(0{,}99\)</td>
-<td class="org-left">\(8^\circ\)</td>
-<td class="org-left">\(50\)</td>
-<td class="org-left">\(7{,}1\)</td>
+<td class="org-left"><code>educ</code></td>
+<td class="org-left">\(0{,}572\)</td>
+<td class="org-left">\(0{,}049\)</td>
+<td class="org-left">\(11{,}58\)</td>
 </tr>
 
 <tr>
-<td class="org-left">\(0{,}999\)</td>
-<td class="org-left">\(2{,}6^\circ\)</td>
-<td class="org-left">\(500\)</td>
-<td class="org-left">\(22\)</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="outline-container-org5171bba" class="outline-4">
-<h4 id="org5171bba">Cuánto se acorta: el factor de inflación de la varianza</h4>
-<div class="outline-text-4" id="text-org5171bba">
-<p>
-La igualdad del recuadro, la longitud de la parte propia, sale de la lección 8 sin ningún ingrediente nuevo. La regresión auxiliar de \(\boldsymbol x_j\) sobre los demás regresores es una regresión como cualquier otra, con \(\boldsymbol x_j\) en el papel del regresando, así que tiene su triángulo rectángulo y su identidad \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\). Escribamos las tres sumas con su subíndice \(j\) para recordar de qué regresión provienen. La suma total es la longitud al cuadrado del regresor en desviaciones, \(\mathrm{STC}_j=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\). La suma residual es la longitud al cuadrado de la parte propia, \(\mathrm{SRC}_j=\Vert\tilde{\boldsymbol x}_j\Vert_e^2\), porque \(\tilde{\boldsymbol x}_j\) es el residuo de esa regresión. Y el coeficiente de determinación de la regresión auxiliar, que llamaremos \(R_j^2\), es \(\mathrm{SEC}_j/\mathrm{STC}_j=1-\mathrm{SRC}_j/\mathrm{STC}_j\). Despejando,
-\[
-\Vert\tilde{\boldsymbol x}_j\Vert_e^2=\mathrm{SRC}_j=\mathrm{STC}_j\,(1-R_j^2)=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\,(1-R_j^2).
-\]
-Tomando raíces, \(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\,\sqrt{1-R_j^2}\) (es Pitágoras en la regresión auxiliar, y así lo escribe el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=13">apéndice, sección 5.4</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>)). Y la lección 8 otra vez: \(R_j^2=\cos^2\theta_j\), con \(\theta_j\) el ángulo entre el regresor en desviaciones \((\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1)\) y su ajuste en desviaciones en la regresión auxiliar, así que \(1-R_j^2=1-\cos^2\theta_j=\sin^2\theta_j\) (Pitágoras en el triángulo de la figura, como se explicó al presentarla) y queda la igualdad del recuadro, \(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\,\sin\theta_j\). Es lo que la figura de ``La parte propia de un regresor'' muestra: el cateto vertical mide la hipotenusa por el seno del ángulo. \(\blacksquare\)
-</p>
-
-<p>
-Ahora sustituimos la longitud recién obtenida en la fórmula del error estándar, \(\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\), que queda escrita como producto de dos factores:
-\[
-\mathrm{ee}(\hat\beta_j)=\frac{\mathfrak s}{\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\,\sqrt{1-R_j^2}}=\frac{\mathfrak s}{\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e}\cdot\frac{1}{\sqrt{1-R_j^2}}.
-\]
-El primero, \(\mathfrak s/\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\), es el error estándar que tendría \(\hat\beta_j\) si el regresor no compartiera nada con los demás: la fórmula de la lección 12, con el \(\mathfrak s\) del modelo completo. El segundo, \(1/\sqrt{1-R_j^2}\), es el factor que añade compartir variación con los demás. Su cuadrado tiene nombre propio en los manuales: <i>factor de inflación de la varianza</i>, \(\mathrm{VIF}_j=1/(1-R_j^2)\), porque multiplica la varianza del estimador; al error estándar lo multiplica su raíz. En el lenguaje del curso, \(\mathrm{VIF}_j=1/\sin^2\theta_j\): cuanto más se cierra el ángulo entre un regresor y el subespacio de los demás, más se infla.
-</p>
-
-<p>
-Con dos regresores no constantes la regresión auxiliar es simple, \(\boldsymbol x_2\) sobre \(\boldsymbol 1\) y \(\boldsymbol x_3\), y la lección 8 demostró que en regresión simple \(R^2=\rho^2\). Por tanto \(R_2^2=\rho_{\boldsymbol x_2\boldsymbol x_3}^2\) y \(\mathrm{VIF}_2=1/(1-\rho_{\boldsymbol x_2\boldsymbol x_3}^2)\), y lo mismo para \(\boldsymbol x_3\): con \(k=3\) los dos regresores tienen el mismo VIF. La tabla de la transparencia recorre la escala. Una correlación de \(0{,}5\) apenas se nota: el error estándar crece un \(15\,\%\). Una de \(0{,}9\) lo multiplica por \(2{,}3\). Una de \(0{,}99\), por \(7\); y con \(0{,}999\) el ángulo es de \(2{,}6^\circ\) y el error estándar se multiplica por \(22\). El crecimiento no es lineal en \(\rho\): casi todo el aumento se produce en los últimos grados antes de la alineación exacta. Por eso la colinealidad apenas se nota hasta que la correlación es muy alta.
-</p>
-
-<p>
-Con más de dos regresores no constantes no hay atajo: \(R_j^2\) es el \(R^2\) de una regresión múltiple, y hay que estimarla. Gretl lo calcula con un comando, como veremos en la transparencia siguiente.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4, ecuación de \(\mathrm{Var}(\hat\beta_j)\) con el factor \(1-R_j^2\) y la discusión del VIF que la sigue.
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-org4fd109e" class="outline-2">
-<h2 id="org4fd109e"><span class="section-number-2">5.</span> El caso <code>nox</code> y <code>lnox</code> con números</h2>
-<div class="outline-text-2" id="text-5">
-<p>
-Regresión auxiliar de <code>nox</code> sobre <code>rooms</code> y <code>lnox</code> (<code>hprice2</code>): \(R_j^2=0{,}9879\), es decir, los otros dos regresores reproducen el \(98{,}8\,\%\) de la variación de <code>nox</code>.
-</p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-left" />
-
-<col  class="org-left" />
-</colgroup>
-<thead>
-<tr>
-<th scope="col" class="org-left">Cantidad</th>
-<th scope="col" class="org-left">Valor</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="org-left">\(\Vert\boldsymbol x_{\text{nox}}-\mu_{\text{nox}}\boldsymbol 1\Vert_e\) (longitud de <code>nox</code> en desviaciones de su media)</td>
-<td class="org-left">\(26{,}03\)</td>
+<td class="org-left"><code>exper</code></td>
+<td class="org-left">\(0{,}025\)</td>
+<td class="org-left">\(0{,}012\)</td>
+<td class="org-left">\(2{,}20\)</td>
 </tr>
 
 <tr>
-<td class="org-left">\(\sqrt{1-R_j^2}=\sin\theta_j\)</td>
-<td class="org-left">\(0{,}1099\)</td>
-</tr>
-
-<tr>
-<td class="org-left">\(\Vert\tilde{\boldsymbol x}_{\text{nox}}\Vert_e\) (parte propia)</td>
-<td class="org-left">\(2{,}861\)</td>
-</tr>
-
-<tr>
-<td class="org-left">\(\mathrm{VIF}=1/(1-R_j^2)\); \(\sqrt{\mathrm{VIF}}\)</td>
-<td class="org-left">\(82{,}8;\ 9{,}10\)</td>
-</tr>
-
-<tr>
-<td class="org-left">\(\mathfrak s/\Vert\tilde{\boldsymbol x}_{\text{nox}}\Vert_e=6290{,}37/2{,}861\) (error estándar de <code>nox</code>)</td>
-<td class="org-left">\(\approx2198{,}9\)</td>
+<td class="org-left"><code>tenure</code></td>
+<td class="org-left">\(0{,}141\)</td>
+<td class="org-left">\(0{,}021\)</td>
+<td class="org-left">\(6{,}66\)</td>
 </tr>
 </tbody>
 </table>
 
 <p>
-El último valor, \(2198{,}9\), es el error estándar de <code>nox</code> en la tabla de la lección 13 (modelo con <code>rooms</code>, <code>nox</code> y <code>lnox</code>). Sin <code>lnox</code>, la parte propia de <code>nox</code> medía \(24{,}81\); con <code>lnox</code>, \(2{,}861\) (se ha dividido por \(8{,}7\)).
-</p>
-
-<p>
-En Gretl: comando <code>vif</code> tras estimar, o <i><i><code>Análisis -&gt; Colinealidad</code></i></i> en la ventana del modelo. Devuelve \(82{,}8\) para <code>nox</code>, \(82{,}9\) para <code>lnox</code> y \(1{,}1\) para <code>rooms</code>.
-</p>
-</div>
-<div id="outline-container-orgad6e7ce" class="outline-4">
-<h4 id="orgad6e7ce">El caso <code>nox</code> y <code>lnox</code> con números</h4>
-<div class="outline-text-4" id="text-orgad6e7ce">
-<p>
-Volvamos al modelo con que abrimos la sesión y hagamos la cuenta completa para <code>nox</code>. La regresión auxiliar es la de <code>nox</code> sobre la constante, <code>rooms</code> y <code>lnox</code>, y su coeficiente de determinación es \(R_j^2=0{,}9879\): los otros regresores reproducen el \(98{,}8\,\%\) de la variación de <code>nox</code>. Casi todo, como cabía esperar de una variable y su logaritmo, cuya correlación es \(0{,}9939\), un ángulo de \(6{,}3^\circ\).
-</p>
-
-<p>
-Las longitudes salen de la fórmula de ``Cuánto se acorta: el factor de inflación de la varianza''. El regresor en desviaciones mide \(26{,}03\); \(\sqrt{1-R_j^2}=0{,}1099\); la parte propia mide \(26{,}03\cdot0{,}1099=2{,}861\). Y el error estándar es \(\mathfrak s\) dividido por esa longitud: \(6290{,}37/2{,}861\approx2198{,}9\) (con todos los decimales de Gretl, \(2198{,}85\)), la cifra que Gretl imprime en la tabla de apertura de la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=2">lección 13</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#tabla-apertura">html</a>). La fórmula del error estándar se cumple aquí con cuatro cifras.
-</p>
-
-<p>
-Conviene leer también el factor por el que se ha multiplicado el error estándar. En el modelo sin <code>lnox</code>, la parte propia de <code>nox</code> es su residuo sobre \(\boldsymbol 1\) y <code>rooms</code>, y mide \(24{,}81\): casi toda su longitud en desviaciones, porque <code>rooms</code> apenas comparte nada con <code>nox</code>. Al entrar <code>lnox</code>, la parte propia baja a \(2{,}861\), un factor \(8{,}7\), y el error estándar sube en el mismo factor, de \(253{,}6\) a \(2198{,}9\). No ha cambiado el ruido ni el número de observaciones; solo la longitud propia de <code>nox</code>.
-</p>
-
-<p>
-Gretl calcula los factores de inflación con el comando <code>vif</code>, que se ejecuta después de estimar el modelo, o desde el menú <i><i><code>Análisis -&gt; Colinealidad</code></i></i> de la ventana del modelo. Para nuestro modelo devuelve \(82{,}8\) para <code>nox</code>, \(82{,}9\) para <code>lnox</code> y \(1{,}1\) para <code>rooms</code>: las dos medidas de contaminación comparten casi toda su variación y ninguna comparte casi nada con <code>rooms</code>. Con la salida de Gretl y esta lección, un VIF se lee así: es \(1/\sin^2\theta_j\), y su raíz es el factor por el que se ha multiplicado el error estándar del coeficiente respecto al que tendría si el regresor no compartiera variación con los demás regresores. Con \(82{,}8\), ese factor es \(9{,}10\); y en efecto \(241{,}6\cdot9{,}10\approx2198{,}9\), donde \(241{,}6\) es \(\mathfrak s\) dividido por la longitud completa del regresor en desviaciones.
-</p>
-
-<p>
-<i>Para profundizar</i>: manual de Gretl, comando <code>vif</code>; Wooldridge, J. M. (2020), cap. 3, sección 3.4 (el VIF como estadístico de diagnóstico y sus límites).
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-org8b0f413" class="outline-2">
-<h2 id="org8b0f413"><span class="section-number-2">6.</span> Por qué oscilan los coeficientes</h2>
-<div class="outline-text-2" id="text-6">
-<p>
-\(\boldsymbol{\mathop{\widehat y}}\) es la proyección de \(\boldsymbol y\) sobre el subespacio de los regresores y no depende de qué generadores lo describan. \(\hat\beta_2\) y \(\hat\beta_3\) son las <i>coordenadas</i> de \(\boldsymbol{\mathop{\widehat y}}\) respecto de los generadores, y sí dependen de ellos: con generadores casi alineados son inestables.
-</p>
-
-
-<div id="orge9bbccc" class="figure">
-<p><img src="img/S20-Lecc14/ParalelogramoAplastado_fila.png" alt="ParalelogramoAplastado_fila.png" width="700px" />
-</p>
-<p><span class="figure-number">Figura 2: </span>Dos regresores en desviaciones y de longitud \(1\) (a trazos), que forman \(70^\circ\) a la izquierda y \(10^\circ\) a la derecha, y el mismo punto \(\boldsymbol{\mathop{\widehat y}}\) en los dos paneles. Los tramos continuos son su descomposición \(\hat\beta_2\boldsymbol x_2+\hat\beta_3\boldsymbol x_3\): primero \(\hat\beta_2\boldsymbol x_2\), horizontal y hacia la izquierda porque \(\hat\beta_2<0\), y después \(\hat\beta_3\boldsymbol x_3\) hasta \(\boldsymbol{\mathop{\widehat y}}\). \(\boldsymbol{\mathop{\widehat y}}'\) es el ajuste que daría otra muestra: dista \(0{,}07\) de \(\boldsymbol{\mathop{\widehat y}}\) en la dirección perpendicular a \(\boldsymbol x_2\), y su descomposición va en color más claro. A \(70^\circ\) las coordenadas cambian poco, lo mismo que el ajuste; a \(10^\circ\) cambian \(0{,}40\) cada una y en sentidos opuestos, casi seis veces el desplazamiento del ajuste: el factor es \(1/\sin10^\circ\).</p>
-</div>
-
-<p>
-Un desplazamiento de \(\boldsymbol{\mathop{\widehat y}}\) perpendicular a \(\boldsymbol x_2\) cambia \(\hat\beta_3\) en \(1/\sin\theta=\sqrt{\mathrm{VIF}}\) veces ese desplazamiento, y \(\hat\beta_2\) lo compensa con signo contrario. \(\mathrm{SRC}\), \(R^2\) y \(F\) dependen de \(\boldsymbol{\mathop{\widehat y}}\), no de sus coordenadas: la colinealidad no los altera.
-</p>
-</div>
-<div id="outline-container-orga10bb58" class="outline-4">
-<h4 id="orga10bb58">Por qué oscilan los coeficientes</h4>
-<div class="outline-text-4" id="text-orga10bb58">
-<p>
-El error estándar dice cuánto se dispersa un coeficiente de una muestra a otra. La figura dice por qué se dispersa tanto cuando los regresores casi se alinean, y lo dice sin probabilidad: es geometría de coordenadas.
-</p>
-
-<p>
-Recordemos la lección 10: \(\boldsymbol{\mathop{\widehat y}}\) es la proyección de \(\boldsymbol y\) sobre el subespacio de los regresores, y \(\boldsymbol{\mathop{\widehat\beta}}\) son las coordenadas de esa proyección respecto de los generadores, <i>lo que hay que avanzar en la dirección de cada regresor para llegar a \(\boldsymbol{\mathop{\widehat y}}\).</i> La proyección depende del subespacio, no de qué generadores lo describan. Las coordenadas sí dependen de los generadores, y de cómo estén colocados.
-</p>
-
-<p>
-La figura toma dos regresores en desviaciones de longitud \(1\) y un ajuste \(\boldsymbol{\mathop{\widehat y}}\) en el plano que generan. Si cambia muy ligeramente \(\boldsymbol y\), cambiará muy ligeramente el ajuste; vamos a representar esa idea con un segundo ajuste \(\boldsymbol{\mathop{\widehat y}}'\) próximo al primero (a distancia \(0{,}07\)). Con los generadores a \(70^\circ\), las coordenadas pasan de \((-0{,}63;\,0{,}37)\) a \((-0{,}65;\,0{,}45)\): cambios del mismo orden que el desplazamiento. Con los generadores a \(10^\circ\), pasan de \((-2{,}48;\,2{,}02)\) a \((-2{,}88;\,2{,}42)\): cada coordenada cambia \(0{,}40\), casi seis veces el desplazamiento, y una sube lo que la otra baja. La cuenta exacta es sencilla para un desplazamiento perpendicular a \(\boldsymbol x_2\): la coordenada de \(\boldsymbol x_3\) cambia \(1/\sin\theta\) veces el desplazamiento, y la de \(\boldsymbol x_2\) lo compensa con signo contrario. Ese factor \(1/\sin\theta\) es \(\sqrt{\mathrm{VIF}}\), el mismo de ``Cuánto se acorta: el factor de inflación de la varianza'': el error estándar mide con probabilidad lo que la figura muestra con geometría.
-</p>
-
-<p>
-Dos consecuencias. La primera es que los coeficientes de regresores cuyos vectores en desviaciones casi se alinean no solo son imprecisos, sino que lo son <i>simultáneamente y en sentidos opuestos</i>: cuando el azar de la muestra aumenta uno, reduce el otro. La lección 11 dio, en su fórmula matricial y para \(k=2\), la covarianza entre \(\hat\beta_1\) y \(\hat\beta_2\), negativa cuando la media del regresor es positiva; con regresores alineados, la covarianza entre \(\hat\beta_2\) y \(\hat\beta_3\) es muy negativa, y así lo comprobaremos en el laboratorio de colinealidad con un experimento de Monte Carlo. Es lo que se veía en la tabla de la lección 13: <code>nox</code> con coeficiente \(404\) y <code>lnox</code> con \(-13262\), dos cifras enormes de signo opuesto que se reparten un efecto que, sumado, es el de siempre.
-</p>
-
-<p>
-La segunda consecuencia es la que hay que retener para leer resultados. Lo que la colinealidad estropea son las coordenadas; no el ajuste. \(\boldsymbol{\mathop{\widehat y}}\) es el mismo punto se describa como se describa, así que \(\mathrm{SRC}\), \(R^2\), \(\mathfrak s\) y el \(F\) de significación conjunta no dependen de que los generadores estén alineados o no. Por eso la lección 13 podía decir que las dos variables juntas mejoran el ajuste y, a la vez, que no puede determinarse el efecto individual de cada una, porque la muestra no permite separarlos: el subespacio que generan es estable; pero la estimación de cómo se reparte el efecto entre ellas, no.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (el ejemplo de gasto por alumno en varias partidas, en el que dos regresores con vectores en desviaciones casi alineados tienen coeficientes imprecisos mientras el conjunto está bien estimado).
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-orge0201c7" class="outline-2">
-<h2 id="orge0201c7"><span class="section-number-2">7.</span> Síntomas y diagnóstico</h2>
-<div class="outline-text-2" id="text-7">
-<ul class="org-ul">
-<li>\(F\) conjunto alto con \(t\) individuales bajos (lección 13), o \(R^2\) alto con casi nada significativo.</li>
-<li>Errores estándar que se disparan al añadir un regresor, sin que apenas cambie \(\mathfrak s\).</li>
-<li>Coeficientes muy sensibles a quitar unas pocas observaciones o a añadir un regresor.</li>
-<li>Correlaciones altas entre regresores (pero con \(k>3\) no bastan; mejor diagnóstico con el \(\mathrm{VIF}_j\) de cada uno).</li>
-</ul>
-
-<p>
-<i>Una distinción</i>: que un coeficiente cambie al añadir un regresor es normal, es el efecto parcial de la lección 10. Colinealidad es que su error estándar se dispare y que cambie mucho con poca información nueva.
-</p>
-
-<p>
-<i>Qué mirar</i>: \(\sqrt{\mathrm{VIF}_j}\), el factor por el que se ha multiplicado el error estándar de \(\hat\beta_j\). Es una escala, no un veredicto.
-</p>
-</div>
-<div id="outline-container-orga9e6eb0" class="outline-4">
-<h4 id="orga9e6eb0">Síntomas y diagnóstico</h4>
-<div class="outline-text-4" id="text-orga9e6eb0">
-<p>
-La colinealidad de grado, a diferencia de la exacta, no es de inmediata detección: Gretl estima el modelo sin ningún aviso. Hay que reconocerla en la tabla, y los síntomas son los que las lecciones anteriores ya han producido.
-</p>
-
-<p>
-El primero es el de la lección 13: un \(F\) de significación conjunta alto con \(t\) individuales bajos, o un \(R^2\) alto en un modelo donde casi ningún coeficiente es significativo. El \(F\) y el \(R^2\) miran el subespacio; los \(t\) miran las coordenadas. Que discrepen significa que los regresores juntos mejoran el ajuste, pero que la muestra no permite atribuir esa mejora a uno u otro: cada coordenada por separado está mal determinada.
-</p>
-
-<p>
-El segundo es el de la tabla de apertura: un error estándar que se dispara al añadir un regresor mientras \(\mathfrak s\) no cambia. Conviene contrastar ese síntoma con lo que sí es normal. En la lección 10 y en su laboratorio (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms">html</a>)) vimos que un coeficiente cambia de valor, y hasta de signo, al añadir un regresor. Es el efecto parcial: el significado del coeficiente cambia porque se mantiene fija otra variable. Eso no es colinealidad. Colinealidad es que, además, el error estándar se multiplique por un factor grande, y que el coeficiente se vuelva sensible a cambios pequeños de la muestra: quitar unas pocas observaciones y verlo saltar, como ocurría con las viviendas del laboratorio de regresión múltiple (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=7">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#quitar-viviendas">html</a>)).
-</p>
-
-<p>
-El tercero es la correlación entre regresores, el síntoma más usado y el menos fiable. Con dos regresores no constantes basta, porque \(\mathrm{VIF}=1/(1-\rho^2)\). Con más, la lección 10 explicó por qué no: un regresor puede formar un ángulo muy pequeño con el subespacio generado por otros dos sin estar muy correlado con ninguno. La medida que sirve en todos los casos es el VIF de cada regresor, que Gretl calcula con <code>vif</code>, y en particular su raíz, que es el factor por el que se ha multiplicado el error estándar.
-</p>
-
-<p>
-Los manuales suelen dar una regla: un VIF mayor que \(10\) indica un problema. Conviene saberla, porque Gretl la imprime al pie de la salida de <code>vif</code>, y conviene saber también que es arbitraria: \(10\) significa que el error estándar se ha multiplicado por \(3{,}2\), y si ese factor es grave o no depende de para qué se quiera el coeficiente. Un VIF de \(5\) que convierte un intervalo estrecho en uno inservible es un problema; un VIF de \(50\) en un coeficiente que sigue siendo significativo y con un intervalo aceptable no lo es. Léase la escala, no el umbral.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (por qué la regla del VIF mayor que \(10\) es arbitraria y qué debe mirarse en su lugar).
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-orga6778a6" class="outline-2">
-<h2 id="orga6778a6"><span class="section-number-2">8.</span> Qué es y qué no es</h2>
-<div class="outline-text-2" id="text-8">
-<p>
-<i>No es</i> una violación de los supuestos: MCO sigue insesgado y BLUE (lección 11) y los contrastes siguen siendo válidos (lección 12). Los errores estándar grandes son correctos: describen la muestra.
-</p>
-
-<p>
-<i>No estropea</i> el ajuste, el \(R^2\) ni la predicción: \(\boldsymbol{\mathop{\widehat y}}\) es el mismo.
-</p>
-
-<p>
-<i>Es</i> una propiedad de la muestra: falta variación <i>propia</i>. Es el mismo problema que tener pocos datos.
+<b>Lectura</b>: entre un hombre y una mujer con la misma educación, experiencia y antigüedad, el salario de la mujer es \(1{,}81\) dólares por hora menor, en media. De la diferencia bruta de \(2{,}51\), los \(0{,}70\) restantes corresponden a diferencias en esas tres variables (antigüedad media: \(6{,}5\) años los hombres, \(3{,}6\) las mujeres).
 </p>
 
 <div class="org-center">
 <p>
-Para estimar el efecto de una variable hace falta que esa variable varíe <i>por su cuenta</i>.
+``Lo demás fijo'' solo cubre lo que está en el modelo.
 </p>
 </div>
 </div>
-<div id="outline-container-orgfca564d" class="outline-4">
-<h4 id="orgfca564d">Qué es y qué no es</h4>
-<div class="outline-text-4" id="text-orgfca564d">
+<div id="outline-container-orgd80566c" class="outline-4">
+<h4 id="orgd80566c">Con más regresores: la diferencia con lo demás fijo</h4>
+<div class="outline-text-4" id="text-orgd80566c">
 <p>
-Los manuales tratan la colinealidad en el capítulo de ``problemas'' del modelo, y conviene precisar qué clase de problema es, porque no es del tipo de los que vendrán en las lecciones siguientes. En realidad es un problema de la muestra.
+El fichero <code>wage1</code> de Wooldridge es el de la transparencia ``Log-nivel: salarios y educación'' de la lección 15: \(526\) trabajadores de la encuesta de población de Estados Unidos de 1976, con el salario por hora en dólares, los años de educación (<code>educ</code>), de experiencia potencial (<code>exper</code>: la edad menos los años de educación menos seis, es decir, los años transcurridos desde el fin de los estudios) y de antigüedad en la empresa (<code>tenure</code>), y varias indicadoras, entre ellas <code>female</code>, que vale \(1\) para las \(252\) mujeres y \(0\) para los \(274\) hombres, y <code>married</code>, que vale \(1\) para los casados.
 </p>
 
 <p>
-No es una violación de los supuestos. Los supuestos del Modelo Clásico hablan de la perturbación y del modelo poblacional; la colinealidad de grado habla de los regresores de la muestra, y ningún supuesto prohíbe que estén correlados. El único que los menciona, la independencia lineal de la lección 10, prohíbe solo el caso exacto. Con colinealidad de grado, todo lo demostrado sigue siendo válido: \(\hat\beta_j\) es insesgado, su varianza es la que dice la fórmula y, aunque aquí sea enorme, no hay estimador lineal insesgado con una varianza más pequeña (lección 11); los errores estándar de Gretl son correctos y los contrastes \(t\) y \(F\) valen (lección 12). Los errores estándar grandes informan de que esa muestra no permite estimar ese coeficiente con precisión.
+El salario medio es \(7{,}10\) dólares por hora entre los hombres y \(4{,}59\) entre las mujeres. La regresión de <code>wage</code> sobre la constante y <code>female</code> devuelve esas dos cifras: constante \(7{,}10\) y coeficiente de <code>female</code> \(-2{,}51\), con error estándar \(0{,}30\). Es la misma situación que la de los barrios junto al río: con una sola indicadora, el coeficiente es la diferencia de medias entre grupos.
 </p>
 
 <p>
-Tampoco estropea el ajuste. ``Por qué oscilan los coeficientes'' lo dejó claro: \(\boldsymbol{\mathop{\widehat y}}\) es la proyección sobre el subespacio, y el subespacio no depende de cómo se le describa. \(\mathrm{SRC}\), \(R^2\), \(\mathfrak s\) y las predicciones son los mismos con generadores alineados que con generadores perpendiculares. Si lo que se quiere del modelo es predecir, la presencia de colinealidad es irrelevante.
+La tabla de la transparencia añade los tres regresores cuantitativos. El coeficiente de <code>female</code> pasa a \(-1{,}81\), con error estándar \(0{,}27\). La lectura es la de la lección 10: con lo demás fijo, es decir, entre un hombre y una mujer con los mismos años de educación, de experiencia y de antigüedad, el salario de la mujer es \(1{,}81\) dólares por hora menor, en media. El intervalo al 95 % va de \(-2{,}33\) a \(-1{,}29\): datos como estos serían muy raros si no hubiera diferencia salarial entre sexos con las tres variables fijas. Los otros coeficientes se leen como en la lección 12: un año más de educación se acompaña de \(57\) centavos más por hora, y un año más de antigüedad, de \(14\).
 </p>
 
 <p>
-Lo que sí es: una propiedad de la muestra, la falta de variación propia. Un regresor con parte propia corta es un regresor que, dentro de esta muestra, casi no varía por su cuenta; y sin variación propia no hay forma de medir su efecto separado. Es la misma situación que tener pocos datos: con doce viviendas el intervalo de <code>rooms</code> iba de \(1900\) a \(20000\) dólares porque el regresor en desviaciones era corto; con <code>nox</code> y <code>lnox</code> juntas, la parte propia de cada una es corta. En los dos casos falta longitud, y por eso el remedio ``más información'' de la transparencia siguiente es ese: más datos, o mejores datos.
+La diferencia entre las dos cifras, \(-2{,}51\) y \(-1{,}81\), dice algo sobre los datos. La diferencia bruta de medias mezcla dos cosas: la diferencia salarial entre hombres y mujeres comparables, y el hecho de que los dos grupos no son comparables en las variables del modelo. Las mujeres de la muestra tienen una antigüedad media de \(3{,}6\) años frente a \(6{,}5\) los hombres, algo menos de experiencia (\(16{,}4\) frente a \(17{,}6\)) y casi la misma educación (\(12{,}3\) frente a \(12{,}8\)). Como la antigüedad se acompaña de un salario mayor, parte de la diferencia bruta se atribuye a ella, y el salto que queda al fijar las tres variables es menor. Esta es la mecánica de la lección 10 de nuevo: la indicadora se ortogonaliza frente a los demás regresores, y su coeficiente recoge solo la parte de la diferencia salarial que no corresponde a las diferencias de educación, experiencia y antigüedad entre los dos grupos.
 </p>
 
 <p>
-La falta de variación propia es el punto de llegada de una idea que el curso repite desde la lección 11. Allí, la fórmula de la varianza decía ``más dispersión en \(X\), más precisión''. La lección 12 la dibujó con el regresor concentrado y el disperso: para estimar bien el efecto de una variable hace falta que esa variable varíe. Hoy, con varios regresores, la idea toma su forma definitiva: hace falta que varíe <i>por su cuenta</i>, no a la vez que las demás.
+Hay que ser preciso con lo que el coeficiente no dice. ``Lo demás fijo'' se refiere a lo que el modelo incluye: tres variables. Hay muchas otras que difieren entre hombres y mujeres y que el modelo no contiene, como la ocupación, el sector, las horas trabajadas o las interrupciones de la carrera laboral. El coeficiente \(-1{,}81\) mide la diferencia salarial entre hombres y mujeres con igual educación, experiencia y antigüedad observadas; no mide la discriminación, que exigiría comparar trabajadores iguales en todo lo relevante, ni dice qué parte de la diferencia se debe a cada causa. La transparencia ``Qué dice y qué no dice el coeficiente de una indicadora'' recoge esta cautela entre las lecturas incorrectas más frecuentes.
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4, la comparación entre colinealidad y tamaño muestral pequeño; Goldberger, A. S. (1991), <i>A Course in Econometrics</i>, cap. 23, donde acuñó ``micronumerosidad'' para subrayar que son el mismo problema.
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, sección 7.2, ejemplo 7.1 (``Hourly wage equation'') y la discusión sobre la interpretación del coeficiente de <code>female</code>.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgba09f5a" class="outline-2">
-<h2 id="orgba09f5a"><span class="section-number-2">9.</span> Qué hacer y qué no</h2>
+<div id="outline-container-org519651d" class="outline-2">
+<h2 id="org519651d"><span class="section-number-2">4.</span> En log-nivel: una diferencia porcentual</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+El mismo modelo con el logaritmo del salario (<code>lwage</code>) como regresando:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left"><code>lwage</code> sobre…</th>
+<th scope="col" class="org-left">coef.</th>
+<th scope="col" class="org-left">\(\mathrm{ee}\)</th>
+<th scope="col" class="org-left">\(t\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">constante</td>
+<td class="org-left">\(0{,}501\)</td>
+<td class="org-left">\(0{,}102\)</td>
+<td class="org-left">\(4{,}92\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>female</code></td>
+<td class="org-left">\(-0{,}301\)</td>
+<td class="org-left">\(0{,}037\)</td>
+<td class="org-left">\(-8{,}09\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>educ</code></td>
+<td class="org-left">\(0{,}0875\)</td>
+<td class="org-left">\(0{,}0069\)</td>
+<td class="org-left">\(12{,}60\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>exper</code></td>
+<td class="org-left">\(0{,}0046\)</td>
+<td class="org-left">\(0{,}0016\)</td>
+<td class="org-left">\(2{,}85\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>tenure</code></td>
+<td class="org-left">\(0{,}0174\)</td>
+<td class="org-left">\(0{,}0030\)</td>
+<td class="org-left">\(5{,}84\)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+<b>Aproximación</b> (lección 15): con lo demás fijo, el salario de una mujer es menor en la fracción \(0{,}30\), un \(30\) %. <b>Cálculo exacto</b>: \(e^{-0{,}301}-1=-0{,}260\), un \(26\) % menor; para un cambio grande, la aproximación se queda lejos. Intervalo al 95 %: \(\beta_{\text{female}}\in[-0{,}374,\,-0{,}228]\), del \(-31\) % al \(-20\) % en diferencia exacta.
+</p>
+
+<p>
+<b>La lectura depende de la base</b>: un hombre respecto de una mujer comparable cobra más en \(e^{0{,}301}-1=0{,}351\), un \(35\) %. El mismo coeficiente, dos porcentajes, porque las bases son distintas.
+</p>
+</div>
+<div id="outline-container-orgc892f5e" class="outline-4">
+<h4 id="orgc892f5e">En log-nivel: una diferencia porcentual</h4>
+<div class="outline-text-4" id="text-orgc892f5e">
+<p>
+La lección 15 explicó por qué la ecuación de salarios se estima con el logaritmo del salario como regresando: el rendimiento de la educación se enuncia en porcentaje, y la hipótesis de que cada año multiplica el salario por un factor es más verosímil que la de que le suma una cantidad fija. Lo mismo vale para la diferencia entre sexos: es más natural pensar que las mujeres cobran un cierto porcentaje menos que los hombres comparables que una cantidad fija de dólares, sea el salario de \(3\) o de \(20\) dólares por hora. La tabla de la transparencia estima el modelo de la transparencia ``Con más regresores: la diferencia con lo demás fijo'' con <code>lwage</code> en lugar de <code>wage</code>.
+</p>
+
+<p>
+El coeficiente de <code>female</code> es \(-0{,}301\). La aproximación de la lección 15, \(\log(1+p)\approx p\), da la lectura rápida: con la misma educación, experiencia y antigüedad, el salario de una mujer es menor en la fracción \(0{,}30\), un \(30\) %. Pero el coeficiente es grande, y para cambios grandes la aproximación se queda lejos, como se vio con los cuatro años de educación en la lección 15. El cálculo exacto se hace como allí, deshaciendo el logaritmo: el modelo predice para una mujer un salario \(e^{-0{,}301}=0{,}740\) veces el de un hombre con los mismos regresores, es decir, menor en \(e^{-0{,}301}-1=-0{,}260\), un \(26\) %. En general, si el coeficiente de una indicadora en un modelo log-nivel es \(\beta\), el salario del grupo señalado es \(e^{\beta}\) veces el del otro grupo, con lo demás fijo, y la diferencia porcentual exacta es \(e^{\beta}-1\). La aproximación \(\beta\) sirve cuando el coeficiente es pequeño, por debajo de \(0{,}1\) en valor absoluto; para \(0{,}3\) la diferencia entre \(30\) % y \(26\) % ya importa al informar.
+</p>
+
+<p>
+Con la versión exacta aparece una asimetría que con la aproximación pasa inadvertida. La misma estimación dice que una mujer cobra un \(26\) % menos que un hombre comparable y que un hombre cobra un \(35\) % más que una mujer comparable, porque \(e^{0{,}301}-1=0{,}351\). Las dos frases son correctas y describen el mismo cociente de salarios, \(0{,}740\) o su inverso \(1{,}351\); difieren en la base sobre la que se calcula el porcentaje. Con la aproximación las dos lecturas darían \(30\) %, lo que oculta la diferencia. Al informar una diferencia porcentual entre grupos hay que decir respecto de qué grupo se calcula, y la indicadora lo fija: el coeficiente de <code>female</code> compara a las mujeres con los hombres, que son el grupo con valor \(0\), la <i>categoría base</i> o de referencia. La transparencia ``La trampa de las variables ficticias'' muestra que la categoría base se puede cambiar sin cambiar el modelo.
+</p>
+
+<p>
+El intervalo de confianza se construye como en la lección 12 para el coeficiente, de \(-0{,}374\) a \(-0{,}228\), y después se transforma: los extremos de la diferencia exacta son \(e^{-0{,}374}-1=-0{,}312\) y \(e^{-0{,}228}-1=-0{,}204\), así que la diferencia porcentual entre sexos, con las tres variables fijas, está entre el \(20\) % y el \(31\) % con una confianza del 95 %. La transformación se aplica a los extremos y no al error estándar, porque la exponencial no es lineal; el intervalo transformado deja de ser simétrico alrededor de la estimación puntual, \(-0{,}260\).
+</p>
+
+<p>
+Los demás coeficientes se leen como en la lección 15. Un año más de educación se acompaña de un salario mayor en la fracción \(0{,}0875\), un \(8{,}75\) % aproximado y un \(9{,}1\) % exacto; un año más de antigüedad, en un \(1{,}7\) %. Son cifras algo distintas de las de la lección 15, donde el modelo tenía <code>educ</code> como único regresor; al añadir <code>female</code>, <code>exper</code> y <code>tenure</code>, el coeficiente de <code>educ</code> cambia, por el mecanismo de la lección 10.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, sección 7.2, apartado ``Interpreting coefficients on dummy explanatory variables when the dependent variable is log(y)'', con el ejemplo 7.4; Halvorsen, R. y Palmquist, R. (1980), ``The interpretation of dummy variables in semilogarithmic equations'', <i>American Economic Review</i> 70, 474–475, el artículo que fijó la lectura exacta \(e^{\beta}-1\).
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org808c630" class="outline-2">
+<h2 id="org808c630"><span class="section-number-2">5.</span> La trampa de las variables ficticias</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+La indicadora de ser hombre es \(\mathbb 1_{\text{hombre}}=\mathit 1-\mathbb 1_{\text{mujer}}\): las dos suman la indicadora del suceso seguro, \(\mathbb 1_{\text{mujer}}+\mathbb 1_{\text{hombre}}=\mathbb 1_\Omega=\mathit 1\). En la muestra, \(\boldsymbol d_{\text{mujer}}+\boldsymbol d_{\text{hombre}}=\boldsymbol 1\).
+</p>
+
+<p>
+Poner las tres columnas en \(\boldsymbol{\mathsf X}\) es la colinealidad exacta de la lección 10: tres columnas que generan un subespacio de dimensión dos. Gretl avisa: «Omitidas debido a colinealidad exacta: =male=».
+</p>
+
+<p>
+Tres escrituras del mismo modelo, <code>lwage</code> sobre el sexo (sin otros regresores):
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Regresores</th>
+<th scope="col" class="org-left">Coeficientes</th>
+<th scope="col" class="org-left">Lectura</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">constante, <code>female</code></td>
+<td class="org-left">\(1{,}814\); \(-0{,}397\)</td>
+<td class="org-left">media de los hombres; diferencia mujeres \(-\) hombres</td>
+</tr>
+
+<tr>
+<td class="org-left">constante, <code>male</code></td>
+<td class="org-left">\(1{,}416\); \(+0{,}397\)</td>
+<td class="org-left">media de las mujeres; diferencia hombres \(-\) mujeres</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>female</code>, <code>male</code></td>
+<td class="org-left">\(1{,}416\); \(1{,}814\)</td>
+<td class="org-left">media de cada grupo</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-center">
+<p>
+El mismo subespacio y el mismo ajuste (\(\mathrm{SRC}=127{,}6\)) con otra base: cambia la categoría base de la lectura. En la tercera, \(\boldsymbol 1\) no es columna, pero está en el subespacio (lección 10).
+</p>
+</div>
+</div>
+<div id="outline-container-orgf21fb64" class="outline-4">
+<h4 id="orgf21fb64">La trampa de las variables ficticias</h4>
+<div class="outline-text-4" id="text-orgf21fb64">
+<p>
+La lección 14 dejó anunciada esta transparencia: si se incluyen en el modelo una indicadora de mujer, otra de hombre y la constante, hay colinealidad exacta. La razón está en la definición de la lección 12. La indicadora del suceso ``ser hombre'' es la del complementario de ``ser mujer'', \(\mathbb 1_{\text{hombre}}=\mathit 1-\mathbb 1_{\text{mujer}}\), de modo que las dos indicadoras suman la indicadora del suceso seguro: \(\mathbb 1_{\text{mujer}}+\mathbb 1_{\text{hombre}}=\mathbb 1_\Omega=\mathit 1\), que es la constante del modelo. En la muestra, cada fila tiene un \(1\) en una de las dos columnas y un \(0\) en la otra, y \(\boldsymbol d_{\text{mujer}}+\boldsymbol d_{\text{hombre}}=\boldsymbol 1\). Si \(\boldsymbol{\mathsf X}\) contiene las tres columnas, una de ellas es combinación lineal de las otras dos: es la colinealidad exacta de la lección 10, y la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=6">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#colinealidad-exacta">html</a>) de la práctica D de la sesión 14 la construyó a propósito. Las tres columnas generan un subespacio de dimensión dos, la proyección de \(\boldsymbol y\) sobre él existe y es única, pero hay infinitas maneras de escribirla como combinación lineal de tres vectores que no son linealmente independientes, y las ecuaciones normales no tienen solución única. Gretl lo detecta al estimar y elimina una de las columnas, con el aviso «Omitidas debido a colinealidad exacta: =male=» en la cabecera de la tabla de resultados. Este error recibe en los manuales el nombre de <i>trampa de las variables ficticias</i>.
+</p>
+
+<p>
+La solución es omitir una de las tres columnas, y las tres opciones estiman el mismo modelo. La tabla de la transparencia lo muestra con <code>lwage</code> sobre el sexo, sin otros regresores, para que los coeficientes sean medias. Con la constante y <code>female</code>, la constante es la media del logaritmo del salario de los hombres, \(1{,}814\), y el coeficiente de <code>female</code> es la diferencia entre la media de las mujeres y la de los hombres, \(-0{,}397\). Con la constante y <code>male</code>, la constante es la media de las mujeres, \(1{,}416\), y el coeficiente de <code>male</code> la misma diferencia con el signo cambiado. Con las dos indicadoras y sin constante, cada coeficiente es la media de su grupo, por la ortogonalidad de las dos indicadoras que explicó la transparencia ``Una indicadora desplaza el intercepto: la vivienda junto al río''. Los tres ajustes son el mismo vector \(\boldsymbol{\mathop{\widehat y}}\), con la misma suma de cuadrados de los residuos, \(127{,}6\), porque las tres parejas de columnas generan el mismo subespacio de dimensión dos: \(\mathcal L(\boldsymbol 1,\boldsymbol d_{\text{mujer}})=\mathcal L(\boldsymbol 1,\boldsymbol d_{\text{hombre}})=\mathcal L(\boldsymbol d_{\text{mujer}},\boldsymbol d_{\text{hombre}})\). Lo que cambia es la base y, con ella, el significado de cada coeficiente.
+</p>
+
+<p>
+La tercera escritura cobra una observación que la lección 10 hizo al presentar la matriz de regresores: lo que necesita el ajuste no es que \(\boldsymbol 1\) sea una de las columnas de \(\boldsymbol{\mathsf X}\), sino que \(\boldsymbol 1\) pertenezca al subespacio que generan. En el modelo con <code>female</code> y <code>male</code> ninguna columna es constante, pero su suma es \(\boldsymbol 1\), así que \(\boldsymbol 1\in\mathcal L(\boldsymbol d_{\text{mujer}},\boldsymbol d_{\text{hombre}})\) y todo lo que depende de ello sigue valiendo: los residuos suman cero, la media de los valores ajustados es la media de \(\boldsymbol y\) y el \(R^2\) se calcula como en la lección 8. Gretl lo tiene en cuenta: si se estima un modelo sin la constante pero con las dos indicadoras, el \(R^2\) que imprime es el habitual.
+</p>
+
+<p>
+En la práctica, la escritura que se usa es la primera, con la constante y una indicadora por cada grupo menos uno. El grupo sin indicadora es la <i>categoría base</i>, y todos los coeficientes de indicadoras se leen como diferencias respecto de ella. Elegir la base es una decisión de presentación, no de modelo: cambiarla no mueve el ajuste ni ningún contraste sobre el modelo completo, solo reordena qué diferencias aparecen directamente como coeficientes, con su error estándar y su \(t\). La transparencia ``Varias categorías: una indicadora menos que grupos'' usa este recurso para comparar dos grupos que no son la base.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, sección 7.2 (``the dummy variable trap'') y cap. 3, sección 3.3 (colinealidad perfecta); lección 10 de este curso, apuntes de ``La matriz de regresores y el operador selector''.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org2d66fad" class="outline-2">
+<h2 id="org2d66fad"><span class="section-number-2">6.</span> Varias categorías: una indicadora menos que grupos</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Sexo y estado civil definen cuatro grupos excluyentes en <code>wage1</code>: \(86\) hombres solteros, \(188\) casados, \(120\) mujeres solteras y \(132\) casadas. Cuatro indicadoras que suman \(\boldsymbol 1\): con la constante entran tres. Base: hombres solteros.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left"><code>lwage</code> sobre…</th>
+<th scope="col" class="org-left">coef.</th>
+<th scope="col" class="org-left">\(\mathrm{ee}\)</th>
+<th scope="col" class="org-left">\(t\)</th>
+<th scope="col" class="org-left">\(e^{\beta}-1\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">hombre casado</td>
+<td class="org-left">\(0{,}292\)</td>
+<td class="org-left">\(0{,}055\)</td>
+<td class="org-left">\(5{,}27\)</td>
+<td class="org-left">\(+34\) %</td>
+</tr>
+
+<tr>
+<td class="org-left">mujer casada</td>
+<td class="org-left">\(-0{,}120\)</td>
+<td class="org-left">\(0{,}058\)</td>
+<td class="org-left">\(-2{,}07\)</td>
+<td class="org-left">\(-11\) %</td>
+</tr>
+
+<tr>
+<td class="org-left">mujer soltera</td>
+<td class="org-left">\(-0{,}097\)</td>
+<td class="org-left">\(0{,}058\)</td>
+<td class="org-left">\(-1{,}68\)</td>
+<td class="org-left">\(-9\) %</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>educ</code>, <code>exper</code>, <code>tenure</code></td>
+<td class="org-left">\(0{,}0835\); \(0{,}0032\); \(0{,}0157\)</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+<b>Lectura</b>: con lo demás fijo, un hombre casado cobra un \(34\) % más que un hombre soltero; una mujer casada, un \(11\) % menos; una mujer soltera, un \(9\) % menos.
+</p>
+
+<p>
+<b>Comparar dos grupos que no son la base</b>: mujeres casadas frente a solteras, \(-0{,}120-(-0{,}097)=-0{,}024\). Su \(\mathrm{ee}\) se obtiene cambiando la base a mujeres solteras: \(-0{,}024\) con \(\mathrm{ee}\) \(0{,}053\) y \(t=-0{,}45\). Datos como estos no serían raros si las dos cobrasen lo mismo.
+</p>
+</div>
+<div id="outline-container-org40ce5f2" class="outline-4">
+<h4 id="org40ce5f2">Varias categorías: una indicadora menos que grupos</h4>
+<div class="outline-text-4" id="text-org40ce5f2">
+<p>
+Una variable cualitativa puede tener más de dos categorías: la región, el sector, el nivel de estudios por tramos. La regla es la misma que con dos. Si los \(g\) grupos son excluyentes y cubren toda la muestra, sus \(g\) indicadoras suman \(\boldsymbol 1\), por la misma razón que \(\mathbb 1_{\text{mujer}}+\mathbb 1_{\text{hombre}}=\mathit 1\): cada unidad está en un grupo y solo en uno, así que la suma de las indicadoras vale \(1\) en todas las filas. Con la constante en el modelo solo pueden entrar \(g-1\) indicadoras, y el grupo que se queda sin ella es la categoría base. También se pueden incluir las \(g\) indicadoras sin la constante, con coeficientes que son el nivel de cada grupo; las dos escrituras generan el mismo subespacio, como en la transparencia ``La trampa de las variables ficticias''.
+</p>
+
+<p>
+El ejemplo combina dos variables de dos categorías, el sexo y el estado civil, en una de cuatro: hombres solteros, hombres casados, mujeres solteras y mujeres casadas, con \(86\), \(188\), \(120\) y \(132\) trabajadores. Las indicadoras se construyen como productos: <code>married*(1-female)</code> vale \(1\) solo para los hombres casados, y así con las demás. Con los hombres solteros como base, el modelo tiene tres indicadoras, más <code>educ</code>, <code>exper</code> y <code>tenure</code>. Cada coeficiente de indicadora es la diferencia, en logaritmos, entre su grupo y los hombres solteros con la misma educación, experiencia y antigüedad, y la columna \(e^{\beta}-1\) de la tabla la convierte en diferencia porcentual exacta. Un hombre casado cobra, con lo demás fijo, un \(34\) % más que un hombre soltero; una mujer casada, un \(11\) % menos; una mujer soltera, un \(9\) % menos. Con \(t=5{,}27\), datos como estos serían muy raros si los hombres casados cobrasen lo mismo que los solteros; para las mujeres casadas el \(t\) es \(-2{,}07\), y para las solteras \(-1{,}68\), de modo que el contraste al 5 % rechaza en el primer caso y no en el segundo.
+</p>
+
+<p>
+La tabla da directamente las tres diferencias con la base, pero no las diferencias entre dos grupos que no son la base. La diferencia entre mujeres casadas y solteras es la resta de los dos coeficientes, \(-0{,}120-(-0{,}097)=-0{,}024\), y su error estándar no es la resta de los errores estándar: los dos estimadores están correlacionados, porque comparten la base, y la varianza de la diferencia necesita su covarianza. Hay una forma de evitar el cálculo: cambiar la categoría base. Si se estima el mismo modelo con las mujeres solteras como base, es decir, con las indicadoras de hombres solteros, hombres casados y mujeres casadas, el coeficiente de mujeres casadas es directamente la diferencia buscada, \(-0{,}024\), con su error estándar, \(0{,}053\), y su \(t\), \(-0{,}45\). Datos como estos no serían raros si las mujeres casadas y las solteras cobrasen lo mismo, con lo demás fijo. El ajuste y los demás coeficientes no cambian al cambiar la base; solo cambia qué diferencias se leen directamente.
+</p>
+
+<p>
+Hay otra forma de poner el sexo y el estado civil en el modelo: dos indicadoras, <code>female</code> y <code>married</code>, en lugar de tres. Ese modelo es más restrictivo: impone que la diferencia entre casados y solteros sea la misma para hombres y para mujeres, \(0{,}126\) en logaritmos. Los cuatro grupos dicen que no lo es: \(0{,}292\) entre los hombres y \(-0{,}024\) entre las mujeres. El modelo de los cuatro grupos es el de las dos indicadoras más su producto, <code>female*married</code>, y ese producto es una <i>interacción</i>: el efecto de estar casado depende del sexo. Es la idea de la transparencia ``Interacciones: la pendiente cambia de grupo'', aplicada a dos indicadoras.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, sección 7.3 (``Using dummy variables for multiple categories''), con el ejemplo 7.6, que es este modelo con dos regresores cuadráticos más; sección 7.4 para la interacción entre dos indicadoras.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org3497d3f" class="outline-2">
+<h2 id="org3497d3f"><span class="section-number-2">7.</span> Interacciones: la pendiente cambia de grupo</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Una indicadora desplaza el intercepto; su producto por otro regresor, la <i>interacción</i>, desplaza una pendiente:
+\[\log(\text{wage})=\beta_1\,\mathit 1+\beta_2\,\mathbb 1_{\text{mujer}}+\beta_3\,\text{educ}+\beta_4\,\text{exper}+\beta_5\,\mathbb 1_{\text{mujer}}\cdot\text{exper}+\beta_6\,\text{tenure}+U.\]
+Pendiente de <code>exper</code>: \(\beta_4\) para los hombres, \(\beta_4+\beta_5\) para las mujeres. Diferencia de interceptos: \(\beta_2\).
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left"><code>lwage</code> sobre…</th>
+<th scope="col" class="org-left">coef.</th>
+<th scope="col" class="org-left">\(\mathrm{ee}\)</th>
+<th scope="col" class="org-left">\(t\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>female</code></td>
+<td class="org-left">\(-0{,}190\)</td>
+<td class="org-left">\(0{,}059\)</td>
+<td class="org-left">\(-3{,}25\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>exper</code></td>
+<td class="org-left">\(0{,}0084\)</td>
+<td class="org-left">\(0{,}0022\)</td>
+<td class="org-left">\(3{,}76\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>female*exper</code></td>
+<td class="org-left">\(-0{,}0067\)</td>
+<td class="org-left">\(0{,}0027\)</td>
+<td class="org-left">\(-2{,}44\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>educ</code>, <code>tenure</code></td>
+<td class="org-left">\(0{,}0896\); \(0{,}0158\)</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+<b>Lectura</b>: un año más de experiencia se acompaña de un salario mayor en un \(0{,}84\) % para los hombres y en un \(0{,}17\) % para las mujeres. La diferencia entre sexos, en logaritmos, es \(-0{,}19\) sin experiencia y crece \(0{,}0067\) por año: \(-0{,}26\) a los diez años y \(-0{,}32\) a los veinte (del \(17\) % al \(23\) % y al \(28\) % en diferencia exacta). Con \(t=-2{,}44\), datos como estos serían raros si las dos pendientes fuesen iguales.
+</p>
+
+
+<div id="orge83620f" class="figure">
+<p><img src="img/S24-Lecc16/RectasExper.png" alt="RectasExper.png" width="700px" />
+</p>
+<p><span class="figure-number">Figura 2: </span>Los \(526\) trabajadores de <code>wage1</code>: logaritmo del salario por hora frente a los años de experiencia, los hombres en azul y las mujeres en rojo. Las dos rectas son el ajuste de <code>lwage</code> sobre la constante, <code>female</code>, <code>exper</code> y su producto, sin <code>educ</code> ni <code>tenure</code> para que la figura sea plana: la de los hombres tiene ordenada en el origen \(1{,}698\) y pendiente \(0{,}0066\); la de las mujeres, \(1{,}404\) y \(0{,}0007\). La indicadora separa las dos ordenadas en el origen y la interacción separa las dos pendientes: la distancia vertical entre las rectas crece con la experiencia. Los coeficientes de la tabla de la transparencia, con <code>educ</code> y <code>tenure</code>, son algo distintos de los de la figura.</p>
+</div>
+
+<div class="org-center">
+<p>
+Una indicadora: dos rectas paralelas. Una indicadora y una interacción: dos rectas distintas. Sin ninguna de las dos: una sola recta para todos.
+</p>
+</div>
+</div>
+<div id="outline-container-org3b06506" class="outline-4">
+<h4 id="org3b06506">Interacciones: la pendiente cambia de grupo</h4>
+<div class="outline-text-4" id="text-org3b06506">
+<p>
+El modelo de la transparencia ``En log-nivel: una diferencia porcentual'' impone que la diferencia salarial entre sexos sea la misma a cualquier nivel de experiencia: la indicadora desplaza el intercepto y nada más, así que las dos rectas del salario frente a la experiencia, una para cada sexo, son paralelas. Es una restricción, y los datos pueden no cumplirla. Para permitir que la pendiente de <code>exper</code> sea distinta en cada grupo se añade al modelo el producto de la indicadora por el regresor, \(\mathbb 1_{\text{mujer}}\cdot\text{exper}\), que se llama <i>interacción</i> entre las dos variables. En la muestra es una columna más de \(\boldsymbol{\mathsf X}\): vale <code>exper</code> en las filas de las mujeres y \(0\) en las de los hombres; Gretl la construye con <code>series femexper = female*exper</code>. Es un regresor en el sentido de la lección 15, una función de dos variables explicativas, y mínimos cuadrados lo trata como a cualquier otro.
+</p>
+
+<p>
+La lectura se obtiene escribiendo el modelo por grupos. Para un hombre, \(\mathbb 1_{\text{mujer}}=0\), y la parte sistemática es \(\beta_1+\beta_3\,\text{educ}+\beta_4\,\text{exper}+\beta_6\,\text{tenure}\): la pendiente de la experiencia es \(\beta_4\). Para una mujer, \(\mathbb 1_{\text{mujer}}=1\), y queda \((\beta_1+\beta_2)+\beta_3\,\text{educ}+(\beta_4+\beta_5)\,\text{exper}+\beta_6\,\text{tenure}\): el intercepto se desplaza en \(\beta_2\) y la pendiente de la experiencia pasa a ser \(\beta_4+\beta_5\). El coeficiente de la interacción, \(\beta_5\), es por tanto la diferencia entre las pendientes de los dos grupos, y la hipótesis de que las dos rectas son paralelas es \(H_0\!:\beta_5=0\), que se contrasta con el \(t\) de la lección 12.
+</p>
+
+<p>
+Con los datos, la pendiente de la experiencia es \(0{,}0084\) para los hombres: un año más de experiencia se acompaña de un salario mayor en un \(0{,}84\) %, con lo demás fijo. Para las mujeres es \(0{,}0084-0{,}0067=0{,}0017\), un \(0{,}17\) % por año. El \(t\) de la interacción es \(-2{,}44\): datos como estos serían raros si las dos pendientes fuesen iguales, y el contraste al 5 % rechaza que lo sean. El coeficiente de <code>female</code>, \(-0{,}190\), es ahora la diferencia de interceptos, es decir, la diferencia entre sexos para una experiencia de cero años, \(-0{,}190\) en logaritmos, y esa diferencia crece con la experiencia: a los diez años es \(-0{,}190-10\cdot0{,}0067=-0{,}257\), y a los veinte, \(-0{,}324\). En diferencia porcentual exacta, del \(17\) % al \(23\) % y al \(28\) %. La figura dibuja esta situación con el modelo simple sin <code>educ</code> ni <code>tenure</code>: la recta de los hombres sube con la experiencia y la de las mujeres apenas, y la distancia entre las dos crece de izquierda a derecha.
+</p>
+
+<p>
+La misma construcción se aplica a cualquier regresor, y el resultado no siempre es una pendiente distinta. Con la interacción <code>female*educ</code> en lugar de <code>female*exper</code>, el coeficiente de la interacción es \(-0{,}0072\) con error estándar \(0{,}0136\) y \(t=-0{,}53\): datos como estos no serían raros si el rendimiento de la educación fuese el mismo para hombres y mujeres, y el modelo con las rectas paralelas en <code>educ</code> basta. Al añadir una interacción cambia también la lectura del coeficiente de la indicadora, que pasa a ser la diferencia entre grupos en el punto en que el regresor vale cero; en ese modelo, el coeficiente de <code>female</code> es \(-0{,}21\) con error estándar \(0{,}17\), porque compara a hombres y mujeres con cero años de educación, donde apenas hay datos. Cuando interesa la diferencia entre grupos en un punto con datos, se centra el regresor restándole su media antes de construir la interacción, y el coeficiente de la indicadora pasa a ser la diferencia entre grupos en la media del regresor.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, sección 7.4 (``Interactions involving dummy variables''), apartados ``Interactions among dummy variables'' y ``Allowing for different slopes'', con el ejemplo 7.10 (<code>female*educ</code>) y la observación sobre centrar el regresor.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org6073939" class="outline-2">
+<h2 id="org6073939"><span class="section-number-2">8.</span> ¿La misma ecuación para los dos grupos? El contraste de Chow</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+Si todos los coeficientes pueden diferir entre sexos, el modelo tiene la indicadora y una interacción por cada regresor; su ajuste es el de dos regresiones separadas, una por grupo. \(H_0\): los coeficientes de la indicadora y de todas las interacciones valen cero, \(q=4\) restricciones. Es el \(F\) de la lección 13:
+\[F=\frac{(\mathrm{SRC}_r-\mathrm{SRC})/q}{\mathrm{SRC}/(n-k)},\qquad \mathrm{SRC}=\mathrm{SRC}_{\text{hombres}}+\mathrm{SRC}_{\text{mujeres}}.\]
+</p>
+
+<p>
+<code>lwage</code> sobre <code>educ</code>, <code>exper</code> y <code>tenure</code>: modelo común, \(\mathrm{SRC}_r=101{,}46\); hombres (\(n=274\)), \(49{,}55\); mujeres (\(n=252\)), \(39{,}04\). Así, \(F=\dfrac{(101{,}46-88{,}58)/4}{88{,}58/518}=18{,}8\), frente a \(F_c=2{,}39\) al 5 %.
+</p>
+
+<p>
+<b>Lectura</b>: por dimensión, el cateto que ganan las cuatro columnas nuevas es \(18{,}8\) veces más largo al cuadrado que el residuo; con una ecuación común rondaría \(1\). Datos como estos serían muy raros si hombres y mujeres compartiesen la ecuación. El contraste dice que algo difiere, no qué: en el modelo con las ocho columnas ningún \(t\) supera \(2\), porque la indicadora y sus interacciones están casi alineadas (lección 14).
+</p>
+
+<p>
+<b>En Gretl</b>, tras estimar el modelo común: <code>chow female --dummy</code>. El programa construye las interacciones, estima el modelo ampliado e imprime el \(F\) con su valor \(p\).
+</p>
+
+<p>
+<b>Casos particulares</b>: con \(q=1\), solo el intercepto, el \(F\) es el \(t\) de <code>female</code> al cuadrado, \(8{,}09^2=65{,}4\). Con <code>--limit-to=lista</code> solo se interaccionan los regresores de la lista. Para dejar libre el intercepto y contrastar solo las pendientes, <code>restrict</code> sobre las tres interacciones: \(F(3,518)=3{,}05\), valor \(p\) \(0{,}029\).
+</p>
+
+<p>
+<b>El uso original</b>: datos ordenados en el tiempo y la pregunta de si la relación cambia a partir de una fecha, un <i>cambio estructural</i>; los dos grupos son el antes y el después (<code>chow 1982</code> con una serie anual).
+</p>
+</div>
+<div id="outline-container-org6b2315b" class="outline-4">
+<h4 id="org6b2315b">¿La misma ecuación para los dos grupos? El contraste de Chow</h4>
+<div class="outline-text-4" id="text-org6b2315b">
+<p>
+Las transparencias ``En log-nivel: una diferencia porcentual'' e ``Interacciones: la pendiente cambia de grupo'' han dejado que difieran entre sexos primero el intercepto y después una pendiente. El caso general es dejar que difieran todos los coeficientes: el intercepto y las pendientes de <code>educ</code>, <code>exper</code> y <code>tenure</code>. El modelo que lo permite tiene la constante, los tres regresores, la indicadora <code>female</code> y las tres interacciones <code>female*educ</code>, <code>female*exper</code> y <code>female*tenure</code>, ocho columnas. Escrito por grupos, es una ecuación con cuatro coeficientes para los hombres y otra, con otros cuatro, para las mujeres, sin nada en común. Por eso su ajuste coincide con el de dos regresiones separadas, una con los \(274\) hombres y otra con las \(252\) mujeres: la suma de cuadrados de los residuos del modelo con las interacciones, \(88{,}58\), es la suma de las de las dos regresiones separadas, \(49{,}55\) y \(39{,}04\).
+</p>
+
+<p>
+La pregunta de si hombres y mujeres comparten la ecuación es la hipótesis nula de que los coeficientes de la indicadora y de las tres interacciones valen cero, cuatro restricciones lineales. Es el contraste \(F\) de la lección 13 sin ningún cambio: el modelo restringido es el modelo común, <code>lwage</code> sobre la constante, <code>educ</code>, <code>exper</code> y <code>tenure</code>, con \(\mathrm{SRC}_r=101{,}46\); el modelo completo es el de las ocho columnas, con \(\mathrm{SRC}=88{,}58\) y \(n-k=526-8=518\) grados de libertad. El estadístico es \(F=\frac{(101{,}46-88{,}58)/4}{88{,}58/518}=18{,}8\), frente a un valor crítico al 5 % de \(2{,}39\); el valor \(p\) es del orden de \(10^{-14}\). La lectura es la de la lección 13. Las cuatro columnas nuevas alargan el cateto explicado en \(12{,}88\) unidades cuadradas, y repartidas entre sus cuatro dimensiones son \(3{,}22\) por dimensión, frente a \(0{,}171\) por dimensión del residuo; el cociente es \(18{,}8\), y si las cuatro columnas no aportasen nada rondaría \(1\). Datos como estos serían muy raros si hombres y mujeres compartiesen la ecuación. Este uso del \(F\), con un modelo restringido común y uno sin restringir que equivale a dos regresiones separadas, se llama <i>contraste de Chow</i>, por Chow (1960).
+</p>
+
+<p>
+El contraste dice que la ecuación no es la misma, pero no dice en qué difiere. Y los \(t\) del modelo con las ocho columnas tampoco lo dicen: ninguno supera \(2\) en valor absoluto (<code>female</code>, \(0{,}17\); las interacciones con <code>educ</code>, <code>exper</code> y <code>tenure</code>, \(-1{,}15\), \(-1{,}80\) y \(-1{,}21\)), y sin embargo el \(F\) conjunto es \(18{,}8\). Es el caso de la lección 13, dos \(t\) pequeños no son un \(F\) pequeño, y la causa es la de la lección 14: la indicadora y sus tres interacciones están casi alineadas. La columna <code>female*educ</code> vale <code>educ</code> para las mujeres y cero para los hombres, y como <code>educ</code> varía poco entre personas, esa columna es casi proporcional a <code>female</code>, con correlación \(0{,}96\); el VIF de <code>female</code> en ese modelo es \(30\). Cada una de las cuatro columnas tiene poca variación propia y su \(t\) es pequeño, aunque entre las cuatro aporten mucho al ajuste. Para averiguar qué difiere hay que preguntar una cosa cada vez, como hizo la transparencia ``Interacciones: la pendiente cambia de grupo'' con la pendiente de <code>exper</code>, cuya interacción, sola, tiene \(t=-2{,}44\). Una variante útil deja libre el intercepto y contrasta solo las pendientes: se estima el modelo con las ocho columnas y se imponen con <code>restrict</code>, como en la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S20-Prct-A-hprice2-restricciones.pdf#page=3">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S20-Prct-A-hprice2-restricciones.html#excluir-dos">html</a>) de la práctica A de la sesión 20, las tres restricciones de que los coeficientes de las interacciones valgan cero. Con estos datos, \(F(3,518)=3{,}05\) y valor \(p\) \(0{,}029\): datos como estos serían raros al 5 % si las tres pendientes fuesen comunes. Y el caso más simple, \(q=1\), es el de la transparencia ``En log-nivel: una diferencia porcentual'': si solo puede diferir el intercepto, el \(F\) con una restricción es el cuadrado del \(t\) de <code>female</code>, \(8{,}09^2=65{,}4\), como se vio en la lección 13.
+</p>
+
+<p>
+En Gretl el contraste se pide tras estimar el modelo común con <code>chow female --dummy</code>; el programa construye las interacciones, estima el modelo ampliado e imprime el \(F\) con sus grados de libertad y su valor \(p\). La orden no admite que <code>female</code> esté ya en el modelo común, porque entonces la indicadora no sería una columna nueva; la opción <code>--limit-to=lista</code> limita las interacciones a los regresores de una lista definida antes. El uso original del contraste de Chow es con datos ordenados en el tiempo: la pregunta es si la relación cambia a partir de una fecha, un <i>cambio estructural</i>, y los dos grupos son las observaciones anteriores y posteriores a esa fecha; en Gretl, <code>chow 1982</code> con una serie temporal anual parte la muestra en ese año. La mecánica es la misma, con la indicadora del periodo posterior en lugar de la del sexo.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, sección 7.4, apartado ``Testing for differences in regression functions across groups'' (el contraste de Chow como \(F\) de las interacciones); Chow, G. C. (1960), ``Tests of equality between sets of coefficients in two linear regressions'', <i>Econometrica</i> 28, 591–605; lección 13 de este curso, ``El contraste \(F\)''.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgaad6eea" class="outline-2">
+<h2 id="orgaad6eea"><span class="section-number-2">9.</span> Qué dice y qué no dice el coeficiente de una indicadora</h2>
 <div class="outline-text-2" id="text-9">
-<ul class="org-ul">
-<li><i>Nada si el objetivo es predecir</i>: el ajuste no depende de los generadores.</li>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
-<li><i>Obtener más información</i>: más datos o con mayor variación: rentas, tamaños, edades o países más dispares, con regresores que varíen por separado.</li>
 
-<li><i>Reformular</i>: quedarse con una de las dos variables o con una combinación, o imponer una restricción y contrastarla con el \(F\) (lección 13). Se gana precisión y se pierde lo que aportaba al ajuste la que sale. Mirar qué cambia en las predicciones: <code>nox</code> o <code>lnox</code> describen la realidad de forma distinta.</li>
+<colgroup>
+<col  class="org-left" />
 
-<li><i>Ortogonalizar</i>: sustituir un regresor por su parte propia (el residuo de su regresión auxiliar), que es ortogonal a los demás. El ajuste no cambia; cambia la interpretación de los coeficientes.</li>
+<col  class="org-left" />
 
-<li><i>Reconocerlo</i>: si la pregunta exige separar los efectos y la muestra no lo permite, decirlo e informar sobre los intervalos de confianza.</li>
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Modelo</th>
+<th scope="col" class="org-left">El coeficiente \(\beta\) de la indicadora es…</th>
+<th scope="col" class="org-left">Lectura, con lo demás fijo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">\(y\) en niveles</td>
+<td class="org-left">diferencia de interceptos</td>
+<td class="org-left">el grupo señalado difiere en \(\beta\) unidades de \(y\)</td>
+</tr>
 
-<li><i>Lo que no</i>: eliminar regresores uno a uno por su \(t\), sin realizar un contraste conjunto. Lo correcto: identificar los poco significativos y contrastar con el \(F\) que sobran a la vez.</li>
-</ul>
-</div>
-<div id="outline-container-org2ec9dc6" class="outline-4">
-<h4 id="org2ec9dc6">Qué hacer y qué no</h4>
-<div class="outline-text-4" id="text-org2ec9dc6">
+<tr>
+<td class="org-left">\(\log y\)</td>
+<td class="org-left">diferencia en logaritmos</td>
+<td class="org-left">difiere en la fracción \(e^{\beta}-1\) (aproximación \(\beta\)); la base importa</td>
+</tr>
+
+<tr>
+<td class="org-left">varias categorías</td>
+<td class="org-left">diferencia con la categoría base</td>
+<td class="org-left">para comparar dos grupos no base, cambiar la base</td>
+</tr>
+
+<tr>
+<td class="org-left">interacción con \(x\)</td>
+<td class="org-left">diferencia de pendientes</td>
+<td class="org-left">el efecto de \(x\) en el grupo señalado es \(\beta_x+\beta\)</td>
+</tr>
+</tbody>
+</table>
 <p>
-Antes de buscar remedios debemos hacernos una pregunta previa: para qué se quiere el modelo. Si es para predecir, ``Qué es y qué no es'' ya lo dijo: el ajuste es el mismo con cualquier descripción del subespacio; es decir, no hay nada que hacer dado que la colinealidad no supone un problema para la predicción. La predicción es la misma, con el mismo error estándar; la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=7">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#ortogonalizar">html</a>) de la práctica C del laboratorio lo comprueba con dos coches, antes y después de sustituir la edad por su parte propia. Lo que sí hay que vigilar es para qué combinación de regresores se predice. Con regresores alineados, un coche de \(300\) semanas y \(10\) mil millas está dentro del rango de cada variable y, sin embargo, lejos de la recta que forman las dos en la muestra: predecir ahí es extrapolar, y el error estándar de esa predicción es siete veces el de un coche típico. Los remedios que siguen son para cuando el objetivo es conocer el efecto de cada variable.
+<b>Lo que no dice</b>. No hay ``una unidad más'' de una indicadora: es un salto entre grupos. Cuál de los dos grupos vale \(1\) es una decisión de quien codifica: cambiarla cambia el signo y la base, no el ajuste. Una indicadora nunca se transforma: \(\log 0\) no existe (lección 15).
 </p>
 
+<div class="org-center">
 <p>
-Si la colinealidad es falta de variación propia, el remedio de fondo es conseguirla, y solo hay una manera: más información. Las demás opciones no la crean. Reformular el modelo cambia la pregunta por otra que la muestra sí responde; sustituir un regresor por su parte propia cambia la interpretación de los coeficientes. Y, antes que cualquiera de ellas, hay una obligación: decir que la muestra no responde a la pregunta.
-</p>
-
-<p>
-El primer remedio, más información, requiere precisar qué información. La fórmula del error estándar usa la longitud euclídea de la parte propia, \(\Vert\tilde{\boldsymbol x}_j\Vert_e\), la de la lección 2 que no divide por \(n\): su cuadrado es una suma de \(n\) sumandos, uno por observación, y ninguno es negativo. Por eso una observación nueva nunca acorta la parte propia; la alarga tanto más cuanto más se aparte, en el regresor \(j\), de lo que los demás regresores reproducen de ella.<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> Cuánto se alarga depende de qué observaciones se añaden. Si son más observaciones de la misma población, nuevas copias de las mismas variables aleatorias, como las de la matriz de copias del <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice de geometría</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-2">html</a>), secciones <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=7">2</a> y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=9">3</a>, la varianza muestral de cada regresor y la correlación entre regresores apenas cambian, porque aproximan la varianza y la correlación de la población, que son las que son. El VIF se queda donde estaba, la longitud de la parte propia crece con \(\sqrt n\) y el error estándar baja a ese ritmo: para dividirlo por dos hay que cuadruplicar la muestra. Es el remedio contra tener pocos datos, y es caro.
-</p>
-
-<p>
-La otra manera de obtener más información es cambiar la población de la que se muestrea, para que los regresores varíen por separado. En los coches de la práctica C, edad y millas van juntas porque los coches de la muestra tienen un uso parecido, y por eso quedan sobre una recta (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=3">figura de la actividad 1</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#recta">html</a>)). Una muestra que incluyera coches viejos con poco uso y coches jóvenes con mucho (el segundo coche de un hogar, un taxi, una furgoneta de reparto) añadiría observaciones alejadas de esa recta, y bastan pocas para alargar la parte propia de cada regresor. Es la regla general con datos económicos: para separar el efecto de la renta del de la edad, o el del tamaño de una empresa del de su antigüedad, hace falta una muestra con rentas, edades, tamaños o antigüedades más dispares y, sobre todo, con combinaciones que no vayan siempre juntas: jóvenes con renta alta y mayores con renta baja, empresas grandes y jóvenes. Ampliar el ámbito de la muestra (más países, más sectores, más años) suele ser la manera de conseguirlo. Quien diseña un experimento elige esas combinaciones directamente, y en eso consistía la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=7">pregunta 4</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#preguntas">html</a>) de la práctica B de la sesión 16; con datos reales observados en la economía (o en la sociedad), como la población es la que es, se suele perder la posibilidad de diseñar la muestra (ninguna, o casi ninguna, empresa joven es grande desde sus inicios); esa es la razón por la que la colinealidad es más difícil de evitar en economía aplicada.
-</p>
-
-<p>
-El segundo remedio es reformular el modelo: quitar un regresor, o fundir dos en uno. Conviene distinguir tres casos, porque lo que se pierde no es lo mismo. Si dos variables miden la misma magnitud en dos escalas, como <code>nox</code> y <code>lnox</code>, la segunda no añade información sobre las viviendas; añade una forma funcional. Quedarse con una no pierde información, pero obliga a elegir entre dos descripciones distintas de la realidad: con <code>nox</code> en niveles, cada unidad más de contaminación resta lo mismo al precio; con <code>lnox</code>, resta cada vez menos (la interpretación de los regresores en logaritmos se verá en la lección 15). Las dos descripciones ajustan los datos de la muestra casi igual de bien, como mostró la lección 13 con el modelo con <code>nox</code> y el modelo con <code>lnox</code>: una recta y una curva logarítmica pasan casi por los mismos puntos allí donde hay muchos barrios, en los niveles de contaminación habituales. Se separan en los extremos, donde hay pocos barrios: para un barrio muy contaminado, la recta predice un precio mucho menor que la curva. Elegir una u otra es elegir qué se predice fuera de lo habitual, y la muestra apenas ayuda a decidirlo. El segundo caso es el de dos magnitudes distintas que en la muestra se mueven juntas, como la edad y las millas de un coche. Aquí quitar una sí pierde información: el modelo deja de distinguir lo que las dos distinguían. A cambio, el coeficiente de la que queda gana precisión, y cambia de significado. Con las dos variables, el coeficiente de la edad, \(28{,}02\), es el efecto de una semana más de edad <i>a igual kilometraje</i>. Con la edad sola, el coeficiente es \(7{,}34\), y es el efecto de una semana más de edad <i>junto con</i> el de las millas que esa semana trae consigo: en la muestra, por cada semana más de edad un coche tiene, en media, \(134\) millas más (\(0{,}134\) es la pendiente de la regresión de <code>miles</code> sobre <code>age</code>). La identidad de la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=3">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#dos-juntas">html</a>) de la práctica C, \(7{,}34\approx28{,}02-154{,}6\cdot0{,}134\), lo descompone en el efecto de la edad a igual kilometraje más el efecto de esas \(134\) millas. Son dos preguntas distintas, y la muestra responde con más precisión a la segunda. Es un intercambio: precisión a cambio de una pregunta menos fina. El tercer caso es que la teoría diga algo sobre los coeficientes: si dos efectos deben ser iguales, o sumar uno, imponer esa restricción funde regresores y elimina la dirección compartida. La lección 13 enseñó a imponerla y a contrastarla con el estadístico \(F\); si el \(F\) no la rechaza, el modelo restringido reduce la colinealidad y permite una interpretación más clara de los resultados.
-</p>
-
-<p>
-La operación que no crea variación propia deja el subespacio como está y cambia sus generadores: consiste en sustituir un regresor por su componente de variación propia \(\tilde{\boldsymbol x}_{j}\), es decir, por el residuo de su regresión auxiliar sobre los demás regresores. ``Por qué oscilan los coeficientes'' dijo que el ajuste no depende de qué generadores describan el subespacio; esta operación hace que un regresor, o un grupo de ellos, sea ortogonal a los demás. Qué cambia y qué no se deduce de lo demostrado hoy y en la lección 10. No cambia el ajuste: \(\boldsymbol{\mathop{\widehat y}}\), \(\mathrm{SRC}\), \(R^2\), \(\mathfrak s\) y las predicciones son los mismos. No cambia el coeficiente del regresor sustituido, ni su error estándar: \(\hat\beta_j\) se calcula con la parte propia de \(\boldsymbol x_j\), y la parte propia de \(\tilde{\boldsymbol x}_j\) respecto de los demás es ella misma. Sí cambian los coeficientes de los demás regresores: como \(\tilde{\boldsymbol x}_j\) es ortogonal a todos ellos, sus coeficientes pasan a ser los del modelo sin \(\boldsymbol x_j\) (familia ortogonal), con errores estándar menores. Y cambia la interpretación de todos. El coeficiente de \(\tilde{\boldsymbol x}_j\) es el efecto de la parte de \(\boldsymbol x_j\) que no acompaña a los demás regresores; el de cada uno de los demás ya no es el efecto ``con \(\boldsymbol x_j\) fijo'', sino el efecto de esa variable junto con el de la parte de \(\boldsymbol x_j\) que, en la muestra, la acompaña. La regresión auxiliar no crea información: asigna toda la variación compartida a los demás regresores, y esa asignación debe justificarla el problema económico, no la estadística. La <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=7">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#ortogonalizar">html</a>) de la práctica C del laboratorio lo ilustra con la edad y las millas de los coches, sustituyendo la edad por su parte propia: allí se ve, con las tablas delante, qué coeficiente conserva su valor, cuál cambia y por qué los dos cambian de interpretación.
-</p>
-
-<p>
-El caso en que esa justificación es más clara es el de la práctica D del laboratorio (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-D-hprice1-tasacion.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-D-hprice1-tasacion.html#otros-factores">html</a>)): el precio de ochenta y ocho viviendas sobre la tasación de una inmobiliaria y cuatro características de la vivienda. La inmobiliaria tasa a partir de las características, así que es la tasación la que debe sustituirse por su parte propia. Esa parte propia es la valoración de la inmobiliaria una vez descontado el efecto de las características que están en el modelo: lo que la inmobiliaria valora y no está entre los otros regresores (estado de conservación, situación, calidades). Con ella en el modelo, los coeficientes de las características miden su efecto sin mantener fija la tasación, y el coeficiente de la parte propia de la tasación mide cuánto responde el precio a esa valoración adicional de la inmobiliaria; en la muestra resulta claramente significativo (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-D-hprice1-tasacion.pdf#page=5">actividad 4</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-D-hprice1-tasacion.html#precio-otros-factores">html</a>)).
-</p>
-
-<p>
-Reconocerlo no es una opción más: cuando la muestra tiene limitaciones, hay que decirlo. Si la pregunta económica exige separar el efecto de <code>nox</code> del de <code>lnox</code>, estos datos no lo permiten, y lo correcto es informar los dos coeficientes con sus intervalos, que serán amplios, y no atribuir a la estimación una precisión que la muestra no da. Un intervalo ancho informa de lo que la muestra no permite precisar. Una vez dicho, es cuando cabe plantearse qué hacer con esas limitaciones, y es ahí donde se barajan las opciones anteriores, en función de los objetivos del estudio.
-</p>
-
-<p>
-Lo que no hay que hacer lo dijo la lección 13: eliminar regresores porque sus \(t\) son bajos. Con colinealidad de grado, los \(t\) bajos son el síntoma, no un veredicto que indique que deben eliminarse conjuntamente; de hecho, el \(F\) puede rechazar esa eliminación. El procedimiento razonable tiene dos pasos: identificar con los \(t\) las variables poco significativas y contrastar con el \(F\) que pueden omitirse simultáneamente. Si el contraste no rechaza, puede ser conveniente eliminarlas, pero no es preceptivo: si la teoría exige mantenerlas, o el modelo sin ellas deja de tener sentido económico, es mejor dejarlas y reconocer que esta muestra no permite estimar bien sus efectos. La eliminación uno a uno, sacando en cada paso el regresor de mayor valor \(p\) y reestimando (es lo que hace la opción <code>--auto</code> de <code>omit</code> en Gretl), llega a un modelo en el que todos los \(t\) son grandes; con colinealidad de grado, el primero que sale lo hace por azar y el que queda hereda el efecto de los dos, así que conviene leer el contraste conjunto de todas las variables omitidas, que Gretl imprime al final, y no solo el modelo final. Existen, por último, métodos que renuncian a la insesgadez a cambio de varianza, como la regresión <i>ridge</i>, o que sustituyen los regresores por combinaciones ortogonales, como las componentes principales. Quedan fuera de este curso; baste saber que existen y que ninguno crea la información que la muestra no tiene.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (qué hacer ante la colinealidad, y por qué eliminar regresores puede ser peor que dejarlos); Kennedy, P. (2008), <i>A Guide to Econometrics</i>, cap. 12 (un repaso claro de los remedios y de sus costes).
+``Lo demás fijo'' es lo que está en el modelo. El \(26\) % entre sexos es una diferencia entre trabajadores con igual educación, experiencia y antigüedad observadas, no una medida de discriminación.
 </p>
 </div>
 </div>
+<div id="outline-container-orgf602045" class="outline-4">
+<h4 id="orgf602045">Qué dice y qué no dice el coeficiente de una indicadora</h4>
+<div class="outline-text-4" id="text-orgf602045">
+<p>
+La tabla de la transparencia reúne las cuatro lecturas de la lección. Las tres primeras son la misma idea en tres formas: el coeficiente de una indicadora es la diferencia entre el grupo señalado y la categoría base, con los demás regresores fijos. En un modelo en niveles, la diferencia está en las unidades del regresando: \(1{,}81\) dólares por hora, \(4{,}08\) mil dólares. En un modelo con el regresando en logaritmos, la diferencia es relativa: la fracción \(e^{\beta}-1\), que para coeficientes pequeños se aproxima por \(\beta\), y que se calcula respecto de la categoría base, de modo que el porcentaje cambia al cambiar la base. Con varias categorías, cada coeficiente compara su grupo con la base, y la comparación entre dos grupos que no son la base se obtiene cambiando la base. La cuarta lectura es distinta: el coeficiente de una interacción es una diferencia de pendientes, y el efecto del regresor en el grupo señalado es la suma de la pendiente común y la interacción.
+</p>
+
+<p>
+Las lecturas incorrectas más frecuentes son tres. La primera es tratar la indicadora como una variable con unidades y hablar de ``una unidad más de <code>female</code>''. Una indicadora solo toma dos valores, y su coeficiente compara los dos grupos; no hay nada entre \(0\) y \(1\). La segunda es olvidar que la codificación es una decisión. Que las mujeres valgan \(1\) y los hombres \(0\), y no al revés, lo decidió quien preparó el fichero; con la codificación contraria el coeficiente sería \(+0{,}301\), el ajuste sería el mismo y la lectura, la misma diferencia vista desde la otra base. Lo que se compara son grupos, no valores de una variable. Relacionado con esto, una indicadora nunca se transforma: no tiene sentido su logaritmo, que no existe en cero, ni su cuadrado, que es ella misma. La tercera lectura incorrecta es la que la transparencia ``Con más regresores: la diferencia con lo demás fijo'' ya señaló. ``Con lo demás fijo'' quiere decir con los regresores del modelo fijos, y nada más. La diferencia del \(26\) % entre sexos de la transparencia ``En log-nivel: una diferencia porcentual'' es una diferencia entre hombres y mujeres con la misma educación, experiencia y antigüedad observadas. No es una medida de la discriminación salarial, porque el modelo no contiene la ocupación, el sector, la jornada ni otras variables en las que los dos grupos difieren, y no dice qué parte de la diferencia se debe a cada una. Lo que un modelo con indicadoras puede decir es cuánto cambia la diferencia entre grupos al fijar las variables que incluye: de \(-2{,}51\) a \(-1{,}81\) dólares al fijar tres variables. Atribuir lo que queda a una causa concreta exige un argumento que la regresión no proporciona.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, sección 7.2, la discusión del ejemplo 7.1 sobre lo que el coeficiente de <code>female</code> mide y lo que no; cap. 3, sección 3.3 (``omitted variable bias'') para el papel de las variables que faltan.
+</p>
 </div>
-<div id="outline-container-orgb7fc4be" class="outline-2">
-<h2 id="orgb7fc4be"><span class="section-number-2">10.</span> Recapitulación y guiño a las sesiones siguientes</h2>
+</div>
+</div>
+<div id="outline-container-org5b295bf" class="outline-2">
+<h2 id="org5b295bf"><span class="section-number-2">10.</span> Recapitulación y guiño a la lección siguiente</h2>
 <div class="outline-text-2" id="text-10">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -870,382 +1010,362 @@ Lo que no hay que hacer lo dijo la lección 13: eliminar regresores porque sus \
 <tr>
 <th scope="col" class="org-left">Pieza</th>
 <th scope="col" class="org-left">Fórmula</th>
-<th scope="col" class="org-left">Lectura geométrica</th>
+<th scope="col" class="org-left">Lectura</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="org-left">Parte propia del regresor \(\boldsymbol x_j\)</td>
-<td class="org-left">\(\tilde{\boldsymbol x}_j\): residuo de \(\boldsymbol x_j\) sobre los demás</td>
-<td class="org-left">lo que \(\boldsymbol x_j\) no comparte</td>
+<td class="org-left">Indicadora como regresor</td>
+<td class="org-left">\(\mathbb 1_A\) en la población, \(\boldsymbol d\) en la muestra</td>
+<td class="org-left">su coeficiente es un salto entre grupos</td>
 </tr>
 
 <tr>
-<td class="org-left">Longitud de \(\tilde{\boldsymbol x}_j\)</td>
-<td class="org-left">\(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j\)</td>
-<td class="org-left">cateto perpendicular al subespacio de los demás</td>
+<td class="org-left">Dos grupos complementarios</td>
+<td class="org-left">\(\mathbb 1_A+\mathbb 1_{A^c}=\mathit 1\); \(\boldsymbol d_A+\boldsymbol d_{A^c}=\boldsymbol 1\)</td>
+<td class="org-left">ortogonales: coeficientes = medias; con \(\boldsymbol 1\), trampa</td>
 </tr>
 
 <tr>
-<td class="org-left">Error estándar \(\mathrm{ee}(\hat\beta_j)\)</td>
-<td class="org-left">\(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\) (demostración en el apéndice)</td>
-<td class="org-left">longitud del ruido estimado por unidad de longitud propia</td>
+<td class="org-left">Log-nivel</td>
+<td class="org-left">\(e^{\beta}-1\)</td>
+<td class="org-left">diferencia porcentual exacta respecto de la base</td>
 </tr>
 
 <tr>
-<td class="org-left">\(\mathrm{VIF}_j\)</td>
-<td class="org-left">\(1/(1-R_j^2)=1/\sin^2\theta_j\)</td>
-<td class="org-left">inflación de la varianza; su raíz, del error estándar</td>
+<td class="org-left">Interacción</td>
+<td class="org-left">pendiente del grupo señalado: \(\beta_4+\beta_5\) en el ejemplo de <code>exper</code></td>
+<td class="org-left">la pendiente común más la diferencia de pendientes</td>
 </tr>
 
 <tr>
-<td class="org-left">Coeficientes \(\hat\beta_j\)</td>
-<td class="org-left">coordenadas de \(\boldsymbol{\mathop{\widehat y}}\)</td>
-<td class="org-left">inestables si los generadores casi se alinean</td>
+<td class="org-left">Contraste de Chow</td>
+<td class="org-left">\(F\) de la lección 13 con \(\mathrm{SRC}=\mathrm{SRC}_{\text{grupo 1}}+\mathrm{SRC}_{\text{grupo 2}}\)</td>
+<td class="org-left">¿la misma ecuación en los dos grupos?</td>
 </tr>
 </tbody>
 </table>
 <p>
-Demostrado: la longitud de la parte propia. Enunciado (demostración en el apéndice, con la familia ortogonal): el error estándar. Ningún supuesto nuevo, ningún supuesto violado.
+Geometría nueva: solo la ortogonalidad de dos indicadoras complementarias. Nada enunciado sin demostrar. <i>Lección 17</i>: los residuos de <code>wage</code> tienen desviación típica \(3{,}42\) entre los hombres y \(2{,}32\) entre las mujeres; con <code>lwage</code>, \(0{,}43\) y \(0{,}40\). Una varianza que cambia con el grupo es heterocedasticidad.
+</p>
+</div>
+<div id="outline-container-org9ad1937" class="outline-4">
+<h4 id="org9ad1937">Recapitulación y guiño a la lección siguiente</h4>
+<div class="outline-text-4" id="text-org9ad1937">
+<p>
+La lección ha añadido un tipo de regresor y una tabla de lecturas. El regresor es la indicadora de un grupo, \(\mathbb 1_A\) en la población y el vector \(\boldsymbol d\) de ceros y unos en la muestra, que la lección 12 ya había definido para otro fin. Para mínimos cuadrados es una columna más; su coeficiente es una diferencia entre el grupo señalado y la categoría base, con los demás regresores fijos: en unidades del regresando si está en niveles, en fracción \(e^{\beta}-1\) si está en logaritmos, y respecto de la base en los dos casos. El producto de una indicadora por otro regresor, la interacción, convierte la diferencia de interceptos en diferencia de pendientes. Y la pregunta de si dos grupos comparten la ecuación entera es un contraste \(F\) de la lección 13, el contraste de Chow, cuyo modelo sin restringir equivale a dos regresiones separadas.
 </p>
 
 <p>
-<i>Laboratorios</i>: el \(F\) con datos reales y simulados; y la colinealidad creciente en Monte Carlo, la regresión auxiliar de <code>nox</code> y el VIF. <i>Lección 16</i>: la trampa de las variables ficticias es colinealidad exacta con \(\boldsymbol 1\).
-</p>
-</div>
-<div id="outline-container-org75ea7fb" class="outline-4">
-<h4 id="org75ea7fb">Recapitulación y guiño a las sesiones siguientes</h4>
-<div class="outline-text-4" id="text-org75ea7fb">
-<p>
-La sesión ha añadido una definición y un resultado. La definición es la parte propia de un regresor, el residuo de proyectarlo sobre los demás: una regresión de la lección 10 con un regresor en el papel del regresando. El resultado es su longitud, \(\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j\), que sale de Pitágoras en esa regresión auxiliar. Todo lo demás es lectura: el error estándar de la lección 12, el ruido estimado dividido por esa longitud (demostrado en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=13">apéndice, sección 5.4</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>) con la familia ortogonal de la lección 10), el VIF como inverso del seno al cuadrado, y las coordenadas que oscilan porque los generadores casi se alinean.
+La única geometría nueva ha sido pequeña: dos indicadoras de grupos complementarios son ortogonales y suman \(\boldsymbol 1\). De lo primero sale que sus coeficientes son las medias de grupo; de lo segundo, que no pueden entrar las dos junto con la constante, la trampa de las variables ficticias, y también que la constante no necesita ser una columna de \(\boldsymbol{\mathsf X}\) para que el ajuste tenga sus propiedades, como la lección 10 había anticipado. Nada se ha enunciado sin demostrar: las lecturas son álgebra sobre el modelo, y el contraste de Chow es el \(F\) de la lección 13 con un modelo restringido y otro sin restringir.
 </p>
 
 <p>
-Conviene retener también lo que la sesión no ha hecho. No ha añadido ningún supuesto, y ninguno de los anteriores se ha violado: la colinealidad de grado es compatible con todo lo demostrado en las lecciones 11 y 12. Es un problema de la muestra, la falta de variación propia, y su remedio es información, no otro estimador.
+Lo que hay que retener para leer resultados es la cautela de la transparencia ``Qué dice y qué no dice el coeficiente de una indicadora'': el coeficiente compara grupos, no unidades; la base es una decisión; y ``lo demás fijo'' se limita a lo que el modelo contiene. Un \(26\) % de diferencia salarial entre sexos con tres variables fijas es un hecho de la muestra; qué lo produce es otra pregunta.
 </p>
 
 <p>
-Quedan tres hilos. Dos son de laboratorio. En la práctica del contraste \(F\) se aplicará lo de la lección 13 con datos reales y se simulará la distribución del \(F\) bajo la hipótesis nula. En la práctica de colinealidad se verá, con un experimento de Monte Carlo, cómo crece la dispersión de los coeficientes al cerrar el ángulo entre dos regresores mientras el ajuste no se mueve; se calculará a mano la parte propia de <code>nox</code> con la regresión auxiliar; y se comprobará el VIF de Gretl contra la fórmula de hoy. El tercer hilo es de teoría y llega en la lección 16, al introducir las variables ficticias: si se incluyen una indicadora de hombre y otra de mujer junto con la constante, la suma de las dos es \(\boldsymbol 1\), y eso es la colinealidad exacta de la lección 10, que hoy hemos repasado: la llamada ``trampa de las variables ficticias''.
+La lección 17 parte de una observación que los datos de hoy ya permiten hacer. En el modelo en niveles de la transparencia ``Con más regresores: la diferencia con lo demás fijo'', los residuos de los hombres tienen una desviación típica de \(3{,}42\) dólares y los de las mujeres de \(2{,}32\): la dispersión del salario alrededor de la recta no es la misma en los dos grupos, en contra del supuesto de homocedasticidad de la lección 11, que pide la misma varianza para todas las observaciones. En el modelo con el logaritmo del salario las dos desviaciones típicas se acercan, \(0{,}43\) y \(0{,}40\), que es lo que la lección 15 anunció: el logaritmo es el primer remedio. La lección 17 tratará cómo detectar la heterocedasticidad, qué consecuencias tiene para los errores estándar y cómo corregirlos. Y el laboratorio integrador volverá al Boston original con <code>chas</code> para estimar, con datos reales y de una vez, un modelo con logaritmos, indicadoras e interacciones, y diagnosticarlo.
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (resumen) y cap. 7, sección 7.2 (la trampa de las variables ficticias, con la que enlaza la lección 16).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 7, secciones 7.1 a 7.4 (resumen de la lección) y cap. 8, sección 8.1 (anticipo de la heterocedasticidad).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgf6e2334" class="outline-2">
-<h2 id="orgf6e2334"><span class="section-number-2">11.</span> Preguntas de repaso (sesión 20)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div id="outline-container-org4502276" class="outline-2">
+<h2 id="org4502276"><span class="section-number-2">11.</span> Preguntas de repaso (sesión 24)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
 <div class="outline-text-2" id="text-11">
 <p>
 Le propongo 12 preguntas.
 Las marco con un nivel orientativo: [B] básica, [M] media, [D] discriminadora.
 </p>
 </div>
-<div id="outline-container-org766a78c" class="outline-4">
-<h4 id="org766a78c">Comentario</h4>
-<div class="outline-text-4" id="text-org766a78c">
+<div id="outline-container-org6843024" class="outline-4">
+<h4 id="org6843024">Comentario</h4>
+<div class="outline-text-4" id="text-org6843024">
 <p>
-Las preguntas que más le conviene trabajar son la 4 (fija el resultado central: la longitud de la parte propia sale de Pitágoras en la regresión auxiliar), la 7 (la distinción entre lo que la colinealidad estropea, las coordenadas, y lo que respeta, el ajuste) y la 9 (la colinealidad no viola ningún supuesto y los errores estándar grandes son correctos). Repase también la 6: separa el efecto parcial de la lección 10 de la colinealidad, dos cosas fáciles de confundir. La 12 le pide distinguir lo demostrado de lo enunciado.
+Las preguntas que más le conviene trabajar son la 4 (la lectura exacta en log-nivel y la asimetría según la base, que es lo que hay que hacer al informar un resultado), la 6 (por qué dos indicadoras complementarias no pueden entrar con la constante, y qué cambia al omitir una u otra) y la 9 (qué es el coeficiente de la indicadora cuando hay una interacción). Repase también la 2, que fija la relación entre el coeficiente y las medias de grupo, y la 11, que distingue lo que el contraste de Chow dice de lo que no dice.
 </p>
 </div>
 </div>
-<div id="outline-container-org1a8278a" class="outline-4">
-<h4 id="org1a8278a">Pregunta 1 [B] — Exacta frente a de grado</h4>
-<div class="outline-text-4" id="text-org1a8278a">
+<div id="outline-container-orga0917ac" class="outline-4">
+<h4 id="orga0917ac">Pregunta 1 [B] — La indicadora</h4>
+<div class="outline-text-4" id="text-orga0917ac">
 <p>
-La diferencia entre colinealidad exacta y colinealidad de grado es:
+En una muestra de \(200\) trabajadores hay \(80\) mujeres. ¿Cuánto vale la media del vector \(\boldsymbol d_{\text{mujer}}\) y qué estima?
 </p>
-
 <ol class="org-ol">
-<li>Ninguna: son dos nombres para el mismo problema.</li>
-<li>En la exacta un regresor es combinación lineal de los demás y las ecuaciones normales tienen infinitas soluciones; en la de grado forma un ángulo muy pequeño con el subespacio generado por los demás, y la solución es única pero imprecisa e inestable.</li>
-<li>La exacta ocurre con datos reales y la de grado solo con datos simulados.</li>
-<li>La de grado viola los supuestos del modelo y la exacta no.</li>
+<li>\(80\); el número de mujeres de la población.</li>
+<li>\(0{,}4\); la proporción de mujeres en la población, \(\mathrm P(\text{mujer})=\mathrm E(\mathbb 1_{\text{mujer}})\).</li>
+<li>\(0{,}5\); la probabilidad de que una persona sea mujer, que siempre es un medio.</li>
+<li>No tiene media, porque una indicadora no es una variable numérica.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgdf89d7f" class="outline-4">
-<h4 id="orgdf89d7f">Pregunta 2 [B] — La parte propia</h4>
-<div class="outline-text-4" id="text-orgdf89d7f">
+<div id="outline-container-org5071fe2" class="outline-4">
+<h4 id="org5071fe2">Pregunta 2 [B] — Una sola indicadora</h4>
+<div class="outline-text-4" id="text-org5071fe2">
 <p>
-La parte propia \(\tilde{\boldsymbol x}_j\) de un regresor es:
+Se estima <code>medv</code> sobre la constante y <code>chas</code> y se obtiene \(\widehat{\text{medv}}=22{,}09+6{,}35\,\text{chas}\). ¿Cuál es la media de <code>medv</code> entre los barrios junto al río?
 </p>
-
 <ol class="org-ol">
-<li>El regresor en desviaciones respecto a su media.</li>
-<li>El residuo de la regresión de \(\boldsymbol x_j\) sobre los demás regresores, constante incluida: lo que los demás no reproducen.</li>
-<li>El ajuste de la regresión de \(\boldsymbol y\) sobre \(\boldsymbol x_j\).</li>
-<li>La proyección de \(\boldsymbol x_j\) sobre \(\mathcal L(\boldsymbol 1)\).</li>
+<li>\(6{,}35\).</li>
+<li>\(22{,}09\).</li>
+<li>\(28{,}44\).</li>
+<li>No se puede saber sin conocer cuántos barrios hay en cada grupo.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org0fbbb47" class="outline-4">
-<h4 id="org0fbbb47">Pregunta 3 [B] — Qué mide el VIF</h4>
-<div class="outline-text-4" id="text-org0fbbb47">
+<div id="outline-container-orgc3cccd4" class="outline-4">
+<h4 id="orgc3cccd4">Pregunta 3 [M] — Con más regresores</h4>
+<div class="outline-text-4" id="text-orgc3cccd4">
 <p>
-Un \(\mathrm{VIF}_j=25\) significa que:
+La diferencia bruta de salario medio entre hombres y mujeres es de \(2{,}51\) dólares; al añadir <code>educ</code>, <code>exper</code> y <code>tenure</code>, el coeficiente de <code>female</code> es \(-1{,}81\). ¿Qué explica la diferencia entre las dos cifras?
 </p>
-
 <ol class="org-ol">
-<li>El coeficiente \(\hat\beta_j\) es \(25\) veces más grande de lo que debería.</li>
-<li>El \(R^2\) del modelo es \(0{,}25\).</li>
-<li>La varianza de \(\hat\beta_j\) es \(25\) veces la que tendría si el regresor no compartiera nada con los demás; su error estándar, \(5\) veces.</li>
-<li>Hay que eliminar el regresor \(j\) del modelo.</li>
+<li>Un error de estimación: las dos deberían coincidir.</li>
+<li>Que los dos grupos difieren en las variables añadidas, y parte de la diferencia bruta se atribuye a ellas.</li>
+<li>Que el modelo con más regresores tiene menos grados de libertad.</li>
+<li>Que el coeficiente de una indicadora siempre se reduce al añadir regresores.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgc36311f" class="outline-4">
-<h4 id="orgc36311f">Pregunta 4 [M] — De dónde sale la longitud de la parte propia</h4>
-<div class="outline-text-4" id="text-orgc36311f">
+<div id="outline-container-orgd97a370" class="outline-4">
+<h4 id="orgd97a370">Pregunta 4 [M] — Log-nivel y la base</h4>
+<div class="outline-text-4" id="text-orgd97a370">
 <p>
-La identidad \(\Vert\tilde{\boldsymbol x}_j\Vert_e^2=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\,(1-R_j^2)\) se obtiene:
+En un modelo con \(\log(\text{wage})\) como regresando, el coeficiente de <code>female</code> es \(-0{,}30\). ¿Cuál de las siguientes lecturas es la exacta?
 </p>
-
 <ol class="org-ol">
-<li>Del supuesto de normalidad de la perturbación.</li>
-<li>De \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) en la regresión auxiliar de \(\boldsymbol x_j\) sobre los demás regresores: \(\tilde{\boldsymbol x}_j\) es su residuo y \(R_j^2\) su coeficiente de determinación.</li>
-<li>De la fórmula de la inversa de \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\).</li>
-<li>No se obtiene: es un enunciado sin demostrar, como la fórmula matricial completa de la varianza.</li>
+<li>Las mujeres cobran un \(30\) % menos que los hombres comparables, y los hombres un \(30\) % más que las mujeres comparables.</li>
+<li>Las mujeres cobran un \(26\) % menos que los hombres comparables, y los hombres un \(35\) % más que las mujeres comparables.</li>
+<li>Las mujeres cobran \(0{,}30\) dólares menos por hora.</li>
+<li>Las mujeres cobran un \(26\) % menos y los hombres un \(26\) % más.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orga8a6b50" class="outline-4">
-<h4 id="orga8a6b50">Pregunta 5 [M] — Dos regresores</h4>
-<div class="outline-text-4" id="text-orga8a6b50">
+<div id="outline-container-orgf3009a0" class="outline-4">
+<h4 id="orgf3009a0">Pregunta 5 [B] — Intervalo transformado</h4>
+<div class="outline-text-4" id="text-orgf3009a0">
 <p>
-En un modelo con constante y dos regresores no constantes cuya correlación es \(0{,}99\), el error estándar de cada coeficiente, respecto al que tendría si los regresores no compartieran nada, se multiplica aproximadamente por:
+El intervalo al 95 % para el coeficiente de una indicadora en un modelo log-nivel es \([-0{,}374,\,-0{,}228]\). ¿Cuál es el intervalo para la diferencia porcentual exacta?
 </p>
-
 <ol class="org-ol">
-<li>\(0{,}99\).</li>
-<li>\(50\).</li>
-<li>\(7\).</li>
-<li>\(1{,}01\).</li>
+<li>\([-37{,}4\ \%,\,-22{,}8\ \%]\).</li>
+<li>\([e^{-0{,}374}-1,\,e^{-0{,}228}-1]=[-31{,}2\ \%,\,-20{,}4\ \%]\).</li>
+<li>\([-26{,}0\ \%\pm3{,}7\ \%]\).</li>
+<li>No se puede transformar un intervalo; hay que recalcular el error estándar.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org0301251" class="outline-4">
-<h4 id="org0301251">Pregunta 6 [M] — Efecto parcial o colinealidad</h4>
-<div class="outline-text-4" id="text-org0301251">
+<div id="outline-container-org90392fc" class="outline-4">
+<h4 id="org90392fc">Pregunta 6 [D] — La trampa</h4>
+<div class="outline-text-4" id="text-org90392fc">
 <p>
-Al añadir un regresor, el coeficiente de otro cambia de \(56\) a \(-24\) y su error estándar pasa de \(4\) a \(5\). ¿Qué indica?
+Se incluyen en \(\boldsymbol{\mathsf X}\) la constante, \(\boldsymbol d_{\text{mujer}}\) y \(\boldsymbol d_{\text{hombre}}\). ¿Qué ocurre?
 </p>
-
 <ol class="org-ol">
-<li>Colinealidad grave: hay que eliminar uno de los dos.</li>
-<li>Un cambio del efecto parcial (lección 10), no colinealidad: el error estándar apenas ha cambiado.</li>
-<li>Un error de cálculo de Gretl.</li>
-<li>Que el nuevo regresor es combinación lineal exacta del anterior.</li>
+<li>Las tres columnas generan un subespacio de dimensión dos y las ecuaciones normales no tienen solución única; hay que omitir una de las tres.</li>
+<li>El ajuste es imposible porque la proyección de \(\boldsymbol y\) no existe.</li>
+<li>No ocurre nada: las tres columnas son distintas y el modelo se estima sin problema.</li>
+<li>El modelo se estima, pero el \(R^2\) sale mayor que \(1\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org24f3e12" class="outline-4">
-<h4 id="org24f3e12">Pregunta 7 [D] — Lo que oscila y lo que no</h4>
-<div class="outline-text-4" id="text-org24f3e12">
+<div id="outline-container-org6ff5470" class="outline-4">
+<h4 id="org6ff5470">Pregunta 7 [M] — Cambiar la base</h4>
+<div class="outline-text-4" id="text-org6ff5470">
 <p>
-Con dos regresores cuyos vectores en desviaciones casi se alinean, de una muestra a otra cambian mucho:
+Con la constante y <code>female</code>, el ajuste es \(\widehat{\log(\text{wage})}=1{,}814-0{,}397\,\text{female}\). Si se estima con la constante y <code>male</code> en su lugar, ¿qué se obtiene?
 </p>
-
 <ol class="org-ol">
-<li>El ajuste \(\boldsymbol{\mathop{\widehat y}}\), el \(R^2\) y \(\mathfrak s\); los coeficientes, en cambio, son estables.</li>
-<li>Los coeficientes, en sentidos opuestos, mientras el ajuste, el \(R^2\), \(\mathfrak s\) y el \(F\) conjunto apenas cambian: la proyección es estable y las coordenadas no.</li>
-<li>Todo por igual.</li>
-<li>Nada: la colinealidad no afecta a la estimación.</li>
+<li>\(1{,}814+0{,}397\,\text{male}\).</li>
+<li>\(1{,}416+0{,}397\,\text{male}\).</li>
+<li>\(1{,}416-0{,}397\,\text{male}\).</li>
+<li>Otro ajuste, con distinta suma de cuadrados de los residuos.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org4ee42f2" class="outline-4">
-<h4 id="org4ee42f2">Pregunta 8 [M] — El signo de la covarianza</h4>
-<div class="outline-text-4" id="text-org4ee42f2">
+<div id="outline-container-orgd4af53c" class="outline-4">
+<h4 id="orgd4af53c">Pregunta 8 [M] — Varias categorías</h4>
+<div class="outline-text-4" id="text-orgd4af53c">
 <p>
-Con <code>nox</code> y <code>lnox</code> en el mismo modelo, los coeficientes estimados son \(404\) y \(-13262\). La razón de que sean grandes y de signos opuestos es que:
+Una variable de región tiene cinco categorías excluyentes. En un modelo con constante, ¿cuántas indicadoras de región se incluyen y qué mide cada coeficiente?
 </p>
-
 <ol class="org-ol">
-<li>La contaminación tiene efectos contrarios según cómo se mida.</li>
-<li>Los dos regresores casi se alinean, así que el mismo ajuste admite descomposiciones muy distintas en las que un coeficiente compensa al otro; la suma de efectos es la de siempre.</li>
-<li>Uno de los dos regresores tiene varianza cero.</li>
-<li>El modelo está mal especificado y \(\mathrm{SRC}\) es mayor que \(\mathrm{STC}\).</li>
+<li>Cinco; cada coeficiente es el nivel medio de su región.</li>
+<li>Cuatro; cada coeficiente es la diferencia entre su región y la región omitida, con lo demás fijo.</li>
+<li>Cuatro; cada coeficiente es la diferencia entre su región y la media de todas.</li>
+<li>Una, con valores \(1\) a \(5\); su coeficiente es el efecto de pasar a la región siguiente.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgedc9e06" class="outline-4">
-<h4 id="orgedc9e06">Pregunta 9 [D] — Supuestos</h4>
-<div class="outline-text-4" id="text-orgedc9e06">
+<div id="outline-container-org0dda0b2" class="outline-4">
+<h4 id="org0dda0b2">Pregunta 9 [D] — La interacción</h4>
+<div class="outline-text-4" id="text-org0dda0b2">
 <p>
-Respecto a los supuestos del modelo, la colinealidad de grado:
+En \(\log(\text{wage})=\beta_1\,\mathit 1+\beta_2\,\mathbb 1_{\text{mujer}}+\beta_4\,\text{exper}+\beta_5\,\mathbb 1_{\text{mujer}}\cdot\text{exper}+U\), ¿qué miden \(\beta_2\) y \(\beta_5\)?
 </p>
-
 <ol class="org-ol">
-<li>Viola la homocedasticidad, y por eso los errores estándar salen grandes.</li>
-<li>Viola la exogeneidad estricta, y por eso los coeficientes son sesgados.</li>
-<li>No viola ningún supuesto: MCO sigue insesgado y BLUE, y los errores estándar grandes son correctos; la muestra no permite estimar ese coeficiente con precisión.</li>
-<li>Viola la independencia lineal de los regresores, y Gretl no puede estimar el modelo.</li>
+<li>\(\beta_2\) es la diferencia entre sexos para cualquier experiencia; \(\beta_5\) es el efecto de la experiencia para las mujeres.</li>
+<li>\(\beta_2\) es la diferencia entre sexos con cero años de experiencia; \(\beta_5\) es la diferencia entre la pendiente de las mujeres y la de los hombres.</li>
+<li>\(\beta_2\) es la pendiente de los hombres; \(\beta_5\) la de las mujeres.</li>
+<li>\(\beta_2\) y \(\beta_5\) miden lo mismo, porque las dos columnas son colineales.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgfd75cad" class="outline-4">
-<h4 id="orgfd75cad">Pregunta 10 [M] — Qué mirar</h4>
-<div class="outline-text-4" id="text-orgfd75cad">
+<div id="outline-container-orgd78c4b5" class="outline-4">
+<h4 id="orgd78c4b5">Pregunta 10 [M] — Dos rectas</h4>
+<div class="outline-text-4" id="text-orgd78c4b5">
 <p>
-Con cuatro regresores no constantes, ninguno de los cuales está muy correlado con otro por parejas, ¿puede haber colinealidad de grado?
+Se estima \(\log(\text{wage})\) sobre la constante, <code>female</code>, <code>exper</code> y <code>female*exper</code>, y el \(t\) de la interacción es \(-0{,}4\). ¿Qué modelo sugieren los datos?
 </p>
-
 <ol class="org-ol">
-<li>No: si las correlaciones por parejas son moderadas, no hay colinealidad.</li>
-<li>Sí: un regresor puede formar un ángulo muy pequeño con el subespacio generado por los otros tres sin estar muy correlado con ninguno; por eso el diagnóstico es el VIF de cada regresor, no la matriz de correlaciones.</li>
-<li>Solo si \(n\) es pequeño.</li>
-<li>Solo si el \(R^2\) del modelo es mayor que \(0{,}9\).</li>
+<li>Dos rectas distintas, una por sexo.</li>
+<li>Dos rectas paralelas: la indicadora sin la interacción.</li>
+<li>Una sola recta para todos.</li>
+<li>Ninguno: el contraste no permite decidir nada sin conocer el \(t\) de <code>female</code>.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org1940153" class="outline-4">
-<h4 id="org1940153">Pregunta 11 [M] — Qué hacer</h4>
-<div class="outline-text-4" id="text-org1940153">
+<div id="outline-container-org56d534d" class="outline-4">
+<h4 id="org56d534d">Pregunta 11 [D] — El contraste de Chow</h4>
+<div class="outline-text-4" id="text-org56d534d">
 <p>
-Dos regresores miden la misma magnitud en dos escalas, sus \(t\) son bajos y el \(F\) de excluirlos juntos es alto. La respuesta razonable es:
+Un contraste de Chow entre dos grupos, con tres regresores, da \(F(4,518)=18{,}8\). ¿Qué se concluye?
 </p>
-
 <ol class="org-ol">
-<li>Eliminar los dos, porque no son significativos.</li>
-<li>Quedarse con uno de los dos, o con una combinación: la información es la misma y la precisión mejora.</li>
-<li>Duplicar la muestra copiando las observaciones.</li>
-<li>Cambiar el nivel de significación al \(10\,\%\).</li>
+<li>Que los cuatro coeficientes de la indicadora y de las interacciones son distintos de cero.</li>
+<li>Que datos como estos serían muy raros si los dos grupos compartiesen la ecuación; cuáles son los coeficientes que difieren lo dicen los \(t\) del modelo con interacciones.</li>
+<li>Que difieren los interceptos y no las pendientes.</li>
+<li>Que el modelo común tiene mejor ajuste que las dos regresiones separadas.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org64809eb" class="outline-4">
-<h4 id="org64809eb">Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado</h4>
-<div class="outline-text-4" id="text-org64809eb">
+<div id="outline-container-orgb1aee9e" class="outline-4">
+<h4 id="orgb1aee9e">Pregunta 12 [M] — Lo que no dice</h4>
+<div class="outline-text-4" id="text-orgb1aee9e">
 <p>
-De los resultados de la sesión:
+El coeficiente de <code>female</code> en el modelo log-nivel con <code>educ</code>, <code>exper</code> y <code>tenure</code> es \(-0{,}30\). ¿Cuál de estas afirmaciones es correcta?
 </p>
-
 <ol class="org-ol">
-<li>Se ha demostrado \(\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\) y se ha enunciado sin demostrar la longitud de la parte propia.</li>
-<li>Se ha demostrado la longitud de la parte propia, \(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j\), con Pitágoras en la regresión auxiliar; la fórmula del error estándar \(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\) y la insesgadez de \(\mathfrak s^2\) con \(k\) regresores se han enunciado en la sesión y el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html">html</a>) las demuestra.</li>
-<li>Se ha demostrado todo, incluida la insesgadez de \(\mathfrak s^2\) con \(k\) regresores.</li>
-<li>No se ha demostrado nada.</li>
+<li>Las mujeres sufren una discriminación salarial del \(26\) %.</li>
+<li>Entre trabajadores con la misma educación, experiencia y antigüedad observadas, el salario de las mujeres es un \(26\) % menor en media; el modelo no dice a qué se debe.</li>
+<li>Una unidad más de <code>female</code> reduce el salario un \(30\) %.</li>
+<li>El resultado cambiaría si se codificase a los hombres con \(1\), porque la diferencia sería distinta.</li>
 </ol>
 </div>
 </div>
 </div>
-<div id="outline-container-orgf51f5bf" class="outline-2">
-<h2 id="orgf51f5bf"><span class="section-number-2">12.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div id="outline-container-orgb27412c" class="outline-2">
+<h2 id="orgb27412c"><span class="section-number-2">12.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
 <div class="outline-text-2" id="text-12">
 </div>
 <ul class="org-ul">
-<li><a id="org7dbc4f8"></a>Pregunta 1 [B] — Exacta frente a de grado<br />
-<div class="outline-text-5" id="text-org7dbc4f8">
+<li><a id="org314d3ac"></a>Pregunta 1 [B] — La indicadora<br />
+<div class="outline-text-5" id="text-org314d3ac">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: la distinción con la que abre la sesión, y el enlace con la lección 10 (colinealidad exacta, ecuaciones normales con infinitas soluciones). La opción 4 es el error conceptual que la transparencia ``Qué es y qué no es'' desmonta.
+<i>Evalúa</i>: la definición de la lección 12 aplicada a un grupo: la media muestral de la indicadora es la proporción del grupo y estima \(\mathrm E(\mathbb 1_A)=\mathrm P(A)\).
 </p>
 </div>
 </li>
-<li><a id="orgfe9b433"></a>Pregunta 2 [B] — La parte propia<br />
-<div class="outline-text-5" id="text-orgfe9b433">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: la definición central de la sesión. La opción 1 es el caso particular con un solo regresor no constante; observe por qué deja de valer con varios.
-</p>
-</div>
-</li>
-<li><a id="orgea78176"></a>Pregunta 3 [B] — Qué mide el VIF<br />
-<div class="outline-text-5" id="text-orgea78176">
+<li><a id="org6e70beb"></a>Pregunta 2 [B] — Una sola indicadora<br />
+<div class="outline-text-5" id="text-org6e70beb">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: la lectura del VIF como factor de la varianza y de su raíz como factor del error estándar. La opción 4 es la reacción automática que la sesión desaconseja.
+<i>Evalúa</i>: que con una sola indicadora los dos valores ajustados son las medias de grupo: la constante es la media del grupo con <code>chas</code> igual a \(0\) y la suma \(22{,}09+6{,}35\) la del grupo con <code>chas</code> igual a \(1\).
 </p>
 </div>
 </li>
-<li><a id="orgeaa915e"></a>Pregunta 4 [M] — De dónde sale la longitud de la parte propia<br />
-<div class="outline-text-5" id="text-orgeaa915e">
+<li><a id="org994e047"></a>Pregunta 3 [M] — Con más regresores<br />
+<div class="outline-text-5" id="text-org994e047">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: el resultado demostrado hoy, la longitud de la parte propia (el error estándar se enuncia y el apéndice lo demuestra), y el reconocimiento de que es la lección 8 aplicada a una regresión cuyo regresando es un regresor. La opción 4 confunde este resultado con el enunciado de la insesgadez de \(\mathfrak s^2\).
+<i>Evalúa</i>: la lectura <i>ceteris paribus</i> de la lección 10. Las mujeres de la muestra tienen menos antigüedad; al fijarla, parte de la diferencia bruta se atribuye a ella. La opción 4 es falsa: el coeficiente puede aumentar si los grupos difieren en sentido contrario.
 </p>
 </div>
 </li>
-<li><a id="org7944dab"></a>Pregunta 5 [M] — Dos regresores<br />
-<div class="outline-text-5" id="text-org7944dab">
-<p>
-<i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: el cálculo con \(k=3\): \(\mathrm{VIF}=1/(1-0{,}99^2)=50\) y el error estándar se multiplica por \(\sqrt{50}\approx7{,}1\). La opción 2 confunde varianza con error estándar.
-</p>
-</div>
-</li>
-<li><a id="org830ab01"></a>Pregunta 6 [M] — Efecto parcial o colinealidad<br />
-<div class="outline-text-5" id="text-org830ab01">
+<li><a id="orgf14bbbe"></a>Pregunta 4 [M] — Log-nivel y la base<br />
+<div class="outline-text-5" id="text-orgf14bbbe">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: la distinción entre un cambio de significado del coeficiente (efecto parcial, lección 10 y su laboratorio, <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms">html</a>), donde el coeficiente de <code>bedrms</code> cambiaba de signo al añadir <code>sqft</code>) y la colinealidad, cuya firma es el error estándar disparado.
+<i>Evalúa</i>: el cálculo exacto \(e^{\beta}-1\) y la asimetría según la base: \(e^{-0{,}30}-1=-0{,}26\) y \(e^{0{,}30}-1=0{,}35\). La opción 1 es la aproximación, que para un coeficiente de \(0{,}30\) se queda lejos.
 </p>
 </div>
 </li>
-<li><a id="org22e4505"></a>Pregunta 7 [D] — Lo que oscila y lo que no<br />
-<div class="outline-text-5" id="text-org22e4505">
+<li><a id="orgbb4df27"></a>Pregunta 5 [B] — Intervalo transformado<br />
+<div class="outline-text-5" id="text-orgbb4df27">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: la idea que vertebra la sesión: la proyección depende del subespacio y las coordenadas de los generadores. Discrimina porque exige saber qué cantidades miran el subespacio (\(R^2\), \(\mathfrak s\), \(F\)) y cuáles las coordenadas (\(t\)).
+<i>Evalúa</i>: que la transformación se aplica a los extremos del intervalo, no al error estándar, y que el intervalo transformado no es simétrico alrededor de \(-0{,}26\).
 </p>
 </div>
 </li>
-<li><a id="orgfd8542a"></a>Pregunta 8 [M] — El signo de la covarianza<br />
-<div class="outline-text-5" id="text-orgfd8542a">
+<li><a id="orgf8a7774"></a>Pregunta 6 [D] — La trampa<br />
+<div class="outline-text-5" id="text-orgf8a7774">
+<p>
+<i>Respuesta correcta: 1.</i>
+<i>Evalúa</i>: la trampa de las variables ficticias como colinealidad exacta de la lección 10. La proyección existe y es única (la opción 2 es falsa); lo que no es único es el vector de coeficientes. Gretl omite una columna y avisa.
+</p>
+</div>
+</li>
+<li><a id="org5e137e4"></a>Pregunta 7 [M] — Cambiar la base<br />
+<div class="outline-text-5" id="text-org5e137e4">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: la lectura de la figura del paralelogramo aplicada al caso real, y la covarianza negativa entre coeficientes de regresores alineados. La opción 1 es la lectura ingenua de los signos.
+<i>Evalúa</i>: que cambiar la base reescribe el mismo ajuste: la constante pasa a ser la media de las mujeres, \(1{,}814-0{,}397=1{,}416\), y el coeficiente de <code>male</code> es la diferencia con el signo cambiado. La suma de cuadrados de los residuos no cambia.
 </p>
 </div>
 </li>
-<li><a id="org46c9dd0"></a>Pregunta 9 [D] — Supuestos<br />
-<div class="outline-text-5" id="text-org46c9dd0">
-<p>
-<i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: que la colinealidad de grado no es una violación de supuestos y que los errores estándar grandes son información correcta. La opción 4 describe la colinealidad exacta, no la de grado.
-</p>
-</div>
-</li>
-<li><a id="orgdf7b2d4"></a>Pregunta 10 [M] — Qué mirar<br />
-<div class="outline-text-5" id="text-orgdf7b2d4">
+<li><a id="orgb5246a6"></a>Pregunta 8 [M] — Varias categorías<br />
+<div class="outline-text-5" id="text-orgb5246a6">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: el argumento de la lección 10 (un regresor cerca del subespacio de otros sin estar cerca de ninguno) y su consecuencia práctica: el VIF, no la matriz de correlaciones.
+<i>Evalúa</i>: la regla de una indicadora menos que grupos cuando hay constante, y la lectura respecto de la categoría omitida. La opción 4 trata una variable cualitativa como si fuera cuantitativa, lo que impone que pasar de la región 1 a la 2 tenga el mismo efecto que pasar de la 4 a la 5.
 </p>
 </div>
 </li>
-<li><a id="org435d34b"></a>Pregunta 11 [M] — Qué hacer<br />
-<div class="outline-text-5" id="text-org435d34b">
+<li><a id="org2b92226"></a>Pregunta 9 [D] — La interacción<br />
+<div class="outline-text-5" id="text-org2b92226">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: la opción razonable cuando dos regresores llevan la misma información (quedarse con una forma funcional no pierde información), y el error de eliminar los dos que la lección 13 ya señaló. La opción 3 no crea información: las copias repiten las mismas perturbaciones, y el error estándar que calcularía el programa sería falso.
+<i>Evalúa</i>: escribir el modelo por grupos. Con una interacción, el coeficiente de la indicadora es la diferencia de interceptos, es decir, la diferencia entre grupos en \(\text{exper}=0\), y el de la interacción es la diferencia de pendientes; la pendiente de las mujeres es \(\beta_4+\beta_5\), no \(\beta_5\).
 </p>
 </div>
 </li>
-<li><a id="org19e3be3"></a>Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado<br />
-<div class="outline-text-5" id="text-org19e3be3">
+<li><a id="org7f5bb00"></a>Pregunta 10 [M] — Dos rectas<br />
+<div class="outline-text-5" id="text-org7f5bb00">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: el alcance de la sesión, con el mismo criterio que las lecciones 11, 12 y 13: la longitud de la parte propia se demuestra en la sesión con material del curso; la fórmula del error estándar y la insesgadez de \(\mathfrak s^2\) se enuncian y el apéndice las demuestra. La fórmula se comprueba además con números.
+<i>Evalúa</i>: que un \(t\) pequeño en la interacción dice que datos como estos no serían raros con pendientes iguales, así que se conserva la indicadora y se omite la interacción. La opción 3 necesitaría además que el \(t\) de <code>female</code> fuese pequeño, y la 4 confunde los dos contrastes.
+</p>
+</div>
+</li>
+<li><a id="org8b4c5c9"></a>Pregunta 11 [D] — El contraste de Chow<br />
+<div class="outline-text-5" id="text-org8b4c5c9">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: qué contrasta el \(F\) conjunto y qué no. Rechazar la hipótesis conjunta no dice que las cuatro restricciones fallen (opción 1) ni cuáles fallan (opción 3); la opción 4 es imposible, porque el modelo común es el restringido y su \(\mathrm{SRC}\) nunca es menor.
+</p>
+</div>
+</li>
+<li><a id="orgef80963"></a>Pregunta 12 [M] — Lo que no dice<br />
+<div class="outline-text-5" id="text-orgef80963">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: las tres cautelas de la transparencia ``Qué dice y qué no dice el coeficiente de una indicadora'': no hay unidades de una indicadora (opción 3), la codificación no cambia el ajuste ni la diferencia (opción 4) y ``lo demás fijo'' se limita a los regresores del modelo (opción 1).
 </p>
 </div>
 </li>
 </ul>
 </div>
-<div id="footnotes">
-<h2 class="footnotes">Notas al pie de p&aacute;gina: </h2>
-<div id="text-footnotes">
-
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Con la norma estadística de la lección 2, que divide por \(n\), la longitud al cuadrado del regresor en desviaciones es su varianza muestral y no crece con \(n\). Las dos normas se relacionan por \(\Vert\boldsymbol x\Vert_e^2=n\Vert\boldsymbol x\Vert_s^2\), y la de la parte propia es \(\Vert\tilde{\boldsymbol x}_j\Vert_e^2=n\,\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_s^2\,(1-R_j^2)\): la varianza muestral del regresor, por lo que no comparte con los demás, por \(n\).</p></div></div>
-
-
 </div>
-</div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-10-05 lun 16:30</p>
+<p class="date">Created: 2026-10-08 jue 15:31</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
