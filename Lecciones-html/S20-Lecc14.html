@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-10-09 vie 09:47 -->
+<!-- 2026-10-05 lun 16:30 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Lección 11. ¿Es $\boldsymbol{\mathop{\widehat{\beta}}}$ un buen estimador? Insesgadez y varianza</title>
+<title>Lección 14. Colinealidad: cuando los regresores casi se alinean</title>
 <meta name="author" content="Marcos Bujosa" />
-<meta name="description" content="Lección 11: ¿es el estimador MCO un buen estimador? Insesgadez de la pendiente y cálculo de su varianza en el modelo lineal simple." />
+<meta name="description" content="Lección 14: colinealidad. La parte propia de un regresor, el factor de inflación de la varianza (VIF) y por qué los coeficientes se vuelven imprecisos e inestables." />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
   #content { max-width: 60em; margin: auto; }
@@ -247,744 +247,614 @@ $(function() {    $('.note').before("<p class='admonition-title note'>Note</p>")
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Lección 11. ¿Es \(\boldsymbol{\mathop{\widehat{\beta}}}\) un buen estimador? Insesgadez y varianza</h1>
+<h1 class="title">Lección 14. Colinealidad: cuando los regresores casi se alinean</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org6b35076">1. De dónde venimos: una pregunta pendiente</a></li>
-<li><a href="#orga76cacb">2. El marco: muestra aleatoria</a></li>
-<li><a href="#org6959a86">3. \(\hat\beta_2\): la misma fórmula, aplicada a variables aleatorias</a></li>
-<li><a href="#orgf7465e4">4. Dos propiedades de los pesos</a></li>
-<li><a href="#orga09bb44">5. Sustituyendo el modelo poblacional</a></li>
-<li><a href="#orgcbe391e">6. Insesgadez: \(\mathrm{E}(\hat\beta_2)=\beta_2\)</a></li>
-<li><a href="#orgb77c1fc">7. Varianza: cuán dispersas están las estimaciones</a></li>
-<li><a href="#org9058267">8. MCO es BLUE; estimando \(\sigma^2\)</a></li>
-<li><a href="#orgb0ddd9b">9. ¿Y con más regresores?</a></li>
-<li><a href="#orgd3dbb47">10. Recapitulación y guiño a la sesión siguiente</a></li>
-<li><a href="#apendice-copias">11. Apéndice: lanzar una moneda infinitas veces</a></li>
-<li><a href="#org74582cf">12. Preguntas de repaso (sesión 15)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
-<li><a href="#org5bcc378">13. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#orgc30d419">1. De dónde venimos: el caso <code>nox</code> y <code>lnox</code></a></li>
+<li><a href="#orgfb906a1">2. Colinealidad exacta y colinealidad de grado</a></li>
+<li><a href="#org625a22e">3. La parte propia de un regresor</a></li>
+<li><a href="#org72391fb">4. Cuánto se acorta: el factor de inflación de la varianza</a></li>
+<li><a href="#org4fd109e">5. El caso <code>nox</code> y <code>lnox</code> con números</a></li>
+<li><a href="#org8b0f413">6. Por qué oscilan los coeficientes</a></li>
+<li><a href="#orge0201c7">7. Síntomas y diagnóstico</a></li>
+<li><a href="#orga6778a6">8. Qué es y qué no es</a></li>
+<li><a href="#orgba09f5a">9. Qué hacer y qué no</a></li>
+<li><a href="#orgb7fc4be">10. Recapitulación y guiño a las sesiones siguientes</a></li>
+<li><a href="#orgf6e2334">11. Preguntas de repaso (sesión 20)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#orgf51f5bf">12. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
 </ul>
 </div>
 </div>
-<div class="abstract" id="org1b4607e">
+<div class="abstract" id="org19017c0">
 <p>
-¿Es \(\boldsymbol{\mathop{\widehat{\beta}}}\) un buen estimador de \(\boldsymbol\beta\)? Para el modelo lineal simple: \(\hat\beta_2\) es insesgado y calculamos su varianza, <i>reutilizando</i> la fórmula de la lección 7 sobre variables aleatorias.
+La lección 12 dejó enunciado que el error estándar de un coeficiente es \(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\), con \(\tilde{\boldsymbol x}_j\) la parte <i>propia</i> del regresor. Hoy definimos esa parte propia, medimos cuánto se acorta cuando un regresor casi cae en el subespacio de los demás y leemos la consecuencia: coeficientes imprecisos e inestables, con un ajuste que no se mueve.
 </p>
 
 <p>
-<i>``¿Es bueno un estimador? ¿Está bien centrado? ¿Cuánto se dispersa?''</i>
+<i>``El subespacio es estable; las coordenadas, no.''</i>
 </p>
 
 </div>
 
 <ul class="org-ul">
-<li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S15-Lecc11.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S15-Lecc11.pdf">pdf</a>)</li>
+<li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S20-Lecc14.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S20-Lecc14.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S20-Lecc14.pdf">pdf</a>)</li>
 </ul>
-<div id="outline-container-org6b35076" class="outline-2">
-<h2 id="org6b35076"><span class="section-number-2">1.</span> De dónde venimos: una pregunta pendiente</h2>
+<div id="outline-container-orgc30d419" class="outline-2">
+<h2 id="orgc30d419"><span class="section-number-2">1.</span> De dónde venimos: el caso <code>nox</code> y <code>lnox</code></h2>
 <div class="outline-text-2" id="text-1">
 <p>
-Recordemos cómo cerraba la lección 10: <i>``¿es \(\boldsymbol{\mathop{\widehat{\beta}}}\) un buen estimador del verdadero \(\boldsymbol\beta\)?''</i>
-</p>
-
-
-<p>
-\(\hat\beta_1,\hat\beta_2\), calculados primero con argumentos geométricos sobre los vectores de datos, se reinterpretaron después como <i>estimadores</i> de \(\beta_1,\beta_2\) por el método de los momentos.
+La lección 13 dejó un caso sin explicar: en <code>price</code> sobre <code>rooms</code>, <code>nox</code> y <code>lnox</code>, los dos \(t\) de la contaminación eran pequeños y el \(F\) de excluirlas juntas, \(28{,}2\).
 </p>
 
 <p>
-Hoy, para el modelo lineal simple (constante \(\mathit1\) más un regresor <i>no constante</i> \(X\)), demostraremos dos propiedades de \(\hat\beta_2\):
-</p>
-<ol class="org-ol">
-<li><i>Insesgadez</i>: \(\mathrm{E}(\hat\beta_2)=\beta_2\).</li>
-<li><i>Varianza</i>: una fórmula exacta de \(Var[\hat\beta_2\mid\boldsymbol X]\).</li>
-</ol>
-
-<p>
-Nos centramos en \(\hat\beta_2\) (la pendiente, de mayor interés económico); los mismos argumentos, sobre la fórmula \(\hat\beta_1\), permiten probar la insesgadez de \(\hat\beta_1\); no los desarrollamos aquí para no ser repetitivos.
+Lo que cambia al añadir <code>lnox</code> (<code>hprice2</code>, \(n=506\)):
 </p>
 
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Regresores, además de <code>rooms</code></th>
+<th scope="col" class="org-left">coef. de <code>nox</code></th>
+<th scope="col" class="org-left">\(\mathrm{ee}(\hat\beta_{\text{nox}})\)</th>
+<th scope="col" class="org-left">\(\mathfrak s\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>nox</code></td>
+<td class="org-left">\(-1884{,}7\)</td>
+<td class="org-left">\(253{,}6\)</td>
+<td class="org-left">\(6291{,}0\)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>nox</code> y <code>lnox</code></td>
+<td class="org-left">\(404{,}2\)</td>
+<td class="org-left">\(2198{,}9\)</td>
+<td class="org-left">\(6290{,}4\)</td>
+</tr>
+</tbody>
+</table>
+
 <p>
-Ningún ingrediente geométrico nuevo: la fórmula de \(\hat\beta_2\) que obtuvimos por geometría, la reutilizamos hoy tal cual, evaluada sobre variables aleatorias en lugar de sobre datos: <i>una fórmula aritmética vieja, aplicada sobre un objeto nuevo</i>.
+El coeficiente pasa de \(-1884{,}7\) a \(404{,}2\) y cambia de signo; el error estándar se multiplica por \(8{,}7\); \(\mathfrak s\) apenas cambia. La lección 12 enunció \(\mathrm{ee}(\hat\beta_j)=\frac{\mathfrak s}{\Vert\tilde{\boldsymbol x}_j\Vert_e}\): lo que se ha acortado es \(\tilde{\boldsymbol x}_{\text{nox}}\), la parte <i>propia</i> de <code>nox</code>.
+</p>
+
+<div class="org-center">
+<p>
+Hoy: qué es \(\tilde{\boldsymbol x}_j\), cuánto mide, qué le pasa al coeficiente y qué hacer.
 </p>
 </div>
-<div id="outline-container-orgaac6aea" class="outline-4">
-<h4 id="orgaac6aea">De dónde venimos: una pregunta pendiente</h4>
-<div class="outline-text-4" id="text-orgaac6aea">
+</div>
+<div id="outline-container-org098d7fb" class="outline-4">
+<h4 id="org098d7fb">De dónde venimos: el caso <code>nox</code> y <code>lnox</code></h4>
+<div class="outline-text-4" id="text-org098d7fb">
 <p>
-Esta sesión responde a una pregunta que quedó abierta en las lecciones 9 y 10. En la lección 9 (``El puente'') dimos sentido, por primera vez, a la pregunta ``¿\(\hat\beta_2\) estima bien al verdadero \(\beta_2\) poblacional?'', al construir el modelo poblacional \(Y=\beta_1\,\mathit1+\beta_2X+U\) y reinterpretar las fórmulas de la lección 7 como estimadores por el método de los momentos. En la lección 10 (regresión múltiple) esa misma pregunta se generalizó a \(k\) regresores, pero se dejó sin respuesta: una sola frase en la recapitulación, sin fórmula ni supuestos generalizados. Hoy la retomamos en detalle en el caso más sencillo, \(k=2\): la constante \(\mathit1\) y un único regresor no constante \(X\).
+La lección 13 terminó con un caso que supimos leer pero no medir. Con <code>rooms</code> y <code>nox</code> en el modelo, la contaminación tiene un \(t\) de \(-7{,}4\); con <code>rooms</code>, <code>nox</code> y <code>lnox</code>, los \(t\) de las dos medidas de contaminación caen a \(0{,}18\) y \(-1{,}05\), mientras que el \(F\) de excluirlas a la vez vale \(28{,}2\). Dijimos que era la firma de la colinealidad y que la lección 14 le pondría números.
 </p>
 
 <p>
-La estrategia de esta sesión no introduce ninguna geometría nueva. Vamos a reutilizar, tal cual, la fórmula de \(\hat\beta_2\) que obtuvimos en la lección 7 mediante la ``vía alternativa'' (proyección sobre generadores ortogonales, vía Cauchy–Schwarz). Esa fórmula, una vez concluido el cálculo geométrico, quedó escrita como una expresión puramente aritmética: una suma de productos dividida por una suma de cuadrados. Precisamente por ser aritmética, y ya no geométrica, podemos evaluarla en cualquier conjunto de argumentos siempre que las operaciones estén bien definidas. Hoy evaluaremos la fórmula, en lugar de con datos fijos \(x_1,\ldots,x_n,y_1,\ldots,y_n\), con las variables aleatorias de una muestra \(X_1,\ldots,X_n,Y_1,\ldots,Y_n\). El resultado de esa sustitución ya no es un número: es una nueva variable aleatoria, el <i>estimador</i> \(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\).
+La tabla de la transparencia aísla lo que cambia al añadir <code>lnox</code>. Al añadir <code>lnox</code>, el coeficiente de <code>nox</code> cambia de signo y su error estándar pasa de \(253{,}6\) a \(2198{,}9\). Lo que casi no cambia es \(\mathfrak s\): \(6291{,}0\) frente a \(6290{,}4\). El ruido estimado es similar, así que el cambio no viene del numerador del error estándar.
 </p>
 
 <p>
-Conviene decir desde el principio qué NO vamos a hacer. No vamos a definir un nuevo producto escalar \(\langle\cdot,\cdot\rangle\) sobre ``vectores cuyas componentes son variables aleatorias'', ni vamos a apelar de nuevo a Cauchy–Schwarz para justificar la fórmula de \(\hat\beta_2\): la lección de hoy no se basa en ese tipo de argumentos geométricos. Lo único que hacemos hoy es sustituir números por variables aleatorias dentro de una fórmula ya obtenida. Es una operación distinta de una demostración geométrica, y no exige comprobar ninguna propiedad de producto escalar: es la diferencia entre demostrar un teorema y usar en otro contexto la fórmula que el teorema produjo.
+La lección 12 dejó enunciado, sin demostrar, que con varios regresores
+\[
+\mathrm{ee}(\hat\beta_j)=\frac{\mathfrak s}{\Vert\tilde{\boldsymbol x}_j\Vert_e},
+\]
+donde \(\tilde{\boldsymbol x}_j\) es lo que le queda de propio al regresor \(j\) tras descontar lo que comparte con los demás. Si \(\mathfrak s\) no ha cambiado y el error estándar se ha multiplicado por \(8{,}7\), la parte propia de <code>nox</code> se ha dividido por \(8{,}7\). Queda por entender qué es \(\tilde{\boldsymbol x}_j\), por qué se acorta y cuánto.
 </p>
 
 <p>
-Conviene también precisar el alcance de esta sesión: demostramos insesgadez y la expresión de la varianza <i>solo</i> para \(\hat\beta_2\) en la regresión con dos regresores (modelo lineal simple). La generalización a \(k\) regresores existe: la citaremos al final de la sesión en su forma matricial, sin demostrarla, porque requiere álgebra que este curso no desarrolla; la insesgadez y la varianza de cada coeficiente por separado sí están demostradas sin matrices en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=20">apéndice (sección 7.1)</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-7-1">html</a>). Lo que sí haremos, como cierre, es comprobar que la fórmula general, evaluada en el caso particular \(k=2\), coincide con lo que aquí probamos sin matrices.
+La sesión tiene tres partes. Las cuatro primeras transparencias definen la parte propia de un regresor y miden su longitud, con el resultado que hoy se demuestra y el error estándar que se lee a partir de él. Las dos siguientes ponen números al caso <code>nox</code> y <code>lnox</code> y explican por qué los coeficientes oscilan. Las tres últimas son de lectura: síntomas, qué es y qué no es la colinealidad, y qué hacer.
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.5: insesgadez y varianza de los estimadores MCO en regresión simple (Teoremas 2.1 y 2.2).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4, apartado ``Multicollinearity'' (el planteamiento del problema con la fórmula de la varianza de \(\hat\beta_j\)).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orga76cacb" class="outline-2">
-<h2 id="orga76cacb"><span class="section-number-2">2.</span> El marco: muestra aleatoria</h2>
+<div id="outline-container-orgfb906a1" class="outline-2">
+<h2 id="orgfb906a1"><span class="section-number-2">2.</span> Colinealidad exacta y colinealidad de grado</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-Recordemos (lección 9): los \(n\) datos son \(n\) copias <span class="underline">idénticas e independientes</span> de \(Y\); hoy, del par \((X,U)\).
+<i>Exacta</i> (lección 10): un regresor es combinación lineal de los demás. \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) no es invertible; infinitos \(\boldsymbol{\mathop{\widehat\beta}}\) dan el mismo ajuste. Ejemplo: temperatura en Celsius y en Fahrenheit.
 </p>
 
 <p>
-\(\boldsymbol X\): la <i>versión aleatoria</i> de \(\boldsymbol{\mathsf X}=[\boldsymbol 1;\;\boldsymbol x]\), con columnas \(\mathit 1\) (\(n\) copias) y \(X_1,\ldots,X_n\). Análogamente \(\boldsymbol Y=(Y_1,\ldots,Y_n)\) y \(\boldsymbol U=(U_1,\ldots,U_n)\).
-Para cada \(i\): \(\;Y_i=\beta_1\,\mathit1+\beta_2X_i+U_i\), con los tres supuestos de la lección 9, condicionando ahora en \(\boldsymbol X\).
+<i>De grado</i> (hoy): un regresor forma un ángulo muy pequeño con el subespacio generado por los demás (constante incluida). Solución única, pero imprecisa e inestable.
 </p>
 
 <p>
-<i>Lo nuevo</i> es el <b>muestreo aleatorio</b>: las \(n\) copias \((X_i,U_i)\) son independientes entre sí. Dos consecuencias:
+Con dos regresores no constantes: \(\rho_{\boldsymbol x_2\boldsymbol x_3}\) próximo a \(\pm1\), es decir, \(\cos\theta\) próximo a \(\pm1\) y vectores en desviaciones casi alineados (lección 3). Con más: alguno forma un ángulo muy pequeño con el subespacio de los otros, y las correlaciones por parejas no bastan para verlo (lección 10).
 </p>
-
-<ul class="org-ul">
-<li>\(E[U_i\mid\boldsymbol X]=\mathit0\): \(U_i\perp\) funciones de \(X_i\) (<i>por definición</i>) y de las demás copias (<i>por independencia</i>).</li>
-</ul>
-
-<ul class="org-ul">
-<li>Perturbaciones de observaciones distintas, incorreladas: \(Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0\) \(\;(i\neq j)\).</li>
-</ul>
-
 
 <div class="org-center">
 <p>
-Condicionar en \(\boldsymbol X\): la esperanza condicional de la lección 9, sobre las \(n\) copias a la vez.
+Es una escala, no una frontera. La pregunta útil no es ``¿hay colinealidad?'' sino ``¿cuánto aumenta el error estándar de cada coeficiente?''.
 </p>
 </div>
 </div>
-<div id="outline-container-org37fb0e6" class="outline-4">
-<h4 id="org37fb0e6">El marco: muestra aleatoria</h4>
-<div class="outline-text-4" id="text-org37fb0e6">
+<div id="outline-container-orgec1a10b" class="outline-4">
+<h4 id="orgec1a10b">Colinealidad exacta y colinealidad de grado</h4>
+<div class="outline-text-4" id="text-orgec1a10b">
 <p>
-La lección 9 introdujo, sin desarrollarla, una frase que hoy se convierte en el ingrediente central de la sesión: ``asumiremos que nuestros \(n\) datos son el resultado de observar la realización de \(n\) copias idénticas e independientes de esa variable \(Y\)''. Allí esa frase servía únicamente para enunciar que interpretamos cada dato \(y_i\) como la realización de una variable aleatoria. Hoy la trataremos con más profundidad, porque para hablar de la <i>distribución</i> de \(\hat\beta_2\), de cuánto varía de una muestra a otra, necesitamos imaginar que la muestra de datos podría haber sido distinta.
+El curso ya conoce el caso extremo. En la lección 10, al deducir las ecuaciones normales, dijimos que si los regresores son linealmente dependientes la matriz \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) no es invertible y el sistema tiene infinitas soluciones: infinitos vectores \(\boldsymbol{\mathop{\widehat\beta}}\) producen el mismo ajuste \(\boldsymbol{\mathop{\widehat y}}\). Lo llamamos <i>colinealidad exacta</i>, y la práctica que siguió a esa lección lo comprobó (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=6">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#colinealidad-exacta">html</a>)) con la temperatura en grados Celsius y en grados Fahrenheit: Gretl omite una de las dos columnas y avisa. Es una situación que se detecta sola, porque no hay nada que estimar.
 </p>
 
 <p>
-Formalicemos esa idea. Desde la lección 4 venimos usando \(\boldsymbol x=(x_1,\ldots,x_n)\) para el vector de datos observados (y, desde la lección 6, para el vector de datos observados de un <i>regresor</i>), y en la lección 10 los agrupamos en la matriz de regresores \(\boldsymbol{\mathsf X}\), una columna por regresor (en el modelo lineal simple, \(\boldsymbol{\mathsf X}=[\boldsymbol1;\;\boldsymbol x]\)). Hoy introducimos su análogo aleatorio: la matriz<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> \(\boldsymbol X\). Este es el objeto sobre el que condicionaremos todos los momentos a lo largo de la sesión. Cada columna de \(\boldsymbol X\) corresponderá al muestreo de uno de los regresores poblacionales. En el modelo lineal simple son \(\mathit 1\) y \(X\); por tanto, la segunda columna de \(\boldsymbol X\) está formada por las \(n\) variables aleatorias \(X_1,\ldots,X_n\): cada una es una copia idéntica e independiente de la variable poblacional \(X\) de la lección 9.<sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup> Es la misma relación dato/variable aleatoria que venimos usando desde la lección 9 (entre \(y_i\) e \(Y\)), aplicada componente a componente a los \(n\) elementos de la muestra correspondiente a cada columna.
-</p>
-
-
-<div id="orgdc2ac04" class="figure">
-<p><img src="img/S15-Lecc11/MatrizCopias.png" alt="MatrizCopias.png" width="700px" />
-</p>
-<p><span class="figure-number">Figura 1: </span>La matriz de copias. Cada fila es una copia de la variable, una función sobre \(\Omega\); la matriz continúa hacia abajo indefinidamente. Elegir \(n\) filas es crear una muestra; elegir una columna es fijar un suceso elemental \(\omega\) donde evaluar las infinitas copias; las dos cosas a la vez dan el vector de \(\mathbb R^n\) de la derecha: la realización de la muestra. Los datos observados son una columna; repetir el experimento es recorrer otras columnas con las mismas filas.</p>
-</div>
-
-<p>
-La figura ordena lo que sigue. Cada fila es una copia, una variable aleatoria entera; la lista \((X_1,\ldots,X_n)\) son \(n\) filas, no un vector de \(\mathbb R^n\): sus componentes son funciones, no números. Fijar un suceso elemental \(\omega\) es elegir una columna. Las dos cosas a la vez dan un vector de \(\mathbb R^n\), la realización de la muestra, que es lo que tenemos en un vector de datos: nuestro vector es una columna, de \(n\) funciones (\(n\) copias) evaluadas en un mismo \(\omega\). Y cuando en el laboratorio de la sesión siguiente repitamos un experimento dos mil veces (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop">html</a>) de la práctica A de la sesión 16), podremos interpretarlo como que estamos obteniendo dos mil columnas mediante la evaluación de las mismas filas en dos mil \(\omega\) distintos. El <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=9">apéndice (sección 3)</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-3">html</a>) desarrolla esta lectura.
+La colinealidad de grado es el caso próximo a ese: un regresor no es combinación lineal de los demás, pero forma un ángulo muy pequeño con el subespacio que generan (constante incluida). La solución existe y es única, pero el coeficiente de ese regresor se estima con poca precisión y cambia mucho ante cambios pequeños de los datos. Lo llamaremos <i>colinealidad de grado</i>, y la palabra ``grado'' indica que es una escala continua: lo que hay que medir es cuánto aumenta el error estándar de cada coeficiente por este motivo.
 </p>
 
 <p>
-<i>Una precisión de uso</i>. Durante casi toda la sesión no necesitaremos ninguna operación matricial con \(\boldsymbol X\): bastarán sumatorios sobre las \(X_i\), y ``condicionar en \(\boldsymbol X\)'' significará siempre proyectar sobre el espacio de funciones cuyo argumento son, simultáneamente, todas las variables aleatorias presentes en \(\boldsymbol X\). La estructura de matriz de \(\boldsymbol X\) reaparecerá puntualmente al justificar el divisor \(n-k\) (sección ``MCO es BLUE; estimando \(\sigma^2\)'', donde hablaremos de las columnas de \(\boldsymbol{\mathsf X}\)) y, con más de 2 columnas, en la generalización final a \(k\) regresores. Es decir: el símbolo \(\boldsymbol X\) significa lo mismo al principio y al final de la sesión; lo único que cambia es cuántas columnas tiene.
+Con dos regresores no constantes la escala es la correlación. La lección 5 definió \(\rho_{\boldsymbol x_2\boldsymbol x_3}\) como el coseno del ángulo entre los vectores en desviaciones, y la lección 3 mostró que \(\cos\theta=\pm1\) exactamente cuando los vectores están alineados. Colinealidad exacta es \(\rho=\pm1\); colinealidad de grado es \(\rho\) cerca de \(\pm1\), vectores casi alineados. La lección 3 lo anunció: dos regresores muy correlacionados tienen sus vectores en desviaciones casi alineados.
 </p>
 
 <p>
-Para cada observación \(i\), el modelo poblacional de la lección 9 se aplica sin ningún cambio, con subíndice \(i\) añadido:
-\[
-Y_i=\beta_1\,\mathit1+\beta_2X_i+U_i, \qquad i=1,\ldots,n,
-\]
-con los tres supuestos del Modelo Clásico de Regresión Lineal aplicados a cada par \((X_i,U_i)\): linealidad, independencia lineal (\(\mathrm{Var}(X)\neq0\)) y homocedasticidad \(Var[U_i\mid\boldsymbol X]=\sigma^2\,\mathit1\); más la exogeneidad estricta \(E[U_i\mid\boldsymbol X]=\mathit0\), que en la lección 9 obteníamos sin supuesto adicional.<sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup>
+Con tres o más regresores no constantes la correlación por parejas deja de bastar, por la razón que dio la lección 10: un regresor puede estar cerca del subespacio generado por los demás sin estar cerca de ninguno de ellos en particular. El ejemplo de aquella lección sirve: la renta total de un hogar frente a sus dos componentes, renta del trabajo y renta del capital. Las tres transparencias siguientes construyen la medida que sí sirve en todos los casos: la longitud de la parte propia de cada regresor.
 </p>
 
 <p>
-Sobre el supuesto \(\mathrm{Var}(X)\neq0\) conviene una precisión, porque es fácil que el símbolo ``\(X\)'' induzca a confusión una vez que ya solo hablamos de \(X_1,\ldots,X_n\). La letra \(X\), sin subíndice, sigue denotando, como en la lección 9, la variable poblacional de la que \(X_1,\ldots,X_n\) son copias. El supuesto \(\mathrm{Var}(X)\neq0\) se enuncia sobre esa variable poblacional, y se aplica a cada copia \(X_i\) porque, al ser copias idénticas, cada \(X_i\) tiene la misma distribución que \(X\) (y, en particular, la misma varianza).
-</p>
-
-<p>
-Fíjese que la exogeneidad estricta tampoco es introducida aquí como un supuesto adicional, aunque hoy descansa sobre dos propiedades del modelo (en lugar de solo una): en primer lugar, la definición de \(U_i\) da \(U_i\perp\) funciones de \(X_i\); y, en segundo lugar, el muestreo aleatorio da \(U_i\perp\) funciones de las demás copias \(X_j\) con \(j\ne i\). Esta es la primera consecuencia que extraemos del muestreo aleatorio; la segunda viene a continuación. 
-</p>
-
-<p>
-La segunda consecuencia del muestreo aleatorio es aún más directa: si \((X_i,U_i)\) y \((X_j,U_j)\) son independientes para \(i\neq j\), entonces, en particular, \(U_i\) y \(U_j\) son independientes, y dos variables independientes tienen covarianza cero:<sup><a id="fnr.4" class="footref" href="#fn.4" role="doc-backlink">4</a></sup>
-\[
-Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0 \qquad (i\neq j).
-\]
-No se trata, por tanto, de un supuesto añadido <i>ex novo</i>: es la traducción, en términos de covarianzas, de algo que ya habíamos dado por sentado desde la lección 9 al hablar de copias ``idénticas e independientes'' (lo que su curso de estadística del cuatrimestre anterior llamaba, seguramente, <i>muestreo aleatorio simple</i>). Hoy es la primera vez que necesitamos esta consecuencia de forma explícita, porque es la primera vez que trabajamos con <i>varias</i> perturbaciones \(U_1,\ldots,U_n\) simultáneamente, en lugar de con una sola \(U\) genérica. En el lenguaje de la lección 9: dadas \(\boldsymbol X\), las perturbaciones \(U_1,\ldots,U_n\) son una familia ortogonal de variables aleatorias de la misma longitud \(\sigma\). Es todo lo que usan la insesgadez y la varianza de esta sesión; la independencia completa, que es más, solo hará falta en la lección 12 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=16">apéndice, secciones 6.1</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-6-1">html</a>) y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=20">7.1</a>).
-</p>
-
-<p>
-Por último, nótese que, al enunciar el supuesto de homocedasticidad, la varianza de cada \(U_i\) se condiciona a <i>toda</i> la matriz \(\boldsymbol X\); esta condición es más fuerte que condicionar solo sobre \(X_i\). Es la condición que hace falta para todo lo que sigue (ni es un corolario de la definición de \(U_i\) ni tampoco del muestreo aleatorio simple) y la estamos <i>imponiendo</i> directamente en esa forma más fuerte.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.5, supuesto SLR.2 (muestreo aleatorio).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.3 (supuesto MLR.3, no colinealidad perfecta) y sección 3.4 (la distinción con la colinealidad ``imperfecta'').
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org6959a86" class="outline-2">
-<h2 id="org6959a86"><span class="section-number-2">3.</span> \(\hat\beta_2\): la misma fórmula, aplicada a variables aleatorias</h2>
+<div id="outline-container-org625a22e" class="outline-2">
+<h2 id="org625a22e"><span class="section-number-2">3.</span> La parte propia de un regresor</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-<i>Estimación vs. estimador</i> (distinción hoy imprescindible):
-</p>
-<ul class="org-ul">
-<li>\(\hat\beta_2(\boldsymbol x,\boldsymbol y)\), la <i>estimación</i>: un número.</li>
-<li>\(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\), el <i>estimador</i>: una variable aleatoria, la MISMA fórmula sobre la muestra aleatoria.</li>
-</ul>
-
-<p>
-Recordando la ``vía alternativa'' (lección 7):
+Proyectamos \(\boldsymbol x_j\) sobre el subespacio de <i>los demás</i> regresores (constante incluida), como en la lección 10. El residuo de esa <i>regresión auxiliar</i> es la parte propia:
 \[
-\hat\beta_2(\boldsymbol x,\boldsymbol y)=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}=\sum_i w_i y_i; \quad\text{donde } w_i=\frac{(x_i-\mu_{\boldsymbol x})}{\sum_j(x_j-\mu_{\boldsymbol x})^2}.
+\boldsymbol x_j=\underbrace{\text{(combinación de los demás)}}_{\text{lo que comparte}}+\underbrace{\tilde{\boldsymbol x}_j}_{\text{lo propio}},\quad \tilde{\boldsymbol x}_j\perp\text{ los demás regresores.}
 \]
 </p>
 
-<p>
-Sustituimos \(x_i,y_i\) por \(X_i,Y_i\):
+
+<div id="org426854c" class="figure">
+<p><img src="img/S20-Lecc14/PartePropia_fila.png" alt="PartePropia_fila.png" width="700px" />
 </p>
+<p><span class="figure-number">Figura 1: </span>Dos regresores en desviaciones en el plano \(\mathcal L(\boldsymbol 1)^\perp\), con ángulo \(\theta\) de \(60^\circ\), \(20^\circ\) y \(6^\circ\). En azul, \(\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\) y \(\boldsymbol x_3-\mu_{\boldsymbol x_3}\boldsymbol 1\); el vector gris, que va desde la ``sombra'' del primero sobre la recta del segundo hasta la punta del primero, es \(\tilde{\boldsymbol x}_2\), la parte propia de \(\boldsymbol x_2\). Los dos regresores en desviaciones tienen la misma longitud en los tres paneles; la de la parte propia, cateto opuesto al ángulo \(\theta\), es \(\sin\theta\) veces esa longitud: \(0{,}87\), \(0{,}34\) y \(0{,}10\).</p>
+</div>
 
 <p>
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\frac{\sum_i(X_i-\overline{X})Y_i}{\sum_j(X_j-\overline{X})^2}=\sum_i {W_i}Y_i; \quad\text{donde } W_i = \frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}.
-\]
-donde \(\overline{X}=\frac1n\sum_iX_i\) es la <i>media muestral</i>; y \(\sum_i (X_i - \overline{X}) = \mathit 0\).
+Enunciado en la lección 12 (demostración en el apéndice): \(\;\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\). Con un solo regresor no constante, \(\tilde{\boldsymbol x}_2=\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\) y se recupera la lección 12.
 </p>
 </div>
-<div id="outline-container-orgb824b46" class="outline-4">
-<h4 id="orgb824b46">\(\hat\beta_2\): la misma fórmula, aplicada a variables aleatorias</h4>
-<div class="outline-text-4" id="text-orgb824b46">
+<div id="outline-container-org104b2c8" class="outline-4">
+<h4 id="org104b2c8">La parte propia de un regresor</h4>
+<div class="outline-text-4" id="text-org104b2c8">
 <p>
-Antes de seguir, conviene fijar una distinción que hasta ahora el curso no había requerido. Cuando escribimos \(\hat\beta_2=\frac{\sigma_{\boldsymbol{x}\boldsymbol{y}}}{\sigma_{\boldsymbol{x}}^2}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}\) (lección 7) y evaluamos esa fórmula con dos vectores de datos concretos \(\boldsymbol x\) e \(\boldsymbol y\), obtenemos un <i>número</i>: la <i>estimación</i> \(\hat\beta_2\) de \(\beta_2\). Si aplicamos la misma fórmula a dos muestras \(\boldsymbol X\) y \(\boldsymbol Y\), el resultado es una función de variables aleatorias, es decir, una variable aleatoria<sup><a id="fnr.5" class="footref" href="#fn.5" role="doc-backlink">5</a></sup>: el <i>estimador</i> \(\hat\beta_2\) de \(\beta_2\).<sup><a id="fnr.6" class="footref" href="#fn.6" role="doc-backlink">6</a></sup>
+La lección 12 habló de ``la parte del regresor \(j\) que no se puede reconstruir a partir de los demás''. Hoy le damos definición, y la definición es una proyección ortogonal de las de la lección 10, aplicada a un regresor en lugar de al regresando.
 </p>
 
 <p>
-Precisemos qué significa ``sustituir datos por variables aleatorias en una fórmula''. Una fórmula como \(\mu_{\boldsymbol x}=f(x_1,\ldots,x_n)=\frac1n\sum_ix_i\) es, matemáticamente, una función que toma \(n\) números y devuelve un solo número: <i>la media</i>. Pero nada impide evaluar esa MISMA fórmula con otro tipo de argumento (si la operación sigue estando bien definida): si en lugar de \(n\) números sus argumentos son \(n\) variables aleatorias \(X_1,\ldots,X_n\), el resultado \(f(X_1,\ldots,X_n)=\frac1n\sum_iX_i\) ya no es un número, ahora es una variable aleatoria. A esta nueva variable aleatoria la llamamos <i>media muestral</i>, y la denotamos con \({\overline{X}}\); es el estimador natural del valor esperado \(\mathrm{E}(X)\). Su definición emplea la MISMA fórmula aritmética que en la lección 4 usamos para definir la media de un vector de datos, pero ahora la fórmula es aplicada a las \(n\) variables aleatorias de la muestra (de ahí el nombre de <i>media muestral</i>).
+Tomemos el regresor \(\boldsymbol x_j\) y el subespacio generado por todos los demás, constante incluida: \(\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_{j-1},\boldsymbol x_{j+1},\ldots,\boldsymbol x_k)\). Proyectar \(\boldsymbol x_j\) sobre ese subespacio es hacer una regresión, la <i>regresión auxiliar</i> de \(\boldsymbol x_j\) sobre los demás regresores. Esa regresión descompone \(\boldsymbol x_j\) en dos piezas ortogonales: el ajuste, que es la parte de \(\boldsymbol x_j\) que los demás regresores reproducen, y el residuo, que es la parte que no reproducen. A ese residuo lo llamamos <i>parte propia</i> del regresor y lo denotamos \(\tilde{\boldsymbol x}_j\). Por ser un residuo de la lección 10, \(\tilde{\boldsymbol x}_j\) es ortogonal a todos los generadores del subespacio: a \(\boldsymbol 1\) y a cada uno de los otros regresores. Tiene, en particular, media cero.
 </p>
 
 <p>
-Esta observación guía toda la sesión, y no encierra más complejidad que la enunciada: nos limitamos a definir nuevas variables aleatorias mediante la aplicación de fórmulas preexistentes (desarrolladas en su momento en \(\mathbb{R}^n\)) a las variables aleatorias de una muestra. Dichas variables aleatorias se conocen como <i>estadísticos</i> o <i>estadísticos muestrales</i>.
+La figura lo muestra con dos regresores no constantes, en el plano de las desviaciones. Si solo hay otro regresor, \(\boldsymbol x_3\), el subespacio de ``los demás'' en desviaciones es la recta de \(\boldsymbol x_3-\mu_{\boldsymbol x_3}\boldsymbol 1\), y la parte propia de \(\boldsymbol x_2\) es la componente de \(\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\) perpendicular a esa recta: el cateto vertical del triángulo. Aquí aparece por primera vez en el curso el seno, y no hace falta nada nuevo para leerlo: en un triángulo rectángulo el cateto opuesto al ángulo \(\theta\) mide la hipotenusa por \(\sin\theta\), igual que el cateto contiguo mide la hipotenusa por \(\cos\theta\) (lección 3), y Pitágoras en ese mismo triángulo da \(\cos^2\theta+\sin^2\theta=1\), es decir, \(\sin\theta=\sqrt{1-\cos^2\theta}\). En los tres paneles los dos regresores en desviaciones tienen la misma longitud; solo cambia el ángulo \(\theta\) entre ellos. Con \(60^\circ\) la parte propia es casi todo el regresor; con \(6^\circ\) es una décima parte. La transparencia siguiente establece la fórmula.
 </p>
 
 <p>
-Con esto aclarado, retomamos la fórmula de la ``vía alternativa'' de la lección 7. Allí, cambiando a los generadores ortogonales  \(\boldsymbol 1\) y \(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\), obtuvimos, para dos vectores de datos \(\boldsymbol x\) e \(\boldsymbol y\),
-\[
-\hat\beta_2(\boldsymbol x,\boldsymbol y)=\frac{\langle\boldsymbol y,(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1)\rangle_s}{\langle(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1),(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1)\rangle_s}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}.
-\]
-El lado izquierdo de esta igualdad (\(\langle\cdot,\cdot\rangle_s\)) es geometría: un cociente de dos productos escalares, con todo su significado y papel en la proyección ortogonal. El lado derecho, en cambio, ya no necesita esos conceptos para ser evaluado: es una simple expresión aritmética (los factores \(1/n\) de cada producto escalar se cancelan al dividir, así que ni siquiera hace falta especificar el divisor). Hoy nos quedamos con esta expresión aritmética, prescindiendo de la geometría subyacente, y sustituimos directamente las observaciones \(x_i, y_i\) por las variables aleatorias \(X_i, Y_i\); y reescribimos la expresión como una suma ponderada:<sup><a id="fnr.7" class="footref" href="#fn.7" role="doc-backlink">7</a></sup>
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\frac{\sum_i(X_i-\overline{X})Y_i}{\sum_j(X_j-\overline{X})^2}=\sum_{i=1}^n\underbrace{\left(\frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}\right)}_{W_i}Y_i
-=\sum_{i=1}^n {W_i}Y_i.
-\]
-Escribimos los pesos aleatorios \(W_i\) con mayúscula por ser estadísticos (i.e., variables aleatorias).
+Con esta definición, el enunciado de la lección 12 se lee así: el error estándar de \(\hat\beta_j\) es la longitud del ruido estimado, \(\mathfrak s\), por unidad de longitud <i>de la parte propia</i> del regresor. Es la misma lectura de la lección 12, ``longitud del ruido estimado por unidad de longitud del regresor en desviaciones'', con una corrección: con varios regresores no cuenta toda la longitud del regresor, solo la que no comparte con los demás. Cuando solo hay un regresor no constante no hay nada que compartir, la regresión auxiliar es la de \(\boldsymbol x_2\) sobre \(\boldsymbol 1\), su residuo es el vector en desviaciones \(\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\), y la fórmula es la de la lección 12. La demostración está en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>) (sección <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=13">5.4</a> para la fórmula de \(\hat\beta_j\) con la parte propia; <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=19">6.5</a> y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=20">7.1</a> para la insesgadez y la varianza con \(k\) regresores; la insesgadez de \(\mathfrak s^2\) con \(k\) regresores, que la lección 11 enunció, en <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=21">7.2</a>); aquí basta con la lectura: con varios regresores no cuenta toda la longitud del regresor, solo la que no comparte con los demás. El resultado, \(\hat\beta_j\) como coeficiente de la regresión de \(\boldsymbol y\) sobre la parte propia de \(\boldsymbol x_j\), se conoce como <i>teorema de Frisch–Waugh–Lovell</i>, y es lo que usa la opción ``Ortogonalizar'' de ``Qué hacer y qué no''. 
 </p>
 
 <p>
-Respecto a la media muestral, fijémonos que como \(\overline{X}=\frac1n\sum_iX_i\), entonces \(\sum_i X_i=n\overline{X}\) y que \(\sum_{i=1}^n \overline{X}=\underbrace{\overline{X}+\dots+\overline{X}}_{n\text{ veces}}=n\overline{X}\); así
-\[
-\sum_i (X_i - \overline{X}) = \sum_i X_i - \sum_i \overline{X} = n\overline{X} - n\overline{X} = \mathit 0.
-\]
-Usaremos esta propiedad de la <i>media muestral</i> en la siguiente transparencia.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.5 (donde \(\hat\beta_2\) se escribe, con la misma idea, como \(\sum w_iy_i\) mediante sumatorios).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.2, apartado ``A partialling out interpretation of multiple regression'' (la regresión auxiliar y su residuo).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgf7465e4" class="outline-2">
-<h2 id="orgf7465e4"><span class="section-number-2">4.</span> Dos propiedades de los pesos</h2>
+<div id="outline-container-org72391fb" class="outline-2">
+<h2 id="org72391fb"><span class="section-number-2">4.</span> Cuánto se acorta: el factor de inflación de la varianza</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-Dos identidades algebraicas sobre los pesos. Ninguna es nueva.
-</p>
-
-<p>
-Ambas valen para <i>cualquier</i> lista de números y, por tanto, siguen siendo ciertas al sustituir \(x_i\) por \(X_i\): son hechos aritméticos, no probabilísticos:
-</p>
-<ul class="org-ul">
-<li>la primera es la condición \(\sum_i(X_i-\overline{X})=\mathit0\) de la transparencia anterior (la misma cuenta que en la lección 4 daba media cero al vector en desviaciones);</li>
-</ul>
-<p>
+Pitágoras en la regresión auxiliar (lección 8), con \(\mathrm{STC}_j=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\), \(\mathrm{SRC}_j=\Vert\tilde{\boldsymbol x}_j\Vert_e^2\) y \(R_j^2=\cos^2\theta_j\) su coeficiente de determinación, de modo que \(1-R_j^2=1-\cos^2\theta_j=\sin^2\theta_j\):
 \[
-\sum_iW_i=\mathit 0;
+\mathrm{STC}_j=\mathrm{SEC}_j+\mathrm{SRC}_j
+\;\Longrightarrow\;
+\boxed{\;\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\,\sin\theta_j\;}
 \]
 </p>
 
-<ul class="org-ul">
-<li>la segunda es la razón por la que, en la ``vía alternativa'' de la lección 7, el coeficiente de \(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1\) resultaba ser exactamente \(\hat\beta_2\).</li>
-</ul>
 <p>
+Sustituyendo en el error estándar:
 \[
-\sum_iW_iX_i=\mathit 1 \qquad\Big(\text{pues } \textstyle\frac{\sum_i(X_i-{\overline{X}})X_i}{\sum_j(X_j-{\overline{X}})^2}=\frac{\sum_i(X_i-{\overline{X}})^2}{\sum_j(X_j-{\overline{X}})^2}\Big).
+\mathrm{ee}(\hat\beta_j)=\underbrace{\frac{\mathfrak s}{\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e}}_{\text{como si estuviera solo}}\cdot\sqrt{\mathrm{VIF}_j},
+\qquad
+\mathrm{VIF}_j=\frac{1}{1-R_j^2}=\frac{1}{\sin^2\theta_j}.
 \]
 </p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">\(\rho_{\boldsymbol x_2\boldsymbol x_3}\) (con \(k=3\), \(R_2^2=\rho_{\boldsymbol x_2\boldsymbol x_3}^2\))</th>
+<th scope="col" class="org-left">\(\theta\)</th>
+<th scope="col" class="org-left">\(\mathrm{VIF}\)</th>
+<th scope="col" class="org-left">\(\sqrt{\mathrm{VIF}}\)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">\(0{,}5\)</td>
+<td class="org-left">\(60^\circ\)</td>
+<td class="org-left">\(1{,}3\)</td>
+<td class="org-left">\(1{,}2\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(0{,}9\)</td>
+<td class="org-left">\(26^\circ\)</td>
+<td class="org-left">\(5{,}3\)</td>
+<td class="org-left">\(2{,}3\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(0{,}99\)</td>
+<td class="org-left">\(8^\circ\)</td>
+<td class="org-left">\(50\)</td>
+<td class="org-left">\(7{,}1\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(0{,}999\)</td>
+<td class="org-left">\(2{,}6^\circ\)</td>
+<td class="org-left">\(500\)</td>
+<td class="org-left">\(22\)</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div id="outline-container-orgf6a699b" class="outline-4">
-<h4 id="orgf6a699b">Dos propiedades de los pesos</h4>
-<div class="outline-text-4" id="text-orgf6a699b">
+<div id="outline-container-org5171bba" class="outline-4">
+<h4 id="org5171bba">Cuánto se acorta: el factor de inflación de la varianza</h4>
+<div class="outline-text-4" id="text-org5171bba">
 <p>
-Antes de sustituir el modelo poblacional en \(\hat\beta_2=\sum_iW_iY_i\), necesitamos dos propiedades de los pesos \(W_i\) que, en realidad, ya conocemos aunque nunca las hayamos escrito con este nombre. La primera es, literalmente, \(\langle\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1,\boldsymbol1\rangle_s=0\) (lección 4: el vector en desviaciones tiene media cero), dividida por el denominador común de los \(W_i\). La segunda es lo que, en la ``vía alternativa'' de la lección 7, hacía que al proyectar \(\boldsymbol y\) sobre \(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol1\) el coeficiente obtenido fuera la pendiente \(\hat\beta_2\) (allí no aislamos unos ``pesos''; nos limitamos a escribir la fórmula como cociente de productos escalares).
-</p>
-
-<p>
-Un punto clave, para no reintroducir la confusión entre estimador y estimación de ``\(\hat\beta_2\): la misma fórmula, aplicada a variables aleatorias'': estas dos propiedades NO son afirmaciones probabilísticas. Son identidades <i>algebraicas</i>, del mismo tipo que ``\(2+3=5\)'': se cumplen para cualquier elección de \(n\) números \(x_1,\ldots,x_n\) (iguales o distintos entre sí, positivos o negativos), porque se deducen únicamente de la propia definición de \(\overline{X}\) y \(W_i\), nunca de ninguna propiedad estadística de esos números. Por eso, cuando sustituimos \(x_i\) por la variable aleatoria \(X_i\), la identidad sigue siendo cierta sin necesidad de ningún argumento adicional (salvo en los sucesos elementales \(\omega\) en los que las \(n\) copias toman el mismo valor, \(X_1(\omega)=\cdots=X_n(\omega)\): para esos \(\omega\) el denominador \(\sum_j\big(X_j(\omega)-\overline{X}(\omega)\big)^2\) vale \(0\) y \(W_i(\omega)\) no está definido. No es que las variables \(X_i\) sean iguales como funciones, son copias distintas; es que en esa muestra han tomado todas el mismo valor).<sup><a id="fnr.8" class="footref" href="#fn.8" role="doc-backlink">8</a></sup> Conviene retener la regla, porque se usará muchas veces: por este camino solo pasan las identidades, las fórmulas ciertas para toda lista de números. Una afirmación como ``\(X_i-\overline X\) tiene esperanza cero'' no es una identidad (para una lista de números, \(x_i-\bar x\) no es cero), y por eso no pasa: se demuestra con la esperanza, no con el álgebra (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=11">apéndice, sección 4.3</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-4-3">html</a>)).
-</p>
-
-<p>
-<i>Primera propiedad</i>: \(\sum_iW_i=\mathit 0\). Como \(W_i=\frac{(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}\) y el denominador es común a todos los términos, \(\sum_iW_i=\frac{\sum_i(X_i-\overline{X})}{\sum_j(X_j-\overline{X})^2}\); y donde el numerador sabemos que es nulo: \(\sum_i(X_i-\overline{X})=\mathit 0\).
-</p>
-
-<p>
-<i>Segunda propiedad</i>: \(\sum_iW_iX_i=\mathit 1\). Usando de nuevo que \(\sum_i(X_i-{\overline{X}})=\mathit 0\)
+La igualdad del recuadro, la longitud de la parte propia, sale de la lección 8 sin ningún ingrediente nuevo. La regresión auxiliar de \(\boldsymbol x_j\) sobre los demás regresores es una regresión como cualquier otra, con \(\boldsymbol x_j\) en el papel del regresando, así que tiene su triángulo rectángulo y su identidad \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\). Escribamos las tres sumas con su subíndice \(j\) para recordar de qué regresión provienen. La suma total es la longitud al cuadrado del regresor en desviaciones, \(\mathrm{STC}_j=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\). La suma residual es la longitud al cuadrado de la parte propia, \(\mathrm{SRC}_j=\Vert\tilde{\boldsymbol x}_j\Vert_e^2\), porque \(\tilde{\boldsymbol x}_j\) es el residuo de esa regresión. Y el coeficiente de determinación de la regresión auxiliar, que llamaremos \(R_j^2\), es \(\mathrm{SEC}_j/\mathrm{STC}_j=1-\mathrm{SRC}_j/\mathrm{STC}_j\). Despejando,
 \[
-\sum_i(X_i-{\overline{X}})X_i=\sum_i(X_i-{\overline{X}})(X_i-\overline{X}+\overline{X})=\sum_i (X_i-{\overline{X}})(X_i-\overline{X})+\overline{X}\underbrace{\sum_i(X_i-{\overline{X}})}_{=\mathit 0};
+\Vert\tilde{\boldsymbol x}_j\Vert_e^2=\mathrm{SRC}_j=\mathrm{STC}_j\,(1-R_j^2)=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\,(1-R_j^2).
 \]
-y donde hemos sacado factor común \(\overline{X}\) en el sumatorio \(\sum_i(X_i-{\overline{X}})\overline{X}\) para comprobar que es cero.
-</p>
-
-
-<p>
-Por tanto \(\sum_iW_iX_i=\frac{\sum_i(X_i-{\overline{X}})X_i}{\sum_j(X_j-{\overline{X}})^2}=\frac{\sum_i(X_i-{\overline{X}})^2}{\sum_j(X_j-{\overline{X}})^2}=\mathit 1\).
+Tomando raíces, \(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\,\sqrt{1-R_j^2}\) (es Pitágoras en la regresión auxiliar, y así lo escribe el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=13">apéndice, sección 5.4</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>)). Y la lección 8 otra vez: \(R_j^2=\cos^2\theta_j\), con \(\theta_j\) el ángulo entre el regresor en desviaciones \((\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1)\) y su ajuste en desviaciones en la regresión auxiliar, así que \(1-R_j^2=1-\cos^2\theta_j=\sin^2\theta_j\) (Pitágoras en el triángulo de la figura, como se explicó al presentarla) y queda la igualdad del recuadro, \(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\,\sin\theta_j\). Es lo que la figura de ``La parte propia de un regresor'' muestra: el cateto vertical mide la hipotenusa por el seno del ángulo. \(\blacksquare\)
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.5 (donde estas dos propiedades se verifican mediante sumatorios, sin distinguir explícitamente su estatus puramente algebraico).
+Ahora sustituimos la longitud recién obtenida en la fórmula del error estándar, \(\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\), que queda escrita como producto de dos factores:
+\[
+\mathrm{ee}(\hat\beta_j)=\frac{\mathfrak s}{\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\,\sqrt{1-R_j^2}}=\frac{\mathfrak s}{\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e}\cdot\frac{1}{\sqrt{1-R_j^2}}.
+\]
+El primero, \(\mathfrak s/\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\), es el error estándar que tendría \(\hat\beta_j\) si el regresor no compartiera nada con los demás: la fórmula de la lección 12, con el \(\mathfrak s\) del modelo completo. El segundo, \(1/\sqrt{1-R_j^2}\), es el factor que añade compartir variación con los demás. Su cuadrado tiene nombre propio en los manuales: <i>factor de inflación de la varianza</i>, \(\mathrm{VIF}_j=1/(1-R_j^2)\), porque multiplica la varianza del estimador; al error estándar lo multiplica su raíz. En el lenguaje del curso, \(\mathrm{VIF}_j=1/\sin^2\theta_j\): cuanto más se cierra el ángulo entre un regresor y el subespacio de los demás, más se infla.
+</p>
+
+<p>
+Con dos regresores no constantes la regresión auxiliar es simple, \(\boldsymbol x_2\) sobre \(\boldsymbol 1\) y \(\boldsymbol x_3\), y la lección 8 demostró que en regresión simple \(R^2=\rho^2\). Por tanto \(R_2^2=\rho_{\boldsymbol x_2\boldsymbol x_3}^2\) y \(\mathrm{VIF}_2=1/(1-\rho_{\boldsymbol x_2\boldsymbol x_3}^2)\), y lo mismo para \(\boldsymbol x_3\): con \(k=3\) los dos regresores tienen el mismo VIF. La tabla de la transparencia recorre la escala. Una correlación de \(0{,}5\) apenas se nota: el error estándar crece un \(15\,\%\). Una de \(0{,}9\) lo multiplica por \(2{,}3\). Una de \(0{,}99\), por \(7\); y con \(0{,}999\) el ángulo es de \(2{,}6^\circ\) y el error estándar se multiplica por \(22\). El crecimiento no es lineal en \(\rho\): casi todo el aumento se produce en los últimos grados antes de la alineación exacta. Por eso la colinealidad apenas se nota hasta que la correlación es muy alta.
+</p>
+
+<p>
+Con más de dos regresores no constantes no hay atajo: \(R_j^2\) es el \(R^2\) de una regresión múltiple, y hay que estimarla. Gretl lo calcula con un comando, como veremos en la transparencia siguiente.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4, ecuación de \(\mathrm{Var}(\hat\beta_j)\) con el factor \(1-R_j^2\) y la discusión del VIF que la sigue.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orga09bb44" class="outline-2">
-<h2 id="orga09bb44"><span class="section-number-2">5.</span> Sustituyendo el modelo poblacional</h2>
+<div id="outline-container-org4fd109e" class="outline-2">
+<h2 id="org4fd109e"><span class="section-number-2">5.</span> El caso <code>nox</code> y <code>lnox</code> con números</h2>
 <div class="outline-text-2" id="text-5">
 <p>
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\sum_iW_iY_i=\sum_iW_i(\beta_1\,\mathit1+\beta_2X_i+U_i)
-\]
+Regresión auxiliar de <code>nox</code> sobre <code>rooms</code> y <code>lnox</code> (<code>hprice2</code>): \(R_j^2=0{,}9879\), es decir, los otros dos regresores reproducen el \(98{,}8\,\%\) de la variación de <code>nox</code>.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Cantidad</th>
+<th scope="col" class="org-left">Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">\(\Vert\boldsymbol x_{\text{nox}}-\mu_{\text{nox}}\boldsymbol 1\Vert_e\) (longitud de <code>nox</code> en desviaciones de su media)</td>
+<td class="org-left">\(26{,}03\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(\sqrt{1-R_j^2}=\sin\theta_j\)</td>
+<td class="org-left">\(0{,}1099\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(\Vert\tilde{\boldsymbol x}_{\text{nox}}\Vert_e\) (parte propia)</td>
+<td class="org-left">\(2{,}861\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(\mathrm{VIF}=1/(1-R_j^2)\); \(\sqrt{\mathrm{VIF}}\)</td>
+<td class="org-left">\(82{,}8;\ 9{,}10\)</td>
+</tr>
+
+<tr>
+<td class="org-left">\(\mathfrak s/\Vert\tilde{\boldsymbol x}_{\text{nox}}\Vert_e=6290{,}37/2{,}861\) (error estándar de <code>nox</code>)</td>
+<td class="org-left">\(\approx2198{,}9\)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+El último valor, \(2198{,}9\), es el error estándar de <code>nox</code> en la tabla de la lección 13 (modelo con <code>rooms</code>, <code>nox</code> y <code>lnox</code>). Sin <code>lnox</code>, la parte propia de <code>nox</code> medía \(24{,}81\); con <code>lnox</code>, \(2{,}861\) (se ha dividido por \(8{,}7\)).
 </p>
 
 <p>
-\[
-=\beta_1\underbrace{\sum_iW_i}_{=\mathit0}+\beta_2\underbrace{\sum_iW_iX_i}_{=\mathit1}+\sum_iW_iU_i
-\]
-</p>
-
-<p>
-\[
-\boxed{\;\hat\beta_2(\boldsymbol X,\boldsymbol U)=\beta_2\,\mathit{1}+\sum_{i=1}^nW_iU_i\;}
-\]
-(escrito ahora en función de \(\boldsymbol U\), pues \(\boldsymbol Y\) ha sido sustituida).
-</p>
-
-<p>
-Mediante manipulación algebraica (sustitución y las dos identidades de la transparencia anterior): <i>el estimador es el parámetro verdadero MÁS una ``suma ponderada'' de las perturbaciones</i>. Todo lo que sigue sale de estudiar ese segundo término.
+En Gretl: comando <code>vif</code> tras estimar, o <i><i><code>Análisis -&gt; Colinealidad</code></i></i> en la ventana del modelo. Devuelve \(82{,}8\) para <code>nox</code>, \(82{,}9\) para <code>lnox</code> y \(1{,}1\) para <code>rooms</code>.
 </p>
 </div>
-<div id="outline-container-org32407a1" class="outline-4">
-<h4 id="org32407a1">Sustituyendo el modelo poblacional</h4>
-<div class="outline-text-4" id="text-org32407a1">
+<div id="outline-container-orgad6e7ce" class="outline-4">
+<h4 id="orgad6e7ce">El caso <code>nox</code> y <code>lnox</code> con números</h4>
+<div class="outline-text-4" id="text-orgad6e7ce">
 <p>
-Con las dos propiedades de ``Dos propiedades de los pesos'' (puramente algebraicas, válidas para cualquier valor que tomen \(X_1,\ldots,X_n\)), el cálculo es puramente mecánico. Partimos de \(\hat\beta_2=\sum_iW_iY_i\) (sección ``\(\hat\beta_2\): la misma fórmula, aplicada a variables aleatorias'') y sustituimos el modelo poblacional \(Y_i=\beta_1\,\mathit1+\beta_2X_i+U_i\) (sección ``El marco: muestra aleatoria'') en cada sumando:
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol U)=\sum_iW_i(\beta_1\,\mathit1+\beta_2X_i+U_i)=\beta_1\sum_iW_i+\beta_2\sum_iW_iX_i+\sum_iW_iU_i.
-\]
-El primer término se anula (\(\sum_iW_i=\mathit 0\)); el segundo se reduce exactamente a \(\beta_2\,\mathit1\) (\(\sum_iW_iX_i=\mathit 1\)):
-\[
-\hat\beta_2(\boldsymbol X,\boldsymbol U)=\beta_2\,\mathit1+\sum_{i=1}^nW_iU_i.
-\]
+Volvamos al modelo con que abrimos la sesión y hagamos la cuenta completa para <code>nox</code>. La regresión auxiliar es la de <code>nox</code> sobre la constante, <code>rooms</code> y <code>lnox</code>, y su coeficiente de determinación es \(R_j^2=0{,}9879\): los otros regresores reproducen el \(98{,}8\,\%\) de la variación de <code>nox</code>. Casi todo, como cabía esperar de una variable y su logaritmo, cuya correlación es \(0{,}9939\), un ángulo de \(6{,}3^\circ\).
 </p>
 
 <p>
-Esta identidad es el núcleo algebraico de la sesión: dice que el estimador \(\hat\beta_2\) es la variable aleatoria constante \(\beta_2\,\mathit1\) (donde \(\beta_2\) es el verdadero parámetro poblacional) <i>más</i> una ``suma ponderada'' de las perturbaciones \(U_1,\ldots,U_n\), con los pesos \(W_i\) que ya conocemos. Todo lo que necesitamos demostrar sobre \(\hat\beta_2\) (que su valor esperado sea \(\beta_2\), y que su dispersión sea tal o cual) se reduce, a partir de aquí, a estudiar el comportamiento de esa suma ponderada \(\sum_iW_iU_i\). Los \(W_i\) son funciones de \(X_1,\ldots,X_n\), como acabamos de comprobar. Por eso, al condicionar en \(\boldsymbol X\), podremos <i>sacarlos fuera</i> de la esperanza y de la varianza condicionales. Conviene ser preciso sobre qué autoriza ese paso, porque es tentador decir que ``condicionar en \(\boldsymbol X\) convierte los \(W_i\) en números'': no es así. Los \(W_i\) siguen siendo variables aleatorias, funciones de \(\omega\), antes y después de condicionar; lo que ocurre es que son funciones <i>de aquello sobre lo que se condiciona</i>, y el Lema de la sección siguiente demuestra que tales factores salen fuera del operador \(E[\,\cdot\mid\boldsymbol X]\). El resultado <i>se parece</i> al de una combinación lineal con coeficientes fijos, pero la justificación no es esa: es el Lema, que a su vez sale de la caracterización geométrica de la esperanza condicional (lección 9).
+Las longitudes salen de la fórmula de ``Cuánto se acorta: el factor de inflación de la varianza''. El regresor en desviaciones mide \(26{,}03\); \(\sqrt{1-R_j^2}=0{,}1099\); la parte propia mide \(26{,}03\cdot0{,}1099=2{,}861\). Y el error estándar es \(\mathfrak s\) dividido por esa longitud: \(6290{,}37/2{,}861\approx2198{,}9\) (con todos los decimales de Gretl, \(2198{,}85\)), la cifra que Gretl imprime en la tabla de apertura de la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=2">lección 13</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#tabla-apertura">html</a>). La fórmula del error estándar se cumple aquí con cuatro cifras.
 </p>
 
 <p>
-El ejemplo numérico de la lección 7 es coherente con esta descomposición: allí, con \(\boldsymbol u=(1,-2,0,2,-1)\) diseñado deliberadamente con \(\sum w_iu_i=0\) (covarianza muestral nula con el regresor), obtuvimos la <i>estimación</i> \(\hat\beta_2=\beta_2\) exactamente. La fórmula de hoy explica <i>por qué</i> ese resultado se debía al diseño del ejemplo y no es lo esperable en general: \(\hat\beta_2=\beta_2\,\mathit1+\sum_iW_iU_i\), y solo cuando esa suma se anula por construcción (como en aquel ejemplo, ya con datos y no con variables aleatorias) coinciden estimador y parámetro. En una muestra genuinamente aleatoria, \(\sum_iW_iU_i\) no será cero, sino una variable aleatoria con su propio valor esperado y su propia varianza, que es lo que estudiamos en las dos transparencias siguientes.
+Conviene leer también el factor por el que se ha multiplicado el error estándar. En el modelo sin <code>lnox</code>, la parte propia de <code>nox</code> es su residuo sobre \(\boldsymbol 1\) y <code>rooms</code>, y mide \(24{,}81\): casi toda su longitud en desviaciones, porque <code>rooms</code> apenas comparte nada con <code>nox</code>. Al entrar <code>lnox</code>, la parte propia baja a \(2{,}861\), un factor \(8{,}7\), y el error estándar sube en el mismo factor, de \(253{,}6\) a \(2198{,}9\). No ha cambiado el ruido ni el número de observaciones; solo la longitud propia de <code>nox</code>.
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, ecuación (2.35) y comentario adyacente.
+Gretl calcula los factores de inflación con el comando <code>vif</code>, que se ejecuta después de estimar el modelo, o desde el menú <i><i><code>Análisis -&gt; Colinealidad</code></i></i> de la ventana del modelo. Para nuestro modelo devuelve \(82{,}8\) para <code>nox</code>, \(82{,}9\) para <code>lnox</code> y \(1{,}1\) para <code>rooms</code>: las dos medidas de contaminación comparten casi toda su variación y ninguna comparte casi nada con <code>rooms</code>. Con la salida de Gretl y esta lección, un VIF se lee así: es \(1/\sin^2\theta_j\), y su raíz es el factor por el que se ha multiplicado el error estándar del coeficiente respecto al que tendría si el regresor no compartiera variación con los demás regresores. Con \(82{,}8\), ese factor es \(9{,}10\); y en efecto \(241{,}6\cdot9{,}10\approx2198{,}9\), donde \(241{,}6\) es \(\mathfrak s\) dividido por la longitud completa del regresor en desviaciones.
+</p>
+
+<p>
+<i>Para profundizar</i>: manual de Gretl, comando <code>vif</code>; Wooldridge, J. M. (2020), cap. 3, sección 3.4 (el VIF como estadístico de diagnóstico y sus límites).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgcbe391e" class="outline-2">
-<h2 id="orgcbe391e"><span class="section-number-2">6.</span> Insesgadez: \(\mathrm{E}(\hat\beta_2)=\beta_2\)</h2>
+<div id="outline-container-org8b0f413" class="outline-2">
+<h2 id="org8b0f413"><span class="section-number-2">6.</span> Por qué oscilan los coeficientes</h2>
 <div class="outline-text-2" id="text-6">
 <p>
-Cambiemos de pregunta: 
-</p>
-<ul class="org-ul">
-<li>de ``¿Cuánto vale la <span class="underline">estimación</span> \(\hat\beta_2\) con los datos disponibles \(\boldsymbol x\) e \(\boldsymbol y\)?''</li>
-<li>a ``¿cuánto vale el <span class="underline">estimador</span> \(\hat\beta_2\), en promedio, sobre todas las muestras posibles?'' (su proyección sobre \(\mathit1\), lección 9).</li>
-</ul>
-
-<blockquote>
-<p>
-<i>Lema</i> (demostrado en los apuntes): si \(c(\boldsymbol X)\) es una función de \(\boldsymbol X\),
-\[
-E\big[c(\boldsymbol X)Z\mid\boldsymbol X\big]=c(\boldsymbol X)E[Z\mid\boldsymbol X].
-\]
-</p>
-</blockquote>
-<p>
-\(\mbox{ }\)
+\(\boldsymbol{\mathop{\widehat y}}\) es la proyección de \(\boldsymbol y\) sobre el subespacio de los regresores y no depende de qué generadores lo describan. \(\hat\beta_2\) y \(\hat\beta_3\) son las <i>coordenadas</i> de \(\boldsymbol{\mathop{\widehat y}}\) respecto de los generadores, y sí dependen de ellos: con generadores casi alineados son inestables.
 </p>
 
-<p>
-Aplicándolo con \(c(\boldsymbol X)=W_i\) (pues cada \(W_i\) es función de \(\boldsymbol X\), sección anterior):
-\[
-E[\hat\beta_2\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iW_i\,E[U_i\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iW_i\,\mathit0=\beta_2\,\mathit1.
-\]
-</p>
 
-<blockquote>
-<p>
-<i>Ley de las esperanzas iteradas</i>: Como \(E[Z\mid\boldsymbol X]\) es la proyección ortogonal de \(Z\) sobre el espacio de las funciones de \(\boldsymbol X\) (y \(\mathit1\) es una de ellas), entonces \(Z-E[Z\mid\boldsymbol X]\perp\mathit1\). Por tanto, \[\mathrm{E}(Z)=\mathrm{E}\big(E[Z\mid\boldsymbol X]\big).\]
+<div id="orge9bbccc" class="figure">
+<p><img src="img/S20-Lecc14/ParalelogramoAplastado_fila.png" alt="ParalelogramoAplastado_fila.png" width="700px" />
 </p>
-</blockquote>
-<p>
-\(\mbox{ }\)
-</p>
+<p><span class="figure-number">Figura 2: </span>Dos regresores en desviaciones y de longitud \(1\) (a trazos), que forman \(70^\circ\) a la izquierda y \(10^\circ\) a la derecha, y el mismo punto \(\boldsymbol{\mathop{\widehat y}}\) en los dos paneles. Los tramos continuos son su descomposición \(\hat\beta_2\boldsymbol x_2+\hat\beta_3\boldsymbol x_3\): primero \(\hat\beta_2\boldsymbol x_2\), horizontal y hacia la izquierda porque \(\hat\beta_2<0\), y después \(\hat\beta_3\boldsymbol x_3\) hasta \(\boldsymbol{\mathop{\widehat y}}\). \(\boldsymbol{\mathop{\widehat y}}'\) es el ajuste que daría otra muestra: dista \(0{,}07\) de \(\boldsymbol{\mathop{\widehat y}}\) en la dirección perpendicular a \(\boldsymbol x_2\), y su descomposición va en color más claro. A \(70^\circ\) las coordenadas cambian poco, lo mismo que el ajuste; a \(10^\circ\) cambian \(0{,}40\) cada una y en sentidos opuestos, casi seis veces el desplazamiento del ajuste: el factor es \(1/\sin10^\circ\).</p>
+</div>
 
 <p>
-\[
-\boxed{\;\mathrm{E}(\hat\beta_2)=\mathrm{E}\big(E[\hat\beta_2\mid\boldsymbol X]\big)=\beta_2.\;}
-\]
-</p>
-
-<div class="org-center">
-<p>
-\(\hat\beta_2\) no coincide con \(\beta_2\) en cada muestra, pero no se desvía <i>sistemáticamente</i> en ninguna dirección.
+Un desplazamiento de \(\boldsymbol{\mathop{\widehat y}}\) perpendicular a \(\boldsymbol x_2\) cambia \(\hat\beta_3\) en \(1/\sin\theta=\sqrt{\mathrm{VIF}}\) veces ese desplazamiento, y \(\hat\beta_2\) lo compensa con signo contrario. \(\mathrm{SRC}\), \(R^2\) y \(F\) dependen de \(\boldsymbol{\mathop{\widehat y}}\), no de sus coordenadas: la colinealidad no los altera.
 </p>
 </div>
-</div>
-<div id="outline-container-orgdc721c5" class="outline-4">
-<h4 id="orgdc721c5">Insesgadez: \(\mathrm{E}(\hat\beta_2)=\beta_2\)</h4>
-<div class="outline-text-4" id="text-orgdc721c5">
+<div id="outline-container-orga10bb58" class="outline-4">
+<h4 id="orga10bb58">Por qué oscilan los coeficientes</h4>
+<div class="outline-text-4" id="text-orga10bb58">
 <p>
-Partimos de \(\hat\beta_2=\beta_2\,\mathit1+\sum_iW_iU_i\) (``Sustituyendo el modelo poblacional'') y tomamos esperanza condicionada a \(\boldsymbol X\): el primer paso de la sesión que usa probabilidad.
+El error estándar dice cuánto se dispersa un coeficiente de una muestra a otra. La figura dice por qué se dispersa tanto cuando los regresores casi se alinean, y lo dice sin probabilidad: es geometría de coordenadas.
 </p>
 
 <p>
-Antes de seguir, conviene explicitar algo que en la lección 9 quedó implícito en la propia definición de \(E[Z\mid\boldsymbol X]\) como la función de \(\boldsymbol X\) que minimiza la distancia \(\|Z-g(\boldsymbol X)\|_P\). Exactamente igual que en \(\mathbb R^n\) (lección 4 para una recta, y lección 6 al pasar a un plano: minimizar la distancia de un vector a un subespacio equivale a que el residuo sea ortogonal a <i>todo</i> el subespacio, a cada uno de sus generadores), esa minimización es equivalente a esta caracterización, que usaremos repetidamente de aquí en adelante:
-</p>
-
-<blockquote>
-<p>
-<i>Caracterización de \(E[Z\mid\boldsymbol X]\)</i>. Es la única variable aleatoria (salvo, como advertimos en la lección 9, en un conjunto de sucesos de probabilidad nula) que cumple, a la vez:
-</p>
-<ol class="org-ol">
-<li><i>Pertenencia</i>: es una función de \(\boldsymbol X\).</li>
-<li><i>Ortogonalidad del residuo</i>: \(\mathrm{E}\Big((Z-E[Z\mid\boldsymbol X])h(\boldsymbol X)\Big)=0\) para <i>toda</i> función \(h(\boldsymbol X)\).</li>
-</ol>
-</blockquote>
-
-<p>
-De esta caracterización salen, con el mismo tipo de comprobación (verificar que el candidato pertenece al espacio y que el residuo es ortogonal), dos propiedades que usaremos continuamente sin volver a citarlas: \(E[\,\cdot\mid\boldsymbol X]\) es <i>lineal</i>, \(E[aZ+bW\mid\boldsymbol X]=a\,E[Z\mid\boldsymbol X]+b\,E[W\mid\boldsymbol X]\), y <i>deja fijas</i> las funciones de \(\boldsymbol X\), \(E[g(\boldsymbol X)\mid\boldsymbol X]=g(\boldsymbol X)\); en particular, \(E[\beta_2\,\mathit1\mid\boldsymbol X]=\beta_2\,\mathit1\). Y con esta misma caracterización podemos demostrar el siguiente lema:
-</p>
-
-<blockquote>
-<p>
-<i>Lema (sacar fuera de la esperanza condicionada las funciones de variables sobre las que se condiciona)</i>. Si \(c(\boldsymbol X)\) es una función de la lista de variables aleatorias \(\boldsymbol X\),
-\[
-E[c(\boldsymbol X)Z\mid\boldsymbol X]=c(\boldsymbol X)E[Z\mid\boldsymbol X].
-\]
-</p>
-</blockquote>
-
-<p>
-<i>Demostración</i>. Comprobamos que el candidato \(c(\boldsymbol X)E[Z\mid\boldsymbol X]\) cumple las DOS propiedades que caracterizan a \(E[c(\boldsymbol X)Z\mid\boldsymbol X]\):
-</p>
-
-<ul class="org-ul">
-<li><i>Pertenencia</i>: el producto \(c(\boldsymbol X)E[Z\mid\boldsymbol X]\) es función de \(\boldsymbol X\) (producto de funciones de \(\boldsymbol X\)).</li>
-<li><i>Ortogonalidad</i>: para cualquier \(h(\boldsymbol X)\),</li>
-</ul>
-<p>
-\[
-\mathrm{E}\Big(\big(c(\boldsymbol X)Z - c(\boldsymbol X)E[Z\mid \boldsymbol{X}]\big)\,h(\boldsymbol{X})\Big)
-= \mathrm{E}\Big(\big(Z - E[Z\mid \boldsymbol{X}]\big)\,\underbrace{c(\boldsymbol X)h(\boldsymbol{X})}_{\text{función de }\boldsymbol X}\Big)=0
-\]
-porque \(c(\boldsymbol X)h(\boldsymbol X)\) es, ella misma, función de \(\boldsymbol X\), y ya sabemos que \(Z-E[Z\mid\boldsymbol X]\) es ortogonal a <i>cualquiera</i> de ellas.
+Recordemos la lección 10: \(\boldsymbol{\mathop{\widehat y}}\) es la proyección de \(\boldsymbol y\) sobre el subespacio de los regresores, y \(\boldsymbol{\mathop{\widehat\beta}}\) son las coordenadas de esa proyección respecto de los generadores, <i>lo que hay que avanzar en la dirección de cada regresor para llegar a \(\boldsymbol{\mathop{\widehat y}}\).</i> La proyección depende del subespacio, no de qué generadores lo describan. Las coordenadas sí dependen de los generadores, y de cómo estén colocados.
 </p>
 
 <p>
-Como \(c(\boldsymbol X)E[Z\mid\boldsymbol X]\) cumple las dos propiedades que caracterizan a \(E[c(\boldsymbol X)Z\mid\boldsymbol X]\), concluimos \(E\big[c(\boldsymbol X)Z\mid\boldsymbol X\big]=c(\boldsymbol X)E[Z\mid\boldsymbol X]\). \(\blacksquare\)
+La figura toma dos regresores en desviaciones de longitud \(1\) y un ajuste \(\boldsymbol{\mathop{\widehat y}}\) en el plano que generan. Si cambia muy ligeramente \(\boldsymbol y\), cambiará muy ligeramente el ajuste; vamos a representar esa idea con un segundo ajuste \(\boldsymbol{\mathop{\widehat y}}'\) próximo al primero (a distancia \(0{,}07\)). Con los generadores a \(70^\circ\), las coordenadas pasan de \((-0{,}63;\,0{,}37)\) a \((-0{,}65;\,0{,}45)\): cambios del mismo orden que el desplazamiento. Con los generadores a \(10^\circ\), pasan de \((-2{,}48;\,2{,}02)\) a \((-2{,}88;\,2{,}42)\): cada coordenada cambia \(0{,}40\), casi seis veces el desplazamiento, y una sube lo que la otra baja. La cuenta exacta es sencilla para un desplazamiento perpendicular a \(\boldsymbol x_2\): la coordenada de \(\boldsymbol x_3\) cambia \(1/\sin\theta\) veces el desplazamiento, y la de \(\boldsymbol x_2\) lo compensa con signo contrario. Ese factor \(1/\sin\theta\) es \(\sqrt{\mathrm{VIF}}\), el mismo de ``Cuánto se acorta: el factor de inflación de la varianza'': el error estándar mide con probabilidad lo que la figura muestra con geometría.
 </p>
 
 <p>
-Aplicamos el lema con \(c(\boldsymbol X)=W_i\) y con \(Z=U_i\):
-\[
-E[\hat\beta_2\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iE[W_iU_i\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iW_i\,E[U_i\mid\boldsymbol X]=\beta_2\,\mathit1+\sum_iW_i\,\mathit0=\beta_2\,\mathit1,
-\]
-donde hemos usado la exogeneidad estricta \(E[U_i\mid\boldsymbol X]=\mathit0\) de la sección ``El marco: muestra aleatoria''.
+Dos consecuencias. La primera es que los coeficientes de regresores cuyos vectores en desviaciones casi se alinean no solo son imprecisos, sino que lo son <i>simultáneamente y en sentidos opuestos</i>: cuando el azar de la muestra aumenta uno, reduce el otro. La lección 11 dio, en su fórmula matricial y para \(k=2\), la covarianza entre \(\hat\beta_1\) y \(\hat\beta_2\), negativa cuando la media del regresor es positiva; con regresores alineados, la covarianza entre \(\hat\beta_2\) y \(\hat\beta_3\) es muy negativa, y así lo comprobaremos en el laboratorio de colinealidad con un experimento de Monte Carlo. Es lo que se veía en la tabla de la lección 13: <code>nox</code> con coeficiente \(404\) y <code>lnox</code> con \(-13262\), dos cifras enormes de signo opuesto que se reparten un efecto que, sumado, es el de siempre.
 </p>
 
 <p>
-Falta un último paso, pasar de la esperanza condicional a la esperanza incondicional: queremos encontrar \(\mathrm{E}(\hat\beta_2)\), no \(E[\hat\beta_2\mid\boldsymbol X]\). Aquí es donde entra la Ley de las Esperanzas Iteradas, que es la <i>misma</i> idea que ya usamos en la lección 9 para deducir \(\mathrm{E}(U)=0\) a partir de \(U\perp\mathit1\). En general: la función constante \(\mathit1\) es, trivialmente, una función de \(\boldsymbol X\); aplicando la ortogonalidad del residuo (recordada más arriba) con \(h(\boldsymbol X)=\mathit1\), obtenemos \(Z-E[Z\mid\boldsymbol X]\perp\mathit1\) para <i>cualquier</i> \(Z\)
-\[
-\mathrm{E}\Big(\big(Z-E[Z\mid\boldsymbol X]\big)\,\mathit 1 \Big)=0 \iff \mathrm{E}(Z)-\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=0,
-\]
-es decir, \(\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)\), sin ninguna restricción sobre \(Z\). Esta es la Ley de las Esperanzas Iteradas, una consecuencia inmediata de nuestra propia definición geométrica de esperanza condicional. Tanto el Lema como esta ley se demuestran en dos líneas a partir de la caracterización de la proyección por la ortogonalidad del resto (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=4">apéndice, sección 1.3</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-1-3">html</a>)), donde la ley se lee como proyectar en dos pasos sobre subespacios anidados: la misma figura del Pitágoras anidado que usará la lección 13.
+La segunda consecuencia es la que hay que retener para leer resultados. Lo que la colinealidad estropea son las coordenadas; no el ajuste. \(\boldsymbol{\mathop{\widehat y}}\) es el mismo punto se describa como se describa, así que \(\mathrm{SRC}\), \(R^2\), \(\mathfrak s\) y el \(F\) de significación conjunta no dependen de que los generadores estén alineados o no. Por eso la lección 13 podía decir que las dos variables juntas mejoran el ajuste y, a la vez, que no puede determinarse el efecto individual de cada una, porque la muestra no permite separarlos: el subespacio que generan es estable; pero la estimación de cómo se reparte el efecto entre ellas, no.
 </p>
 
 <p>
-Aplicándola a \(Z=\hat\beta_2\), y usando que \(E[\hat\beta_2\mid\boldsymbol X]=\beta_2\,\mathit1\) es constante:
-\[
-\mathrm{E}(\hat\beta_2)=\mathrm{E}\big(E[\hat\beta_2\mid\boldsymbol X]\big)=\mathrm{E}(\beta_2\,\mathit1)=\beta_2.
-\]
-\(\hat\beta_2\) es, por tanto, un <i>estimador insesgado</i> de \(\beta_2\): en promedio, sobre todas las muestras posibles que podríamos haber observado, ni sobreestima ni subestima el verdadero parámetro poblacional.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, Teorema 2.1 (insesgadez de \(\hat\beta_1,\hat\beta_2\)).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (el ejemplo de gasto por alumno en varias partidas, en el que dos regresores con vectores en desviaciones casi alineados tienen coeficientes imprecisos mientras el conjunto está bien estimado).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgb77c1fc" class="outline-2">
-<h2 id="orgb77c1fc"><span class="section-number-2">7.</span> Varianza: cuán dispersas están las estimaciones</h2>
+<div id="outline-container-orge0201c7" class="outline-2">
+<h2 id="orge0201c7"><span class="section-number-2">7.</span> Síntomas y diagnóstico</h2>
 <div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li>\(F\) conjunto alto con \(t\) individuales bajos (lección 13), o \(R^2\) alto con casi nada significativo.</li>
+<li>Errores estándar que se disparan al añadir un regresor, sin que apenas cambie \(\mathfrak s\).</li>
+<li>Coeficientes muy sensibles a quitar unas pocas observaciones o a añadir un regresor.</li>
+<li>Correlaciones altas entre regresores (pero con \(k>3\) no bastan; mejor diagnóstico con el \(\mathrm{VIF}_j\) de cada uno).</li>
+</ul>
+
 <p>
-Desarrollando el cuadrado (apuntes) y aplicando el <i>Lema</i> anterior:
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=Var\Big[\textstyle\sum_iW_iU_i\,\Big|\,\boldsymbol X\Big]=\sum_iW_i^2\,Var[U_i\mid\boldsymbol X]+\sum_{i\neq j}W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X]
-\]
+<i>Una distinción</i>: que un coeficiente cambie al añadir un regresor es normal, es el efecto parcial de la lección 10. Colinealidad es que su error estándar se dispare y que cambie mucho con poca información nueva.
 </p>
 
 <p>
-Homocedasticidad + \(Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0\) (``El marco'') \(\;\Longrightarrow\;\)
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2\sum_iW_i^2.
-\]
-</p>
-
-<p>
-\[
-\boxed{\;Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-{\overline{X}})^2}=\frac{\sigma^2}{n\,S^2}.\;}
-\]
-donde \(S^2=\frac1n\sum_i(X_i-\overline{X})^2\) es la <i>varianza muestral</i> del regresor (divisor \(n\), como en la lección 5).
-</p>
-
-<div class="org-center">
-<p>
-Más dispersión en \(X\), o más observaciones: más precisión. Más ruido (\(\sigma^2\)): menos precisión.
+<i>Qué mirar</i>: \(\sqrt{\mathrm{VIF}_j}\), el factor por el que se ha multiplicado el error estándar de \(\hat\beta_j\). Es una escala, no un veredicto.
 </p>
 </div>
-
+<div id="outline-container-orga9e6eb0" class="outline-4">
+<h4 id="orga9e6eb0">Síntomas y diagnóstico</h4>
+<div class="outline-text-4" id="text-orga9e6eb0">
 <p>
-<i>Versión interactiva</i>: <a href="https://mybinder.org/v2/gh/mbujosab/PEconometria/gh-pages?labpath=CuadernosElectronicos/S15-Notebook04.ipynb">cuaderno 4 en MyBinder</a> (muchas muestras, muchas rectas; el histograma de \(\hat\beta_2\) y el efecto de la dispersión de \(\boldsymbol x\)).
-</p>
-</div>
-<div id="outline-container-org91017bc" class="outline-4">
-<h4 id="org91017bc">Varianza: cuán dispersas están las estimaciones</h4>
-<div class="outline-text-4" id="text-org91017bc">
-<p>
-La insesgadez nos dice que \(\hat\beta_2\) está bien ``centrado'' en \(\beta_2\). Pero un estimador insesgado puede, aun así, ser muy poco fiable en una muestra concreta si su dispersión es grande. Necesitamos, por tanto, calcular \(Var[\hat\beta_2\mid\boldsymbol X]\).
+La colinealidad de grado, a diferencia de la exacta, no es de inmediata detección: Gretl estima el modelo sin ningún aviso. Hay que reconocerla en la tabla, y los síntomas son los que las lecciones anteriores ya han producido.
 </p>
 
 <p>
-Partimos de \(\hat\beta_2=\beta_2\,\mathit1+\sum_iW_iU_i\). Como \(\beta_2\,\mathit1\) es una variable aleatoria constante: \(Var[\hat\beta_2\mid\boldsymbol X]=Var\big[\sum_iW_iU_i\mid\boldsymbol X\big]\). Nos queda, por tanto, desarrollar la varianza de una suma de \(n\) sumandos. Lo haremos en dos pasos: primero calculamos la varianza y la covarianza de cada sumando por separado (aquí interviene el Lema), y después desarrollamos la suma completa.
-Calculemos primero, para un único sumando, \(Var[W_iU_i\mid\boldsymbol X]\). Ya vimos que \(E[W_iU_i\mid\boldsymbol X]=\mathit0\) (Lema, con \(c(\boldsymbol X)=W_i\)). Por tanto, la definición de varianza condicional (\(Var[Z\mid\boldsymbol X]=E[(Z-E[Z\mid\boldsymbol X])^2\mid\boldsymbol X]\)) se simplifica exactamente como en la lección 9 (\(Var[U\mid X]=E[U^2\mid X]\), porque también allí \(E[U\mid X]=\mathit0\)):
-\[
-Var[W_iU_i\mid\boldsymbol X]=E[(W_iU_i)^2\mid\boldsymbol X]=E[W_i^2U_i^2\mid\boldsymbol X]=W_i^2\,E[U_i^2\mid\boldsymbol X]=W_i^2\,Var[U_i\mid\boldsymbol X],
-\]
-donde la penúltima igualdad es, de nuevo, el Lema (con \(c(\boldsymbol X)=W_i^2\), sobre \(Z=U_i^2\)), y la última vuelve a usar que \(E[U_i\mid\boldsymbol X]=\mathit0\).
+El primero es el de la lección 13: un \(F\) de significación conjunta alto con \(t\) individuales bajos, o un \(R^2\) alto en un modelo donde casi ningún coeficiente es significativo. El \(F\) y el \(R^2\) miran el subespacio; los \(t\) miran las coordenadas. Que discrepen significa que los regresores juntos mejoran el ajuste, pero que la muestra no permite atribuir esa mejora a uno u otro: cada coordenada por separado está mal determinada.
 </p>
 
 <p>
-Por el mismo argumento, para \(i\neq j\) (usando la covarianza condicional definida en ``El marco: muestra aleatoria'', \(Cov[Z,W\mid\boldsymbol X]=E[(Z-E[Z\mid\boldsymbol X])(W-E[W\mid\boldsymbol X])\mid\boldsymbol X]\), análoga a la varianza):
-\[
-Cov[W_iU_i,W_jU_j\mid\boldsymbol X]=E[W_iU_iW_jU_j\mid\boldsymbol X]=W_iW_j\,E[U_iU_j\mid\boldsymbol X]=W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X],
-\]
-usando el Lema con \(c(\boldsymbol X)=W_iW_j\).
+El segundo es el de la tabla de apertura: un error estándar que se dispara al añadir un regresor mientras \(\mathfrak s\) no cambia. Conviene contrastar ese síntoma con lo que sí es normal. En la lección 10 y en su laboratorio (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms">html</a>)) vimos que un coeficiente cambia de valor, y hasta de signo, al añadir un regresor. Es el efecto parcial: el significado del coeficiente cambia porque se mantiene fija otra variable. Eso no es colinealidad. Colinealidad es que, además, el error estándar se multiplique por un factor grande, y que el coeficiente se vuelva sensible a cambios pequeños de la muestra: quitar unas pocas observaciones y verlo saltar, como ocurría con las viviendas del laboratorio de regresión múltiple (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=7">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#quitar-viviendas">html</a>)).
 </p>
 
 <p>
-Con estas dos piezas ya podemos desarrollar la suma entera. Abreviando \(Z_i=W_iU_i\) (de modo que \(E[Z_i\mid\boldsymbol X]=\mathit0\) para todo \(i\), como acabamos de comprobar), la definición de varianza condicional da
-\[
-Var\Big[\sum_iZ_i\,\Big|\,\boldsymbol X\Big]=E\Big[\Big(\sum_iZ_i\Big)^2\,\Big|\,\boldsymbol X\Big]=E\Big[\sum_i\sum_jZ_iZ_j\,\Big|\,\boldsymbol X\Big]=\sum_i\sum_jE[Z_iZ_j\mid\boldsymbol X],
-\]
-donde solo hemos desarrollado el cuadrado de la suma y usado después la linealidad de la esperanza <i>condicional</i> (recordada junto al Lema, en la sección ``Insesgadez''), aplicada ahora a una suma de \(n^2\) términos. Basta ya con separar los términos de la diagonal (\(i=j\)) del resto: como todas las \(Z_i\) tienen esperanza condicional nula, \(E[Z_iZ_j\mid\boldsymbol X]\) es \(Var[Z_i\mid\boldsymbol X]\) cuando \(i=j\), y \(Cov[Z_i,Z_j\mid\boldsymbol X]\) cuando \(i\neq j\). Sustituyendo en ambos casos las dos piezas calculadas más arriba:
-\[
-Var\Big[\sum_iW_iU_i\,\Big|\,\boldsymbol X\Big]=\sum_iW_i^2\,Var[U_i\mid\boldsymbol X]+\sum_{i\neq j}W_iW_j\,Cov[U_i,U_j\mid\boldsymbol X].
-\]
+El tercero es la correlación entre regresores, el síntoma más usado y el menos fiable. Con dos regresores no constantes basta, porque \(\mathrm{VIF}=1/(1-\rho^2)\). Con más, la lección 10 explicó por qué no: un regresor puede formar un ángulo muy pequeño con el subespacio generado por otros dos sin estar muy correlado con ninguno. La medida que sirve en todos los casos es el VIF de cada regresor, que Gretl calcula con <code>vif</code>, y en particular su raíz, que es el factor por el que se ha multiplicado el error estándar.
 </p>
 
 <p>
-Ahora intervienen, por primera vez en la sesión, la homocedasticidad (\(Var[U_i\mid\boldsymbol X]=\sigma^2\,\mathit 1\) para todo \(i\), supuesto de la lección 9) y la ausencia de covarianza cruzada (\(Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0\) para \(i\neq j\), consecuencia del muestreo aleatorio, sección ``El marco: muestra aleatoria''). Con ambas, la doble suma se reduce a
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2\sum_iW_i^2.
-\]
+Los manuales suelen dar una regla: un VIF mayor que \(10\) indica un problema. Conviene saberla, porque Gretl la imprime al pie de la salida de <code>vif</code>, y conviene saber también que es arbitraria: \(10\) significa que el error estándar se ha multiplicado por \(3{,}2\), y si ese factor es grave o no depende de para qué se quiera el coeficiente. Un VIF de \(5\) que convierte un intervalo estrecho en uno inservible es un problema; un VIF de \(50\) en un coeficiente que sigue siendo significativo y con un intervalo aceptable no lo es. Léase la escala, no el umbral.
 </p>
 
 <p>
-Calculemos \(\sum_iW_i^2\). Como \(W_i=\frac{X_i-{\overline{X}}}{\sum_j(X_j-{\overline{X}})^2}\):
-\[
-\sum_iW_i^2=\sum_i\left(\frac{X_i-{\overline{X}}}{\sum_j(X_j-{\overline{X}})^2}\right)^2=\frac{\sum_i(X_i-{\overline{X}})^2}{\left(\sum_j(X_j-{\overline{X}})^2\right)^2}=\frac{1}{\sum_j(X_j-{\overline{X}})^2}.
-\]
-Sustituyendo:
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-{\overline{X}})^2}.
-\]
-</p>
-
-<p>
-Esta expresión admite una segunda lectura, útil para su interpretación. Como \(\sum_i(X_i-{\overline{X}})^2=n\cdot\frac1n\sum_i(X_i-{\overline{X}})^2=n\,S^2\) (la varianza muestral del regresor, con la convención estadística del curso, \(S^2=\frac1n\sum_i(X_i-{\overline{X}})^2\)), podemos escribir, equivalentemente,
-\[
-Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{n\,S^2}.
-\]
-Esta segunda forma hace explícitos los tres ingredientes que determinan la precisión de \(\hat\beta_2\). (i) Cuanto mayor sea \(\sigma^2\) (más ruido en la perturbación), menor será la precisión. (ii) Cuanto mayor sea \(n\) (más observaciones), mayor será la precisión. (iii) Cuanto mayor sea \(S^2\) (más dispersión en los valores del regresor), mayor será la precisión: una muestra donde \(X\) apenas varía impide medir la pendiente con precisión.<sup><a id="fnr.9" class="footref" href="#fn.9" role="doc-backlink">9</a></sup>
-</p>
-
-<p>
-Nótese, por último, que este resultado es <i>condicional</i> a \(\boldsymbol X\): distintas muestras, con distintos valores del regresor, tendrían distinta precisión. Si quisiéramos la varianza <i>incondicional</i> \(\mathrm{Var}(\hat\beta_2)\), tendríamos que aplicar la <i>ley de la varianza total</i>, que no es sino la identidad pitagórica de la lección 9 (allí enunciada para \(Y\), condicionando en \(X\)), aplicada ahora a \(Z=\hat\beta_2\) condicionando en \(\boldsymbol X\). Para cualquier variable aleatoria \(Z\) con varianza finita, \(E[Z\mid\boldsymbol X]\) es la proyección ortogonal de \(Z\) sobre las funciones de \(\boldsymbol X\), así que \(Z=E[Z\mid\boldsymbol X]+\big(Z-E[Z\mid\boldsymbol X]\big)\) descompone \(Z\) en dos partes ortogonales entre sí. Aplicando Pitágoras a esa descomposición, y la ley de las esperanzas iteradas para escribir \(\mathrm{E}\big((Z-E[Z\mid\boldsymbol X])^2\big)\) como \(\mathrm{E}\big(Var[Z\mid\boldsymbol X]\big)\), se obtiene
-\[
-\mathrm{Var}(\hat\beta_2)=\mathrm{E}\big(Var[\hat\beta_2\mid\boldsymbol X]\big)+\mathrm{Var}\big(E[\hat\beta_2\mid\boldsymbol X]\big),
-\]
-donde el segundo sumando es cero (pues \(E[\hat\beta_2\mid\boldsymbol X]=\beta_2\,\mathit1\) es constante, sección ``Insesgadez'', y la varianza de una constante es cero). Pero el primer sumando, \(\mathrm{E}\big(\sigma^2/(nS^2)\big)\), es la esperanza de un <i>cociente</i>, y no se simplifica en general (la esperanza de \(1/S^2\) no es \(1/\mathrm{E}(S^2)\)). Por eso, en la práctica, y en el resto de este curso, trabajaremos siempre con la fórmula <i>condicional</i> recién obtenida, evaluada en la muestra efectivamente observada: es lo que hace cualquier programa estadístico al reportar el error estándar de un coeficiente.
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, Teorema 2.2 (varianza de \(\hat\beta_1,\hat\beta_2\) bajo los supuestos SLR.1-SLR.5).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (por qué la regla del VIF mayor que \(10\) es arbitraria y qué debe mirarse en su lugar).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org9058267" class="outline-2">
-<h2 id="org9058267"><span class="section-number-2">8.</span> MCO es BLUE; estimando \(\sigma^2\)</h2>
+<div id="outline-container-orga6778a6" class="outline-2">
+<h2 id="orga6778a6"><span class="section-number-2">8.</span> Qué es y qué no es</h2>
 <div class="outline-text-2" id="text-8">
 <p>
-Enunciado (Gauss–Markov; demostración en el apéndice): de entre todos los estimadores <i>lineales e insesgados</i> de \(\beta_2\), \(\hat\beta_2\) tiene la menor varianza: MCO es <i>BLUE</i> (<i>Best Linear Unbiased Estimator</i>).
+<i>No es</i> una violación de los supuestos: MCO sigue insesgado y BLUE (lección 11) y los contrastes siguen siendo válidos (lección 12). Los errores estándar grandes son correctos: describen la muestra.
 </p>
 
 <p>
-\(\sigma^2\) (desconocido) se estima con la <i>cuasivarianza de los residuos</i>, un <i>tercer</i> producto escalar, tras el euclídeo y el estadístico:
-\[
-\langle\cdot,\cdot\rangle_{n-k}=\frac1{n-k}\langle\cdot,\cdot\rangle_{e}, \qquad \mathfrak{s}^2=\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{\mathop{\widehat{e}}}\rangle_{n-k}=\frac{\mathrm{SRC}}{n-k}.
-\]
+<i>No estropea</i> el ajuste, el \(R^2\) ni la predicción: \(\boldsymbol{\mathop{\widehat y}}\) es el mismo.
 </p>
 
 <p>
-Tres divisores, tres motivos distintos: \(1\) (geometría pura, sin más), \(n\) (para que \(\|\boldsymbol1\|_s=1\), lección 4), \(n-k\) (para que \(\mathfrak s^2\) sea un estimador insesgado de \(\sigma^2\)).
+<i>Es</i> una propiedad de la muestra: falta variación <i>propia</i>. Es el mismo problema que tener pocos datos.
+</p>
+
+<div class="org-center">
+<p>
+Para estimar el efecto de una variable hace falta que esa variable varíe <i>por su cuenta</i>.
 </p>
 </div>
-<div id="outline-container-org850a480" class="outline-4">
-<h4 id="org850a480">MCO es BLUE; estimando \(\sigma^2\)</h4>
-<div class="outline-text-4" id="text-org850a480">
+</div>
+<div id="outline-container-orgfca564d" class="outline-4">
+<h4 id="orgfca564d">Qué es y qué no es</h4>
+<div class="outline-text-4" id="text-orgfca564d">
 <p>
-Con insesgadez y varianza ya establecidas, cerramos con dos observaciones que esta sesión enuncia y el apéndice demuestra, y que conviene conocer.
+Los manuales tratan la colinealidad en el capítulo de ``problemas'' del modelo, y conviene precisar qué clase de problema es, porque no es del tipo de los que vendrán en las lecciones siguientes. En realidad es un problema de la muestra.
 </p>
 
 <p>
-La primera es el <i>Teorema de Gauss–Markov</i>: bajo los tres supuestos del Modelo Clásico de Regresión Lineal (y el muestreo aleatorio de esta sesión), \(\hat\beta_2\) no es solo insesgado; es, además, el estimador de <i>menor varianza</i> entre todos los estimadores <i>lineales</i> e <i>insesgados</i>. Lineal quiere decir de la forma \(\sum_iC_iY_i\), donde \(Y_1,\ldots,Y_n\) son las variables aleatorias de la muestra (no los datos observados \(y_1,\ldots,y_n\)) y los pesos \(C_i\) no dependen de \(\boldsymbol Y\) (van con mayúscula porque, igual que los \(W_i\), pueden ser funciones de \(\boldsymbol X\)). Este resultado se resume con el acrónimo <i>BLUE</i> (<i>Best Linear Unbiased Estimator</i>, ``el mejor estimador lineal insesgado''). La demostración está en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=22">apéndice (sección 7.3)</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-7-3">html</a>), y no necesita matrices: cualquier otro vector de pesos insesgado difiere de los pesos MCO en un vector ortogonal a ellos, y Pitágoras hace el resto; aquí basta con saber que es la justificación teórica de por qué, entre todas las rectas que podríamos ajustar, elegimos la de mínimos cuadrados.
+No es una violación de los supuestos. Los supuestos del Modelo Clásico hablan de la perturbación y del modelo poblacional; la colinealidad de grado habla de los regresores de la muestra, y ningún supuesto prohíbe que estén correlados. El único que los menciona, la independencia lineal de la lección 10, prohíbe solo el caso exacto. Con colinealidad de grado, todo lo demostrado sigue siendo válido: \(\hat\beta_j\) es insesgado, su varianza es la que dice la fórmula y, aunque aquí sea enorme, no hay estimador lineal insesgado con una varianza más pequeña (lección 11); los errores estándar de Gretl son correctos y los contrastes \(t\) y \(F\) valen (lección 12). Los errores estándar grandes informan de que esa muestra no permite estimar ese coeficiente con precisión.
 </p>
 
 <p>
-La segunda observación es más práctica: la fórmula \(Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-{\overline{X}})^2\) depende de \(\sigma^2\), la varianza de la perturbación poblacional, que no conocemos. Para usarla en la práctica (algo que haremos en la próxima sesión teórica, al construir errores estándar) necesitamos estimar \(\sigma^2\) a partir de los residuos \(\boldsymbol{\mathop{\widehat e}}\). Estos residuos observados se interpretan aquí como la realización, sobre nuestra muestra concreta, de la lista de residuos \((\hat E_1,\ldots,\hat E_n)\), con \(\hat E_i=Y_i-\hat\beta_1\,\mathit1-\hat\beta_2X_i\); es el mismo paso de variable aleatoria a dato que hemos dado varias veces en esta sesión. Esas componentes aproximan, sin ser idénticas a ellas, a las perturbaciones \(U_i\) del modelo poblacional.<sup><a id="fnr.10" class="footref" href="#fn.10" role="doc-backlink">10</a></sup>
+Tampoco estropea el ajuste. ``Por qué oscilan los coeficientes'' lo dejó claro: \(\boldsymbol{\mathop{\widehat y}}\) es la proyección sobre el subespacio, y el subespacio no depende de cómo se le describa. \(\mathrm{SRC}\), \(R^2\), \(\mathfrak s\) y las predicciones son los mismos con generadores alineados que con generadores perpendiculares. Si lo que se quiere del modelo es predecir, la presencia de colinealidad es irrelevante.
 </p>
 
 <p>
-La estimación natural sería \(\langle\boldsymbol{\mathop{\widehat e}},\boldsymbol{\mathop{\widehat e}}\rangle_s=\mathrm{SRC}/n\), la varianza de los residuos con nuestra convención habitual. Pero ese estimador, la misma fórmula evaluada sobre la lista de residuos \((\hat E_1,\ldots,\hat E_n)\) en lugar de sobre los datos observados \(\boldsymbol{\mathop{\widehat e}}\), es <i>sesgado</i>: subestima \(\sigma^2\) en promedio. La demostración está en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=21">apéndice (sección 7.2)</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-7-2">html</a>); aquí basta con la razón geométrica que sigue.<sup><a id="fnr.11" class="footref" href="#fn.11" role="doc-backlink">11</a></sup> La razón de este sesgo es geométrica, y ya la conocemos en parte: por construcción (ecuaciones normales, lección 10), los residuos \(\boldsymbol{\mathop{\widehat e}}\) no son un vector arbitrario de \(\mathbb R^n\), sino que viven siempre en el subespacio ortogonal a las columnas de \(\boldsymbol{\mathsf X}\). Como ese subespacio de regresores tiene dimensión \(k\) (hay \(k\) regresores, incluida la constante), su complemento ortogonal tiene dimensión \(n-k\) (la misma cuenta informal de dimensión que empleamos ya en la lección 4 para \(\mathcal L(\boldsymbol1)^\perp\), de dimensión \(n-1\), el caso particular \(k=1\)). Dicho de otro modo: aunque \(\boldsymbol{\mathop{\widehat e}}\) tiene \(n\) componentes, solo \(n-k\) de ellas son realmente ``libres''; las \(k\) restantes quedan fijadas por las \(k\) condiciones de ortogonalidad \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathop{\widehat e}}=\boldsymbol 0\). En una base ortonormal de ese complemento, \(\mathrm{SRC}\) es la suma de los cuadrados de \(n-k\) coordenadas, y cada una de ellas, evaluada sobre la muestra, tiene esperanza \(\sigma^2\): por eso \(\mathrm{SRC}\) tiene esperanza \((n-k)\sigma^2\), y \(\mathrm{SRC}/n\), esperanza \(\frac{n-k}{n}\sigma^2\), menor que \(\sigma^2\). Dividir por \(n-k\), en vez de por \(n\), es la manera de tener en cuenta esta pérdida de \(k\) grados de libertad, y es lo que hace insesgado al estimador resultante. El estimador que sí resulta insesgado usa, por tanto, ese divisor distinto: \(n-k\) (el número de observaciones menos el número total de coeficientes estimados, incluida la constante) en vez de \(n\).<sup><a id="fnr.12" class="footref" href="#fn.12" role="doc-backlink">12</a></sup>
+Lo que sí es: una propiedad de la muestra, la falta de variación propia. Un regresor con parte propia corta es un regresor que, dentro de esta muestra, casi no varía por su cuenta; y sin variación propia no hay forma de medir su efecto separado. Es la misma situación que tener pocos datos: con doce viviendas el intervalo de <code>rooms</code> iba de \(1900\) a \(20000\) dólares porque el regresor en desviaciones era corto; con <code>nox</code> y <code>lnox</code> juntas, la parte propia de cada una es corta. En los dos casos falta longitud, y por eso el remedio ``más información'' de la transparencia siguiente es ese: más datos, o mejores datos.
 </p>
 
 <p>
-Ese divisor nos lleva, de forma natural, a introducir un <i>tercer</i> producto escalar en la familia que el curso ha ido construyendo desde la lección 2: junto al euclídeo \(\langle\cdot,\cdot\rangle_e\) (divisor \(1\)) y al estadístico \(\langle\cdot,\cdot\rangle_s=\langle\cdot,\cdot\rangle_n\) (divisor \(n\)), definimos
-\[
-\langle\boldsymbol v,\boldsymbol w\rangle_{n-k}=\frac{1}{n-k}\langle\boldsymbol v,\boldsymbol w\rangle_e.
-\]
-Sigue siendo, técnicamente, un producto escalar legítimo (multiplicar por una constante positiva conserva la simetría, la linealidad y la positividad),<sup><a id="fnr.13" class="footref" href="#fn.13" role="doc-backlink">13</a></sup> y con él definimos la <i>cuasivarianza de los residuos</i>
-\[
-\mathfrak s^2=\langle\boldsymbol{\mathop{\widehat e}},\boldsymbol{\mathop{\widehat e}}\rangle_{n-k}=\frac{\mathrm{SRC}}{n-k},
-\]
-que sí es un estimador insesgado de \(\sigma^2\): la demostración está en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=21">apéndice (sección 7.2)</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-7-2">html</a>), y es la cuenta de coordenadas del párrafo anterior. Merece la pena subrayar que el motivo último de cada uno de los tres divisores es distinto. El divisor \(1\) no obedece a ningún motivo particular (es la geometría euclídea sin más). El divisor \(n\) se eligió, en la lección 4, para que \(\|\boldsymbol1\|_s=1\): un motivo puramente geométrico. El divisor \(n-k\) se elige aquí por un motivo <i>estadístico</i>, lograr insesgadez, y la lectura geométrica no es un añadido sino la razón: es la dimensión del subespacio donde vive \(\boldsymbol{\mathop{\widehat e}}\), el número de coordenadas del ruido que entran en \(\mathrm{SRC}\). El símbolo \(\mathfrak s^2\) (con la ese gótica) se reserva para esta cantidad, para no confundirla con la varianza muestral \(S^2\) (introducida hoy) ni con la \(s^2\) de los manuales clásicos de estadística, que suele denotar esto mismo con otra convención tipográfica.
+La falta de variación propia es el punto de llegada de una idea que el curso repite desde la lección 11. Allí, la fórmula de la varianza decía ``más dispersión en \(X\), más precisión''. La lección 12 la dibujó con el regresor concentrado y el disperso: para estimar bien el efecto de una variable hace falta que esa variable varíe. Hoy, con varios regresores, la idea toma su forma definitiva: hace falta que varíe <i>por su cuenta</i>, no a la vez que las demás.
 </p>
 
 <p>
-La expresión \(n-k\) recibe, en la terminología habitual de la estadística, el nombre de <i>grados de libertad</i> del modelo: el número de observaciones menos el número de parámetros ya estimados. En esta sesión, con dos regresores en total, \(k=2\), así que \(\mathfrak s^2=\mathrm{SRC}/(n-2)\). Volveremos sobre los grados de libertad, con más detalle, en la próxima sesión teórica.
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4, la comparación entre colinealidad y tamaño muestral pequeño; Goldberger, A. S. (1991), <i>A Course in Econometrics</i>, cap. 23, donde acuñó ``micronumerosidad'' para subrayar que son el mismo problema.
 </p>
-
-<p>
-<i>Para profundizar</i>:
-</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgba09f5a" class="outline-2">
+<h2 id="orgba09f5a"><span class="section-number-2">9.</span> Qué hacer y qué no</h2>
+<div class="outline-text-2" id="text-9">
 <ul class="org-ul">
-<li>Wooldridge, J. M. (2020), cap. 2, Teorema 2.2 (parte final: BLUE) y cap. 3, sección 3.5 (Teorema de Gauss-Markov, versión general con \(k\) regresores).</li>
-<li>Wooldridge, J. M. (2020), cap. 3, sección 3.4 (estimación insesgada de \(\sigma^2\), grados de libertad).</li>
+<li><i>Nada si el objetivo es predecir</i>: el ajuste no depende de los generadores.</li>
+
+<li><i>Obtener más información</i>: más datos o con mayor variación: rentas, tamaños, edades o países más dispares, con regresores que varíen por separado.</li>
+
+<li><i>Reformular</i>: quedarse con una de las dos variables o con una combinación, o imponer una restricción y contrastarla con el \(F\) (lección 13). Se gana precisión y se pierde lo que aportaba al ajuste la que sale. Mirar qué cambia en las predicciones: <code>nox</code> o <code>lnox</code> describen la realidad de forma distinta.</li>
+
+<li><i>Ortogonalizar</i>: sustituir un regresor por su parte propia (el residuo de su regresión auxiliar), que es ortogonal a los demás. El ajuste no cambia; cambia la interpretación de los coeficientes.</li>
+
+<li><i>Reconocerlo</i>: si la pregunta exige separar los efectos y la muestra no lo permite, decirlo e informar sobre los intervalos de confianza.</li>
+
+<li><i>Lo que no</i>: eliminar regresores uno a uno por su \(t\), sin realizar un contraste conjunto. Lo correcto: identificar los poco significativos y contrastar con el \(F\) que sobran a la vez.</li>
 </ul>
 </div>
-</div>
-</div>
-<div id="outline-container-orgb0ddd9b" class="outline-2">
-<h2 id="orgb0ddd9b"><span class="section-number-2">9.</span> ¿Y con más regresores?</h2>
-<div class="outline-text-2" id="text-9">
+<div id="outline-container-org2ec9dc6" class="outline-4">
+<h4 id="org2ec9dc6">Qué hacer y qué no</h4>
+<div class="outline-text-4" id="text-org2ec9dc6">
 <p>
-Sin demostrarlo (generalización matricial de lo probado hoy; recordando la notación de la lección 10 y su extensión aleatoria de ``El marco''):
-\[
-E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\,\mathit1,\qquad
-Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}.
-\]
+Antes de buscar remedios debemos hacernos una pregunta previa: para qué se quiere el modelo. Si es para predecir, ``Qué es y qué no es'' ya lo dijo: el ajuste es el mismo con cualquier descripción del subespacio; es decir, no hay nada que hacer dado que la colinealidad no supone un problema para la predicción. La predicción es la misma, con el mismo error estándar; la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=7">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#ortogonalizar">html</a>) de la práctica C del laboratorio lo comprueba con dos coches, antes y después de sustituir la edad por su parte propia. Lo que sí hay que vigilar es para qué combinación de regresores se predice. Con regresores alineados, un coche de \(300\) semanas y \(10\) mil millas está dentro del rango de cada variable y, sin embargo, lejos de la recta que forman las dos en la muestra: predecir ahí es extrapolar, y el error estándar de esa predicción es siete veces el de un coche típico. Los remedios que siguen son para cuando el objetivo es conocer el efecto de cada variable.
 </p>
 
 <p>
-En la diagonal de esta matriz están \(Var[\hat\beta_1\mid\boldsymbol X],\ldots,Var[\hat\beta_k\mid\boldsymbol X]\); fuera de la diagonal, las covarianzas \(Cov[\hat\beta_i,\hat\beta_j\mid\boldsymbol X]\).
+Si la colinealidad es falta de variación propia, el remedio de fondo es conseguirla, y solo hay una manera: más información. Las demás opciones no la crean. Reformular el modelo cambia la pregunta por otra que la muestra sí responde; sustituir un regresor por su parte propia cambia la interpretación de los coeficientes. Y, antes que cualquiera de ellas, hay una obligación: decir que la muestra no responde a la pregunta.
 </p>
 
 <p>
-Para \(k=2\), el elemento \((2,2)\) de esta fórmula matricial se reduce exactamente a lo que hoy hemos demostrado sin matrices (y los otros tres elementos dan lo que no hemos calculado).
+El primer remedio, más información, requiere precisar qué información. La fórmula del error estándar usa la longitud euclídea de la parte propia, \(\Vert\tilde{\boldsymbol x}_j\Vert_e\), la de la lección 2 que no divide por \(n\): su cuadrado es una suma de \(n\) sumandos, uno por observación, y ninguno es negativo. Por eso una observación nueva nunca acorta la parte propia; la alarga tanto más cuanto más se aparte, en el regresor \(j\), de lo que los demás regresores reproducen de ella.<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> Cuánto se alarga depende de qué observaciones se añaden. Si son más observaciones de la misma población, nuevas copias de las mismas variables aleatorias, como las de la matriz de copias del <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice de geometría</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-2">html</a>), secciones <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=7">2</a> y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=9">3</a>, la varianza muestral de cada regresor y la correlación entre regresores apenas cambian, porque aproximan la varianza y la correlación de la población, que son las que son. El VIF se queda donde estaba, la longitud de la parte propia crece con \(\sqrt n\) y el error estándar baja a ese ritmo: para dividirlo por dos hay que cuadruplicar la muestra. Es el remedio contra tener pocos datos, y es caro.
 </p>
 
 <p>
-Sustituyendo \(\boldsymbol X\) por la matriz de regresores observada \(\boldsymbol{\mathsf X}\), y \(\sigma^2\) por su estimación \(\mathfrak s^2\) (transparencia anterior), obtenemos la fórmula que calculan los programas estadísticos:
-\[
-\mathfrak s^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}.
-\]
-</p>
-</div>
-<div id="outline-container-org8d68192" class="outline-4">
-<h4 id="org8d68192">¿Y con más regresores?</h4>
-<div class="outline-text-4" id="text-org8d68192">
-<p>
-Todo lo demostrado en esta sesión se ha limitado, deliberadamente, al caso con dos regresores: la constante \(\mathit1\) y un único regresor no constante \(X\). Con \(k\) regresores (lección 10), el resultado análogo existe, y su enunciado, sin demostración, es la generalización matricial natural de lo que hoy hemos probado:
-\[
-E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\,\mathit1,\qquad Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}.
-\]
-Aquí \(\boldsymbol X\) es la misma matriz aleatoria de regresores que fijamos al abrir la sesión, solo que ahora con \(k\) columnas en lugar de dos; \(\boldsymbol{\mathsf X}\) sigue denotando, como en la lección 10, la matriz de regresores <i>observada</i>. La primera igualdad generaliza la insesgadez de la sección ``Insesgadez'': \(\boldsymbol\beta\,\mathit1\) denota el vector cuyas componentes son las variables aleatorias constantes \(\beta_1\,\mathit1,\ldots,\beta_k\,\mathit1\), el análogo, para un vector de parámetros, de la constante \(\beta_2\,\mathit1\) que obtuvimos en la sección ``Insesgadez''. La segunda generaliza la varianza de la sección ``Varianza'': es una matriz \(k\times k\) que ocupa el lugar que antes ocupaba el escalar \(1/\sum_i(X_i-{\overline{X}})^2\); en su diagonal contiene las varianzas \(Var[\hat\beta_1\mid\boldsymbol X],\ldots,Var[\hat\beta_k\mid\boldsymbol X]\) (con \(Var[\hat\beta_2\mid\boldsymbol X]\) como caso particular, ya conocido, en la posición \((2,2)\)), y fuera de la diagonal, las covarianzas \(Cov[\hat\beta_i,\hat\beta_j\mid\boldsymbol X]\) entre cada par de coeficientes. Para cada coeficiente por separado, la insesgadez y la varianza con \(k\) regresores sí se demuestran con material del curso, una vez que la lección 14 define la parte propia del regresor: <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=13">apéndice, secciones 5.4</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>), <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=19">6.5</a> y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=20">7.1</a>. La fórmula matricial completa sigue enunciada; su diagonal, no.
+La otra manera de obtener más información es cambiar la población de la que se muestrea, para que los regresores varíen por separado. En los coches de la práctica C, edad y millas van juntas porque los coches de la muestra tienen un uso parecido, y por eso quedan sobre una recta (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=3">figura de la actividad 1</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#recta">html</a>)). Una muestra que incluyera coches viejos con poco uso y coches jóvenes con mucho (el segundo coche de un hogar, un taxi, una furgoneta de reparto) añadiría observaciones alejadas de esa recta, y bastan pocas para alargar la parte propia de cada regresor. Es la regla general con datos económicos: para separar el efecto de la renta del de la edad, o el del tamaño de una empresa del de su antigüedad, hace falta una muestra con rentas, edades, tamaños o antigüedades más dispares y, sobre todo, con combinaciones que no vayan siempre juntas: jóvenes con renta alta y mayores con renta baja, empresas grandes y jóvenes. Ampliar el ámbito de la muestra (más países, más sectores, más años) suele ser la manera de conseguirlo. Quien diseña un experimento elige esas combinaciones directamente, y en eso consistía la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=7">pregunta 4</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#preguntas">html</a>) de la práctica B de la sesión 16; con datos reales observados en la economía (o en la sociedad), como la población es la que es, se suele perder la posibilidad de diseñar la muestra (ninguna, o casi ninguna, empresa joven es grande desde sus inicios); esa es la razón por la que la colinealidad es más difícil de evitar en economía aplicada.
 </p>
 
 <p>
-Al evaluar esta fórmula en una muestra ya observada, sustituimos la matriz aleatoria \(\boldsymbol X\) por la matriz de regresores observada \(\boldsymbol{\mathsf X}\), con lo que queda por calcular \((\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}\). Multiplicada por \(\mathfrak s^2\) (la estimación de \(\sigma^2\) de ``MCO es BLUE; estimando \(\sigma^2\)'', pues \(\sigma^2\) sigue siendo desconocido) da \(\mathfrak s^2(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X})^{-1}\): la fórmula que Gretl (y cualquier otro programa estadístico) usa internamente para calcular los errores estándar que veremos en la próxima sesión teórica.
+El segundo remedio es reformular el modelo: quitar un regresor, o fundir dos en uno. Conviene distinguir tres casos, porque lo que se pierde no es lo mismo. Si dos variables miden la misma magnitud en dos escalas, como <code>nox</code> y <code>lnox</code>, la segunda no añade información sobre las viviendas; añade una forma funcional. Quedarse con una no pierde información, pero obliga a elegir entre dos descripciones distintas de la realidad: con <code>nox</code> en niveles, cada unidad más de contaminación resta lo mismo al precio; con <code>lnox</code>, resta cada vez menos (la interpretación de los regresores en logaritmos se verá en la lección 15). Las dos descripciones ajustan los datos de la muestra casi igual de bien, como mostró la lección 13 con el modelo con <code>nox</code> y el modelo con <code>lnox</code>: una recta y una curva logarítmica pasan casi por los mismos puntos allí donde hay muchos barrios, en los niveles de contaminación habituales. Se separan en los extremos, donde hay pocos barrios: para un barrio muy contaminado, la recta predice un precio mucho menor que la curva. Elegir una u otra es elegir qué se predice fuera de lo habitual, y la muestra apenas ayuda a decidirlo. El segundo caso es el de dos magnitudes distintas que en la muestra se mueven juntas, como la edad y las millas de un coche. Aquí quitar una sí pierde información: el modelo deja de distinguir lo que las dos distinguían. A cambio, el coeficiente de la que queda gana precisión, y cambia de significado. Con las dos variables, el coeficiente de la edad, \(28{,}02\), es el efecto de una semana más de edad <i>a igual kilometraje</i>. Con la edad sola, el coeficiente es \(7{,}34\), y es el efecto de una semana más de edad <i>junto con</i> el de las millas que esa semana trae consigo: en la muestra, por cada semana más de edad un coche tiene, en media, \(134\) millas más (\(0{,}134\) es la pendiente de la regresión de <code>miles</code> sobre <code>age</code>). La identidad de la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=3">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#dos-juntas">html</a>) de la práctica C, \(7{,}34\approx28{,}02-154{,}6\cdot0{,}134\), lo descompone en el efecto de la edad a igual kilometraje más el efecto de esas \(134\) millas. Son dos preguntas distintas, y la muestra responde con más precisión a la segunda. Es un intercambio: precisión a cambio de una pregunta menos fina. El tercer caso es que la teoría diga algo sobre los coeficientes: si dos efectos deben ser iguales, o sumar uno, imponer esa restricción funde regresores y elimina la dirección compartida. La lección 13 enseñó a imponerla y a contrastarla con el estadístico \(F\); si el \(F\) no la rechaza, el modelo restringido reduce la colinealidad y permite una interpretación más clara de los resultados.
 </p>
 
 <p>
-Es razonable preguntarse si esta fórmula, presentada aquí sin demostración, es compatible con lo que sí hemos demostrado hoy. La respuesta es sí, y podemos comprobarlo con un cálculo elemental. Para \(k=2\) (constante más un único regresor no constante), la matriz \(\boldsymbol{X}^\top\boldsymbol{X}\) (análogo aleatorio de la \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) de la lección 10) es
-\[
-\boldsymbol{X}^\top\boldsymbol{X}=\begin{pmatrix}n\,\mathit1 & n\overline{X}\\ n\overline{X} & \sum_iX_i^2\end{pmatrix}.
-\]
-Usando la fórmula general para invertir una matriz \(2\times2\), obtenemos<sup><a id="fnr.14" class="footref" href="#fn.14" role="doc-backlink">14</a></sup>
-\[
-(\boldsymbol{X}^\top\boldsymbol{X})^{-1}=\frac{1}{n\sum_i(X_i-\overline{X})^2}\begin{pmatrix}\sum_iX_i^2 & -n\overline{X}\\ -n\overline{X} & n\,\mathit1\end{pmatrix}.
-\]
-El elemento \((2,2)\) de esta matriz, el que corresponde a la varianza condicional del segundo coeficiente, \(\hat\beta_2\), vale \(n\,\mathit1\big/\big(n\sum_i(X_i-\overline{X})^2\big)=\mathit1\big/\sum_i(X_i-\overline{X})^2\). Multiplicando por \(\sigma^2\):
-\[
-\sigma^2\big[(\boldsymbol{X}^\top\boldsymbol{X})^{-1}\big]_{22}=\frac{\sigma^2}{\sum_i(X_i-\overline{X})^2},
-\]
-exactamente la fórmula de la sección ``Varianza''. Además, la misma matriz da las otras dos cantidades que esta sesión no ha llegado a calcular, al habernos centrado, como anunciamos al abrir, en \(\hat\beta_2\): el elemento \((1,1)\), multiplicado por \(\sigma^2\), da \(Var[\hat\beta_1\mid\boldsymbol{X}]=\sigma^2\sum_iX_i^2\big/\big(n\sum_i(X_i-\overline{X})^2\big)\); y el elemento \((1,2)=(2,1)\), multiplicado por \(\sigma^2\), da \(Cov[\hat\beta_1,\hat\beta_2\mid\boldsymbol{X}]=-\sigma^2\overline{X}\big/\sum_i(X_i-\overline{X})^2\). La generalización matricial, aunque no la hayamos demostrado, es consistente con todo lo que sí hemos probado en esta sesión, y añade dos fórmulas más que no habíamos calculado en la lección.
+La operación que no crea variación propia deja el subespacio como está y cambia sus generadores: consiste en sustituir un regresor por su componente de variación propia \(\tilde{\boldsymbol x}_{j}\), es decir, por el residuo de su regresión auxiliar sobre los demás regresores. ``Por qué oscilan los coeficientes'' dijo que el ajuste no depende de qué generadores describan el subespacio; esta operación hace que un regresor, o un grupo de ellos, sea ortogonal a los demás. Qué cambia y qué no se deduce de lo demostrado hoy y en la lección 10. No cambia el ajuste: \(\boldsymbol{\mathop{\widehat y}}\), \(\mathrm{SRC}\), \(R^2\), \(\mathfrak s\) y las predicciones son los mismos. No cambia el coeficiente del regresor sustituido, ni su error estándar: \(\hat\beta_j\) se calcula con la parte propia de \(\boldsymbol x_j\), y la parte propia de \(\tilde{\boldsymbol x}_j\) respecto de los demás es ella misma. Sí cambian los coeficientes de los demás regresores: como \(\tilde{\boldsymbol x}_j\) es ortogonal a todos ellos, sus coeficientes pasan a ser los del modelo sin \(\boldsymbol x_j\) (familia ortogonal), con errores estándar menores. Y cambia la interpretación de todos. El coeficiente de \(\tilde{\boldsymbol x}_j\) es el efecto de la parte de \(\boldsymbol x_j\) que no acompaña a los demás regresores; el de cada uno de los demás ya no es el efecto ``con \(\boldsymbol x_j\) fijo'', sino el efecto de esa variable junto con el de la parte de \(\boldsymbol x_j\) que, en la muestra, la acompaña. La regresión auxiliar no crea información: asigna toda la variación compartida a los demás regresores, y esa asignación debe justificarla el problema económico, no la estadística. La <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=7">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#ortogonalizar">html</a>) de la práctica C del laboratorio lo ilustra con la edad y las millas de los coches, sustituyendo la edad por su parte propia: allí se ve, con las tablas delante, qué coeficiente conserva su valor, cuál cambia y por qué los dos cambian de interpretación.
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), Apéndice E.2 (fórmulas matriciales de insesgadez y varianza para el modelo de regresión múltiple).
+El caso en que esa justificación es más clara es el de la práctica D del laboratorio (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-D-hprice1-tasacion.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-D-hprice1-tasacion.html#otros-factores">html</a>)): el precio de ochenta y ocho viviendas sobre la tasación de una inmobiliaria y cuatro características de la vivienda. La inmobiliaria tasa a partir de las características, así que es la tasación la que debe sustituirse por su parte propia. Esa parte propia es la valoración de la inmobiliaria una vez descontado el efecto de las características que están en el modelo: lo que la inmobiliaria valora y no está entre los otros regresores (estado de conservación, situación, calidades). Con ella en el modelo, los coeficientes de las características miden su efecto sin mantener fija la tasación, y el coeficiente de la parte propia de la tasación mide cuánto responde el precio a esa valoración adicional de la inmobiliaria; en la muestra resulta claramente significativo (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-D-hprice1-tasacion.pdf#page=5">actividad 4</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-D-hprice1-tasacion.html#precio-otros-factores">html</a>)).
+</p>
+
+<p>
+Reconocerlo no es una opción más: cuando la muestra tiene limitaciones, hay que decirlo. Si la pregunta económica exige separar el efecto de <code>nox</code> del de <code>lnox</code>, estos datos no lo permiten, y lo correcto es informar los dos coeficientes con sus intervalos, que serán amplios, y no atribuir a la estimación una precisión que la muestra no da. Un intervalo ancho informa de lo que la muestra no permite precisar. Una vez dicho, es cuando cabe plantearse qué hacer con esas limitaciones, y es ahí donde se barajan las opciones anteriores, en función de los objetivos del estudio.
+</p>
+
+<p>
+Lo que no hay que hacer lo dijo la lección 13: eliminar regresores porque sus \(t\) son bajos. Con colinealidad de grado, los \(t\) bajos son el síntoma, no un veredicto que indique que deben eliminarse conjuntamente; de hecho, el \(F\) puede rechazar esa eliminación. El procedimiento razonable tiene dos pasos: identificar con los \(t\) las variables poco significativas y contrastar con el \(F\) que pueden omitirse simultáneamente. Si el contraste no rechaza, puede ser conveniente eliminarlas, pero no es preceptivo: si la teoría exige mantenerlas, o el modelo sin ellas deja de tener sentido económico, es mejor dejarlas y reconocer que esta muestra no permite estimar bien sus efectos. La eliminación uno a uno, sacando en cada paso el regresor de mayor valor \(p\) y reestimando (es lo que hace la opción <code>--auto</code> de <code>omit</code> en Gretl), llega a un modelo en el que todos los \(t\) son grandes; con colinealidad de grado, el primero que sale lo hace por azar y el que queda hereda el efecto de los dos, así que conviene leer el contraste conjunto de todas las variables omitidas, que Gretl imprime al final, y no solo el modelo final. Existen, por último, métodos que renuncian a la insesgadez a cambio de varianza, como la regresión <i>ridge</i>, o que sustituyen los regresores por combinaciones ortogonales, como las componentes principales. Quedan fuera de este curso; baste saber que existen y que ninguno crea la información que la muestra no tiene.
+</p>
+
+<p>
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (qué hacer ante la colinealidad, y por qué eliminar regresores puede ser peor que dejarlos); Kennedy, P. (2008), <i>A Guide to Econometrics</i>, cap. 12 (un repaso claro de los remedios y de sus costes).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgd3dbb47" class="outline-2">
-<h2 id="orgd3dbb47"><span class="section-number-2">10.</span> Recapitulación y guiño a la sesión siguiente</h2>
+<div id="outline-container-orgb7fc4be" class="outline-2">
+<h2 id="orgb7fc4be"><span class="section-number-2">10.</span> Recapitulación y guiño a las sesiones siguientes</h2>
 <div class="outline-text-2" id="text-10">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -998,372 +868,367 @@ exactamente la fórmula de la sección ``Varianza''. Además, la misma matriz da
 </colgroup>
 <thead>
 <tr>
-<th scope="col" class="org-left">Propiedad</th>
-<th scope="col" class="org-left">Resultado (regresión simple, \(k=2\))</th>
-<th scope="col" class="org-left">Supuestos usados</th>
+<th scope="col" class="org-left">Pieza</th>
+<th scope="col" class="org-left">Fórmula</th>
+<th scope="col" class="org-left">Lectura geométrica</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="org-left">Insesgadez</td>
-<td class="org-left">\(\mathrm{E}(\hat\beta_2)=\beta_2\)</td>
-<td class="org-left">Linealidad + \(\mathrm{Var}(X)\neq0\) + muestreo aleatorio</td>
+<td class="org-left">Parte propia del regresor \(\boldsymbol x_j\)</td>
+<td class="org-left">\(\tilde{\boldsymbol x}_j\): residuo de \(\boldsymbol x_j\) sobre los demás</td>
+<td class="org-left">lo que \(\boldsymbol x_j\) no comparte</td>
 </tr>
 
 <tr>
-<td class="org-left">Varianza</td>
-<td class="org-left">\(Var[\hat\beta_2\mid\boldsymbol X]=\frac{\sigma^2}{\sum_i(X_i-{\overline{X}})^2}\)</td>
-<td class="org-left">+ Homocedasticidad (+ \(Cov[U_i,U_j\mid\boldsymbol X]=\mathit0\), del muestreo aleatorio)</td>
+<td class="org-left">Longitud de \(\tilde{\boldsymbol x}_j\)</td>
+<td class="org-left">\(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j\)</td>
+<td class="org-left">cateto perpendicular al subespacio de los demás</td>
 </tr>
 
 <tr>
-<td class="org-left">Eficiencia</td>
-<td class="org-left">MCO es BLUE (mejor entre los lineales e insesgados)</td>
-<td class="org-left">Los tres + muestreo aleatorio (Gauss–Markov, apéndice)</td>
+<td class="org-left">Error estándar \(\mathrm{ee}(\hat\beta_j)\)</td>
+<td class="org-left">\(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\) (demostración en el apéndice)</td>
+<td class="org-left">longitud del ruido estimado por unidad de longitud propia</td>
+</tr>
+
+<tr>
+<td class="org-left">\(\mathrm{VIF}_j\)</td>
+<td class="org-left">\(1/(1-R_j^2)=1/\sin^2\theta_j\)</td>
+<td class="org-left">inflación de la varianza; su raíz, del error estándar</td>
+</tr>
+
+<tr>
+<td class="org-left">Coeficientes \(\hat\beta_j\)</td>
+<td class="org-left">coordenadas de \(\boldsymbol{\mathop{\widehat y}}\)</td>
+<td class="org-left">inestables si los generadores casi se alinean</td>
 </tr>
 </tbody>
 </table>
-
 <p>
-Casi nada nuevo: la vía alternativa (lección 7), la esperanza condicional y la independencia entre observaciones (lección 9). Lo único nuevo: evaluar la fórmula sobre variables aleatorias, no sobre datos; eso, y solo eso, convierte \(\hat\beta_2\) en un estimador.
+Demostrado: la longitud de la parte propia. Enunciado (demostración en el apéndice, con la familia ortogonal): el error estándar. Ningún supuesto nuevo, ningún supuesto violado.
 </p>
 
 <p>
-<i>Nota</i>: los mismos argumentos, sobre \(\hat\beta_1=\overline{Y}-\hat\beta_2{\overline{X}}\), prueban la insesgadez de \(\hat\beta_1\).
-</p>
-
-<p>
-<i>Lección 12</i>: ya conocemos el valor esperado y la varianza de \(\hat\beta_2\); para intervalos de confianza y contrastes hace falta algo más: la <i>forma</i> de su distribución.
+<i>Laboratorios</i>: el \(F\) con datos reales y simulados; y la colinealidad creciente en Monte Carlo, la regresión auxiliar de <code>nox</code> y el VIF. <i>Lección 16</i>: la trampa de las variables ficticias es colinealidad exacta con \(\boldsymbol 1\).
 </p>
 </div>
-<div id="outline-container-org3c35b0e" class="outline-4">
-<h4 id="org3c35b0e">Recapitulación y guiño a la sesión siguiente</h4>
-<div class="outline-text-4" id="text-org3c35b0e">
+<div id="outline-container-org75ea7fb" class="outline-4">
+<h4 id="org75ea7fb">Recapitulación y guiño a las sesiones siguientes</h4>
+<div class="outline-text-4" id="text-org75ea7fb">
 <p>
-Esta sesión tiene pocos ingredientes nuevos. Hemos demostrado dos propiedades, insesgadez y varianza de \(\hat\beta_2\), con piezas que ya teníamos. La fórmula de la ``vía alternativa'' de la lección 7 nos dio \(\hat\beta_2\) como combinación lineal de los datos. La esperanza condicional de la lección 9 nos permitió tomar esperanzas y varianzas ``condicionando en \(\boldsymbol X\)''. Y la independencia entre observaciones, anunciada en esa misma lección 9 (``copias idénticas e independientes''), nos dio la incorrelación entre perturbaciones.
+La sesión ha añadido una definición y un resultado. La definición es la parte propia de un regresor, el residuo de proyectarlo sobre los demás: una regresión de la lección 10 con un regresor en el papel del regresando. El resultado es su longitud, \(\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j\), que sale de Pitágoras en esa regresión auxiliar. Todo lo demás es lectura: el error estándar de la lección 12, el ruido estimado dividido por esa longitud (demostrado en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=13">apéndice, sección 5.4</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>) con la familia ortogonal de la lección 10), el VIF como inverso del seno al cuadrado, y las coordenadas que oscilan porque los generadores casi se alinean.
 </p>
 
 <p>
-Lo único nuevo es esto: tomar una fórmula ARITMÉTICA ya obtenida (geométricamente, en la lección 7, sobre datos fijos) y evaluarla en variables aleatorias en lugar de en datos. Eso, sin más, es lo que convierte una estimación (un número, calculado a partir de una muestra concreta) en un estimador (una variable aleatoria, cuya distribución depende de qué muestra hubiéramos observado). No hemos definido ningún producto escalar nuevo sobre ``vectores de variables aleatorias'', ni hemos vuelto a demostrar Cauchy–Schwarz sobre un objeto distinto. Sencillamente, hemos sustituido números por variables aleatorias dentro de una fórmula que ya sabíamos cierta, y hemos reservado la herramienta probabilística de la lección 9 (esperanza condicional, independencia) para el momento en que era necesaria: al tomar esperanzas y varianzas de esa suma ponderada.
+Conviene retener también lo que la sesión no ha hecho. No ha añadido ningún supuesto, y ninguno de los anteriores se ha violado: la colinealidad de grado es compatible con todo lo demostrado en las lecciones 11 y 12. Es un problema de la muestra, la falta de variación propia, y su remedio es información, no otro estimador.
 </p>
 
 <p>
-La tabla resume las dos propiedades centrales, junto con los supuestos exactos que cada una requiere: la insesgadez solo necesita linealidad (más el muestreo aleatorio, que es lo que eleva la exogeneidad estricta al condicionamiento en toda la matriz \(\boldsymbol X\)); la varianza necesita, además, homocedasticidad y la ausencia de covarianza cruzada entre perturbaciones (también consecuencia del muestreo aleatorio). Conviene tener presente esta jerarquía: cada propiedad exige un subconjunto distinto de los tres supuestos del Modelo Clásico. Cuando más adelante se ponga en duda alguno de ellos (la homocedasticidad, por ejemplo), sabremos qué propiedad de \(\hat\beta_2\) deja de estar garantizada y cuál sigue intacta.
+Quedan tres hilos. Dos son de laboratorio. En la práctica del contraste \(F\) se aplicará lo de la lección 13 con datos reales y se simulará la distribución del \(F\) bajo la hipótesis nula. En la práctica de colinealidad se verá, con un experimento de Monte Carlo, cómo crece la dispersión de los coeficientes al cerrar el ángulo entre dos regresores mientras el ajuste no se mueve; se calculará a mano la parte propia de <code>nox</code> con la regresión auxiliar; y se comprobará el VIF de Gretl contra la fórmula de hoy. El tercer hilo es de teoría y llega en la lección 16, al introducir las variables ficticias: si se incluyen una indicadora de hombre y otra de mujer junto con la constante, la suma de las dos es \(\boldsymbol 1\), y eso es la colinealidad exacta de la lección 10, que hoy hemos repasado: la llamada ``trampa de las variables ficticias''.
 </p>
 
 <p>
-Queda, sin embargo, una limitación importante que esta sesión no resuelve. Saber que \(\hat\beta_2\) está bien centrado en \(\beta_2\) (insesgadez) y saber cuánto se dispersa alrededor de ese centro (varianza) NO basta para responder preguntas del tipo ``¿es \(\hat\beta_2=0{,}5\) una estimación compatible con \(\beta_2=0\)?'' o ``¿en qué rango de valores podemos confiar razonablemente que está el verdadero \(\beta_2\)?''. Para responderlas (son los contrastes de hipótesis y los intervalos de confianza que ocuparán buena parte del resto del curso) no basta con el valor esperado y la varianza de \(\hat\beta_2\): hace falta conocer, además, la <i>forma</i> completa de su distribución. Esa es la tarea de la próxima sesión teórica: enunciar, apoyándonos en un supuesto adicional sobre la distribución de la perturbación \(U\), la distribución de \(\hat\beta_2\) (la demostración está en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=24">apéndice (sección 9)</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-9">html</a>)), y a partir de ella construir el error estándar, el intervalo de confianza y el contraste \(t\).
-</p>
-
-<p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 2, sección 2.5 (Teoremas 2.1 y 2.2) y cap. 3, secciones 3.3 y 3.4 (los mismos resultados con \(k\) regresores).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (resumen) y cap. 7, sección 7.2 (la trampa de las variables ficticias, con la que enlaza la lección 16).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-apendice-copias" class="outline-2">
-<h2 id="apendice-copias"><span class="section-number-2">11.</span> Apéndice: lanzar una moneda infinitas veces</h2>
-<div class="outline-text-2" id="text-apendice-copias">
-<p>
-<i>Material complementario</i>. Este apartado respondía a una pregunta que la lección 9 dejó abierta y que esta lección ha usado sin discutir: de dónde salen las copias idénticas e independientes de una variable aleatoria, y qué significa, en el lenguaje geométrico del curso, que sean independientes. La respuesta, con el ejemplo de la moneda (el intervalo \([0,1]\) con la longitud como probabilidad, y la moneda \(n\)-ésima como la cifra binaria \(n\)-ésima de \(\omega\)), está ahora en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice ``Estructura geométrica de la probabilidad y de la inferencia en el modelo de regresión''</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html">html</a>), secciones <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=6">1.5</a> (independientes es ``a escuadra''), <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=7">2</a> (la moneda) y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=9">3</a> (la matriz de copias: filas, columnas y vectores de \(\mathbb R^n\)). Lo esencial cabe en dos frases: ``\(n\) copias idénticas e independientes'' no es un supuesto sobre el mundo, sino una construcción, porque dada cualquier variable existe un \(\Omega\) en el que caben tantas copias como se quiera; lo que sí es un supuesto es que <i>nuestros datos</i> sean una realización de esas copias, y ese supuesto es el muestreo aleatorio de esta lección.
-</p>
-</div>
-</div>
-<div id="outline-container-org74582cf" class="outline-2">
-<h2 id="org74582cf"><span class="section-number-2">12.</span> Preguntas de repaso (sesión 15)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
-<div class="outline-text-2" id="text-12">
+<div id="outline-container-orgf6e2334" class="outline-2">
+<h2 id="orgf6e2334"><span class="section-number-2">11.</span> Preguntas de repaso (sesión 20)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div class="outline-text-2" id="text-11">
 <p>
 Le propongo 12 preguntas.
 Las marco con un nivel orientativo: [B] básica, [M] media, [D] discriminadora.
 </p>
 </div>
-<div id="outline-container-org568f728" class="outline-4">
-<h4 id="org568f728">Comentario</h4>
-<div class="outline-text-4" id="text-org568f728">
+<div id="outline-container-org766a78c" class="outline-4">
+<h4 id="org766a78c">Comentario</h4>
+<div class="outline-text-4" id="text-org766a78c">
 <p>
-Las preguntas que más le conviene trabajar son la 7 (la Ley de las Esperanzas Iteradas es una consecuencia inmediata de la definición geométrica de esperanza condicional de la lección 9) y la 9 (la incorrelación entre perturbaciones es una consecuencia del muestreo aleatorio anunciado en esa misma lección). La 12 le pide distinguir qué se ha demostrado hoy y qué se ha enunciado solo por analogía matricial. Repase también la 8: la lectura de la fórmula de la varianza (qué la hace grande o pequeña) es la que más usará en las prácticas de laboratorio.
+Las preguntas que más le conviene trabajar son la 4 (fija el resultado central: la longitud de la parte propia sale de Pitágoras en la regresión auxiliar), la 7 (la distinción entre lo que la colinealidad estropea, las coordenadas, y lo que respeta, el ajuste) y la 9 (la colinealidad no viola ningún supuesto y los errores estándar grandes son correctos). Repase también la 6: separa el efecto parcial de la lección 10 de la colinealidad, dos cosas fáciles de confundir. La 12 le pide distinguir lo demostrado de lo enunciado.
 </p>
 </div>
 </div>
-<div id="outline-container-org543ca2a" class="outline-4">
-<h4 id="org543ca2a">Pregunta 1 [B] — Estimador vs. estimación</h4>
-<div class="outline-text-4" id="text-org543ca2a">
+<div id="outline-container-org1a8278a" class="outline-4">
+<h4 id="org1a8278a">Pregunta 1 [B] — Exacta frente a de grado</h4>
+<div class="outline-text-4" id="text-org1a8278a">
 <p>
-La distinción entre \(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\) y \(\hat\beta_2(\boldsymbol x,\boldsymbol y)\) es:
-</p>
-
-<ol class="org-ol">
-<li>Una diferencia sin importancia, ambas notaciones significan siempre lo mismo.</li>
-<li>\(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\) es el estimador (variable aleatoria); \(\hat\beta_2(\boldsymbol x,\boldsymbol y)\) es la estimación (un número).</li>
-<li>\(\hat\beta_2(\boldsymbol X,\boldsymbol Y)\) es la estimación; \(\hat\beta_2(\boldsymbol x,\boldsymbol y)\) es el estimador.</li>
-<li>Solo tiene sentido hablar de \(\hat\beta_2(\boldsymbol x,\boldsymbol y)\); el estimador no existe como objeto matemático.</li>
-</ol>
-</div>
-</div>
-<div id="outline-container-org2c6c9e4" class="outline-4">
-<h4 id="org2c6c9e4">Pregunta 2 [B] — El supuesto de muestreo aleatorio</h4>
-<div class="outline-text-4" id="text-org2c6c9e4">
-<p>
-La condición \(Cov[U_i,U_j\mid\boldsymbol X]=\mathit 0\) para \(i\neq j\) es:
+La diferencia entre colinealidad exacta y colinealidad de grado es:
 </p>
 
 <ol class="org-ol">
-<li>Un supuesto completamente nuevo, no relacionado con nada visto antes.</li>
-<li>Consecuencia de la homocedasticidad.</li>
-<li>Consecuencia de la independencia entre observaciones (``copias idénticas e independientes''), ya anunciada en la lección 9.</li>
-<li>Una consecuencia de la insesgadez de \(\hat\beta_2\).</li>
+<li>Ninguna: son dos nombres para el mismo problema.</li>
+<li>En la exacta un regresor es combinación lineal de los demás y las ecuaciones normales tienen infinitas soluciones; en la de grado forma un ángulo muy pequeño con el subespacio generado por los demás, y la solución es única pero imprecisa e inestable.</li>
+<li>La exacta ocurre con datos reales y la de grado solo con datos simulados.</li>
+<li>La de grado viola los supuestos del modelo y la exacta no.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org7cc98bc" class="outline-4">
-<h4 id="org7cc98bc">Pregunta 3 [M] — Origen de los pesos \(W_i\)</h4>
-<div class="outline-text-4" id="text-org7cc98bc">
+<div id="outline-container-orgdf89d7f" class="outline-4">
+<h4 id="orgdf89d7f">Pregunta 2 [B] — La parte propia</h4>
+<div class="outline-text-4" id="text-orgdf89d7f">
 <p>
-Los pesos \(W_i=(X_i-{\overline{X}})/\sum_j(X_j-{\overline{X}})^2\) que aparecen en \(\hat\beta_2(\boldsymbol X,\boldsymbol Y)=\sum_iW_iY_i\) provienen de:
+La parte propia \(\tilde{\boldsymbol x}_j\) de un regresor es:
 </p>
 
 <ol class="org-ol">
-<li>Una definición completamente nueva, exclusiva de esta sesión.</li>
-<li>Evaluar, sobre las variables aleatorias de la muestra, la MISMA fórmula aritmética que la ``vía alternativa'' de la lección 7 obtuvo geométricamente sobre datos fijos.</li>
-<li>El teorema de Gauss-Markov.</li>
-<li>La cuasivarianza de los residuos.</li>
+<li>El regresor en desviaciones respecto a su media.</li>
+<li>El residuo de la regresión de \(\boldsymbol x_j\) sobre los demás regresores, constante incluida: lo que los demás no reproducen.</li>
+<li>El ajuste de la regresión de \(\boldsymbol y\) sobre \(\boldsymbol x_j\).</li>
+<li>La proyección de \(\boldsymbol x_j\) sobre \(\mathcal L(\boldsymbol 1)\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org10a2496" class="outline-4">
-<h4 id="org10a2496">Pregunta 4 [M] — Las dos propiedades de los pesos</h4>
-<div class="outline-text-4" id="text-org10a2496">
+<div id="outline-container-org0fbbb47" class="outline-4">
+<h4 id="org0fbbb47">Pregunta 3 [B] — Qué mide el VIF</h4>
+<div class="outline-text-4" id="text-org0fbbb47">
 <p>
-La propiedad \(\sum_iW_i=\mathit 0\) se deduce de:
+Un \(\mathrm{VIF}_j=25\) significa que:
 </p>
 
 <ol class="org-ol">
-<li>La homocedasticidad de la perturbación.</li>
-<li>Que \(X_i-{\overline{X}}\) suma cero por pura aritmética: la misma cuenta que en la lección 4, aplicada ahora a \(n\) variables aleatorias en lugar de a \(n\) datos.</li>
-<li>Que \(\hat\beta_2\) es insesgado.</li>
-<li>La independencia entre \(U_i\) y \(U_j\).</li>
+<li>El coeficiente \(\hat\beta_j\) es \(25\) veces más grande de lo que debería.</li>
+<li>El \(R^2\) del modelo es \(0{,}25\).</li>
+<li>La varianza de \(\hat\beta_j\) es \(25\) veces la que tendría si el regresor no compartiera nada con los demás; su error estándar, \(5\) veces.</li>
+<li>Hay que eliminar el regresor \(j\) del modelo.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgd085ad3" class="outline-4">
-<h4 id="orgd085ad3">Pregunta 5 [M] — El paso de sustitución</h4>
-<div class="outline-text-4" id="text-orgd085ad3">
+<div id="outline-container-orgc36311f" class="outline-4">
+<h4 id="orgc36311f">Pregunta 4 [M] — De dónde sale la longitud de la parte propia</h4>
+<div class="outline-text-4" id="text-orgc36311f">
 <p>
-Al sustituir \(Y_i=\beta_1\,\mathit1+\beta_2X_i+U_i\) en \(\hat\beta_2=\sum_iW_iY_i\), el término con \(\beta_1\) desaparece porque:
+La identidad \(\Vert\tilde{\boldsymbol x}_j\Vert_e^2=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\,(1-R_j^2)\) se obtiene:
 </p>
 
 <ol class="org-ol">
-<li>\(\beta_1\) siempre vale cero.</li>
-<li>\(\sum_iW_i=\mathit 0\).</li>
-<li>\(\sum_iW_iX_i=\mathit 1\).</li>
-<li>\(W_i\) no depende de \(\beta_1\).</li>
+<li>Del supuesto de normalidad de la perturbación.</li>
+<li>De \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) en la regresión auxiliar de \(\boldsymbol x_j\) sobre los demás regresores: \(\tilde{\boldsymbol x}_j\) es su residuo y \(R_j^2\) su coeficiente de determinación.</li>
+<li>De la fórmula de la inversa de \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\).</li>
+<li>No se obtiene: es un enunciado sin demostrar, como la fórmula matricial completa de la varianza.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org99d3b37" class="outline-4">
-<h4 id="org99d3b37">Pregunta 6 [M] — ``Sacar lo que se conoce''</h4>
-<div class="outline-text-4" id="text-org99d3b37">
+<div id="outline-container-orga8a6b50" class="outline-4">
+<h4 id="orga8a6b50">Pregunta 5 [M] — Dos regresores</h4>
+<div class="outline-text-4" id="text-orga8a6b50">
 <p>
-La propiedad \(E[c(\boldsymbol X)Z\mid\boldsymbol X]=c(\boldsymbol X)E[Z\mid\boldsymbol X]\), usada para justificar que \(W_i\) ``sale'' de la esperanza condicionada, se demuestra:
+En un modelo con constante y dos regresores no constantes cuya correlación es \(0{,}99\), el error estándar de cada coeficiente, respecto al que tendría si los regresores no compartieran nada, se multiplica aproximadamente por:
 </p>
 
 <ol class="org-ol">
-<li>Citando un teorema de un curso de probabilidad más avanzado, no visto en esta asignatura.</li>
-<li>A partir de la propia definición de \(E[Z\mid\boldsymbol X]\) como proyección ortogonal sobre las funciones de \(\boldsymbol X\).</li>
-<li>Solo es válida si \(Z\) es independiente de \(\boldsymbol X\).</li>
-<li>Es una consecuencia de la homocedasticidad.</li>
+<li>\(0{,}99\).</li>
+<li>\(50\).</li>
+<li>\(7\).</li>
+<li>\(1{,}01\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgcbb36f9" class="outline-4">
-<h4 id="orgcbb36f9">Pregunta 7 [D] — Ley de las esperanzas iteradas</h4>
-<div class="outline-text-4" id="text-orgcbb36f9">
+<div id="outline-container-org0301251" class="outline-4">
+<h4 id="org0301251">Pregunta 6 [M] — Efecto parcial o colinealidad</h4>
+<div class="outline-text-4" id="text-org0301251">
 <p>
-La igualdad \(\mathrm{E}\big(E[Z\mid\boldsymbol X]\big)=\mathrm{E}(Z)\) se justifica en esta sesión porque:
+Al añadir un regresor, el coeficiente de otro cambia de \(56\) a \(-24\) y su error estándar pasa de \(4\) a \(5\). ¿Qué indica?
 </p>
 
 <ol class="org-ol">
-<li>Es un axioma que se acepta sin más.</li>
-<li>\(\mathit1\) es una función de \(\boldsymbol X\), y \(E[Z\mid\boldsymbol X]\) se define como la proyección de \(Z\) sobre todas las funciones de \(\boldsymbol X\); por tanto \(Z-E[Z\mid\boldsymbol X]\perp\mathit1\).</li>
-<li>Solo es cierta cuando \(Z=\hat\beta_2\).</li>
-<li>Es consecuencia de la homocedasticidad.</li>
+<li>Colinealidad grave: hay que eliminar uno de los dos.</li>
+<li>Un cambio del efecto parcial (lección 10), no colinealidad: el error estándar apenas ha cambiado.</li>
+<li>Un error de cálculo de Gretl.</li>
+<li>Que el nuevo regresor es combinación lineal exacta del anterior.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org5e6b515" class="outline-4">
-<h4 id="org5e6b515">Pregunta 8 [M] — Lectura de la fórmula de la varianza</h4>
-<div class="outline-text-4" id="text-org5e6b515">
+<div id="outline-container-org24f3e12" class="outline-4">
+<h4 id="org24f3e12">Pregunta 7 [D] — Lo que oscila y lo que no</h4>
+<div class="outline-text-4" id="text-org24f3e12">
 <p>
-Según \(Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/(nS^2)\), la precisión de \(\hat\beta_2\) (menor varianza) aumenta cuando:
+Con dos regresores cuyos vectores en desviaciones casi se alinean, de una muestra a otra cambian mucho:
 </p>
 
 <ol class="org-ol">
-<li>\(\sigma^2\) aumenta.</li>
-<li>\(n\) disminuye.</li>
-<li>\(S^2\) (la varianza muestral del regresor) aumenta.</li>
-<li>\(\beta_2\) aumenta.</li>
+<li>El ajuste \(\boldsymbol{\mathop{\widehat y}}\), el \(R^2\) y \(\mathfrak s\); los coeficientes, en cambio, son estables.</li>
+<li>Los coeficientes, en sentidos opuestos, mientras el ajuste, el \(R^2\), \(\mathfrak s\) y el \(F\) conjunto apenas cambian: la proyección es estable y las coordenadas no.</li>
+<li>Todo por igual.</li>
+<li>Nada: la colinealidad no afecta a la estimación.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgfa3ea20" class="outline-4">
-<h4 id="orgfa3ea20">Pregunta 9 [D] — Por qué hace falta la incorrelación entre perturbaciones</h4>
-<div class="outline-text-4" id="text-orgfa3ea20">
+<div id="outline-container-org4ee42f2" class="outline-4">
+<h4 id="org4ee42f2">Pregunta 8 [M] — El signo de la covarianza</h4>
+<div class="outline-text-4" id="text-org4ee42f2">
 <p>
-Si \(Cov[U_i,U_j\mid\boldsymbol X]\neq\mathit0\) para algún \(i\neq j\), ¿qué parte de la derivación de esta sesión dejaría de ser válida?
+Con <code>nox</code> y <code>lnox</code> en el mismo modelo, los coeficientes estimados son \(404\) y \(-13262\). La razón de que sean grandes y de signos opuestos es que:
 </p>
 
 <ol class="org-ol">
-<li>La insesgadez de \(\hat\beta_2\).</li>
-<li>Nada; todo el desarrollo es independiente de este supuesto.</li>
-<li>La fórmula de la varianza, \(Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-{\overline{X}})^2\), que dejaría de reducirse a esa expresión tan simple.</li>
-<li>La propia definición de \(\hat\beta_2\) como combinación lineal de los datos.</li>
+<li>La contaminación tiene efectos contrarios según cómo se mida.</li>
+<li>Los dos regresores casi se alinean, así que el mismo ajuste admite descomposiciones muy distintas en las que un coeficiente compensa al otro; la suma de efectos es la de siempre.</li>
+<li>Uno de los dos regresores tiene varianza cero.</li>
+<li>El modelo está mal especificado y \(\mathrm{SRC}\) es mayor que \(\mathrm{STC}\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgd481e08" class="outline-4">
-<h4 id="orgd481e08">Pregunta 10 [M] — El tercer producto escalar</h4>
-<div class="outline-text-4" id="text-orgd481e08">
+<div id="outline-container-orgedc9e06" class="outline-4">
+<h4 id="orgedc9e06">Pregunta 9 [D] — Supuestos</h4>
+<div class="outline-text-4" id="text-orgedc9e06">
 <p>
-El divisor \(n-k\) de \(\langle\cdot,\cdot\rangle_{n-k}\) se elige, a diferencia del divisor \(n\) de \(\langle\cdot,\cdot\rangle_s\), por un motivo:
+Respecto a los supuestos del modelo, la colinealidad de grado:
 </p>
 
 <ol class="org-ol">
-<li>Geométrico, igual que el divisor \(n\) (para que \(\|\boldsymbol1\|_s=1\)).</li>
-<li>Estadístico: para que \(\mathfrak s^2=\mathrm{SRC}/(n-k)\) sea un estimador insesgado de \(\sigma^2\).</li>
-<li>Arbitrario, sin ninguna justificación.</li>
-<li>Relacionado con el teorema de Gauss-Markov.</li>
+<li>Viola la homocedasticidad, y por eso los errores estándar salen grandes.</li>
+<li>Viola la exogeneidad estricta, y por eso los coeficientes son sesgados.</li>
+<li>No viola ningún supuesto: MCO sigue insesgado y BLUE, y los errores estándar grandes son correctos; la muestra no permite estimar ese coeficiente con precisión.</li>
+<li>Viola la independencia lineal de los regresores, y Gretl no puede estimar el modelo.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-org3d21c1b" class="outline-4">
-<h4 id="org3d21c1b">Pregunta 11 [B] — Gauss-Markov</h4>
-<div class="outline-text-4" id="text-org3d21c1b">
+<div id="outline-container-orgfd75cad" class="outline-4">
+<h4 id="orgfd75cad">Pregunta 10 [M] — Qué mirar</h4>
+<div class="outline-text-4" id="text-orgfd75cad">
 <p>
-Que MCO sea BLUE significa que:
+Con cuatro regresores no constantes, ninguno de los cuales está muy correlado con otro por parejas, ¿puede haber colinealidad de grado?
 </p>
 
 <ol class="org-ol">
-<li>\(\hat\beta_2\) acierta siempre el verdadero valor de \(\beta_2\).</li>
-<li>\(\hat\beta_2\) tiene la menor varianza entre todos los estimadores lineales e insesgados de \(\beta_2\).</li>
-<li>\(\hat\beta_2\) es el único estimador insesgado posible.</li>
-<li>\(\hat\beta_2\) no depende de los supuestos del modelo clásico.</li>
+<li>No: si las correlaciones por parejas son moderadas, no hay colinealidad.</li>
+<li>Sí: un regresor puede formar un ángulo muy pequeño con el subespacio generado por los otros tres sin estar muy correlado con ninguno; por eso el diagnóstico es el VIF de cada regresor, no la matriz de correlaciones.</li>
+<li>Solo si \(n\) es pequeño.</li>
+<li>Solo si el \(R^2\) del modelo es mayor que \(0{,}9\).</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgf6a4ef5" class="outline-4">
-<h4 id="orgf6a4ef5">Pregunta 12 [D] — Qué está demostrado y qué no</h4>
-<div class="outline-text-4" id="text-orgf6a4ef5">
+<div id="outline-container-org1940153" class="outline-4">
+<h4 id="org1940153">Pregunta 11 [M] — Qué hacer</h4>
+<div class="outline-text-4" id="text-org1940153">
 <p>
-Respecto a la generalización a \(k\) regresores (\(E[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\boldsymbol\beta\,\mathit1\), \(Var[\boldsymbol{\mathop{\widehat{\beta}}}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}\)), esta sesión:
+Dos regresores miden la misma magnitud en dos escalas, sus \(t\) son bajos y el \(F\) de excluirlos juntos es alto. La respuesta razonable es:
 </p>
 
 <ol class="org-ol">
-<li>La demuestra íntegramente, generalizando paso a paso el argumento de los pesos \(W_i\).</li>
-<li>La presenta como aserción, sin demostrarla, y solo verifica, con un cálculo elemental de una inversa \(2\times2\), que es consistente con lo demostrado para \(k=2\).</li>
-<li>No la menciona en absoluto.</li>
-<li>La demuestra solo para el caso \(k=3\).</li>
+<li>Eliminar los dos, porque no son significativos.</li>
+<li>Quedarse con uno de los dos, o con una combinación: la información es la misma y la precisión mejora.</li>
+<li>Duplicar la muestra copiando las observaciones.</li>
+<li>Cambiar el nivel de significación al \(10\,\%\).</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org64809eb" class="outline-4">
+<h4 id="org64809eb">Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado</h4>
+<div class="outline-text-4" id="text-org64809eb">
+<p>
+De los resultados de la sesión:
+</p>
+
+<ol class="org-ol">
+<li>Se ha demostrado \(\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\) y se ha enunciado sin demostrar la longitud de la parte propia.</li>
+<li>Se ha demostrado la longitud de la parte propia, \(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j\), con Pitágoras en la regresión auxiliar; la fórmula del error estándar \(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\) y la insesgadez de \(\mathfrak s^2\) con \(k\) regresores se han enunciado en la sesión y el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html">html</a>) las demuestra.</li>
+<li>Se ha demostrado todo, incluida la insesgadez de \(\mathfrak s^2\) con \(k\) regresores.</li>
+<li>No se ha demostrado nada.</li>
 </ol>
 </div>
 </div>
 </div>
-<div id="outline-container-org5bcc378" class="outline-2">
-<h2 id="org5bcc378"><span class="section-number-2">13.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
-<div class="outline-text-2" id="text-13">
+<div id="outline-container-orgf51f5bf" class="outline-2">
+<h2 id="orgf51f5bf"><span class="section-number-2">12.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div class="outline-text-2" id="text-12">
 </div>
 <ul class="org-ul">
-<li><a id="orge090f4c"></a>Pregunta 1 [B] — Estimador vs. estimación<br />
-<div class="outline-text-5" id="text-orge090f4c">
+<li><a id="org7dbc4f8"></a>Pregunta 1 [B] — Exacta frente a de grado<br />
+<div class="outline-text-5" id="text-org7dbc4f8">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: retención de la distinción notacional introducida al abrir la sesión, necesaria para hablar con propiedad de la distribución de \(\hat\beta_2\).
+<i>Evalúa</i>: la distinción con la que abre la sesión, y el enlace con la lección 10 (colinealidad exacta, ecuaciones normales con infinitas soluciones). La opción 4 es el error conceptual que la transparencia ``Qué es y qué no es'' desmonta.
 </p>
 </div>
 </li>
-<li><a id="org3b7524a"></a>Pregunta 2 [B] — El supuesto de muestreo aleatorio<br />
-<div class="outline-text-5" id="text-org3b7524a">
+<li><a id="orgfe9b433"></a>Pregunta 2 [B] — La parte propia<br />
+<div class="outline-text-5" id="text-orgfe9b433">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la definición central de la sesión. La opción 1 es el caso particular con un solo regresor no constante; observe por qué deja de valer con varios.
+</p>
+</div>
+</li>
+<li><a id="orgea78176"></a>Pregunta 3 [B] — Qué mide el VIF<br />
+<div class="outline-text-5" id="text-orgea78176">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: reconocimiento de que la incorrelación entre perturbaciones no es un supuesto añadido, sino consecuencia de algo ya anunciado en la lección 9.
+<i>Evalúa</i>: la lectura del VIF como factor de la varianza y de su raíz como factor del error estándar. La opción 4 es la reacción automática que la sesión desaconseja.
 </p>
 </div>
 </li>
-<li><a id="org523edd3"></a>Pregunta 3 [M] — Origen de los pesos \(W_i\)<br />
-<div class="outline-text-5" id="text-org523edd3">
+<li><a id="orgeaa915e"></a>Pregunta 4 [M] — De dónde sale la longitud de la parte propia<br />
+<div class="outline-text-5" id="text-orgeaa915e">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión de que hoy no se repite ninguna demostración geométrica; se reutiliza, sobre variables aleatorias, la fórmula aritmética que la lección 7 ya obtuvo.
+<i>Evalúa</i>: el resultado demostrado hoy, la longitud de la parte propia (el error estándar se enuncia y el apéndice lo demuestra), y el reconocimiento de que es la lección 8 aplicada a una regresión cuyo regresando es un regresor. La opción 4 confunde este resultado con el enunciado de la insesgadez de \(\mathfrak s^2\).
 </p>
 </div>
 </li>
-<li><a id="orgd561587"></a>Pregunta 4 [M] — Las dos propiedades de los pesos<br />
-<div class="outline-text-5" id="text-orgd561587">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: reconocimiento de que \(\sum_iW_i=\mathit 0\) es un hecho algebraico (la misma cuenta que ya vimos en la lección 4), no una propiedad geométrica de un supuesto ``espacio de variables aleatorias-vector''.
-</p>
-</div>
-</li>
-<li><a id="orgf76e5b6"></a>Pregunta 5 [M] — El paso de sustitución<br />
-<div class="outline-text-5" id="text-orgf76e5b6">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: seguimiento del paso algebraico central de la sección ``Sustituyendo el modelo poblacional''.
-</p>
-</div>
-</li>
-<li><a id="orga93c628"></a>Pregunta 6 [M] — ``Sacar lo que se conoce''<br />
-<div class="outline-text-5" id="text-orga93c628">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión de que esta propiedad, aunque parezca un resultado estándar, se deduce de nuestra propia definición geométrica de esperanza condicional.
-</p>
-</div>
-</li>
-<li><a id="orgcec9707"></a>Pregunta 7 [D] — Ley de las esperanzas iteradas<br />
-<div class="outline-text-5" id="text-orgcec9707">
-<p>
-<i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión de que la Ley de las Esperanzas Iteradas no es un teorema citado desde fuera, sino consecuencia inmediata de la definición de esperanza condicional como proyección (lección 9).
-</p>
-</div>
-</li>
-<li><a id="org0a35a3e"></a>Pregunta 8 [M] — Lectura de la fórmula de la varianza<br />
-<div class="outline-text-5" id="text-org0a35a3e">
+<li><a id="org7944dab"></a>Pregunta 5 [M] — Dos regresores<br />
+<div class="outline-text-5" id="text-org7944dab">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: interpretación correcta de los tres ingredientes (\(\sigma^2\), \(n\), \(S^2\)) de la fórmula de la varianza, clave para las prácticas de laboratorio venideras.
+<i>Evalúa</i>: el cálculo con \(k=3\): \(\mathrm{VIF}=1/(1-0{,}99^2)=50\) y el error estándar se multiplica por \(\sqrt{50}\approx7{,}1\). La opción 2 confunde varianza con error estándar.
 </p>
 </div>
 </li>
-<li><a id="org9385190"></a>Pregunta 9 [D] — Por qué hace falta la incorrelación entre perturbaciones<br />
-<div class="outline-text-5" id="text-org9385190">
+<li><a id="org830ab01"></a>Pregunta 6 [M] — Efecto parcial o colinealidad<br />
+<div class="outline-text-5" id="text-org830ab01">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la distinción entre un cambio de significado del coeficiente (efecto parcial, lección 10 y su laboratorio, <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms">html</a>), donde el coeficiente de <code>bedrms</code> cambiaba de signo al añadir <code>sqft</code>) y la colinealidad, cuya firma es el error estándar disparado.
+</p>
+</div>
+</li>
+<li><a id="org22e4505"></a>Pregunta 7 [D] — Lo que oscila y lo que no<br />
+<div class="outline-text-5" id="text-org22e4505">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la idea que vertebra la sesión: la proyección depende del subespacio y las coordenadas de los generadores. Discrimina porque exige saber qué cantidades miran el subespacio (\(R^2\), \(\mathfrak s\), \(F\)) y cuáles las coordenadas (\(t\)).
+</p>
+</div>
+</li>
+<li><a id="orgfd8542a"></a>Pregunta 8 [M] — El signo de la covarianza<br />
+<div class="outline-text-5" id="text-orgfd8542a">
+<p>
+<i>Respuesta correcta: 2.</i>
+<i>Evalúa</i>: la lectura de la figura del paralelogramo aplicada al caso real, y la covarianza negativa entre coeficientes de regresores alineados. La opción 1 es la lectura ingenua de los signos.
+</p>
+</div>
+</li>
+<li><a id="org46c9dd0"></a>Pregunta 9 [D] — Supuestos<br />
+<div class="outline-text-5" id="text-org46c9dd0">
 <p>
 <i>Respuesta correcta: 3.</i>
-<i>Evalúa</i>: identificación precisa de qué parte de la demostración depende de qué supuesto (la insesgadez se mantiene; la simplicidad de la fórmula de varianza, no).
+<i>Evalúa</i>: que la colinealidad de grado no es una violación de supuestos y que los errores estándar grandes son información correcta. La opción 4 describe la colinealidad exacta, no la de grado.
 </p>
 </div>
 </li>
-<li><a id="org09a31a4"></a>Pregunta 10 [M] — El tercer producto escalar<br />
-<div class="outline-text-5" id="text-org09a31a4">
+<li><a id="orgdf7b2d4"></a>Pregunta 10 [M] — Qué mirar<br />
+<div class="outline-text-5" id="text-orgdf7b2d4">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: distinción entre los motivos geométrico y estadístico de los tres divisores usados en el curso.
+<i>Evalúa</i>: el argumento de la lección 10 (un regresor cerca del subespacio de otros sin estar cerca de ninguno) y su consecuencia práctica: el VIF, no la matriz de correlaciones.
 </p>
 </div>
 </li>
-<li><a id="org50aac4a"></a>Pregunta 11 [B] — Gauss-Markov<br />
-<div class="outline-text-5" id="text-org50aac4a">
+<li><a id="org435d34b"></a>Pregunta 11 [M] — Qué hacer<br />
+<div class="outline-text-5" id="text-org435d34b">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: comprensión de qué garantiza y qué no garantiza el teorema de Gauss-Markov.
+<i>Evalúa</i>: la opción razonable cuando dos regresores llevan la misma información (quedarse con una forma funcional no pierde información), y el error de eliminar los dos que la lección 13 ya señaló. La opción 3 no crea información: las copias repiten las mismas perturbaciones, y el error estándar que calcularía el programa sería falso.
 </p>
 </div>
 </li>
-<li><a id="org8656a5b"></a>Pregunta 12 [D] — Qué está demostrado y qué no<br />
-<div class="outline-text-5" id="text-org8656a5b">
+<li><a id="org19e3be3"></a>Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado<br />
+<div class="outline-text-5" id="text-org19e3be3">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: el alcance exacto de la sesión: qué se demuestra con detalle (k=2) y qué se asevera por generalización, con una única verificación puntual.
+<i>Evalúa</i>: el alcance de la sesión, con el mismo criterio que las lecciones 11, 12 y 13: la longitud de la parte propia se demuestra en la sesión con material del curso; la fórmula del error estándar y la insesgadez de \(\mathfrak s^2\) se enuncian y el apéndice las demuestra. La fórmula se comprueba además con números.
 </p>
 </div>
 </li>
@@ -1373,85 +1238,14 @@ Respecto a la generalización a \(k\) regresores (\(E[\boldsymbol{\mathop{\wideh
 <h2 class="footnotes">Notas al pie de p&aacute;gina: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Denotada en negrita cursiva pero sin letra de palo seco (reservada para las matrices de regresores observadas).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Para decir que son copias idénticas basta con que tengan la misma función de distribución: \(F_{X_i}(x) = \operatorname{P}(X_i \leq x) \quad \text{para todo } i = 1, \dots, n\). Esto no las obliga a ser la misma función sobre \(\Omega\); al contrario: dos copias independientes suelen asignar valores distintos para un mismo suceso elemental. Lo que sí comparten, por tener la misma distribución, es el conjunto de valores que toman con probabilidad positiva: su imagen, salvo en sucesos de probabilidad nula, donde ninguna de las dos está sujeta a restricción alguna. Por otro lado, la independencia entre variables aleatorias implica que su función de distribución de probabilidad conjunta equivale al producto de sus distribuciones individuales. Para el caso de \(n\) variables, esto se expresa como: \(F_{X_1, X_2, \dots, X_n}(x_1, x_2, \dots, x_n) = \prod_{i=1}^{n} F_{X_i}(x_i)\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Ese ``sin supuesto adicional'' merece hoy una precisión que en la lección 9 no hacía falta. Allí, \(U=Y-E[Y|X]\) era ortogonal <i>por construcción</i> a toda función de \(X\), y de ahí salía \(E[U\mid X]=\mathit0\) sin suponer nada más. Hoy, sin embargo, no estamos condicionando en \(X_i\), sino en <i>toda</i> la matriz \(\boldsymbol X\), es decir, en las \(n\) copias a la vez. Y la definición de \(U_i\) solo garantiza, por sí sola, la ortogonalidad frente a las funciones de \(X_i\): nada dice directamente sobre las funciones de \(X_j\) con \(j\neq i\). ¿Por qué vale entonces \(E[U_i\mid\boldsymbol X]=\mathit0\)? Por el muestreo aleatorio, y se puede ver con la misma geometría del curso. Lo que hay que comprobar es que \(U_i\) es ortogonal a toda función de la matriz \(\boldsymbol X\). Empecemos por las funciones más sencillas: los productos \(a(X_i)b(X_{-i})\), donde \(X_{-i}\) abrevia ``las demás copias'', \(X_j\) con \(j\neq i\). Separemos \(b(X_{-i})\) en su parte constante y su parte centrada, exactamente como hicimos con los vectores de datos en la lección 4, escribiendo \(\mathrm{E}(b)\) por \(\mathrm{E}\big(b(X_{-i})\big)\):
-\[
-a(X_i)\,b(X_{-i}) \;=\; \underbrace{\mathrm{E}(b)\,a(X_i)}_{\text{función de }X_i}\;+\;a(X_i)\,\big(b(X_{-i})-\mathrm{E}(b)\,\mathit1\big).
-\]
-\(U_i\) es ortogonal al primer sumando por definición: es una función de \(X_i\). Y es ortogonal al segundo por la independencia. En efecto, \((X_i,U_i)\) es independiente de \(X_{-i}\), y la independencia se traduce, en nuestro lenguaje, en que <i>la parte centrada de cualquier función de \(X_{-i}\) es ortogonal a cualquier función de \((X_i,U_i)\).</i> Es el hecho, conocido del curso de probabilidad, de que variables independientes están incorreladas, aplicado aquí a \(U_i\,a(X_i)\) y a \(b(X_{-i})\):
-\[
-\big\langle U_i\,a(X_i),\;b(X_{-i})-\mathrm{E}(b)\,\mathit1\big\rangle_P=\mathrm{Cov}\big(U_i\,a(X_i),\,b(X_{-i})\big)=0.
-\]
-Así que \(U_i\) es ortogonal a todos los productos \(a(X_i)\,b(X_{-i})\) y, por linealidad del producto escalar, a sus combinaciones lineales. Lo único que admitimos sin demostración, el paso que pertenece a un curso de probabilidad, es que con esas combinaciones se aproxima cualquier función de \(\boldsymbol X\). Con ello, \(U_i\) es ortogonal a toda función de \(\boldsymbol X\), que es lo que dice \(E[U_i\mid\boldsymbol X]=\mathit0\). El argumento completo, con la lectura de la independencia como escuadra, está en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=16">apéndice, sección 6.1</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-6-1">html</a>).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara"><i>Notación</i>. Esta es la primera vez en el curso que aparece una covarianza <i>condicionada</i>. Sigue el mismo convenio que ya fijamos en la lección 9 para la esperanza y la varianza: \(\mathrm{Cov}(\cdot,\cdot)\), con paréntesis y en recta, es un <i>número</i> (la covarianza no condicionada); \(Cov[\cdot,\cdot\mid\cdot]\), con corchetes y en cursiva, es una <i>variable aleatoria</i>, una función de aquello sobre lo que se condiciona. Su definición es la análoga de la varianza condicional: \(Cov[Z,W\mid\boldsymbol X]=E\big[(Z-E[Z\mid\boldsymbol X])(W-E[W\mid\boldsymbol X])\mid\boldsymbol X\big]\). La usaremos efectivamente al calcular la varianza de \(\hat\beta_2\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5" role="doc-backlink">5</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Una función de \(\omega\in\Omega\), donde \(\Omega\) es el espacio de sucesos.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6" role="doc-backlink">6</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">En la literatura estadística y econométrica es costumbre usar la misma notación para ambos objetos (la estimación y el estimador), pero recuerde que son muy distintos (un número el primero y una variable aleatoria el segundo).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.7" class="footnum" href="#fnr.7" role="doc-backlink">7</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">El nombre correcto de la operación debería ser <i>forma bilineal definida sobre el anillo de las variables aleatorias</i>. Pero ese nombre aquí no ayuda, dado el nivel matemático del curso. Tan solo advertir que el nombre de <i>suma ponderada</i> es abusivo, pues en la expresión \(\sum_{i=1}^n {W_i}Y_i\) no hay ``números'' que hagan de ponderaciones en la suma de las \(Y_i\); lo que aparece son las variables aleatorias \(W_i\), que son funciones (no números). Por el mismo motivo, tampoco es correcto el nombre de <i>combinación lineal</i> de las \(Y_i\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.8" class="footnum" href="#fnr.8" role="doc-backlink">8</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Una precisión: el supuesto \(\mathrm{Var}(X)\neq0\) <i>no</i> basta para que ese suceso tenga probabilidad cero. Si \(X\) es continua, sí: el suceso ``las \(n\) copias toman el mismo valor'' tiene probabilidad nula. Pero si \(X\) es discreta no: con \(X\) de Bernoulli de parámetro \(1/2\), por ejemplo, \(\mathrm{Var}(X)=1/4\neq0\) y, sin embargo, la probabilidad de que las \(n\) copias tomen el mismo valor vale \(2^{1-n}>0\). Lo correcto, en general, es decir que \(\mathrm{Var}(X)\neq0\) garantiza que esa probabilidad es <i>menor que uno</i> y que tiende a cero al crecer \(n\); y que todo lo que sigue se entiende condicionado a que la muestra observada no sea una de esas degeneradas, igual que un programa estadístico no calcula la pendiente cuando el regresor no varía en la muestra.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.9" class="footnum" href="#fnr.9" role="doc-backlink">9</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara"><i>Un apunte geométrico, antes de seguir</i>. La fórmula de \(W_i\) no es una
-construcción de esta lección: ya estaba latente en la propia
-definición de \(c_2\), el coeficiente que la ``vía alternativa'' de la lección 7
-nos dio como pendiente. Recordemos aquella fórmula:
-\[
-c_2 =
-\frac{\Big\langle\boldsymbol{y},\,(\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1})\Big\rangle_s}{\|\boldsymbol{x}-\mu_{\boldsymbol{x}}\boldsymbol{1}\|_s^2} = 
-\hat\beta_2
-\]
-Si desarrollamos ambos productos escalares como sumas, cancelando el factor
-\(1/n\) entre numerador y denominador (la misma observación que
-hicimos al abrir esta sesión, al pasar de \(\langle\cdot,\cdot\rangle_s\) a la
-expresión con sumatorios), obtenemos
-\[
-c_2=\frac{\frac1n\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\frac1n\sum_j(x_j-\mu_{\boldsymbol x})^2}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})y_i}{\sum_j(x_j-\mu_{\boldsymbol x})^2}=\sum_i\underbrace{\left(\frac{(x_i-\mu_{\boldsymbol x})}{\sum_j(x_j-\mu_{\boldsymbol x})^2}\right)}_{w_i}y_i.
-\]
-Es decir: los pesos \(w_i=(x_i-\mu_{\boldsymbol x})/\sum_j(x_j-\mu_{\boldsymbol x})^2\)
-(aquí evaluados sobre un vector de datos fijo \(\boldsymbol x\), no sobre la
-muestra aleatoria \(\boldsymbol X\)) no son más que \(c_2\) descompuesto
-sumando a sumando. Es el mismo cociente de
-productos escalares de la lección 3 (Cauchy–Schwarz), el que la lección 7 aplicó
-al generador \(\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\), ahora mirada componente a componente.
-Esta reconexión da, sin ningún cálculo adicional, la cantidad
-\(\sum_iw_i^2\) que acabamos de necesitar para la varianza. Como el denominador
-\(\sum_j(x_j-\mu_{\boldsymbol x})^2\) es común a todos los \(w_i\):
-\[
-\sum_iw_i^2=\sum_i\frac{(x_i-\mu_{\boldsymbol x})^2}{\left(\sum_j(x_j-\mu_{\boldsymbol x})^2\right)^2}=\frac{\sum_i(x_i-\mu_{\boldsymbol x})^2}{\left(\sum_j(x_j-\mu_{\boldsymbol x})^2\right)^2}=\frac1{\sum_j(x_j-\mu_{\boldsymbol x})^2},
-\]
-la misma expresión de unas líneas más arriba, allí evaluada sobre la muestra aleatoria \(\boldsymbol X\) y aquí sobre
-el vector de datos \(\boldsymbol x\). Evaluada en la muestra observada, la varianza de \(\hat\beta_2\) es, pues,
-\(\sigma^2\) dividido entre el cuadrado de la longitud <i>euclídea</i> (lección 2,
-sin el factor \(1/n\)) del vector en desviaciones del regresor,
-\(\|\boldsymbol x-\mu_{\boldsymbol x}\boldsymbol 1\|_e^2\), el mismo vector con
-el que, en la lección 7, calculamos la propia pendiente. Cuanto más
-``largo'' sea ese vector en desviaciones, menor la varianza: la misma
-intuición de ``más dispersión, más precisión'' que ya leímos en la fórmula
-con \(S^2\), ahora vista como una propiedad exacta de la longitud de un vector
-concreto en \(\mathbb R^n\).</p></div></div>
-
-<div class="footdef"><sup><a id="fn.10" class="footnum" href="#fnr.10" role="doc-backlink">10</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Esta es la posición de Eros con la que abríamos la lección 9: ni conocemos \(U_i\) (eso sería la posición del dios), ni carecemos de toda información sobre ella (la posición del ignorante); \(\hat E_i\) es nuestro mejor sustituto calculable, construido para que, bajo los supuestos del modelo, se comporte como \(U_i\) en promedio.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.11" class="footnum" href="#fnr.11" role="doc-backlink">11</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Seguimos aquí, por simplicidad, la misma convención del resto de esta sección: escribimos las fórmulas con los datos observados \(\boldsymbol{\mathop{\widehat e}}\), aunque hablemos de propiedades, como el sesgo o la insesgadez, que, en sentido estricto, son propiedades del estimador (la variable aleatoria subyacente), no de un número concreto. Es el mismo tipo de abuso de notación, ya señalado al distinguir estimador de estimación, habitual en toda la literatura econométrica; introducir aquí toda la notación necesaria para evitarlo tendría un coste en claridad mayor que el beneficio.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.12" class="footnum" href="#fnr.12" role="doc-backlink">12</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Esta idea ya la usamos, sin justificarla del todo, en la práctica de laboratorio que sigue a la lección 10, al motivar por qué dividir por \(n-k\) (y no por \(n\)) produce estimadores insesgados. Precisemos ahora, con algo más de rigor, el motivo exacto de ese divisor.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.13" class="footnum" href="#fnr.13" role="doc-backlink">13</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">El subíndice \(n-k\) indica por qué número se divide. Con ese mismo criterio los tres productos escalares del curso admiten una notación unificada: \(\langle\cdot,\cdot\rangle_e=\langle\cdot,\cdot\rangle_1\) (se divide por \(1\)), \(\langle\cdot,\cdot\rangle_s=\langle\cdot,\cdot\rangle_n\) (por \(n\)) y \(\langle\cdot,\cdot\rangle_{n-k}\) (por \(n-k\)). Mantendremos los subíndices \(e\) y \(s\), ya habituales, pero conviene saber que la familia es una sola.</p></div></div>
-
-<div class="footdef"><sup><a id="fn.14" class="footnum" href="#fnr.14" role="doc-backlink">14</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">\(\begin{pmatrix}a&b\\c&d\end{pmatrix}^{-1}=\dfrac{1}{ad-bc}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}\), con \(a=n\,\mathit1\), \(b=c=n\overline{X}\), \(d=\sum_iX_i^2\), y usando que \(ad-bc=n\sum_iX_i^2-n^2\overline{X}^2=n\sum_i(X_i-\overline{X})^2\) (la ``fórmula de cálculo'' de la varianza, lección 5, evaluada sobre \(\boldsymbol{X}\) y multiplicada por \(n\)).</p></div></div>
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Con la norma estadística de la lección 2, que divide por \(n\), la longitud al cuadrado del regresor en desviaciones es su varianza muestral y no crece con \(n\). Las dos normas se relacionan por \(\Vert\boldsymbol x\Vert_e^2=n\Vert\boldsymbol x\Vert_s^2\), y la de la parte propia es \(\Vert\tilde{\boldsymbol x}_j\Vert_e^2=n\,\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_s^2\,(1-R_j^2)\): la varianza muestral del regresor, por lo que no comparte con los demás, por \(n\).</p></div></div>
 
 
 </div>
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-10-09 vie 09:47</p>
+<p class="date">Created: 2026-10-05 lun 16:30</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
