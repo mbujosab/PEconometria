@@ -100,13 +100,13 @@ Dicho de otro modo, seguimos exactamente en la misma ecuación con la que abrimo
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-Para ilustrar la regresión múltiple rescatamos la misma figura geométrica que ya usamos en la lección 8 (al demostrar $R^2 = \cos^2\theta$). En aquella lección dibujamos solo la proyección $\boldsymbol{\mathop{\overline{y}}}$ sobre los vectores constantes y la proyección $\boldsymbol{\mathop{\widehat{y}}}$ sobre el subespacio de los regresores, sin la componente $\hat\beta_2\boldsymbol{x}$ por separado. Por eso la figura vale igual cuando el subespacio pasa de dos direcciones a $k$: lo único que ya no cabría dibujar son los $k-1$ ejes individuales $\mathcal{L}(\boldsymbol{x}_2),\ldots,\mathcal{L}(\boldsymbol{x}_k)$, que nunca aparecieron.
+Para ilustrar la regresión múltiple rescatamos la misma figura geométrica que ya usamos en la lección 8 (al demostrar $R^2 = \cos^2\theta$). En aquella lección dibujamos solo la proyección $\boldsymbol{\mathop{\overline{y}}}$ sobre los vectores constantes y la proyección $\boldsymbol{\mathop{\widehat{y}}}$ sobre el subespacio de los regresores, sin la componente $\hat\beta_2\boldsymbol{x}$ por separado. Por eso la figura vale igual cuando el subespacio pasa de dos direcciones a $k$: lo único que ya no cabría dibujar son los $k-1$ ejes individuales $\mathcal{L}(\boldsymbol{x}_2),\ldots,\mathcal{L}(\boldsymbol{x}_k)$.
 
 Esa abstracción nos permite ahora releer la misma figura para $k$ regresores. El subespacio representado por el ``suelo'' de la figura ya no es un plano bidimensional, sino que representa esquemáticamente el subespacio $\mathcal{L}(\boldsymbol{1}, \boldsymbol{x}_2, \dots, \boldsymbol{x}_k)$ de $k$ dimensiones. 
 
 Todo lo que dedujimos en la lección 8 respecto de esta figura sigue siendo cierto ahora:
 1. El vector ajustado $\boldsymbol{\mathop{\widehat{y}}}$ es la proyección ortogonal.
-2. El residuo $\boldsymbol{\mathop{\widehat{e}}}$ forma un ángulo de $90^\circ$ con el subespacio entero.
+2. El residuo $\boldsymbol{\mathop{\widehat{e}}}$ es perpendicular a todo el subespacio.
 3. El triángulo rectángulo formado por $\boldsymbol{y} - \boldsymbol{\mathop{\overline{y}}}$, $\boldsymbol{\mathop{\widehat{y}}} - \boldsymbol{\mathop{\overline{y}}}$ y $\boldsymbol{\mathop{\widehat{e}}}$ sigue existiendo, lo que significa que el teorema de Pitágoras sigue siendo aplicable: $\mathrm{STC} = \mathrm{SEC} + \mathrm{SRC}$ ($\sigma_{\boldsymbol{y}}^2 = \sigma_{\boldsymbol{\mathop{\widehat{y}}}}^2 + \sigma_{\boldsymbol{\mathop{\widehat{e}}}}^2$) es igual de válido en la regresión múltiple.
 4. El coeficiente de determinación se define igual: $R^2 = \cos^2\theta$, donde $\theta$ sigue siendo el ángulo entre los vectores en desviaciones de los datos y de su ajuste.
 
@@ -134,7 +134,7 @@ Tendremos $k$ condiciones de ortogonalidad simultáneas:
 Recordando que $\hat e_i = y_i - (\hat\beta_1 + \hat\beta_2 x_{i2} + \dots + \hat\beta_k x_{ik})$, solo queda encontrar los $k$ parámetros $\hat\beta_j$ que satisfacen estas $k$ condiciones. 
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Pero escribir y resolver este sistema con sumatorios es demasiado laborioso. Necesitamos *comprimir* la notación. 
+Pero escribir y resolver este sistema con sumatorios es pesado y engorroso. Necesitamos *comprimir* la notación. 
 
 
 *** El problema aritmético: demasiadas ecuaciones
@@ -150,7 +150,7 @@ Ahora tenemos $k$ regresores (la constante y las $k-1$ variables). Para que el r
 
 Si intentamos sustituir $\hat e_i$ en cada ecuación y desarrollar los sumatorios, nos encontraremos con expresiones muy largas. Despejar a mano un sistema de cinco regresores con sumatorios exige seguir decenas de subíndices cruzados.
 
-Hay solo un problema de notación: la notación con sumatorios no es adecuada para la dimensión del problema. Para solucionarlo, vamos a introducir una herramienta matemática diseñada específicamente para agrupar vectores y hacer múltiples productos escalares de una sola vez: las *matrices*. Lo haremos con una notación especial.
+Tan solo es un problema de notación: la escritura con sumatorios no es adecuada para la dimensión del problema. Para solucionarlo, vamos a introducir un objeto matemático diseñado específicamente para agrupar vectores y hacer múltiples productos escalares de una sola vez: la *matriz*.
 
 
 * La matriz de regresores y el operador selector
@@ -185,15 +185,15 @@ Para seleccionar filas y columnas de la matriz usaremos un /operador selector/ (
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-Para evitar los sumatorios, agrupamos todos los regresores. Una matriz no es más que una tabla, una lista de vectores-columna del mismo tamaño puestos uno al lado del otro. Si agrupamos nuestra constante y todos nuestros regresores, construimos la matriz de regresores $\boldsymbol{\mathsf{X}}$ (también llamada /matriz de diseño/): sus columnas son los regresores, la constante $\boldsymbol 1$ incluida, y el regresando $\boldsymbol y$ no forma parte de ella. Las matrices las denotaremos siempre con letras mayúsculas de palo seco en negrita, para distinguirlas visualmente de los vectores.
+Para evitar los sumatorios, agrupamos los regresores. Una lista de vectores del mismo tamaño es una matriz, y esos vectores son sus columnas. La lista de los regresores es la /matriz de regresores/ $\boldsymbol{\mathsf{X}}$ (también llamada /matriz de diseño/); el regresando $\boldsymbol y$ no forma parte de ella. Las matrices las denotaremos siempre con letras mayúsculas de palo seco en negrita, para distinguirlas visualmente de los vectores.
 
-Para operar con esta matriz de forma coherente con lo que ya sabemos de vectores, vamos a introducir una notación especial basada en un /operador selector/ (la barra vertical). Esta notación no es la habitual en los manuales clásicos anglosajones (pero es la que se utiliza en el /Curso de Álgebra Lineal/ que nos sirvió de referencia en las primeras lecciones del curso).
+Para operar con esta matriz de forma coherente con lo que ya sabemos de vectores, vamos a introducir una notación especial basada en un /operador selector/ (la barra vertical). Esta notación no aparece en los manuales clásicos; es la del /Curso de Álgebra Lineal/ que nos sirvió de referencia en las primeras lecciones del curso.
 
 La mecánica:
 - Si el selector actúa sobre la matriz $\boldsymbol{\mathsf{X}}$ por la /derecha/ ($\boldsymbol{\mathsf{X}}_{|j}$), la ``corta'' verticalmente. Nos devuelve la columna \(j\)-ésima (es decir, el vector que contiene todas las observaciones del regresor $j$).
 - Si el selector actúa por la /izquierda/ (${}_{i|}\boldsymbol{\mathsf{X}}$), la ``corta'' horizontalmente. Nos devuelve la fila \(i\)-ésima (es decir, el conjunto de características del individuo $i$).
 
-¿Qué pasa si aplicamos este selector a un vector, que solo tiene una dimensión? La regla es muy simple: el selector extrae la componente \(i\)-ésima del vector, /sea cual sea el lado por el que se aplique/. Tanto $\boldsymbol{v}_{|i}$ como ${}_{i|}\boldsymbol{v}$ significan lo mismo: el número $v_i$. 
+Un vector es una lista de números, y sobre él el selector escoge la componente que indica el índice, /sea cual sea el lado por el que actúe/: tanto $\boldsymbol{v}_{|i}$ como ${}_{i|}\boldsymbol{v}$ son el número $v_i$. 
 
 # Esta simetría del vector ante el selector es la clave que nos va a permitir definir las operaciones matriciales sin tener que recurrir al clásico algoritmo ``filas por columnas'' (recuerde *los vectores son listas de números y nunca se transponen*).
 
@@ -201,7 +201,7 @@ Adviértase que esta barra vertical no es la barra de condicionamiento de la lec
 
 Conviene cerrar esta sección con una precisión que no cambia nada de lo dicho,
 pero que conviene señalar cuanto antes, porque reaparecerá al hablar de
-variables dummy: lo verdaderamente necesario para que el ajuste sea válido no
+variables indicadoras: lo verdaderamente necesario para que el ajuste sea válido no
 es que alguna columna de $\boldsymbol{\mathsf{X}}$ sea literalmente el vector
 constante $\boldsymbol{1}$, sino que $\boldsymbol{1}$ pertenezca al subespacio
 generado por las columnas de $\boldsymbol{\mathsf{X}}$ (es decir, que exista
@@ -224,12 +224,11 @@ separado, constante.
 
 Definiremos la operación /vector $\times$ matriz/ ($\boldsymbol{v}\boldsymbol{\mathsf{X}}$) de forma que el resultado sea un nuevo vector, cuya componente \(j\)-ésima sea el /producto escalar/ entre $\boldsymbol{v}$ y la columna $j$ de la matriz:
 \[
-(\boldsymbol{v}\boldsymbol{\mathsf{X}})_{|j} \;=\; \boldsymbol{v} \cdot \boldsymbol{\mathsf{X}}_{|j}\,;
-\quad\text{es decir}\quad \langle\boldsymbol{v},\,\boldsymbol{\mathsf{X}}_{|j}\rangle_e
+(\boldsymbol{v}\boldsymbol{\mathsf{X}})_{|j} \;=\; \langle\boldsymbol{v},\,\boldsymbol{\mathsf{X}}_{|j}\rangle_e
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Aplicando esto a nuestro problema, la lista de $k$ productos escalares $\boldsymbol{\mathop{\widehat{e}}} \cdot \boldsymbol{\mathsf{X}}_{|j} = 0$ (euclídeos: como $\boldsymbol{\mathop{\widehat{e}}}\cdot\boldsymbol{x}_j=n\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{x}_j\rangle_s$, valen $0$ igualmente) se comprime en una única ecuación:
+Aplicando esto a nuestro problema, la lista de $k$ condiciones $\langle\boldsymbol{\mathop{\widehat{e}}},\,\boldsymbol{\mathsf{X}}_{|j}\rangle_e = 0$ (euclídeos: como $\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{x}_j\rangle_e=n\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{x}_j\rangle_s$, valen $0$ igualmente) se comprime en una única ecuación:
 \[
 \boxed{\; \boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}} \;=\; \boldsymbol{0} \;}
 \]
@@ -237,14 +236,13 @@ Aplicando esto a nuestro problema, la lista de $k$ productos escalares $\boldsym
 \[
 \boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}} \;=\; 
 \boldsymbol{\mathop{\widehat{e}}}\,[\boldsymbol{1};\;\boldsymbol{x}_2;\;\dots\;; \boldsymbol{x}_k] \;=\; 
-(\boldsymbol{\mathop{\widehat{e}}}\cdot\boldsymbol{1},\; \boldsymbol{\mathop{\widehat{e}}}\cdot\boldsymbol{x}_2,\dots\;, \boldsymbol{\mathop{\widehat{e}}}\cdot\boldsymbol{x}_k) \;=\; 
+(\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{1}\rangle_e,\; \langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{x}_2\rangle_e,\dots\;, \langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{x}_k\rangle_e) \;=\; 
 (0,\;0,\dots,\; 0).
 \]
 
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-/Simplificación de la notación/: Como $(\boldsymbol{v}\boldsymbol{\mathsf{X}})_{|j} = \boldsymbol{v}\cdot(\boldsymbol{\mathsf{X}}_{|j})$, podemos /prescindir de los paréntesis y el punto/ y escribir sencillamente $\boldsymbol{v}\boldsymbol{\mathsf{X}}_{|j}$ para denotar ambas operaciones. 
-Lo re-interpretamos como: ``el selector sobre la matriz tiene precedencia sobre el producto''.
+/Simplificación de la notación/: como $(\boldsymbol{v}\boldsymbol{\mathsf{X}})_{|j}=\langle\boldsymbol{v},\boldsymbol{\mathsf{X}}_{|j}\rangle_e$, las dos lecturas de $\boldsymbol{v}\boldsymbol{\mathsf{X}}_{|j}$ dan lo mismo: la componente $j$ de $\boldsymbol{v}\boldsymbol{\mathsf{X}}$, o el producto escalar de $\boldsymbol{v}$ con la columna $j$. Por eso podemos escribir $\boldsymbol{v}\boldsymbol{\mathsf{X}}_{|j}$ sin paréntesis.
 # \[
 # \boldsymbol{v}\boldsymbol{\mathsf{X}}_{|j} \;=\; \boldsymbol{v} \cdot \boldsymbol{\mathsf{X}}_{|j}
 # \]
@@ -257,7 +255,7 @@ Lo re-interpretamos como: ``el selector sobre la matriz tiene precedencia sobre 
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-Si recordamos ``El problema aritmético: demasiadas ecuaciones'', nuestro problema consistía en que teníamos $k$ ecuaciones de la forma $\langle\boldsymbol{\mathop{\widehat{e}}},\,\boldsymbol{x}_j\rangle_e=\boldsymbol{\mathop{\widehat{e}}} \cdot \boldsymbol{x}_j = 0$. Necesitamos una operación que agrupe todos esos productos escalares en una sola expresión.[fn::Fíjese que en esta y en las siguientes transparencias de notación matricial trabajamos con el producto euclídeo (también conocido como producto punto) $\langle\_,\,\_\rangle_e=\_ \cdot \_$; recuerde que esto no cambia ninguna condición de ortogonalidad.]
+Si recordamos ``El problema aritmético: demasiadas ecuaciones'', nuestro problema consistía en que teníamos $k$ ecuaciones de la forma $\langle\boldsymbol{\mathop{\widehat{e}}},\,\boldsymbol{x}_j\rangle_e = 0$. Necesitamos una operación que agrupe todos esos productos escalares en una sola expresión.[fn::Fíjese que en esta y en las siguientes transparencias de notación matricial trabajamos con el producto escalar euclídeo $\langle\cdot,\cdot\rangle_e$; recuerde que esto no cambia ninguna condición de ortogonalidad.]
 
 Esa operación es precisamente el producto de un vector por una matriz. Lo definimos geométricamente: $\boldsymbol{v}\boldsymbol{\mathsf{X}}$ da como resultado un vector, y su componente \(j\)-ésima se calcula haciendo el producto escalar del vector $\boldsymbol{v}$ con la columna \(j\)-ésima de la matriz $\boldsymbol{\mathsf{X}}$.
 
@@ -312,11 +310,11 @@ Así, la descomposición $\boldsymbol{y}=\boldsymbol{\mathop{\widehat{y}}}+\bold
 
 Y ¿cuál es el valor ajustado para el individuo $i$? 
 
-Recordando que el operador por la izquierda selecciona la \(i\)-ésima componente del ajuste (y la precedencia del selector):
+Recordando que el operador por la izquierda selecciona la \(i\)-ésima componente del ajuste:
 \[
-{}_{i|}\boldsymbol{\mathop{\widehat{y}}} \;=\; {}_{i|}\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}} \;=\; {}_{i|}\boldsymbol{\mathsf{X}} \cdot \boldsymbol{\mathop{\widehat{\beta}}}
+{}_{i|}\boldsymbol{\mathop{\widehat{y}}} \;=\; {}_{i|}\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}} \;=\; \langle{}_{i|}\boldsymbol{\mathsf{X}},\boldsymbol{\mathop{\widehat{\beta}}}\rangle_e
 \]
-/El ajuste para un individuo es el producto punto de sus datos (la fila ${}_{i|}\boldsymbol{\mathsf{X}}$) por los parámetros ajustados/ $\boldsymbol{\mathop{\widehat{\beta}}}$.
+/El ajuste para un individuo es el producto escalar de sus datos (la fila ${}_{i|}\boldsymbol{\mathsf{X}}$) por los parámetros ajustados/ $\boldsymbol{\mathop{\widehat{\beta}}}$.
 
 
 *** Matriz por Vector (El Ajuste) y la Doble Lectura
@@ -339,11 +337,11 @@ A partir de ahora, cuando veamos la expresión $\boldsymbol{\mathsf{X}}\boldsymb
 
 La ecuación $\boldsymbol{\mathop{\widehat{y}}}=\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$ se usará durante el resto del curso. Recordemos que, desde la lección 6, veníamos escribiendo $\boldsymbol{y}=\boldsymbol{\mathop{\widehat{y}}}+\boldsymbol{\mathop{\widehat{e}}}$ (forma que la lección 7 hizo explícita en su primera transparencia). Con la notación matricial recién definida, esa misma ecuación se escribe, sin ningún ingrediente nuevo, como $\boldsymbol{y}=\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}+\boldsymbol{\mathop{\widehat{e}}}$, de donde también $\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{y}-\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$. Esta última expresión es la que sustituiremos dentro de la condición de ortogonalidad más adelante en esta misma lección, al derivar las ecuaciones normales.
 
-Ahora sabemos que $\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$ es el vector con todos los valores ajustados $\boldsymbol{\mathop{\widehat{y}}}$. Para seleccionar el ajuste correspondiente a un individuo $i$ aplicaremos el operador selector por la izquierda: gracias a las reglas de nuestro operador selector[fn::La misma regla de precedencia sobre el producto fijada para $\boldsymbol v\boldsymbol{\mathsf X}$ por la derecha se aplica, simétricamente, cuando el selector actúa por la izquierda.], ${}_{i|}\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$ se evalúa como el producto escalar de la fila \(i\)-ésima de la matriz $\boldsymbol{\mathsf{X}}$ por el vector $\boldsymbol{\mathop{\widehat{\beta}}}$, es decir ${}_{i|}\boldsymbol{\mathsf{X}} \cdot \boldsymbol{\mathop{\widehat{\beta}}}$. Comprobémoslo: la componente $i$ de la combinación lineal de columnas es
+Ahora sabemos que $\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$ es el vector con todos los valores ajustados $\boldsymbol{\mathop{\widehat{y}}}$. Para seleccionar el ajuste correspondiente a un individuo $i$ aplicaremos el operador selector por la izquierda: como ocurría por la derecha con $\boldsymbol v\boldsymbol{\mathsf X}_{|j}$, las dos lecturas coinciden, y ${}_{i|}\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}$ se evalúa como el producto escalar de la fila \(i\)-ésima de la matriz $\boldsymbol{\mathsf{X}}$ por el vector $\boldsymbol{\mathop{\widehat{\beta}}}$, es decir $\langle{}_{i|}\boldsymbol{\mathsf{X}},\boldsymbol{\mathop{\widehat{\beta}}}\rangle_e$. Comprobémoslo: la componente $i$ de la combinación lineal de columnas es
 \[
 {}_{i|}\Big(\hat\beta_1\boldsymbol{\mathsf{X}}_{|1}+\cdots+\hat\beta_k\boldsymbol{\mathsf{X}}_{|k}\Big)
 \;=\;\hat\beta_1x_{i1}+\cdots+\hat\beta_kx_{ik}
-\;=\;{}_{i|}\boldsymbol{\mathsf{X}}\cdot\boldsymbol{\mathop{\widehat{\beta}}},
+\;=\;\langle{}_{i|}\boldsymbol{\mathsf{X}},\boldsymbol{\mathop{\widehat{\beta}}}\rangle_e,
 \]
 porque tomar la componente $i$ de una suma de vectores es sumar las componentes $i$ de cada uno, y la componente $i$ de la columna $j$ es precisamente el dato $x_{ij}$ de la fila $i$. Por eso pueden quitarse los paréntesis. Esto arroja una *doble lectura* del producto /matriz por vector/: en su conjunto es una combinación lineal de columnas pero, componente a componente, es un listado de productos punto de cada fila por el vector. 
 
@@ -370,7 +368,7 @@ La *transposición* de una matriz ($\boldsymbol{\mathsf{X}}^\top$) convierte sus
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 Por tanto, $\boldsymbol{v}\boldsymbol{\mathsf{X}}$ y $\boldsymbol{\mathsf{X}}^\top\boldsymbol{v}$ son *el mismo vector*:
 \[
-(\boldsymbol{v}\boldsymbol{\mathsf{X}})_{|j} \;=\; \boldsymbol{v} \cdot \boldsymbol{\mathsf{X}}_{|j} \;=\; \boldsymbol{\mathsf{X}}_{|j} \cdot \boldsymbol{v} \;=\; {}_{j|}(\boldsymbol{\mathsf{X}}^\top) \cdot \boldsymbol{v} \;=\; {}_{j|}(\boldsymbol{\mathsf{X}}^\top\boldsymbol{v})
+(\boldsymbol{v}\boldsymbol{\mathsf{X}})_{|j} \;=\; \langle\boldsymbol{v},\boldsymbol{\mathsf{X}}_{|j}\rangle_e \;=\; \langle\boldsymbol{\mathsf{X}}_{|j},\boldsymbol{v}\rangle_e \;=\; \langle{}_{j|}(\boldsymbol{\mathsf{X}}^\top),\boldsymbol{v}\rangle_e \;=\; {}_{j|}(\boldsymbol{\mathsf{X}}^\top\boldsymbol{v})
 \]
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 Así, la condición de ortogonalidad $\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}} = \boldsymbol{0}$ puede escribirse de forma equivalente como:
@@ -409,7 +407,7 @@ Para llegar a las ecuaciones normales, la forma compacta de las $k$ condiciones 
 \qquad\text{y}\qquad
 \boldsymbol{\mathsf{X}}^\top(\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}})=(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})\boldsymbol{\mathop{\widehat{\beta}}}.
 \]
-La primera dice que $\boldsymbol{\mathsf{X}}^\top$ ``distribuye'' sobre la resta; la segunda, que la posición de los paréntesis no altera el resultado.[fn::Para ver en detalle el producto de matrices y la demostración de linealidad para cada una de las operaciones puede consultar el manual [[https://mbujosab.github.io/CursoDeAlgebraLineal/libro.pdf][Un Curso de Álgebra Lineal]].]
+La primera dice que $\boldsymbol{\mathsf{X}}^\top$ se distribuye sobre la resta; la segunda, que la posición de los paréntesis no altera el resultado.[fn::Para ver en detalle el producto de matrices y la demostración de linealidad para cada una de las operaciones puede consultar el manual [[https://mbujosab.github.io/CursoDeAlgebraLineal/libro.pdf][Un Curso de Álgebra Lineal]].]
 
 /Para profundizar/:
 - Wooldridge, J. M. (2020), Apéndice E.1-E.2: la notación matricial de las
@@ -429,7 +427,7 @@ en $\quad\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymb
 \;\Longrightarrow\;
 \boxed{\;\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\,\boldsymbol{\mathop{\widehat{\beta}}} \;=\; \boldsymbol{\mathsf{X}}^\top\boldsymbol{y}.\;}
 \]
-(Hemos usado que $\boldsymbol{\mathsf{X}}^\top$ distribuye sobre la resta.) Aquí aparece (por primera vez en el curso) un producto de matrices: $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}};\;$ baste saber que es otra matriz.
+(Hemos usado que $\boldsymbol{\mathsf{X}}^\top$ se distribuye sobre la resta.) Aquí aparece (por primera vez en el curso) un producto de matrices: $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}};\;$ baste saber que es otra matriz.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 La expresión del recuadro es el sistema de /ecuaciones normales/. 
@@ -451,7 +449,7 @@ Cuando los $k$ regresores son linealmente independientes (ninguno es combinació
 :END:
 
 #+attr_ipynb: (slideshow . ((slide_type . skip)))
-``Transposición'' nos dejó las $k$ condiciones de ortogonalidad
+La transposición nos dejó las $k$ condiciones de ortogonalidad
 comprimidas en $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}$.
 Resolver este sistema para obtener $\boldsymbol{\mathop{\widehat{\beta}}}$ es
 puramente algebraico: sustituimos la definición del residuo,
@@ -492,7 +490,7 @@ Es la fórmula de los manuales y la que Gretl usa internamente. En este curso el
 Para cerrar, vale la pena señalar que la existencia de una única solución para las ecuaciones normales
 es lo único que falla cuando los regresores son linealmente dependientes: en tal caso $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}$ no es invertible (/colinealidad exacta/) y el sistema de ecuaciones normales pasa a tener infinitas soluciones (es un sistema /compatible/ pero /_indeterminado_/); en consecuencia hay infinitos vectores $\boldsymbol{\mathop{\widehat{\beta}}}$ que arrojan el mismo ajuste $\boldsymbol{\mathop{\widehat{y}}}$.[fn::En la lección 14 veremos un problema distinto: la /colinealidad de grado/, una situación en la que el sistema de ecuaciones normales tiene solución única, pero extremadamente sensible a pequeños cambios en los datos (algo que acarrea un grave problema en la interpretación de resultados). Ocurre cuando algunos regresores están casi alineados.]
 
-La siguiente transparencia se ocupa de la situación contraria: cuando los regresores son perpendiculares entre sí.
+A continuación veremos una situación radicalmente distinta: regresores perpendiculares entre sí.
 
 /Para profundizar/:
 - Wooldridge, J. M. (2020), Apéndice E: derivación matricial completa de las
@@ -562,7 +560,7 @@ Por tanto, en este caso tan especial, no hace falta resolver ningún sistema de 
 Una advertencia, que prepara la transparencia siguiente. Este escenario, regresores mutuamente
 ortogonales, simplifica el cálculo, pero es la /excepción/, no la
 norma. Con datos económicos reales, los regresores casi siempre están
-correlacionados entre sí en alguna medida (por ejemplo, la antigüedad y la experiencia de un trabajador) y no suelen tener media cero. Cuando los regresores
+correlados entre sí en alguna medida (por ejemplo, la antigüedad y la experiencia de un trabajador) y no suelen tener media cero. Cuando los regresores
 no son mutuamente ortogonales, no hay fórmula separada: hay que resolver el sistema
 completo de ecuaciones normales de ``Ecuaciones normales''.
 
@@ -645,7 +643,7 @@ eso $R^2$, aunque sigue siendo $\cos^2\theta$, ya no coincide, en general, con
 el cuadrado de ninguna correlación simple $\rho_{\boldsymbol{x}_j\boldsymbol{y}}$,
 ni con la suma de esos cuadrados.
 
-Hay, sin embargo, una excepción donde $R^2$ es la suma de las correlaciones al cuadrado, y es precisamente el caso especial de ``Familia ortogonal''. El enlace con aquella transparencia exige un paso, porque allí los generadores $\boldsymbol{z}_j$ ya tenían media cero y aquí los regresores $\boldsymbol{x}_j$ no la tienen. El puente es el mismo que usamos en la ``vía alternativa'' de la lección 7. Sustituir cada $\boldsymbol{x}_j$ por su versión centrada $\boldsymbol{x}_j-\mu_{\boldsymbol{x}_j}\boldsymbol{1}$ no cambia el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\ldots,\boldsymbol{x}_k)$, porque cada vector centrado es combinación lineal de $\boldsymbol{1}$ y del original, y viceversa. Por tanto no cambia el ajuste $\boldsymbol{\mathop{\widehat{y}}}$ ni los coeficientes $\hat\beta_j$ con $j\geq2$; solo cambia el de $\boldsymbol{1}$, que pasa a ser $\mu_{\boldsymbol{y}}$. Así que los $\boldsymbol{z}_j$ de ``Familia ortogonal'' son estos vectores centrados, y la parte de $\boldsymbol{\mathop{\widehat{y}}}$ en desviaciones es
+Hay, sin embargo, una excepción donde $R^2$ es la suma de las correlaciones al cuadrado, y es precisamente el caso especial de ``Familia ortogonal''. El enlace con aquella transparencia exige un paso, porque allí los generadores $\boldsymbol{z}_j$ ya tenían media cero y aquí los regresores $\boldsymbol{x}_j$ no la tienen. El puente es el mismo que usamos en la ``vía alternativa'' de la lección 7. Sustituir cada $\boldsymbol{x}_j$ por su versión centrada $\boldsymbol{x}_j-\mu_{\boldsymbol{x}_j}\boldsymbol{1}$ no cambia el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\ldots,\boldsymbol{x}_k)$, porque cada vector centrado es combinación lineal de $\boldsymbol{1}$ y del original, y viceversa. Por tanto no cambia el ajuste $\boldsymbol{\mathop{\widehat{y}}}$ ni los coeficientes $\hat\beta_j$ con $j\geq2$; solo cambia $\hat\beta_1$, que pasa a ser igual a $\mu_{\boldsymbol{y}}$. Así que los $\boldsymbol{z}_j$ de ``Familia ortogonal'' son estos vectores centrados, y la parte de $\boldsymbol{\mathop{\widehat{y}}}$ en desviaciones es
 \[
 \boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}=\hat\beta_2(\boldsymbol{x}_2-\mu_{\boldsymbol{x}_2}\boldsymbol{1})+\cdots+\hat\beta_k(\boldsymbol{x}_k-\mu_{\boldsymbol{x}_k}\boldsymbol{1}).
 \]
@@ -689,7 +687,7 @@ aplicadas por separado, gracias a la ortogonalidad mutua, a cada dirección
 $j=2,\ldots,k$.
 
 Sustituyendo este resultado, término a término, en la suma de cocientes que
-habíamos obtenido para $R^2$, concluimos que, en este caso muy particular, y
+habíamos obtenido para $R^2$, concluimos que, en este caso tan particular, y
 solo en él,
 \[
 R^2 = \rho_{\boldsymbol{x}_2\boldsymbol{y}}^2+\cdots+\rho_{\boldsymbol{x}_k\boldsymbol{y}}^2.
@@ -715,8 +713,10 @@ Recordemos (lección 9): $Y=\beta_1\,\mathit{1}+\beta_2X+U$, con tres supuestos 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 Lo generalizamos a $k-1$ regresores no constantes $X_2,\ldots,X_k$:
 \[
-Y = \beta_1\,\mathit{1}+\beta_2X_2+\cdots+\beta_kX_k+U.
+Y = \beta_1\,\mathit{1}+\beta_2X_2+\cdots+\beta_kX_k+U,
 \]
+donde $U=Y-E[Y\mid X_2,\ldots,X_k]$: como en la lección 9, la parte de $Y$ ortogonal al espacio de las funciones de los regresores, que ahora es el de las funciones de $X_2,\ldots,X_k$ a la vez, aún mayor.
+
 Los mismos tres supuestos, condicionando ahora sobre todos los regresores a la vez:
 1. $E[Y\mid X_2,\ldots,X_k]=\beta_1\,\mathit{1}+\beta_2X_2+\cdots+\beta_kX_k$
 2. $\mathit{1},X_2,\ldots,X_k$ /linealmente independientes/ (generaliza $\mathrm{Var}(X)\neq0$).
@@ -728,12 +728,23 @@ Y el mismo corolario, sin supuesto adicional: $E[U\mid X_2,\ldots,X_k]=\mathit{0
 # ¿De dónde salía este segundo supuesto en la lección 9? Con un único regresor, se reducía a $\mathrm{Var}(X)\neq0$: ya lo necesitábamos, sin nombrarlo, para que $\beta_2=\mathrm{Cov}(X,Y)/\mathrm{Var}(X)$ tuviera sentido /(en los apuntes: cuidado, esto no equivale a "$X$ no es un múltiplo de $\mathit{1}$")/.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Y el método de los momentos se extiende tal cual: sustituir momentos poblacionales por muestrales reproduce las ecuaciones normales $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}$.
-
-#+attr_ipynb: (slideshow . ((slide_type . fragment)))
 #+begin_center
 Condicionamos sobre una lista de variables más larga. Pero la estructura no cambia.
 #+end_center
+
+** El método de los momentos
+:PROPERTIES:
+:metadata: (slideshow . ((slide_type . subslide)))
+:UNNUMBERED: notoc
+:END:
+
+El método de los momentos de la lección 9 se extiende tal cual. El corolario da $k$ condiciones sobre momentos poblacionales, que son productos escalares entre variables aleatorias: $\langle U,\mathit{1}\rangle_P=\mathrm E(U)=0$ y $\langle U,X_j\rangle_P=\mathrm E(X_jU)=0$ para cada regresor.
+
+#+attr_ipynb: (slideshow . ((slide_type . fragment)))
+Sustituir cada producto escalar $\langle\cdot,\cdot\rangle_P$ entre variables aleatorias por su análogo $\langle\cdot,\cdot\rangle_s$ entre vectores de datos da $\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol{x}_j\rangle_s=0$: las condiciones de ortogonalidad $\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol{0}$, es decir, las ecuaciones normales
+\[
+\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}.
+\]
 
 *** El modelo poblacional también se generaliza
 :PROPERTIES:
@@ -776,7 +787,7 @@ Ejemplo sencillo: la temperatura de un mismo día medida en grados Celsius y en 
 
 Con tres o más regresores no constantes, mirar las correlaciones por parejas ya no basta. La dependencia lineal significa que alguno de los regresores es combinación lineal de /los demás/ (incluida la constante $\mathit{1}$), por ejemplo $X_4=a\,\mathit{1}+b\,X_2+c\,X_3$; y eso puede ocurrir sin que $X_4$ esté perfectamente correlado con $X_2$ ni con $X_3$ por separado, porque lo que reproduce a $X_4$ no es ninguno de los dos, sino el espacio que generan $\mathit{1}$, $X_2$ y $X_3$ juntos. Piense en la renta total de un hogar y en sus dos componentes, renta del trabajo y renta del capital: la suma es función exacta de las dos partes, pero su correlación con cada una de ellas por separado puede ser moderada. La formulación general del supuesto es, pues, la que ya conoce de $\mathbb{R}^n$: que ningún regresor pertenezca al espacio generado por los otros; o, lo que es lo mismo, que $\{\mathit{1},X_2,\ldots,X_k\}$ sea una familia linealmente independiente.
 
-Por último, el método de los momentos de la lección 9 se extiende igual: sustituir cada momento poblacional desconocido por su análogo muestral reproduce el sistema de ecuaciones normales $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}$ obtenido hoy por vía puramente geométrica.
+Por último, el método de los momentos de la lección 9 se extiende igual. Del corolario $E[U\mid X_2,\ldots,X_k]=\mathit{0}$ salen $k$ condiciones sobre momentos poblacionales, que son productos escalares entre variables aleatorias: $\langle U,\mathit{1}\rangle_P=\mathrm E(U)=0$ y $\langle U,X_j\rangle_P=\mathrm E(X_jU)=0$ para $j=2,\ldots,k$. Sustituir cada producto escalar $\langle\cdot,\cdot\rangle_P$ entre variables aleatorias por su análogo $\langle\cdot,\cdot\rangle_s$ entre vectores de datos da $\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol 1\rangle_s=0$ y $\langle\boldsymbol{\mathop{\widehat{e}}},\boldsymbol x_j\rangle_s=0$, que son las condiciones de ortogonalidad $\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol 0$, y reproduce el sistema de ecuaciones normales $\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}$ obtenido hoy por vía puramente geométrica.
 
 /Para profundizar/:
 - Wooldridge, J. M. (2020), cap. 3, sección 3.3: supuestos del modelo de

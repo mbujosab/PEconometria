@@ -101,7 +101,7 @@ El mundo artificial tiene $n=100$, $y=1+x_2+x_3+u$ con $u$ normal de desviación
 
 1. Comprobar que la varianza empírica de $\hat\beta_2$ crece como el VIF, y que coincide con $\sigma^2/\Vert\tilde{\boldsymbol x}_2\Vert_e^2$.
 2. Ver que la $\mathrm{SRC}$ no cambia con $\rho$: el ajuste es el mismo punto, y solo cambian sus coordenadas.
-3. Ver que $\hat\beta_2$ y $\hat\beta_3$ oscilan /juntos y al revés/: covarianza negativa, y suma $\hat\beta_2+\hat\beta_3$ tan estable como lo era $\hat\beta_2$ sin colinealidad.
+3. Ver que $\hat\beta_2$ y $\hat\beta_3$ oscilan /juntos y al revés/: covarianza negativa, porque aquí la correlación entre los regresores es positiva (con correlación negativa oscilarían en el mismo sentido), y suma $\hat\beta_2+\hat\beta_3$ tan estable como lo era $\hat\beta_2$ sin colinealidad.
 4. Ver cómo un efecto verdadero deja de ser significativo cuando el regresor pierde parte propia.
 
 /Comandos nuevos de esta práctica/. Seguimos con =nulldata=, =set seed=, =normal()=, =series= y =scalar= (sesión 7), =ols= con =--quiet= y los accesores =$ess=, =$coeff= y =$stderr= (sesiones 11 a 18), las matrices y =mcov= (práctica A de la sesión 16, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=7][apéndice]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#apendice-matricial][html]])) y =critical= (sesión 18). Lo nuevo:
@@ -136,7 +136,7 @@ matrix rhos = {0, 0.9, 0.99, 0.999}
 #+NAME: MonteCarlo
 #+begin_src gretl :eval no
 printf "n = %d, beta = (1, 1, 1), sigma = 1, %d replicas por cada rho\n\n", n, R
-printf "%7s %8s %8s %10s %10s %10s %10s %8s %8s %8s\n", "rho", "corr", "VIF", "var(b2)", "teorica", "cov(b2,b3)", "var(b2+b3)", "SRC", "R2", "%|t|>tc"
+printf "%7s %8s %8s %10s %10s %10s %10s %10s %8s %8s %8s\n", "rho", "corr", "VIF", "var(b2)", "teorica", "cov(b2,b3)", "var(b2+b3)", "var(b2-b3)", "SRC", "R2", "%|t|>tc"
 loop j=1..4 --quiet
     scalar rho = rhos[j]
     set seed 2026
@@ -160,7 +160,7 @@ loop j=1..4 --quiet
         signif += abs($coeff(x2)/$stderr(x2)) > tc
     endloop
     matrix V = mcov(B)
-    printf "%7.3f %8.4f %8.1f %10.4f %10.4f %10.4f %10.4f %8.2f %8.4f %8.3f\n", rho, corr(x2, x3), 1/(1-corr(x2,x3)^2), V[1,1], varTeorica, V[1,2], V[1,1]+V[2,2]+2*V[1,2], meanc(S[,1]), meanc(S[,2]), signif/R
+    printf "%7.3f %8.4f %8.1f %10.4f %10.4f %10.4f %10.4f %10.4f %8.2f %8.4f %8.3f\n", rho, corr(x2, x3), 1/(1-corr(x2,x3)^2), V[1,1], varTeorica, V[1,2], V[1,1]+V[2,2]+2*V[1,2], V[1,1]+V[2,2]-2*V[1,2], meanc(S[,1]), meanc(S[,2]), signif/R
     if j == 1
         matrix B0 = B
     elif j == 3
@@ -187,7 +187,7 @@ Lea la tabla por columnas. La varianza empírica de $\hat\beta_2$ coincide con $
 
 La $\mathrm{SRC}$ es la misma en las cuatro filas, con todos sus decimales. El subespacio es el mismo por construcción y las perturbaciones sorteadas también, así que el residuo es idéntico. El $R^2$ sí cambia, porque cambia $y$: con $\beta_2=\beta_3=1$, dos regresores alineados suman sus efectos y la señal es mayor. La colinealidad no cambia el ajuste; dispersa las coordenadas.
 
-La covarianza entre $\hat\beta_2$ y $\hat\beta_3$ es negativa y casi igual a la varianza en valor absoluto, salvo con $\rho=0$, donde es prácticamente nula ($0{,}0003$ frente a $0{,}0108$): cuando uno sube, el otro baja lo mismo. Por eso la varianza de la suma se queda en $0{,}011$ para $\rho=0{,}9$, $0{,}99$ y $0{,}999$: la suma se mide con la precisión que $\hat\beta_2$ tenía sin colinealidad. Y la última columna dice lo que la colinealidad cuesta: un coeficiente que vale $1$, con ruido de desviación típica $1$ y cien datos, se detecta siempre con $\rho=0$ y solo el $7\%$ de las veces con $\rho=0{,}999$.
+La covarianza entre $\hat\beta_2$ y $\hat\beta_3$ es negativa y casi igual a la varianza en valor absoluto, salvo con $\rho=0$, donde es prácticamente nula ($0{,}0003$ frente a $0{,}0108$): cuando uno sube, el otro baja lo mismo. Por eso la varianza de la suma se queda en $0{,}011$ para $\rho=0{,}9$, $0{,}99$ y $0{,}999$: la suma se mide con la precisión que $\hat\beta_2$ tenía sin colinealidad. La diferencia $\hat\beta_2-\hat\beta_3$ se comporta al revés: su varianza pasa de $0{,}022$ con $\rho=0$ a $2{,}28$ con $\rho=0{,}99$ y a $22{,}8$ con $\rho=0{,}999$. Es lo que la lección 14 dice de las restricciones en ``Qué hacer y qué no'' ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=14][pdf]], [[https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#que-hacer-y-que-no][html]]). La restricción $\beta_2=\beta_3$, que aquí es cierta, deja el regresor $\boldsymbol x_2+\boldsymbol x_3$, y su estimación tiene la precisión de la suma. Una restricción como $\beta_2+\beta_3=2$, también cierta, deja el regresor $\boldsymbol x_2-\boldsymbol x_3$, y su estimación tiene la precisión de la diferencia: apenas gana precisión. Y la última columna dice lo que la colinealidad cuesta: un coeficiente que vale $1$, con ruido de desviación típica $1$ y cien datos, se detecta siempre con $\rho=0$ y solo el $7\%$ de las veces con $\rho=0{,}999$.
 
 * Actividad 2 - Los histogramas y la nube
 :PROPERTIES:
@@ -272,6 +272,7 @@ La nube es la figura de ``Por qué oscilan los coeficientes'' de la lección 14 
 3. En la última columna, el efecto verdadero de $\boldsymbol x_2$ solo se detecta el $26\%$ de las veces con $\rho=0{,}99$. Un investigador con una sola muestra obtiene $t=0{,}9$ y concluye que $\boldsymbol x_2$ no influye. ¿Qué diría usted, y qué pediría ver?
 4. La nube de la Actividad 2 está centrada en $(1,1)$. Si el investigador de la pregunta anterior obtiene $(\hat\beta_2,\hat\beta_3)=(-0{,}5;\,2{,}5)$, ¿son esos valores ``incorrectos''? ¿Qué es lo que sí está bien estimado en esa muestra?
 5. ¿Qué habría que cambiar en el experimento para que, con $\rho=0{,}99$, el $t$ de $\boldsymbol x_2$ volviera a superar $t_c$ en casi todas las réplicas? Diga dos cosas distintas y compare su coste.
+6. Si $\boldsymbol x_3$ se hubiera generado con $\rho=-0{,}99$, ¿cómo sería la nube de la Actividad 2? ¿Qué columnas de la tabla cambiarían, y cuáles no?
 
 * Para profundizar
 
@@ -301,6 +302,8 @@ La nube es la figura de ``Por qué oscilan los coeficientes'' de la lección 14 
 4. /Valores ``incorrectos''./ No: son una réplica posible, un punto de la nube, y el estimador que los produjo es insesgado y de varianza mínima entre los lineales. Lo que está mal es leerlos como el efecto separado de cada regresor, que la muestra no puede dar. Lo que sí está bien estimado es la suma, $2{,}0$, y con ella el ajuste: la $\mathrm{SRC}$ de esa réplica es la misma que tendría con cualquiera de los otros tres valores de $\rho$, porque el subespacio es el mismo; lo mal determinado es el reparto entre las dos coordenadas, no el punto $\boldsymbol{\mathop{\widehat y}}$. La predicción de $y$ para una nueva observación en la que $x_2$ y $x_3$ vayan juntos, como en la muestra, es tan buena como sin colinealidad.
 
 5. /Qué cambiar./ Más observaciones: la parte propia crece como $\sqrt n$, y para recuperar el factor $7$ del error estándar haría falta multiplicar $n$ por $50$. O más variación propia: sortear $\boldsymbol x_3$ con menos correlación es lo que un diseño experimental puede hacer y los datos observados no; con $\rho=0{,}9$ bastaban cien observaciones. La segunda opción es mucho más barata cuando está disponible, y es lo que la lección 14 llamó regresores que varíen por separado.
+
+6. /Correlación negativa./ El subespacio sería el mismo, porque $\boldsymbol x_3$ seguiría siendo una combinación de $\boldsymbol z_1$ y $\boldsymbol z_2$, y la parte propia de $\boldsymbol x_2$ tendría prácticamente la misma longitud, porque solo depende del valor absoluto de la correlación. Por eso la $\mathrm{SRC}$ sería idéntica, y el VIF, la varianza de $\hat\beta_2$ y la última columna, prácticamente las mismas. Cambiaría el signo de la covarianza, que pasaría a ser positiva, cerca de $+0{,}57$: la nube se alargaría a lo largo de una recta de pendiente $+1$, y cuando el azar sube un coeficiente, sube también el otro. Y se intercambiarían las columnas de la suma y de la diferencia: la dirección compartida sería ahora $\boldsymbol x_2-\boldsymbol x_3$, así que la diferencia se estimaría con precisión y la suma no. El $R^2$ también cambiaría, y mucho: con $\beta_2=\beta_3=1$ y regresores casi opuestos, los dos efectos casi se cancelan y la parte sistemática de $\boldsymbol y$ es pequeña. Lo que no depende del signo es lo que la lección 14 subraya: las coordenadas oscilan mucho y el ajuste apenas se mueve.
 
 * COMMENT Banco de preguntas de reserva
 
