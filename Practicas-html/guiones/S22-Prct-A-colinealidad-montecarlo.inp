@@ -29,7 +29,7 @@ scalar tc  = critical(t, n-3, 0.025)
 matrix rhos = {0, 0.9, 0.99, 0.999}
 outfile --quiet montecarlo.txt
     printf "n = %d, beta = (1, 1, 1), sigma = 1, %d replicas por cada rho\n\n", n, R
-    printf "%7s %8s %8s %10s %10s %10s %10s %8s %8s %8s\n", "rho", "corr", "VIF", "var(b2)", "teorica", "cov(b2,b3)", "var(b2+b3)", "SRC", "R2", "%|t|>tc"
+    printf "%7s %8s %8s %10s %10s %10s %10s %10s %8s %8s %8s\n", "rho", "corr", "VIF", "var(b2)", "teorica", "cov(b2,b3)", "var(b2+b3)", "var(b2-b3)", "SRC", "R2", "%|t|>tc"
     loop j=1..4 --quiet
         scalar rho = rhos[j]
         set seed 2026
@@ -53,7 +53,7 @@ outfile --quiet montecarlo.txt
             signif += abs($coeff(x2)/$stderr(x2)) > tc
         endloop
         matrix V = mcov(B)
-        printf "%7.3f %8.4f %8.1f %10.4f %10.4f %10.4f %10.4f %8.2f %8.4f %8.3f\n", rho, corr(x2, x3), 1/(1-corr(x2,x3)^2), V[1,1], varTeorica, V[1,2], V[1,1]+V[2,2]+2*V[1,2], meanc(S[,1]), meanc(S[,2]), signif/R
+        printf "%7.3f %8.4f %8.1f %10.4f %10.4f %10.4f %10.4f %10.4f %8.2f %8.4f %8.3f\n", rho, corr(x2, x3), 1/(1-corr(x2,x3)^2), V[1,1], varTeorica, V[1,2], V[1,1]+V[2,2]+2*V[1,2], V[1,1]+V[2,2]-2*V[1,2], meanc(S[,1]), meanc(S[,2]), signif/R
         if j == 1
             matrix B0 = B
         elif j == 3
