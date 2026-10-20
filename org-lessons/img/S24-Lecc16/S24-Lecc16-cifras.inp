@@ -6,12 +6,16 @@
 open ../data/boston.csv --quiet
 ols medv const chas --quiet
 printf "t2 medv~chas : const=%.3f chas=%.3f ee=%.3f t=%.2f R2=%.4f n=%d\n", $coeff(const), $coeff(chas), $stderr(chas), $coeff(chas)/$stderr(chas), $rsq, $nobs
+printf "t2 ee const %.3f\n", $stderr(const)
 printf "t2 medias por grupo: sin rio %.3f (n=%d), con rio %.3f (n=%d)\n", sum(medv*(1-chas))/sum(1-chas), sum(1-chas), sum(medv*chas)/sum(chas), sum(chas)
 series norio = 1 - chas
 ols medv chas norio --quiet
 printf "t2 medv~chas+norio (sin constante): chas=%.3f norio=%.3f ; <d_rio,d_norio>=%g\n", $coeff(chas), $coeff(norio), sum(chas*norio)
 ols medv const rm chas --quiet
 printf "t2 medv~rm+chas : rm=%.3f chas=%.3f ee=%.3f t=%.2f\n", $coeff(rm), $coeff(chas), $stderr(chas), $coeff(chas)/$stderr(chas)
+printf "t2 medv~rm+chas : const %.3f (ee %.3f, t %.2f) rm ee %.3f t %.2f\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), $stderr(rm), $coeff(rm)/$stderr(rm)
+scalar drm = sum(rm*chas)/sum(chas) - sum(rm*(1-chas))/sum(1-chas)
+printf "t2 rm medias: rio %.4f norio %.4f ; rm*dif %.4f ; chas %.4f\n", sum(rm*chas)/sum(chas), sum(rm*(1-chas))/sum(1-chas), $coeff(rm)*drm, $coeff(chas)
 
 # --- Transparencias 3 y 4: wage1 ---
 open wage1.gdt --quiet
@@ -23,12 +27,25 @@ printf "t3 wage~female+educ+exper+tenure : const=%.3f female=%.3f (ee %.3f, t %.
 printf "t3 medias de educ, exper, tenure: hombres %.2f %.2f %.2f ; mujeres %.2f %.2f %.2f\n", sum(educ*(1-female))/sum(1-female), sum(exper*(1-female))/sum(1-female), sum(tenure*(1-female))/sum(1-female), sum(educ*female)/sum(female), sum(exper*female)/sum(female), sum(tenure*female)/sum(female)
 ols wage const female educ exper tenure --quiet
 printf "t3 tabla: const %.3f (ee %.3f, t %.2f) female t %.2f educ t %.2f exper t %.2f tenure t %.2f ; IC female [%.2f, %.2f]\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), $coeff(female)/$stderr(female), $coeff(educ)/$stderr(educ), $coeff(exper)/$stderr(exper), $coeff(tenure)/$stderr(tenure), $coeff(female)-critical(t,$df,0.025)*$stderr(female), $coeff(female)+critical(t,$df,0.025)*$stderr(female)
+# --- t3: errores estándar y descomposición exacta ---
+ols wage const female --quiet
+printf "t3 wage~female : ee const %.3f ; t female %.2f\n", $stderr(const), $coeff(female)/$stderr(female)
+ols wage const female educ exper tenure --quiet
+scalar de = sum(educ*female)/sum(female) - sum(educ*(1-female))/sum(1-female)
+scalar dx = sum(exper*female)/sum(female) - sum(exper*(1-female))/sum(1-female)
+scalar dt = sum(tenure*female)/sum(female) - sum(tenure*(1-female))/sum(1-female)
+printf "t3 descomp: dif %.3f %.3f %.3f ; terminos %.3f %.3f %.3f ; suma %.3f\n", de, dx, dt, $coeff(educ)*de, $coeff(exper)*dx, $coeff(tenure)*dt, $coeff(female)+$coeff(educ)*de+$coeff(exper)*dx+$coeff(tenure)*dt
+
 ols lwage const female educ exper tenure --quiet
 printf "t4 tabla: const %.3f (ee %.3f, t %.2f) female t %.2f educ t %.2f exper t %.2f tenure t %.2f\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), $coeff(female)/$stderr(female), $coeff(educ)/$stderr(educ), $coeff(exper)/$stderr(exper), $coeff(tenure)/$stderr(tenure)
 ols lwage const female educ exper tenure --quiet
 scalar bf = $coeff(female)
 printf "t4 lwage~female+educ+exper+tenure : const=%.3f female=%.4f (ee %.4f, t %.2f) educ=%.4f (ee %.4f) exper=%.4f (ee %.4f) tenure=%.4f (ee %.4f) R2=%.3f ; exacto mujer/hombre %.4f ; hombre/mujer %.4f ; IC female [%.3f, %.3f]\n", $coeff(const), bf, $stderr(female), bf/$stderr(female), $coeff(educ), $stderr(educ), $coeff(exper), $stderr(exper), $coeff(tenure), $stderr(tenure), $rsq, exp(bf)-1, exp(-bf)-1, bf-critical(t,$df,0.025)*$stderr(female), bf+critical(t,$df,0.025)*$stderr(female)
 printf "t4 IC exacto: [%.3f, %.3f]\n", exp(bf-critical(t,$df,0.025)*$stderr(female))-1, exp(bf+critical(t,$df,0.025)*$stderr(female))-1
+
+# --- t4: rectas paralelas (figura RectasParalelas) ---
+ols lwage const female exper --quiet
+printf "t4 paralelas: const %.4f (ee %.3f) female %.4f (ee %.3f) exper %.5f (ee %.5f) ; mujeres %.4f\n", $coeff(const), $stderr(const), $coeff(female), $stderr(female), $coeff(exper), $stderr(exper), $coeff(const)+$coeff(female)
 
 # --- Transparencia 5: la trampa, tres escrituras del mismo modelo ---
 series male = 1 - female
@@ -55,6 +72,19 @@ printf "t6 base solteras: marrmale=%.4f marrfem=%.4f (ee %.4f, t %.2f) singmale=
 ols lwage const female married educ exper tenure --quiet
 printf "t6 aditivo female+married: female=%.4f married=%.4f (ee %.4f) R2=%.3f\n", $coeff(female), $coeff(married), $stderr(married), $rsq
 
+# --- t6: cuatro grupos (tras crear marrmale, marrfem, singfem, singmale) ---
+ols lwage const marrmale marrfem singfem educ exper tenure --quiet
+matrix V = $vcv
+printf "t6 base solteros: const %.3f (ee %.3f) ; t %.2f %.2f %.2f ; ee educ %.4f exper %.4f tenure %.4f ; SRC %.2f\n", $coeff(const), $stderr(const), $coeff(marrmale)/$stderr(marrmale), $coeff(marrfem)/$stderr(marrfem), $coeff(singfem)/$stderr(singfem), $stderr(educ), $stderr(exper), $stderr(tenure), $ess
+printf "t6 cov(marrfem,singfem) %.4f ; ee dif %.3f ; sin cov %.3f\n", V[3,4], sqrt(V[3,3]+V[4,4]-2*V[3,4]), sqrt(V[3,3]+V[4,4])
+ols lwage const singmale marrmale marrfem educ exper tenure --quiet
+printf "t6 base solteras: const %.3f (ee %.3f) singmale ee %.3f marrmale ee %.3f marrfem ee %.3f\n", $coeff(const), $stderr(const), $stderr(singmale), $stderr(marrmale), $stderr(marrfem)
+ols lwage const female married educ exper tenure --quiet
+printf "t6 aditivo: const %.3f (ee %.3f) female ee %.3f ; educ %.4f (%.4f) exper %.4f (%.4f) tenure %.4f (%.4f)\n", $coeff(const), $stderr(const), $stderr(female), $coeff(educ), $stderr(educ), $coeff(exper), $stderr(exper), $coeff(tenure), $stderr(tenure)
+series femmar = female*married
+ols lwage const female married femmar educ exper tenure --quiet
+printf "t6 femmar: const %.3f female %.3f (%.3f) married %.3f (%.3f) femmar %.3f (ee %.3f, t %.2f) SRC %.2f\n", $coeff(const), $coeff(female), $stderr(female), $coeff(married), $stderr(married), $coeff(femmar), $stderr(femmar), $coeff(femmar)/$stderr(femmar), $ess
+
 # --- Transparencia 7: interacciones ---
 series femexper = female*exper
 series femeduc  = female*educ
@@ -67,6 +97,17 @@ printf "t7 con female*educ: female=%.4f (ee %.4f) educ=%.4f femeduc=%.4f (ee %.4
 ols lwage const female exper femexper --quiet
 printf "t7 figura lwage~female+exper+female*exper : const=%.4f female=%.4f exper=%.5f femexper=%.5f ; rectas hombres %.4f + %.5f exper ; mujeres %.4f + %.5f exper\n", $coeff(const), $coeff(female), $coeff(exper), $coeff(femexper), $coeff(const), $coeff(exper), $coeff(const)+$coeff(female), $coeff(exper)+$coeff(femexper)
 printf "t7 rango exper: %d a %d\n", min(exper), max(exper)
+
+# --- t7: errores estándar, exactos, female*educ y centrado ---
+ols lwage const female educ exper femexper tenure --quiet
+printf "t7 ee const %.3f educ %.4f tenure %.4f ; exactos %.3f %.3f %.3f\n", $stderr(const), $stderr(educ), $stderr(tenure), exp($coeff(female))-1, exp($coeff(female)+10*$coeff(femexper))-1, exp($coeff(female)+20*$coeff(femexper))-1
+printf "t7 educ=0: %d ; educ en [8,18]: %d de %d\n", sum(educ==0), sum(educ>=8 && educ<=18), $nobs
+ols lwage const female educ femeduc exper tenure --quiet
+scalar ee_nc = $stderr(female)
+series educc = educ - mean(educ)
+series femeducc = female*educc
+ols lwage const female educc femeducc exper tenure --quiet
+printf "t7 centrado: media educ %.2f ; female %.3f (ee %.3f, t %.2f) ; exacto %.3f ; cociente ee %.2f ; educc %.4f femeducc %.4f\n", mean(educ), $coeff(female), $stderr(female), $coeff(female)/$stderr(female), exp($coeff(female))-1, ee_nc/$stderr(female), $coeff(educc), $coeff(femeducc)
 
 # --- Transparencia 8: Chow ---
 ols lwage const educ exper tenure --quiet
@@ -106,6 +147,10 @@ printf "t8 solo pendientes (q=3): F=%.3f p=%.4f\n", $test, $pvalue
 # solo intercepto distinto: q=1, es el t de female al cuadrado
 ols lwage const female educ exper tenure --quiet
 printf "t8 q=1: t(female)^2=%.2f\n", ($coeff(female)/$stderr(female))^2
+
+# --- t8: ecuación de las ocho columnas (tras crear femtenure) ---
+ols lwage const female educ exper tenure femeduc femexper femtenure --quiet
+printf "t8 ocho columnas: const %.3f (%.3f) female %.3f (%.3f) educ %.4f (%.4f) exper %.4f (%.4f) tenure %.4f (%.4f) femeduc %.4f (%.4f) femexper %.4f (%.4f) femtenure %.4f (%.4f)\n", $coeff(const), $stderr(const), $coeff(female), $stderr(female), $coeff(educ), $stderr(educ), $coeff(exper), $stderr(exper), $coeff(tenure), $stderr(tenure), $coeff(femeduc), $stderr(femeduc), $coeff(femexper), $stderr(femexper), $coeff(femtenure), $stderr(femtenure)
 
 # --- Transparencia 10: dispersión de los residuos por grupo (guiño a la lección 17) ---
 ols lwage const female educ exper tenure --quiet
