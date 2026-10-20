@@ -59,6 +59,7 @@
 rm -fr $(pwd)/$practica
 mkdir -p $(pwd)/$practica 
 DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica-plano.inp
 #+END_SRC
 
 #+begin_src gretl :tangle guiones/S14-Prct-B-hprice2-r2ajustado.inp :exports none :eval no
@@ -188,6 +189,68 @@ La razón es que el desplazamiento del coeficiente de $\boldsymbol{x}_2$ al aña
 donde interviene también la /magnitud/ del coeficiente del regresor añadido y la escala de cada variable. La correlación indica si habrá desplazamiento; no indica cuánto.
 
 Fíjese que $R^2$ no es la suma de los dos $R^2$ simples: $0{,}4841+0{,}1815=0{,}666$ frente a $0{,}535$, porque sus vectores en desviaciones no son ortogonales (correlación $-0{,}30$; lección 10).
+
+*** El plano de regresión
+:PROPERTIES:
+:CUSTOM_ID: plano-rooms-nox
+:END:
+
+El modelo =price~rooms+nox= tiene dos regresores no constantes, así que su ajuste es un plano en el espacio de las tres variables, como en la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=5][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#plano-sqft-bedrms][html]]) de la práctica A. Dibújelo desde los menús:
+
+1. En la ventana principal de Gretl, //~Ver -> Gráficos -> Gráfico en 3D...~//
+2. Elija =rooms= como variable del eje X, =nox= como variable del eje Y y =price= como variable del eje Z, el vertical. Pulse //~Aceptar~//.
+3. Gire la figura con el ratón. Busque primero la vista en la que el eje de =nox= apunta hacia usted, y luego la vista en la que lo hace el eje de =rooms=.
+
+Qué representa la figura:
+
+- /Cada punto es un barrio/ del área de Boston: su número medio de habitaciones por vivienda, su concentración de óxidos de nitrógeno y su precio mediano. Hay $506$ puntos, uno por barrio.
+- /El plano/ es el conjunto de precios ajustados, $-18423+8179\,\text{rooms}-1885\,\text{nox}$. A lo largo del eje de =rooms= sube $8179$ dólares por habitación con =nox= fijo; a lo largo del eje de =nox= baja $1885$ dólares por unidad con =rooms= fijo. Esas dos pendientes son los efectos parciales de la tabla de la regresión múltiple.
+- /Las dos vistas del paso 3/ separan los dos efectos. Mirando de frente el eje de =nox=, el plano se ve como una recta que sube con =rooms=; mirando de frente el de =rooms=, como una recta que baja con =nox=. Pero esas rectas no son las de las regresiones simples, que miden los efectos sin fijar el otro regresor: la de =nox= sola tiene pendiente $-3387$, casi el doble que la del plano.
+- /La distancia vertical/ de cada punto al plano es su residuo. La nube es ancha alrededor del plano: el $R^2$ es $0{,}535$, y casi la mitad de la variación del precio queda sin explicar.
+- En la esquina de pocas habitaciones y mucha contaminación no hay barrios, y allí el plano llega a dar precios negativos. El plano describe la nube donde hay datos; fuera de ella es una extrapolación.
+
+#+BEGIN_EXPORT latex
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.75\textwidth}
+  \includegraphics[width=\textwidth]{./S14-Prct-B-hprice2-r2ajustado/plano_price_rooms_nox.png}
+\end{minipage}%
+\caption{Los 506 barrios (puntos azules) y el plano ajustado de \texttt{price} sobre \texttt{rooms} y \texttt{nox} (en gris).}
+\end{figure}
+#+END_EXPORT
+
+#+BEGIN_EXPORT HTML
+<figure style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+    <img src="./S14-Prct-B-hprice2-r2ajustado/plano_price_rooms_nox.png" style="max-width:75%; height:auto;"/>
+    <figcaption>Los 506 barrios (puntos azules) y el plano ajustado de <code>price</code> sobre <code>rooms</code> y <code>nox</code> (en gris).</figcaption>
+</figure>
+#+END_EXPORT
+
+#+begin_src gretl :tangle guiones/S14-Prct-B-hprice2-r2ajustado-plano.inp :exports none :eval no
+# Guion auxiliar: genera la figura estática del plano de regresión que
+# aparece en el texto de la práctica. No forma parte de la práctica:
+# en clase, el plano se dibuja desde el menú de Gretl.
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+open hprice2.gdt --quiet
+ols price const rooms nox --quiet
+matrix b = $coeff
+set force_decpoint on
+outfile --quiet plano.plt
+printf "set xlabel 'rooms'\nset ylabel 'nox'\nset zlabel 'price' rotate\n"
+printf "set view 62,300\nset samples 12\nset isosamples 12\nset key off\nset xyplane 0\n"
+printf "set xrange [3.5:9]\nset yrange [3.8:8.8]\nset zrange [-10000:52000]\nset border 4095 lc rgb '#888888'\n"
+printf "f(x,y) = %.10g + %.10g*x + %.10g*y\n", b[1], b[2], b[3]
+printf "splot f(x,y) with lines lc rgb '#bbbbbb', '-' using 1:2:3 with points pt 7 ps 0.4 lc rgb 'blue'\n"
+loop i=1..$nobs
+  printf "%g %g %g\n", rooms[i], nox[i], price[i]
+endloop
+printf "e\n"
+end outfile
+set force_decpoint off
+string fin = getenv("DIRECTORIO") ~ "/plano.plt"
+gnuplot --input=@fin --output="plano_price_rooms_nox.png"
+#+end_src
 
 * Actividad 3 - Un tercer regresor: stratio
 :PROPERTIES:

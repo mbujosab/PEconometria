@@ -28,6 +28,10 @@ Gretl).
   plana): la indicadora separa las ordenadas en el origen y la interacción
   separa las pendientes.
 
+- =RectasParalelas=: los mismos datos con las dos rectas del modelo =lwage=
+  sobre la constante, =female= y =exper=, sin interacción: la indicadora
+  separa las ordenadas en el origen y las dos rectas tienen la misma pendiente.
+
 Para regenerar los PNG: =../compila_figuras.sh figuras-S24-Lecc16.org= desde
 este directorio.
 
@@ -96,6 +100,40 @@ este directorio.
       \addlegendentry{hombres: $1{,}698 + 0{,}0066\,\text{exper}$}
       \addplot[domain=1:51, samples=2, very thick, color=\Rojo] {1.4042 + 0.00074*x};
       \addlegendentry{mujeres: $1{,}404 + 0{,}0007\,\text{exper}$}
+    \end{axis}
+  \end{tikzpicture}
+\end{document}
+#+END_SRC
+
+** Salario y experiencia por sexo: dos rectas paralelas
+
+#+NAME: RectasParalelas
+#+BEGIN_SRC latex :noweb no-export :tangle tex/RectasParalelas.tex :results discard :exports code :eval no
+<<Preambulo comun>>
+
+\begin{document}
+  <<Colores>>
+  \pgfplotstableread[row sep=\\]{
+  <<Datos hombres>>
+  }\hombres
+  \pgfplotstableread[row sep=\\]{
+  <<Datos mujeres>>
+  }\mujeres
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=15cm, height=6.4cm,
+      xlabel={\small años de experiencia (\texttt{exper})},
+      ylabel={\small $\log(\text{wage})$},
+      xmin=0, xmax=52, ymin=-0.7, ymax=3.4,
+      tick label style={font=\scriptsize},
+      legend style={font=\scriptsize, at={(0.97,0.03)}, anchor=south east, draw=none, fill=white, fill opacity=0.85, text opacity=1},
+      legend cell align=left]
+      \addplot[only marks, mark=*, mark size=0.55pt, color=\Azul!40, forget plot] table[x=exper, y=lwage] {\hombres};
+      \addplot[only marks, mark=*, mark size=0.55pt, color=\Rojo!45, forget plot] table[x=exper, y=lwage] {\mujeres};
+      \addplot[domain=1:51, samples=2, very thick, color=\Azul] {1.7476 + 0.00376*x};
+      \addlegendentry{hombres: $1{,}748 + 0{,}0038\,\text{exper}$}
+      \addplot[domain=1:51, samples=2, very thick, color=\Rojo] {1.3546 + 0.00376*x};
+      \addlegendentry{mujeres: $1{,}355 + 0{,}0038\,\text{exper}$}
     \end{axis}
   \end{tikzpicture}
 \end{document}
