@@ -1,0 +1,268 @@
+#+Title: Sesión 25 (B) --- Cobb–Douglas en Gretl: elasticidades y rendimientos a escala con =greene9_1=
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+DESCRIPTION: Práctica de Gretl, sesión 25 (B): la función de producción de Cobb-Douglas de la lección 15 con los datos de Zellner y Revankar; elasticidades parciales, el contraste de rendimientos constantes con restrict y el modelo restringido por sustitución.
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L25-Prct-B-greene-cobb-douglas
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S25-Prct-B-greene-cobb-douglas"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S25-Prct-B-greene-cobb-douglas.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S25-Prct-B-greene-cobb-douglas.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S25-Prct-B-greene-cobb-douglas.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+La lección 15 (``Cobb–Douglas: elasticidades y rendimientos a escala'') presentó la función de producción $Q=A\,L^{\alpha}K^{\gamma}e^{U}$ con los datos de Zellner y Revankar, que Gretl incluye como =greene9_1= en la pestaña //~Greene~// de los ficheros de muestra: el valor añadido (=valadd=), el capital (=capital=) y el trabajo (=labor=) de la industria del equipo de transporte en $25$ estados de Estados Unidos en 1957. Esta práctica reproduce en Gretl las cifras de la lección: el modelo log-log, la lectura de las elasticidades parciales, el contraste de rendimientos constantes a escala con =restrict= y el modelo restringido construido por sustitución, como en la lección 13.
+
+/Objetivos/
+
+1. Estimar la función de producción en logaritmos y leer $\hat\alpha$ y $\hat\gamma$ como elasticidades parciales.
+2. Contrastar $H_0\!:\alpha+\gamma=1$ con =restrict= y con el intervalo de confianza de la suma.
+3. Construir el modelo restringido por sustitución, la regresión del producto por trabajador sobre el capital por trabajador, y reproducir el $F$ con las dos sumas de cuadrados.
+4. Leer el resultado con la cautela de un contraste con $25$ observaciones.
+
+/Comandos nuevos de esta práctica/. Uno solo:
+- =logs= :: crea el logaritmo de cada serie de la lista y lo guarda con el prefijo =l_= (=logs valadd= crea =l_valadd=); en la ventana principal, con las series marcadas, //~Añadir -> Logaritmos de las variables seleccionadas~//.
+Los demás ya se han usado: =open= (sesión 4), =summary --simple= y =printf= (sesión 7), =series= (sesión 7), la función =corr=, como el comando =corr= de la sesión 7, la matriz =$vcv= de varianzas y covarianzas de los coeficientes ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S20-Prct-A-hprice2-restricciones.pdf#page=6][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S20-Prct-A-hprice2-restricciones.html#elipse-confianza][html]]) de la práctica A de la sesión 20), que allí se leía por posición (=$vcv[3,4]=) y aquí por los nombres de los regresores (=$vcv(a,b)= es la covarianza estimada entre los coeficientes de =a= y =b=, y =$vcv(a,a)= la varianza estimada del coeficiente de =a=, el cuadrado de su error estándar), =ols= y sus accesores (sesiones 11 a 18), =restrict= y =$test= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S20-Prct-A-hprice2-restricciones.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S20-Prct-A-hprice2-restricciones.html#excluir-dos][html]]) de la práctica A de la sesión 20) y la función =critical= (sesión 18).
+
+* Actividad 1 - La función de producción en logaritmos
+:PROPERTIES:
+:CUSTOM_ID: modelo-log-log
+:END:
+
+Abra =greene9_1= (//~Archivo -> Abrir datos -> Archivo de muestra~//, pestaña //~Greene~//), cree los logaritmos de las tres variables y estime el modelo log-log del valor añadido sobre el trabajo y el capital.
+
+=open= carga el fichero y =summary --simple= da los estadísticos principales de las tres series. =logs= crea =l_valadd=, =l_capital= y =l_labor=. El modelo se estima con =ols=; el =printf= imprime $e^{\hat\beta_1}$, la estimación del factor de escala $A$, y la correlación entre los logaritmos de los dos factores.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Abrir
+#+begin_src gretl :eval no
+open greene9_1 --quiet
+#+end_src
+#+NAME: ModeloLogLog
+#+begin_src gretl :eval no
+summary valadd capital labor --simple
+logs valadd capital labor
+ols l_valadd const l_labor l_capital
+printf "Factor de escala A = e^const = %.2f ; correlacion entre l_labor y l_capital: %.3f\n", exp($coeff(const)), corr(l_labor, l_capital)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-B-greene-cobb-douglas.inp :eval no :exports none :noweb yes
+<<Abrir>>
+outfile --quiet modeloLogLog.txt
+    <<ModeloLogLog>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-B-greene-cobb-douglas/modeloLogLog.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El modelo estimado es el de la lección 15: $\hat\alpha=0{,}805$ con error estándar $0{,}126$ y $\hat\gamma=0{,}245$ con error estándar $0{,}107$, $R^2=0{,}973$ y $\mathfrak s=0{,}236$. Es un modelo log-log y sus coeficientes son elasticidades: si el trabajo varía en la fracción $p$ con el capital fijo, el valor añadido varía en la fracción $0{,}805\,p$; si varía el capital con el trabajo fijo, en la fracción $0{,}245\,p$. El $t$ del trabajo es $6{,}37$: datos como estos serían muy raros si la elasticidad del trabajo fuese cero. El del capital es $2{,}30$ con valor $p$ $0{,}03$: datos como estos serían raros si la elasticidad del capital fuese cero, pero no mucho, y al 1 % no se rechazaría.
+
+La precisión es escasa porque los dos regresores están muy correlados: la correlación entre =l_labor= y =l_capital= es $0{,}952$, los estados con más trabajo tienen más capital, y la parte propia de cada regresor es corta (lección 14). La constante, $1{,}844$, es el logaritmo del factor de escala, $A=e^{1{,}844}=6{,}3$: no es un valor ajustado que se lea como cantidad económica, porque el punto en que los dos logaritmos valen cero, un estado con una unidad de trabajo y una de capital, queda fuera de los datos (=labor= va de $4{,}1$ a $490$ y =capital= de $1{,}5$ a $435$).
+
+* Actividad 2 - ¿Rendimientos constantes a escala?
+:PROPERTIES:
+:CUSTOM_ID: rendimientos-constantes
+:END:
+
+Contraste $H_0\!:\alpha+\gamma=1$: si los dos factores aumentan en la misma fracción $p$, el valor añadido aumenta en la fracción $(\alpha+\gamma)\,p$, y la suma vale $1$ cuando los rendimientos son constantes.
+
+La suma estimada es $\hat\alpha+\hat\gamma$ y su varianza estimada es la suma de las dos varianzas más dos veces la covarianza, que =$vcv= proporciona (la lección 16, en ``Varias categorías: una indicadora menos que grupos'', hizo la cuenta análoga para la diferencia de dos coeficientes, con los cuatro grupos de =wage1=); con su raíz, el error estándar de la suma, el primer =printf= imprime el intervalo al 95 % para $\alpha+\gamma$, con el valor crítico de la $t$ con $n-k=22$ grados de libertad que da =critical=. Después, =restrict= impone la restricción $\alpha+\gamma=1$ (en la ventana del modelo, //~Contrastes -> Restricciones lineales~//) y =$test= y =$pvalue= recogen el $F$ y su valor $p$; el último =printf= añade el valor crítico de la $F(1,22)$ al 5 %.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: Restriccion
+#+begin_src gretl :eval no
+scalar suma = $coeff(l_labor) + $coeff(l_capital)
+scalar eeSuma = sqrt($vcv(l_labor, l_labor) + $vcv(l_capital, l_capital) + 2*$vcv(l_labor, l_capital))
+scalar tc = critical(t, $df, 0.025)
+printf "alpha + gamma = %.3f ; error estandar %.3f ; t frente a 1: %.2f ; intervalo al 95%%: [%.3f, %.3f]\n", suma, eeSuma, (suma - 1)/eeSuma, suma - tc*eeSuma, suma + tc*eeSuma
+restrict --quiet
+    b[l_labor] + b[l_capital] = 1
+end restrict
+printf "F(1,%d) = %.2f   valor p = %.3f   valor critico al 5%%: %.2f\n", $df, $test, $pvalue, critical(F, 1, $df, 0.05)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-B-greene-cobb-douglas.inp :eval no :exports none :noweb yes
+outfile --quiet restriccion.txt
+    <<Restriccion>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-B-greene-cobb-douglas/restriccion.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La suma estimada es $1{,}051$ con error estándar $0{,}041$. El estadístico $F(1,22)$ vale $1{,}54$, frente a un valor crítico de $4{,}30$ al 5 %, y el valor $p$ es $0{,}23$: datos como estos no serían raros si los rendimientos fuesen constantes, y el contraste al 5 % no rechaza $H_0$. Con una restricción, el $F$ es el cuadrado del $t$ de la suma frente a $1$: $(1{,}051-1)/0{,}041=1{,}24$, y $1{,}24^2=1{,}54$, como en la lección 13.
+
+El intervalo al 95 % para $\alpha+\gamma$ va de $0{,}966$ a $1{,}135$: es el conjunto de valores de la suma que el contraste no rechaza al 5 %. Contiene al $1$, pero también rendimientos algo decrecientes y bastante crecientes. ``No se rechaza'' no es ``los rendimientos son constantes''.
+
+* Actividad 3 - El modelo restringido por sustitución
+:PROPERTIES:
+:CUSTOM_ID: modelo-restringido
+:END:
+
+Imponga la restricción como en la lección 13: con $\gamma=1-\alpha$, el modelo se escribe $\log Q-\log L=\beta_1+\gamma\,(\log K-\log L)+U$, la regresión del logaritmo del producto por trabajador sobre el logaritmo del capital por trabajador. Estímela y reconstruya el $F$ con las dos sumas de cuadrados.
+
+Las dos =series= crean el producto por trabajador y el capital por trabajador, en logaritmos. El =ols= estima el modelo restringido; su coeficiente es $\hat\gamma$ restringido y $1$ menos ese coeficiente es $\hat\alpha$ restringido. Antes se guarda en =SRC= la suma de cuadrados de los residuos del modelo sin restringir y en =s2= su cuasivarianza, $\mathfrak s^2$; el =printf= imprime las dos sumas de cuadrados y el cociente $(\mathrm{SRC}_r-\mathrm{SRC})/\mathfrak s^2$, que con una restricción es el $F$ de la lección 13.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: Restringido
+#+begin_src gretl :eval no
+ols l_valadd const l_labor l_capital --quiet
+scalar SRC = $ess
+scalar s2 = $sigma^2
+series lqpl = l_valadd - l_labor
+series lkpl = l_capital - l_labor
+ols lqpl const lkpl
+printf "Restringido: gamma = %.3f (ee %.3f), alpha = 1 - gamma = %.3f\n", $coeff(lkpl), $stderr(lkpl), 1 - $coeff(lkpl)
+printf "SRC sin restringir %.3f ; SRC restringido %.3f ; (SRC_r - SRC)/s2 = %.2f\n", SRC, $ess, ($ess - SRC)/s2
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-B-greene-cobb-douglas.inp :eval no :exports none :noweb yes
+outfile --quiet restringido.txt
+    <<Restringido>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-B-greene-cobb-douglas/restringido.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El coeficiente del capital por trabajador es $0{,}289$ con error estándar $0{,}102$: las estimaciones restringidas son $\hat\gamma=0{,}289$ y $\hat\alpha=0{,}711$. Al imponer rendimientos constantes, el reparto entre trabajo y capital se desplaza hacia el capital respecto de la estimación libre ($0{,}805$ y $0{,}245$). La suma de cuadrados de los residuos sube de $1{,}222$ a $1{,}308$, y esa diferencia dividida por $\mathfrak s^2$ es $1{,}54$, el $F$ de la Actividad 2: la restricción aumenta la longitud al cuadrado del residuo en una cantidad del orden de lo que cabe esperar por una dimensión si $H_0$ fuese cierta.
+
+El $R^2$ del modelo restringido, $0{,}259$, no se compara con el $0{,}973$ del modelo sin restringir: los regresandos son distintos, =l_valadd= frente al logaritmo del producto por trabajador, y el segundo tiene mucha menos variación total que explicar. Lo comparable son las sumas de cuadrados de los residuos: el residuo del modelo restringido, $\log Q-\log L-\hat\beta_1-\hat\gamma\,(\log K-\log L)$, es igual a $\log Q-\hat\beta_1-(1-\hat\gamma)\log L-\hat\gamma\log K$, un residuo de =l_valadd= con la restricción impuesta, y se compara con el del modelo libre.
+
+* Actividad 4 - Lo que el contraste no dice
+:PROPERTIES:
+:CUSTOM_ID: potencia
+:END:
+
+Sin código. Dos cautelas de la lección 15 antes de informar el resultado.
+
+La primera es la potencia: con $25$ observaciones, un contraste rechaza una hipótesis falsa por poco en una fracción pequeña de las muestras. La [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=5][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#falsa-por-poco][html]]) de la práctica C de la sesión 18 lo midió repitiendo el experimento: con doce observaciones, una hipótesis falsa por poco se rechazaba menos de una de cada tres veces. El intervalo de la Actividad 2, de $0{,}966$ a $1{,}135$, dice lo mismo con los datos de aquí: el contraste deja sin descartar rendimientos a escala entre un $3$ % decrecientes y un $13$ % crecientes.
+
+La segunda es la lectura de $\gamma$. Los datos son de sección cruzada, $25$ estados en un mismo año: $\hat\gamma$ describe cómo varía el valor añadido entre estados con distinto capital y el mismo trabajo. Leerlo como el efecto de aumentar el capital en una industria dada exige el supuesto de exogeneidad de la lección 9, $E[U\mid\boldsymbol X]=\mathit 0$: que lo que la función no recoge, la tecnología, la cualificación del trabajo o la composición de la industria en cada estado, sea ortogonal a las funciones del trabajo y del capital.
+
+* Preguntas de interpretación para la clase
+
+1. $\hat\alpha=0{,}805$ y $\hat\gamma=0{,}245$. ¿Qué mide cada uno, con qué fijo, y qué mide su suma?
+2. El $t$ del capital es $2{,}30$ y su valor $p$ $0{,}03$. ¿Qué se concluye al 5 % y qué al 1 %? ¿Por qué es tan baja la precisión con un $R^2$ de $0{,}973$?
+3. El $F$ del contraste de rendimientos constantes es $1{,}54$ y el $t$ de la suma frente a $1$ es $1{,}24$. ¿Qué relación hay entre los dos números y por qué?
+4. Al imponer $\alpha+\gamma=1$, $\hat\gamma$ pasa de $0{,}245$ a $0{,}289$ y $\hat\alpha$ de $0{,}805$ a $0{,}711$. ¿Por qué cambian los dos y por qué el ajuste empeora poco?
+5. El intervalo para $\alpha+\gamma$ va de $0{,}966$ a $1{,}135$. ¿Es correcto informar que ``la industria tiene rendimientos constantes a escala''? ¿Qué se puede informar?
+
+* Para profundizar
+
+- Zellner, A. y Revankar, N. S. (1969), ``Generalized production functions'', /Review of Economic Studies/ 36, 241–250: el origen de los datos.
+- Greene, W. H. (2018), /Econometric Analysis/, 8.ª ed., Pearson: el fichero =greene9_1= de Gretl reproduce su ejemplo de Cobb–Douglas con el contraste de rendimientos constantes.
+- Wooldridge, J. M. (2020), /Introductory Econometrics/, cap. 4, sección 4.4 (contraste de una combinación lineal de parámetros) y cap. 6, sección 6.2 (modelos con logaritmos).
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S25-Prct-B-greene-cobb-douglas.inp}
+
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. $\hat\alpha$ es la elasticidad del valor añadido respecto del trabajo con el capital fijo: si el trabajo varía en la fracción $p$, el valor añadido varía en la fracción $0{,}805\,p$. $\hat\gamma$ es la elasticidad respecto del capital con el trabajo fijo. La suma mide los rendimientos a escala: si los dos factores varían en la misma fracción $p$, el valor añadido varía en la fracción $1{,}051\,p$.
+2. Al 5 % se rechaza que la elasticidad del capital sea cero, porque el valor $p$ es menor que $0{,}05$; al 1 % no se rechaza. La precisión es baja aunque el ajuste sea alto porque la precisión de cada coeficiente depende de la parte propia de su regresor, no del ajuste conjunto: =l_labor= y =l_capital= tienen correlación $0{,}952$, y la parte de cada uno que el otro no comparte es corta, como en la lección 14.
+3. $1{,}24^2=1{,}54$. Con una sola restricción, el contraste $F$ y el contraste $t$ de la combinación $\alpha+\gamma$ frente a $1$ son el mismo contraste, como se vio en la lección 13: el $F$ con $q=1$ es el cuadrado del $t$.
+4. La restricción obliga a que la suma valga $1$, y la estimación libre daba $1{,}051$: hay que repartir una reducción de $0{,}051$. Como los dos regresores están muy correlados, el ajuste distingue mal cuánto corresponde a cada uno, y la restricción mueve los dos coeficientes a la vez, el del capital hacia arriba y el del trabajo hacia abajo, con un coste pequeño en la suma de cuadrados ($1{,}222$ a $1{,}308$): la restricción se impone en una dirección en la que los datos apenas distinguen.
+5. No. El contraste no rechaza rendimientos constantes, pero tampoco rechaza ningún valor de la suma entre $0{,}966$ y $1{,}135$. Se puede informar que, a la luz del contraste, datos como estos no serían raros con rendimientos constantes, y que con $25$ observaciones el intervalo deja sin descartar rendimientos entre un $3$ % decrecientes y un $13$ % crecientes.

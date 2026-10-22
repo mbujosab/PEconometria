@@ -1,0 +1,419 @@
+#+Title: Sesión 25 (A) --- Laboratorio integrador I: logaritmos, indicadoras, interacciones y el contraste de Chow con el Boston original
+#+author: Marcos Bujosa
+#+LANGUAGE: es
+#+DESCRIPTION: Práctica de Gretl, sesión 25 (A): el Boston original con chas; log-nivel, la indicadora del río Charles, una interacción y el contraste de Chow en Gretl con wage1 y con Boston.
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+OPTIONS: author:t email:nil
+
+#+OPTIONS: :eval yes
+#+PROPERTY: header-args :eval yes
+
+#+latex_class_options: [10pt]
+
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \setmainfont{Latin Modern Roman}
+#+LATEX_HEADER: \usepackage[spanish]{babel}
+
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \setminted{frame=single, fontsize=\footnotesize, breaklines=true, bgcolor=gray!8}
+#+LATEX_HEADER: \setminted[octave]{}
+
+#+LaTeX_HEADER: \makeatletter \def\blfootnote{\gdef\@thefnmark{}\@footnotetext} \makeatother
+
+#+INFOJS_OPT: view:overview
+#+SETUPFILE: ../css/bigblow_inline.theme
+
+#+begin_src emacs-lisp :exports none :tangle no :results silent :eval yes
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-minted-langs '(gretl "octave"))
+(setq org-latex-pdf-process
+      '("latexmk -shell-escape -pdf -xelatex -interaction=nonstopmode -output-directory=%o %f"))
+#+end_src
+
+#+NAME: if-no--guiones-makefir
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(unless (file-directory-p "guiones")
+  (make-directory "guiones"))
+#+END_SRC
+
+#+NAME: tangle-all-code-blocks
+#+BEGIN_SRC emacs-lisp :exports none :results silent :tangle no
+(org-babel-tangle)
+#+END_SRC
+
+#+begin_src emacs-lisp :results silent :exports none
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((latex . t)))
+#+end_src
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-html-validation-link nil)
+#+END_SRC
+
+#+name: execute-gretl-practice
+#+PROPERTY: P-L25-Prct-A-boston-integrador
+#+BEGIN_SRC sh  :exports none  :results silent :var practica="S25-Prct-A-boston-integrador"
+rm -fr $(pwd)/$practica
+mkdir -p $(pwd)/$practica
+DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
+#+END_SRC
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :exports none :eval no
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+#+end_src
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :exports none :eval no
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+#+end_src
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :exports none :eval no
+set verbose off
+#+end_src
+
+#+LATEX: \maketitle
+#+LATEX: \blfootnote{Licencia: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).}
+
+
+* Descripción de la práctica
+
+Esta práctica y la de la sesión 26 cierran el curso con un solo conjunto de datos reales y, de una vez, las herramientas de las lecciones 15 y 16: un modelo con el regresando en logaritmos, una variable indicadora, una interacción y el contraste de Chow. Los datos son el Boston original, el fichero =boston.csv= que se importó en la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S04-Prct-B-boston.pdf#page=2][actividad 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S04-Prct-B-boston.html#dicotomica-chas][html]]) de la práctica B de la sesión 4: $506$ barrios del área de Boston con el precio mediano de la vivienda (=medv=, en miles de dólares), el número medio de habitaciones por vivienda (=rm=, la =rooms= de =hprice2=), la distancia ponderada a cinco centros de empleo (=dis=, la =dist= de =hprice2=), el porcentaje de población de estatus bajo del barrio (=lstat=) y la indicadora =chas=, que vale $1$ en los $35$ barrios que limitan con el río Charles. La lección 16 usó =chas= en niveles y con =rm= como único regresor; aquí entra en un modelo log-nivel con tres regresores, que es el modelo hilo de las dos prácticas.
+
+La segunda mitad de la práctica lleva a Gretl el contraste de Chow de la lección 16: primero con =wage1=, para reproducir las cifras de la lección con la orden =chow=, y después con el Boston original por =chas=, donde el resultado es distinto: con =wage1= el contraste sugiere pendientes distintas y con Boston solo un intercepto distinto.
+
+/Objetivos/
+
+1. Estimar el modelo log-nivel del precio mediano sobre =rm=, =lstat= y =dis= y leer sus coeficientes como en la lección 15.
+2. Añadir la indicadora =chas= y leer su coeficiente como diferencia porcentual exacta entre barrios con las mismas características, con la categoría base y la cautela de la lección 16; y comparar el ajuste de los modelos en logaritmos y en niveles sobre las previsiones del precio en dólares, como en la lección 15.
+3. Añadir la interacción =chas*rm= y decidir, con su $t$, si los datos sugieren una pendiente distinta para los barrios junto al río.
+4. Hacer en Gretl el contraste de Chow de la lección 16 con =wage1=, con la orden =chow= y con =restrict=, y obtener las mismas cifras que la lección.
+5. Repetir el contraste con Boston por =chas= y distinguir lo que dice el $F$ conjunto de lo que dicen las preguntas una a una.
+
+/Comandos nuevos de esta práctica/. Uno solo:
+- =chow= :: tras estimar un modelo con =ols=, contrasta si la ecuación es la misma en dos grupos definidos por una indicadora (=chow female --dummy=) o antes y después de una observación (=chow 300=). Imprime la regresión aumentada con la indicadora y sus interacciones, y el $F$ de la lección 13.
+Los demás ya se han usado: =open= y =labels= (sesión 4), =summary --simple= (sesión 7), =ols= y sus accesores, =$yhat= y =$rsq= incluidos (sesiones 11 a 18), =series= (sesión 7), la función =corr= (la correlación entre dos series, como el comando =corr= de la sesión 7), =restrict= y =$test= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S20-Prct-A-hprice2-restricciones.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S20-Prct-A-hprice2-restricciones.html#excluir-dos][html]]) de la práctica A de la sesión 20), =smpl --restrict= y =smpl full= (sesión 14) y =printf= (sesión 7).
+
+* Actividad 1 - Los datos y el modelo log-nivel
+:PROPERTIES:
+:CUSTOM_ID: modelo-comun
+:END:
+
+Importe =boston.csv= (//~Archivo -> Abrir datos -> Usuario~//, o desde línea de comandos con la ruta relativa al fichero). Cree el logaritmo del precio mediano y estime el modelo con =rm=, =lstat= y =dis= (//~Modelo -> Mínimos cuadrados ordinarios~//).
+
+=open= carga el fichero y =summary --simple= da los estadísticos principales de las cinco variables que se usan. =series lmedv = log(medv)= crea el logaritmo del precio, como =lprice= en la lección 15. El modelo se estima con =ols=, y el =printf= final imprime la lectura exacta del coeficiente de =rm= con $e^{\beta}-1$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: Abrir
+#+begin_src gretl :eval no
+open ../../data/boston.csv --quiet
+#+end_src
+#+NAME: Descripcion
+#+begin_src gretl :eval no
+summary medv rm lstat dis chas --simple
+series lmedv = log(medv)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :eval no :exports none :noweb yes
+<<Abrir>>
+outfile --quiet descripcion.txt
+    <<Descripcion>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-A-boston-integrador/descripcion.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: ModeloComun
+#+begin_src gretl :eval no
+ols lmedv const rm lstat dis
+printf "Una habitacion mas por vivienda: %.1f%% aproximado, %.1f%% exacto\n", 100*$coeff(rm), 100*(exp($coeff(rm))-1)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :eval no :exports none :noweb yes
+outfile --quiet modeloComun.txt
+    <<ModeloComun>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-A-boston-integrador/modeloComun.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El modelo de =lmedv= sobre =rm=, =lstat= y =dis= es log-nivel y se lee como en la lección 15, en tanto por uno. El coeficiente de =rm= es $0{,}124$: a una habitación más de media por vivienda le acompaña un precio mediano mayor en la fracción $0{,}124$, un $12{,}4$ % aproximado y un $13{,}2$ % exacto, con =lstat= y =dis= fijos. El de =lstat=, $-0{,}040$: un punto más de porcentaje de población de estatus bajo se acompaña de un precio un $4$ % menor. El de =dis= es $-0{,}009$ con $t=-1{,}6$: datos como estos no serían raros si el coeficiente de =dis= valiese cero, es decir, si con =rm= y =lstat= fijos la distancia a los centros de empleo no se acompañase de ningún cambio del precio. El $R^2$ es $0{,}680$ y la suma de cuadrados de los residuos, $26{,}98$.
+
+La constante, $2{,}79$, es el valor ajustado del logaritmo del precio en el punto en que =rm=, =lstat= y =dis= valen cero a la vez, y no se interpreta: =rm= va de $3{,}56$ a $8{,}78$ y ningún barrio está cerca de ese punto.
+
+* Actividad 2 - La indicadora del río Charles
+:PROPERTIES:
+:CUSTOM_ID: indicadora-chas
+:END:
+
+Añada =chas= al modelo. Su coeficiente es la diferencia, en logaritmos, entre un barrio junto al río y otro sin río con las mismas =rm=, =lstat= y =dis=; la lectura exacta es $e^{\beta}-1$. Estime también el mismo modelo con =medv= en niveles para comparar.
+
+Los dos =printf= calculan la diferencia porcentual exacta en los dos sentidos, respecto de los barrios sin río (la categoría base, los que tienen =chas= igual a $0$) y respecto de los barrios junto al río, como en la transparencia ``En log-nivel: una diferencia porcentual'' de la lección 16. El tercer =ols= estima el modelo en niveles.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: ConChas
+#+begin_src gretl :eval no
+ols lmedv const rm lstat dis chas
+printf "Junto al rio respecto de sin rio: %.1f%% exacto (aproximado %.1f%%)\n", 100*(exp($coeff(chas))-1), 100*$coeff(chas)
+printf "Sin rio respecto de junto al rio: %.1f%% exacto\n", 100*(exp(-$coeff(chas))-1)
+ols medv const rm lstat dis chas --quiet
+printf "En niveles: chas = %.2f mil dolares (ee %.2f, t = %.2f)\n", $coeff(chas), $stderr(chas), $coeff(chas)/$stderr(chas)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :eval no :exports none :noweb yes
+outfile --quiet conChas.txt
+    <<ConChas>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-A-boston-integrador/conChas.txt example
+#+latex: }
+
+La lección 15 (``Previsión con y sin logaritmos'') dejó dicho cómo comparar el ajuste del modelo en logaritmos con el del modelo en niveles: no con sus $R^2$, que miden ajustes a regresandos distintos, sino pasando a dólares las previsiones del modelo en logaritmos y midiendo cuánto se parecen al precio observado. =$yhat= es la serie de valores ajustados del último modelo; =exp($yhat)= deshace el logaritmo y predice la mediana del precio, y multiplicar por $e^{\mathfrak s^2/2}$, con =$sigma= la desviación típica de la regresión, $\mathfrak s$, da la previsión de la esperanza bajo normalidad. La función =corr= calcula la correlación entre dos series; su cuadrado, guardado en el escalar =r2log=, es la medida de ajuste sobre la misma variable, que para el modelo en niveles coincide con su $R^2$ (=$rsq=).
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: Prevision
+#+begin_src gretl :eval no
+ols lmedv const rm lstat dis chas --quiet
+series prevLog = exp($yhat) * exp($sigma^2/2)
+printf "Factor de correccion exp(s^2/2) = %.4f\n", exp($sigma^2/2)
+printf "Precio medio observado %.2f ; media de exp(yhat) %.2f ; media de la prevision corregida %.2f\n", mean(medv), mean(exp($yhat)), mean(prevLog)
+scalar r2log = corr(medv, prevLog)^2
+ols medv const rm lstat dis chas --quiet
+printf "Correlacion al cuadrado con medv: modelo en logaritmos %.3f ; modelo en niveles %.3f (su R2: %.3f)\n", r2log, corr(medv, $yhat)^2, $rsq
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :eval no :exports none :noweb yes
+outfile --quiet prevision.txt
+    <<Prevision>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-A-boston-integrador/prevision.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El coeficiente de =chas= es $0{,}160$ con error estándar $0{,}041$ y $t=3{,}93$: datos como estos serían muy raros si el coeficiente de =chas= valiese cero, es decir, si con las mismas =rm=, =lstat= y =dis= el precio mediano fuese el mismo junto al río y lejos de él. La diferencia exacta es $e^{0{,}160}-1=0{,}173$: a un barrio junto al río le corresponde, en promedio, un precio mediano un $17$ % mayor que a otro sin río con el mismo número medio de habitaciones, el mismo =lstat= y la misma distancia. En el otro sentido, a un barrio sin río le corresponde un precio un $15$ % menor que a uno junto al río: los dos porcentajes se calculan sobre precios distintos, y por eso no coinciden.
+
+Tres cautelas de la lección 16. La comparación es entre barrios, no entre viviendas: el modelo no dice cuánto más vale una vivienda por estar junto al río. ``Con lo demás fijo'' cubre tres variables; la lección 16 obtuvo $6{,}35$ mil dólares como diferencia bruta y $4{,}08$ con =rm= fijo, y aquí, en niveles y con tres regresores fijos, la diferencia es de $3{,}74$ mil dólares, con $t=3{,}90$. Y los coeficientes de =rm= y =lstat= apenas cambian al añadir =chas=, y el de =dis= pasa de $-0{,}009$ a $-0{,}006$: la indicadora está poco correlada con los tres regresores.
+
+Las previsiones en dólares, como en la lección 15. El factor de corrección es $e^{\mathfrak s^2/2}=1{,}027$: la media de $e^{\hat y}$ es $21{,}94$ mil dólares, un $2{,}6$ % por debajo del precio medio observado, $22{,}53$, y la media de las previsiones corregidas, $22{,}52$, lo reproduce. Sobre la misma variable, el modelo en logaritmos ajusta mejor que el modelo en niveles: la correlación al cuadrado entre =medv= y su previsión es $0{,}728$ frente a $0{,}657$, que es el $R^2$ del modelo en niveles. Los $R^2$ de los dos modelos, $0{,}690$ y $0{,}657$, no eran comparables, porque miden el ajuste a regresandos distintos.
+
+* Actividad 3 - Una interacción: ¿la misma pendiente de =rm= junto al río?
+:PROPERTIES:
+:CUSTOM_ID: interaccion-chas-rm
+:END:
+
+Construya la interacción =chas*rm= y añádala al modelo. Su coeficiente es la diferencia entre la pendiente de =rm= en los barrios junto al río y en los demás, como en la transparencia ``Interacciones: la pendiente cambia de grupo'' de la lección 16.
+
+=series chasrm = chas*rm= crea la columna que vale =rm= en los barrios junto al río y $0$ en los demás. El =printf= imprime las dos pendientes.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: Interaccion
+#+begin_src gretl :eval no
+series chasrm = chas*rm
+ols lmedv const rm lstat dis chas chasrm
+printf "Pendiente de rm sin rio: %.4f ; junto al rio: %.4f ; t de la interaccion: %.2f\n", $coeff(rm), $coeff(rm)+$coeff(chasrm), $coeff(chasrm)/$stderr(chasrm)
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :eval no :exports none :noweb yes
+outfile --quiet interaccion.txt
+    <<Interaccion>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-A-boston-integrador/interaccion.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El coeficiente de la interacción es $-0{,}062$ con error estándar $0{,}047$ y $t=-1{,}31$: datos como estos no serían raros si la pendiente de =rm= fuese la misma en los dos grupos, y el contraste al 5 % no rechaza que el coeficiente de la interacción valga cero. Con este contraste no hay motivo para preferir el modelo con la interacción al de la Actividad 2, que es más sencillo.
+
+Fíjese en lo que ocurre con el coeficiente de =chas=: pasa de $0{,}160$ a $0{,}563$ y su error estándar de $0{,}041$ a $0{,}310$. Con la interacción en el modelo, ese coeficiente es la diferencia entre grupos en el punto =rm= igual a cero, donde no hay barrios, y por eso se estima con tan poca precisión. Es la misma situación que la de =female*educ= en los apuntes de ``Interacciones: la pendiente cambia de grupo'' de la lección 16, y el remedio es el mismo que allí: centrar =rm= en su media antes de construir la interacción.
+
+* Actividad 4 - El contraste de Chow en Gretl: =wage1=, como en la lección 16
+:PROPERTIES:
+:CUSTOM_ID: chow-wage1
+:END:
+
+Abra =wage1= (//~Archivo -> Abrir datos -> Archivo de muestra~//, pestaña //~Wooldridge~//) y reproduzca el contraste de la transparencia ``El contraste de Chow: ¿la misma ecuación?'' de la lección 16: el modelo común es =lwage= sobre =educ=, =exper= y =tenure=, y la pregunta es si hombres y mujeres comparten la ecuación.
+
+La orden =chow female --dummy= se ejecuta después de estimar el modelo común (en la ventana del modelo, //~Contrastes -> Contraste de Chow~//, eligiendo la variable ficticia =female=). Gretl estima la regresión aumentada con =female= y sus tres interacciones, la imprime, y calcula el $F$ de la lección 13 con el modelo común como restringido: cuatro restricciones. La orden exige que la indicadora no esté ya en el modelo común: si se estima =lwage= sobre =educ=, =exper=, =tenure= y =female= y después se pide =chow female --dummy=, Gretl responde «El modelo ya contiene female». Para preguntar solo por las pendientes, dejando que cada sexo tenga su intercepto, se estima el modelo con las ocho columnas y se imponen con =restrict= las tres restricciones de las interacciones, como en la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S20-Prct-A-hprice2-restricciones.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S20-Prct-A-hprice2-restricciones.html#excluir-dos][html]]) de la práctica A de la sesión 20. El último bloque comprueba el caso $q=1$: si solo puede diferir el intercepto, el $F$ con una restricción es el cuadrado del $t$ de =female=.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/o bien teclee en línea de comandos/:
+#+NAME: AbrirWage
+#+begin_src gretl :eval no
+open wage1 --quiet
+#+end_src
+#+NAME: ChowWage
+#+begin_src gretl :eval no
+ols lwage const educ exper tenure --quiet
+chow female --dummy
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :eval no :exports none :noweb yes
+<<AbrirWage>>
+outfile --quiet chowWage.txt
+    <<ChowWage>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-A-boston-integrador/chowWage.txt example
+#+latex: }
+
+=series= construye las tres interacciones; =restrict= impone que sus coeficientes valgan cero y =$test= y =$pvalue= recogen el $F$ y su valor $p$.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: PendientesWage
+#+begin_src gretl :eval no
+series femeduc = female*educ
+series femexper = female*exper
+series femtenure = female*tenure
+ols lwage const educ exper tenure female femeduc femexper femtenure --quiet
+restrict --quiet
+    b[femeduc] = 0
+    b[femexper] = 0
+    b[femtenure] = 0
+end restrict
+printf "Solo las pendientes (q = 3): F(3,%d) = %.2f   valor p = %.3f\n", $df, $test, $pvalue
+ols lwage const educ exper tenure female --quiet
+printf "Solo el intercepto (q = 1): t de female = %.2f ; t al cuadrado = %.1f\n", $coeff(female)/$stderr(female), ($coeff(female)/$stderr(female))^2
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :eval no :exports none :noweb yes
+outfile --quiet pendientesWage.txt
+    <<PendientesWage>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-A-boston-integrador/pendientesWage.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+La orden =chow= devuelve $F(4,518)=18{,}8$ con valor $p$ del orden de $10^{-14}$, las cifras de la lección 16: datos como estos serían muy raros si hombres y mujeres compartiesen la ecuación. En la regresión aumentada que imprime, ningún $t$ de =female= ni de sus interacciones supera $2$ en valor absoluto, aunque el $F$ conjunto es $18{,}8$: es el caso de la lección 13, un $F$ conjunto alto con $t$ individuales pequeños, por la colinealidad entre la indicadora y sus interacciones que la lección 16 explicó.
+
+Las preguntas una a una sí dicen qué difiere. Solo las pendientes: $F(3,518)=3{,}04$ con valor $p$ $0{,}028$, y el contraste al 5 % rechaza que las tres pendientes sean comunes. Solo el intercepto: el $t$ de =female= es $-8{,}09$ y su cuadrado, $65{,}4$, es el $F$ con una restricción.
+
+* Actividad 5 - El contraste de Chow con Boston: ¿la misma ecuación junto al río?
+:PROPERTIES:
+:CUSTOM_ID: chow-boston
+:END:
+
+Vuelva al Boston original y repita las tres preguntas con =chas= como indicadora: ¿comparten la ecuación los barrios junto al río y los demás? Si no, ¿difieren las pendientes? ¿Y el intercepto?
+
+El guion vuelve a abrir =boston.csv= porque la Actividad 4 cargó otro fichero, y repite el modelo común. Después, la misma secuencia que con =wage1=: =chow chas --dummy=, el modelo con las ocho columnas con =restrict= sobre las tres interacciones, y el $t$ de =chas= al cuadrado.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: AbrirBoston
+#+begin_src gretl :eval no
+open ../../data/boston.csv --quiet
+series lmedv = log(medv)
+#+end_src
+#+NAME: ChowBoston
+#+begin_src gretl :eval no
+ols lmedv const rm lstat dis --quiet
+chow chas --dummy
+series chasrm = chas*rm
+series chaslstat = chas*lstat
+series chasdis = chas*dis
+ols lmedv const rm lstat dis chas chasrm chaslstat chasdis --quiet
+restrict --quiet
+    b[chasrm] = 0
+    b[chaslstat] = 0
+    b[chasdis] = 0
+end restrict
+printf "Solo las pendientes (q = 3): F(3,%d) = %.2f   valor p = %.3f\n", $df, $test, $pvalue
+ols lmedv const rm lstat dis chas --quiet
+printf "Solo el intercepto (q = 1): t de chas = %.2f ; t al cuadrado = %.1f\n", $coeff(chas)/$stderr(chas), ($coeff(chas)/$stderr(chas))^2
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S25-Prct-A-boston-integrador.inp :eval no :exports none :noweb yes
+<<AbrirBoston>>
+outfile --quiet chowBoston.txt
+    <<ChowBoston>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S25-Prct-A-boston-integrador/chowBoston.txt example
+#+latex: }
+
+*** Lo que debe observar
+
+El $F$ conjunto es $F(4,498)=4{,}54$ con valor $p$ $0{,}0013$: datos como estos serían raros si los barrios junto al río y los demás compartiesen la ecuación, y el contraste al 5 % rechaza que la compartan. Como con =wage1=, ningún $t$ de la regresión aumentada supera $2$: el de =chas= es $1{,}09$ y los de las interacciones, $-1{,}11$, $-0{,}16$ y $0{,}98$.
+
+Con Boston, las preguntas una a una dan la respuesta contraria a la de =wage1=. Solo las pendientes: $F(3,498)=0{,}90$ con valor $p$ $0{,}44$, y datos como estos no serían raros si las tres pendientes fuesen comunes. Solo el intercepto: el $t$ de =chas= es $3{,}93$ y su cuadrado, $15{,}5$. Con =wage1= el contraste sugería pendientes distintas por sexo; con Boston sugiere la misma ecuación para los dos grupos salvo el intercepto, que es el modelo de la Actividad 2: dos ecuaciones con las mismas pendientes, una $0{,}160$ por encima de la otra en logaritmos. El $F$ conjunto dice que algo difiere; qué difiere lo dicen las preguntas una a una.
+
+* Preguntas de interpretación para la clase
+
+1. El coeficiente de =rm= en la Actividad 1 es $0{,}124$. ¿Por qué el porcentaje exacto, $13{,}2$ %, difiere del aproximado, $12{,}4$ %, y cuál de los dos se informa?
+2. En la Actividad 2, ¿por qué un barrio junto al río tiene un precio un $17$ % mayor y uno sin río un precio un $15$ % menor, si el coeficiente es el mismo?
+3. ¿Qué compara el coeficiente de =chas= y qué no compara? ¿Qué cambiaría si en lugar de =chas= el fichero trajese la indicadora de los barrios sin río?
+4. En la Actividad 3, el coeficiente de =chas= pasa de $0{,}160$ a $0{,}563$ al añadir la interacción. ¿Qué mide en cada modelo y por qué el segundo se estima con tan poca precisión?
+5. El contraste de Chow rechaza con =wage1= y con Boston. ¿Por qué la conclusión sobre qué difiere es distinta en los dos casos?
+6. En las dos regresiones aumentadas ningún $t$ supera $2$ y los dos $F$ conjuntos rechazan. ¿Es una contradicción?
+7. Los $R^2$ de los modelos con =lmedv= y con =medv= de la Actividad 2 son $0{,}690$ y $0{,}657$. ¿Por qué no se pueden comparar, y qué se compara en su lugar?
+
+* Para profundizar
+
+- Wooldridge, J. M. (2020), /Introductory Econometrics/, cap. 7, secciones 7.2 a 7.4 (indicadoras, interacciones y el contraste de Chow como $F$ de las interacciones).
+- Harrison, D. y Rubinfeld, D. L. (1978), ``Hedonic housing prices and the demand for clean air'', /Journal of Environmental Economics and Management/ 5, 81–102: el origen de los datos, con =chas= entre los regresores de su ecuación hedónica.
+- Manual de Gretl, orden =chow= (las opciones =--dummy= y =--limit-to=lista=, que permite contrastar solo un subconjunto de los regresores).
+
+#+LATEX: \clearpage
+
+* Código completo de la práctica
+
+#+LATEX: \inputminted[fontsize=\footnotesize, breaklines=true]{octave}{guiones/S25-Prct-A-boston-integrador.inp}
+
+
+#+LATEX: \clearpage
+
+* Respuestas
+
+1. La lectura aproximada usa $\log(1+p)\approx p$, que vale para $p$ pequeño; $0{,}124$ ya está por encima del $0{,}1$ en que la lección 15 situó el límite. El cálculo exacto deshace el logaritmo: $e^{0{,}124}-1=0{,}132$. Se informa el exacto; la aproximación sirve para la lectura rápida.
+2. Los dos porcentajes describen el mismo cociente de precios, $e^{0{,}160}=1{,}173$ y su inverso $0{,}853$, calculado sobre bases distintas: el $17$ % es la diferencia sobre el precio de los barrios sin río, la categoría base, y el $15$ % la diferencia sobre el precio de los barrios junto al río. Al informar hay que decir respecto de qué grupo se calcula.
+3. Compara el precio mediano de dos barrios con el mismo número medio de habitaciones, el mismo porcentaje de población de estatus bajo y la misma distancia a los centros de empleo, uno junto al río y otro no. No compara viviendas, y no dice nada de las variables que no están en el modelo. Con la indicadora contraria el coeficiente sería $-0{,}160$, la constante subiría en $0{,}160$ y el ajuste sería el mismo: cambia la categoría base, no el modelo.
+4. En el modelo sin interacción, $0{,}160$ es la diferencia entre grupos con cualquier valor de =rm=, porque las dos rectas son paralelas. Con la interacción, la diferencia depende de =rm=, $0{,}563-0{,}062\,\text{rm}$, y el coeficiente de =chas= es esa diferencia en =rm= igual a cero. Ningún barrio tiene menos de $3{,}56$ habitaciones de media, así que el coeficiente $0{,}563$ es una extrapolación de las dos rectas hasta un punto sin datos, y su error estándar, $0{,}310$, refleja esa falta de datos. Centrar =rm= en su media daría la diferencia en un punto con datos.
+5. El $F$ conjunto solo dice que las cuatro restricciones no se cumplen a la vez. Con =wage1=, el $F$ de solo las pendientes rechaza ($3{,}04$, valor $p$ $0{,}028$); con Boston no rechaza ($0{,}90$, valor $p$ $0{,}44$) y lo que separa a los grupos es el intercepto ($t=3{,}93$). Son dos conjuntos de datos distintos, y el contraste conjunto no distingue entre pendientes distintas e interceptos distintos: hay que preguntar una cosa cada vez.
+6. No. Cada $t$ pregunta por un coeficiente con los otros tres en el modelo, y la indicadora y sus interacciones comparten casi toda su variación (en =wage1=, la correlación entre =female= y =female*educ= es $0{,}96$). Cada una por separado aporta poco al ajuste, y entre las cuatro aportan mucho: es el caso de la lección 13, un $F$ conjunto alto con $t$ individuales pequeños, explicado por la colinealidad de la lección 14.
+7. Miden el ajuste a regresandos distintos, el logaritmo del precio y el precio en miles de dólares, cada uno con su propia variación total. Para comparar hay que medir sobre la misma variable: las previsiones del modelo en logaritmos se pasan a dólares con la corrección $e^{\mathfrak s^2/2}$ y se calcula el cuadrado de su correlación con =medv=, $0{,}728$, frente al $R^2$ del modelo en niveles, $0{,}657$, que es esa misma medida para ese modelo. La corrección no cambia la correlación, porque multiplicar por una constante no la altera; lo que cambia es la media de las previsiones, que pasa a coincidir con la observada.
