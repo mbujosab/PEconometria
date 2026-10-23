@@ -1,0 +1,218 @@
+#+TITLE: Informe: barrido de la regla de la constante (Fase 1, inventario)
+#+DATE: 2026-10-22
+#+OPTIONS: toc:nil
+
+Encargo: =doc/prompts/Encargo-2026-10-22-barrido-constante.md=. Regla:
+Guía §6 («La constante es el coeficiente del regresor $\boldsymbol 1$…») y
+Plan §4.1. Esta entrega cubre solo la Fase 1: no se ha editado ningún
+fichero del curso. La Fase 2 espera la decisión del autor.
+
+Requisito previo: comprobado. Las cinco prácticas de S25 y S26, L9, Plan,
+Guía e =index.org= están en el commit 146b6b9; =git status= solo muestra
+ficheros sin seguimiento ajenos al barrido (directorios de salida de Gretl,
+=doc/Grado/=, =ZZnotaS17.org=, =.tex/.pdf= de =doc/prompts/=).
+
+* Alcance y búsqueda
+
+- Ficheros: 41 (=org-lessons/S*-Lecc*.org= sin =S24-Lecc16.org=,
+  =Apendice-geometria.org=, =org-pract/S*-Prct-*.org= de S04 a S22).
+- Patrones del encargo (=grep -n -i=): =constante= (392 apariciones),
+  =intercepto= (4), =ordenada en el origen= (1), =término independiente= (1),
+  =todos los regresores= (7), =todas las variables= (10), =valen cero= (5),
+  =vale cero= (6), =carece de interpretación= (1), =no debe interpretarse=
+  (1), =sentido económico= (2); =no tiene interpretación= y =no se
+  interpreta=: ninguna. En total, *338 líneas*.
+- Búsqueda complementaria, para lecturas que no usan la palabra
+  «constante»: =cero años=, =cero habitaciones= y similares, =en el origen=,
+  =categoría base=, =extrapol=, =rango de los datos=, =educc=, y las cifras
+  de las constantes estimadas (=-34 796=, =-18423=, =-0,905=). Añadió un
+  lugar (S14-B, plano de =price~rooms+nox=) y la ecuación en niveles de L15.
+
+* Descartes (314 líneas)
+
+No hablan de leer la constante: el regresor $\boldsymbol 1$ o =const= en
+listas de regresores («sobre la constante y =rooms=», «incluida la
+constante», «$k$ cuenta la constante»); «regresores no constantes»;
+«vector constante», «variable aleatoria constante», «función constante»,
+«recta de las constantes»; «sumar una constante», «constante positiva»;
+«elasticidad constante», «rendimientos constantes», «varianza constante»;
+«sin constante» (S11-A, actividad 6); «todas las variables» en =labels= y
+en L1, L9; «vale cero / valen cero» sobre perturbaciones o distractores de
+preguntas; «sentido económico» en L9:455 (causalidad, no constante).
+
+* Tabla de lugares que hablan del valor de la constante (22)
+
+| # | Lugar | Cita breve | Diagnóstico |
+|---+-------+------------+-------------|
+| 1 | =S08-Lecc06.org:594= | «Depende de si el modelo tiene término constante» (distractor) | Cumple: no lee la constante |
+| 2 | =S09-Lecc07.org:115= | «El intercepto (la constante) es /función de/ la pendiente» | Cumple: mecánica del ajuste |
+| 3 | =S09-Lecc07.org:145= | «la constante $\hat\beta_1$ siempre tomará el valor necesario para que la recta… pase por $(\mu_x,\mu_y)$» | Cumple |
+| 4 | =S09-Lecc07.org:509-511= | «Pendiente y ordenada en el origen: … $\hat\beta_1=2$» | Cumple: cálculo con datos simulados, sin lectura económica |
+| 5 | =S09-Lecc07.org:555= | «fija el intercepto en función de la pendiente» | Cumple |
+| 6 | =S12-Lecc09.org:381= | «la constante numerada como $\beta_1$» | Cumple: notación |
+| 7 | =S13-Lecc10.org:1206= | «carezca de término independiente (pase por el origen)» (distractor) | Cumple |
+| 8 | =S17-Lecc12.org:486= | tabla, «constante 10,0343» | Cumple: no se lee |
+| 9 | =S19-Lecc13.org:209= | tabla, «constante 9458,01» | Cumple: no se lee |
+| 10 | =S19-Lecc13.org:414= | «contrasta la significación conjunta de /todos/ los regresores» | Cumple la regla de la constante; roza la regla de nombrar («nunca “todos los regresores”»): la $H_0$ excluye la constante (la propia L13:645 lo dice). PROPUESTA P3 |
+| 11 | =S19-Lecc13.org:484, 645= | «El coeficiente de la constante es cero» (distractor); «la constante nunca entra en ese contraste» | Cumple |
+| 12 | =S23-Lecc15.org:201, 208= | «La constante también se lee… el salario predicho es $1{,}79$ dólares por hora con cero años de educación» | *Infringe*: lee la constante como cantidad económica con un origen que apenas tiene datos (=educ= = 0 en 2 de 526 trabajadores; es el ejemplo que cita la propia Guía §6). Sustitución S2 |
+| 13 | =S23-Lecc15.org:367= | «La constante, $e^{1{,}844}=6{,}3$, es el factor de escala $A$» | Caso de juicio: identifica la constante con un parámetro del modelo económico, no la lee como valor ajustado; pero ese parámetro es el producto con $L=K=1$, fuera de los datos. PROPUESTA P2 |
+| 14 | =S23-Lecc15.org:413= | «solo cambia la constante ($9{,}234\to2{,}326$)» | Cumple: no la lee |
+| 15 | =S23-Lecc15.org:480= | «Su coeficiente es un desplazamiento del intercepto entre grupos» | Cumple |
+| 16 | =S23-Lecc15.org:641-642= | opciones sobre el cambio de la constante con las unidades | Cumple |
+| 17 | =S11-Prct-A-mco-simulado.org:326= | =printf "beta1 estimado (constante)…"= | Cumple: datos simulados |
+| 18 | =S11-Prct-B-hprice2-ajuste.org:149= | «Es el precio ajustado cuando todos los regresores valen cero… en torno al punto en que todos los regresores valen cero» | *Infringe* (dos veces en la línea): formulación falsa «todos los regresores valen cero». El resto del párrafo cumple («no debe interpretarse», rango de =rooms=, precio negativo). Sustitución S1 |
+| 19 | =S14-Prct-A-ramanathan.org:546-547= | «cambia… la constante de $52{,}351$ a $18{,}962$» | Cumple: no la lee |
+| 20 | =S14-Prct-B-hprice2-r2ajustado.org:207, 210= | plano «$-18423+8179\,\text{rooms}-1885\,\text{nox}$»; «allí el plano llega a dar precios negativos… fuera de ella es una extrapolación» | Cumple, y aplica la idea de la regla al plano |
+| 21 | =S20-Prct-C-distribucion-F.org:118= | «tres escalares fijan la constante =b1=» | Cumple: simulación |
+| 22 | =S22-Prct-D-hprice1-tasacion.org:342= | «La constante de ese modelo restringido es la diferencia media entre precio y tasación» | Cumple: el modelo restringido solo tiene la constante, que es la media de =price - assess= |
+
+* Recuento
+
+- Líneas revisadas: 338 (patrones del encargo) más la búsqueda
+  complementaria.
+- Descartadas por no hablar de leer la constante: 314.
+- Lugares que hablan del valor de la constante: 22.
+  - Cumplen: 19 (uno de ellos, el 10, con una propuesta menor de redacción).
+  - Infringen: 2 (S11-B:149, la ya conocida; L15:208, nueva).
+  - Caso de juicio: 1 (L15:367, Cobb–Douglas).
+
+El recuento es pequeño. Las lecciones 6, 7, 10, 12 y 13 no leen la
+constante en ningún ejemplo con datos reales; las prácticas de S14–S22
+tampoco, salvo el plano de S14-B, que ya dice lo que la regla pide. Las dos
+infracciones están en los dos únicos sitios donde el curso interpreta la
+constante de una regresión con datos reales antes de la lección 16.
+
+* Sustituciones propuestas para la Fase 2 (infracciones categóricas)
+
+** S1. =org-pract/S11-Prct-B-hprice2-ajuste.org:149=
+
+Antes:
+
+#+begin_quote
+La constante, $-34\,796$, no debe interpretarse. Es el precio ajustado cuando todos los regresores valen cero, y en los datos ningún barrio tiene un número medio de habitaciones cercano a cero: =rooms= va de $3{,}56$ a $8{,}78$. Cuando no hay datos en torno al punto en que todos los regresores valen cero, la constante carece de interpretación, y atribuirle una conduce a absurdos. Aquí sería el precio mediano, negativo, de un barrio cuyas viviendas no tuvieran ninguna habitación.
+#+end_quote
+
+Después:
+
+#+begin_quote
+La constante, $-34\,796$, no debe interpretarse. Es el precio ajustado en el origen de =rooms=, el punto en que =rooms= vale cero, y en los datos ningún barrio tiene un número medio de habitaciones cercano a cero: =rooms= va de $3{,}56$ a $8{,}78$. Fuera de la región que ocupan los datos, el ajuste es una extrapolación sin observaciones que la sostengan, y atribuir un significado a la constante conduce a absurdos. Aquí sería el precio mediano, negativo, de un barrio cuyas viviendas no tuvieran ninguna habitación.
+#+end_quote
+
+Solo cambian las dos frases con «todos los regresores valen cero»; las
+cifras ya están en el texto. Es una práctica, sin transparencias.
+
+** S2. =org-lessons/S23-Lecc15.org:208= (apuntes, subsección sin transparencia)
+
+Antes:
+
+#+begin_quote
+La constante también se lee, pero no como en el modelo en niveles. Deshaciendo el logaritmo, el modelo log-nivel estimado es $\widehat{\text{wage}}=e^{0{,}584}\,e^{0{,}0827\,\text{educ}}=1{,}79\cdot1{,}086^{\text{educ}}$: el salario predicho es $1{,}79$ dólares por hora con cero años de educación, y cada año de educación lo multiplica por $1{,}086$. En el modelo en niveles la constante, $-0{,}905$, es una cantidad que se suma; en el log-nivel, $e^{\hat\beta_1}=1{,}79$ es un factor que multiplica.
+#+end_quote
+
+Después:
+
+#+begin_quote
+La constante cambia de papel respecto al modelo en niveles. Deshaciendo el logaritmo, el modelo log-nivel estimado es $\widehat{\text{wage}}=e^{0{,}584}\,e^{0{,}0827\,\text{educ}}=1{,}79\cdot1{,}086^{\text{educ}}$: cada año de educación multiplica el salario predicho por $1{,}086$. En el modelo en niveles la constante, $-0{,}905$, es una cantidad que se suma; en el log-nivel, $e^{\hat\beta_1}=1{,}79$ es un factor que multiplica. En ninguno de los dos se lee como el salario de quien no tiene educación: es el valor ajustado en =educ= igual a cero, y solo $2$ de los $526$ trabajadores de =wage1= están en ese punto. En niveles, esa lectura daría un salario negativo, $-0{,}905$ dólares por hora.
+#+end_quote
+
+Mantiene el argumento del párrafo (sumar frente a multiplicar) y retira
+la lectura del salario con cero años de educación. Cifras comprobadas con
+Gretl el 22-10: =educ= va de 0 a 18 y vale 0 en 2 de los 526 trabajadores;
+=ols lwage const educ= da constante $0{,}5838$ y $e^{0{,}5838}=1{,}7928$.
+El «2 de 526» no está hoy en el texto de ninguna lección; sale de esa
+salida de Gretl (y de la Guía §6).
+
+* Propuestas (no categóricas; no se aplicarán sin decisión del autor)
+
+** P1. Remedio de centrar, en S11-B y L15
+
+La regla incluye el remedio (centrar los regresores). Ninguno de los dos
+sitios lo menciona. Si el autor lo quiere, una frase al final de cada uno:
+
+- S11-B:149, tras «…no tuvieran ninguna habitación.»: «Si interesa un
+  precio de referencia, el origen se elige: con =rooms= centrado (lección
+  7), la constante es el precio ajustado en la media de =rooms=, que es el
+  precio medio.»
+- L15:208, al final del párrafo: «Si interesa un salario de referencia, se
+  centra =educ=, como hará la lección 16 con =educc=.»
+
+Ojo en S11-B: la práctica es de la sesión 11 y la lección 7 ya enseñó la
+base centrada; la frase no añade ningún comando.
+
+** P2. Cobb–Douglas, =org-lessons/S23-Lecc15.org:367=
+
+Texto: «La constante, $e^{1{,}844}=6{,}3$, es el factor de escala $A$.»
+Dos defectos menores: la constante es $1{,}844$ (estima $\log A$), no
+$e^{1{,}844}$; y el factor de escala es el producto con $L=K=1$, fuera de
+los datos (en =greene9_1=, Gretl: =labor= va de $4{,}06$ a $490{,}4$ y
+=capital= de $1{,}54$ a $435{,}1$), y su valor depende de las unidades de
+$L$ y $K$. Propuesta mínima:
+
+#+begin_quote
+La constante, $1{,}844$, estima $\log A$, y $e^{1{,}844}=6{,}3$ estima el factor de escala $A$, que depende de las unidades en que se miden el trabajo y el capital.
+#+end_quote
+
+Es decisión del autor si la identificación de la constante con un
+parámetro del modelo económico cuenta como «lectura» en el sentido de la
+regla (véase G1).
+
+** P3. =org-lessons/S19-Lecc13.org:414=
+
+«contrasta la significación conjunta de /todos/ los regresores» →
+«contrasta la significación conjunta de /todos/ los regresores no
+constantes». Coherente con L13:97 y L13:645. No es una lectura de la
+constante; solo la regla de nombrar.
+
+* Observaciones fuera del alcance de la regla
+
+- =org-pract/S22-Prct-D-hprice1-tasacion.org:342=: «Las dos conclusiones
+  son compatibles». No es «compatible» entre datos e hipótesis (lo prohibido
+  en Guía §6), sino entre dos conclusiones; lo anoto por si el autor quiere
+  extender la prohibición («Las dos conclusiones no se contradicen»).
+
+* Precisión propuesta para la Guía §6 (sin editar la Guía)
+
+G1. Añadir, tras la frase sobre los regresores cuantitativos: «La regla
+vale igual para $e^{\hat\beta_1}$ en los modelos con el regresando en
+logaritmos (lección 15: es el valor ajustado de $y$ en el origen, deshecho
+el logaritmo). Cuando la constante estima un parámetro del modelo económico
+(el $\log A$ de Cobb–Douglas), se dice qué parámetro estima, pero no se lee
+como valor ajustado si el origen está fuera de los datos.»
+
+* Fase 2: aplicado (2026-10-23)
+
+El autor aprobó todo el informe el 23-10 («Todo me parece Ok»): S1, S2,
+P1, P2, P3, la observación de S22-D y G1. Aplicado con un script con
+=assert= previos y copia de cada fichero antes de escribir:
+
+- =org-pract/S11-Prct-B-hprice2-ajuste.org:149=: S1 y la frase de P1.
+- =org-lessons/S23-Lecc15.org:208=: S2 y la frase de P1.
+- =org-lessons/S23-Lecc15.org:367=: P2.
+- =org-lessons/S19-Lecc13.org:414=: P3 («regresores no constantes»).
+- =org-pract/S22-Prct-D-hprice1-tasacion.org:342=: «son compatibles» →
+  «no se contradicen».
+- =doc/prompts/GuiaDeEstilo.org= §6: G1, tras «cero habitaciones de media)».
+- =doc/prompts/PlanDeEscritura.org= §4.1: la misma precisión, abreviada.
+
+Ningún cambio cae en una transparencia (L13:414 y L15:208, 367 están en
+subsecciones =skip=), así que no hubo que medir.
+
+Compilados PDF y HTML de los cuatro ficheros del curso: sin errores.
+
+=comprobar-paginas.py= sobre los editados y los que los enlazan: 12 avisos,
+ninguno debido a estos cambios. Seis enlaces apuntan a páginas de S14-A y
+S14-B que ya no coinciden con los PDF compilados el 20-10 (L13:190, 204,
+229, 267, 312; L14:312; S14-B:198); los otros son avisos de «apéndice no
+reconocido» en L9, también previos. Pendiente de corregir aparte.
+
+* Enlaces a S14-A y S14-B corregidos (2026-10-23, a petición del autor)
+
+Nueve enlaces =#page== desfasados respecto de los PDF de S14-A y S14-B
+compilados el 20-10, corregidos y recompilados los ficheros:
+L13:190 (5→6), 204, 229, 267, 312 (4→5); L14:312 (7→8); S14-B:198 (5→4);
+S11-D:237 (7→8); S14-C:316, 456 (5→6). =comprobar-paginas.py= sobre todas
+las lecciones y prácticas deja solo 6 avisos «apéndice: no se reconoce la
+sección» (L9:62, 67, 112, 114; L16:313), falsos positivos: la etiqueta del
+enlace es «pdf» o «muestra»; comprobados a mano (páginas 5, 7 y 9 del
+apéndice = secciones 1.4, 2 y 3).
