@@ -38,9 +38,11 @@ git -C "$DEST" clean -fd
 
 mkdir -p "$DEST"/{Transparencias,Lecciones-html,Lecciones-pdf,Practicas-html/guiones,Practicas-pdf,CuadernosElectronicos,img,css}
 
-find org-lessons -maxdepth 1 -name '*.slides.html'                  -exec cp {} "$DEST"/Transparencias/ \;
-find org-lessons -maxdepth 1 -name '*.html' ! -name '*.slides.html' -exec cp {} "$DEST"/Lecciones-html/ \;
-find org-lessons -maxdepth 1 -name '*.pdf'                          -exec cp {} "$DEST"/Lecciones-pdf/ \;
+# Fuera: notas privadas (ZZ*) y copias de conflicto de la sincronización (*Conflict*).
+NOPUB=(! -name 'ZZ*' ! -name '*Conflict*')
+find org-lessons -maxdepth 1 -name '*.slides.html' "${NOPUB[@]}"                  -exec cp {} "$DEST"/Transparencias/ \;
+find org-lessons -maxdepth 1 -name '*.html' ! -name '*.slides.html' "${NOPUB[@]}" -exec cp {} "$DEST"/Lecciones-html/ \;
+find org-lessons -maxdepth 1 -name '*.pdf' "${NOPUB[@]}"                          -exec cp {} "$DEST"/Lecciones-pdf/ \;
 
 # Logo: para insertar en la página web
 cp -r img/Logo.jpg "$DEST"/img/
@@ -61,8 +63,8 @@ for destino in "$DEST"/Lecciones-html "$DEST"/Transparencias; do
           -exec cp --parents {} "$destino"/ \; )
 done
 
-find org-pract -maxdepth 1 -name '*.html'        -exec cp {} "$DEST"/Practicas-html/ \;
-find org-pract -maxdepth 1 -name '*.pdf'         -exec cp {} "$DEST"/Practicas-pdf/ \;
+find org-pract -maxdepth 1 -name '*.html' "${NOPUB[@]}" -exec cp {} "$DEST"/Practicas-html/ \;
+find org-pract -maxdepth 1 -name '*.pdf' "${NOPUB[@]}"  -exec cp {} "$DEST"/Practicas-pdf/ \;
 find org-pract/guiones -maxdepth 1 -name '*.inp' -exec cp {} "$DEST"/Practicas-html/guiones/ \;
 
 # Salida de gretlcli por práctica (gráficos, estimaciones, etc.): una
