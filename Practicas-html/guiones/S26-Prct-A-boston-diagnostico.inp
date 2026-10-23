@@ -1,0 +1,59 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open ../../data/boston.csv --quiet
+series lmedv = log(medv)
+outfile --quiet palanca.txt
+    ols lmedv const rm lstat dis chas --quiet
+    scalar k = 5
+    leverage --quiet --save
+    summary lever --simple
+    printf "Suma de las palancas: %.2f ; media k/n = %.4f ; mediana %.4f ; convencion 2k/n = %.4f ; barrios por encima: %d\n", sum(lever), k/$nobs, median(lever), 2*k/$nobs, sum(lever > 2*k/$nobs)
+    scalar i = imaxc({lever})
+    printf "Palanca maxima %.4f en el barrio %d: medv %.1f  rm %.2f  lstat %.2f  dis %.2f  chas %d\n", lever[i], i, medv[i], rm[i], lstat[i], dis[i], chas[i]
+end outfile
+
+outfile --quiet cook.txt
+    series e = $uhat
+    scalar s2 = $sigma^2
+    series cook = e^2 * lever / (k * s2 * (1 - lever)^2)
+    printf "Convencion 4/n = %.4f ; barrios por encima: %d\n", 4/$nobs, sum(cook > 4/$nobs)
+    scalar j = imaxc({cook})
+    printf "Cook maxima %.3f en el barrio %d: medv %.1f  rm %.2f  lstat %.2f  dis %.2f  chas %d  palanca %.4f  residuo %.3f\n", cook[j], j, medv[j], rm[j], lstat[j], dis[j], chas[j], lever[j], e[j]
+    printf "Barrio %d, el de palanca maxima: residuo %.3f  Cook %.4f ; barrios con Cook mayor: %d\n", i, e[i], cook[i], sum(cook > cook[i])
+    printf "Con todos:        chas %.4f  rm %.4f  lstat %.4f  dis %.4f\n", $coeff(chas), $coeff(rm), $coeff(lstat), $coeff(dis)
+    smpl cook < max(cook) --restrict
+    ols lmedv const rm lstat dis chas --quiet
+    printf "Sin el barrio %d: chas %.4f  rm %.4f  lstat %.4f  dis %.4f  (n = %d)\n", j, $coeff(chas), $coeff(rm), $coeff(lstat), $coeff(dis), $nobs
+    smpl full
+end outfile
+
+outfile --quiet censura.txt
+    printf "Barrios con medv = 50: %d\n", sum(medv == 50)
+    printf "Cook media de esos barrios: %.4f ; de los demas: %.4f\n", mean(cook * (medv == 50)) / mean(medv == 50), mean(cook * (medv < 50)) / mean(medv < 50)
+    smpl medv == 50 --restrict
+    printf "Residuos de esos barrios: minimo %.3f ; maximo %.3f\n", min(e), max(e)
+    printf "Medias de esos barrios: rm %.2f  lstat %.2f  palanca %.4f ; con palanca mayor que k/n: %d ; con Cook mayor que 4/n: %d\n", mean(rm), mean(lstat), mean(lever), sum(lever > k/506), sum(cook > 4/506)
+    smpl full
+    smpl medv < 50 --restrict
+    ols lmedv const rm lstat dis chas
+    printf "Sin los 16: chas %.4f (ee %.4f)  rm %.4f  lstat %.4f  dis %.4f\n", $coeff(chas), $stderr(chas), $coeff(rm), $coeff(lstat), $coeff(dis)
+    smpl full
+end outfile

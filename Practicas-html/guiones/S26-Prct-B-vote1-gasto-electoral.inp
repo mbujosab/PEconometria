@@ -1,0 +1,55 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open vote1 --quiet
+outfile --quiet datos.txt
+    summary voteA expendA expendB prtystrA shareA --simple
+    series lexpendA = log(expendA)
+    printf "Elecciones: %d ; ganadas por A (voteA > 50): %d\n", $nobs, sum(voteA > 50)
+end outfile
+
+outfile --quiet nivelLog.txt
+    ols voteA const lexpendA lexpendB prtystrA
+    printf "1%% mas de gasto de A: %.3f puntos ; 1%% mas de gasto de B: %.3f puntos ; duplicar el gasto de A: %.1f puntos\n", $coeff(lexpendA)/100, $coeff(lexpendB)/100, $coeff(lexpendA)*log(2)
+end outfile
+
+outfile --quiet sumaCero.txt
+    scalar suma = $coeff(lexpendA) + $coeff(lexpendB)
+    scalar eeSuma = sqrt($vcv(lexpendA, lexpendA) + $vcv(lexpendB, lexpendB) + 2*$vcv(lexpendA, lexpendB))
+    scalar tc = critical(t, $df, 0.025)
+    printf "b2 + b3 = %.3f ; error estandar %.3f ; t = %.2f ; intervalo al 95%%: [%.2f, %.2f]\n", suma, eeSuma, suma/eeSuma, suma - tc*eeSuma, suma + tc*eeSuma
+    scalar SRC = $ess
+    restrict --quiet
+        b[lexpendA] + b[lexpendB] = 0
+    end restrict
+    printf "F(1,%d) = %.2f   valor p = %.3f\n", $df, $test, $pvalue
+    series ldif = lexpendA - lexpendB
+    ols voteA const ldif prtystrA
+    printf "SRC sin restringir %.1f ; SRC restringido %.1f\n", SRC, $ess
+end outfile
+
+outfile --quiet cuota.txt
+    ols voteA const shareA
+    printf "Con la mitad del gasto (shareA = 50): voto ajustado %.1f%%\n", $coeff(const) + 50*$coeff(shareA)
+end outfile
+
+outfile --quiet democrata.txt
+    ols voteA const lexpendA lexpendB prtystrA democA
+end outfile

@@ -1,0 +1,94 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open ../../data/boston.csv --quiet
+outfile --quiet descripcion.txt
+    summary medv rm lstat dis chas --simple
+    series lmedv = log(medv)
+end outfile
+
+outfile --quiet modeloComun.txt
+    ols lmedv const rm lstat dis
+    printf "Una habitacion mas por vivienda: %.1f%% aproximado, %.1f%% exacto\n", 100*$coeff(rm), 100*(exp($coeff(rm))-1)
+end outfile
+
+outfile --quiet conChas.txt
+    ols lmedv const rm lstat dis chas
+    printf "Junto al rio respecto de sin rio: %.1f%% exacto (aproximado %.1f%%)\n", 100*(exp($coeff(chas))-1), 100*$coeff(chas)
+    printf "Sin rio respecto de junto al rio: %.1f%% exacto\n", 100*(exp(-$coeff(chas))-1)
+    ols medv const rm lstat dis chas --quiet
+    printf "En niveles: chas = %.2f mil dolares (ee %.2f, t = %.2f)\n", $coeff(chas), $stderr(chas), $coeff(chas)/$stderr(chas)
+end outfile
+
+outfile --quiet prevision.txt
+    ols lmedv const rm lstat dis chas --quiet
+    series prevLog = exp($yhat) * exp($sigma^2/2)
+    printf "Factor de correccion exp(s^2/2) = %.4f\n", exp($sigma^2/2)
+    printf "Precio medio observado %.2f ; media de exp(yhat) %.2f ; media de la prevision corregida %.2f\n", mean(medv), mean(exp($yhat)), mean(prevLog)
+    scalar r2log = corr(medv, prevLog)^2
+    ols medv const rm lstat dis chas --quiet
+    printf "Correlacion al cuadrado con medv: modelo en logaritmos %.3f ; modelo en niveles %.3f (su R2: %.3f)\n", r2log, corr(medv, $yhat)^2, $rsq
+end outfile
+
+outfile --quiet interaccion.txt
+    series chasrm = chas*rm
+    ols lmedv const rm lstat dis chas chasrm
+    printf "Pendiente de rm sin rio: %.4f ; junto al rio: %.4f ; t de la interaccion: %.2f\n", $coeff(rm), $coeff(rm)+$coeff(chasrm), $coeff(chasrm)/$stderr(chasrm)
+end outfile
+
+open wage1 --quiet
+outfile --quiet chowWage.txt
+    ols lwage const educ exper tenure --quiet
+    chow female --dummy
+end outfile
+
+outfile --quiet pendientesWage.txt
+    series femeduc = female*educ
+    series femexper = female*exper
+    series femtenure = female*tenure
+    ols lwage const educ exper tenure female femeduc femexper femtenure --quiet
+    restrict --quiet
+        b[femeduc] = 0
+        b[femexper] = 0
+        b[femtenure] = 0
+    end restrict
+    printf "Solo las pendientes (q = 3): F(3,%d) = %.2f   valor p = %.3f\n", $df, $test, $pvalue
+    ols lwage const educ exper tenure female --quiet
+    printf "Solo el intercepto (q = 1): t de female = %.2f ; t al cuadrado = %.1f\n", $coeff(female)/$stderr(female), ($coeff(female)/$stderr(female))^2
+end outfile
+
+open ../../data/boston.csv --quiet
+series lmedv = log(medv)
+outfile --quiet chowBoston.txt
+    ols lmedv const rm lstat dis --quiet
+    chow chas --dummy
+    series chasrm = chas*rm
+    series chaslstat = chas*lstat
+    series chasdis = chas*dis
+    ols lmedv const rm lstat dis chas chasrm chaslstat chasdis --quiet
+    restrict --quiet
+        b[chasrm] = 0
+        b[chaslstat] = 0
+        b[chasdis] = 0
+    end restrict
+    printf "Solo las pendientes (q = 3): F(3,%d) = %.2f   valor p = %.3f\n", $df, $test, $pvalue
+    ols lmedv const rm lstat dis chas --quiet
+    printf "Solo el intercepto (q = 1): t de chas = %.2f ; t al cuadrado = %.1f\n", $coeff(chas)/$stderr(chas), ($coeff(chas)/$stderr(chas))^2
+end outfile

@@ -1,0 +1,49 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open greene9_1 --quiet
+outfile --quiet modeloLogLog.txt
+    summary valadd capital labor --simple
+    logs valadd capital labor
+    ols l_valadd const l_labor l_capital
+    printf "Factor de escala A = e^const = %.2f ; correlacion entre l_labor y l_capital: %.3f\n", exp($coeff(const)), corr(l_labor, l_capital)
+end outfile
+
+outfile --quiet restriccion.txt
+    scalar suma = $coeff(l_labor) + $coeff(l_capital)
+    scalar eeSuma = sqrt($vcv(l_labor, l_labor) + $vcv(l_capital, l_capital) + 2*$vcv(l_labor, l_capital))
+    scalar tc = critical(t, $df, 0.025)
+    printf "alpha + gamma = %.3f ; error estandar %.3f ; t frente a 1: %.2f ; intervalo al 95%%: [%.3f, %.3f]\n", suma, eeSuma, (suma - 1)/eeSuma, suma - tc*eeSuma, suma + tc*eeSuma
+    restrict --quiet
+        b[l_labor] + b[l_capital] = 1
+    end restrict
+    printf "F(1,%d) = %.2f   valor p = %.3f   valor critico al 5%%: %.2f\n", $df, $test, $pvalue, critical(F, 1, $df, 0.05)
+end outfile
+
+outfile --quiet restringido.txt
+    ols l_valadd const l_labor l_capital --quiet
+    scalar SRC = $ess
+    scalar s2 = $sigma^2
+    series lqpl = l_valadd - l_labor
+    series lkpl = l_capital - l_labor
+    ols lqpl const lkpl
+    printf "Restringido: gamma = %.3f (ee %.3f), alpha = 1 - gamma = %.3f\n", $coeff(lkpl), $stderr(lkpl), 1 - $coeff(lkpl)
+    printf "SRC sin restringir %.3f ; SRC restringido %.3f ; (SRC_r - SRC)/s2 = %.2f\n", SRC, $ess, ($ess - SRC)/s2
+end outfile

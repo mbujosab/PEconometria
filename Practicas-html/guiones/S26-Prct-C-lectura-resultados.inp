@@ -1,0 +1,51 @@
+# ------------------------------------------------------------
+# Copyright (C) 2026 Marcos Bujosa
+# Licencia: GNU General Public License v3.0 o posterior
+# Este código es software libre y puede ser redistribuido y/o modificado bajo los términos de la GPL.
+# Ver el archivo LICENSE del repositorio para más detalles.
+# ------------------------------------------------------------
+
+# Los dos primeros comandos son necesarios para que Gretl guarde los resultados de la práctica en el directorio de trabajo
+# al ejecutar lo siguiente desde un terminal (use los nombres y ruta que correspondan)
+#
+#    DIRECTORIO="Nombre_Directorio_trabajo" gretlcli -b ruta/nombre_fichero_de_la_practica.inp
+#
+# Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
+# que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+
+string directory = getenv("DIRECTORIO")
+set workdir "@directory"
+
+set verbose off
+
+open hprice1 --quiet
+outfile --quiet tabla1.txt
+    summary price sqrft bdrms lotsize --simple
+    ols price const sqrft bdrms lotsize
+    printf "100 pies cuadrados mas de casa: %.1f mil dolares ; 1000 pies cuadrados mas de parcela: %.2f mil dolares\n", 100*$coeff(sqrft), 1000*$coeff(lotsize)
+end outfile
+
+open wage1 --quiet
+outfile --quiet tabla2.txt
+    ols lwage const educ exper tenure female
+    printf "female exacto: %.1f%% ; educ exacto: %.1f%% ; e^const = %.2f dolares ; trabajadores con educ = 0: %d\n", 100*(exp($coeff(female))-1), 100*(exp($coeff(educ))-1), exp($coeff(const)), sum(educ == 0)
+end outfile
+
+open meap93 --quiet
+outfile --quiet tabla3.txt
+    summary math10 expend lnchprg enroll --simple
+    logs expend enroll
+    ols math10 const l_expend lnchprg l_enroll
+    printf "10%% mas de gasto por alumno: %.2f puntos de aprobados (aprox.)\n", $coeff(l_expend)/10
+    scalar tc = critical(t, $df, 0.025)
+    printf "Intervalo al 95%% para el coeficiente de l_expend: [%.2f, %.2f]\n", $coeff(l_expend) - tc*$stderr(l_expend), $coeff(l_expend) + tc*$stderr(l_expend)
+    ols math10 const l_expend --quiet
+    printf "Sin la pobreza ni el tamano: coeficiente de l_expend %.2f (ee %.2f) ; correlacion entre l_expend y lnchprg: %.3f\n", $coeff(l_expend), $stderr(l_expend), corr(l_expend, lnchprg)
+end outfile
+
+open hprice2 --quiet
+outfile --quiet tabla4.txt
+    logs price nox
+    ols l_price const l_nox rooms dist stratio
+    printf "rooms exacto: %.1f%% ; stratio exacto: %.1f%%\n", 100*(exp($coeff(rooms))-1), 100*(exp($coeff(stratio))-1)
+end outfile
