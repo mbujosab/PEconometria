@@ -52,6 +52,16 @@ loop R --progressive --quiet
     scalar b_fijo = $coeff(rooms)
     store "@workdir/repFijo.gdt" b_fijo
 endloop
+outfile --quiet avisoA.txt
+    printf "Hecho: %d replicas con el regresor fijo guardadas en repFijo.gdt\n", R
+end outfile
+
+outfile --quiet unSorteoX.txt
+    set seed 160
+    series xnew = mu_r + sd_r*normal(0,1)       # doce viviendas NUEVAS
+    printf "Sxx de las doce viviendas observadas = %.4f\n", Sxx_obs
+    printf "Sxx de doce viviendas sorteadas       = %.4f\n", sum((xnew-mean(xnew))^2)
+end outfile
 
 set seed 160
 loop R --progressive --quiet
@@ -63,6 +73,9 @@ loop R --progressive --quiet
     scalar Sxx_i = sum((xnew-mean(xnew))^2)     # el Sxx de ESTA replica
     store "@workdir/repVar.gdt" b_var Sxx_i
 endloop
+outfile --quiet avisoB.txt
+    printf "Hecho: %d replicas con regresor nuevo guardadas en repVar.gdt\n", R
+end outfile
 
 outfile --quiet comparacion.txt
     printf "=== LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===\n"

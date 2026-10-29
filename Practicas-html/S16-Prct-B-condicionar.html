@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-10-29 jue 17:09 -->
+<!-- 2026-10-29 jue 17:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 16 (B) &#x2014; Condicionar en $\boldsymbol X$: la misma fórmula, dos experimentos</title>
@@ -287,38 +287,46 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org2a847aa">Descripción de la práctica</a></li>
-<li><a href="#doce-viviendas">Actividad 1 - El mismo mundo, pero con doce viviendas</a></li>
-<li><a href="#org6ba7e35">Actividad 2 - Experimento A: el regresor se queda quieto</a></li>
-<li><a href="#orgf0647fa">Actividad 3 - Experimento B: el regresor también se sortea</a></li>
-<li><a href="#org5de318b">Actividad 4 - Las dos varianzas, cara a cara</a>
+<li><a href="#org1a2102c">Descripción de la práctica</a></li>
+<li><a href="#doce-viviendas">Actividad 1 - El mismo mundo, pero con doce viviendas</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org887014e">Lo que debe observar</a></li>
-<li><a href="#orgc9723d7">De dónde viene la diferencia</a></li>
+<li><a href="#org6027da0">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgc5b6ee8">Actividad 5 - ¿Y si la muestra fuera grande?</a>
+<li><a href="#org9fda880">Actividad 2 - Experimento A: el regresor se queda quieto</a></li>
+<li><a href="#org7ca1274">Actividad 3 - Experimento B: el regresor también se sortea</a></li>
+<li><a href="#org1457f7d">Actividad 4 - Las dos varianzas, cara a cara</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgda3ada0">Lo que debe observar</a></li>
+<li><a href="#org8e0ef60">Lo que debe observar</a></li>
+<li><a href="#orga10d818">De dónde viene la diferencia</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgb23c949">Actividad 5 - ¿Y si la muestra fuera grande?</a>
+<ul>
+<li>
+<ul>
+<li><a href="#orge73ad16">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a href="#preguntas">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org0ba5e3c">Código completo de la práctica</a></li>
-<li><a href="#org4938d34">Respuestas</a></li>
+<li><a href="#org58265cb">Código completo de la práctica</a></li>
+<li><a href="#orgbd2d1ac">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org2a847aa" class="outline-2">
-<h2 id="org2a847aa">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org2a847aa">
+<div id="outline-container-org1a2102c" class="outline-2">
+<h2 id="org1a2102c">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org1a2102c">
 <p>
 Qué es condicionar en \(\boldsymbol X\) ya está definido con precisión: la lección 9 presentó \(E[Z\mid\boldsymbol X]\) como la proyección ortogonal de \(Z\) sobre las funciones de \(\boldsymbol X\), y la lección 11 trabajó con esa definición. Esta práctica busca otra cosa: la <i>consecuencia observable</i> de condicionar, es decir, qué cambia en los números cuando se condiciona y cuando no.
 </p>
@@ -381,7 +389,7 @@ Dos bloques. El primero repite el mundo artificial de la práctica A y añade do
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgb8969fd">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="org16061dd">open hprice2.gdt --quiet
 
 ols price const rooms --quiet
 scalar b1_true = $coeff(const)
@@ -394,7 +402,7 @@ scalar sd_r = sd(rooms)
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf891025">printf "Poblacion del regresor: media = %.4f   desv. tipica = %.4f\n", mu_r, sd_r
+<pre class="src src-gretl" id="orgce984b9">printf "Poblacion del regresor: media = %.4f   desv. tipica = %.4f\n", mu_r, sd_r
 
 set seed 160
 smpl 12 --random                        # doce viviendas elegidas AL AZAR
@@ -408,7 +416,7 @@ printf "  Sxx tipico de una muestra de este tamano = %.4f\n", ($nobs-1)*sd_r^2
 printf "\nVar[b2 | X] que predice la leccion 11 = %.1f   (desv. tipica %.1f)\n", var_cond, sqrt(var_cond)
 </pre>
 </div>
-<pre class="example" id="orgd7645b1">
+<pre class="example" id="orgd890e8e">
 Poblacion del regresor: media = 6,2841   desv. tipica = 0,7026
 
 Submuestra observada (n = 12):
@@ -427,22 +435,30 @@ Dos detalles del código merecen comentario. El primero es <code>smpl 12 --rando
 </p>
 
 <p>
-Compare ahora las dos últimas cifras: el Sxx de nuestras doce viviendas y el Sxx que cabría esperar de doce viviendas cualesquiera. Esa comparación explica los resultados que siguen.
+Una cifra de la salida necesita explicación: el «Sxx típico de una muestra de este tamaño», \((n-1)\,\mathrm{sd}_r^2\). La función <code>sd</code> de Gretl divide por \(n-1\), así que \(\mathrm{sd}_r^2\) es la cuasivarianza de <code>rooms</code> en las 506 viviendas, y \((n-1)\,\mathrm{sd}_r^2\) es la suma de cuadrados en desviaciones que tendría, en promedio, una muestra de \(n\) viviendas sorteadas de esa población (es la esperanza de \(\sum_i(X_i-\overline X)^2\), con la regla de su curso de Estadística para la cuasivarianza). Es el patrón con el que vamos a comparar el Sxx de las doce viviendas que nos han tocado.
+</p>
+</div>
+<div id="outline-container-org6027da0" class="outline-4">
+<h4 id="org6027da0">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org6027da0">
+<p>
+Tres cifras. La primera, el Sxx de nuestras doce viviendas, \(3{,}27\), frente al típico de doce viviendas cualesquiera, \(5{,}43\): las doce que han salido tienen valores de <code>rooms</code> menos dispersos de lo habitual (desviación típica \(0{,}545\) frente a \(0{,}703\) en las 506). La segunda, la varianza que la lección 11 predice para esta muestra, unos \(13{,}4\) millones, es decir, una desviación típica de \(3663\) dólares por habitación para una pendiente verdadera de \(9120\): con doce viviendas la estimación es muy imprecisa, y esa imprecisión es lo que hace visible la diferencia que buscamos. Guarde la primera comparación, \(3{,}27\) frente a \(5{,}43\): explica el signo de todo lo que sigue.
 </p>
 </div>
 </div>
-<div id="outline-container-org6ba7e35" class="outline-2">
-<h2 id="org6ba7e35">Actividad 2 - Experimento A: el regresor se queda quieto</h2>
-<div class="outline-text-2" id="text-org6ba7e35">
+</div>
+<div id="outline-container-org9fda880" class="outline-2">
+<h2 id="org9fda880">Actividad 2 - Experimento A: el regresor se queda quieto</h2>
+<div class="outline-text-2" id="text-org9fda880">
 <p>
-Es el experimento de la práctica A, sin más cambio que el tamaño muestral. El bucle es el de la práctica A con <code>R = 4000</code> réplicas y la muestra de doce viviendas: cada vuelta sortea la perturbación, construye <code>y</code>, estima con <code>ols --quiet</code> y guarda el coeficiente <code>b_fijo</code> como una fila más de <code>repFijo.gdt</code>.
+Es el experimento de la práctica A sin más cambio que el tamaño muestral: las doce viviendas en lugar de las 506. Cada vuelta sortea la perturbación, construye <code>y</code>, estima con <code>ols --quiet</code> y guarda el coeficiente <code>b_fijo</code> como una fila más de <code>repFijo.gdt</code>. Usamos <code>R = 4000</code> réplicas, el doble que en la práctica A: la varianza empírica de \(R\) réplicas tiene su propio error de Montecarlo, del orden de \(\sqrt{2/R}\) en términos relativos (un \(3\%\) con 2000, un \(2\%\) con 4000), y queremos que sea pequeño frente a la diferencia entre los dos experimentos, que resultará ser mucho mayor.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf0bddaa">scalar R = 4000
+<pre class="src src-gretl" id="org5e79f73">scalar R = 4000
 
 set seed 160
 loop R --progressive --quiet
@@ -454,20 +470,52 @@ loop R --progressive --quiet
 endloop
 </pre>
 </div>
+<div class="org-src-container">
+<pre class="src src-gretl" id="orgb8a48fb">printf "Hecho: %d replicas con el regresor fijo guardadas en repFijo.gdt\n", R
+</pre>
 </div>
-</div>
-<div id="outline-container-orgf0647fa" class="outline-2">
-<h2 id="orgf0647fa">Actividad 3 - Experimento B: el regresor también se sortea</h2>
-<div class="outline-text-2" id="text-orgf0647fa">
+<pre class="example" id="orgcb4d864">
+Hecho: 4000 replicas con el regresor fijo guardadas en repFijo.gdt
+</pre>
 <p>
-Ahora añadimos una línea dentro del bucle: antes de construir el regresando, sorteamos un regresor nuevo. Conceptualmente estamos diciendo ``no solo podría haber sido otra la perturbación; también podrían haber sido otras las doce viviendas''. En el código, la línea nueva es <code>series xnew = mu_r + sd_r*normal(0,1)</code>: doce sorteos de una normal estándar, reescalados a la media y la desviación típica de la población del regresor. Después <code>y</code> se construye con <code>xnew</code>, la regresión se estima sobre <code>xnew</code>, y <code>store</code> guarda dos escalares por réplica, el coeficiente <code>b_var</code> y <code>Sxx_i</code>, la suma de cuadrados en desviaciones del regresor de esa réplica, en <code>repVar.gdt</code>.
+Todavía no miramos las estimaciones: las compararemos en la actividad 4 junto a las del experimento B. Lo que tenemos ahora es un fichero con 4000 estimaciones de \(\beta_2\), todas obtenidas con las <i>mismas</i> doce viviendas y distintas perturbaciones.
+</p>
+</div>
+</div>
+<div id="outline-container-org7ca1274" class="outline-2">
+<h2 id="org7ca1274">Actividad 3 - Experimento B: el regresor también se sortea</h2>
+<div class="outline-text-2" id="text-org7ca1274">
+<p>
+Ahora decimos ``no solo podría haber sido otra la perturbación; también podrían haber sido otras las doce viviendas''. Para eso hace falta una población de la que sortear viviendas nuevas, y no tenemos más que las 506 de <code>hprice2</code>. La solución más simple es quedarse con su media y su desviación típica, \(\mu_r=6{,}28\) y \(\mathrm{sd}_r=0{,}70\), y sortear de una normal con esos dos números: <code>mu_r + sd_r*normal(0,1)</code> son doce sorteos de una normal estándar reescalados a la media y la dispersión del regresor real. No pretende ser el mecanismo que genera las viviendas de Boston; solo fabrica ``otras doce viviendas'' con la dispersión típica de las reales.
+</p>
+
+<p>
+Antes de meterlo en un bucle, un solo sorteo, para ver qué cambia. El bloque sortea un <code>xnew</code>, calcula su Sxx y lo imprime junto al de las doce viviendas observadas.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf30b473">set seed 160
+<pre class="src src-gretl" id="orgca21147">set seed 160
+series xnew = mu_r + sd_r*normal(0,1)       # doce viviendas NUEVAS
+printf "Sxx de las doce viviendas observadas = %.4f\n", Sxx_obs
+printf "Sxx de doce viviendas sorteadas       = %.4f\n", sum((xnew-mean(xnew))^2)
+</pre>
+</div>
+<pre class="example" id="org112b548">
+Sxx de las doce viviendas observadas = 3,2670
+Sxx de doce viviendas sorteadas       = 3,1687
+</pre>
+<p>
+El Sxx de las doce viviendas sorteadas no coincide con el de las observadas, y en otro sorteo saldría otro. Eso es lo que el experimento B añade: en cada réplica, además de la perturbación, cambia el regresor y con él su Sxx. En el código del bucle la línea nueva es la primera; después <code>y</code> se construye con <code>xnew</code>, la regresión se estima sobre <code>xnew</code>, y <code>store</code> guarda dos escalares por réplica en <code>repVar.gdt</code>: el coeficiente <code>b_var</code> y <code>Sxx_i</code>, la suma de cuadrados en desviaciones del regresor <i>de esa réplica</i>. En el experimento A ese número era una constante, \(3{,}27\); aquí es una variable aleatoria más, y en ella está la diferencia entre los dos experimentos.
+</p>
+
+<p>
+<i>en línea de comandos</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="org4bb5995">set seed 160
 loop R --progressive --quiet
     series xnew = mu_r + sd_r*normal(0,1)       # doce viviendas NUEVAS
     series u    = normal(0, sigma)
@@ -479,62 +527,66 @@ loop R --progressive --quiet
 endloop
 </pre>
 </div>
-<p>
-Guardamos también <code>Sxx_i</code>, la suma de cuadrados en desviaciones del regresor <i>de cada réplica</i>. En el experimento A ese número era una constante; aquí es una variable aleatoria más, y en ella está la diferencia entre los dos experimentos.
-</p>
+<div class="org-src-container">
+<pre class="src src-gretl" id="orgda2c775">printf "Hecho: %d replicas con regresor nuevo guardadas en repVar.gdt\n", R
+</pre>
+</div>
+<pre class="example" id="org86751c9">
+Hecho: 4000 replicas con regresor nuevo guardadas en repVar.gdt
+</pre>
 </div>
 </div>
-<div id="outline-container-org5de318b" class="outline-2">
-<h2 id="org5de318b">Actividad 4 - Las dos varianzas, cara a cara</h2>
-<div class="outline-text-2" id="text-org5de318b">
+<div id="outline-container-org1457f7d" class="outline-2">
+<h2 id="org1457f7d">Actividad 4 - Las dos varianzas, cara a cara</h2>
+<div class="outline-text-2" id="text-org1457f7d">
 <p>
-Tres bloques de <code>printf</code>, cada uno con su salida. El primero usa los escalares teóricos. El segundo va precedido de <code>AbrirRepFijo</code>, que abre <code>repFijo.gdt</code>, y calcula la media y la varianza (divisor \(n\)) de <code>b_fijo</code>. El tercero va precedido de <code>AbrirRepVar</code>, que abre <code>repVar.gdt</code>, y hace lo mismo con <code>b_var</code> y añade, con <code>mean</code>, <code>min</code> y <code>max</code>, el recorrido de <code>Sxx_i</code> a lo largo de las réplicas.
+Ya tenemos los dos ficheros de réplicas. Ahora ponemos cara a cara tres cosas: lo que predice la lección 11 para nuestras doce viviendas, lo que ha salido con el regresor fijo y lo que ha salido con el regresor sorteado. Tres bloques, cada uno con su salida. El primero imprime la predicción con los escalares que todavía tenemos. El segundo va precedido de <code>AbrirRepFijo</code>, que abre <code>repFijo.gdt</code> (y borra los escalares, por eso la predicción se imprime antes), y calcula la media y la varianza, con divisor \(n\), de <code>b_fijo</code>. El tercero va precedido de <code>AbrirRepVar</code>, hace lo mismo con <code>b_var</code> y añade, con <code>mean</code>, <code>min</code> y <code>max</code>, cuánto ha variado <code>Sxx_i</code> de una réplica a otra.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org8aa449b">printf "=== LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===\n"
+<pre class="src src-gretl" id="org26db093">printf "=== LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===\n"
 printf "beta_2 verdadero  = %.2f\n", b2_true
 printf "Var[b2 | X]       = %.1f\n\n", var_cond
 </pre>
 </div>
-<pre class="example" id="org8aced45">
+<pre class="example" id="orgad9daed">
 === LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===
 beta_2 verdadero  = 9119,55
 Var[b2 | X]       = 13417907,5
 </pre>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgb835de2">open "@workdir/repFijo.gdt" --quiet
+<pre class="src src-gretl" id="org8464e6c">open "@workdir/repFijo.gdt" --quiet
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf16d826">printf "=== EXPERIMENTO A: regresor FIJO ===\n"
+<pre class="src src-gretl" id="org3df22af">printf "=== EXPERIMENTO A: regresor FIJO ===\n"
 printf "media de b2hat    = %.2f\n", mean(b_fijo)
 printf "varianza de b2hat = %.1f\n\n", sum((b_fijo-mean(b_fijo))^2)/$nobs
 </pre>
 </div>
-<pre class="example" id="orgeea5848">
+<pre class="example" id="org259ac0c">
 === EXPERIMENTO A: regresor FIJO ===
 media de b2hat    = 9061,70
 varianza de b2hat = 13168607,8
 </pre>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgaec7720">open "@workdir/repVar.gdt" --quiet
+<pre class="src src-gretl" id="orgcd5b1ab">open "@workdir/repVar.gdt" --quiet
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgac53c4d">printf "=== EXPERIMENTO B: regresor REGENERADO en cada replica ===\n"
+<pre class="src src-gretl" id="org5988796">printf "=== EXPERIMENTO B: regresor REGENERADO en cada replica ===\n"
 printf "media de b2hat    = %.2f\n", mean(b_var)
 printf "varianza de b2hat = %.1f\n", sum((b_var-mean(b_var))^2)/$nobs
 printf "\nSxx a lo largo de las replicas del experimento B:\n"
 printf "  medio = %.4f    minimo = %.4f    maximo = %.4f\n", mean(Sxx_i), min(Sxx_i), max(Sxx_i)
 </pre>
 </div>
-<pre class="example" id="org32638b8">
+<pre class="example" id="org7d482ad">
 === EXPERIMENTO B: regresor REGENERADO en cada replica ===
 media de b2hat    = 9125,59
 varianza de b2hat = 9747173,3
@@ -543,25 +595,25 @@ Sxx a lo largo de las replicas del experimento B:
   medio = 5,4482    minimo = 0,7178    maximo = 19,0432
 </pre>
 </div>
-<div id="outline-container-org887014e" class="outline-4">
-<h4 id="org887014e">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org887014e">
+<div id="outline-container-org8e0ef60" class="outline-4">
+<h4 id="org8e0ef60">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org8e0ef60">
 <p>
-Tres hechos, en este orden:
+Tres hechos, en este orden, con las cifras de las salidas:
 </p>
 
 <ol class="org-ol">
-<li><i>El experimento A reproduce la fórmula</i>. La varianza empírica de las estimaciones con el regresor fijo queda cerca de \(\sigma^2/\mathrm{Sxx}\), calculado con el Sxx de <i>nuestras doce viviendas</i>. La fórmula de la lección 11 describe este experimento.</li>
-<li><i>El experimento B da otro resultado</i>. Con el regresor regenerado, la varianza es apreciablemente distinta. Los dos experimentos responden a preguntas diferentes.</li>
-<li><i>Las medias, en cambio, coinciden</i>. En ambos experimentos la media de las estimaciones queda cerca de \(\beta_2\). La insesgadez se cumple en los dos diseños; la fórmula de la varianza, no.</li>
+<li><i>El experimento A reproduce la fórmula</i>. Con el regresor fijo, la varianza empírica de las 4000 estimaciones es \(13{,}17\) millones; la lección 11 predecía \(13{,}42\) millones con el Sxx de <i>nuestras doce viviendas</i>. La diferencia, un \(2\%\), es el error de Montecarlo. La fórmula de la lección 11 describe este experimento.</li>
+<li><i>El experimento B da otro resultado</i>. Con el regresor sorteado en cada réplica, la varianza es \(9{,}75\) millones, un \(27\%\) menor. No es error de Montecarlo: los dos experimentos responden a preguntas distintas.</li>
+<li><i>Las medias, en cambio, coinciden</i>. \(9062\) en A y \(9126\) en B, frente a un \(\beta_2\) verdadero de \(9120\). La media de 4000 réplicas con desviación típica \(3600\) tiene un error del orden de \(3600/\sqrt{4000}\approx57\), así que las dos están donde deben. La insesgadez se cumple en los dos diseños; la fórmula de la varianza, no.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgc9723d7" class="outline-4">
-<h4 id="orgc9723d7">De dónde viene la diferencia</h4>
-<div class="outline-text-4" id="text-orgc9723d7">
+<div id="outline-container-orga10d818" class="outline-4">
+<h4 id="orga10d818">De dónde viene la diferencia</h4>
+<div class="outline-text-4" id="text-orga10d818">
 <p>
-Mire la última línea de la salida: el recorrido de <code>Sxx_i</code> a lo largo de las réplicas del experimento B. Verá que ese número varía considerablemente de una réplica a otra, y compárelo con el Sxx fijo de nuestras doce viviendas observadas.
+Mire la última línea de la salida: a lo largo de las réplicas del experimento B, <code>Sxx_i</code> ha ido de \(0{,}72\) a \(19{,}04\), con un promedio de \(5{,}45\), que es el Sxx típico de la actividad 1. En el experimento A valía siempre \(3{,}27\).
 </p>
 
 <p>
@@ -574,18 +626,26 @@ Esta es la razón por la que la lección 11 se detuvo en la fórmula condicional
 </div>
 </div>
 </div>
-<div id="outline-container-orgc5b6ee8" class="outline-2">
-<h2 id="orgc5b6ee8">Actividad 5 - ¿Y si la muestra fuera grande?</h2>
-<div class="outline-text-2" id="text-orgc5b6ee8">
+<div id="outline-container-orgb23c949" class="outline-2">
+<h2 id="orgb23c949">Actividad 5 - ¿Y si la muestra fuera grande?</h2>
+<div class="outline-text-2" id="text-orgb23c949">
 <p>
-Repita el experimento con cuatrocientas viviendas en lugar de doce, dejando todo lo demás igual. Cuatro bloques. El primero realiza todos los pasos: reabre <code>hprice2</code> y recupera los escalares (se perdieron al abrir los ficheros de réplicas), toma cuatrocientas viviendas con <code>smpl 400 --random</code>, y ejecuta un solo bucle de 40 000 vueltas que hace los dos experimentos a la vez: primero con <code>rooms</code> fijo (coeficiente <code>bg_fijo</code>) y después con un regresor nuevo <code>xnew</code> y una perturbación nueva <code>u2</code> (coeficiente <code>bg_var</code>); <code>store</code> guarda los dos por réplica en <code>repGrande.gdt</code>. Tarda bastante más que los bucles anteriores. El segundo imprime las cifras teóricas; el tercero, <code>AbrirRepGrande</code>, abre <code>repGrande.gdt</code>, y el cuarto imprime las dos varianzas empíricas y su cociente.
+Repetimos el experimento con cuatrocientas viviendas en lugar de doce, dejando todo lo demás igual. La pregunta es si la diferencia entre los dos experimentos sobrevive cuando la muestra es grande, y en qué sentido: la actividad 4 ha dicho que el signo de la diferencia depende de si nuestra muestra concreta está más o menos dispersa que lo típico, y con cuatrocientas viviendas esa comparación puede salir al revés.
+</p>
+
+<p>
+Dos cambios respecto a la actividad 4 merecen explicación. El primero: los dos experimentos van en <i>un solo</i> bucle, que en cada vuelta estima primero con <code>rooms</code> fijo (coeficiente <code>bg_fijo</code>) y después con un regresor nuevo <code>xnew</code> y una perturbación nueva <code>u2</code> (coeficiente <code>bg_var</code>); así las dos series de réplicas tienen el mismo número de vueltas y la misma semilla, y el cociente entre sus varianzas no depende de eso. El segundo: \(40\,000\) réplicas en lugar de \(4\,000\). Con cuatrocientas viviendas el efecto que buscamos es pequeño, en torno a un \(4{,}5\%\), y con \(4\,000\) réplicas el error de Montecarlo de un cociente de varianzas supera el \(3\%\): repitiendo el experimento con distintas semillas, el cociente oscilaba entre \(1{,}00\) y \(1{,}08\), y con algunas semillas el efecto parecía desaparecer. Con \(40\,000\) se estabiliza por encima de uno. El coste son unos segundos más. Un experimento simulado tiene su propia precisión, y conviene asegurarse de que es mejor que el efecto que se quiere ver.
+</p>
+
+<p>
+Cuatro bloques. El primero reabre <code>hprice2</code> y recupera los escalares (se perdieron al abrir los ficheros de réplicas), toma cuatrocientas viviendas con <code>smpl 400 --random</code> y ejecuta el bucle; <code>store</code> guarda los dos coeficientes por réplica en <code>repGrande.gdt</code>. El segundo imprime las cifras teóricas, entre ellas el cociente entre el Sxx observado y el típico, que es lo que cabe esperar del cociente entre las dos varianzas. El tercero, <code>AbrirRepGrande</code>, abre <code>repGrande.gdt</code>, y el cuarto imprime las dos varianzas empíricas y su cociente.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org3d69a56">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="orgd368459">open hprice2.gdt --quiet
 ols price const rooms --quiet
 scalar b1_true = $coeff(const)
 scalar b2_true = $coeff(rooms)
@@ -616,36 +676,36 @@ endloop
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org2e14fe0">printf "Con n = 400:  Sxx observado = %.2f   (tipico: %.2f)\n", Sxx_obs, ($nobs-1)*sd_r^2
+<pre class="src src-gretl" id="orgd0024f8">printf "Con n = 400:  Sxx observado = %.2f   (tipico: %.2f)\n", Sxx_obs, ($nobs-1)*sd_r^2
 printf "             Var[b2|X] condicional teorica = %.2f\n", var_cond
 printf "             cociente Sxx observado/tipico = %.3f  &lt;- lo que cabe esperar de var_B/var_A\n", Sxx_obs/(($nobs-1)*sd_r^2)
 </pre>
 </div>
-<pre class="example" id="org404e1e0">
+<pre class="example" id="org06e841b">
 Con n = 400:  Sxx observado = 205,76   (tipico: 196,96)
              Var[b2|X] condicional teorica = 213046,34
              cociente Sxx observado/tipico = 1,045  &lt;- lo que cabe esperar de var_B/var_A
 </pre>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org321c469">open "@workdir/repGrande.gdt" --quiet
+<pre class="src src-gretl" id="orgb773a98">open "@workdir/repGrande.gdt" --quiet
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgccd7fea">printf "  regresor FIJO       : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
+<pre class="src src-gretl" id="orga48fdc7">printf "  regresor FIJO       : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
 printf "  regresor REGENERADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
 printf "  cociente observado  : %.3f\n", (sum((bg_var-mean(bg_var))^2))/(sum((bg_fijo-mean(bg_fijo))^2))
 </pre>
 </div>
-<pre class="example" id="orgbf58d65">
+<pre class="example" id="org580a9b4">
   regresor FIJO       : var = 214203,96
   regresor REGENERADO : var = 224464,19
   cociente observado  : 1,048
 </pre>
 </div>
-<div id="outline-container-orgda3ada0" class="outline-4">
-<h4 id="orgda3ada0">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgda3ada0">
+<div id="outline-container-orge73ad16" class="outline-4">
+<h4 id="orge73ad16">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orge73ad16">
 <p>
 Lo primero que conviene mirar no es el tamaño de la diferencia, sino su <i>signo</i>.
 </p>
@@ -673,7 +733,7 @@ En cuanto al tamaño, la diferencia <i>se reduce mucho</i> al pasar de doce a cu
 </ol>
 
 <p>
-Con \(n=400\) el segundo efecto ya es prácticamente inapreciable, y todo lo que queda es el primero. Eso se puede comprobar con las cifras de la salida: el cociente de varianzas que observamos debería parecerse al cociente Sxx observado/típico, que la salida imprime, y en efecto se le parece.<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>
+Con \(n=400\) el segundo efecto ya es prácticamente inapreciable, y todo lo que queda es el primero. Eso se puede comprobar con las cifras de la salida: el cociente de varianzas que observamos debería parecerse al cociente Sxx observado/típico, que la salida imprime, y en efecto se le parece.
 </p>
 
 <p>
@@ -704,9 +764,9 @@ La conclusión práctica es que con muestras grandes la distinción tiene poca c
 </ul>
 </div>
 </div>
-<div id="outline-container-org0ba5e3c" class="outline-2">
-<h2 id="org0ba5e3c">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org0ba5e3c">
+<div id="outline-container-org58265cb" class="outline-2">
+<h2 id="org58265cb">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org58265cb">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -724,9 +784,9 @@ La conclusión práctica es que con muestras grandes la distinción tiene poca c
 </table>
 </div>
 </div>
-<div id="outline-container-org4938d34" class="outline-2">
-<h2 id="org4938d34">Respuestas</h2>
-<div class="outline-text-2" id="text-org4938d34">
+<div id="outline-container-orgbd2d1ac" class="outline-2">
+<h2 id="orgbd2d1ac">Respuestas</h2>
+<div class="outline-text-2" id="text-orgbd2d1ac">
 <ol class="org-ol">
 <li><i>Las dos preguntas</i>. El experimento A pregunta: ``dadas <i>estas</i> doce viviendas, con estos valores concretos de <code>rooms</code>, ¿cuánto variaría mi estimación si el azar hubiera repartido otras perturbaciones?''. El experimento B pregunta algo más amplio: ``¿cuánto variaría mi estimación entre todos los estudios posibles de doce viviendas, considerando que también podrían haber sido otras las viviendas?''. La primera toma la muestra de regresores como un dato del problema; la segunda la considera parte de lo que podría haber sido distinto.</li>
 
@@ -740,18 +800,10 @@ La conclusión práctica es que con muestras grandes la distinción tiene poca c
 </ol>
 </div>
 </div>
-<div id="footnotes">
-<h2 class="footnotes">Notas al pie de p&aacute;gina: </h2>
-<div id="text-footnotes">
-
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Aquí hemos subido el número de réplicas de \(4\,000\) a \(40\,000\), y merece la pena decir por qué: con \(4\,000\) réplicas el ruido de Montecarlo sobre un cociente de varianzas supera el \(3\%\), del mismo orden que el efecto de un \(4{,}5\%\) que queremos medir. Repitiendo el experimento con distintas semillas, el cociente oscilaba entre \(1{,}00\) y \(1{,}08\); con algunas semillas el efecto <i>parecía</i> desaparecer del todo. Con \(40\,000\) réplicas el cociente se estabiliza por encima de uno y el experimento ilustra lo que pretende ilustrar. El coste es de unos pocos segundos. Un experimento simulado tiene su propia precisión, y conviene asegurarse de que es mejor que el efecto que se quiere ver.</p></div></div>
-
-
 </div>
-</div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-10-29 jue 17:09</p>
+<p class="date">Created: 2026-10-29 jue 17:55</p>
 </div>
 </body>
 </html>
