@@ -93,7 +93,7 @@ set verbose off
 
 * Descripción de la práctica
 
-Cerramos la sesión con tres experimentos que responden a dos preguntas.
+Cerramos la sesión con dos preguntas y cinco experimentos. La actividad 1 responde a la mitad de la primera pregunta con tres perturbaciones distintas en un solo bucle; la actividad 2 responde a la otra mitad con tres experimentos encadenados, cada uno motivado por el resultado del anterior; la actividad 3 responde a la segunda pregunta con un solo experimento.
 
 La primera se planteó al final de la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=6][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#histograma-b2][html]])): el histograma de $\hat\beta_2$ tenía forma de campana, y dijimos que no debíamos sacar conclusiones de ello porque habíamos /impuesto/ esa forma al generar las perturbaciones con una normal. Ahora lo comprobamos: ¿qué ocurre si las generamos con distribuciones muy alejadas de la normal?
 
@@ -218,7 +218,7 @@ end outfile
 
 *** Lo que debe observar
 
-Las tres medias quedan cerca de $\beta_2$ y las tres varianzas cerca de $\sigma^2/\mathrm{Sxx}$. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a marcadamente asimétrica) no cambia ni el valor esperado ni la varianza.
+Las tres medias, $9130$, $9126$ y $9119$, quedan junto a $\beta_2=9120$, y las tres varianzas, $178\,000$, $170\,000$ y $178\,000$, junto a los $175\,845$ que predice la fórmula: desviaciones de entre el $1$ y el $3\%$, el error de Montecarlo de 2000 réplicas. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a marcadamente asimétrica) no cambia ni el valor esperado ni la varianza.
 
 Es lo que la lección 11 demostró. Merece la pena volver sobre aquella demostración y comprobar qué se usó en cada paso.
 
@@ -232,6 +232,8 @@ En ningún punto se dijo /qué distribución/ tiene $U$. Solo se usaron su esper
 :PROPERTIES:
 :CUSTOM_ID: forma
 :END:
+
+*** Primer experimento: 506 viviendas y perturbación $\chi^2_4$
 
 Que el valor esperado y la varianza no dependan de la distribución de $U$ no significa que /nada/ dependa de ella. Veamos los histogramas. =freq b_chi --normal= dibuja, como en la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=6][actividad 5]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#histograma-b2][html]])), el histograma de las estimaciones obtenidas con perturbación chi-cuadrado, con la normal superpuesta y el contraste de normalidad.
 
@@ -259,9 +261,11 @@ freq b_chi --normal --plot="@workdir/hist_chi_grande.png"
 #+CAPTION: Distribución de $\hat\beta_2$ con perturbaciones $\chi^2$ (asimétricas) y $n=506$.
 [[file:./S16-Prct-C-sorpresas/hist_chi_grande.png]]
 
-Con las 506 observaciones de =hprice2=, el histograma de $\hat\beta_2$ sigue pareciendo una campana aunque las perturbaciones sean muy asimétricas.
+Lea la salida antes que la figura. El contraste de normalidad no rechaza: valor $p$ de $0{,}89$. Y el histograma es una campana. Con 506 observaciones, la asimetría de la perturbación no llega a $\hat\beta_2$.
 
-Antes de sacar conclusiones, probemos con una muestra pequeña y una asimetría mayor: doce viviendas y perturbaciones $\chi^2$ con /un/ grado de libertad.
+Tiene explicación en la fórmula de la lección 11: $\hat\beta_2=\beta_2\,\mathit1+\sum_iW_iU_i$ suma 506 perturbaciones con pesos pequeños y de los dos signos, y una suma de muchos sumandos pequeños tiende a disimular la forma de cada uno. Para ver si la asimetría de $U$ puede llegar a $\hat\beta_2$ hay que quitarle a la suma lo que la disimula: pocas observaciones y una perturbación más asimétrica. Tomamos doce viviendas, las mismas de la práctica B, y una $\chi^2$ con /un/ grado de libertad, cuyo coeficiente de asimetría es $2\sqrt2\approx2{,}83$ frente a $\sqrt2\approx1{,}41$ de la $\chi^2_4$.
+
+*** Segundo experimento: doce viviendas y perturbación $\chi^2_1$
 
 Cuatro bloques, y un quinto para el histograma. El primero reabre =hprice2=, recupera los parámetros y se queda con doce viviendas: con =set seed 160= y =smpl 12 --random=, las mismas doce de la práctica B ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#doce-viviendas][html]])). El segundo es el bucle: 4000 réplicas con una perturbación chi-cuadrado de un grado de libertad, centrada (se le resta su esperanza, $1$) y reescalada (se divide por su desviación típica, $\sqrt2$, y se multiplica por =sigma=), guardando =b_peq=. El tercero, =AbrirRepCpeq=, abre =repCpeq.gdt=, y el cuarto calcula la media, la desviación típica y el coeficiente de asimetría escrito con sumas: la media de los cubos de las desviaciones dividida por el cubo de la desviación típica. El quinto, =freq b_peq --normal=, dibuja el histograma e imprime la tabla de frecuencias y el contraste de normalidad.
 
@@ -343,9 +347,11 @@ freq b_peq --normal --plot="@workdir/hist_chi_peq.png"
 #+CAPTION: Distribución de $\hat\beta_2$ con perturbaciones $\chi^2$ de un grado de libertad y solo $n=12$. Sigue pareciendo simétrica.
 [[file:./S16-Prct-C-sorpresas/hist_chi_peq.png]]
 
-*** Por qué el histograma sigue siendo simétrico
+*** Lo que debe observar
 
-Aunque la perturbación es muy asimétrica y la muestra es muy pequeña, el histograma de $\hat\beta_2$ /sigue pareciendo simétrico/, y el coeficiente de asimetría que acabamos de calcular sale prácticamente nulo. (El contraste de normalidad de =freq --normal= sí rechaza, pero lo hace por las colas, la curtosis, no por la asimetría.)
+La media, $9209$, y la varianza, $12{,}85$ millones, siguen donde la lección 11 las pone: $\beta_2=9120$ y, para estas doce viviendas, $13{,}42$ millones (es la misma muestra que en la práctica B, con el mismo Sxx de $3{,}27$). Lo que buscábamos era la asimetría, y sale $-0{,}08$: prácticamente nula. El contraste de normalidad sí rechaza (valor $p$ de $0{,}000$), pero no por la asimetría: por las colas, que son más pesadas que las de la normal.
+
+*** Por qué el histograma sigue siendo simétrico
 
 La explicación está, una vez más, en la fórmula de la lección 11:
 \[
@@ -353,11 +359,12 @@ La explicación está, una vez más, en la fórmula de la lección 11:
 \]
 Los pesos $W_i$ son proporcionales a las /desviaciones/ del regresor respecto a su media, y esas desviaciones son negativas para aproximadamente la mitad de las observaciones. Así que $\sum_iW_iU_i$ suma perturbaciones asimétricas hacia la derecha con peso positivo y perturbaciones asimétricas hacia la derecha con peso /negativo/, que al cambiarles el signo quedan asimétricas hacia la izquierda. Las dos asimetrías se compensan en buena medida, y el resultado sale casi simétrico.
 
-*** ¿Perturbación o regresor?
+*** Tercer experimento: ¿perturbación o regresor?
 
-Hay dos causas posibles y todavía no las hemos separado. Cuando el histograma salga asimétrico, ¿será por la distribución de la /perturbación/ o por la del /regresor/?
+La explicación anterior deja una duda. La asimetría no ha llegado a $\hat\beta_2$ porque los pesos $W_i$ de los dos signos la compensan, y los pesos dependen del regresor. Entonces, cuando el histograma salga asimétrico, ¿será por la distribución de la perturbación o por la del regresor? Para saberlo hay que cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y $\chi^2_1$) con dos regresores, con las mismas doce viviendas y 8000 réplicas, y medimos la asimetría de $\hat\beta_2$ en cada uno:
 
-Para separarlos hace falta cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y $\chi^2$ con un grado de libertad) con dos regresores: uno /equilibrado/ (las mismas doce viviendas reales de la práctica B) y otro con una /observación dominante/, en el que once viviendas comparten el mismo valor y una toma un valor muy alejado de ellas.
+- un regresor /equilibrado/: los valores reales de =rooms= de las doce viviendas, con pesos repartidos entre las doce;
+- un regresor con una /observación dominante/: once viviendas con el mismo valor, $6$, y una con $14$. En esta la única desviación grande respecto a la media es la de la primera vivienda, así que su peso $w_1$ domina a los otros once y $\hat\beta_2$ depende casi solo de $U_1$. En la salida este regresor se rotula ``obs. dominante''.
 
 Cuatro bloques. El primero recupera las mismas doce viviendas y define los dos regresores: =x_eq= es una copia de =rooms=; =series x_pal = 6= da el valor 6 a las doce observaciones y =x_pal[1] = 14= cambia solo la primera. El segundo es un bucle de 8000 vueltas con dos perturbaciones por réplica, normal y chi-cuadrado de un grado de libertad, y cuatro regresiones, una por cada combinación de perturbación y regresor; =store= guarda los cuatro coeficientes en =repDD.gdt=. El tercero, =AbrirRepDD=, abre ese fichero, y el cuarto calcula la media y la desviación típica de cada serie y la tabla de asimetrías, con =%8.3f= para alinear las columnas.
 
@@ -421,9 +428,9 @@ scalar s3 = sqrt(sum((eq_chi-m3)^2)/$nobs)
 scalar m4 = mean(pal_chi)
 scalar s4 = sqrt(sum((pal_chi-m4)^2)/$nobs)
 
-printf "ASIMETRIA DE b2 ESTIMADO      regresor equilibrado   regresor con palanca\n"
-printf "perturbacion NORMAL                %8.3f               %8.3f\n", (sum((eq_nor-m1)^3)/$nobs)/s1^3,  (sum((pal_nor-m2)^3)/$nobs)/s2^3
-printf "perturbacion CHI2(1)               %8.3f               %8.3f\n", (sum((eq_chi-m3)^3)/$nobs)/s3^3,  (sum((pal_chi-m4)^3)/$nobs)/s4^3
+printf "ASIMETRIA DE b2 ESTIMADO      regresor equilibrado   regresor obs. dominante\n"
+printf "perturbacion NORMAL                %8.3f                 %8.3f\n", (sum((eq_nor-m1)^3)/$nobs)/s1^3,  (sum((pal_nor-m2)^3)/$nobs)/s2^3
+printf "perturbacion CHI2(1)               %8.3f                 %8.3f\n", (sum((eq_chi-m3)^3)/$nobs)/s3^3,  (sum((pal_chi-m4)^3)/$nobs)/s4^3
 #+end_src
 #+latex: }
 
@@ -476,8 +483,8 @@ freq pal_chi --normal --plot="@workdir/hist_pal_chi.png"
 
 Lea la tabla por filas, que es donde está la respuesta:
 
-- /Fila de arriba (perturbación normal)/: la asimetría es prácticamente nula en las DOS columnas. Por muy desequilibrado que sea el regresor, con perturbaciones normales $\hat\beta_2$ sale simétrico.
-- /Fila de abajo (perturbación $\chi^2$)/: la asimetría es pequeña con el regresor equilibrado y grande con el de observación dominante.
+- /Fila de arriba (perturbación normal)/: $0{,}024$ con el regresor equilibrado y $0{,}032$ con el de observación dominante. Asimetría nula en las dos columnas. Por muy desequilibrado que sea el regresor, con perturbaciones normales $\hat\beta_2$ sale simétrico.
+- /Fila de abajo (perturbación $\chi^2_1$)/: $-0{,}070$ con el regresor equilibrado y $2{,}460$ con el de observación dominante, casi la asimetría de la propia $\chi^2_1$ ($2{,}83$). Con el mismo regresor, la perturbación asimétrica produce un $\hat\beta_2$ asimétrico; con la misma perturbación, el regresor equilibrado la hace desaparecer.
 
 De ahí la respuesta a la pregunta del epígrafe:
 
@@ -583,7 +590,7 @@ end outfile
 
 *** Lo que debe observar
 
-Las dos mil estimaciones son /el mismo número/, y ese número es $\beta_2$. La varianza es cero. El histograma, si lo dibujara, sería una única barra.
+Las 2000 estimaciones son /el mismo número/: media, mínimo y máximo valen $9119{,}548390$, que es $\beta_2$ con seis decimales, y la varianza es $0$ hasta el décimo decimal. El histograma, si lo dibujara, sería una única barra.
 
 La explicación es inmediata a partir de la lección 11, que estableció
 \[
@@ -628,7 +635,7 @@ Es el caso del ejemplo de la lección 7: aquel $\boldsymbol u=(1,-2,0,2,-1)$ era
 
 1. /¿Hace falta normalidad para la insesgadez?/ No, y el experimento lo confirma: con perturbaciones uniformes y con perturbaciones muy asimétricas la media de las estimaciones sigue quedando en $\beta_2$. La razón está en la demostración de la lección 11: la insesgadez sale de tomar esperanza condicional en $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$, usar el lema para sacar los $W_i$ fuera, y aplicar $E[U_i\mid\boldsymbol X]=\mathit 0$. Ese supuesto habla de la /esperanza condicional/ de $U$, no de su distribución. Una uniforme y una chi-cuadrado centrada tienen esperanza condicional cero igual que una normal, y eso es cuanto se necesita.
 
-2. /¿Es irrelevante la normalidad?/ Hay que separar dos cosas. Lo que la práctica /demuestra/ es que la insesgadez y la fórmula de la varianza no requieren normalidad: se cumplen con las tres distribuciones ensayadas. Lo que la práctica solo /sugiere/, y no prueba, es algo sobre la forma: con muchas observaciones el histograma de $\hat\beta_2$ tiende a parecer una campana aunque $U$ no sea normal, mientras que con pocas observaciones el contraste de normalidad puede rechazar (en la Actividad 2 lo hace por la curtosis, aunque el histograma siga pareciendo simétrico) y, cuando una observación domina el regresor, el histograma hereda la asimetría de $U$. De ahí no se puede concluir que la normalidad sea innecesaria. Puede concluirse, como mucho, que el papel de ese supuesto es más sutil de lo que parecía, y que hace falta un resultado teórico, que aquí no tenemos, para saber cuándo cabe prescindir de él. El [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf][apéndice]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html][html]]) separa las dos cosas en dos resultados: insesgadez y varianza solo usan que las coordenadas del ruido son ortogonales y de la misma longitud (Resultados 1 y 2), y eso vale para la uniforme y para la $\chi^2$; la forma exacta $t_{n-k}$ o $F_{q,n-k}$ usa que sean independientes (Resultado 3), y eso solo lo da la normal.
+2. /¿Es irrelevante la normalidad?/ Hay que separar dos cosas. Lo que la práctica /demuestra/ es que la insesgadez y la fórmula de la varianza no requieren normalidad: se cumplen con las tres distribuciones ensayadas. Lo que la práctica solo /sugiere/, y no prueba, es algo sobre la forma: con muchas observaciones el histograma de $\hat\beta_2$ tiende a parecer una campana aunque $U$ no sea normal, mientras que con pocas observaciones el contraste de normalidad puede rechazar (en la Actividad 2 lo hace por la curtosis, aunque el histograma siga pareciendo simétrico) y, cuando una observación domina el regresor, el histograma hereda la asimetría de $U$. De ahí no se puede concluir que la normalidad sea innecesaria. Puede concluirse, como mucho, que el papel de ese supuesto es más sutil de lo que parecía, y que hace falta un resultado teórico, que aquí no tenemos, para saber cuándo cabe prescindir de él. El [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf][apéndice]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html][html]]) separa las dos cosas en dos resultados: insesgadez y varianza solo usan que las coordenadas de la perturbación son ortogonales y de la misma longitud (Resultados 1 y 2), y eso vale para la uniforme y para la $\chi^2$; la forma exacta $t_{n-k}$ o $F_{q,n-k}$ usa que sean independientes (Resultado 3), y eso solo lo da la normal.
 
 3. /Varianza cero/. Porque hemos construido cada perturbación de modo que $\sum_iw_iu_i=0$ exactamente en cada muestra, de forma que $\hat\beta_2=\beta_2$ siempre, sin variabilidad alguna. No contradice la fórmula de la lección 11, sino que ilustra su alcance: aquella fórmula calcula la varianza de $\hat\beta_2$ /bajo los supuestos del modelo/, entre los cuales está que $\boldsymbol U$ sea aleatoria con $E[U_i\mid\boldsymbol X]=\mathit 0$. Nuestras perturbaciones fabricadas no cumplen ese modelo: no son un sorteo libre, sino un sorteo al que después le hemos impuesto una restricción que depende de $\boldsymbol X$. Al condicionar el sorteo a esa restricción hemos salido del marco en el que la fórmula era válida.
 

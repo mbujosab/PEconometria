@@ -1,0 +1,197 @@
+#+TITLE: Revisión de S16-B y S16-C: qué se hace, por qué y qué se obtiene
+#+DATE: 2026-10-29
+#+OPTIONS: toc:nil
+
+Origen: el autor, tras leer las tres prácticas de la sesión 16 el 29-10, juzga que S16-B y S16-C «se siguen peor que S16-A» y que «requieren un poco más de detalle en la descripción de lo que se hace, por qué se hace, y lo que se obtiene». Este documento localiza dónde falta cada una de las tres cosas y propone el texto. APLICADO el 29-10 por la noche con el visto bueno del autor («Adelante»); véase «Aplicado» al final. Las cifras citadas son las de las salidas actuales de Gretl (carpetas =S16-Prct-B-condicionar/= y =S16-Prct-C-sorpresas/=).
+
+* Diagnóstico: por qué A se sigue y B y C no
+
+S16-A tiene un ritmo fijo por actividad: un párrafo que dice /para qué/ se hace lo que sigue; la lectura «línea a línea» del código; la salida; y un epígrafe «Lo que debe observar» que lee la salida. Además, antes de repetir nada, hace /una/ réplica a mano (actividad 2). B y C rompen ese ritmo en cinco puntos:
+
+1. *Bucles sin salida ni lectura.* En S16-B las actividades 2 y 3 son un bucle cada una, sin ninguna salida y sin «Lo que debe observar»: el lector ejecuta dos experimentos a ciegas y no ve nada hasta la actividad 4. En S16-A cada bucle imprime al menos un aviso y se lee enseguida.
+2. *Lo nuevo entra directamente dentro de un bucle.* La idea nueva de S16-B, sortear también el regresor, aparece por primera vez como una línea dentro de =loop=. El lector nunca ve un sorteo suelto de =xnew= ni su Sxx frente al de las doce viviendas observadas.
+3. *Salidas que no se leen con cifras.* S16-B, actividad 1: la salida da 3,27 frente a 5,43 y una varianza de 13,4 millones, y el texto solo dice «compare las dos últimas cifras». Actividad 4: «Lo que debe observar» no cita ninguna cifra. S16-C, actividad 2: se imprimen un valor $p$ de 0,89, una media de 9209, una varianza de 12,85 millones y una tabla 2×2, y el texto solo lee la asimetría.
+4. *Decisiones de diseño sin motivo.* Por qué 4000 réplicas en B (A usaba 2000); por qué =xnew= se sortea de una normal con la media y la desviación típica de las 506 viviendas; qué es el «Sxx típico» y por qué vale $(n-1)\,\mathrm{sd}^2$; por qué en C se pasa de $n=506$ a $n=12$ y de $\chi^2_4$ a $\chi^2_1$; por qué después se sospecha del regresor.
+5. *Un encadenamiento sin mapa en S16-C.* La descripción anuncia «tres experimentos que responden a dos preguntas», pero la actividad 2 contiene tres experimentos distintos (506 viviendas, doce viviendas, el 2×2), y las transiciones son de una línea («Antes de sacar conclusiones, probemos…», «Hay dos causas posibles y todavía no las hemos separado»).
+
+Lo que sigue arregla esos cinco puntos sin cambiar ningún experimento, ninguna cifra ni ninguna conclusión. Los cambios de código son tres y pequeños (B2, B3 y C3), marcados; exigen regenerar las salidas con =make=.
+
+* S16-B
+
+** B1. Actividad 1: leer la salida (texto; sin código)
+
+Sustituir el párrafo «Compare ahora las dos últimas cifras…» por un epígrafe, y añadir antes la explicación del «Sxx típico»:
+
+#+begin_quote
+Una cifra de la salida necesita explicación: el «Sxx típico de una muestra de este tamaño», $(n-1)\,\mathrm{sd}_r^2$. La función =sd= de Gretl divide por $n-1$, así que $\mathrm{sd}_r^2$ es la cuasivarianza de =rooms= en las 506 viviendas, y $(n-1)\,\mathrm{sd}_r^2$ es la suma de cuadrados en desviaciones que tendría, en promedio, una muestra de $n$ viviendas sorteadas de esa población (es la esperanza de $\sum_i(X_i-\overline X)^2$, con la regla de su curso de Estadística para la cuasivarianza). Es el patrón con el que vamos a comparar el Sxx de las doce viviendas que nos han tocado.
+
+,*** Lo que debe observar
+
+Tres cifras. La primera, el Sxx de nuestras doce viviendas, $3{,}27$, frente al típico de doce viviendas cualesquiera, $5{,}43$: las doce que han salido tienen valores de =rooms= menos dispersos de lo habitual (desviación típica $0{,}545$ frente a $0{,}703$ en las 506). La segunda, la varianza que la lección 11 predice para esta muestra, unos $13{,}4$ millones, es decir, una desviación típica de $3663$ dólares por habitación para una pendiente verdadera de $9120$: con doce viviendas la estimación es muy imprecisa, y esa imprecisión es lo que hace visible la diferencia que buscamos. Guarde la primera comparación, $3{,}27$ frente a $5{,}43$: explica el signo de todo lo que sigue.
+#+end_quote
+
+** B2. Actividad 2: por qué 4000 réplicas, aviso al salir del bucle y qué se tiene (texto + un =printf=)
+
+Sustituir el párrafo único por:
+
+#+begin_quote
+Es el experimento de la práctica A sin más cambio que el tamaño muestral: las doce viviendas en lugar de las 506. Cada vuelta sortea la perturbación, construye =y=, estima con =ols --quiet= y guarda el coeficiente =b_fijo= como una fila más de =repFijo.gdt=. Usamos =R = 4000= réplicas, el doble que en la práctica A: la varianza empírica de $R$ réplicas tiene su propio error de Montecarlo, del orden de $\sqrt{2/R}$ en términos relativos (un $3\,\%$ con 2000, un $2\,\%$ con 4000), y queremos que sea pequeño frente a la diferencia entre los dos experimentos, que resultará ser mucho mayor.
+#+end_quote
+
+Después del bucle, como en la práctica A, un bloque =AvisoA= con =printf "Hecho: %d replicas con el regresor fijo guardadas en repFijo.gdt\n", R= y su salida, seguido de:
+
+#+begin_quote
+Todavía no miramos las estimaciones: las compararemos en la actividad 4 junto a las del experimento B. Lo que tenemos ahora es un fichero con 4000 estimaciones de $\beta_2$, todas obtenidas con las /mismas/ doce viviendas y distintas perturbaciones.
+#+end_quote
+
+DECIDE EL AUTOR la frase del error de Montecarlo: $\sqrt{2/R}$ es la desviación típica relativa de la varianza empírica con datos normales; es correcta, pero es una afirmación que la práctica no demuestra.
+
+** B3. Actividad 3: el porqué del diseño, un sorteo a mano antes del bucle, aviso y qué se tiene (texto + un bloque nuevo + un =printf=)
+
+Sustituir el párrafo único por tres, con un bloque de código nuevo entre el primero y el segundo:
+
+#+begin_quote
+Ahora decimos «no solo podría haber sido otra la perturbación; también podrían haber sido otras las doce viviendas». Para eso hace falta una población de la que sortear viviendas nuevas, y no tenemos más que las 506 de =hprice2=. La solución más simple es quedarse con su media y su desviación típica, $\mu_r=6{,}28$ y $\mathrm{sd}_r=0{,}70$, y sortear de una normal con esos dos números: =mu_r + sd_r*normal(0,1)= son doce sorteos de una normal estándar reescalados a la media y la dispersión del regresor real. No pretende ser el mecanismo que genera las viviendas de Boston; solo fabrica «otras doce viviendas» con la dispersión típica de las reales.
+
+Antes de meterlo en un bucle, un solo sorteo, para ver qué cambia. El bloque sortea un =xnew=, calcula su Sxx y lo imprime junto al de las doce viviendas observadas.
+
+[bloque =UnSorteoX=: =set seed 160=; =series xnew = mu_r + sd_r*normal(0,1)=; =printf "Sxx de las doce viviendas observadas = %.4f\n", Sxx_obs=; =printf "Sxx de doce viviendas sorteadas       = %.4f\n", sum((xnew-mean(xnew))^2)=; con su salida]
+
+El Sxx de las doce viviendas sorteadas no coincide con el de las observadas, y en otro sorteo saldría otro. Eso es lo que el experimento B añade: en cada réplica, además de la perturbación, cambia el regresor y con él su Sxx. En el código del bucle la línea nueva es la primera; después =y= se construye con =xnew=, la regresión se estima sobre =xnew=, y =store= guarda dos escalares por réplica en =repVar.gdt=: el coeficiente =b_var= y =Sxx_i=, la suma de cuadrados en desviaciones del regresor /de esa réplica/. En el experimento A ese número era una constante, $3{,}27$; aquí es una variable aleatoria más, y en ella está la diferencia entre los dos experimentos.
+#+end_quote
+
+Después del bucle, bloque =AvisoB= con =printf "Hecho: %d replicas con regresor nuevo guardadas en repVar.gdt\n", R= y su salida. El párrafo actual «Guardamos también =Sxx_i=…» queda absorbido por el texto de arriba.
+
+Nota de código: el sorteo suelto consume números pseudoaleatorios; para que el bucle del experimento B siga dando las cifras actuales, el bloque =UnSorteoX= debe ir /antes/ del =set seed 160= que precede al bucle (que ya está en el código), así que las salidas de la actividad 4 no cambian. Solo aparece una salida nueva.
+
+** B4. Actividad 4: leer las salidas con cifras (texto)
+
+Sustituir el párrafo introductorio «Tres bloques de =printf=…» por:
+
+#+begin_quote
+Ya tenemos los dos ficheros de réplicas. Ahora ponemos cara a cara tres cosas: lo que predice la lección 11 para nuestras doce viviendas, lo que ha salido con el regresor fijo y lo que ha salido con el regresor sorteado. Tres bloques, cada uno con su salida. El primero imprime la predicción con los escalares que todavía tenemos. El segundo va precedido de =AbrirRepFijo=, que abre =repFijo.gdt= (y borra los escalares, por eso la predicción se imprime antes), y calcula la media y la varianza, con divisor $n$, de =b_fijo=. El tercero va precedido de =AbrirRepVar=, hace lo mismo con =b_var= y añade, con =mean=, =min= y =max=, cuánto ha variado =Sxx_i= de una réplica a otra.
+#+end_quote
+
+Sustituir «Lo que debe observar» por:
+
+#+begin_quote
+Tres hechos, en este orden, con las cifras de las salidas:
+
+1. /El experimento A reproduce la fórmula./ Con el regresor fijo, la varianza empírica de las 4000 estimaciones es $13{,}17$ millones; la lección 11 predecía $13{,}42$ millones con el Sxx de /nuestras doce viviendas/. La diferencia, un $2\,\%$, es el error de Montecarlo. La fórmula de la lección 11 describe este experimento.
+2. /El experimento B da otro resultado./ Con el regresor sorteado en cada réplica, la varianza es $9{,}75$ millones, un $27\,\%$ menor. No es error de Montecarlo: los dos experimentos responden a preguntas distintas.
+3. /Las medias, en cambio, coinciden./ $9062$ en A y $9126$ en B, frente a un $\beta_2$ verdadero de $9120$. La media de 4000 réplicas con desviación típica $3600$ tiene un error del orden de $3600/\sqrt{4000}\approx57$, así que las dos están donde deben. La insesgadez se cumple en los dos diseños; la fórmula de la varianza, no.
+#+end_quote
+
+Y en «De dónde viene la diferencia», sustituir el primer párrafo por:
+
+#+begin_quote
+Mire la última línea de la salida: a lo largo de las réplicas del experimento B, =Sxx_i= ha ido de $0{,}72$ a $19{,}04$, con un promedio de $5{,}45$, que es el Sxx típico de la actividad 1. En el experimento A valía siempre $3{,}27$.
+#+end_quote
+
+El resto del epígrafe («En el experimento A la varianza de $\hat\beta_2$ es $\sigma^2$ dividido por un número fijo…») no cambia.
+
+** B5. Actividad 5: separar el porqué de la mecánica; la nota de las 40 000 réplicas al cuerpo (texto)
+
+Sustituir el párrafo único por tres:
+
+#+begin_quote
+Repetimos el experimento con cuatrocientas viviendas en lugar de doce, dejando todo lo demás igual. La pregunta es si la diferencia entre los dos experimentos sobrevive cuando la muestra es grande, y en qué sentido: la actividad 4 ha dicho que el signo de la diferencia depende de si nuestra muestra concreta está más o menos dispersa que lo típico, y con cuatrocientas viviendas esa comparación puede salir al revés.
+
+Dos cambios respecto a la actividad 4 merecen explicación. El primero: los dos experimentos van en /un solo/ bucle, que en cada vuelta estima primero con =rooms= fijo (coeficiente =bg_fijo=) y después con un regresor nuevo =xnew= y una perturbación nueva =u2= (coeficiente =bg_var=); así las dos series de réplicas tienen el mismo número de vueltas y la misma semilla, y el cociente entre sus varianzas no depende de eso. El segundo: $40\,000$ réplicas en lugar de $4\,000$. Con cuatrocientas viviendas el efecto que buscamos es pequeño, en torno a un $4{,}5\,\%$, y con $4\,000$ réplicas el error de Montecarlo de un cociente de varianzas supera el $3\,\%$: repitiendo el experimento con distintas semillas, el cociente oscilaba entre $1{,}00$ y $1{,}08$, y con algunas semillas el efecto parecía desaparecer. Con $40\,000$ se estabiliza por encima de uno. El coste son unos segundos más. Un experimento simulado tiene su propia precisión, y conviene asegurarse de que es mejor que el efecto que se quiere ver.
+
+Cuatro bloques. El primero reabre =hprice2= y recupera los escalares (se perdieron al abrir los ficheros de réplicas), toma cuatrocientas viviendas con =smpl 400 --random= y ejecuta el bucle; =store= guarda los dos coeficientes por réplica en =repGrande.gdt=. El segundo imprime las cifras teóricas, entre ellas el cociente entre el Sxx observado y el típico, que es lo que cabe esperar del cociente entre las dos varianzas. El tercero, =AbrirRepGrande=, abre =repGrande.gdt=, y el cuarto imprime las dos varianzas empíricas y su cociente.
+#+end_quote
+
+La nota al pie actual (=[fn::Aquí hemos subido el número de réplicas…]=) desaparece, porque su contenido pasa al segundo párrafo. «Lo que debe observar» ya lee las cifras y no cambia.
+
+* S16-C
+
+** C1. Descripción: un mapa de las actividades (texto)
+
+Sustituir «Cerramos la sesión con tres experimentos que responden a dos preguntas.» por:
+
+#+begin_quote
+Cerramos la sesión con dos preguntas y cinco experimentos. La actividad 1 responde a la mitad de la primera pregunta con tres perturbaciones distintas en un solo bucle; la actividad 2 responde a la otra mitad con tres experimentos encadenados, cada uno motivado por el resultado del anterior; la actividad 3 responde a la segunda pregunta con un solo experimento.
+#+end_quote
+
+(Los cinco: tres perturbaciones; $n=506$ con $\chi^2_4$; $n=12$ con $\chi^2_1$; el 2×2; la perturbación ortogonal. Si se prefiere contar bucles, son cinco bucles.)
+
+** C2. Actividad 1: leer la salida con cifras (texto)
+
+Sustituir el primer párrafo de «Lo que debe observar» por:
+
+#+begin_quote
+Las tres medias, $9130$, $9126$ y $9119$, quedan junto a $\beta_2=9120$, y las tres varianzas, $178\,000$, $170\,000$ y $178\,000$, junto a los $175\,845$ que predice la fórmula: desviaciones de entre el $1$ y el $3\,\%$, el error de Montecarlo de 2000 réplicas. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a marcadamente asimétrica) no cambia ni el valor esperado ni la varianza.
+#+end_quote
+
+** C3. Actividad 2: tres experimentos, cada uno con su porqué, su mecánica y su lectura (texto; un rótulo de =printf=)
+
+Reorganizar la actividad en tres epígrafes de tercer nivel. El contenido de los bloques de código no cambia, salvo un rótulo (abajo).
+
+*** Primer experimento: 506 viviendas y perturbación $\chi^2_4$
+
+El párrafo de apertura actual («Que el valor esperado y la varianza no dependan…») se mantiene. Después de la figura, sustituir «Con las 506 observaciones de =hprice2=, el histograma … muy asimétricas.» y «Antes de sacar conclusiones, probemos…» por:
+
+#+begin_quote
+Lea la salida antes que la figura. El contraste de normalidad no rechaza: valor $p$ de $0{,}89$. Y el histograma es una campana. Con 506 observaciones, la asimetría de la perturbación no llega a $\hat\beta_2$.
+
+Tiene explicación en la fórmula de la lección 11: $\hat\beta_2=\beta_2\,\mathit1+\sum_iW_iU_i$ suma 506 perturbaciones con pesos pequeños y de los dos signos, y una suma de muchos sumandos pequeños tiende a disimular la forma de cada uno. Para ver si la asimetría de $U$ puede llegar a $\hat\beta_2$ hay que quitarle a la suma lo que la disimula: pocas observaciones y una perturbación más asimétrica. Tomamos doce viviendas, las mismas de la práctica B, y una $\chi^2$ con /un/ grado de libertad, cuyo coeficiente de asimetría es $2\sqrt2\approx2{,}83$ frente a $\sqrt2\approx1{,}41$ de la $\chi^2_4$.
+#+end_quote
+
+*** Segundo experimento: doce viviendas y perturbación $\chi^2_1$
+
+El párrafo «Cuatro bloques, y un quinto para el histograma…» se mantiene. Añadir, antes de «Por qué el histograma sigue siendo simétrico», la lectura de la salida:
+
+#+begin_quote
+,*** Lo que debe observar
+
+La media, $9209$, y la varianza, $12{,}85$ millones, siguen donde la lección 11 las pone: $\beta_2=9120$ y, para estas doce viviendas, $13{,}42$ millones (es la misma muestra que en la práctica B, con el mismo Sxx de $3{,}27$). Lo que buscábamos era la asimetría, y sale $-0{,}08$: prácticamente nula. El contraste de normalidad sí rechaza (valor $p$ de $0{,}000$), pero no por la asimetría: por las colas, que son más pesadas que las de la normal.
+#+end_quote
+
+El epígrafe «Por qué el histograma sigue siendo simétrico» se mantiene, sin su primera frase, que repite lo anterior; empieza en «La explicación está, una vez más, en la fórmula de la lección 11».
+
+*** Tercer experimento: ¿perturbación o regresor?
+
+Sustituir los dos primeros párrafos del epígrafe («Hay dos causas posibles…» y «Para separarlos hace falta cambiar una cosa cada vez…») por:
+
+#+begin_quote
+La explicación anterior deja una duda. La asimetría no ha llegado a $\hat\beta_2$ porque los pesos $W_i$ de los dos signos la compensan, y los pesos dependen del regresor. Entonces, cuando el histograma salga asimétrico, ¿será por la distribución de la perturbación o por la del regresor? Para saberlo hay que cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y $\chi^2_1$) con dos regresores, con las mismas doce viviendas y 8000 réplicas, y medimos la asimetría de $\hat\beta_2$ en cada uno:
+
+- un regresor /equilibrado/: los valores reales de =rooms= de las doce viviendas, con pesos repartidos entre las doce;
+- un regresor con una /observación dominante/: once viviendas con el mismo valor, $6$, y una con $14$. En esta la única desviación grande respecto a la media es la de la primera vivienda, así que su peso $w_1$ domina a los otros once y $\hat\beta_2$ depende casi solo de $U_1$. En la salida este regresor se rotula «con observación dominante».
+#+end_quote
+
+Código: en =DosPorDosResultado=, el rótulo =regresor con palanca= pasa a =regresor con obs. dominante= (y la cabecera, por anchura, a =regresor equilibrado   regresor obs. dominante=). «Palanca» no aparece en ningún otro sitio de la práctica ni del curso.
+
+Sustituir el primer bloque de «Lo que debe observar» (los dos guiones) por:
+
+#+begin_quote
+Lea la tabla por filas, que es donde está la respuesta:
+
+- /Fila de arriba (perturbación normal)/: $0{,}024$ con el regresor equilibrado y $0{,}032$ con el de observación dominante. Asimetría nula en las dos columnas. Por muy desequilibrado que sea el regresor, con perturbaciones normales $\hat\beta_2$ sale simétrico.
+- /Fila de abajo (perturbación $\chi^2_1$)/: $-0{,}070$ con el regresor equilibrado y $2{,}460$ con el de observación dominante, casi la asimetría de la propia $\chi^2_1$ ($2{,}83$). Con el mismo regresor, la perturbación asimétrica produce un $\hat\beta_2$ asimétrico; con la misma perturbación, el regresor equilibrado la hace desaparecer.
+#+end_quote
+
+El resto del epígrafe (la frase central, la explicación con los $w_i$ y su nota, «Lo que el regresor sí controla…») y «Recapitulando las dos preguntas» no cambian.
+
+** C4. Actividad 3: leer la salida con cifras (texto)
+
+Sustituir la primera frase de «Lo que debe observar» por:
+
+#+begin_quote
+Las 2000 estimaciones son /el mismo número/: media, mínimo y máximo valen $9119{,}548390$, que es $\beta_2$ con seis decimales, y la varianza es $0$ hasta el décimo decimal. El histograma, si lo dibujara, sería una única barra.
+#+end_quote
+
+* Qué exige volver a ejecutar Gretl
+
+- B2 y B3: dos =printf= nuevos y un bloque nuevo de un sorteo, con tres salidas nuevas. Las salidas existentes no cambian si el sorteo suelto va antes del =set seed 160= del bucle (B3, nota de código).
+- C3: un rótulo en un =printf=; la salida =dosPorDos.txt= cambia solo en el texto del rótulo.
+- Todo lo demás es texto. Se regenera con =make org-pract/S16-Prct-B-condicionar.pdf= (y =.html=) y lo mismo para C; el bucle de 40 000 vueltas de B tarda unos segundos.
+
+* Lo que no se toca
+
+Los experimentos, las semillas, las cifras, las conclusiones, las preguntas y las respuestas. Tampoco la nota al pie de la actividad 2 de C sobre no generalizar el paso de los $w_i$, ni la tabla «Recapitulando las dos preguntas».
+
+* Aplicado (29-10, noche)
+
+Todo lo propuesto, B1 a B5 y C1 a C4, con tres ajustes: los porcentajes en modo matemático van como $3\%$ y no como $3\,\%$ (babel-spanish da «Incompatible glue units» con =\,\%=); «ruido» → «perturbación» en la respuesta 2 de C; y el enlace de la lección 14 a la pregunta 4 de S16-B pasa de la página 7 a la 8, porque S16-B tiene ahora 12 páginas. Salidas regeneradas con =make=: las cifras existentes no cambian (comprobado con =diff= contra copia previa); salidas nuevas =avisoA.txt=, =unSorteoX.txt= (Sxx sorteado 3,1687 frente a 3,2670) y =avisoB.txt=; =dosPorDos.txt= solo cambia el rótulo. =comprobar-paginas.py= sin avisos nuevos. Ficha 7.17 anotada.
