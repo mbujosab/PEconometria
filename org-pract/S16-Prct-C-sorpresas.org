@@ -134,28 +134,28 @@ Un solo bucle que hace tres experimentos por vuelta. Antes del bucle: el mundo a
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 scalar Sxx     = sum((rooms-mean(rooms))^2)
-scalar var_teo = sigma^2 / Sxx
+scalar Var_b2_en_X_observada = sigma^2 / Sxx
 scalar a_unif  = sigma*sqrt(3)          # semiamplitud de la uniforme
 
 scalar R = 2000
 set seed 20261030
 loop R --progressive --quiet
     series u_nor = normal(0, sigma)
-    series y1 = b1_true + b2_true*rooms + u_nor
+    series y1 = beta1_verdadero + beta2_verdadero*rooms + u_nor
     ols y1 const rooms --quiet
     scalar b_nor = $coeff(rooms)
 
     series u_uni = -a_unif + 2*a_unif*uniform(0,1)
-    series y2 = b1_true + b2_true*rooms + u_uni
+    series y2 = beta1_verdadero + beta2_verdadero*rooms + u_uni
     ols y2 const rooms --quiet
     scalar b_uni = $coeff(rooms)
 
     series u_chi = (randgen(X,4) - 4)/sqrt(8) * sigma
-    series y3 = b1_true + b2_true*rooms + u_chi
+    series y3 = beta1_verdadero + beta2_verdadero*rooms + u_chi
     ols y3 const rooms --quiet
     scalar b_chi = $coeff(rooms)
 
@@ -175,8 +175,8 @@ Los tres bloques siguientes imprimen la teoría, con los escalares aún disponib
 #+NAME: ComparacionTresTeoria
 #+begin_src gretl :eval no
 printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
-printf "beta_2     = %.4f\n", b2_true
-printf "Var[b2|X]  = %.2f   (desv. tipica %.2f)\n\n", var_teo, sqrt(var_teo)
+printf "beta_2     = %.4f\n", beta2_verdadero
+printf "Var[b2|X]  = %.2f   (error estandar %.2f)\n\n", Var_b2_en_X_observada, sqrt(Var_b2_en_X_observada)
 #+end_src
 #+latex: }
 
@@ -275,8 +275,8 @@ Cuatro bloques, y un quinto para el histograma. El primero reabre =hprice2=, rec
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 
 set seed 160
@@ -288,7 +288,7 @@ smpl 12 --random
 set seed 99
 loop 4000 --progressive --quiet
     series u_p = (randgen(X,1) - 1)/sqrt(2) * sigma     # chi2 con 1 g.l., muy asimetrica
-    series y_p = b1_true + b2_true*rooms + u_p
+    series y_p = beta1_verdadero + beta2_verdadero*rooms + u_p
     ols y_p const rooms --quiet
     scalar b_peq = $coeff(rooms)
     store "@workdir/repCpeq.gdt" b_peq
@@ -374,8 +374,8 @@ Cuatro bloques. El primero recupera las mismas doce viviendas y define los dos r
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 
 set seed 160
@@ -392,19 +392,19 @@ loop 8000 --progressive --quiet
     series u_nor = normal(0, sigma)                     # perturbacion normal
     series u_chi = (randgen(X,1) - 1)/sqrt(2) * sigma   # perturbacion chi2(1)
 
-    series y1 = b1_true + b2_true*x_eq + u_nor
+    series y1 = beta1_verdadero + beta2_verdadero*x_eq + u_nor
     ols y1 const x_eq --quiet
     scalar eq_nor = $coeff(x_eq)
 
-    series y2 = b1_true + b2_true*x_pal + u_nor
+    series y2 = beta1_verdadero + beta2_verdadero*x_pal + u_nor
     ols y2 const x_pal --quiet
     scalar pal_nor = $coeff(x_pal)
 
-    series y3 = b1_true + b2_true*x_eq + u_chi
+    series y3 = beta1_verdadero + beta2_verdadero*x_eq + u_chi
     ols y3 const x_eq --quiet
     scalar eq_chi = $coeff(x_eq)
 
-    series y4 = b1_true + b2_true*x_pal + u_chi
+    series y4 = beta1_verdadero + beta2_verdadero*x_pal + u_chi
     ols y4 const x_pal --quiet
     scalar pal_chi = $coeff(x_pal)
 
@@ -528,8 +528,8 @@ Antes del bucle, el mundo artificial. En cada vuelta: =u0= es un sorteo normal e
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 
 set seed 20261030
@@ -538,7 +538,7 @@ loop 2000 --progressive --quiet
     ols u0 const rooms --quiet
     series uex = $uhat                                    # ortogonal EXACTAMENTE a 1 y a rooms
     series uex = uex / sqrt(sum(uex^2)/$nobs) * sigma      # y con varianza exactamente sigma^2
-    series y_e = b1_true + b2_true*rooms + uex
+    series y_e = beta1_verdadero + beta2_verdadero*rooms + uex
     ols y_e const rooms --quiet
     scalar b_exa = $coeff(rooms)
     store "@workdir/repExacta.gdt" b_exa
@@ -548,7 +548,7 @@ endloop
 
 #+NAME: UExactaTeoria
 #+begin_src gretl :eval no
-printf "beta_2 verdadero = %.6f\n", b2_true
+printf "beta_2 verdadero = %.6f\n", beta2_verdadero
 #+end_src
 #+latex: }
 

@@ -93,11 +93,11 @@ set verbose off
 
 * Descripción de la práctica
 
-Qué es condicionar en $\boldsymbol X$ ya está definido con precisión: la lección 9 presentó $E[Z\mid\boldsymbol X]$ como la proyección ortogonal de $Z$ sobre las funciones de $\boldsymbol X$, y la lección 11 trabajó con esa definición. Esta práctica busca otra cosa: la /consecuencia observable/ de condicionar, es decir, qué cambia en los números cuando se condiciona y cuando no.
+Qué es condicionar en $\boldsymbol X$ ya está definido con precisión: la lección 9 presentó $E[Z\mid\boldsymbol X]$ como la proyección ortogonal de $Z$ sobre las funciones de $\boldsymbol X$, y la lección 11 trabajó con esa definición. Esta práctica busca otra cosa: la /consecuencia observable/ de condicionar, es decir, qué distingue en los números la varianza condicional evaluada en la muestra observada de la varianza incondicional.
 
-En la práctica A mantuvimos el regresor =rooms= fijo a lo largo de las 2000 réplicas, y solo dejamos cambiar la perturbación. Lo justificamos con una frase: /``eso es lo que significa condicionar en $\boldsymbol X$''/. En la imagen de la matriz de copias de la lección 11 ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=10][apéndice, sección 3]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-3][html]])), condicionar en $\boldsymbol X$ no es elegir columnas: es proyectar sobre las funciones de $\boldsymbol X$ (lección 9). Mantener el regresor fijo y dejar variar solo la perturbación, bloque de filas a bloque de filas, es la versión experimental de ese condicionamiento.
+En la práctica A ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop][html]])) mantuvimos el regresor =rooms= fijo a lo largo de las 2000 réplicas, y solo dejamos cambiar la perturbación. Lo justificamos así: $Var[\hat\beta_2\mid\boldsymbol X]$ es una función de $\boldsymbol X$, y el experimento evalúa esa función en el $\omega$ observado, donde $\boldsymbol X$ vale =rooms=. Condicionar en $\boldsymbol X$ es otra cosa: proyectar sobre las funciones de $\boldsymbol X$ (lección 9); de esa proyección sale la función, y el ordenador solo la evalúa. En la imagen de la matriz de copias de la lección 11 ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=10][apéndice, sección 3]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-3][html]])), fijar el regresor es quedarse con sus $n$ valores en la columna que ocurrió y recorrer, bloque de filas a bloque de filas, solo copias nuevas de la perturbación.
 
-Esta práctica pone esa frase a prueba haciendo lo contrario. Vamos a repetir el mismo experimento de Montecarlo dos veces:
+Esta práctica hace lo contrario. Vamos a repetir el mismo experimento de Montecarlo dos veces:
 
 - /Experimento A/: el regresor se fija una vez y no cambia; solo cambia la perturbación.
 - /Experimento B/: en cada réplica se sortea /también/ un regresor nuevo.
@@ -107,15 +107,18 @@ Si la distinción fuera irrelevante, ambos experimentos darían lo mismo. Veremo
 /Objetivos/
 
 1. Comprobar que la fórmula $Var[\hat\beta_2\mid\boldsymbol X]=\sigma^2/\sum_i(X_i-\overline{X})^2$ describe el experimento A, no el B.
-2. Ver qué consecuencia numérica concreta tiene el condicionamiento en $Var[\cdot\mid\boldsymbol X]$, que las lecciones 9 y 11 ya definieron con precisión.
+2. Ver qué consecuencia numérica tiene condicionar en $\boldsymbol X$, operación que las lecciones 9 y 11 ya definieron con precisión.
 3. Ver que la insesgadez, en cambio, se cumple en /ambos/ experimentos, y entender por qué las dos propiedades se comportan de forma distinta.
 4. Apreciar por qué el resultado que reportan los programas estadísticos es siempre el condicional.
 
-/Advertencia de diseño/. Para que la diferencia se vea con claridad, trabajaremos con una muestra deliberadamente /pequeña/: doce viviendas. Cuanto mayor es la muestra, menos importa la distinción que queremos ilustrar, y con las 506 observaciones de la práctica A costaría apreciarla. En la última actividad repetiremos el experimento con una muestra grande para comprobar precisamente eso.
+/Advertencia de diseño/. Para que la diferencia se vea con claridad, trabajaremos con una muestra deliberadamente /pequeña/: doce viviendas. Cuanto mayor es la muestra, menos importa la distinción que queremos ilustrar, y con las 506 observaciones de la práctica A costaría apreciarla. En la Actividad 5 repetiremos el experimento con una muestra grande para comprobar eso.
 
 /Comandos nuevos de esta práctica/. Todo el aparato es el de la práctica A: =open=, =ols --quiet= y sus accesores, =loop --progressive=, =store= y la apertura del fichero de réplicas con =open "@workdir/…"=. Lo nuevo:
 - =smpl 12 --random= :: elige al azar doce observaciones del conjunto de datos y restringe la muestra a ellas; a partir de ahí =$nobs= vale 12 y las funciones sobre series actúan solo sobre esas doce. Con =set seed= delante, siempre salen las mismas.
-- =sd(x)= :: desviación típica de una serie, con divisor $n-1$ (sesión 7).
+- =matrix pob_rooms = {rooms}= :: copia la serie en una matriz columna (práctica D de la sesión 14, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#matriz-regresores][html]])); la matriz no se ve afectada por =smpl=, y por eso conserva las 506 viviendas cuando la muestra se restringe a doce.
+- =muniform(r, c)= :: matriz de $r\times c$ sorteos uniformes entre 0 y 1.
+- =ceil(x)= :: redondeo hacia arriba al entero; =ceil(N * muniform(12,1))= da doce índices enteros entre 1 y $N$.
+- =pob_rooms[idx]= :: extrae de la matriz las filas cuyos índices están en =idx=; si un índice se repite, la misma vivienda sale dos veces (sorteo /con reemplazamiento/).
 - =min(x)=, =max(x)= :: mínimo y máximo de una serie.
 - Bloques que empiezan con =open= :: cuando la salida de una actividad mezcla escalares teóricos y series de réplicas, los =printf= van en bloques distintos: el que calcula sobre las réplicas va precedido de =open "@workdir/…"=, que abre su fichero, y desde esa línea los escalares anteriores ya no existen. Por eso los valores teóricos se imprimen siempre antes.
 
@@ -125,9 +128,9 @@ Si la distinción fuera irrelevante, ambos experimentos darían lo mismo. Veremo
 :CUSTOM_ID: doce-viviendas
 :END:
 
-Reutilizamos el mundo artificial de la práctica A (mismos $\beta_1$, $\beta_2$ y $\sigma$), pero nos quedamos solo con doce viviendas, elegidas al azar. Además, anotamos la media y la desviación típica de =rooms= en el conjunto completo: servirán de ``población'' de la que se sortean regresores nuevos en el experimento B.
+Reutilizamos el mundo artificial de la práctica A (mismos $\beta_1$, $\beta_2$ y $\sigma$), pero nos quedamos solo con doce viviendas, elegidas al azar. Además, guardamos las 506 viviendas en una matriz antes de restringir la muestra: son la población de la que el experimento B sorteará viviendas nuevas.
 
-Dos bloques. El primero repite el mundo artificial de la práctica A y añade dos escalares, la media y la desviación típica de =rooms= en las 506 viviendas, que servirán de población del regresor. El segundo imprime esa población, restringe la muestra a doce viviendas con =smpl 12 --random= (después de =set seed 160=, para que sean siempre las mismas doce) y calcula sobre ellas =Sxx_obs=, la suma de cuadrados en desviaciones, y =var_cond=, la varianza que predice la lección 11. El «Sxx típico» que también se imprime es $(n-1)$ veces la varianza poblacional del regresor: lo que cabría esperar de doce viviendas cualesquiera.
+Dos bloques. El primero repite el mundo artificial de la práctica A y guarda los 506 valores de =rooms= en la matriz =pob_rooms=, la población del regresor, y calcula su varianza =var_rooms= con el divisor del curso. El segundo imprime la media y la varianza de esa población, restringe la muestra a doce viviendas con =smpl 12 --random= (después de =set seed 160=, para que sean siempre las mismas doce) y calcula sobre ellas =Sxx_obs=, la suma de cuadrados en desviaciones, y =Var_b2_en_X_observada=, la varianza que predice la lección 11. El «Sxx esperado» que también se imprime es $(n-1)$ veces esa varianza: el valor esperado de Sxx para doce viviendas sorteadas de la población.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -136,28 +139,29 @@ Dos bloques. El primero repite el mundo artificial de la práctica A y añade do
 open hprice2.gdt --quiet
 
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 
-scalar mu_r = mean(rooms)               # "poblacion" del regresor
-scalar sd_r = sd(rooms)
+matrix pob_rooms = {rooms}              # las 506 viviendas: la "poblacion" del regresor
+scalar N         = $nobs
+scalar var_rooms = sum((rooms-mean(rooms))^2)/N
 #+end_src
 
 #+NAME: Preparacion
 #+begin_src gretl :eval no
-printf "Poblacion del regresor: media = %.4f   desv. tipica = %.4f\n", mu_r, sd_r
+printf "Poblacion del regresor (las %d viviendas de hprice2): media = %.4f   varianza = %.4f\n", N, mean(rooms), var_rooms
 
 set seed 160
 smpl 12 --random                        # doce viviendas elegidas AL AZAR
 scalar Sxx_obs  = sum((rooms-mean(rooms))^2)
-scalar var_cond = sigma^2 / Sxx_obs
+scalar Var_b2_en_X_observada = sigma^2 / Sxx_obs
 
 printf "\nSubmuestra observada (n = %d):\n", $nobs
-printf "  media(rooms) = %.4f    desv. tipica(rooms) = %.4f\n", mean(rooms), sd(rooms)
-printf "  Sxx = suma de cuadrados en desviaciones = %.4f\n", Sxx_obs
-printf "  Sxx tipico de una muestra de este tamano = %.4f\n", ($nobs-1)*sd_r^2
-printf "\nVar[b2 | X] que predice la leccion 11 = %.1f   (desv. tipica %.1f)\n", var_cond, sqrt(var_cond)
+printf "  media(rooms) = %.4f    varianza(rooms) = %.4f\n", mean(rooms), sum((rooms-mean(rooms))^2)/$nobs
+printf "  Sxx de estas %d viviendas (suma de cuadrados en desviaciones) = %.4f\n", $nobs, Sxx_obs
+printf "  Sxx esperado para %d viviendas sorteadas de la poblacion     = %.4f\n", $nobs, ($nobs-1)*var_rooms
+printf "\nVar[b2 | X] en estas %d viviendas (formula de la leccion 11) = %.1f   (error estandar %.1f)\n", $nobs, Var_b2_en_X_observada, sqrt(Var_b2_en_X_observada)
 #+end_src
 #+latex: }
 
@@ -176,11 +180,11 @@ Recuerde que =Sxx= es la abreviatura que introdujimos en la práctica A para $\s
 
 Dos detalles del código merecen comentario. El primero es =smpl 12 --random=: elegimos las doce viviendas /al azar/, en lugar de tomar las doce primeras. Es importante, porque =hprice2= viene ordenado por distritos censales y las primeras viviendas se parecen mucho entre sí; tomarlas directamente nos daría una submuestra atípica por un motivo ajeno a lo que queremos estudiar. El segundo es =set seed=, que fija /qué/ doce viviendas salen, para que el resultado sea reproducible.
 
-Una cifra de la salida necesita explicación: el «Sxx típico de una muestra de este tamaño», $(n-1)\,\mathrm{sd}_r^2$. La función =sd= de Gretl divide por $n-1$, así que $\mathrm{sd}_r^2$ es la cuasivarianza de =rooms= en las 506 viviendas, y $(n-1)\,\mathrm{sd}_r^2$ es la suma de cuadrados en desviaciones que tendría, en promedio, una muestra de $n$ viviendas sorteadas de esa población (es la esperanza de $\sum_i(X_i-\overline X)^2$, con la regla de su curso de Estadística para la cuasivarianza). Es el patrón con el que vamos a comparar el Sxx de las doce viviendas que nos han tocado.
+Una cifra de la salida necesita explicación: el «Sxx esperado para 12 viviendas sorteadas de la población», $(n-1)\,\sigma^2_{\boldsymbol x}$, con $\sigma^2_{\boldsymbol x}$ la varianza de =rooms= en las 506 viviendas (lección 4). Si cada una de las doce viviendas se sortea de las 506 con reemplazamiento, las doce son copias idénticas e independientes de una variable con esa varianza, y el valor esperado de $\sum_i(X_i-\overline X)^2$ es $(n-1)\,\sigma^2_{\boldsymbol x}$, la regla de su curso de Estadística para la cuasivarianza. Es el patrón con el que vamos a comparar el Sxx de las doce viviendas que nos han tocado.
 
 *** Lo que debe observar
 
-Tres cifras. La primera, el Sxx de nuestras doce viviendas, $3{,}27$, frente al típico de doce viviendas cualesquiera, $5{,}43$: las doce que han salido tienen valores de =rooms= menos dispersos de lo habitual (desviación típica $0{,}545$ frente a $0{,}703$ en las 506). La segunda, la varianza que la lección 11 predice para esta muestra, unos $13{,}4$ millones, es decir, una desviación típica de $3663$ dólares por habitación para una pendiente verdadera de $9120$: con doce viviendas la estimación es muy imprecisa, y esa imprecisión es lo que hace visible la diferencia que buscamos. Guarde la primera comparación, $3{,}27$ frente a $5{,}43$: explica el signo de todo lo que sigue.
+Tres cifras. La primera es el Sxx de estas doce viviendas, $3{,}27$. La segunda es el Sxx esperado para doce viviendas sorteadas de la población, $5{,}42$: el promedio de Sxx sobre todas las muestras posibles de doce. Las doce que han salido tienen valores de =rooms= menos dispersos que la población: varianza $0{,}272$, frente a $0{,}493$ en las 506. La tercera es $Var[\hat\beta_2\mid\boldsymbol X]$ evaluada en estas doce viviendas, la fórmula de la lección 11 con el $\sigma$ del mundo artificial y este Sxx: unos $13{,}4$ millones. Su raíz es el error estándar de $\hat\beta_2$, $3663$ dólares por habitación, frente a una pendiente verdadera de $9120$. Con doce viviendas la estimación es muy imprecisa, y esa imprecisión es lo que hace visible la diferencia que buscamos. Retenga la comparación entre las dos primeras cifras, $3{,}27$ frente a $5{,}42$: es el primero de los dos efectos que explican el signo de lo que sigue.
 
 
 * Actividad 2 - Experimento A: el regresor se queda quieto
@@ -196,7 +200,7 @@ scalar R = 4000
 set seed 160
 loop R --progressive --quiet
     series u = normal(0, sigma)
-    series y = b1_true + b2_true*rooms + u      # rooms NO cambia
+    series y = beta1_verdadero + beta2_verdadero*rooms + u      # rooms NO cambia
     ols y const rooms --quiet
     scalar b_fijo = $coeff(rooms)
     store "@workdir/repFijo.gdt" b_fijo
@@ -222,21 +226,22 @@ end outfile
 #+include: ./S16-Prct-B-condicionar/avisoA.txt example
 #+latex: }
 
-Todavía no miramos las estimaciones: las compararemos en la actividad 4 junto a las del experimento B. Lo que tenemos ahora es un fichero con 4000 estimaciones de $\beta_2$, todas obtenidas con las /mismas/ doce viviendas y distintas perturbaciones.
+Todavía no miramos las estimaciones: las compararemos en la Actividad 4 junto a las del experimento B. Lo que tenemos ahora es un fichero con 4000 estimaciones de $\beta_2$, todas obtenidas con las /mismas/ doce viviendas y distintas perturbaciones.
 
 
 * Actividad 3 - Experimento B: el regresor también se sortea
 
-Ahora decimos ``no solo podría haber sido otra la perturbación; también podrían haber sido otras las doce viviendas''. Para eso hace falta una población de la que sortear viviendas nuevas, y no tenemos más que las 506 de =hprice2=. La solución más simple es quedarse con su media y su desviación típica, $\mu_r=6{,}28$ y $\mathrm{sd}_r=0{,}70$, y sortear de una normal con esos dos números: =mu_r + sd_r*normal(0,1)= son doce sorteos de una normal estándar reescalados a la media y la dispersión del regresor real. No pretende ser el mecanismo que genera las viviendas de Boston; solo fabrica ``otras doce viviendas'' con la dispersión típica de las reales.
+Ahora decimos ``no solo podría haber sido otra la perturbación; también podrían haber sido otras las doce viviendas''. Para eso hace falta una población de la que sortear viviendas nuevas, y la tenemos: las 506 de =hprice2=, guardadas en =pob_rooms=. En cada réplica sorteamos doce de ellas con reemplazamiento: =muniform(12,1)= da doce números entre 0 y 1, =ceil(N * ...)= los convierte en doce índices entre 1 y 506, y =pob_rooms[idx]= extrae esas doce viviendas. Con reemplazamiento, cada sorteo es una copia idéntica e independiente de la distribución de =rooms= en =hprice2=: la muestra aleatoria de la lección 11, con esa distribución como población. Una misma vivienda puede salir dos veces, y eso es lo que hace independientes a los doce sorteos.
 
-Antes de meterlo en un bucle, un solo sorteo, para ver qué cambia. El bloque sortea un =xnew=, calcula su Sxx y lo imprime junto al de las doce viviendas observadas.
+Antes de incluir el sorteo en el bucle, hacemos uno solo para ver qué cambia. El bloque sortea un =xnew=, calcula su Sxx y lo imprime junto al de las doce viviendas observadas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: UnSorteoX
 #+begin_src gretl :eval no
 set seed 160
-series xnew = mu_r + sd_r*normal(0,1)       # doce viviendas NUEVAS
+matrix idx  = ceil(N * muniform(12,1))      # doce indices entre 1 y 506
+series xnew = pob_rooms[idx]                # doce viviendas de hprice2, con reemplazamiento
 printf "Sxx de las doce viviendas observadas = %.4f\n", Sxx_obs
 printf "Sxx de doce viviendas sorteadas       = %.4f\n", sum((xnew-mean(xnew))^2)
 #+end_src
@@ -252,7 +257,7 @@ end outfile
 #+include: ./S16-Prct-B-condicionar/unSorteoX.txt example
 #+latex: }
 
-El Sxx de las doce viviendas sorteadas no coincide con el de las observadas, y en otro sorteo saldría otro. Eso es lo que el experimento B añade: en cada réplica, además de la perturbación, cambia el regresor y con él su Sxx. En el código del bucle la línea nueva es la primera; después =y= se construye con =xnew=, la regresión se estima sobre =xnew=, y =store= guarda dos escalares por réplica en =repVar.gdt=: el coeficiente =b_var= y =Sxx_i=, la suma de cuadrados en desviaciones del regresor /de esa réplica/. En el experimento A ese número era una constante, $3{,}27$; aquí es una variable aleatoria más, y en ella está la diferencia entre los dos experimentos.
+El Sxx de las doce viviendas sorteadas no coincide con el de las observadas, y en otro sorteo saldría otro. Eso es lo que el experimento B añade: en cada réplica, además de la perturbación, cambia el regresor y con él su Sxx. En el código del bucle las líneas nuevas son las dos primeras; después =y= se construye con =xnew=, la regresión se estima sobre =xnew=, y =store= guarda dos escalares por réplica en =repVar.gdt=: el coeficiente =b_var= y =Sxx_i=, la suma de cuadrados en desviaciones del regresor /de esa réplica/. En el experimento A ese número era una constante, $3{,}27$; aquí es una variable aleatoria más, y en ella está la diferencia entre los dos experimentos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -260,9 +265,10 @@ El Sxx de las doce viviendas sorteadas no coincide con el de las observadas, y e
 #+begin_src gretl :eval no
 set seed 160
 loop R --progressive --quiet
-    series xnew = mu_r + sd_r*normal(0,1)       # doce viviendas NUEVAS
+    matrix idx  = ceil(N * muniform(12,1))      # doce indices entre 1 y 506
+    series xnew = pob_rooms[idx]                # doce viviendas NUEVAS, de hprice2
     series u    = normal(0, sigma)
-    series y    = b1_true + b2_true*xnew + u
+    series y    = beta1_verdadero + beta2_verdadero*xnew + u
     ols y const xnew --quiet
     scalar b_var = $coeff(xnew)
     scalar Sxx_i = sum((xnew-mean(xnew))^2)     # el Sxx de ESTA replica
@@ -290,17 +296,17 @@ end outfile
 #+latex: }
 
 
-* Actividad 4 - Las dos varianzas, cara a cara
+* Actividad 4 - Las dos varianzas, comparadas
 
-Ya tenemos los dos ficheros de réplicas. Ahora ponemos cara a cara tres cosas: lo que predice la lección 11 para nuestras doce viviendas, lo que ha salido con el regresor fijo y lo que ha salido con el regresor sorteado. Tres bloques, cada uno con su salida. El primero imprime la predicción con los escalares que todavía tenemos. El segundo va precedido de =AbrirRepFijo=, que abre =repFijo.gdt= (y borra los escalares, por eso la predicción se imprime antes), y calcula la media y la varianza, con divisor $n$, de =b_fijo=. El tercero va precedido de =AbrirRepVar=, hace lo mismo con =b_var= y añade, con =mean=, =min= y =max=, cuánto ha variado =Sxx_i= de una réplica a otra.
+Ya tenemos los dos ficheros de réplicas. Ahora comparamos tres cosas: lo que predice la lección 11 para nuestras doce viviendas, lo que ha salido con el regresor fijo y lo que ha salido con el regresor sorteado. Tres bloques, cada uno con su salida. El primero imprime la predicción con los escalares que todavía tenemos. El segundo va precedido de =open "@workdir/repFijo.gdt"=, que abre el fichero de réplicas (y borra los escalares, por eso la predicción se imprime antes), y calcula la media y la varianza, con divisor $n$, de =b_fijo=. El tercero va precedido de =open "@workdir/repVar.gdt"=, hace lo mismo con =b_var= y añade, con =mean=, =min= y =max=, cuánto ha variado =Sxx_i= de una réplica a otra.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: ComparacionTeoria
 #+begin_src gretl :eval no
 printf "=== LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===\n"
-printf "beta_2 verdadero  = %.2f\n", b2_true
-printf "Var[b2 | X]       = %.1f\n\n", var_cond
+printf "beta_2 verdadero  = %.2f\n", beta2_verdadero
+printf "Var[b2 | X]       = %.1f\n\n", Var_b2_en_X_observada
 #+end_src
 #+latex: }
 
@@ -347,7 +353,7 @@ open "@workdir/repVar.gdt" --quiet
 
 #+NAME: ComparacionB
 #+begin_src gretl :eval no
-printf "=== EXPERIMENTO B: regresor REGENERADO en cada replica ===\n"
+printf "=== EXPERIMENTO B: regresor REMUESTREADO en cada replica ===\n"
 printf "media de b2hat    = %.2f\n", mean(b_var)
 printf "varianza de b2hat = %.1f\n", sum((b_var-mean(b_var))^2)/$nobs
 printf "\nSxx a lo largo de las replicas del experimento B:\n"
@@ -371,25 +377,109 @@ end outfile
 Tres hechos, en este orden, con las cifras de las salidas:
 
 1. /El experimento A reproduce la fórmula/. Con el regresor fijo, la varianza empírica de las 4000 estimaciones es $13{,}17$ millones; la lección 11 predecía $13{,}42$ millones con el Sxx de /nuestras doce viviendas/. La diferencia, un $2\%$, es el error de Montecarlo. La fórmula de la lección 11 describe este experimento.
-2. /El experimento B da otro resultado/. Con el regresor sorteado en cada réplica, la varianza es $9{,}75$ millones, un $27\%$ menor. No es error de Montecarlo: los dos experimentos responden a preguntas distintas.
-3. /Las medias, en cambio, coinciden/. $9062$ en A y $9126$ en B, frente a un $\beta_2$ verdadero de $9120$. La media de 4000 réplicas con desviación típica $3600$ tiene un error del orden de $3600/\sqrt{4000}\approx57$, así que las dos están donde deben. La insesgadez se cumple en los dos diseños; la fórmula de la varianza, no.
+2. /El experimento B da otro resultado/. Con el regresor sorteado en cada réplica, la varianza es $11{,}51$ millones, un $13\%$ menor. No es error de Montecarlo: los dos experimentos responden a preguntas distintas.
+3. /Las medias, en cambio, coinciden/. $9062$ en A y $9107$ en B, frente a un $\beta_2$ verdadero de $9120$. El promedio de 4000 réplicas de un estimador con error estándar $3663$ tiene a su vez un error estándar del orden de $3663/\sqrt{4000}\approx58$, así que las dos diferencias, $58$ y $13$, son del orden de ese error. La insesgadez se cumple en los dos diseños; la fórmula de la varianza, no.
 
 *** De dónde viene la diferencia
 
-Mire la última línea de la salida: a lo largo de las réplicas del experimento B, =Sxx_i= ha ido de $0{,}72$ a $19{,}04$, con un promedio de $5{,}45$, que es el Sxx típico de la actividad 1. En el experimento A valía siempre $3{,}27$.
+Mire la última línea de la salida: a lo largo de las réplicas del experimento B, =Sxx_i= ha ido de $0{,}42$ a $25{,}57$, con un promedio de $5{,}44$, cerca del Sxx esperado de la Actividad 1, $5{,}42$. En el experimento A valía siempre $3{,}27$.
 
-En el experimento A la varianza de $\hat\beta_2$ es $\sigma^2$ dividido por /un número fijo/. En el experimento B es, en promedio, $\sigma^2$ multiplicado por el promedio de $1/\mathrm{Sxx}$, y el promedio de un cociente no es el cociente de los promedios. Si nuestras doce viviendas concretas resultan tener valores de =rooms= menos dispersos de lo habitual, su Sxx será menor que el típico y, en consecuencia, condicionar en ellas dará una varianza /mayor/ que la que resulta de promediar sobre todos los conjuntos posibles de doce viviendas. Si hubieran salido más dispersas, ocurriría lo contrario.
+En el experimento A la varianza de $\hat\beta_2$ es $\sigma^2$ dividido por un número fijo, $3{,}27$. En el experimento B es $\sigma^2$ multiplicado por el promedio de $1/\mathrm{Sxx}_i$ a lo largo de las réplicas, y el promedio de un cociente no es el cociente de los promedios: $\sigma^2$ dividido por el Sxx medio, $5{,}44$, daría $8{,}1$ millones, lejos de los $11{,}5$ observados; promediar $1/\mathrm{Sxx}$ sobre conjuntos de doce viviendas tan dispares (Sxx entre $0{,}42$ y $25{,}57$) da bastante más que $1/5{,}44$. Dos efectos separan la cifra de B de la de A. El primero es que nuestras doce viviendas tienen un Sxx, $3{,}27$, menor que el esperado, $5{,}42$: la fórmula condicional evaluada en ellas da una varianza mayor que la de un conjunto de doce viviendas con la dispersión de la población. El segundo es ese promedio de $1/\mathrm{Sxx}$, que empuja la varianza de B hacia arriba. Con nuestras doce viviendas pesa más el primer efecto, y B queda por debajo de A. Con otras doce viviendas, más dispersas que la población, ocurriría lo contrario: lo comprobamos a continuación. La Actividad 5 separa los dos efectos.
 
 Esta es la razón por la que la lección 11 se detuvo en la fórmula condicional y solo mencionó brevemente la incondicional: al intentar calcular $\mathrm{Var}(\hat\beta_2)$ aparecía $\mathrm{E}\big(\sigma^2/(nS^2)\big)$, la esperanza de un cociente, que no se simplifica.
 
 
+
+*** Otras doce viviendas, más dispersas que la población
+
+El experimento B no depende de qué doce viviendas hayamos observado: remuestrea las 506 en cada réplica, así que su varianza, $11{,}51$ millones, es la misma sea cual sea la submuestra. El experimento A sí depende de ella. Para ver el signo contrario basta, por tanto, otra submuestra con Sxx mayor que el esperado, y repetir solo el experimento A. Con =set seed 2= salen doce viviendas con Sxx $7{,}39$, frente al esperado $5{,}42$.
+
+Tres bloques. El primero reabre =hprice2=, recupera los escalares, elige esas otras doce viviendas e imprime su Sxx y la varianza que predice la lección 11. El segundo ejecuta sobre ellas el experimento A, con la misma semilla $160$ que en la Actividad 2, y guarda el coeficiente =b_fijo2= en =repFijo2.gdt=; después, =open "@workdir/repFijo2.gdt"= abre ese fichero, y el último =printf= imprime la media y la varianza de las estimaciones.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: OtrasDoceDatos
+#+begin_src gretl :eval no
+open hprice2.gdt --quiet
+ols price const rooms --quiet
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
+scalar sigma     = sqrt($ess/$df)
+scalar var_rooms = sum((rooms-mean(rooms))^2)/$nobs
+
+set seed 2
+smpl 12 --random                        # OTRAS doce viviendas
+scalar Sxx_obs2 = sum((rooms-mean(rooms))^2)
+scalar Var_b2_en_X_observada2 = sigma^2 / Sxx_obs2
+#+end_src
+
+#+NAME: OtrasDoceTeoria
+#+begin_src gretl :eval no
+printf "Sxx de estas otras 12 viviendas = %.4f   (esperado %.4f; las doce de la Actividad 1: 3,2670)\n", Sxx_obs2, 11*var_rooms
+printf "Var[b2 | X] en estas 12 viviendas (formula de la leccion 11) = %.1f\n", Var_b2_en_X_observada2
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+<<OtrasDoceDatos>>
+outfile --quiet otrasDoce.txt
+    <<OtrasDoceTeoria>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-B-condicionar/otrasDoce.txt example
+#+latex: }
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+#+NAME: OtrasDoceBucle
+#+begin_src gretl :eval no
+set seed 160
+loop 4000 --progressive --quiet
+    series u = normal(0, sigma)
+    series y = beta1_verdadero + beta2_verdadero*rooms + u      # rooms NO cambia
+    ols y const rooms --quiet
+    scalar b_fijo2 = $coeff(rooms)
+    store "@workdir/repFijo2.gdt" b_fijo2
+endloop
+#+end_src
+
+#+NAME: AbrirRepFijo2
+#+begin_src gretl :eval no
+open "@workdir/repFijo2.gdt" --quiet
+#+end_src
+
+#+NAME: OtrasDoceResultado
+#+begin_src gretl :eval no
+printf "=== EXPERIMENTO A con las otras doce viviendas: regresor FIJO ===\n"
+printf "media de b_fijo2    = %.2f\n", mean(b_fijo2)
+printf "varianza de b_fijo2 = %.1f\n", sum((b_fijo2-mean(b_fijo2))^2)/$nobs
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S16-Prct-B-condicionar.inp :eval no :exports none :noweb yes
+<<OtrasDoceBucle>>
+<<AbrirRepFijo2>>
+outfile --quiet otrasDoceResultado.txt
+    <<OtrasDoceResultado>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S16-Prct-B-condicionar/otrasDoceResultado.txt example
+#+latex: }
+
+/Lo que debe observar/. Con estas doce viviendas la fórmula de la lección 11 da $5{,}93$ millones, y el experimento A lo reproduce: $5{,}81$ millones, con la media de las estimaciones, $9130$, cerca de $9120$. El experimento B sigue en $11{,}51$ millones, y ahora queda /por encima/ de A, al doble. El signo de la diferencia depende de la muestra observada: con doce viviendas poco dispersas la varianza condicional evaluada en ellas es mayor que la incondicional, y con doce viviendas muy dispersas es menor. Entre tanto, la incondicional no se ha movido, porque no usa la muestra observada.
+
+Hay una segunda lectura, y es la que importa para quien analiza datos reales. El error estándar que informa un programa es la raíz de $Var[\hat\beta_2\mid\boldsymbol X]$ evaluada en los datos que le tocaron: $3663$ dólares por habitación con las primeras doce viviendas y $2435$ con las otras doce, en el mismo mundo artificial y con la misma $\sigma$. Con muestras pequeñas, la precisión que se atribuye a una estimación depende mucho de la muestra concreta con la que se calcula. Con datos reales la dependencia es aún mayor, porque $\sigma^2$ también se sustituye por su estimación $\mathfrak s^2$ (lección 11), que cambia de una muestra a otra.
+
 * Actividad 5 - ¿Y si la muestra fuera grande?
 
-Repetimos el experimento con cuatrocientas viviendas en lugar de doce, dejando todo lo demás igual. La pregunta es si la diferencia entre los dos experimentos sobrevive cuando la muestra es grande, y en qué sentido: la actividad 4 ha dicho que el signo de la diferencia depende de si nuestra muestra concreta está más o menos dispersa que lo típico, y con cuatrocientas viviendas esa comparación puede salir al revés.
+Repetimos el experimento con cuatrocientas viviendas en lugar de doce, dejando todo lo demás igual. La pregunta es si la diferencia entre los dos experimentos sobrevive cuando la muestra es grande, y en qué sentido: la Actividad 4 ha dicho que el signo de la diferencia depende de si nuestra muestra concreta está más o menos dispersa que lo esperado, y con cuatrocientas viviendas esa comparación puede salir al revés.
 
-Dos cambios respecto a la actividad 4 merecen explicación. El primero: los dos experimentos van en /un solo/ bucle, que en cada vuelta estima primero con =rooms= fijo (coeficiente =bg_fijo=) y después con un regresor nuevo =xnew= y una perturbación nueva =u2= (coeficiente =bg_var=); así las dos series de réplicas tienen el mismo número de vueltas y la misma semilla, y el cociente entre sus varianzas no depende de eso. El segundo: $40\,000$ réplicas en lugar de $4\,000$. Con cuatrocientas viviendas el efecto que buscamos es pequeño, en torno a un $4{,}5\%$, y con $4\,000$ réplicas el error de Montecarlo de un cociente de varianzas supera el $3\%$: repitiendo el experimento con distintas semillas, el cociente oscilaba entre $1{,}00$ y $1{,}08$, y con algunas semillas el efecto parecía desaparecer. Con $40\,000$ se estabiliza por encima de uno. El coste son unos segundos más. Un experimento simulado tiene su propia precisión, y conviene asegurarse de que es mejor que el efecto que se quiere ver.
+Dos cambios respecto a las Actividades 2 y 3 merecen explicación. El primero: los dos experimentos van en /un solo/ bucle, que en cada vuelta estima primero con =rooms= fijo (coeficiente =bg_fijo=) y después con un regresor nuevo =xnew= y una perturbación nueva =u2= (coeficiente =bg_var=); así las dos series de réplicas tienen el mismo número de vueltas y la misma semilla, y el cociente entre sus varianzas no depende de eso. El segundo: $40\,000$ réplicas en lugar de $4\,000$. Con cuatrocientas viviendas el efecto que buscamos es pequeño, en torno a un $4{,}7\%$, y con $4\,000$ réplicas el error de Montecarlo de un cociente de varianzas supera el $3\%$: repitiendo el experimento con distintas semillas, el cociente oscilaba entre $0{,}99$ y $1{,}07$, y con alguna semilla el efecto desaparecía. Con $40\,000$ se estabiliza por encima de uno. El coste son unos segundos más. Un experimento simulado tiene su propia precisión, y conviene asegurarse de que su error es menor que el efecto que se quiere ver.
 
-Cuatro bloques. El primero reabre =hprice2= y recupera los escalares (se perdieron al abrir los ficheros de réplicas), toma cuatrocientas viviendas con =smpl 400 --random= y ejecuta el bucle; =store= guarda los dos coeficientes por réplica en =repGrande.gdt=. El segundo imprime las cifras teóricas, entre ellas el cociente entre el Sxx observado y el típico, que es lo que cabe esperar del cociente entre las dos varianzas. El tercero, =AbrirRepGrande=, abre =repGrande.gdt=, y el cuarto imprime las dos varianzas empíricas y su cociente.
+Cuatro bloques. El primero reabre =hprice2= y recupera los escalares (se perdieron al abrir los ficheros de réplicas), toma cuatrocientas viviendas con =smpl 400 --random= y ejecuta el bucle; =store= guarda los dos coeficientes por réplica en =repGrande.gdt=. El segundo imprime las cifras teóricas, entre ellas el cociente entre el Sxx observado y el esperado, que es lo que cabe esperar del cociente entre las dos varianzas. El tercero, =open "@workdir/repGrande.gdt"=, abre el fichero de réplicas, y el cuarto imprime las dos varianzas empíricas y su cociente.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -397,26 +487,28 @@ Cuatro bloques. El primero reabre =hprice2= y recupera los escalares (se perdier
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
-scalar mu_r = mean(rooms)
-scalar sd_r = sd(rooms)
+matrix pob_rooms = {rooms}
+scalar N         = $nobs
+scalar var_rooms = sum((rooms-mean(rooms))^2)/N
 
 set seed 160
 smpl 400 --random
 scalar Sxx_obs  = sum((rooms-mean(rooms))^2)
-scalar var_cond = sigma^2 / Sxx_obs
+scalar Var_b2_en_X_observada = sigma^2 / Sxx_obs
 
 set seed 160
-loop 40000 --progressive --quiet      # diez veces mas replicas: ver nota
+loop 40000 --progressive --quiet      # diez veces mas replicas que en la Actividad 2: ver el texto
     series u = normal(0, sigma)
-    series y = b1_true + b2_true*rooms + u
+    series y = beta1_verdadero + beta2_verdadero*rooms + u
     ols y const rooms --quiet
     scalar bg_fijo = $coeff(rooms)
-    series xnew = mu_r + sd_r*normal(0,1)
+    matrix idx  = ceil(N * muniform(400,1))
+    series xnew = pob_rooms[idx]
     series u2   = normal(0, sigma)
-    series y2   = b1_true + b2_true*xnew + u2
+    series y2   = beta1_verdadero + beta2_verdadero*xnew + u2
     ols y2 const xnew --quiet
     scalar bg_var = $coeff(xnew)
     store "@workdir/repGrande.gdt" bg_fijo bg_var
@@ -426,9 +518,9 @@ endloop
 
 #+NAME: MuestraGrandeTeoria
 #+begin_src gretl :eval no
-printf "Con n = 400:  Sxx observado = %.2f   (tipico: %.2f)\n", Sxx_obs, ($nobs-1)*sd_r^2
-printf "             Var[b2|X] condicional teorica = %.2f\n", var_cond
-printf "             cociente Sxx observado/tipico = %.3f  <- lo que cabe esperar de var_B/var_A\n", Sxx_obs/(($nobs-1)*sd_r^2)
+printf "Con n = 400:  Sxx observado = %.2f   (esperado: %.2f)\n", Sxx_obs, ($nobs-1)*var_rooms
+printf "             Var[b2|X] en las 400 viviendas observadas = %.2f\n", Var_b2_en_X_observada
+printf "             cociente Sxx observado/esperado = %.3f  <- lo que cabe esperar de var_B/var_A\n", Sxx_obs/(($nobs-1)*var_rooms)
 #+end_src
 #+latex: }
 
@@ -451,9 +543,9 @@ open "@workdir/repGrande.gdt" --quiet
 
 #+NAME: MuestraGrandeResultado
 #+begin_src gretl :eval no
-printf "  regresor FIJO       : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
-printf "  regresor REGENERADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
-printf "  cociente observado  : %.3f\n", (sum((bg_var-mean(bg_var))^2))/(sum((bg_fijo-mean(bg_fijo))^2))
+printf "  regresor FIJO         : var = %.2f\n", sum((bg_fijo-mean(bg_fijo))^2)/$nobs
+printf "  regresor REMUESTREADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
+printf "  cociente observado    : %.3f\n", (sum((bg_var-mean(bg_var))^2))/(sum((bg_fijo-mean(bg_fijo))^2))
 #+end_src
 #+latex: }
 
@@ -472,21 +564,21 @@ end outfile
 
 Lo primero que conviene mirar no es el tamaño de la diferencia, sino su /signo/.
 
-Con doce viviendas, la varianza del experimento B salía *menor* que la del A. Con cuatrocientas sale *mayor*. Es la confirmación del mecanismo que explicamos en la Actividad 4. Allí dijimos que todo dependía de si nuestra muestra concreta tenía un Sxx más pequeño o más grande que el típico, y añadimos: ``si hubieran salido más dispersas, ocurriría lo contrario''. Compruébelo en las salidas:
+Con nuestras doce viviendas, la varianza del experimento B salía *menor* que la del A; con las otras doce de la Actividad 4, más dispersas, *mayor*. Con cuatrocientas sale *mayor*. Es el mecanismo que explicamos en la Actividad 4: el signo depende de si la muestra observada tiene un Sxx más pequeño o más grande que el esperado. Compruébelo en las salidas:
 
-- /Doce viviendas/: Sxx observado $=3{,}27$ frente a un típico de $5{,}43$. Nuestra muestra estaba *poco dispersa*, condicionar en ella daba una varianza mayor que el promedio, y por eso B quedaba por debajo de A.
-- /Cuatrocientas viviendas/: Sxx observado $=205{,}76$ frente a un típico de $196{,}96$. Ahora la muestra está, ligeramente, *más dispersa* de lo típico; condicionar en ella da una varianza menor que el promedio, y B queda por encima de A.
+- /Doce viviendas/: Sxx observado $=3{,}27$ frente a un esperado de $5{,}42$. Nuestra muestra estaba *poco dispersa*, la fórmula condicional evaluada en ella daba una varianza mayor que el promedio, y B quedaba por debajo de A.
+- /Cuatrocientas viviendas/: Sxx observado $=205{,}76$ frente a un esperado de $196{,}57$. Ahora la muestra está algo *más dispersa* de lo esperado; la fórmula condicional evaluada en ella da una varianza menor que el promedio, y B queda por encima de A. Las varianzas son $211\,596$ con el regresor fijo (la fórmula de la lección 11 predecía $213\,046$) y $224\,931$ con el regresor sorteado.
 
-El cambio de signo es la predicción cumplida. Y descarta una conclusión falsa que sería fácil extraer de la Actividad 4, ``condicionar infla la varianza'': condicionar no la aumenta ni la reduce sistemáticamente, la /ajusta a la muestra que tenemos/, y hacia qué lado la ajuste depende de cómo sea esa muestra.
+El cambio de signo es la predicción cumplida. Y descarta una conclusión falsa que sería fácil extraer de la Actividad 4, ``la varianza condicional es mayor que la incondicional'': evaluada en la muestra observada no es sistemáticamente mayor ni menor, es la varianza /para la muestra que tenemos/, y hacia qué lado caiga depende de cómo sea esa muestra.
 
-En cuanto al tamaño, la diferencia /se reduce mucho/ al pasar de doce a cuatrocientas observaciones, pero no llega a desaparecer. Conviene entender por qué, porque en esa distinción hay dos efectos superpuestos:
+En cuanto al tamaño, la diferencia /se reduce/ al pasar de doce a cuatrocientas observaciones, de un $13\%$ a un $6\%$, pero no llega a desaparecer. Conviene entender por qué: en esa diferencia se superponen dos efectos:
 
-1. /Nuestra muestra deja de ser excepcional/. Con doce viviendas, el Sxx de la muestra observada podía quedar muy lejos del típico; con cuatrocientas, cualquier muestra tiene un Sxx bastante parecido al típico. Este efecto se atenúa al crecer $n$, pero lentamente.
+1. /Nuestra muestra deja de ser excepcional/. Con doce viviendas, el Sxx de la muestra observada podía quedar muy lejos del esperado; con cuatrocientas, cualquier muestra tiene un Sxx bastante parecido al esperado. Este efecto se atenúa al crecer $n$, pero lentamente.
 2. /El promedio de un cociente no es el cociente de los promedios/. Aunque el Sxx medio coincidiera con el observado, promediar $\sigma^2/\mathrm{Sxx}$ sobre las réplicas no daría $\sigma^2$ dividido por el Sxx medio. Este segundo efecto también se atenúa con $n$, y más deprisa que el primero.
 
-Con $n=400$ el segundo efecto ya es prácticamente inapreciable, y todo lo que queda es el primero. Eso se puede comprobar con las cifras de la salida: el cociente de varianzas que observamos debería parecerse al cociente Sxx observado/típico, que la salida imprime, y en efecto se le parece.
+Con $n=400$ el segundo efecto ya es prácticamente inapreciable, y todo lo que queda es el primero. Eso se puede comprobar con las cifras de la salida: el cociente de varianzas que observamos debería parecerse al cociente Sxx observado/esperado: $1{,}063$ frente a $1{,}047$, con un error de Montecarlo del orden del $1\%$.
 
-La conclusión práctica es que con muestras grandes la distinción tiene poca consecuencia numérica. La conclusión conceptual, en cambio, no cambia en absoluto: siguen siendo dos preguntas distintas, y la que responde la fórmula de la lección 11, y también su programa estadístico, es siempre la condicional.
+La conclusión práctica es que con muestras grandes la distinción tiene poca consecuencia numérica. La conclusión conceptual, en cambio, no cambia: siguen siendo dos preguntas distintas, y la que responde la fórmula de la lección 11, y también su programa estadístico, es siempre la condicional. Y la condicional, evaluada en la muestra observada, es tan dependiente de esa muestra como lo eran los $3663$ y los $2435$ dólares de la Actividad 4: el error estándar de una estimación es él mismo una cifra calculada con los datos que tocaron.
 
 
 * Preguntas de interpretación para la clase
@@ -498,11 +590,11 @@ La conclusión práctica es que con muestras grandes la distinción tiene poca c
 2. ¿Por qué la insesgadez se cumple en los dos experimentos, mientras que la fórmula de la varianza solo describe el primero? (Pista: ¿en qué paso de la demostración de la lección 11 interviene $\boldsymbol X$ de forma esencial?)
 3. Cuando Gretl le muestra el error estándar de un coeficiente, ¿está respondiendo a la pregunta del experimento A o a la del B? ¿Por qué cree que es así?
 4. Imagine que un investigador /diseña/ el experimento y puede elegir los valores del regresor (por ejemplo, las dosis en un ensayo). A la vista de la fórmula de la lección 11, ¿qué le convendría hacer con esas dosis?
-5. En la Actividad 5, con $n=400$, las dos varianzas casi coinciden. ¿Diría entonces que la distinción entre condicionar y no condicionar es irrelevante en la práctica? Argumente a favor y en contra.
+5. En la Actividad 5, con $n=400$, las dos varianzas casi coinciden. ¿Diría entonces que la distinción entre la varianza condicional y la incondicional es irrelevante en la práctica? Argumente a favor y en contra.
 
 /Para profundizar/:
 
-- Lección 11 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html][lección 11]]), sección ``Varianza'', en particular el párrafo final sobre la varianza incondicional y la ley de la varianza total.
+- Lección 11 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html][lección 11]]), sección ``Varianza'', en particular el párrafo final sobre la varianza incondicional y la descomposición de la varianza (apéndice, sección 1.3).
 - Lección 9 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S12-Lecc09.html][lección 9]]) para la esperanza condicional como proyección.
 - Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 2, sección 2.5.
 
@@ -524,9 +616,9 @@ La conclusión práctica es que con muestras grandes la distinción tiene poca c
 
 3. /Lo que reporta Gretl/. Responde a la pregunta del experimento A: el error estándar se calcula con la matriz de regresores efectivamente observada, sustituyendo $\sigma^2$ por su estimación $\mathfrak s^2$. Tiene sentido que sea así por dos motivos. Uno práctico: no conocemos la distribución de la que salieron los regresores, así que no podríamos promediar sobre ella aunque quisiéramos. Y otro conceptual: la pregunta que le interesa a quien analiza unos datos es cuánta confianza merece /su/ estimación, con /su/ muestra, no cuánta merecería en promedio un estudio hipotético que nunca hizo.
 
-4. /Si se pueden elegir los valores del regresor/. La fórmula dice que la varianza es $\sigma^2$ dividido por $\sum_i(X_i-\overline{X})^2$. Conviene, por tanto, hacer ese denominador lo más grande posible: elegir dosis muy separadas entre sí, en los extremos del rango admisible, en lugar de concentrarlas en torno a un valor central. Es el mismo principio que hemos visto en sentido contrario en esta práctica: nuestras doce viviendas tenían valores de =rooms= poco dispersos, y eso aumentaba la varianza de la estimación. (Naturalmente, esto supone que el modelo lineal es válido en todo ese rango: separar mucho las dosis mejora la precisión, pero solo si la relación sigue siendo lineal allí.)
+4. /Si se pueden elegir los valores del regresor/. La fórmula dice que la varianza es $\sigma^2$ dividido por $\sum_i(X_i-\overline{X})^2$. Conviene, por tanto, hacer ese denominador lo más grande posible: elegir dosis muy separadas entre sí, en los extremos del rango admisible, en lugar de concentrarlas en torno a un valor central. Es el mismo principio que hemos visto en sentido contrario en esta práctica: nuestras doce viviendas tenían valores de =rooms= poco dispersos, y eso aumentaba la varianza de la estimación. (Esto supone que el modelo lineal es válido en todo ese rango: separar mucho las dosis mejora la precisión, pero solo si la relación sigue siendo lineal allí.)
 
-5. /¿Es irrelevante con $n$ grande?/ A favor de que lo es: numéricamente las dos varianzas se acercan mucho (la diferencia pasa de ser enorme con doce observaciones a ser modesta con cuatrocientas), así que a efectos de calcular un error estándar la distinción cambia poco las cifras. En contra: primero, ``$n$ grande'' no siempre se tiene, y con muestras pequeñas, que abundan en economía aplicada, la diferencia es la que hemos visto. Segundo, la distinción no es solo numérica, sino conceptual: aclara qué población de muestras estamos imaginando cuando decimos que un estimador ``varía''. Confundir ambas preguntas lleva a interpretar mal qué significa exactamente un error estándar.
+5. /¿Es irrelevante con $n$ grande?/ A favor de que lo es: numéricamente las dos varianzas se acercan mucho (la diferencia pasa de un $13\%$ con doce observaciones a un $6\%$ con cuatrocientas), así que a efectos de calcular un error estándar la distinción cambia poco las cifras. En contra: primero, ``$n$ grande'' no siempre se tiene, y con muestras pequeñas, que abundan en economía aplicada, la diferencia es la que hemos visto. Segundo, la distinción no es solo numérica, sino conceptual: aclara qué población de muestras estamos imaginando cuando decimos que un estimador ``varía''. Confundir ambas preguntas lleva a interpretar mal qué significa un error estándar.
 
 
 * COMMENT Banco de preguntas de reserva
@@ -538,7 +630,7 @@ b) El regresor tiene varianza cero.
 c) El regresor no está correlado con la perturbación.
 d) El regresor es no aleatorio en la población.
 /Respuesta correcta: a./
-/Evalúa/: distinción entre condicionar (tratar como dado) y suponer no aleatorio o incorrelado.
+/Evalúa/: distinción entre condicionar (proyectar sobre las funciones de $\boldsymbol X$ y evaluar la función en la muestra observada) y suponer el regresor no aleatorio o incorrelado.
 
 ** Pregunta R2 — Insesgadez frente a varianza
 En el experimento B (regresor regenerado en cada réplica), ¿qué ocurre?
