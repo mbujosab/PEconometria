@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-10-29 jue 17:55 -->
+<!-- 2026-10-30 vie 09:58 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 16 (C) &#x2014; Dos sorpresas: lo que no hace falta suponer y lo que sí</title>
@@ -287,12 +287,12 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org649fca5">Descripción de la práctica</a></li>
+<li><a href="#orga0e4954">Descripción de la práctica</a></li>
 <li><a href="#tres-perturbaciones">Actividad 1 - Tres perturbaciones muy distintas, la misma esperanza y la misma varianza</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgf5ff33b">Lo que debe observar</a></li>
+<li><a href="#org5e492ab">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
@@ -301,35 +301,35 @@ org_html_manager.setup();  // activate after the parameters are set
 <ul>
 <li>
 <ul>
-<li><a href="#org34cf74f">Primer experimento: 506 viviendas y perturbación \(\chi^2_4\)</a></li>
-<li><a href="#org8764ea9">Segundo experimento: doce viviendas y perturbación \(\chi^2_1\)</a></li>
-<li><a href="#org9c027bc">Lo que debe observar</a></li>
-<li><a href="#orgfaf96ea">Por qué el histograma sigue siendo simétrico</a></li>
-<li><a href="#orgfe83757">Tercer experimento: ¿perturbación o regresor?</a></li>
-<li><a href="#orgc085e34">Lo que debe observar</a></li>
-<li><a href="#org00367cb">Recapitulando las dos preguntas</a></li>
+<li><a href="#org74576a2">Primer experimento: 506 viviendas y perturbación \(\chi^2_4\)</a></li>
+<li><a href="#org7e93f77">Segundo experimento: doce viviendas y perturbación \(\chi^2_1\)</a></li>
+<li><a href="#orgcca2862">Lo que debe observar</a></li>
+<li><a href="#orgdc0fe9c">Por qué el histograma sigue siendo simétrico</a></li>
+<li><a href="#org666ea30">Tercer experimento: ¿perturbación o regresor?</a></li>
+<li><a href="#org69e3ae2">Lo que debe observar</a></li>
+<li><a href="#org901acbe">Recapitulando las dos preguntas</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org59a7ec3">Actividad 3 - Forzar la ortogonalidad exactamente</a>
+<li><a href="#orga09b298">Actividad 3 - Forzar la ortogonalidad exactamente</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org4dbea7a">Lo que debe observar</a></li>
+<li><a href="#org4e523aa">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orged6dfb2">Preguntas de interpretación para la clase</a></li>
-<li><a href="#org3092d66">Código completo de la práctica</a></li>
-<li><a href="#org6beb6a9">Respuestas</a></li>
+<li><a href="#org344694a">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org4bdaa52">Código completo de la práctica</a></li>
+<li><a href="#orgbb9681c">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org649fca5" class="outline-2">
-<h2 id="org649fca5">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org649fca5">
+<div id="outline-container-orga0e4954" class="outline-2">
+<h2 id="orga0e4954">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orga0e4954">
 <p>
 Cerramos la sesión con dos preguntas y cinco experimentos. La actividad 1 responde a la mitad de la primera pregunta con tres perturbaciones distintas en un solo bucle; la actividad 2 responde a la otra mitad con tres experimentos encadenados, cada uno motivado por el resultado del anterior; la actividad 3 responde a la segunda pregunta con un solo experimento.
 </p>
@@ -387,30 +387,30 @@ Un solo bucle que hace tres experimentos por vuelta. Antes del bucle: el mundo a
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org39cac22">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="org2fbbba6">open hprice2.gdt --quiet
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 scalar Sxx     = sum((rooms-mean(rooms))^2)
-scalar var_teo = sigma^2 / Sxx
+scalar Var_b2_en_X_observada = sigma^2 / Sxx
 scalar a_unif  = sigma*sqrt(3)          # semiamplitud de la uniforme
 
 scalar R = 2000
 set seed 20261030
 loop R --progressive --quiet
     series u_nor = normal(0, sigma)
-    series y1 = b1_true + b2_true*rooms + u_nor
+    series y1 = beta1_verdadero + beta2_verdadero*rooms + u_nor
     ols y1 const rooms --quiet
     scalar b_nor = $coeff(rooms)
 
     series u_uni = -a_unif + 2*a_unif*uniform(0,1)
-    series y2 = b1_true + b2_true*rooms + u_uni
+    series y2 = beta1_verdadero + beta2_verdadero*rooms + u_uni
     ols y2 const rooms --quiet
     scalar b_uni = $coeff(rooms)
 
     series u_chi = (randgen(X,4) - 4)/sqrt(8) * sigma
-    series y3 = b1_true + b2_true*rooms + u_chi
+    series y3 = beta1_verdadero + beta2_verdadero*rooms + u_chi
     ols y3 const rooms --quiet
     scalar b_chi = $coeff(rooms)
 
@@ -426,38 +426,38 @@ Los tres bloques siguientes imprimen la teoría, con los escalares aún disponib
 <i>y ahora comparamos los tres casos con lo que predice la lección 11</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org8a5f731">printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
-printf "beta_2     = %.4f\n", b2_true
-printf "Var[b2|X]  = %.2f   (desv. tipica %.2f)\n\n", var_teo, sqrt(var_teo)
+<pre class="src src-gretl" id="org7d298c3">printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
+printf "beta_2     = %.4f\n", beta2_verdadero
+printf "Var[b2|X]  = %.2f   (error estandar %.2f)\n\n", Var_b2_en_X_observada, sqrt(Var_b2_en_X_observada)
 </pre>
 </div>
-<pre class="example" id="org5c1735e">
+<pre class="example" id="org1fbbf20">
 === LO QUE PREDICE LA LECCION 11 ===
 beta_2     = 9119,5484
-Var[b2|X]  = 175844,80   (desv. tipica 419,34)
+Var[b2|X]  = 175844,80   (error estandar 419,34)
 </pre>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org2b1ecb0">open "@workdir/repC.gdt" --quiet
+<pre class="src src-gretl" id="org50a0f40">open "@workdir/repC.gdt" --quiet
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgb77e28d">printf "=== LO QUE SALE DE %d REPLICAS, SEGUN COMO SEA LA PERTURBACION ===\n", $nobs
+<pre class="src src-gretl" id="orgc0723d0">printf "=== LO QUE SALE DE %d REPLICAS, SEGUN COMO SEA LA PERTURBACION ===\n", $nobs
 printf "perturbacion normal    : media = %10.2f    varianza = %12.2f\n", mean(b_nor), sum((b_nor-mean(b_nor))^2)/$nobs
 printf "perturbacion uniforme  : media = %10.2f    varianza = %12.2f\n", mean(b_uni), sum((b_uni-mean(b_uni))^2)/$nobs
 printf "perturbacion chi2(4)   : media = %10.2f    varianza = %12.2f\n", mean(b_chi), sum((b_chi-mean(b_chi))^2)/$nobs
 </pre>
 </div>
-<pre class="example" id="org3ec35a5">
+<pre class="example" id="orgdca4fd4">
 === LO QUE SALE DE 2000 REPLICAS, SEGUN COMO SEA LA PERTURBACION ===
 perturbacion normal    : media =    9130,35    varianza =    178188,26
 perturbacion uniforme  : media =    9125,71    varianza =    170057,83
 perturbacion chi2(4)   : media =    9118,59    varianza =    178413,11
 </pre>
 </div>
-<div id="outline-container-orgf5ff33b" class="outline-4">
-<h4 id="orgf5ff33b">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgf5ff33b">
+<div id="outline-container-org5e492ab" class="outline-4">
+<h4 id="org5e492ab">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org5e492ab">
 <p>
 Las tres medias, \(9130\), \(9126\) y \(9119\), quedan junto a \(\beta_2=9120\), y las tres varianzas, \(178\,000\), \(170\,000\) y \(178\,000\), junto a los \(175\,845\) que predice la fórmula: desviaciones de entre el \(1\) y el \(3\%\), el error de Montecarlo de 2000 réplicas. Cambiar radicalmente la distribución de la perturbación (de simétrica con colas a simétrica sin colas, y de ahí a marcadamente asimétrica) no cambia ni el valor esperado ni la varianza.
 </p>
@@ -481,9 +481,9 @@ En ningún punto se dijo <i>qué distribución</i> tiene \(U\). Solo se usaron s
 <h2 id="forma">Actividad 2 - La forma sí depende de la distribución de \(U\)</h2>
 <div class="outline-text-2" id="text-forma">
 </div>
-<div id="outline-container-org34cf74f" class="outline-4">
-<h4 id="org34cf74f">Primer experimento: 506 viviendas y perturbación \(\chi^2_4\)</h4>
-<div class="outline-text-4" id="text-org34cf74f">
+<div id="outline-container-org74576a2" class="outline-4">
+<h4 id="org74576a2">Primer experimento: 506 viviendas y perturbación \(\chi^2_4\)</h4>
+<div class="outline-text-4" id="text-org74576a2">
 <p>
 Que el valor esperado y la varianza no dependan de la distribución de \(U\) no significa que <i>nada</i> dependa de ella. Veamos los histogramas. <code>freq b_chi --normal</code> dibuja, como en la práctica A (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=6">actividad 5</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#histograma-b2">html</a>)), el histograma de las estimaciones obtenidas con perturbación chi-cuadrado, con la normal superpuesta y el contraste de normalidad.
 </p>
@@ -492,10 +492,10 @@ Que el valor esperado y la varianza no dependan de la distribución de \(U\) no 
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgd868d18">freq b_chi --normal
+<pre class="src src-gretl" id="org5c2adfa">freq b_chi --normal
 </pre>
 </div>
-<pre class="example" id="org444f3cb">
+<pre class="example" id="orgb989c67">
 Distribución de frecuencias para b_chi, observaciones 1-2000
 número de cajas = 29, Media = 9118,59, Desv.típ.=422,495
 
@@ -535,7 +535,7 @@ Contraste de la hipótesis nula de distribución Normal:
 Chi-cuadrado(2) = 0,230 con valor p 0,89142
 </pre>
 
-<div id="org611e7b0" class="figure">
+<div id="org9c41c69" class="figure">
 <p><img src="./S16-Prct-C-sorpresas/hist_chi_grande.png" alt="hist_chi_grande.png" width="560px" />
 </p>
 <p><span class="figure-number">Figura 1: </span>Distribución de \(\hat\beta_2\) con perturbaciones \(\chi^2\) (asimétricas) y \(n=506\).</p>
@@ -550,9 +550,9 @@ Tiene explicación en la fórmula de la lección 11: \(\hat\beta_2=\beta_2\,\mat
 </p>
 </div>
 </div>
-<div id="outline-container-org8764ea9" class="outline-4">
-<h4 id="org8764ea9">Segundo experimento: doce viviendas y perturbación \(\chi^2_1\)</h4>
-<div class="outline-text-4" id="text-org8764ea9">
+<div id="outline-container-org7e93f77" class="outline-4">
+<h4 id="org7e93f77">Segundo experimento: doce viviendas y perturbación \(\chi^2_1\)</h4>
+<div class="outline-text-4" id="text-org7e93f77">
 <p>
 Cuatro bloques, y un quinto para el histograma. El primero reabre <code>hprice2</code>, recupera los parámetros y se queda con doce viviendas: con <code>set seed 160</code> y <code>smpl 12 --random</code>, las mismas doce de la práctica B (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=2">actividad 1</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#doce-viviendas">html</a>)). El segundo es el bucle: 4000 réplicas con una perturbación chi-cuadrado de un grado de libertad, centrada (se le resta su esperanza, \(1\)) y reescalada (se divide por su desviación típica, \(\sqrt2\), y se multiplica por <code>sigma</code>), guardando <code>b_peq</code>. El tercero, <code>AbrirRepCpeq</code>, abre <code>repCpeq.gdt</code>, y el cuarto calcula la media, la desviación típica y el coeficiente de asimetría escrito con sumas: la media de los cubos de las desviaciones dividida por el cubo de la desviación típica. El quinto, <code>freq b_peq --normal</code>, dibuja el histograma e imprime la tabla de frecuencias y el contraste de normalidad.
 </p>
@@ -561,10 +561,10 @@ Cuatro bloques, y un quinto para el histograma. El primero reabre <code>hprice2<
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgff2d08f">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="orgf748178">open hprice2.gdt --quiet
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 
 set seed 160
@@ -573,10 +573,10 @@ smpl 12 --random
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org2056a35">set seed 99
+<pre class="src src-gretl" id="orgfc6ac06">set seed 99
 loop 4000 --progressive --quiet
     series u_p = (randgen(X,1) - 1)/sqrt(2) * sigma     # chi2 con 1 g.l., muy asimetrica
-    series y_p = b1_true + b2_true*rooms + u_p
+    series y_p = beta1_verdadero + beta2_verdadero*rooms + u_p
     ols y_p const rooms --quiet
     scalar b_peq = $coeff(rooms)
     store "@workdir/repCpeq.gdt" b_peq
@@ -585,12 +585,12 @@ endloop
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org4297e06">open "@workdir/repCpeq.gdt" --quiet
+<pre class="src src-gretl" id="orgd34315f">open "@workdir/repCpeq.gdt" --quiet
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orga8ae818">scalar m_p = mean(b_peq)
+<pre class="src src-gretl" id="org2a34967">scalar m_p = mean(b_peq)
 scalar s_p = sqrt(sum((b_peq-m_p)^2)/$nobs)
 printf "n = 12, perturbacion chi2 con 1 g.l.\n"
 printf "  media     = %.1f\n", m_p
@@ -598,17 +598,17 @@ printf "  varianza  = %.1f\n", s_p^2
 printf "  asimetria = %.3f\n", (sum((b_peq-m_p)^3)/$nobs)/s_p^3
 </pre>
 </div>
-<pre class="example" id="orgc5b4374">
+<pre class="example" id="org345ad26">
 n = 12, perturbacion chi2 con 1 g.l.
   media     = 9208,6
   varianza  = 12853823,5
   asimetria = -0,082
 </pre>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org3f24c4c">freq b_peq --normal
+<pre class="src src-gretl" id="org262845f">freq b_peq --normal
 </pre>
 </div>
-<pre class="example" id="orgff54a26">
+<pre class="example" id="org4d000c6">
 Distribución de frecuencias para b_peq, observaciones 1-4000
 número de cajas = 29, Media = 9208,57, Desv.típ.=3585,67
 
@@ -648,24 +648,24 @@ Contraste de la hipótesis nula de distribución Normal:
 Chi-cuadrado(2) = 243,019 con valor p 0,00000
 </pre>
 
-<div id="org676ddbf" class="figure">
+<div id="org782b10a" class="figure">
 <p><img src="./S16-Prct-C-sorpresas/hist_chi_peq.png" alt="hist_chi_peq.png" width="560px" />
 </p>
 <p><span class="figure-number">Figura 2: </span>Distribución de \(\hat\beta_2\) con perturbaciones \(\chi^2\) de un grado de libertad y solo \(n=12\). Sigue pareciendo simétrica.</p>
 </div>
 </div>
 </div>
-<div id="outline-container-org9c027bc" class="outline-4">
-<h4 id="org9c027bc">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org9c027bc">
+<div id="outline-container-orgcca2862" class="outline-4">
+<h4 id="orgcca2862">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgcca2862">
 <p>
 La media, \(9209\), y la varianza, \(12{,}85\) millones, siguen donde la lección 11 las pone: \(\beta_2=9120\) y, para estas doce viviendas, \(13{,}42\) millones (es la misma muestra que en la práctica B, con el mismo Sxx de \(3{,}27\)). Lo que buscábamos era la asimetría, y sale \(-0{,}08\): prácticamente nula. El contraste de normalidad sí rechaza (valor \(p\) de \(0{,}000\)), pero no por la asimetría: por las colas, que son más pesadas que las de la normal.
 </p>
 </div>
 </div>
-<div id="outline-container-orgfaf96ea" class="outline-4">
-<h4 id="orgfaf96ea">Por qué el histograma sigue siendo simétrico</h4>
-<div class="outline-text-4" id="text-orgfaf96ea">
+<div id="outline-container-orgdc0fe9c" class="outline-4">
+<h4 id="orgdc0fe9c">Por qué el histograma sigue siendo simétrico</h4>
+<div class="outline-text-4" id="text-orgdc0fe9c">
 <p>
 La explicación está, una vez más, en la fórmula de la lección 11:
 \[
@@ -675,9 +675,9 @@ Los pesos \(W_i\) son proporcionales a las <i>desviaciones</i> del regresor resp
 </p>
 </div>
 </div>
-<div id="outline-container-orgfe83757" class="outline-4">
-<h4 id="orgfe83757">Tercer experimento: ¿perturbación o regresor?</h4>
-<div class="outline-text-4" id="text-orgfe83757">
+<div id="outline-container-org666ea30" class="outline-4">
+<h4 id="org666ea30">Tercer experimento: ¿perturbación o regresor?</h4>
+<div class="outline-text-4" id="text-org666ea30">
 <p>
 La explicación anterior deja una duda. La asimetría no ha llegado a \(\hat\beta_2\) porque los pesos \(W_i\) de los dos signos la compensan, y los pesos dependen del regresor. Entonces, cuando el histograma salga asimétrico, ¿será por la distribución de la perturbación o por la del regresor? Para saberlo hay que cambiar una cosa cada vez. Montamos los cuatro experimentos que resultan de combinar dos perturbaciones (normal y \(\chi^2_1\)) con dos regresores, con las mismas doce viviendas y 8000 réplicas, y medimos la asimetría de \(\hat\beta_2\) en cada uno:
 </p>
@@ -695,10 +695,10 @@ Cuatro bloques. El primero recupera las mismas doce viviendas y define los dos r
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org7db226a">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="orgd89d5ba">open hprice2.gdt --quiet
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 
 set seed 160
@@ -710,24 +710,24 @@ x_pal[1]     = 14           #   once iguales y una que se sale
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgea69010">set seed 99
+<pre class="src src-gretl" id="org2357490">set seed 99
 loop 8000 --progressive --quiet
     series u_nor = normal(0, sigma)                     # perturbacion normal
     series u_chi = (randgen(X,1) - 1)/sqrt(2) * sigma   # perturbacion chi2(1)
 
-    series y1 = b1_true + b2_true*x_eq + u_nor
+    series y1 = beta1_verdadero + beta2_verdadero*x_eq + u_nor
     ols y1 const x_eq --quiet
     scalar eq_nor = $coeff(x_eq)
 
-    series y2 = b1_true + b2_true*x_pal + u_nor
+    series y2 = beta1_verdadero + beta2_verdadero*x_pal + u_nor
     ols y2 const x_pal --quiet
     scalar pal_nor = $coeff(x_pal)
 
-    series y3 = b1_true + b2_true*x_eq + u_chi
+    series y3 = beta1_verdadero + beta2_verdadero*x_eq + u_chi
     ols y3 const x_eq --quiet
     scalar eq_chi = $coeff(x_eq)
 
-    series y4 = b1_true + b2_true*x_pal + u_chi
+    series y4 = beta1_verdadero + beta2_verdadero*x_pal + u_chi
     ols y4 const x_pal --quiet
     scalar pal_chi = $coeff(x_pal)
 
@@ -737,12 +737,12 @@ endloop
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org45b1ec5">open "@workdir/repDD.gdt" --quiet
+<pre class="src src-gretl" id="org87ee4b8">open "@workdir/repDD.gdt" --quiet
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org4704752">scalar m1 = mean(eq_nor)
+<pre class="src src-gretl" id="orga3829ee">scalar m1 = mean(eq_nor)
 scalar s1 = sqrt(sum((eq_nor-m1)^2)/$nobs)
 scalar m2 = mean(pal_nor)
 scalar s2 = sqrt(sum((pal_nor-m2)^2)/$nobs)
@@ -756,7 +756,7 @@ printf "perturbacion NORMAL                %8.3f                 %8.3f\n", (sum(
 printf "perturbacion CHI2(1)               %8.3f                 %8.3f\n", (sum((eq_chi-m3)^3)/$nobs)/s3^3,  (sum((pal_chi-m4)^3)/$nobs)/s4^3
 </pre>
 </div>
-<pre class="example" id="org6501c9f">
+<pre class="example" id="orgc193420">
 ASIMETRIA DE b2 ESTIMADO      regresor equilibrado   regresor obs. dominante
 perturbacion NORMAL                   0,024                    0,032
 perturbacion CHI2(1)                 -0,070                    2,460
@@ -766,11 +766,11 @@ Y los dos histogramas de la columna de la derecha, los dos con el regresor de ob
 </p>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="org6a60dec">freq pal_nor --normal
+<pre class="src src-gretl" id="orgac00c63">freq pal_nor --normal
 freq pal_chi --normal
 </pre>
 </div>
-<pre class="example" id="org662a683">
+<pre class="example" id="orgf1bc275">
 Distribución de frecuencias para pal_nor, observaciones 1-8000
 número de cajas = 29, Media = 9110,93, Desv.típ.=858,896
 
@@ -849,23 +849,23 @@ Contraste de la hipótesis nula de distribución Normal:
 Chi-cuadrado(2) = 7609,261 con valor p 0,00000
 </pre>
 
-<div id="org7f52202" class="figure">
+<div id="org7bff76f" class="figure">
 <p><img src="./S16-Prct-C-sorpresas/hist_pal_nor.png" alt="hist_pal_nor.png" width="520px" />
 </p>
 <p><span class="figure-number">Figura 3: </span>Regresor con observación dominante y perturbación <b>normal</b>: \(\hat\beta_2\) sale simétrico.</p>
 </div>
 
 
-<div id="orgc650e83" class="figure">
+<div id="orga122a5f" class="figure">
 <p><img src="./S16-Prct-C-sorpresas/hist_pal_chi.png" alt="hist_pal_chi.png" width="520px" />
 </p>
 <p><span class="figure-number">Figura 4: </span>El <b>mismo</b> regresor, con perturbación \(\chi^2\) de un grado de libertad: ahora \(\hat\beta_2\) hereda la asimetría.</p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgc085e34" class="outline-4">
-<h4 id="orgc085e34">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgc085e34">
+<div id="outline-container-org69e3ae2" class="outline-4">
+<h4 id="org69e3ae2">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org69e3ae2">
 <p>
 Lea la tabla por filas, que es donde está la respuesta:
 </p>
@@ -898,9 +898,9 @@ Lo que el regresor sí controla es <i>cuánta</i> de la asimetría de \(U\) lleg
 </p>
 </div>
 </div>
-<div id="outline-container-org00367cb" class="outline-4">
-<h4 id="org00367cb">Recapitulando las dos preguntas</h4>
-<div class="outline-text-4" id="text-org00367cb">
+<div id="outline-container-org901acbe" class="outline-4">
+<h4 id="org901acbe">Recapitulando las dos preguntas</h4>
+<div class="outline-text-4" id="text-org901acbe">
 <p>
 Conviene no confundir lo que hemos establecido con lo que solo hemos observado:
 </p>
@@ -953,9 +953,9 @@ Las dos primeras filas están <i>demostradas</i> en la lección 11 y verificadas
 </div>
 </div>
 </div>
-<div id="outline-container-org59a7ec3" class="outline-2">
-<h2 id="org59a7ec3">Actividad 3 - Forzar la ortogonalidad exactamente</h2>
-<div class="outline-text-2" id="text-org59a7ec3">
+<div id="outline-container-orga09b298" class="outline-2">
+<h2 id="orga09b298">Actividad 3 - Forzar la ortogonalidad exactamente</h2>
+<div class="outline-text-2" id="text-orga09b298">
 <p>
 Tanto los supuestos del modelo como el corolario de la exogeneidad se enuncian <i>en esperanza</i>: \(E[U_i\mid\boldsymbol X]=\mathit 0\) dice que la perturbación vale cero <i>en promedio</i>, no que valga cero en ninguna muestra concreta. En cualquier muestra real, el vector de perturbaciones tendrá una media que no será cero y no será ortogonal al regresor.
 </p>
@@ -972,10 +972,10 @@ Antes del bucle, el mundo artificial. En cada vuelta: <code>u0</code> es un sort
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgd123ba0">open hprice2.gdt --quiet
+<pre class="src src-gretl" id="orge84261c">open hprice2.gdt --quiet
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)
-scalar b2_true = $coeff(rooms)
+scalar beta1_verdadero = $coeff(const)
+scalar beta2_verdadero = $coeff(rooms)
 scalar sigma   = sqrt($ess/$df)
 
 set seed 20261030
@@ -984,7 +984,7 @@ loop 2000 --progressive --quiet
     ols u0 const rooms --quiet
     series uex = $uhat                                    # ortogonal EXACTAMENTE a 1 y a rooms
     series uex = uex / sqrt(sum(uex^2)/$nobs) * sigma      # y con varianza exactamente sigma^2
-    series y_e = b1_true + b2_true*rooms + uex
+    series y_e = beta1_verdadero + beta2_verdadero*rooms + uex
     ols y_e const rooms --quiet
     scalar b_exa = $coeff(rooms)
     store "@workdir/repExacta.gdt" b_exa
@@ -994,32 +994,32 @@ endloop
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf487ba5">printf "beta_2 verdadero = %.6f\n", b2_true
+<pre class="src src-gretl" id="org48ef8fd">printf "beta_2 verdadero = %.6f\n", beta2_verdadero
 </pre>
 </div>
-<pre class="example" id="orge309f33">
+<pre class="example" id="org79999d1">
 beta_2 verdadero = 9119,548390
 </pre>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgcfd3970">open "@workdir/repExacta.gdt" --quiet
+<pre class="src src-gretl" id="orgf2c24b1">open "@workdir/repExacta.gdt" --quiet
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orge8f1d59">printf "media de las 2000 estimaciones = %.6f\n", mean(b_exa)
+<pre class="src src-gretl" id="orge7db63f">printf "media de las 2000 estimaciones = %.6f\n", mean(b_exa)
 printf "varianza de las estimaciones   = %.10f\n", sum((b_exa-mean(b_exa))^2)/$nobs
 printf "minimo = %.6f    maximo = %.6f\n", min(b_exa), max(b_exa)
 </pre>
 </div>
-<pre class="example" id="org6413dcc">
+<pre class="example" id="org6016b26">
 media de las 2000 estimaciones = 9119,548390
 varianza de las estimaciones   = 0,0000000000
 minimo = 9119,548390    maximo = 9119,548390
 </pre>
 </div>
-<div id="outline-container-org4dbea7a" class="outline-4">
-<h4 id="org4dbea7a">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org4dbea7a">
+<div id="outline-container-org4e523aa" class="outline-4">
+<h4 id="org4e523aa">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org4e523aa">
 <p>
 Las 2000 estimaciones son <i>el mismo número</i>: media, mínimo y máximo valen \(9119{,}548390\), que es \(\beta_2\) con seis decimales, y la varianza es \(0\) hasta el décimo decimal. El histograma, si lo dibujara, sería una única barra.
 </p>
@@ -1048,9 +1048,9 @@ Es el caso del ejemplo de la lección 7: aquel \(\boldsymbol u=(1,-2,0,2,-1)\) e
 </div>
 </div>
 </div>
-<div id="outline-container-orged6dfb2" class="outline-2">
-<h2 id="orged6dfb2">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-orged6dfb2">
+<div id="outline-container-org344694a" class="outline-2">
+<h2 id="org344694a">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org344694a">
 <ol class="org-ol">
 <li>Un compañero afirma: ``para que MCO sea insesgado hace falta que las perturbaciones sean normales''. A la vista de la Actividad 1, ¿qué le respondería? ¿En qué paso concreto de la demostración de la lección 11 se apoyaría?</li>
 <li>En la Actividad 2, con \(n=506\) el histograma parecía normal aunque \(U\) no lo fuera. ¿Diría entonces que la normalidad de \(U\) es irrelevante para todo? Distinga entre lo que la práctica demuestra y lo que solo sugiere.</li>
@@ -1070,9 +1070,9 @@ Es el caso del ejemplo de la lección 7: aquel \(\boldsymbol u=(1,-2,0,2,-1)\) e
 </ul>
 </div>
 </div>
-<div id="outline-container-org3092d66" class="outline-2">
-<h2 id="org3092d66">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org3092d66">
+<div id="outline-container-org4bdaa52" class="outline-2">
+<h2 id="org4bdaa52">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org4bdaa52">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -1090,9 +1090,9 @@ Es el caso del ejemplo de la lección 7: aquel \(\boldsymbol u=(1,-2,0,2,-1)\) e
 </table>
 </div>
 </div>
-<div id="outline-container-org6beb6a9" class="outline-2">
-<h2 id="org6beb6a9">Respuestas</h2>
-<div class="outline-text-2" id="text-org6beb6a9">
+<div id="outline-container-orgbb9681c" class="outline-2">
+<h2 id="orgbb9681c">Respuestas</h2>
+<div class="outline-text-2" id="text-orgbb9681c">
 <ol class="org-ol">
 <li><i>¿Hace falta normalidad para la insesgadez?</i> No, y el experimento lo confirma: con perturbaciones uniformes y con perturbaciones muy asimétricas la media de las estimaciones sigue quedando en \(\beta_2\). La razón está en la demostración de la lección 11: la insesgadez sale de tomar esperanza condicional en \(\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i\), usar el lema para sacar los \(W_i\) fuera, y aplicar \(E[U_i\mid\boldsymbol X]=\mathit 0\). Ese supuesto habla de la <i>esperanza condicional</i> de \(U\), no de su distribución. Una uniforme y una chi-cuadrado centrada tienen esperanza condicional cero igual que una normal, y eso es cuanto se necesita.</li>
 
@@ -1117,7 +1117,7 @@ Es el caso del ejemplo de la lección 7: aquel \(\boldsymbol u=(1,-2,0,2,-1)\) e
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-10-29 jue 17:55</p>
+<p class="date">Created: 2026-10-30 vie 09:58</p>
 </div>
 </body>
 </html>

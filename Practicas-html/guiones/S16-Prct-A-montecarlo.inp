@@ -21,45 +21,45 @@ set verbose off
 open hprice2.gdt --quiet
 
 ols price const rooms --quiet
-scalar b1_true = $coeff(const)          # beta_1 "verdadero"
-scalar b2_true = $coeff(rooms)          # beta_2 "verdadero"
+scalar beta1_verdadero = $coeff(const)          # beta_1 "verdadero"
+scalar beta2_verdadero = $coeff(rooms)          # beta_2 "verdadero"
 scalar sigma   = sqrt($ess/$df)         # sigma "verdadera" (raiz de la cuasivarianza)
 scalar n       = $nobs
 scalar Sxx     = sum((rooms - mean(rooms))^2)
-scalar var_teo = sigma^2 / Sxx          # formula de la leccion 11
+scalar Var_b2_en_X_observada = sigma^2 / Sxx          # formula de la leccion 11
 
 outfile --quiet mundoArtificial.txt
-    printf "n            = %d\n", n
-    printf "beta_1       = %.4f\n", b1_true
-    printf "beta_2       = %.4f\n", b2_true
-    printf "sigma        = %.4f\n", sigma
-    printf "Sxx          = %.4f\n", Sxx
-    printf "Var[b2 | X]  = sigma^2/Sxx = %.4f\n", var_teo
-    printf "desv. tipica = %.4f\n", sqrt(var_teo)
+    printf "n              = %d\n", n
+    printf "beta_1         = %.4f\n", beta1_verdadero
+    printf "beta_2         = %.4f\n", beta2_verdadero
+    printf "sigma          = %.4f\n", sigma
+    printf "Sxx            = %.4f\n", Sxx
+    printf "Var[b2 | X]    = sigma^2/Sxx = %.4f\n", Var_b2_en_X_observada
+    printf "error estandar = %.4f\n", sqrt(Var_b2_en_X_observada)
 end outfile
 
 outfile --quiet unaReplica.txt
     set seed 20261030                       # para que el resultado sea reproducible
     
     series u_sim = normal(0, sigma)                    # perturbacion nueva
-    series y_sim = b1_true + b2_true*rooms + u_sim     # muestra simulada
+    series y_sim = beta1_verdadero + beta2_verdadero*rooms + u_sim     # muestra simulada
     
     ols y_sim const rooms
-    printf "\nbeta_2 verdadero  = %.4f\n", b2_true
+    printf "\nbeta_2 verdadero  = %.4f\n", beta2_verdadero
     printf "beta_2 estimado   = %.4f\n", $coeff(rooms)
-    printf "diferencia        = %.4f\n", $coeff(rooms) - b2_true
+    printf "diferencia        = %.4f\n", $coeff(rooms) - beta2_verdadero
 end outfile
 
 scalar R = 2000                         # numero de replicas
 
 set seed 20261030
 loop R --progressive --quiet
-    series u    = normal(0, sigma)
-    series ysim = b1_true + b2_true*rooms + u
-    ols ysim const rooms --quiet
-    scalar b1hat = $coeff(const)
-    scalar b2hat = $coeff(rooms)
-    store "@workdir/replicas.gdt" b1hat b2hat
+    series u_sim = normal(0, sigma)
+    series y_sim = beta1_verdadero + beta2_verdadero*rooms + u_sim
+    ols y_sim const rooms --quiet
+    scalar beta1_estimado = $coeff(const)
+    scalar beta2_estimado = $coeff(rooms)
+    store "@workdir/replicas.gdt" beta1_estimado beta2_estimado
 endloop
 
 outfile --quiet bucle.txt
@@ -68,20 +68,20 @@ end outfile
 
 outfile --quiet analisisReplicas.txt
     printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
-    printf "beta_2 verdadero          = %.4f\n", b2_true
-    printf "Var[b2 | X] = sigma^2/Sxx = %.4f\n", var_teo
-    printf "desviacion tipica         = %.4f\n\n", sqrt(var_teo)
+    printf "beta_2 verdadero               = %.4f\n", beta2_verdadero
+    printf "Var[b2 | X] en la X observada  = %.4f\n", Var_b2_en_X_observada
+    printf "error estandar                 = %.4f\n\n", sqrt(Var_b2_en_X_observada)
 end outfile
 
 open "@workdir/replicas.gdt" --quiet
 outfile --quiet empiricoReplicas.txt
     printf "=== LO QUE SALE DE %d REPLICAS SIMULADAS ===\n", $nobs
-    printf "media de b2hat            = %.4f\n", mean(b2hat)
-    printf "varianza de b2hat         = %.4f\n", sum((b2hat-mean(b2hat))^2)/$nobs
-    printf "desviacion tipica         = %.4f\n", sqrt(sum((b2hat-mean(b2hat))^2)/$nobs)
+    printf "media de beta2_estimado        = %.4f\n", mean(beta2_estimado)
+    printf "varianza de beta2_estimado     = %.4f\n", sum((beta2_estimado-mean(beta2_estimado))^2)/$nobs
+    printf "desv. tipica de beta2_estimado = %.4f\n", sqrt(sum((beta2_estimado-mean(beta2_estimado))^2)/$nobs)
 end outfile
 
-freq b2hat --normal --plot="@workdir/histograma_b2.png"
+freq beta2_estimado --normal --plot="@workdir/histograma_b2.png"
 
 open hprice2.gdt --quiet                  # recuperamos los regresores
 ols price const rooms --quiet
@@ -89,16 +89,16 @@ scalar sigma = sqrt($ess/$df)
 
 outfile --quiet matrizVCV.txt
     matrix X      = {const, rooms}
-    matrix invXTX = invpd(X'X)
-    matrix Vteo   = sigma^2 * invXTX
+    matrix inv_XtX = invpd(X'X)
+    matrix Var_beta_en_X_observada   = sigma^2 * inv_XtX
     printf "Matriz sigma^2 (X'X)^{-1} predicha por la leccion 11:\n"
-    print Vteo
+    print Var_beta_en_X_observada
 end outfile
 
 open "@workdir/replicas.gdt" --quiet
 outfile --quiet matrizEmpirica.txt
-    matrix B    = {b1hat}~{b2hat}
-    matrix Vemp = mcov(B)
+    matrix betas_replicas = {beta1_estimado}~{beta2_estimado}
+    matrix Var_beta_replicas = mcov(betas_replicas)
     printf "\nMatriz de varianzas y covarianzas EMPIRICA de las replicas:\n"
-    print Vemp
+    print Var_beta_replicas
 end outfile
