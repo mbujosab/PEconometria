@@ -71,7 +71,7 @@ $(LESSONS_DIR)/%.html: $(LESSONS_DIR)/%.org | figures
 
 $(LESSONS_DIR)/%.ipynb: $(LESSONS_DIR)/%.org | figures
 	$(EMACS_BATCH) --eval \
-	  '(progn (setq org-confirm-babel-evaluate nil) (require (quote ox-ipynb)) (find-file "$<") (org-babel-execute-buffer) (ox-ipynb-export-to-ipynb-file))'
+	  '(progn (setq org-confirm-babel-evaluate nil) (require (quote ox-ipynb)) (find-file "$<") (org-babel-execute-buffer) (mb/org-flatten-custom-id-links) (ox-ipynb-export-to-ipynb-file))'
 # $(LESSONS_DIR)/%.pdf: $(LESSONS_DIR)/%.org | figures
 # 	$(EMACS_BATCH) --eval '(progn (find-file "$<") (org-latex-export-to-pdf))'
 # 
