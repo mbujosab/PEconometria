@@ -28,4 +28,41 @@ Opcional: renombrar `L-12-RuidoEnElPieDeLaTabla` (por ejemplo, `L-12-LaPerturbac
 
 ## Aplicado
 
-(Pendiente: lo rellena la sesión del banco.)
+Sesión del banco, 2026-11-04 (Fable). Comprobación independiente de lo que dice
+el apartado «Qué se ha comprobado ya»: barrido mecánico de las 70 preguntas
+(`preguntas/L-*.json`) con las palabras de los once puntos; sin cambios en las
+preguntas, sin commit ni Moodle.
+
+1. **Nada que corregir en el banco**, como dice el aviso. «Ruido» solo en el
+   nombre interno `L-12-RuidoEnElPieDeLaTabla` (las otras dos coincidencias son
+   «construidos»). «La probabilidad de que $H_0$ sea cierta» aparece dos veces,
+   ambas como distractor falso (L-12-IntervaloYContraste y
+   L-13-QueContrastaElFDelPie), con el `exp` que la corrige en el sentido del
+   punto 1. No hay «centroide» (L-07 ya dice «punto de las medias»),
+   «derivadas», «no añaden información», «error de tipo I», «muy negativas o
+   muy positivas», ni los valores $p$ del contraste de normalidad ($0{,}13$ /
+   $0{,}000$); los «0,000» del banco son valores $p$ de tablas simuladas. El
+   nivel como convención ya está en L-12-ElNivelLoEligeQuienContrasta y en
+   L-12-UnaSalidaFilaAFila-x3 («el $5$\,\% es el nivel …», «solo por
+   costumbre»). Ninguna pregunta remite «a la lección 12» ni a ninguna otra.
+2. **Reglas añadidas al checklist** de `PROMPT-generar-preguntas.org`
+   (entrada «Reglas de la lección 12, 3 de noviembre de 2026»): valor $p$ como
+   probabilidad; columnas $t$ y valor $p$ «se reconstruyen … y añaden su
+   lectura»; nivel como convención (una de cada veinte / cien / mil) sin «error
+   de tipo I»; región crítica en sus dos formas; «punto de las medias»;
+   $\mathfrak s$ y sus dos comparaciones; «razón de catetos» solo para $k=2$;
+   $H_1$ de dos colas «por debajo y por encima de cero»; atribución de los
+   valores $p$ de normalidad (A: $0{,}13$; C, actividad 2: $0{,}000$); y el lema
+   del error estándar del aviso del 30-10.
+3. **Renombrado opcional**: no aplicado. Se mantiene la decisión del
+   instructor del 29-10 (renombrar obliga a rehacer la categoría de Moodle y la
+   selección); el alumno no ve el nombre.
+4. **Para decisión del instructor** (no tocado): tres `exp` describen
+   $\mathfrak s$ como «longitud estimada de la perturbación por unidad de
+   longitud del regresor en desviaciones» (L-12-IntervaloYContraste y
+   L-12-RuidoEnElPieDeLaTabla) o «por unidad de longitud propia del regresor»
+   (L-13-TIndividualesPequenosFGrande). Es la sustitución de «ruido estimado»
+   del 29-10 y es coherente con el punto 7 ($\mathfrak s$ estima $\sigma$),
+   pero no es literalmente el lema nuevo «longitud del residuo por unidad de
+   longitud del regresor en desviaciones». Si se quiere el lema literal, son
+   tres ficheros y tres categorías de Moodle.
