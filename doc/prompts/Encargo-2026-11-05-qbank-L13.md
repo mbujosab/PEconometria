@@ -23,4 +23,13 @@ Queda pendiente en la lección 14 el mismo cambio («el ruido estimado» por la 
 
 ## Aplicado
 
-(Lo rellena la sesión del banco.)
+(Sesión del banco, 05-11-2026.)
+
+- Respuesta al aviso: tomado nota; las opciones de `L-13-TIndividualesPequenosFGrande` que calcan el
+  pasaje («aporta algo que no aporten ya $\boldsymbol 1$, $\boldsymbol x_2$ y $\boldsymbol x_4$») ya nombran la
+  constante desde el 05-11 por la mañana, en línea con la redacción nueva de la lección.
+- «Ruido»: comprobadas las siete preguntas de L13 (`grep -i ruido preguntas/L-13-*.json`): ninguna lo usa
+  en enunciado, opciones ni explicaciones; sus `exp` sobre el $F$ ya dicen «coordenadas de la
+  perturbación». En el resto del banco «ruido» aparece solo en el nombre interno
+  `L-12-RuidoEnElPieDeLaTabla` (decisión del 29-10). Nada que cambiar.
+- Pendiente de la lección 14: cuando se avise, misma comprobación en `preguntas/L-14-*.json`.
