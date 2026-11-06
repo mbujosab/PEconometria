@@ -33,3 +33,13 @@ Queda pendiente en la lección 14 el mismo cambio («el ruido estimado» por la 
   perturbación». En el resto del banco «ruido» aparece solo en el nombre interno
   `L-12-RuidoEnElPieDeLaTabla` (decisión del 29-10). Nada que cambiar.
 - Pendiente de la lección 14: cuando se avise, misma comprobación en `preguntas/L-14-*.json`.
+
+## Añadido el 06-11: lección 14 y regla nueva sobre $\hat\beta_j$
+
+1. **«Ruido» fuera de la lección 14** (06-11): «el ruido estimado» y «el ruido» eran $\mathfrak s$, la estimación de $\sigma$; la lección dice ahora «la estimación $\mathfrak s$ de $\sigma$», «ni $\mathfrak s$ ni el número de observaciones» y «$\mathfrak s$ dividido por esa longitud». Misma comprobación que en L13 en `preguntas/L-14-*.json`: ninguna pregunta debe decir «ruido».
+2. **Regla nueva de la Guía §7** (autor, 06-11): $\hat\beta_j$ designa el estimador y la estimación, y cada frase dice cuál: por la palabra («el estimador $\hat\beta_2$», «la estimación $\hat\beta_2$»), por los argumentos ($\hat\beta_2(\boldsymbol X,\boldsymbol Y)$, $\hat\beta_2(\boldsymbol x,\boldsymbol y)$) o por el contexto (esperanza, varianza, distribución, $\boldsymbol X$, $W_i$, $U_i$: estimador; un valor numérico o un vector de datos: estimación). Motivo: «Fijar los regresores no fija $\hat\beta_2$» era cierta para el estimador y falsa para la estimación. Aplicada en L11, L12 y L14 (L13 solo usa el símbolo en $\mathrm{ee}(\hat\beta_j)$ y en $t$). Para el banco: en enunciados, opciones y explicaciones, cuando $\hat\beta_j$ vaya solo y la frase hable de su distribución, su varianza o su insesgadez, decir «el estimador»; cuando sea el número de una tabla, «la estimación» o el valor. Añadir la regla al checklist.
+
+## Aplicado (06-11)
+
+(Lo rellena la sesión del banco.)
+
