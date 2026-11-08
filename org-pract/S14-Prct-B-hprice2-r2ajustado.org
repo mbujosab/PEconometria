@@ -79,6 +79,10 @@ DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica-plano.inp
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -131,6 +135,7 @@ summary price rooms nox stratio
 outfile --quiet resumen.txt
     <<EtiquetasResumen>>
 end outfile
+printf "%s", readfile("resumen.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -167,6 +172,7 @@ corr rooms nox
 outfile --quiet Ols_rooms_nox_simple_y_conjunto.txt
     <<OlsRoomsNoxSimplesYConjunto>>
 end outfile
+printf "%s", readfile("Ols_rooms_nox_simple_y_conjunto.txt")   # en pantalla
 #+end_src
 
 #+latex: {\footnotesize
@@ -249,7 +255,8 @@ printf "e\n"
 end outfile
 set force_decpoint off
 string fin = getenv("DIRECTORIO") ~ "/plano.plt"
-gnuplot --input=@fin --output="plano_price_rooms_nox.png"
+gnuplot --input=@fin --output=display                       # en pantalla
+gnuplot --input=@fin --output="plano_price_rooms_nox.png"   # guardada para el documento
 #+end_src
 
 * Actividad 3 - Un tercer regresor: stratio
@@ -275,6 +282,7 @@ ols price const rooms nox stratio
 outfile --quiet Ols_multiple_con_stratio.txt
     <<OlsConStratio>>
 end outfile
+printf "%s", readfile("Ols_multiple_con_stratio.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -322,6 +330,7 @@ printf "R2 price~rooms+nox+stratio    = %.4f\n", r2_todos
 outfile --quiet comparacionR2cuatroModelos.txt
     <<ComparacionR2CuatroModelos>>
 end outfile
+printf "%s", readfile("comparacionR2cuatroModelos.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -367,6 +376,7 @@ printf "  R2 ajustado = %.4f\n", Rbarsq
 outfile --quiet r2AjustadoTresModelos.txt
     <<R2AjustadoTresModelos>>
 end outfile
+printf "%s", readfile("r2AjustadoTresModelos.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -437,6 +447,7 @@ printf "R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = %.6f\n", Rbarsq
 outfile --quiet verificacionFormulaR2ajustado.txt
     <<VerificacionFormulaR2Ajustado>>
 end outfile
+printf "%s", readfile("verificacionFormulaR2ajustado.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize

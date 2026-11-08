@@ -88,6 +88,10 @@ DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -147,6 +151,7 @@ summary price rooms nox
 outfile --quiet estadisticos.txt
     <<Recordatorio summary>>
 end outfile
+printf "%s", readfile("estadisticos.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -178,6 +183,7 @@ Debe obtener una salida como esta:
 outfile --quiet matrizCorrelaciones.txt
     <<Matriz de correlacion>>
 end outfile
+printf "%s", readfile("matrizCorrelaciones.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -201,6 +207,7 @@ printf "Cov(rooms,nox)    = %.4f    Corr(rooms,nox)   = %.4f\n", cov(rooms,nox),
 outfile --quiet covarianzasYcorrelaciones.txt
     <<Cov y corr por pares>>
 end outfile
+printf "%s", readfile("covarianzasYcorrelaciones.txt")   # en pantalla
   #+end_src
   
   
@@ -229,9 +236,12 @@ gnuplot rooms nox
   #+latex: }
 
 #+begin_src gretl :tangle guiones/S07-Prct-A-hprice2.inp :eval no :exports none :noweb yes
-gnuplot price rooms --output="price_rooms.png"
-gnuplot price nox   --output="price_nox.png"
-gnuplot rooms nox   --output="rooms_nox.png"
+gnuplot price rooms --output=display             # en pantalla
+gnuplot price rooms --output="price_rooms.png"   # guardada para el documento
+gnuplot price nox   --output=display             # en pantalla
+gnuplot price nox   --output="price_nox.png"     # guardada para el documento
+gnuplot rooms nox   --output=display             # en pantalla
+gnuplot rooms nox   --output="rooms_nox.png"     # guardada para el documento
 #+end_src
 
 
@@ -297,6 +307,7 @@ printf "Suma nox_c   = %.10f\n", sum(nox_c)
 outfile --quiet comprobacionOrtogonalidad.txt
     <<Comprobacion de ortogonalidad>>
 end outfile
+printf "%s", readfile("comprobacionOrtogonalidad.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -340,6 +351,7 @@ Compruebe que =coseno_pr= y =corr(price,rooms)= coinciden.
 outfile --quiet coseno-price-rooms.txt
     <<Coseno price-rooms>>
 end outfile
+printf "%s", readfile("coseno-price-rooms.txt")   # en pantalla
 #+end_src
 
 
@@ -374,6 +386,7 @@ printf "cos(theta) rooms-nox = %.6f  (ángulo = %.2f grados)\n", coseno_rn, thet
 outfile --quiet cosenosOtrosPares.txt
     <<Coseno price-nox y rooms-nox>>
 end outfile
+printf "%s", readfile("cosenosOtrosPares.txt")   # en pantalla
 #+end_src
 
 
@@ -419,6 +432,7 @@ printf "rho de Gretl (corr)           = %.6f\n", corr(price,rooms)
 outfile --quiet invarianzarespectodivisor.txt
     <<Invarianza del divisor>>
 end outfile
+printf "%s", readfile("invarianzarespectodivisor.txt")   # en pantalla
 #+end_src
 
 

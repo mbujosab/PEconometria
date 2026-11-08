@@ -79,6 +79,10 @@ DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica-plano.inp
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -145,6 +149,7 @@ summary price sqft bedrms baths --simple
 outfile --quiet resumen.txt
     <<EtiquetasCastellano>>
 end outfile
+printf "%s", readfile("resumen.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -163,6 +168,7 @@ print price sqft bedrms baths --byobs
 outfile --quiet vistazoDatos.txt
     <<VistazoDatos>>
 end outfile
+printf "%s", readfile("vistazoDatos.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -192,6 +198,7 @@ ols price const sqft
 outfile --quiet OLS_Precio_Superficie.txt
     <<OlsPriceSqftSimple>>
 end outfile
+printf "%s", readfile("OLS_Precio_Superficie.txt")   # en pantalla
 #+end_src
 
 #+latex: {\footnotesize
@@ -259,6 +266,7 @@ ols price const sqft bedrms
 outfile --quiet olsBedrms.txt
     <<OlsBedrmsSoloYAcompanado>>
 end outfile
+printf "%s", readfile("olsBedrms.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -283,6 +291,7 @@ corr sqft bedrms
 outfile --quiet corrSqftBedrms.txt
     <<CorrSqftBedrms>>
 end outfile
+printf "%s", readfile("corrSqftBedrms.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -355,7 +364,8 @@ printf "e\n"
 end outfile
 set force_decpoint off
 string fin = getenv("DIRECTORIO") ~ "/plano.plt"
-gnuplot --input=@fin --output="plano_price_sqft_bedrms.png"
+gnuplot --input=@fin --output=display                         # en pantalla
+gnuplot --input=@fin --output="plano_price_sqft_bedrms.png"   # guardada para el documento
 #+end_src
 
 
@@ -377,6 +387,7 @@ ols price const sqft bedrms baths
 outfile --quiet olsBaths.txt
     <<OlsConBaths>>
 end outfile
+printf "%s", readfile("olsBaths.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -399,6 +410,7 @@ corr sqft bedrms baths
 outfile --quiet corrTres.txt
     <<CorrSqftBedrmsBaths>>
 end outfile
+printf "%s", readfile("corrTres.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -447,6 +459,7 @@ printf "R2 price~sqft+bedrms+baths  = %.4f\n", r2_4
 outfile --quiet sintesisR2.txt
     <<SintesisR2>>
 end outfile
+printf "%s", readfile("sintesisR2.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -532,6 +545,7 @@ printf "obs 14 (n=13)    %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[14], resid[14], 
 outfile --quiet submuestras.txt
     <<TablaSubmuestras>>
 end outfile
+printf "%s", readfile("submuestras.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize

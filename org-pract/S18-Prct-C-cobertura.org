@@ -78,6 +78,10 @@ DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -173,6 +177,7 @@ printf "Rechazos de la H0 cierta al 5%%             : %.4f   (objetivo: 0,05)\n"
 outfile --quiet cobertura.txt
     <<Cobertura>>
 end outfile
+printf "%s", readfile("cobertura.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -202,10 +207,12 @@ smpl full
 #+begin_src gretl :tangle guiones/S18-Prct-C-cobertura.inp :eval no :exports none
 smpl 1 100
 series B2 = 0.5
-gnuplot cL cR B2 --time-series --with-lines --output="@workdir/baile.png"
+gnuplot cL cR B2 --time-series --with-lines --output=display                # en pantalla
+gnuplot cL cR B2 --time-series --with-lines --output="@workdir/baile.png"   # guardada para el documento
 outfile --quiet baile.txt
     printf "Intervalos que fallan entre los 100 primeros: %d\n", 100 - sum(dentro)
 end outfile
+printf "%s", readfile("baile.txt")   # en pantalla
 smpl full
 #+end_src
 
@@ -256,6 +263,7 @@ outfile --quiet precioSigma.txt
     printf "  97,5%%  -> %.3f      (la t_10 predice  %.3f; la normal,  %.3f)\n", quantile(tstat, 0.975), tc, zc
     printf "Fraccion de |t| > 1,96                 : %.4f   (con 1,96 se rechazaria la H0 cierta mas del 5%%)\n", mean(abs(tstat) > zc)
 end outfile
+printf "%s", readfile("precioSigma.txt")   # en pantalla
 freq tstat --plot="@workdir/histT.png"
 #+end_src
 
@@ -318,6 +326,7 @@ printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura
 outfile --quiet deteccion.txt
     <<DeteccionN12>>
 end outfile
+printf "%s", readfile("deteccion.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -347,6 +356,7 @@ printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura
 outfile --quiet deteccionN120.txt
     <<DeteccionN120>>
 end outfile
+printf "%s", readfile("deteccionN120.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -393,6 +403,7 @@ printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 
 outfile --quiet apendice.txt
     <<Chi2N12>>
 end outfile
+printf "%s", readfile("apendice.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -422,6 +433,7 @@ printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 
 outfile --quiet apendiceN120.txt
     <<Chi2N120>>
 end outfile
+printf "%s", readfile("apendiceN120.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize

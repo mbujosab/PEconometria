@@ -41,5 +41,17 @@ Queda pendiente en la lección 14 el mismo cambio («el ruido estimado» por la 
 
 ## Aplicado (06-11)
 
-(Lo rellena la sesión del banco.)
+(Sesión del banco, 08-11-2026; sin commit.)
+
+1. **«Ruido» en L14**: `grep -i ruido preguntas/L-14-*.json` no da nada; las cuatro preguntas de L14 ya hablan de $\mathfrak s$ y del error estándar sin «ruido». En todo el banco «ruido» sigue apareciendo solo en el nombre interno `L-12-RuidoEnElPieDeLaTabla` (decisión del 29-10). Nada que cambiar.
+2. **$\hat\beta_j$, estimador o estimación**: barrido de todas las frases del banco (enunciados, opciones, explicaciones y textos del `setup`) en que $\hat\beta_j$ va solo junto a un término de distribución, varianza, insesgadez, precisión o dispersión: 67 frases. Casi todas ya lo dejan claro por el contexto (esperanza, varianza, $W_i$, $U_i$, «realización de la variable aleatoria», «copias de $\hat\beta_2$») o por la palabra. Se han cambiado seis, todas en explicaciones, donde la frase no decía cuál era:
+   - `L-09-PoblacionYMuestra`: «$\hat\beta_2$ depende de los hogares que caen en la muestra… otro número» → «la estimación $\hat\beta_2$ depende…».
+   - `L-11-DosMuestrasMismoEstimador`: «han calculado $\hat\beta_2$ con dos conjuntos de datos distintos, y $\hat\beta_2=\beta_2\,\mathit 1+\sum_iW_iU_i$ toma valores distintos…» → «han calculado la estimación $\hat\beta_2$… y el estimador $\hat\beta_2=\ldots$ toma valores distintos…».
+   - `L-11-QueHaceMasPrecisoAlEstimador`: «cuánto variaría $\hat\beta_2$ de una muestra a otra con esos años de educación» → «cuánto variaría el estimador $\hat\beta_2$…» (es el caso del ejemplo de la regla: fijar los regresores).
+   - `L-12-IntervaloYContraste`: «mezcla el tamaño del coeficiente con su precisión» → «… con la precisión del estimador» (como ya decía `L-12-SignificativoNoEsRelevante`), y «un $\hat\beta_2$ minúsculo» → «una estimación $\hat\beta_2$ minúscula».
+   - `L-14-TablaAntesYDespues`: «$\hat\beta_2$ sigue centrado en el parámetro que estima, solo que con una dispersión $f$ veces mayor» → «el estimador $\hat\beta_2$ sigue centrado…» (la pregunta enseña una tabla, donde $\hat\beta_2$ es el número).
+   Se dejan como están las frases en que $\hat\beta_2$ es el rótulo de la columna «Coeficiente» de una tabla (L-12-LeerUnaTablaDeGretl, L-14-TablaAntesYDespues): ahí es la estimación por el contexto. L13 solo usa el símbolo en $\mathrm{ee}(\hat\beta_j)$ y en $t$, como la lección.
+3. **Checklist**: la regla está añadida, con su ejemplo, a la casilla del estimador y la estimación de `PROMPT-generar-preguntas.org` («Checklist específico de este proyecto»).
+
+Lint del banco completo (qbank 0.9, notación y separador de `config.py`): los mismos avisos antes y después, ninguno nuevo.
 

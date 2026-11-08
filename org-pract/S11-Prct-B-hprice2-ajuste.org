@@ -78,6 +78,10 @@ DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -138,6 +142,7 @@ ols price const rooms
 outfile --quiet olsPriceRooms.txt
     <<Ols price rooms>>
 end outfile
+printf "%s", readfile("olsPriceRooms.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -171,6 +176,7 @@ ols price const nox
 outfile --quiet olsPriceNox.txt
     <<Ols price nox>>
 end outfile
+printf "%s", readfile("olsPriceNox.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -211,6 +217,7 @@ printf "Modelo price~nox  :  suma(ehat) = %.8f    suma(nox*ehat)   = %.8f\n", su
 outfile --quiet ortogonalidadAmbosModelos.txt
     <<Ortogonalidad ambos modelos>>
 end outfile
+printf "%s", readfile("ortogonalidadAmbosModelos.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -255,6 +262,7 @@ printf "corr(price,nox)^2   = %.4f\n", corr(price,nox)^2
 outfile --quiet bondadDeAjusteAmbosModelos.txt
     <<Bondad de ajuste ambos modelos>>
 end outfile
+printf "%s", readfile("bondadDeAjusteAmbosModelos.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -280,6 +288,7 @@ printf "price~nox  :  R2 = %.4f   ->   theta = %.2f grados\n", R2_n_manual, acos
 outfile --quiet anguloTheta.txt
     <<Angulo theta en grados>>
 end outfile
+printf "%s", readfile("anguloTheta.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -306,8 +315,10 @@ gnuplot price nox
   #+latex: }
 
 #+begin_src gretl :tangle guiones/S11-Prct-B-hprice2-ajuste.inp :eval no :exports none :noweb yes
-gnuplot price rooms --output="price_rooms_fit.png"
-gnuplot price nox   --output="price_nox_fit.png"
+gnuplot price rooms --output=display                 # en pantalla
+gnuplot price rooms --output="price_rooms_fit.png"   # guardada para el documento
+gnuplot price nox   --output=display                 # en pantalla
+gnuplot price nox   --output="price_nox_fit.png"     # guardada para el documento
 #+end_src
 
 #+BEGIN_EXPORT latex
@@ -362,6 +373,7 @@ printf "producto de las dos pendientes  = %.6f   (= R2 = rho^2)\n", b_pr*b_rp
 outfile --quiet intercambiarPapeles.txt
     <<Intercambiar papeles>>
 end outfile
+printf "%s", readfile("intercambiarPapeles.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize

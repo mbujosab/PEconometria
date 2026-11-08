@@ -78,6 +78,10 @@ DIRECTORIO="$(pwd)/$practica" gretlcli -b $(pwd)/guiones/$practica.inp
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -175,6 +179,7 @@ endloop
 outfile --quiet montecarlo.txt
     <<MonteCarlo>>
 end outfile
+printf "%s", readfile("montecarlo.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -223,6 +228,7 @@ printf "correlacion entre b2 y b3 con rho = 0,99: %.4f\n", corr(b2_rho99, b3_rho
 outfile --quiet histogramas.txt
     <<ResumenReplicas>>
 end outfile
+printf "%s", readfile("histogramas.txt")   # en pantalla
 #+end_src
 
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
@@ -241,7 +247,8 @@ gnuplot b3_rho99 b2_rho99
 #+begin_src gretl :tangle guiones/S22-Prct-A-colinealidad-montecarlo.inp :eval no :exports none
 freq b2_rho0 --plot="@workdir/histRho0.png"
 freq b2_rho99 --plot="@workdir/histRho99.png"
-gnuplot b3_rho99 b2_rho99 --output="@workdir/nubeRho99.png"
+gnuplot b3_rho99 b2_rho99 --output=display                    # en pantalla
+gnuplot b3_rho99 b2_rho99 --output="@workdir/nubeRho99.png"   # guardada para el documento
 #+end_src
 
 #+attr_latex: :width 0.48\textwidth
