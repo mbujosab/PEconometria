@@ -362,11 +362,39 @@ end outfile
 #+include: ./S18-Prct-A-hprice2-inferencia/doceViviendas.txt example
 #+latex: }
 
+Con las mismas doce viviendas (la semilla se fija otra vez antes de =smpl 12 --random=, así que salen las mismas filas) estimamos también el modelo con tres regresores de la práctica B de la sesión 14, =price= sobre =rooms=, =nox= y =stratio=. La lección 13 lee esta salida: =$Fstat= es el $F$ del pie de la tabla, que contrasta que los tres coeficientes sean cero a la vez, y =critical(F, 3, $df, 0.05)= su valor crítico; los dos =printf= imprimen ese contraste y los $t$ de =nox= y =stratio= con su valor crítico.
+
+#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
+#+NAME: DoceViviendasTres
+#+begin_src gretl :eval no
+set seed 20261107                                # las mismas doce viviendas
+smpl 12 --random
+ols price const rooms nox stratio
+scalar Fc12 = critical(F, 3, $df, 0.05)
+printf "\nF(3,%d) = %.2f,  F_c al 5%% = %.2f,  valor p = %.3f\n", $df, $Fstat, Fc12, pvalue(F, 3, $df, $Fstat)
+printf "t de nox = %.2f,  t de stratio = %.2f,  t_c al 5%% = %.2f\n", $coeff(nox)/$stderr(nox), $coeff(stratio)/$stderr(stratio), critical(t, $df, 0.025)
+smpl full
+#+end_src
+#+latex: }
+
+#+begin_src gretl :tangle guiones/S18-Prct-A-hprice2-inferencia.inp :eval no :exports none :noweb yes
+outfile --quiet doceViviendasTres.txt
+    <<DoceViviendasTres>>
+end outfile
+#+end_src
+
+#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
+#+include: ./S18-Prct-A-hprice2-inferencia/doceViviendasTres.txt example
+#+latex: }
+
 *** Lo que debe observar
 
 Con estas doce viviendas el coeficiente sigue siendo /significativo/: $\vert t\vert=2{,}69$ frente a un valor crítico de $2{,}23$. Si solo mirase el asterisco, concluiría lo mismo que con quinientas. Pero mire el intervalo: va de unos $1\,900$ a casi $20\,000$ dólares por habitación, diez veces más ancho que el de la muestra completa. Es la situación que la lección 12 describió con el panel izquierdo de su figura: /significativo, e informativo de casi nada/.
 
 Dos cosas han cambiado y una no. Han cambiado el error estándar (diez veces mayor, porque el regresor en desviaciones es mucho más corto con doce datos) y el valor crítico ($2{,}23$ con diez grados de libertad frente a $1{,}96$ con quinientos: la $t$ exige más cuando hay menos evidencia). No ha cambiado la relación entre las variables, que es la misma se muestreen las casas que se muestreen. Por eso la lección 12 insistía en mirar el coeficiente y el intervalo antes que el veredicto.
+
+Con los tres regresores, el $F(3,8)$ del pie de la tabla vale $9{,}55$ frente a un valor crítico de $4{,}07$ (valor $p$ $0{,}005$): datos como estos serían muy raros si los tres coeficientes fuesen cero a la vez. Y sin embargo el $t$ de =stratio= es $-0{,}10$, el de =nox=, $-2{,}6$, apenas supera el valor crítico $2{,}31$, y los tres intervalos son muy anchos. La lección 13 usa esta salida para decir lo que el $F$ dice y lo que no dice: que los tres regresores en conjunto acortan el residuo más de lo esperable por azar, pero no cuáles ni de qué tamaño es su efecto.
 
 * Preguntas de interpretación para la clase
 
