@@ -84,3 +84,13 @@ outfile --quiet doceViviendas.txt
     printf "IC 95%% con 506 viviendas: [%.1f ; %.1f]\n", b2 - tc*ee, b2 + tc*ee
     smpl full
 end outfile
+
+outfile --quiet doceViviendasTres.txt
+    set seed 20261107                                # las mismas doce viviendas
+    smpl 12 --random
+    ols price const rooms nox stratio
+    scalar Fc12 = critical(F, 3, $df, 0.05)
+    printf "\nF(3,%d) = %.2f,  F_c al 5%% = %.2f,  valor p = %.3f\n", $df, $Fstat, Fc12, pvalue(F, 3, $df, $Fstat)
+    printf "t de nox = %.2f,  t de stratio = %.2f,  t_c al 5%% = %.2f\n", $coeff(nox)/$stderr(nox), $coeff(stratio)/$stderr(stratio), critical(t, $df, 0.025)
+    smpl full
+end outfile
