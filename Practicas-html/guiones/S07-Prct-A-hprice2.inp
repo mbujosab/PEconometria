@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -24,20 +28,26 @@ setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx
 outfile --quiet estadisticos.txt
     summary price rooms nox
 end outfile
+printf "%s", readfile("estadisticos.txt")   # en pantalla
 
 outfile --quiet matrizCorrelaciones.txt
     corr price rooms nox
 end outfile
+printf "%s", readfile("matrizCorrelaciones.txt")   # en pantalla
 
 outfile --quiet covarianzasYcorrelaciones.txt
     printf "Cov(price,rooms)  = %.4f    Corr(price,rooms) = %.4f\n", cov(price,rooms), corr(price,rooms)
     printf "Cov(price,nox)    = %.4f    Corr(price,nox)   = %.4f\n", cov(price,nox), corr(price,nox)
     printf "Cov(rooms,nox)    = %.4f    Corr(rooms,nox)   = %.4f\n", cov(rooms,nox), corr(rooms,nox)
 end outfile
+printf "%s", readfile("covarianzasYcorrelaciones.txt")   # en pantalla
 
-gnuplot price rooms --output="price_rooms.png"
-gnuplot price nox   --output="price_nox.png"
-gnuplot rooms nox   --output="rooms_nox.png"
+gnuplot price rooms --output=display             # en pantalla
+gnuplot price rooms --output="price_rooms.png"   # guardada para el documento
+gnuplot price nox   --output=display             # en pantalla
+gnuplot price nox   --output="price_nox.png"     # guardada para el documento
+gnuplot rooms nox   --output=display             # en pantalla
+gnuplot rooms nox   --output="rooms_nox.png"     # guardada para el documento
 
 series price_c = price - mean(price)
 series rooms_c = rooms - mean(rooms)
@@ -48,6 +58,7 @@ outfile --quiet comprobacionOrtogonalidad.txt
     printf "Suma rooms_c = %.10f\n", sum(rooms_c)
     printf "Suma nox_c   = %.10f\n", sum(nox_c)
 end outfile
+printf "%s", readfile("comprobacionOrtogonalidad.txt")   # en pantalla
 
 outfile --quiet coseno-price-rooms.txt
     scalar dp_pr       = sum(price_c * rooms_c)
@@ -62,6 +73,7 @@ outfile --quiet coseno-price-rooms.txt
     printf "corr(price,rooms) de Gretl      = %.6f\n", corr(price,rooms)
     printf "Ángulo price-rooms = %.2f grados\n", theta_pr
 end outfile
+printf "%s", readfile("coseno-price-rooms.txt")   # en pantalla
 
 outfile --quiet cosenosOtrosPares.txt
     scalar norma_nox = sqrt(sum(nox_c^2))
@@ -76,6 +88,7 @@ outfile --quiet cosenosOtrosPares.txt
     scalar theta_rn = acos(coseno_rn) * rad2deg
     printf "cos(theta) rooms-nox = %.6f  (ángulo = %.2f grados)\n", coseno_rn, theta_rn
 end outfile
+printf "%s", readfile("cosenosOtrosPares.txt")   # en pantalla
 
 outfile --quiet invarianzarespectodivisor.txt
     scalar n = $nobs
@@ -95,3 +108,4 @@ outfile --quiet invarianzarespectodivisor.txt
     printf "rho dividiendo por (n-1)      = %.6f\n", rho_dividiendo_n1
     printf "rho de Gretl (corr)           = %.6f\n", corr(price,rooms)
 end outfile
+printf "%s", readfile("invarianzarespectodivisor.txt")   # en pantalla

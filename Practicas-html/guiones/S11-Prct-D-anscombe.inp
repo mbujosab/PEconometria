@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -33,6 +37,7 @@ outfile --quiet datos.txt
     
     summary x1 y1 x2 y2 x3 y3 x4 y4 --simple
 end outfile
+printf "%s", readfile("datos.txt")   # en pantalla
 
 outfile --quiet regresiones.txt
     printf "conjunto   beta1     beta2     rho(x,y)    R2       SRC\n"
@@ -41,8 +46,13 @@ outfile --quiet regresiones.txt
         printf "   %d     %7.3f   %7.4f   %8.4f   %7.4f   %7.3f\n", i, $coeff(const), $coeff(x$i), corr(x$i, y$i), $rsq, $ess
     endloop
 end outfile
+printf "%s", readfile("regresiones.txt")   # en pantalla
 
-gnuplot y1 x1 --output="@workdir/anscombe1.png"
-gnuplot y2 x2 --output="@workdir/anscombe2.png"
-gnuplot y3 x3 --output="@workdir/anscombe3.png"
-gnuplot y4 x4 --output="@workdir/anscombe4.png"
+gnuplot y1 x1 --output=display                    # en pantalla
+gnuplot y1 x1 --output="@workdir/anscombe1.png"   # guardada para el documento
+gnuplot y2 x2 --output=display                    # en pantalla
+gnuplot y2 x2 --output="@workdir/anscombe2.png"   # guardada para el documento
+gnuplot y3 x3 --output=display                    # en pantalla
+gnuplot y3 x3 --output="@workdir/anscombe3.png"   # guardada para el documento
+gnuplot y4 x4 --output=display                    # en pantalla
+gnuplot y4 x4 --output="@workdir/anscombe4.png"   # guardada para el documento

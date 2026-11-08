@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -22,6 +26,7 @@ open hprice2.gdt --quiet
 outfile --quiet tabla.txt
     ols price const rooms
 end outfile
+printf "%s", readfile("tabla.txt")   # en pantalla
 
 outfile --quiet reconstruccion.txt
     scalar n   = $nobs
@@ -46,18 +51,21 @@ outfile --quiet reconstruccion.txt
     printf "valor p                      = %.3g\n", p
     printf "IC 95%%: [%.2f ; %.2f]\n", b2 - tc*ee, b2 + tc*ee
 end outfile
+printf "%s", readfile("reconstruccion.txt")   # en pantalla
 
 outfile --quiet identidad.txt
     printf "sqrt((n-k)*SEC/SRC)   = %.4f    t   = %.4f\n", sqrt((n-k)*SEC/SRC), tst
     printf "(n-k)*R2/(1-R2)       = %.4f    t^2 = %.4f\n", (n-k)*$rsq/(1-$rsq), tst^2
     printf "F(1, %d) del pie de la tabla = %.4f\n", n-k, $Fstat
 end outfile
+printf "%s", readfile("identidad.txt")   # en pantalla
 
 outfile --quiet restriccionCero.txt
     restrict
         b[2] = 0
     end restrict
 end outfile
+printf "%s", readfile("restriccionCero.txt")   # en pantalla
 
 outfile --quiet contrasteC.txt
     scalar c    = 10000
@@ -73,6 +81,7 @@ outfile --quiet contrasteC.txt
     printf "IC 95%%: [%.2f ; %.2f]   ¿contiene a %d?  %s\n", b2 - tc*ee,  b2 + tc*ee,  c, (b2 - tc*ee  <= c && c <= b2 + tc*ee  ? "si" : "no")
     printf "IC 99%%: [%.2f ; %.2f]   ¿contiene a %d?  %s\n", b2 - tc1*ee, b2 + tc1*ee, c, (b2 - tc1*ee <= c && c <= b2 + tc1*ee ? "si" : "no")
 end outfile
+printf "%s", readfile("contrasteC.txt")   # en pantalla
 
 outfile --quiet doceViviendas.txt
     set seed 20261107                                # para que todos obtengamos las mismas doce
@@ -84,6 +93,7 @@ outfile --quiet doceViviendas.txt
     printf "IC 95%% con 506 viviendas: [%.1f ; %.1f]\n", b2 - tc*ee, b2 + tc*ee
     smpl full
 end outfile
+printf "%s", readfile("doceViviendas.txt")   # en pantalla
 
 outfile --quiet doceViviendasTres.txt
     set seed 20261107                                # las mismas doce viviendas
@@ -94,3 +104,4 @@ outfile --quiet doceViviendasTres.txt
     printf "t de nox = %.2f,  t de stratio = %.2f,  t_c al 5%% = %.2f\n", $coeff(nox)/$stderr(nox), $coeff(stratio)/$stderr(stratio), critical(t, $df, 0.025)
     smpl full
 end outfile
+printf "%s", readfile("doceViviendasTres.txt")   # en pantalla

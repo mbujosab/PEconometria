@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -31,6 +35,7 @@ outfile --quiet datosSimulados.txt
     
     printf "Correlacion entre x2 y x3 = %.4f  (no son ortogonales en desviaciones)\n", corr(x2,x3)
 end outfile
+printf "%s", readfile("datosSimulados.txt")   # en pantalla
 
 outfile --quiet matrizXyEcuacionesNormales.txt
     list Xlist = const x2 x3
@@ -46,6 +51,7 @@ outfile --quiet matrizXyEcuacionesNormales.txt
     printf "\nVector X'y (3x1):\n"
     print XtY
 end outfile
+printf "%s", readfile("matrizXyEcuacionesNormales.txt")   # en pantalla
 
 outfile --quiet betaMatricialVsOls.txt
     matrix beta_matricial = invpd(XtX)*XtY
@@ -61,6 +67,7 @@ outfile --quiet betaMatricialVsOls.txt
     printf "\nDiferencia (debe ser practicamente cero):\n"
     print diferencia
 end outfile
+printf "%s", readfile("betaMatricialVsOls.txt")   # en pantalla
 
 outfile --quiet verificacionXteYeX.txt
     series ehat = $uhat
@@ -75,6 +82,7 @@ outfile --quiet verificacionXteYeX.txt
     printf "\ne*X (Gretl lo presenta como fila 1x3; mismos tres numeros):\n"
     print eX
 end outfile
+printf "%s", readfile("verificacionXteYeX.txt")   # en pantalla
 
 outfile --quiet datosFamiliaOrtogonal.txt
     series z2 = x2 - mean(x2)        # centrado: media nula
@@ -88,6 +96,7 @@ outfile --quiet datosFamiliaOrtogonal.txt
     printf "suma(z2*z3)  = %.10f   (debe ser 0: ortogonalidad mutua)\n", sum(z2*z3)
     printf "corr(z2,z3)  = %.10f   (era 0,5046 entre x2 y x3)\n", corr(z2,z3)
 end outfile
+printf "%s", readfile("datosFamiliaOrtogonal.txt")   # en pantalla
 
 outfile --quiet familiaOrtogonalComparacion.txt
     printf "================ CASO GENERAL (Actividad 1) ================\n"
@@ -104,6 +113,7 @@ outfile --quiet familiaOrtogonalComparacion.txt
     printf "beta3:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(z3), cov(z3,yo)/var(z3)
     printf "R2    : conjunto = %10.6f     suma de rho^2     = %10.6f\n", $rsq, corr(z2,yo)^2 + corr(z3,yo)^2
 end outfile
+printf "%s", readfile("familiaOrtogonalComparacion.txt")   # en pantalla
 
 outfile --quiet colinealidadExacta.txt
     series C = x2                     # "temperatura" en Celsius
@@ -116,6 +126,7 @@ outfile --quiet colinealidadExacta.txt
     
     ols y const C F
 end outfile
+printf "%s", readfile("colinealidadExacta.txt")   # en pantalla
 
 outfile --quiet coordenadasBaseOrtonormal.txt
     ols y const x2 x3 --quiet
@@ -150,3 +161,4 @@ outfile --quiet coordenadasBaseOrtonormal.txt
     printf "\n(SEC/(k-1)) / (SRC/(n-k)) = %.4f    F de Gretl = %.4f\n", (cE'cE/(k-1)) / (cR'cR/(n-k)), $Fstat
     printf "c2 / ||parte propia de x3|| = %.6f    beta3 de Gretl = %.6f\n", cE[2]/sqrt(sum(e3^2)), $coeff(x3)
 end outfile
+printf "%s", readfile("coordenadasBaseOrtonormal.txt")   # en pantalla

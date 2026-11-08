@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -42,6 +46,7 @@ outfile --quiet preparacion.txt
     printf "  Sxx esperado para %d viviendas sorteadas de la poblacion     = %.4f\n", $nobs, ($nobs-1)*var_rooms
     printf "\nVar[b2 | X] en estas %d viviendas (formula de la leccion 11) = %.1f   (error estandar %.1f)\n", $nobs, Var_b2_en_X_observada, sqrt(Var_b2_en_X_observada)
 end outfile
+printf "%s", readfile("preparacion.txt")   # en pantalla
 
 scalar R = 4000
 
@@ -56,6 +61,7 @@ endloop
 outfile --quiet avisoA.txt
     printf "Hecho: %d replicas con el regresor fijo guardadas en repFijo.gdt\n", R
 end outfile
+printf "%s", readfile("avisoA.txt")   # en pantalla
 
 outfile --quiet unSorteoX.txt
     set seed 160
@@ -64,6 +70,7 @@ outfile --quiet unSorteoX.txt
     printf "Sxx de las doce viviendas observadas = %.4f\n", Sxx_obs
     printf "Sxx de doce viviendas sorteadas       = %.4f\n", sum((xnew-mean(xnew))^2)
 end outfile
+printf "%s", readfile("unSorteoX.txt")   # en pantalla
 
 set seed 160
 loop R --progressive --quiet
@@ -79,12 +86,14 @@ endloop
 outfile --quiet avisoB.txt
     printf "Hecho: %d replicas con regresor nuevo guardadas en repVar.gdt\n", R
 end outfile
+printf "%s", readfile("avisoB.txt")   # en pantalla
 
 outfile --quiet comparacion.txt
     printf "=== LO QUE PREDICE LA LECCION 11 (condicional en la X observada) ===\n"
     printf "beta_2 verdadero  = %.2f\n", beta2_verdadero
     printf "Var[b2 | X]       = %.1f\n\n", Var_b2_en_X_observada
 end outfile
+printf "%s", readfile("comparacion.txt")   # en pantalla
 
 open "@workdir/repFijo.gdt" --quiet
 outfile --quiet comparacionA.txt
@@ -92,6 +101,7 @@ outfile --quiet comparacionA.txt
     printf "media de b2hat    = %.2f\n", mean(b_fijo)
     printf "varianza de b2hat = %.1f\n\n", sum((b_fijo-mean(b_fijo))^2)/$nobs
 end outfile
+printf "%s", readfile("comparacionA.txt")   # en pantalla
 
 open "@workdir/repVar.gdt" --quiet
 outfile --quiet comparacionB.txt
@@ -101,6 +111,7 @@ outfile --quiet comparacionB.txt
     printf "\nSxx a lo largo de las replicas del experimento B:\n"
     printf "  medio = %.4f    minimo = %.4f    maximo = %.4f\n", mean(Sxx_i), min(Sxx_i), max(Sxx_i)
 end outfile
+printf "%s", readfile("comparacionB.txt")   # en pantalla
 
 open hprice2.gdt --quiet
 ols price const rooms --quiet
@@ -117,6 +128,7 @@ outfile --quiet otrasDoce.txt
     printf "Sxx de estas otras 12 viviendas = %.4f   (esperado %.4f; las doce de la Actividad 1: 3,2670)\n", Sxx_obs2, 11*var_rooms
     printf "Var[b2 | X] en estas 12 viviendas (formula de la leccion 11) = %.1f\n", Var_b2_en_X_observada2
 end outfile
+printf "%s", readfile("otrasDoce.txt")   # en pantalla
 
 set seed 160
 loop 4000 --progressive --quiet
@@ -132,6 +144,7 @@ outfile --quiet otrasDoceResultado.txt
     printf "media de b_fijo2    = %.2f\n", mean(b_fijo2)
     printf "varianza de b_fijo2 = %.1f\n", sum((b_fijo2-mean(b_fijo2))^2)/$nobs
 end outfile
+printf "%s", readfile("otrasDoceResultado.txt")   # en pantalla
 
 open hprice2.gdt --quiet
 ols price const rooms --quiet
@@ -167,6 +180,7 @@ outfile --quiet muestraGrande.txt
     printf "             Var[b2|X] en las 400 viviendas observadas = %.2f\n", Var_b2_en_X_observada
     printf "             cociente Sxx observado/esperado = %.3f  <- lo que cabe esperar de var_B/var_A\n", Sxx_obs/(($nobs-1)*var_rooms)
 end outfile
+printf "%s", readfile("muestraGrande.txt")   # en pantalla
 
 open "@workdir/repGrande.gdt" --quiet
 outfile --quiet muestraGrandeResultado.txt
@@ -174,3 +188,4 @@ outfile --quiet muestraGrandeResultado.txt
     printf "  regresor REMUESTREADO : var = %.2f\n", sum((bg_var-mean(bg_var))^2)/$nobs
     printf "  cociente observado    : %.3f\n", (sum((bg_var-mean(bg_var))^2))/(sum((bg_fijo-mean(bg_fijo))^2))
 end outfile
+printf "%s", readfile("muestraGrandeResultado.txt")   # en pantalla

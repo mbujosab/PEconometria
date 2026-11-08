@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -25,6 +29,7 @@ print y
 outfile --quiet ortogonalidad.txt
     printf "Suma de (y - mu_y) = %.10f   (debe ser 0)\n", sum(y - mean(y))
 end outfile
+printf "%s", readfile("ortogonalidad.txt")   # en pantalla
 
 outfile --quiet ortogonalidad-n.txt
     scalar mu_y      = mean(y)
@@ -34,11 +39,13 @@ outfile --quiet ortogonalidad-n.txt
     printf "mu_y2                = %.6f\n", mu_y2
     printf "mu_y^2 + sigma_y^2   = %.6f   (divisor n)\n", mu_y^2 + var_n
 end outfile
+printf "%s", readfile("ortogonalidad-n.txt")   # en pantalla
 
 outfile --quiet ortogonalidad-n-1.txt
     scalar var_n1 = sum((y - mu_y)^2) / ($nobs - 1)     # divisor 1/(n-1)
     printf "mu_y^2 + var(n-1)    = %.6f   (divisor n-1, ya NO coincide con mu_y2)\n", mu_y^2 + var_n1
 end outfile
+printf "%s", readfile("ortogonalidad-n-1.txt")   # en pantalla
 
 outfile --quiet dosSeriesn50amano.txt
     nulldata 50 --preserve
@@ -63,6 +70,7 @@ outfile --quiet dosSeriesn50amano.txt
     scalar pitag_chi2 = mean(y_chi2^2) - (mu_chi2^2 + var_chi2)
     printf "%-10s -> ortogonalidad: %.10f    Pitágoras (desajuste): %.10f\n", "y_chi2", ortog_chi2, pitag_chi2
 end outfile
+printf "%s", readfile("dosSeriesn50amano.txt")   # en pantalla
 
 outfile --quiet dosSeriesn50conloop.txt
     loop foreach i y_normal y_chi2 --quiet
@@ -73,6 +81,7 @@ outfile --quiet dosSeriesn50conloop.txt
         printf "%-10s -> ortogonalidad: %.10f    Pitágoras (desajuste): %.10f\n", "$i", ortog, pitag
     endloop
 end outfile
+printf "%s", readfile("dosSeriesn50conloop.txt")   # en pantalla
 
 outfile --quiet correlacionN2.txt
     nulldata 2 --preserve
@@ -86,6 +95,7 @@ outfile --quiet correlacionN2.txt
     series b = normal()
     printf "Segundo sorteo (n=2): corr(a,b) = %+.10f\n", corr(a,b)
 end outfile
+printf "%s", readfile("correlacionN2.txt")   # en pantalla
 
 nulldata 100 --preserve
 set seed 11223
@@ -101,6 +111,7 @@ outfile --quiet covarianzamanual.txt
     printf "Covarianza \"a mano\" (divisor n) = %.6f\n", cov_manual
     printf "cov(x,y) de Gretl (divisor n-1)  = %.6f\n", cov(x,y)
 end outfile
+printf "%s", readfile("covarianzamanual.txt")   # en pantalla
 
 scalar norma_x = sqrt(sum((x - mean(x))^2))
 scalar norma_y = sqrt(sum((y - mean(y))^2))
@@ -117,6 +128,7 @@ outfile --quiet correlacioncomocosenoxy.txt
     printf "cos(theta) \"a mano\" = %.6f\n", coseno
     printf "corr(x,y) de Gretl  = %.6f\n", corr(x,y)
 end outfile
+printf "%s", readfile("correlacioncomocosenoxy.txt")   # en pantalla
 
 outfile --quiet desigualdades.txt
     scalar norma_suma = sqrt(sum(((x - mean(x)) + (y - mean(y)))^2))
@@ -126,6 +138,7 @@ outfile --quiet desigualdades.txt
     printf "Triangular:      ||x_c+y_c|| = %.4f  <=  ||x_c||+||y_c|| = %.4f\n", \
            norma_suma, norma_x + norma_y
 end outfile
+printf "%s", readfile("desigualdades.txt")   # en pantalla
 
 outfile --quiet loopopcionalderepeticionmasiva.txt
     nulldata 30 --preserve
@@ -168,3 +181,4 @@ outfile --quiet loopopcionalderepeticionmasiva.txt
     printf "  Desviación MÁXIMA Pitágoras        : %.10f\n", max_dev_pitag
     printf "  Desviación MÁXIMA rho = cos(theta) : %.10f\n", max_dev_rho
 end outfile
+printf "%s", readfile("loopopcionalderepeticionmasiva.txt")   # en pantalla

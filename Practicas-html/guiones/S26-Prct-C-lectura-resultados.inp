@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -24,12 +28,14 @@ outfile --quiet tabla1.txt
     ols price const sqrft bdrms lotsize
     printf "100 pies cuadrados mas de casa: %.1f mil dolares ; 1000 pies cuadrados mas de parcela: %.2f mil dolares\n", 100*$coeff(sqrft), 1000*$coeff(lotsize)
 end outfile
+printf "%s", readfile("tabla1.txt")   # en pantalla
 
 open wage1 --quiet
 outfile --quiet tabla2.txt
     ols lwage const educ exper tenure female
     printf "female exacto: %.1f%% ; educ exacto: %.1f%% ; e^const = %.2f dolares ; trabajadores con educ = 0: %d\n", 100*(exp($coeff(female))-1), 100*(exp($coeff(educ))-1), exp($coeff(const)), sum(educ == 0)
 end outfile
+printf "%s", readfile("tabla2.txt")   # en pantalla
 
 open meap93 --quiet
 outfile --quiet tabla3.txt
@@ -42,6 +48,7 @@ outfile --quiet tabla3.txt
     ols math10 const l_expend --quiet
     printf "Sin la pobreza ni el tamano: coeficiente de l_expend %.2f (ee %.2f) ; correlacion entre l_expend y lnchprg: %.3f\n", $coeff(l_expend), $stderr(l_expend), corr(l_expend, lnchprg)
 end outfile
+printf "%s", readfile("tabla3.txt")   # en pantalla
 
 open hprice2 --quiet
 outfile --quiet tabla4.txt
@@ -49,3 +56,4 @@ outfile --quiet tabla4.txt
     ols l_price const l_nox rooms dist stratio
     printf "rooms exacto: %.1f%% ; stratio exacto: %.1f%%\n", 100*(exp($coeff(rooms))-1), 100*(exp($coeff(stratio))-1)
 end outfile
+printf "%s", readfile("tabla4.txt")   # en pantalla

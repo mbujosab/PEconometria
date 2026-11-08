@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -45,6 +49,7 @@ outfile --quiet bajoH0.txt
     printf "fraccion de F > F_c(3,502) = %.4f\n", mean(Fst > critical(F, 3, 502, 0.05))
     printf "cuantil empirico 95%% de F  = %.3f   (F_c = %.3f)\n", quantile(Fst, 0.95), Fc506
 end outfile
+printf "%s", readfile("bajoH0.txt")   # en pantalla
 
 freq Fst --plot="@workdir/histF.png"
 
@@ -70,6 +75,7 @@ outfile --quiet n20.txt
     printf "fraccion de F > F_c(3,16)  = %.4f\n", mean(F20 > Fc20)
     printf "fraccion de F > F_c(3,502) = %.4f\n", mean(F20 > critical(F, 3, 502, 0.05))
 end outfile
+printf "%s", readfile("n20.txt")   # en pantalla
 
 freq F20 --plot="@workdir/histF20.png"
 
@@ -103,3 +109,4 @@ outfile --quiet deteccion.txt
     endloop
     printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rech/R
 end outfile
+printf "%s", readfile("deteccion.txt")   # en pantalla

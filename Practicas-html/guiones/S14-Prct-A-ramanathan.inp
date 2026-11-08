@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -26,14 +30,17 @@ outfile --quiet resumen.txt
     
     summary price sqft bedrms baths --simple
 end outfile
+printf "%s", readfile("resumen.txt")   # en pantalla
 
 outfile --quiet vistazoDatos.txt
     print price sqft bedrms baths --byobs
 end outfile
+printf "%s", readfile("vistazoDatos.txt")   # en pantalla
 
 outfile --quiet OLS_Precio_Superficie.txt
     ols price const sqft
 end outfile
+printf "%s", readfile("OLS_Precio_Superficie.txt")   # en pantalla
 
 gnuplot price sqft --output="price_sqft_simple.png"
 
@@ -41,18 +48,22 @@ outfile --quiet olsBedrms.txt
     ols price const bedrms
     ols price const sqft bedrms
 end outfile
+printf "%s", readfile("olsBedrms.txt")   # en pantalla
 
 outfile --quiet corrSqftBedrms.txt
     corr sqft bedrms
 end outfile
+printf "%s", readfile("corrSqftBedrms.txt")   # en pantalla
 
 outfile --quiet olsBaths.txt
     ols price const sqft bedrms baths
 end outfile
+printf "%s", readfile("olsBaths.txt")   # en pantalla
 
 outfile --quiet corrTres.txt
     corr sqft bedrms baths
 end outfile
+printf "%s", readfile("corrTres.txt")   # en pantalla
 
 outfile --quiet sintesisR2.txt
     ols price const sqft --quiet
@@ -69,6 +80,7 @@ outfile --quiet sintesisR2.txt
     printf "R2 price~sqft+bedrms        = %.4f\n", r2_3
     printf "R2 price~sqft+bedrms+baths  = %.4f\n", r2_4
 end outfile
+printf "%s", readfile("sintesisR2.txt")   # en pantalla
 
 smpl full                       # las 14 viviendas
 ols price const sqft --quiet
@@ -105,3 +117,4 @@ outfile --quiet submuestras.txt
     printf "obs 12 (n=13)    %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[12], resid[12], a_s12, b_s12
     printf "obs 14 (n=13)    %5.0f  %8.2f   %10.3f  %10.4f\n", sqft[14], resid[14], a_s14, b_s14
 end outfile
+printf "%s", readfile("submuestras.txt")   # en pantalla

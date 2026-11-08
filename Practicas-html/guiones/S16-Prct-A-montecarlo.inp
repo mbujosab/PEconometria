@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -37,6 +41,7 @@ outfile --quiet mundoArtificial.txt
     printf "Var[b2 | X]    = sigma^2/Sxx = %.4f\n", Var_b2_en_X_observada
     printf "error estandar = %.4f\n", sqrt(Var_b2_en_X_observada)
 end outfile
+printf "%s", readfile("mundoArtificial.txt")   # en pantalla
 
 outfile --quiet unaReplica.txt
     set seed 20261030                       # para que el resultado sea reproducible
@@ -49,6 +54,7 @@ outfile --quiet unaReplica.txt
     printf "beta_2 estimado   = %.4f\n", $coeff(rooms)
     printf "diferencia        = %.4f\n", $coeff(rooms) - beta2_verdadero
 end outfile
+printf "%s", readfile("unaReplica.txt")   # en pantalla
 
 scalar R = 2000                         # numero de replicas
 
@@ -65,6 +71,7 @@ endloop
 outfile --quiet bucle.txt
     printf "Hecho: %d replicas guardadas en replicas.gdt\n", R
 end outfile
+printf "%s", readfile("bucle.txt")   # en pantalla
 
 outfile --quiet analisisReplicas.txt
     printf "=== LO QUE PREDICE LA LECCION 11 ===\n"
@@ -72,6 +79,7 @@ outfile --quiet analisisReplicas.txt
     printf "Var[b2 | X] en la X observada  = %.4f\n", Var_b2_en_X_observada
     printf "error estandar                 = %.4f\n\n", sqrt(Var_b2_en_X_observada)
 end outfile
+printf "%s", readfile("analisisReplicas.txt")   # en pantalla
 
 open "@workdir/replicas.gdt" --quiet
 outfile --quiet empiricoReplicas.txt
@@ -80,6 +88,7 @@ outfile --quiet empiricoReplicas.txt
     printf "varianza de beta2_estimado     = %.4f\n", sum((beta2_estimado-mean(beta2_estimado))^2)/$nobs
     printf "desv. tipica de beta2_estimado = %.4f\n", sqrt(sum((beta2_estimado-mean(beta2_estimado))^2)/$nobs)
 end outfile
+printf "%s", readfile("empiricoReplicas.txt")   # en pantalla
 
 freq beta2_estimado --normal --plot="@workdir/histograma_b2.png"
 
@@ -94,6 +103,7 @@ outfile --quiet matrizVCV.txt
     printf "Matriz sigma^2 (X'X)^{-1} predicha por la leccion 11:\n"
     print Var_beta_en_X_observada
 end outfile
+printf "%s", readfile("matrizVCV.txt")   # en pantalla
 
 open "@workdir/replicas.gdt" --quiet
 outfile --quiet matrizEmpirica.txt
@@ -102,3 +112,4 @@ outfile --quiet matrizEmpirica.txt
     printf "\nMatriz de varianzas y covarianzas EMPIRICA de las replicas:\n"
     print Var_beta_replicas
 end outfile
+printf "%s", readfile("matrizEmpirica.txt")   # en pantalla

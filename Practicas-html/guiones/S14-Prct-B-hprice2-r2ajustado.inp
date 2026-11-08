@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -25,6 +29,7 @@ outfile --quiet resumen.txt
     
     summary price rooms nox stratio
 end outfile
+printf "%s", readfile("resumen.txt")   # en pantalla
 
 outfile --quiet Ols_rooms_nox_simple_y_conjunto.txt
     ols price const rooms
@@ -32,10 +37,12 @@ outfile --quiet Ols_rooms_nox_simple_y_conjunto.txt
     ols price const rooms nox
     corr rooms nox
 end outfile
+printf "%s", readfile("Ols_rooms_nox_simple_y_conjunto.txt")   # en pantalla
 
 outfile --quiet Ols_multiple_con_stratio.txt
     ols price const rooms nox stratio
 end outfile
+printf "%s", readfile("Ols_multiple_con_stratio.txt")   # en pantalla
 
 outfile --quiet comparacionR2cuatroModelos.txt
     ols price const rooms --quiet
@@ -55,6 +62,7 @@ outfile --quiet comparacionR2cuatroModelos.txt
     printf "R2 price~rooms+nox            = %.4f\n", r2_rooms_nox
     printf "R2 price~rooms+nox+stratio    = %.4f\n", r2_todos
 end outfile
+printf "%s", readfile("comparacionR2cuatroModelos.txt")   # en pantalla
 
 outfile --quiet r2AjustadoTresModelos.txt
     ols price const rooms nox --quiet
@@ -75,6 +83,7 @@ outfile --quiet r2AjustadoTresModelos.txt
     printf "  R2          = %.4f\n", $rsq
     printf "  R2 ajustado = %.4f\n", Rbarsq
 end outfile
+printf "%s", readfile("r2AjustadoTresModelos.txt")   # en pantalla
 
 outfile --quiet verificacionFormulaR2ajustado.txt
     ols price const rooms nox stratio --quiet
@@ -88,3 +97,4 @@ outfile --quiet verificacionFormulaR2ajustado.txt
     printf "R2 ajustado (formula original: 1-(SRC/(n-k))/(STC/(n-1)) ) = %.6f\n", Rbarsq_orig
     printf "R2 ajustado (formula reducida: 1-(1-R2)(n-1)/(n-k)) = %.6f\n", Rbarsq
 end outfile
+printf "%s", readfile("verificacionFormulaR2ajustado.txt")   # en pantalla

@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -24,6 +28,7 @@ outfile --quiet modelo.txt
     scalar s = $sigma
     scalar ee_nox = $stderr(nox)
 end outfile
+printf "%s", readfile("modelo.txt")   # en pantalla
 
 outfile --quiet auxiliar.txt
     ols nox const rooms lnox
@@ -35,6 +40,7 @@ outfile --quiet auxiliar.txt
     printf "sqrt(1 - R2aux)          = %.4f   (= seno del angulo)\n", sqrt(1 - R2aux)
     printf "producto                 = %.4f\n", sqrt(sum((nox - mean(nox))^2))*sqrt(1 - R2aux)
 end outfile
+printf "%s", readfile("auxiliar.txt")   # en pantalla
 
 outfile --quiet errorEstandar.txt
     printf "s del modelo completo               = %.4f\n", s
@@ -43,11 +49,13 @@ outfile --quiet errorEstandar.txt
     printf "VIF = 1/(1 - R2aux)                 = %.3f      sqrt(VIF) = %.3f\n", 1/(1-R2aux), 1/sqrt(1-R2aux)
     printf "s / ||nox en desviaciones||         = %.3f      x sqrt(VIF) = %.3f\n", s/sqrt(sum((nox - mean(nox))^2)), s/sqrt(sum((nox - mean(nox))^2))/sqrt(1-R2aux)
 end outfile
+printf "%s", readfile("errorEstandar.txt")   # en pantalla
 
 outfile --quiet vif.txt
     ols price const rooms nox lnox --quiet
     vif
 end outfile
+printf "%s", readfile("vif.txt")   # en pantalla
 
 outfile --quiet sinLnox.txt
     ols price const rooms nox
@@ -59,6 +67,7 @@ outfile --quiet sinLnox.txt
     ols price const rooms nox --quiet
     vif
 end outfile
+printf "%s", readfile("sinLnox.txt")   # en pantalla
 
 outfile --quiet intervalos.txt
     ols price const rooms nox lnox --quiet
@@ -69,3 +78,4 @@ outfile --quiet intervalos.txt
     ols price const rooms nox --quiet
     printf "IC 95%% de nox  sin lnox: [%.1f ; %.1f]\n", $coeff(nox) - tc*$stderr(nox), $coeff(nox) + tc*$stderr(nox)
 end outfile
+printf "%s", readfile("intervalos.txt")   # en pantalla

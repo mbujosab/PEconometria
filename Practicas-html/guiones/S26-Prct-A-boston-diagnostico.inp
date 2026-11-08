@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -29,6 +33,7 @@ outfile --quiet palanca.txt
     scalar i = imaxc({lever})
     printf "Palanca maxima %.4f en el barrio %d: medv %.1f  rm %.2f  lstat %.2f  dis %.2f  chas %d\n", lever[i], i, medv[i], rm[i], lstat[i], dis[i], chas[i]
 end outfile
+printf "%s", readfile("palanca.txt")   # en pantalla
 
 outfile --quiet cook.txt
     series e = $uhat
@@ -44,6 +49,7 @@ outfile --quiet cook.txt
     printf "Sin el barrio %d: chas %.4f  rm %.4f  lstat %.4f  dis %.4f  (n = %d)\n", j, $coeff(chas), $coeff(rm), $coeff(lstat), $coeff(dis), $nobs
     smpl full
 end outfile
+printf "%s", readfile("cook.txt")   # en pantalla
 
 outfile --quiet censura.txt
     printf "Barrios con medv = 50: %d\n", sum(medv == 50)
@@ -57,3 +63,4 @@ outfile --quiet censura.txt
     printf "Sin los 16: chas %.4f (ee %.4f)  rm %.4f  lstat %.4f  dis %.4f\n", $coeff(chas), $stderr(chas), $coeff(rm), $coeff(lstat), $coeff(dis)
     smpl full
 end outfile
+printf "%s", readfile("censura.txt")   # en pantalla

@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -23,11 +27,13 @@ outfile --quiet descripcion.txt
     summary medv rm lstat dis chas --simple
     series lmedv = log(medv)
 end outfile
+printf "%s", readfile("descripcion.txt")   # en pantalla
 
 outfile --quiet modeloComun.txt
     ols lmedv const rm lstat dis
     printf "Una habitacion mas por vivienda: %.1f%% aproximado, %.1f%% exacto\n", 100*$coeff(rm), 100*(exp($coeff(rm))-1)
 end outfile
+printf "%s", readfile("modeloComun.txt")   # en pantalla
 
 outfile --quiet conChas.txt
     ols lmedv const rm lstat dis chas
@@ -36,6 +42,7 @@ outfile --quiet conChas.txt
     ols medv const rm lstat dis chas --quiet
     printf "En niveles: chas = %.2f mil dolares (ee %.2f, t = %.2f)\n", $coeff(chas), $stderr(chas), $coeff(chas)/$stderr(chas)
 end outfile
+printf "%s", readfile("conChas.txt")   # en pantalla
 
 outfile --quiet prevision.txt
     ols lmedv const rm lstat dis chas --quiet
@@ -46,18 +53,21 @@ outfile --quiet prevision.txt
     ols medv const rm lstat dis chas --quiet
     printf "Correlacion al cuadrado con medv: modelo en logaritmos %.3f ; modelo en niveles %.3f (su R2: %.3f)\n", r2log, corr(medv, $yhat)^2, $rsq
 end outfile
+printf "%s", readfile("prevision.txt")   # en pantalla
 
 outfile --quiet interaccion.txt
     series chasrm = chas*rm
     ols lmedv const rm lstat dis chas chasrm
     printf "Pendiente de rm sin rio: %.4f ; junto al rio: %.4f ; t de la interaccion: %.2f\n", $coeff(rm), $coeff(rm)+$coeff(chasrm), $coeff(chasrm)/$stderr(chasrm)
 end outfile
+printf "%s", readfile("interaccion.txt")   # en pantalla
 
 open wage1 --quiet
 outfile --quiet chowWage.txt
     ols lwage const educ exper tenure --quiet
     chow female --dummy
 end outfile
+printf "%s", readfile("chowWage.txt")   # en pantalla
 
 outfile --quiet pendientesWage.txt
     series femeduc = female*educ
@@ -73,6 +83,7 @@ outfile --quiet pendientesWage.txt
     ols lwage const educ exper tenure female --quiet
     printf "Solo el intercepto (q = 1): t de female = %.2f ; t al cuadrado = %.1f\n", $coeff(female)/$stderr(female), ($coeff(female)/$stderr(female))^2
 end outfile
+printf "%s", readfile("pendientesWage.txt")   # en pantalla
 
 open ../../data/boston.csv --quiet
 series lmedv = log(medv)
@@ -92,3 +103,4 @@ outfile --quiet chowBoston.txt
     ols lmedv const rm lstat dis chas --quiet
     printf "Solo el intercepto (q = 1): t de chas = %.2f ; t al cuadrado = %.1f\n", $coeff(chas)/$stderr(chas), ($coeff(chas)/$stderr(chas))^2
 end outfile
+printf "%s", readfile("chowBoston.txt")   # en pantalla

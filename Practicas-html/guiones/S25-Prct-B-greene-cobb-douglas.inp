@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -25,6 +29,7 @@ outfile --quiet modeloLogLog.txt
     ols l_valadd const l_labor l_capital
     printf "Factor de escala A = e^const = %.2f ; correlacion entre l_labor y l_capital: %.3f\n", exp($coeff(const)), corr(l_labor, l_capital)
 end outfile
+printf "%s", readfile("modeloLogLog.txt")   # en pantalla
 
 outfile --quiet restriccion.txt
     scalar suma = $coeff(l_labor) + $coeff(l_capital)
@@ -36,6 +41,7 @@ outfile --quiet restriccion.txt
     end restrict
     printf "F(1,%d) = %.2f   valor p = %.3f   valor critico al 5%%: %.2f\n", $df, $test, $pvalue, critical(F, 1, $df, 0.05)
 end outfile
+printf "%s", readfile("restriccion.txt")   # en pantalla
 
 outfile --quiet restringido.txt
     ols l_valadd const l_labor l_capital --quiet
@@ -47,3 +53,4 @@ outfile --quiet restringido.txt
     printf "Restringido: gamma = %.3f (ee %.3f), alpha = 1 - gamma = %.3f\n", $coeff(lkpl), $stderr(lkpl), 1 - $coeff(lkpl)
     printf "SRC sin restringir %.3f ; SRC restringido %.3f ; (SRC_r - SRC)/s2 = %.2f\n", SRC, $ess, ($ess - SRC)/s2
 end outfile
+printf "%s", readfile("restringido.txt")   # en pantalla

@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -61,6 +65,7 @@ outfile --quiet montecarlo.txt
         endif
     endloop
 end outfile
+printf "%s", readfile("montecarlo.txt")   # en pantalla
 
 # Histogramas de b2 con rho = 0 y con rho = 0,99 (mismos ejes)
 nulldata R --preserve
@@ -74,7 +79,9 @@ outfile --quiet histogramas.txt
     printf "rho = 0,99  : b2 + b3 medio = %.4f   desv. tipica = %.4f\n", mean(suma_rho99), sd(suma_rho99)
     printf "correlacion entre b2 y b3 con rho = 0,99: %.4f\n", corr(b2_rho99, b3_rho99)
 end outfile
+printf "%s", readfile("histogramas.txt")   # en pantalla
 
 freq b2_rho0 --plot="@workdir/histRho0.png"
 freq b2_rho99 --plot="@workdir/histRho99.png"
-gnuplot b3_rho99 b2_rho99 --output="@workdir/nubeRho99.png"
+gnuplot b3_rho99 b2_rho99 --output=display                    # en pantalla
+gnuplot b3_rho99 b2_rho99 --output="@workdir/nubeRho99.png"   # guardada para el documento

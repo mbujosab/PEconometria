@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -31,6 +35,7 @@ outfile --quiet concentrado.txt
     printf "t = %.2f   (t_c al 5%% = %.3f)\n", $coeff(x_c)/$stderr(x_c), tc
     printf "IC 95%%: [%.2f ; %.2f]\n", $coeff(x_c) - tc*$stderr(x_c), $coeff(x_c) + tc*$stderr(x_c)
 end outfile
+printf "%s", readfile("concentrado.txt")   # en pantalla
 
 series x_d = 22.5 + 5*(index - 1)
 series y_d = {22.670, 22.900, 26.560, 26.790, 31.990, 34.850, \
@@ -41,12 +46,14 @@ outfile --quiet disperso.txt
     printf "t = %.2f   (t_c al 5%% = %.3f)\n", $coeff(x_d)/$stderr(x_d), tc
     printf "IC 95%%: [%.2f ; %.2f]\n", $coeff(x_d) - tc*$stderr(x_d), $coeff(x_d) + tc*$stderr(x_d)
 end outfile
+printf "%s", readfile("disperso.txt")   # en pantalla
 
 outfile --quiet mismasPerturbaciones.txt
     series u_c = y_c - 10 - 0.5*x_c        # perturbacion del panel concentrado
     series u_d = y_d - 10 - 0.5*x_d        # perturbacion del panel disperso
     printf "\nmayor diferencia entre las dos series de perturbaciones: %.6f\n", max(abs(u_c - u_d))
 end outfile
+printf "%s", readfile("mismasPerturbaciones.txt")   # en pantalla
 
 outfile --quiet contrastes.txt
     ols y_c const x_c --quiet
@@ -61,6 +68,7 @@ outfile --quiet contrastes.txt
     printf "H0: beta_2 = 0,5 (cierta)   t = %6.2f    t = %6.2f\n", t_cierta_c, t_cierta_d
     printf "H0: beta_2 = 0   (falsa)    t = %6.2f    t = %6.2f\n", t_falsa_c,  t_falsa_d
 end outfile
+printf "%s", readfile("contrastes.txt")   # en pantalla
 
 outfile --quiet unidades.txt
     series x_d100 = 100*x_d
@@ -70,3 +78,4 @@ outfile --quiet unidades.txt
     printf "x multiplicado por 100   : coef = %.6f   ee = %.6f   t = %.2f   p = %.3g\n", $coeff(x_d100), $stderr(x_d100), $coeff(x_d100)/$stderr(x_d100), 2*pvalue(t, $df, abs($coeff(x_d100)/$stderr(x_d100)))
     printf "R2 en ambos casos        : %.4f\n", $rsq
 end outfile
+printf "%s", readfile("unidades.txt")   # en pantalla

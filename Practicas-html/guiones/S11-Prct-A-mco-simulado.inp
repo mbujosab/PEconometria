@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -28,6 +32,7 @@ series y = 2 + 3*x + u
 outfile --quiet olsEjemploN5.txt
     ols y const x
 end outfile
+printf "%s", readfile("olsEjemploN5.txt")   # en pantalla
 
 outfile --quiet residuosYortogonalidad.txt
     series ehat = $uhat
@@ -39,6 +44,7 @@ outfile --quiet residuosYortogonalidad.txt
     printf "Suma de x*residuos           sum(x*ehat) = %.10f\n", sum(x*ehat)
     printf "Diferencia maxima |ehat-u|              = %.10f\n", max(abs(ehat-u))
 end outfile
+printf "%s", readfile("residuosYortogonalidad.txt")   # en pantalla
 
 outfile --quiet stcSecSrcR2.txt
     scalar mu_y = mean(y)
@@ -50,6 +56,7 @@ outfile --quiet stcSecSrcR2.txt
     printf "R2 (a mano)         = %.6f\n", SEC/STC
     printf "R2 de Gretl ($rsq)  = %.6f\n", $rsq
 end outfile
+printf "%s", readfile("stcSecSrcR2.txt")   # en pantalla
 
 outfile --quiet mediasYpuntoDeLasMedias.txt
     scalar mu_x    = mean(x)
@@ -59,6 +66,7 @@ outfile --quiet mediasYpuntoDeLasMedias.txt
     printf "beta1 + beta2*mu_x = %.10f          (la recta pasa por el punto de las medias)\n", $coeff(const) + $coeff(x)*mu_x
     printf "Diferencia maxima |(yhat-mu_yhat) - beta2*(x-mu_x)| = %.10f\n", max(abs((yhat-mu_yhat) - $coeff(x)*(x-mu_x)))
 end outfile
+printf "%s", readfile("mediasYpuntoDeLasMedias.txt")   # en pantalla
 
 outfile --quiet pendienteComoCorrelacion.txt
     scalar rho_xy = corr(x,y)
@@ -70,6 +78,7 @@ outfile --quiet pendienteComoCorrelacion.txt
     printf "rho_xy^2                     = %.6f\n", rho_xy^2
     printf "R2 ($rsq de Gretl)           = %.6f\n", $rsq
 end outfile
+printf "%s", readfile("pendienteComoCorrelacion.txt")   # en pantalla
 
 nulldata 60 --preserve
 set seed 24680
@@ -87,6 +96,7 @@ outfile --quiet verificacionMuestraGrande.txt
     printf "beta2 estimado (pendiente)         = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
     printf "beta1 estimado (constante)         = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
 end outfile
+printf "%s", readfile("verificacionMuestraGrande.txt")   # en pantalla
 
 outfile --quiet sinConstante.txt
     ols y2 const x2 --quiet
@@ -100,3 +110,4 @@ outfile --quiet sinConstante.txt
     printf "media de y2 = %.4f   media del ajuste sin constante = %.4f   (con constante: %.4f)\n", mean(y2), mean($yhat), mu_yhat_con
     printf "pendiente sin constante = %.4f   (con constante: %.4f;  generador: 3)\n", $coeff(x2), b2_con
 end outfile
+printf "%s", readfile("sinConstante.txt")   # en pantalla

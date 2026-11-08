@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -24,6 +28,7 @@ outfile --quiet descripcion.txt
     summary cost age miles --simple
     corr age miles
 end outfile
+printf "%s", readfile("descripcion.txt")   # en pantalla
 
 outfile --quiet simples.txt
     ols cost const age
@@ -31,12 +36,15 @@ outfile --quiet simples.txt
     ols cost const miles
     printf "cost ~ miles:  coef(miles) = %8.3f   ee = %7.3f   t = %6.2f   R2 = %.4f   s = %.1f\n", $coeff(miles), $stderr(miles), $coeff(miles)/$stderr(miles), $rsq, $sigma
 end outfile
-gnuplot miles age --output="@workdir/milesAge.png"
+printf "%s", readfile("simples.txt")   # en pantalla
+gnuplot miles age --output=display                   # en pantalla
+gnuplot miles age --output="@workdir/milesAge.png"   # guardada para el documento
 
 outfile --quiet conjunto.txt
     ols cost const age miles
     vif
 end outfile
+printf "%s", readfile("conjunto.txt")   # en pantalla
 
 outfile --quiet partesPropias.txt
     ols age const miles --quiet
@@ -47,6 +55,7 @@ outfile --quiet partesPropias.txt
     ols cost const age miles --quiet
     printf "s = %.3f ;  s/||parte propia de miles|| = %.3f ;  ee(miles) de Gretl = %.3f\n", $sigma, $sigma/longPropiaMiles, $stderr(miles)
 end outfile
+printf "%s", readfile("partesPropias.txt")   # en pantalla
 
 ols cost const age miles --quiet
 scalar df = $df
@@ -68,6 +77,7 @@ outfile --quiet contrastes.txt
     printf "Omitir miles: F(1,%d) = %.2f = t^2   valor p = %.2e\n", df, F_miles, pvalue(F, 1, df, F_miles)
     printf "correlacion entre los estimadores de age y miles: %.4f\n", $vcv[2,3]/sqrt($vcv[2,2]*$vcv[3,3])
 end outfile
+printf "%s", readfile("contrastes.txt")   # en pantalla
 
 outfile --quiet submuestras.txt
     printf "La misma regresion en dos mitades de la muestra:\n"
@@ -79,6 +89,7 @@ outfile --quiet submuestras.txt
     printf "obs 29-57: coef(age) = %8.3f (ee %6.3f)   coef(miles) = %9.3f (ee %7.3f)   s = %.1f\n", $coeff(age), $stderr(age), $coeff(miles), $stderr(miles), $sigma
     smpl full
 end outfile
+printf "%s", readfile("submuestras.txt")   # en pantalla
 
 outfile --quiet ortogonal.txt
     ols age const miles --quiet
@@ -89,6 +100,7 @@ outfile --quiet ortogonal.txt
     ols cost const miles uhatAge
     vif
 end outfile
+printf "%s", readfile("ortogonal.txt")   # en pantalla
 
 outfile --quiet prediccion.txt
     loop foreach i 1 2
@@ -102,3 +114,4 @@ outfile --quiet prediccion.txt
         printf "   modelo con uhatAge: prediccion = %8.1f   ee = %6.1f   (uhatAge del coche = %.1f)\n", x0*$coeff, sqrt(x0*$vcv*x0'), 300 - (a0 + a1*mi)
     endloop
 end outfile
+printf "%s", readfile("prediccion.txt")   # en pantalla

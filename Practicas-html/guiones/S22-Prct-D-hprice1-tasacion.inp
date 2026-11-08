@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -24,11 +28,13 @@ outfile --quiet descripcion.txt
     summary price assess bdrms lotsize sqrft colonial --simple
     corr assess bdrms lotsize sqrft colonial
 end outfile
+printf "%s", readfile("descripcion.txt")   # en pantalla
 
 outfile --quiet conTasacion.txt
     ols price const assess bdrms lotsize sqrft colonial
     vif
 end outfile
+printf "%s", readfile("conTasacion.txt")   # en pantalla
 
 ols price const assess bdrms lotsize sqrft colonial --quiet
 scalar df = $df
@@ -43,6 +49,7 @@ outfile --quiet sinTasacion.txt
     printf "Omitir las cuatro caracteristicas: F(4,%d) = %.3f   F_c = %.3f   valor p = %.3f\n\n", df, Fcar, critical(F, 4, df, 0.05), pvalue(F, 4, df, Fcar)
     ols price const bdrms lotsize sqrft colonial
 end outfile
+printf "%s", readfile("sinTasacion.txt")   # en pantalla
 
 outfile --quiet auxiliar.txt
     ols assess const bdrms lotsize sqrft colonial
@@ -50,11 +57,13 @@ outfile --quiet auxiliar.txt
     printf "||assess en desviaciones|| = %.2f    ||otrosTasac|| = %.2f\n\n", sqrt(sum((assess-mean(assess))^2)), sqrt(sum(otrosTasac^2))
     corr otrosTasac bdrms lotsize sqrft colonial
 end outfile
+printf "%s", readfile("auxiliar.txt")   # en pantalla
 
 outfile --quiet conOtros.txt
     ols price const bdrms lotsize sqrft colonial otrosTasac
     vif
 end outfile
+printf "%s", readfile("conOtros.txt")   # en pantalla
 
 ols price const assess bdrms lotsize sqrft colonial --quiet
 scalar df = $df
@@ -82,3 +91,4 @@ outfile --quiet racionalidad.txt
     printf "media(price - assess) = %.2f   ee = %.2f   t = %.2f   (%.1f%% del precio medio, %.1f)\n", $coeff(const), $stderr(const), $coeff(const)/$stderr(const), 100*$coeff(const)/mean(price), mean(price)
     printf "Con la sexta restriccion, constante = 0: F(6,%d) = %.3f   valor p = %.4f\n", df, Fseis, pvalue(F, 6, df, Fseis)
 end outfile
+printf "%s", readfile("racionalidad.txt")   # en pantalla

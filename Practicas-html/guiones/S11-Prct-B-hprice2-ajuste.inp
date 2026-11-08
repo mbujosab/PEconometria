@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -24,10 +28,12 @@ setinfo nox -d "Concentración de óxidos de nitrógeno" -n "Contaminación (NOx
 outfile --quiet olsPriceRooms.txt
     ols price const rooms
 end outfile
+printf "%s", readfile("olsPriceRooms.txt")   # en pantalla
 
 outfile --quiet olsPriceNox.txt
     ols price const nox
 end outfile
+printf "%s", readfile("olsPriceNox.txt")   # en pantalla
 
 outfile --quiet ortogonalidadAmbosModelos.txt
     ols price const rooms --quiet
@@ -43,6 +49,7 @@ outfile --quiet ortogonalidadAmbosModelos.txt
     printf "Modelo price~rooms:  suma(ehat) = %.8f    suma(rooms*ehat) = %.8f\n", sum_e_rooms, sum_xe_rooms
     printf "Modelo price~nox  :  suma(ehat) = %.8f    suma(nox*ehat)   = %.8f\n", sum_e_nox,  sum_xe_nox
 end outfile
+printf "%s", readfile("ortogonalidadAmbosModelos.txt")   # en pantalla
 
 outfile --quiet bondadDeAjusteAmbosModelos.txt
     ols price const rooms --quiet
@@ -65,14 +72,18 @@ outfile --quiet bondadDeAjusteAmbosModelos.txt
     printf "corr(price,rooms)^2 = %.4f\n", corr(price,rooms)^2
     printf "corr(price,nox)^2   = %.4f\n", corr(price,nox)^2
 end outfile
+printf "%s", readfile("bondadDeAjusteAmbosModelos.txt")   # en pantalla
 
 outfile --quiet anguloTheta.txt
     printf "price~rooms:  R2 = %.4f   ->   theta = %.2f grados\n", R2_r_manual, acos(sqrt(R2_r_manual))*180/$pi
     printf "price~nox  :  R2 = %.4f   ->   theta = %.2f grados\n", R2_n_manual, acos(sqrt(R2_n_manual))*180/$pi
 end outfile
+printf "%s", readfile("anguloTheta.txt")   # en pantalla
 
-gnuplot price rooms --output="price_rooms_fit.png"
-gnuplot price nox   --output="price_nox_fit.png"
+gnuplot price rooms --output=display                 # en pantalla
+gnuplot price rooms --output="price_rooms_fit.png"   # guardada para el documento
+gnuplot price nox   --output=display                 # en pantalla
+gnuplot price nox   --output="price_nox_fit.png"     # guardada para el documento
 
 outfile --quiet intercambiarPapeles.txt
     ols price const rooms --quiet
@@ -88,3 +99,4 @@ outfile --quiet intercambiarPapeles.txt
     printf "inversa de la primera pendiente = %.8f   (no es la segunda)\n", 1/b_pr
     printf "producto de las dos pendientes  = %.6f   (= R2 = rho^2)\n", b_pr*b_rp
 end outfile
+printf "%s", readfile("intercambiarPapeles.txt")   # en pantalla

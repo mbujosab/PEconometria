@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -30,6 +34,7 @@ outfile --quiet completo.txt
     scalar SRCr = $ess
     corr bedrms baths
 end outfile
+printf "%s", readfile("completo.txt")   # en pantalla
 
 outfile --quiet conjunta.txt
     scalar Fj = ((SRCr - SRC)/2)/s2
@@ -41,6 +46,7 @@ outfile --quiet conjunta.txt
         b[baths] = 0
     end restrict
 end outfile
+printf "%s", readfile("conjunta.txt")   # en pantalla
 
 ols price const sqft bedrms baths --quiet
 scalar tc = critical(t, $df, 0.025)
@@ -79,6 +85,7 @@ outfile --quiet esquinas.txt
     printf "  esquina (%.2f, %.2f): F = %.3f   valor p = %.3f\n", iR, jR, F_RR, pvalue(F, 2, 10, F_RR)
     printf "Correlacion entre los estimadores de bedrms y baths (de la matriz de varianzas): %.3f\n", corrEst
 end outfile
+printf "%s", readfile("esquinas.txt")   # en pantalla
 
 ols price const sqft bedrms baths --quiet
 scalar Fc = critical(F, 2, $df, 0.05)

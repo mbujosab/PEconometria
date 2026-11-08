@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -30,10 +34,12 @@ outfile --quiet datos.txt
     
     print edad peso --byobs
 end outfile
+printf "%s", readfile("datos.txt")   # en pantalla
 
 outfile --quiet modeloLineal.txt
     ols peso const edad
 end outfile
+printf "%s", readfile("modeloLineal.txt")   # en pantalla
 
 gnuplot peso edad --output="peso_edad_lineal.png"
 
@@ -41,6 +47,7 @@ outfile --quiet modeloCuadratico.txt
     series edad2 = edad^2
     ols peso const edad edad2
 end outfile
+printf "%s", readfile("modeloCuadratico.txt")   # en pantalla
 
 gnuplot peso edad --fit=quadratic --output="peso_edad_cuadratico.png"
 
@@ -48,6 +55,7 @@ outfile --quiet modeloCubico.txt
     series edad3 = edad^3
     ols peso const edad edad2 edad3
 end outfile
+printf "%s", readfile("modeloCubico.txt")   # en pantalla
 
 gnuplot peso edad --fit=cubic --output="peso_edad_cubico.png"
 
@@ -64,6 +72,7 @@ outfile --quiet comparacionTresModelosR2.txt
     scalar Rbarsq3 = 1 - (1-$rsq)*($nobs-1)/($nobs-$ncoeff)
     printf "Modelo 3 (cubica):   R2 = %.4f   R2 ajustado = %.4f\n", $rsq, Rbarsq3
 end outfile
+printf "%s", readfile("comparacionTresModelosR2.txt")   # en pantalla
 
 outfile --quiet extrapolacionTresModelos.txt
     ols peso const edad edad2 edad3 --quiet
@@ -96,3 +105,4 @@ outfile --quiet extrapolacionTresModelos.txt
     printf "  Modelo 2 (parabola) : %.1f anios\n", -p2/(2*p3)
     printf "  Modelo 3 (cubica)   : %.1f anios\n", (-2*b3 - sqrt(4*b3^2 - 12*b2*b4))/(6*b4)
 end outfile
+printf "%s", readfile("extrapolacionTresModelos.txt")   # en pantalla

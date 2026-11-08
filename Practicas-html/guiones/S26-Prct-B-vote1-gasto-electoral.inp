@@ -12,6 +12,10 @@
 #
 # Si esto no le funciona en su sistema, comente las siguientes dos líneas y sitúese en el directorio de trabajo de gretl
 # que corresponda (configure dicho directorio de trabajo desde la ventana principal de Gretl).
+#
+# Cada actividad guarda su salida en un fichero de texto (el que el documento de la práctica
+# muestra) y la imprime a continuación en pantalla con readfile(), de modo que al ejecutar
+# este guion se ve lo mismo que en el documento.
 
 string directory = getenv("DIRECTORIO")
 set workdir "@directory"
@@ -24,11 +28,13 @@ outfile --quiet datos.txt
     series lexpendA = log(expendA)
     printf "Elecciones: %d ; ganadas por A (voteA > 50): %d\n", $nobs, sum(voteA > 50)
 end outfile
+printf "%s", readfile("datos.txt")   # en pantalla
 
 outfile --quiet nivelLog.txt
     ols voteA const lexpendA lexpendB prtystrA
     printf "1%% mas de gasto de A: %.3f puntos ; 1%% mas de gasto de B: %.3f puntos ; duplicar el gasto de A: %.1f puntos\n", $coeff(lexpendA)/100, $coeff(lexpendB)/100, $coeff(lexpendA)*log(2)
 end outfile
+printf "%s", readfile("nivelLog.txt")   # en pantalla
 
 outfile --quiet sumaCero.txt
     scalar suma = $coeff(lexpendA) + $coeff(lexpendB)
@@ -44,12 +50,15 @@ outfile --quiet sumaCero.txt
     ols voteA const ldif prtystrA
     printf "SRC sin restringir %.1f ; SRC restringido %.1f\n", SRC, $ess
 end outfile
+printf "%s", readfile("sumaCero.txt")   # en pantalla
 
 outfile --quiet cuota.txt
     ols voteA const shareA
     printf "Con la mitad del gasto (shareA = 50): voto ajustado %.1f%%\n", $coeff(const) + 50*$coeff(shareA)
 end outfile
+printf "%s", readfile("cuota.txt")   # en pantalla
 
 outfile --quiet democrata.txt
     ols voteA const lexpendA lexpendB prtystrA democA
 end outfile
+printf "%s", readfile("democrata.txt")   # en pantalla
