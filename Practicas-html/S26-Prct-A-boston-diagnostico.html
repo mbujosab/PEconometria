@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-11-08 dom 14:05 -->
+<!-- 2026-11-10 mar 12:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 26 (A) &#x2014; Laboratorio integrador II: palanca, distancia de Cook y el diccionario geometría ↔ probabilidad</title>
@@ -287,12 +287,12 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org2205a80">Descripción de la práctica</a></li>
+<li><a href="#orgf33d624">Descripción de la práctica</a></li>
 <li><a href="#palanca-barrios">Actividad 1 - La palanca de cada barrio</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org3708c55">Lo que debe observar</a></li>
+<li><a href="#org619b72b">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
@@ -301,7 +301,7 @@ org_html_manager.setup();  // activate after the parameters are set
 <ul>
 <li>
 <ul>
-<li><a href="#org28b2ac2">Lo que debe observar</a></li>
+<li><a href="#orgff34288">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
@@ -310,22 +310,22 @@ org_html_manager.setup();  // activate after the parameters are set
 <ul>
 <li>
 <ul>
-<li><a href="#orgfbba38e">Lo que debe observar</a></li>
+<li><a href="#org13fca35">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a href="#diccionario">Cierre - El diccionario geometría ↔ probabilidad</a></li>
-<li><a href="#org12e5963">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orgae007e8">Para profundizar</a></li>
-<li><a href="#org70c4acb">Código completo de la práctica</a></li>
-<li><a href="#orgf91b18a">Respuestas</a></li>
+<li><a href="#orgb6cacb7">Preguntas de interpretación para la clase</a></li>
+<li><a href="#orgdb61a56">Para profundizar</a></li>
+<li><a href="#org7335212">Código completo de la práctica</a></li>
+<li><a href="#org734216b">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org2205a80" class="outline-2">
-<h2 id="org2205a80">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org2205a80">
+<div id="outline-container-orgf33d624" class="outline-2">
+<h2 id="orgf33d624">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orgf33d624">
 <p>
 La <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S25-Prct-A-boston-integrador.pdf#page=3">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S25-Prct-A-boston-integrador.html#indicadora-chas">html</a>) de la práctica A de la sesión 25 dejó estimado el modelo del Boston original: el logaritmo del precio mediano sobre <code>rm</code>, <code>lstat</code>, <code>dis</code> y la indicadora <code>chas</code>. Esta práctica pregunta cuánto depende ese ajuste de barrios concretos. La <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=8">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#quitar-viviendas">html</a>) de la práctica A de la sesión 14 hizo la misma pregunta con catorce viviendas: las quitó una a una y miró cómo se movían los coeficientes. Esta práctica usa dos medidas que resumen esa comprobación para las \(506\) observaciones a la vez: la <i>palanca</i> de cada barrio, que es geometría de la lección 10, y la <i>distancia de Cook</i>, que combina la palanca con el residuo.
 </p>
@@ -376,12 +376,12 @@ El valor ajustado es la proyección de \(\boldsymbol y\) sobre el subespacio gen
 <i>o bien teclee en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org0e8035a">open ../../data/boston.csv --quiet
+<pre class="src src-gretl" id="org11b2669">open ../../data/boston.csv --quiet
 series lmedv = log(medv)
 </pre>
 </div>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgc2b3208">ols lmedv const rm lstat dis chas --quiet
+<pre class="src src-gretl" id="org894018c">ols lmedv const rm lstat dis chas --quiet
 scalar k = 5
 leverage --quiet --save
 summary lever --simple
@@ -390,7 +390,7 @@ scalar i = imaxc({lever})
 printf "Palanca maxima %.4f en el barrio %d: medv %.1f  rm %.2f  lstat %.2f  dis %.2f  chas %d\n", lever[i], i, medv[i], rm[i], lstat[i], dis[i], chas[i]
 </pre>
 </div>
-<pre class="example" id="org14bd5c1">
+<pre class="example" id="org4d8c742">
 Estadísticos principales, usando las observaciones 1 - 506
 para la variable 'lever' (506 observaciones válidas)
 
@@ -404,9 +404,9 @@ Suma de las palancas: 5,00 ; media k/n = 0,0099 ; mediana 0,0061 ; convencion 2k
 Palanca maxima 0,0755 en el barrio 366: medv 27,5  rm 3,56  lstat 7,12  dis 1,61  chas 0
 </pre>
 </div>
-<div id="outline-container-org3708c55" class="outline-4">
-<h4 id="org3708c55">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org3708c55">
+<div id="outline-container-org619b72b" class="outline-4">
+<h4 id="org619b72b">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org619b72b">
 <p>
 Las palancas suman \(5\), el número de columnas de \(\boldsymbol{\mathsf X}\), y su media es \(0{,}0099\): en promedio, cada barrio pesa un \(1\) % en su propio valor ajustado. La distribución es asimétrica: la mediana, \(0{,}0061\), queda por debajo de la media, y \(62\) barrios superan la convención \(2k/n=0{,}0198\). La palanca máxima, \(0{,}0755\), es la del barrio \(366\): tiene <code>rm</code> igual a \(3{,}56\), el mínimo del fichero, lejos de la media de \(6{,}29\). La palanca es grande donde los regresores están lejos de su media, que es también el motivo por el que la constante no se interpreta en un punto sin datos: allí el ajuste es una extrapolación.
 </p>
@@ -427,7 +427,7 @@ con \(\hat e_i\) el residuo, \(h_i\) la palanca y \(\mathfrak s^2\) la cuasivari
 </p>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orga1aff02">series e = $uhat
+<pre class="src src-gretl" id="org86ca157">series e = $uhat
 scalar s2 = $sigma^2
 series cook = e^2 * lever / (k * s2 * (1 - lever)^2)
 printf "Convencion 4/n = %.4f ; barrios por encima: %d\n", 4/$nobs, sum(cook &gt; 4/$nobs)
@@ -441,7 +441,7 @@ printf "Sin el barrio %d: chas %.4f  rm %.4f  lstat %.4f  dis %.4f  (n = %d)\n",
 smpl full
 </pre>
 </div>
-<pre class="example" id="orgf5e0ec4">
+<pre class="example" id="org366023d">
 Convencion 4/n = 0,0079 ; barrios por encima: 40
 Cook maxima 0,113 en el barrio 365: medv 21,9  rm 8,78  lstat 5,29  dis 1,90  chas 1  palanca 0,0542  residuo -0,699
 Barrio 366, el de palanca maxima: residuo 0,387  Cook 0,0506 ; barrios con Cook mayor: 6
@@ -449,9 +449,9 @@ Con todos:        chas 0,1597  rm 0,1203  lstat -0,0394  dis -0,0062
 Sin el barrio 365: chas 0,1785  rm 0,1292  lstat -0,0391  dis -0,0068  (n = 505)
 </pre>
 </div>
-<div id="outline-container-org28b2ac2" class="outline-4">
-<h4 id="org28b2ac2">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org28b2ac2">
+<div id="outline-container-orgff34288" class="outline-4">
+<h4 id="orgff34288">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgff34288">
 <p>
 Cuarenta barrios superan la convención \(4/n=0{,}0079\). La distancia máxima, \(0{,}113\), es la del barrio \(365\), un barrio junto al río con <code>rm</code> igual a \(8{,}78\), el máximo del fichero, y un precio mediano de \(21{,}9\) mil dólares, bajo para ese número de habitaciones: su residuo es \(-0{,}70\) en logaritmos, el valor ajustado dobla el precio observado (\(e^{0{,}70}=2{,}0\)), y su palanca, \(0{,}054\), es cinco veces y media la media. Palanca alta y residuo grande a la vez. El barrio \(366\), el de palanca máxima, tiene residuo \(0{,}39\) y distancia de Cook \(0{,}051\), la séptima del fichero. Al quitarlo, el coeficiente de <code>chas</code> pasa de \(0{,}160\) a \(0{,}179\) y el de <code>rm</code> de \(0{,}120\) a \(0{,}129\); un solo barrio entre \(506\) mueve la diferencia entre grupos en un \(12\) % de su valor. Que una sola observación mueva el ajuste es lo que la práctica A de la sesión 14 mostró quitando viviendas una a una; la distancia de Cook señala de antemano qué observación mirar.
 </p>
@@ -474,7 +474,7 @@ En el Boston original el precio mediano está censurado: el valor máximo, \(50\
 </p>
 
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf0a25bd">printf "Barrios con medv = 50: %d\n", sum(medv == 50)
+<pre class="src src-gretl" id="orga657b26">printf "Barrios con medv = 50: %d\n", sum(medv == 50)
 printf "Cook media de esos barrios: %.4f ; de los demas: %.4f\n", mean(cook * (medv == 50)) / mean(medv == 50), mean(cook * (medv &lt; 50)) / mean(medv &lt; 50)
 smpl medv == 50 --restrict
 printf "Residuos de esos barrios: minimo %.3f ; maximo %.3f\n", min(e), max(e)
@@ -486,7 +486,7 @@ printf "Sin los 16: chas %.4f (ee %.4f)  rm %.4f  lstat %.4f  dis %.4f\n", $coef
 smpl full
 </pre>
 </div>
-<pre class="example" id="org1ad673c">
+<pre class="example" id="org496a3a1">
 Barrios con medv = 50: 16
 Cook media de esos barrios: 0,0161 ; de los demas: 0,0026
 Residuos de esos barrios: minimo 0,099 ; maximo 0,757
@@ -517,9 +517,9 @@ Sin considerar la constante, el valor p más alto fue el de la variable 8 (dis)
 Sin los 16: chas 0,1234 (ee 0,0422)  rm 0,1072  lstat -0,0369  dis 0,0029
 </pre>
 </div>
-<div id="outline-container-orgfbba38e" class="outline-4">
-<h4 id="orgfbba38e">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgfbba38e">
+<div id="outline-container-org13fca35" class="outline-4">
+<h4 id="org13fca35">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org13fca35">
 <p>
 La distancia de Cook media de los \(16\) barrios censurados es \(0{,}016\), seis veces la de los demás, \(0{,}003\): como grupo, desplazan el ajuste. Sus residuos son todos positivos, entre \(0{,}10\) y \(0{,}76\) en logaritmos: el ajuste queda por debajo de \(50\) en los \(16\), y más por debajo aún del precio real, que es \(50\) o más. Sin ellos, el coeficiente de <code>chas</code> baja de \(0{,}160\) a \(0{,}123\), con error estándar \(0{,}042\), y el de <code>rm</code> de \(0{,}120\) a \(0{,}107\); el de <code>dis</code> cambia de signo, de \(-0{,}006\) a \(+0{,}003\), con \(t=-1{,}10\) y \(t=0{,}51\). La diferencia entre barrios junto al río y sin río sigue siendo positiva y su \(t\) sigue por encima de \(2\), pero el \(17\) % de la sesión 25 pasa a un \(13\) % (\(e^{0{,}123}-1=0{,}13\)).
 </p>
@@ -609,9 +609,9 @@ La columna de la izquierda es lo que Gretl calcula; la de la derecha es lo que s
 </p>
 </div>
 </div>
-<div id="outline-container-org12e5963" class="outline-2">
-<h2 id="org12e5963">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org12e5963">
+<div id="outline-container-orgb6cacb7" class="outline-2">
+<h2 id="orgb6cacb7">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-orgb6cacb7">
 <ol class="org-ol">
 <li>Las palancas suman \(5\) y su media es \(0{,}0099\). ¿Por qué suman el número de columnas de \(\boldsymbol{\mathsf X}\) y no el de filas?</li>
 <li>El barrio \(366\) tiene la palanca máxima y el \(365\) la distancia de Cook máxima. ¿Por qué no coinciden?</li>
@@ -621,9 +621,9 @@ La columna de la izquierda es lo que Gretl calcula; la de la derecha es lo que s
 </ol>
 </div>
 </div>
-<div id="outline-container-orgae007e8" class="outline-2">
-<h2 id="orgae007e8">Para profundizar</h2>
-<div class="outline-text-2" id="text-orgae007e8">
+<div id="outline-container-orgdb61a56" class="outline-2">
+<h2 id="orgdb61a56">Para profundizar</h2>
+<div class="outline-text-2" id="text-orgdb61a56">
 <ul class="org-ul">
 <li>Wooldridge, J. M. (2020), <i>Introductory Econometrics</i>, cap. 9, sección 9.5 (observaciones influyentes).</li>
 <li>Belsley, D. A., Kuh, E. y Welsch, R. E. (1980), <i>Regression Diagnostics</i>, Wiley: la palanca, DFFITS y las convenciones \(2k/n\) y \(2\sqrt{k/n}\).</li>
@@ -632,14 +632,14 @@ La columna de la izquierda es lo que Gretl calcula; la de la derecha es lo que s
 </ul>
 </div>
 </div>
-<div id="outline-container-org70c4acb" class="outline-2">
-<h2 id="org70c4acb">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org70c4acb">
+<div id="outline-container-org7335212" class="outline-2">
+<h2 id="org7335212">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org7335212">
 </div>
 </div>
-<div id="outline-container-orgf91b18a" class="outline-2">
-<h2 id="orgf91b18a">Respuestas</h2>
-<div class="outline-text-2" id="text-orgf91b18a">
+<div id="outline-container-org734216b" class="outline-2">
+<h2 id="org734216b">Respuestas</h2>
+<div class="outline-text-2" id="text-org734216b">
 <ol class="org-ol">
 <li>La palanca \(h_i\) es la longitud al cuadrado de la proyección de \(\boldsymbol e_i\) sobre el subespacio de los regresores. Los \(n\) vectores canónicos forman una base ortonormal de \(\mathbb R^n\), y la suma de las longitudes al cuadrado de sus proyecciones sobre un subespacio es la dimensión de ese subespacio, \(k\), porque con una base ortonormal \(\boldsymbol b_1,\ldots,\boldsymbol b_k\) del subespacio,
 \[\sum_{i=1}^n\Vert P\boldsymbol e_i\Vert_e^2=\sum_{i=1}^n\sum_{j=1}^k\langle\boldsymbol e_i,\boldsymbol b_j\rangle_e^2=\sum_{j=1}^k\sum_{i=1}^n b_{ji}^2=\sum_{j=1}^k\Vert\boldsymbol b_j\Vert_e^2=k;\]
@@ -664,7 +664,7 @@ esa suma es la traza de la matriz de proyección.<sup><a id="fnr.2" class="footr
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-11-08 dom 14:05</p>
+<p class="date">Created: 2026-11-10 mar 12:25</p>
 </div>
 </body>
 </html>
