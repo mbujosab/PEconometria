@@ -20,4 +20,15 @@ Si alguna pregunta del banco cita literalmente un texto de la lección que haya 
 
 ## Aplicado
 
-(Lo rellena la sesión del banco.)
+Sesión del banco, 11-11-2026 (Fable). Sin commit ni Moodle; a la espera de la lectura del instructor.
+
+- **Punto 1 (longitud de las opciones): no aplica al banco tal como está escrito.** El «35 de 36» mide las preguntas de repaso de las lecciones, de respuesta única. El banco no transcribe esas preguntas (cada hueco sortea una alternativa y cada una se marca por separado) y tiene su propia regla de longitud desde el 14-10, con aviso en `lint`. Medido el 11-11 por variante exportada en las 86 preguntas (`qbank-PEconometria/bocetos-2026-11-11/palabras-por-variante.txt`): en L-12 a L-16 la razón de palabras verdaderas/falsas está entre 0,93 y 1,23 y la opción más larga es verdadera en torno a la mitad de las variantes. (a) No se han copiado las doce opciones nuevas; se ha comprobado que ninguna alternativa del banco las contradice. (b) y (c) Los desequilibrios que la medición encuentra están en L-01 a L-10, congeladas y publicadas en Moodle; por decisión del instructor no se tocan este curso y quedan apuntados en `TODO.org` para la revisión de forma de 2027-28.
+- **Punto 2 (pregunta 8, opción 3).** El banco ya lo decía así desde el 08-11 (`L-13-TIndividualesPequenosFGrande`: «juntos […] acortan el residuo más de lo esperable por azar, pero a cada uno le queda muy poca parte propia»). Sin cambios.
+- **Punto 3 (pregunta 12).** El banco no tiene ninguna pregunta sobre qué se demuestra y qué se enuncia. Nada que cambiar.
+- **Punto 4.**
+  - «No se rechaza» sin recomendación de eliminar: en `construir_L13.py` (y, regeneradas, `L-13-DosTPequenosYUnFGrande` y `L-13-QueDiceYQueNoDiceElF`) se han quitado «los datos sugieren omitirlos» y «No rechazar $H_0$ sugiere omitir…»; ahora «los datos no permiten afirmar que … acorten el residuo más de lo esperable por azar». `comprobar_L13.py`: 0 fallos.
+  - 253,6 frente a 236,25: el banco no cita ninguna de las dos cifras.
+  - «Que sobren»: en `L-13-QueContrastaElFDelPie` la explicación decía «¿sobran estas dos variables?»; ahora «¿son cero a la vez los coeficientes de estas dos variables?». «Sobran» sigue solo como distractor o entre comillas como la conclusión que no se debe sacar.
+  - Vocabulario: «se dispara / se hunde» sustituido por «se multiplica / se acerca a cero» en las explicaciones de `L-13-TIndividualesPequenosFGrande`, `L-13-DosSalidasDeGretl-x3` y `L-13-DosTPequenosYUnFGrande`.
+  - «Las q direcciones que la restricción suprime» y los enlaces de las transparencias no afectan a ninguna pregunta.
+- Comprobado: `make lint` sin errores y con los mismos avisos que antes; `make amc LECCION=13-14` compila. Pendiente: reimportar en Moodle las cinco preguntas de L-13 modificadas (solo cambian explicaciones).

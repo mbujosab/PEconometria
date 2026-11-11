@@ -35,4 +35,13 @@ Si alguna pregunta del banco cita literalmente un texto de la lección que haya 
 
 ## Aplicado
 
-(Lo rellena la sesión del banco.)
+Sesión del banco, 11-11-2026 (Fable). Sin commit ni Moodle; a la espera de la lectura del instructor.
+
+- **Punto 1 («en desviaciones»).** Ninguna pregunta define la colinealidad de grado con el ángulo sin decir «en desviaciones»: `L-14-LeerElVIF` y `L-14-SubespacioEstableCoordenadasNo` ya hablaban de $\boldsymbol{x}_j-\mu_{\boldsymbol{x}_j}\boldsymbol{1}$, y las de L-10 y L-12 no usan esa fórmula. Corregida la única explicación que decía «el ángulo entre los regresores» (`L-14-TablaAntesYDespues`, ahora «entre los regresores en desviaciones»).
+- **Punto 2 (`nox` y `lnox`).** El banco no usa ese ejemplo, pero `L-14-SubespacioEstableCoordenadasNo` repetía la idea en dos explicaciones («dos cifras grandes de signo opuesto que se reparten un efecto que, sumado, cambia poco»; «parejas grandes de signo opuesto»). Ahora: «el mismo ajuste admite descomposiciones muy distintas en las que una coordenada compensa a la otra» y «parejas de coordenadas que se compensan».
+- **Punto 3 (qué hacer).** `L-14-QueHacerConLaColinealidad` ya decía que al quitar un regresor el otro gana precisión pero pasa a medir otra cosa; no llama «dos escalas» a una variable y su logaritmo («dos escalas» solo aparece en L-10, para la colinealidad exacta). Sin cambios de fondo.
+- **Puntos 4 y 5 (preguntas 4 y 12).** El banco no tiene preguntas sobre qué se demuestra y qué se enuncia. Nada que cambiar.
+- **Punto 6 (pregunta 7).** En `L-14-SubespacioEstableCoordenadasNo` una opción verdadera decía que el ajuste «apenas se mueve»; ahora «las dos coordenadas oscilan en sentidos opuestos, mientras $\hat{\boldsymbol y}$ oscila como con regresores perpendiculares», y las dos explicaciones dicen que la oscilación del ajuste no depende del ángulo.
+- **Punto 7.** «Rechaza con claridad que sobren los dos» pasa a «que sus dos coeficientes sean cero a la vez», y «contrastar con un $F$ que pueden omitirse a la vez» a «que sus coeficientes valen cero a la vez» (opción y explicación de `L-14-QueHacerConLaColinealidad`). «Mejoran el ajuste» solo aparece como distractor; «alineados» va siempre con «casi»; para predecir sin extrapolar el banco ya decía «no es un problema»; las cifras de la recta y la curva y la tabla del VIF no se citan en ninguna pregunta.
+- **Longitud de las opciones** (aviso de la lección 13, punto 1): no aplica al banco; ver el «Aplicado» de `Encargo-2026-11-11-qbank-L13.md`.
+- Comprobado: `make lint` sin errores y con los mismos avisos que antes; `make amc LECCION=13-14` compila. Pendiente: reimportar en Moodle las tres preguntas de L-14 modificadas.
