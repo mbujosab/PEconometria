@@ -1,0 +1,186 @@
+#+title: Auditoría de fondo de la lección 14 (2026-11-10)
+
+Estado auditado: =org-lessons/S21-Lecc14.org= en =main= = =cbaf0bb= (el fichero no cambia desde =3fa9f0c=, 08-11), con sus productos compilados el 08-11 a las 12:22, posteriores al =.org=. Las referencias =L14:NNN= son líneas de ese fichero; las transparencias se citan por su título. Reglas: =GuiaDeEstilo.org=, leída entera antes de la lección, y la ficha 7.22 del Plan, cuyas decisiones no reabrimos (la tabla de cálculo de «El caso =nox= y =lnox= con números» se queda en pantalla; la demostración del error estándar vive en el apéndice; la regla del VIF mayor que 10 solo en los apuntes).
+
+Criterio: *nada aplicado*. Cada hallazgo lleva línea y frase citada, el problema y la propuesta. Lo que toca un argumento, una definición, una transparencia o la Guía lleva la marca DECIDE EL AUTOR. Primera persona del plural en el informe; usted en los textos propuestos.
+
+* Qué hemos leído y qué no
+
+- *Lección 14 entera, desde el =.org=*: las diez transparencias, los diez apartados de apuntes, la nota al pie, las doce preguntas con sus respuestas y el «Comentario». Las dos figuras, vistas en sus PNG (=PartePropia_fila=, =ParalelogramoAplastado_fila=). No hemos leído el PDF ni el HTML compilados.
+- *Guía de estilo* entera; ficha 7.22 entera; aviso al banco del 19-10 (=Encargo-2026-10-19-qbank-L14.md=).
+- *Apéndice*: solo las secciones que la lección enlaza para el error estándar, 5.4, 6.5 y 7.1 (primer corolario). De las secciones 2, 3 y 7.2 solo hemos comprobado que existen con ese número y ese contenido en el índice.
+- *Comprobaciones con =grep=* en las lecciones 2, 3, 5, 8, 10, 11, 12, 13 y 16 y en las prácticas S14-A, S14-D, S16-B, S18-A, S20-A, S22-A, S22-B, S22-C y S22-D: no son revisiones de esos ficheros.
+- *Cifras*: todas las de =hprice2= recalculadas con =gretlcli= (guion en el directorio temporal de la sesión, no en el repositorio); las de los coches y la tasación, cotejadas con las salidas guardadas de S22-C y S22-D.
+- *Medición*: las once pantallas con =doc/tools/medir-transparencias.py=. *Enlaces*: =doc/tools/comprobar-paginas.py=. No hemos compilado nada.
+- *No comprobado*: las citas de Wooldridge, Goldberger y Kennedy (capítulo y sección); el contenido de S22-A y S22-B más allá de sus títulos de actividad; las anclas del HTML del apéndice.
+
+* Respuesta breve a las tres preguntas
+
+** 1. Coherencia
+
+El hilo se sostiene: el caso de la lección 13 abre con una tabla que aísla lo que cambia ($\mathfrak s$ no, el error estándar sí); de ahí a la definición de la parte propia, a su longitud por Pitágoras en la regresión auxiliar, al VIF, a la cuenta completa con las cifras de Gretl y a la figura de las coordenadas; las tres transparencias de lectura se apoyan en lo anterior sin añadir matemáticas. Cada apartado de apuntes desarrolla su transparencia. Las remisiones al apéndice dicen lo que el apéndice contiene (F3), las anclas y páginas de las prácticas son correctas (F4) y todas las cifras coinciden (F1).
+
+Hay *un desajuste de fondo* (A1): la lección define la colinealidad de grado con un ángulo que no es el del VIF. Y cinco desajustes localizados: una lectura de los coeficientes $404$ y $-13262$ que las cifras no sostienen (A2), un «mucho menor» que son 800 dólares (A3), dos «mejoran el ajuste» que la regla del 08-11 ya no admite (A4), una pregunta de repaso que dice lo contrario de lo que la lección 13 dice desde hoy (A5) y dos respuestas que no corresponden a sus preguntas (A6).
+
+** 2. Logro didáctico
+
+Lo consigue en lo central: que el alumno sepa qué es $\tilde{\boldsymbol x}_j$, de dónde sale su longitud, cómo se lee $\sqrt{\mathrm{VIF}}$ y por qué la colinealidad afecta a las coordenadas y no al ajuste. La transparencia «El caso =nox= y =lnox= con números» ancla la fórmula a la cifra de Gretl con cuatro cifras, y «Qué es y qué no es» cierra la idea de «variar por su cuenta» que viene de las lecciones 11 y 12. Lo que se enuncia y no llega a mostrarse es la fórmula de $\hat\beta_j$ con la parte propia, que el argumento de «Ortogonalizar» usa (B1).
+
+** 3. Comprensión
+
+El alumno se perderá, creemos, en tres sitios: el párrafo único de «Reformular» (unas 560 palabras con tres casos, C1), el arranque del párrafo de «Ortogonalizar», que no nombra la opción (C2), y el argumento del signo de la covarianza (C3). El resto de los apuntes es de lectura llana.
+
+* A. Coherencia y fondo
+
+** A1. El ángulo que define la colinealidad de grado no es el ángulo del VIF — DECIDE EL AUTOR
+
+- =L14:84= (transparencia): «un regresor forma un ángulo muy pequeño con el subespacio generado por los demás (constante incluida)». Igual en =:87=, =:104=, =:198= («el ángulo entre un regresor y el subespacio de los demás»), =:314=, pregunta 1 opción 2 (=:474=), pregunta 10 opción 2 (=:591=) y su respuesta (=:715=). Es la fórmula que prescribe la Guía §5, y también está en =L12:694=.
+- La Guía §7 dice que «ángulo» sin calificativo es el ángulo en $\mathbb R^n$ entre los vectores tal cual. Leída así, la frase habla del ángulo de $\boldsymbol x_j$ con $\mathcal L(\boldsymbol 1,\ldots)$, y ese ángulo es pequeño siempre que la media del regresor sea grande frente a su dispersión, porque $\boldsymbol 1$ está en el subespacio. El ángulo del VIF es otro: $\theta_j$, entre el regresor /en desviaciones/ y su ajuste en desviaciones (bien definido en =:192=).
+- Con los datos de la lección (=gretlcli=): =rooms= forma $6{,}1^\circ$ con el subespacio de $\boldsymbol 1$, =nox= y =lnox=, y su VIF es $1{,}10$ ($\theta_j=72^\circ$). =nox= forma $1{,}3^\circ$ con el subespacio de $\boldsymbol 1$, =rooms= y =lnox=, y su $\theta_j$ es $6{,}3^\circ$. Con la definición de la transparencia, =rooms= tendría la misma colinealidad de grado que =nox=. Es el mismo tipo de error que se corrigió el 08-10 en las lecciones 7 y 8.
+- Propuesta: añadir «en desviaciones» al regresor y dejar el subespacio como está. «Un regresor en desviaciones forma un ángulo muy pequeño con el subespacio generado por los demás (constante incluida)». Es correcto con la constante incluida: la proyección de $\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1$ sobre ese subespacio es el ajuste de la regresión auxiliar menos $\mu_{\boldsymbol x_j}\boldsymbol 1$, y lo que queda es $\tilde{\boldsymbol x}_j$, de modo que el seno de ese ángulo es $\Vert\tilde{\boldsymbol x}_j\Vert_e/\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e=\sin\theta_j$. Son dos palabras en ocho sitios de la lección, uno en la lección 12 y uno en la Guía §5. En la transparencia «Colinealidad exacta y colinealidad de grado» cabe (532 px).
+- Si se acepta, proponemos además una frase en los apuntes de esa transparencia, tras «constante incluida)» (=:104=): «El regresor se toma en desviaciones porque $\boldsymbol 1$ está en ese subespacio: sin restar la media, cualquier regresor con una media grande frente a su dispersión formaría un ángulo pequeño con él. En =hprice2=, =rooms= forma $6^\circ$ con el subespacio de los demás y su error estándar no aumenta.»
+
+** A2. $404$ y $-13262$ no son «dos cifras enormes de signo opuesto» — DECIDE EL AUTOR
+
+- =L14:277=: «=nox= con coeficiente $404$ y =lnox= con $-13262$, dos cifras enormes de signo opuesto que se reparten un efecto que, sumado, es el de siempre». Pregunta 8 (=:562=): «La razón de que sean grandes y de signos opuestos…»; opción 2 (=:565=): «la suma de efectos es la de siempre».
+- Las cifras: con =nox= solo el coeficiente es $-1884{,}7$; con =lnox= solo, $-10951$; con los dos, $404{,}2$ y $-13262$. El de =nox= no crece: se reduce a la quinta parte en valor absoluto y cambia de signo. El de =lnox= crece un $21\,\%$. Y «sumado» no puede leerse: los dos coeficientes están en unidades distintas y $404-13262$ no es ningún efecto. El alumno no sabe todavía leer un coeficiente de un regresor en logaritmos (lección 15).
+- Lo que sí es cierto, y se calcula sin logaritmos: el cambio del precio ajustado cuando =nox= pasa de $5$ a $6$ es $-1885$ dólares con =nox= solo, $-1997$ con =lnox= solo y $-2014$ con los dos ($404{,}2-13262\cdot\ln(6/5)$).
+- Propuesta para =:277=: «Es lo que se veía en la tabla de la lección 13: con =lnox= en el modelo, el coeficiente de =nox= pasa de $-1884{,}7$ a $404{,}2$ y el de =lnox= es $-13262$, de signo opuesto. Lo que apenas cambia es lo que los dos términos dan juntos: cuando =nox= pasa de $5$ a $6$, el precio ajustado baja $1885$ dólares en el modelo con =nox= y $2014$ en el modelo con =nox= y =lnox=.»
+- Propuesta para la pregunta 8: enunciado «…los coeficientes estimados son $404$ y $-13262$, de signos opuestos, y con =nox= solo el coeficiente era $-1885$. La razón es que:»; opción 2 «…en las que un coeficiente compensa al otro; el cambio del precio ajustado ante un aumento de la contaminación es casi el mismo en los dos modelos.» Hay que avisar al banco (E2).
+
+** A3. «la recta predice un precio mucho menor que la curva» — DECIDE EL AUTOR
+
+- =L14:397=: «Se separan en los extremos, donde hay pocos barrios: para un barrio muy contaminado, la recta predice un precio mucho menor que la curva.»
+- Calculado con =rooms= en su media: en el barrio más contaminado de la muestra (=nox= $=8{,}71$) la recta da $16\,556$ dólares y la curva $17\,349$; la diferencia es de $793$ dólares, con $\mathfrak s=6290$. En el menos contaminado ($3{,}85$), $25\,715$ frente a $26\,290$. No es «mucho menor» dentro de la muestra.
+- Propuesta: «Se separan en los extremos, donde hay pocos barrios: en el barrio más contaminado de la muestra la recta predice unos $800$ dólares menos que la curva, y la diferencia crece fuera del rango observado.» La conclusión del párrafo («Elegir una u otra es elegir qué se predice fuera de lo habitual, y la muestra apenas ayuda a decidirlo») queda mejor apoyada.
+
+** A4. «mejoran el ajuste» como conclusión de un contraste (Guía §6, regla del 08-11)
+
+- =L14:279=: «la lección 13 podía decir que las dos variables juntas mejoran el ajuste». =L14:310=: «Que discrepen significa que los regresores juntos mejoran el ajuste, pero que la muestra no permite atribuir esa mejora a uno u otro».
+- La lección 13 ya no lo dice así desde el 08-11. Propuesta: «…que las dos variables juntas acortan el residuo más de lo esperable por azar» y «…que los regresores juntos acortan el residuo más de lo esperable por azar, pero que la muestra no permite atribuir esa reducción a uno u otro». Regla categórica: la aplicaríamos sin más, salvo indicación contraria.
+
+** A5. La pregunta 11 y «dos escalas» — DECIDE EL AUTOR
+
+- Pregunta 11 (=L14:601–606=): «Dos regresores miden la misma magnitud en dos escalas […] La respuesta razonable es: 2) Quedarse con uno de los dos, o con una combinación: la información es la misma y la precisión mejora.»
+- La lección 13 decía eso hasta hoy. Desde =efa91cd= (=L13:404=) dice: «Qué hacer depende de para qué se quiere el modelo. Si el objetivo es solo predecir el precio, no hay nada que arreglar […] y quitar una de las dos no lo resuelve, porque el coeficiente de la que queda recoge lo que ambas comparten.» Los apuntes de la lección 14 (=:389=, =:397=) coinciden con la lección 13 nueva; la pregunta 11 quedó con la versión antigua.
+- «Dos escalas» (=:397= y =:601=): la lección usa Celsius y Fahrenheit, que sí son dos escalas, como ejemplo de colinealidad /exacta/ (=:81=, =:102=). =nox= y =lnox= no son dos escalas: si lo fueran, la colinealidad sería exacta.
+- Propuesta para =:397=: «Si dos variables son la misma magnitud, una en niveles y otra en logaritmos, como =nox= y =lnox=, …». Propuesta para la pregunta 11: enunciado «Dos regresores son la misma magnitud en niveles y en logaritmos, sus $t$ son bajos y el $F$ de excluirlos juntos es alto. Se quiere un solo coeficiente que resuma el efecto de esa magnitud. La respuesta razonable es:»; opción 2 «Quedarse con uno de los dos: no se pierde información sobre las unidades observadas, y hay que decir que se ha elegido una forma funcional.» La respuesta (=:724=) no necesita cambios.
+
+** A6. Dos respuestas que no corresponden a su pregunta
+
+- Pregunta 4, opción 4 (=L14:515=): «es un enunciado sin demostrar, como la fórmula matricial completa de la varianza». Su respuesta (=:661=): «La opción 4 confunde este resultado con el enunciado de la insesgadez de $\mathfrak s^2$». La opción se cambió y la respuesta no. Propuesta: «…con la fórmula matricial de la varianza, que la lección 11 enunció sin demostrar». Lo aplicaríamos como errata.
+- Pregunta 12, opción 2 (=:617=) y respuesta (=:733=): «la fórmula del error estándar […] y la insesgadez de $\mathfrak s^2$ con $k$ regresores se han enunciado en la sesión». Los apuntes dicen que la enunció la lección 11 (=:147=: «que la lección 11 enunció»), y la sesión solo la menciona en un paréntesis. Propuesta: quitar la insesgadez de $\mathfrak s^2$ de la opción 2 y de la respuesta, y cambiar la opción 3 por «Se ha demostrado todo, incluida la fórmula del error estándar». DECIDE EL AUTOR.
+
+** A7. «irrelevante» para predecir, frente a «sin extrapolar»
+
+- =L14:351=: «Si lo que se quiere del modelo es predecir, la presencia de colinealidad es irrelevante.» Transparencia «Qué es y qué no es» (=:329=): «/No estropea/ el ajuste, el $R^2$ ni la predicción».
+- La transparencia siguiente dice «predecir sin extrapolar» (=:365=) y sus apuntes dan el coche de $300$ semanas y $10$ mil millas, con un error estándar de la predicción $7{,}4$ veces mayor ($710{,}9$ frente a $95{,}9$, =prediccion.txt= de S22-C).
+- Propuesta para =:351=: «Si lo que se quiere del modelo es predecir para combinaciones de regresores como las observadas, la colinealidad no es un problema.» La transparencia puede quedarse como está. DECIDE EL AUTOR.
+
+** A8. «regresores alineados» sin el «casi» (Guía §5, precisión frente a grados)
+
+- =L14:277= «con regresores alineados y correlación positiva»; =:279= «de que los generadores estén alineados o no»; =:351= «con generadores alineados que con generadores perpendiculares»; =:389= «Con regresores alineados, un coche de…»; =:697= «coeficientes de regresores alineados con correlación positiva».
+- Alineados es el caso exacto, en el que no hay estimación única. Propuesta: «casi alineados» en los cinco sitios, y en el primero «con regresores cuyos vectores en desviaciones forman un ángulo pequeño y correlación positiva». Regla categórica.
+
+** A9. «El único que los menciona» — DECIDE EL AUTOR
+
+- =L14:349=: «ningún supuesto prohíbe que estén correlados. El único que los menciona, la independencia lineal de la lección 10, prohíbe solo el caso exacto.»
+- La homocedasticidad y la exogeneidad estricta también mencionan los regresores: condicionan en $\boldsymbol X$ (=L11:128=). Propuesta: «El único que se refiere a la relación de los regresores entre sí, la independencia lineal de la lección 10, prohíbe solo el caso exacto.»
+
+* B. Huecos
+
+** B1. La fórmula de $\hat\beta_j$ con la parte propia no aparece escrita — DECIDE EL AUTOR
+
+- =L14:147= la nombra en palabras («$\hat\beta_j$ como coeficiente de la regresión de $\boldsymbol y$ sobre la parte propia de $\boldsymbol x_j$») y =:399= la usa como premisa («$\hat\beta_j$ se calcula con la parte propia de $\boldsymbol x_j$»). No está en ninguna transparencia ni en ningún display de los apuntes.
+- No reabrimos la decisión del 05-10 (la demostración, en el apéndice). Proponemos solo el enunciado en display, que además hace visible por qué el error estándar tiene esa forma. En =:147=, tras «…solo la que no comparte con los demás.»:
+  «El enunciado completo tiene dos partes, y las dos son las de la regresión simple con $\tilde{\boldsymbol x}_j$ en el lugar del regresor en desviaciones:
+  \[
+  \hat\beta_j=\frac{\langle\tilde{\boldsymbol x}_j,\boldsymbol y\rangle_e}{\Vert\tilde{\boldsymbol x}_j\Vert_e^2},\qquad \mathrm{ee}(\hat\beta_j)=\frac{\mathfrak s}{\Vert\tilde{\boldsymbol x}_j\Vert_e}.
+  \]»
+- En el mismo párrafo hay una frase duplicada: «con varios regresores no cuenta toda la longitud del regresor, solo la que no comparte con los demás» está dos veces (tras «con una corrección:» y tras «aquí basta con la lectura:»). Propuesta: en la segunda, «aquí basta con esa lectura».
+
+** B2. «una observación nueva nunca acorta la parte propia» — DECIDE EL AUTOR
+
+- =L14:393=: «su cuadrado es una suma de $n$ sumandos, uno por observación, y ninguno es negativo. Por eso una observación nueva nunca acorta la parte propia».
+- La conclusión es cierta, pero el argumento no basta: con la observación nueva la regresión auxiliar se vuelve a estimar y cambian los $n$ sumandos anteriores. Falta decir que no pueden sumar menos que antes. Propuesta, tras «ninguno es negativo.»: «Al añadir una observación la regresión auxiliar cambia, pero los $n$ sumandos anteriores no pueden sumar menos que antes, porque los coeficientes anteriores hacían mínima esa suma (lección 10), y el sumando nuevo no es negativo. Por eso…».
+
+** B3. «el error estándar de esa predicción» no está definido en ninguna lección
+
+- =L14:389=. La expresión solo aparece aquí y en S22-C. Propuesta de aposición: «y el error estándar de esa predicción, la dispersión del valor ajustado en ese punto de una muestra a otra, es siete veces el de un coche con una combinación de edad y millas habitual». DECIDE EL AUTOR.
+- En la misma frase, «la práctica C del laboratorio» no dice de qué laboratorio (también en =:399=); en =:401= sí («la práctica D del laboratorio» tras nombrarlo). Propuesta: «la práctica C de la sesión 22».
+
+** B4. Tres frases de transparencia — DECIDE EL AUTOR
+
+- «Síntomas y diagnóstico» (=L14:295=): «Colinealidad es que su error estándar se dispare y que cambie mucho con pocos datos nuevos.» El segundo verbo no tiene sujeto claro: lo que cambia es el coeficiente. Propuesta: «Colinealidad es que su error estándar se multiplique y que el coeficiente cambie mucho al añadir o quitar pocas observaciones.» (549 px, cabe.)
+- «Qué hacer y qué no» (=:369=): «Se gana precisión» sin condición; los apuntes dicen que con $\beta_2+\beta_3=1$ no se gana. Y (=:375=) «contrastar con el $F$ que sobran a la vez», que enuncia la hipótesis sobre los regresores (Guía §6). Propuestas: «Puede ganarse precisión, y se pierde…»; «contrastar con el $F$ que sus coeficientes valen cero a la vez». La pantalla está en 680 px: habría que medir.
+- «Cuánto se acorta» (=:167=): la llave «como si estuviera solo». Solo, $\mathfrak s$ sería otro; los apuntes lo precisan («con el $\mathfrak s$ del modelo completo»). Propuesta: «si no compartiera nada».
+
+** B5. $1{,}2$ en la tabla y «un $15\,\%$» en los apuntes
+
+- Tabla de «Cuánto se acorta» (=L14:175=): $\sqrt{\mathrm{VIF}}=1{,}2$ para $\rho=0{,}5$. Apuntes (=:200=): «el error estándar crece un $15\,\%$». El valor es $1{,}155$. Propuesta: $1{,}15$ en la tabla.
+
+* C. Comprensión
+
+** C1. El párrafo de «Reformular» (=L14:397=)
+
+Un solo párrafo con tres casos y unas 560 palabras. Propuesta: tres párrafos, cortando en «El segundo caso es el de dos magnitudes distintas…» y en «El tercer caso es que la teoría diga algo sobre los coeficientes.» Sin cambiar texto. Dentro del tercero, «No ocurre con cualquier restricción.» no dice qué no ocurre: «No toda restricción da esa ganancia.»
+
+** C2. El párrafo de «Ortogonalizar» no nombra la opción (=L14:399=) — DECIDE EL AUTOR
+
+Empieza: «La operación que no crea variación propia deja el subespacio como está y cambia sus generadores: consiste en sustituir…». El lector viene de «El primer remedio» y «El segundo remedio» y no sabe de qué operación se habla; la palabra «ortogonalizar» solo está en la transparencia. Propuesta: «La cuarta opción de la transparencia, ortogonalizar, tampoco crea variación propia. Deja el subespacio como está y cambia sus generadores: consiste en sustituir…».
+
+** C3. El signo de la covarianza (=L14:277=) — DECIDE EL AUTOR
+
+- «como muestra sustituir $\boldsymbol x_3$ por $-\boldsymbol x_3$, que cambia los dos signos». No dice qué dos signos ni por qué. Propuesta: «Para verlo basta sustituir $\boldsymbol x_3$ por $-\boldsymbol x_3$: la correlación entre los regresores cambia de signo, el coeficiente de $\boldsymbol x_3$ también, y con él la covarianza entre los dos estimadores.»
+- En el mismo párrafo, «(cuando el azar de la muestra aumenta uno, reduce el otro)» personifica el azar (regla del 06-11). Propuesta: «(en las muestras en que uno resulta mayor, el otro resulta menor)».
+
+** C4. Repetición en los apuntes de «De dónde venimos» (=L14:63=)
+
+«La tabla de la transparencia aísla lo que cambia al añadir =lnox=. Al añadir =lnox=, el coeficiente…» y «Lo que casi no cambia es $\mathfrak s$: $6291{,}0$ frente a $6290{,}4$. La estimación $\mathfrak s$ de $\sigma$ apenas cambia, así que…». La segunda repetición es un resto de la sustitución de «ruido» del 06-11. Propuesta: «…al añadir =lnox=: el coeficiente de =nox= cambia de signo y su error estándar pasa de $253{,}6$ a $2198{,}9$. Lo que casi no cambia es $\mathfrak s$, la estimación de $\sigma$: $6291{,}0$ frente a $6290{,}4$. El cambio no viene, por tanto, del numerador del error estándar.»
+
+* D. Observaciones menores
+
+1. *Remisiones relativas* (Guía §4): «Las tres transparencias siguientes» (=:108=), «La transparencia siguiente establece la fórmula» (=:145=), «en la transparencia siguiente» (=:202=), «de la transparencia siguiente» (=:353=). Y en =:71=, «Las tres últimas son de lectura» deja fuera la recapitulación, que es la última.
+2. *Remisiones internas sin hiperenlace* (Guía §4, «pendiente en las demás lecciones»): la lección solo tiene un =CUSTOM_ID= (=:383=). Títulos citados sin enlace en =:147=, =:192=, =:239=, =:275=, =:351=, =:389=, =:399= y =:634=. En tres de ellos el título es además el sujeto del argumento (Guía §5): «``Por qué oscilan los coeficientes'' lo dejó claro» (=:351=), «``Qué es y qué no es'' ya lo dijo» (=:389=), «``Por qué oscilan los coeficientes'' dijo que» (=:399=). Mecánico: encargo para Opus, como en las lecciones 12 y 13.
+3. *Prácticas citadas sin enlace doble* (Guía §8): el laboratorio de colinealidad en =:277=, =:430= y =:444= (existen las anclas =nube= en S22-A y =modelo-auxiliar=, =comando-vif=, =ic-correlacion= en S22-B); la elipse de S20-A (=elipse-confianza=) en =:430= y =:444=; y las doce viviendas de =:353=, que son de S18-A, actividad 5 (ancla =doce-viviendas=; el intervalo es $[1888{,}3;\,19966{,}8]$), y la frase no dice de dónde vienen.
+4. *Vocabulario de la Guía §2 y §3*: «enormes» y «enorme» (=:277=, =:349=); «se disparan», «se dispare», «se dispara», «disparado» (=:290=, =:295=, =:312=, =:679=); «sale de», «salen de» por «se deduce de» (=:188=, =:239=, =:440=, =:463=, y el título de la pregunta 4); «que son las que son» (=:393=); «el de siempre», «la de siempre» (=:277=, =:565=, resueltos si se acepta A2); «exactamente cuando» por «si y solo si» (=:106=). Son juicios de redacción: se proponen.
+5. =:143=: «Por ser un residuo de la lección 10» → «Por ser el residuo de una regresión (lección 10)».
+6. =:104=: el párrafo empieza «La colinealidad de grado es…» y tres frases después dice «Lo llamaremos /colinealidad de grado/». Propuesta: quitar la segunda y poner la cursiva en la primera.
+7. =:237=: «cuya correlación es $0{,}9939$, un ángulo de $6{,}3^\circ$» no dice entre qué: «entre sus vectores en desviaciones».
+8. =:310–314=: los apuntes cuentan «El primero», «El segundo», «El tercero» y la transparencia tiene cuatro síntomas; el tercero de la transparencia va dentro del «segundo» de los apuntes.
+9. =:395=: «quedan sobre una recta»; S22-C dice «casi sobre una recta». Con «casi».
+10. =:401=: «resulta claramente significativo»: el $t$ está calculado ($8{,}67$, =conOtros.txt=); mejor darlo: «su estadístico $t$ es $8{,}67$».
+11. =:403=: «informar los dos coeficientes» → «informar de los dos coeficientes».
+12. =:405=: «eliminarlas», «mantenerlas», «dejarlas» tienen por antecedente «regresores»; «el $F$ puede rechazar esa eliminación» → «el $F$ puede rechazar que sus coeficientes valgan cero a la vez»; «a cambio de varianza» → «a cambio de una varianza menor».
+13. =:444=: «Quedan dos hilos, y uno ya empezado» y después «El tercer hilo». Propuesta: «Quedan tres hilos, el primero ya recorrido.»
+14. =:367= (transparencia): dos veces dos puntos en la misma frase.
+15. Figura =PartePropia_fila=, tercer panel: la letra $\theta$ queda encima de los dos vectores a $6^\circ$ y no se lee. Figura =ParalelogramoAplastado_fila=: los rótulos $\boldsymbol x_2$, $\boldsymbol x_3$ y $\boldsymbol{\mathop{\widehat y}}$ no dicen «en desviaciones»; el pie sí lo dice de los regresores, y no del ajuste. Bastaría añadir al pie «y el mismo ajuste en desviaciones».
+
+* E. Guía, Plan y pendientes
+
+1. Si se acepta A1: Guía §5 («ángulo muy pequeño… del regresor en desviaciones con el subespacio…»), =L12:694= y aviso al banco.
+2. Aviso al banco, en un =Encargo-*.md= con su apartado «Aplicado», por lo que se acepte de A2 (pregunta 8), A5 (pregunta 11), A6 (preguntas 4 y 12) y A1 (preguntas 1 y 10).
+3. =L14:347=: «no es del tipo de los que vendrán en las lecciones siguientes». La lección 16 sigue anunciando la lección 17 (=L16:484–500=). Si se confirma que la lección 17 no se escribe este curso, esta frase y aquellas quedan sin objeto.
+4. Ficha 7.22: anotar lo que se decida.
+
+* F. Comprobaciones
+
+** F1. Cifras
+
+Recalculadas con =gretlcli= sobre =hprice2=, todas coinciden: $-1884{,}7$, $253{,}6$, $6291{,}0$; $404{,}2$, $2198{,}85$, $6290{,}37$; $t$ de $-7{,}43$, $0{,}18$ y $-1{,}05$; $F(2,502)=28{,}18$; $R_j^2=0{,}987923$, $\sqrt{1-R_j^2}=0{,}1099$; longitudes $26{,}03$, $2{,}861$ y $24{,}81$; VIF $82{,}80$, $82{,}92$ y $1{,}10$; $\sqrt{\mathrm{VIF}}=9{,}10$; $241{,}6$; correlación $0{,}9939$ y $6{,}3^\circ$. Gretl imprime al pie de =vif= «Valores mayores que 10.0 pueden indicar un problema de colinealidad», como dice =:316=. La tabla de $\rho$ es correcta salvo B5. Las cifras de la figura del paralelogramo cuadran con $1/\sin\theta$ y $1/\tan\theta$ ($0{,}403$ y $-0{,}397$ a $10^\circ$). Coches (S22-C): $28{,}02$, $7{,}34$, $-154{,}6$, VIF $141{,}7$, predicción $710{,}9$ frente a $95{,}9$. Tasación (S22-D): 88 viviendas, cuatro características, $t=8{,}67$.
+
+** F2. Remisiones a otras lecciones
+
+Coinciden con lo que esas lecciones dicen hoy: lección 3 (anuncio de los vectores casi alineados, =L3:372=, =:401=), lección 5 (la correlación como coseno), lección 8 ($R^2=\rho^2$ en regresión simple), lección 10 (colinealidad exacta, =L10:492=; Celsius y Fahrenheit, =:784=; renta total y sus componentes, =:786=; familia ortogonal), lección 11 (covarianza $-\sigma^2\overline X/\sum_i(X_i-\overline X)^2$ con $k=2$; «Más dispersión en $X$», =L11:416=; fórmula matricial enunciada sin demostrar), lección 12 («longitud del residuo por unidad de longitud del regresor en desviaciones», literal en =L12:197=; la parte «que /no/ se puede reconstruir a partir de los demás regresores», =L12:690=), lección 13 (tabla de apertura, «firma de la colinealidad», =L13:387=) y lección 16 (la trampa de las variables ficticias). El seno no aparece antes como razón trigonométrica (en la lección 9 solo dentro de un ejemplo de función).
+
+** F3. Apéndice
+
+La sección 5.4 contiene la fórmula de $\hat\beta_m$ con la parte propia y Pitágoras en la regresión auxiliar; la 6.5, la descomposición $\hat\beta_m=\beta_m\mathit 1+C_1/L_m$; la 7.1, la insesgadez y la varianza $\sigma^2/L_m^2$. Es lo que la lección les atribuye en =:147=, =:192= y =:440=.
+
+** F4. Enlaces y medición
+
+=comprobar-paginas.py=: estado limpio (los 7 falsos positivos conocidos, uno de ellos el de =L14:395=). Las nueve anclas de prácticas que la lección usa existen. Medición: portada 538, y de la primera a la décima 571, 532, 667, 668, 656, 661, 549, 419, 680 y 637 px; todas por debajo de 700.
+
+** F5. Preguntas de repaso
+
+Corresponden a la lección salvo lo dicho en A1 (1 y 10), A2 (8), A5 (11) y A6 (4 y 12). Una observación sobre la 7 (=:552=), DECIDE EL AUTOR: «el ajuste, el $R^2$, $\mathfrak s$ y el $F$ conjunto apenas cambian» de una muestra a otra. Cambian lo que cambiarían con regresores perpendiculares; lo que la lección demuestra es que su variación no depende del ángulo. Propuesta: «…mientras el ajuste, el $R^2$, $\mathfrak s$ y el $F$ conjunto cambian lo mismo que con regresores perpendiculares». La misma salvedad vale para «con un ajuste que no se mueve» del resumen (=:21=) y «mientras el ajuste no se mueve» (=:444=), que como lema pueden quedarse.
