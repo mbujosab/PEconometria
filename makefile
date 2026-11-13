@@ -41,9 +41,9 @@ PRACT_TEXAUX := $(PRACT_ORG:.org=.tex) $(PRACT_ORG:.org=.aux) \
                  $(PRACT_ORG:.org=.log) $(PRACT_ORG:.org=.out) \
                  $(PRACT_ORG:.org=.toc)
 
-.PHONY: all lessons cuadernos pract clean figures
+.PHONY: all lessons cuadernos pract clean figures hoja
 
-all: lessons cuadernos pract index
+all: lessons cuadernos pract hoja index
 
 lessons:   figures $(LESSONS_PDF) $(LESSONS_HTML) $(LESSONS_IPYNB) $(LESSONS_SLIDES)
 cuadernos: $(CUADERNOS_IPYNB)
@@ -143,7 +143,22 @@ clean:
 	rm -rf $(PRACT_GUIONES)
 	rm -rf $(PRACT_STAMPS)
 	rm -rf $(PRACT_OUTDIRS)
+	rm -f $(HOJA_PDF) $(LESSONS_DIR)/Hoja-de-expresiones.aux $(LESSONS_DIR)/Hoja-de-expresiones.log
 	$(MAKE) -C $(LESSONS_IMG_DIR) distclean
+
+# ==================== Hoja de expresiones del examen ====================
+# LaTeX autónomo (no sale de ningún .org). El PDF se deja en org-lessons/ para
+# que deploy-gh-pages.sh lo publique en Lecciones-pdf/ con el resto de los PDF.
+# Debe ocupar UNA página (se proyecta en una pantalla durante el examen): si
+# al cambiarla pasa a dos, la regla falla.
+HOJA_TEX := hoja/Hoja-de-expresiones.tex
+HOJA_PDF := $(LESSONS_DIR)/Hoja-de-expresiones.pdf
+
+hoja: $(HOJA_PDF)
+
+$(HOJA_PDF): $(HOJA_TEX)
+	lualatex -interaction=nonstopmode -halt-on-error -output-directory=$(LESSONS_DIR) $< >/dev/null
+	@test "$$(pdfinfo $@ | awk '/^Pages:/{print $$2}')" = 1 || { echo "ERROR: la hoja de expresiones ocupa más de una página" >&2; rm -f $@; exit 1; }
 
 # ==================== index.org (portada de gh-pages) ====================
 INDEX_ORG  := index.org

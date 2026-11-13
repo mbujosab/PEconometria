@@ -67,5 +67,7 @@ Ejecutado el 08-11-2026 por Opus (Claude Code), sin commitear. Script de Python 
 
 **5. Prueba de pantalla** (`DIRECTORIO=<scratchpad>/prueba/… gretlcli -b guiones/….inp > salida`): S07-A (7 `.txt`), S18-A (7) y S20-C (3, con el Montecarlo): rc=0 y el contenido completo de cada `.txt` aparece en la salida **exactamente una vez**; el directorio de trabajo de S07-A queda con los mismos ficheros que el de `make`.
 
-**Sesión principal (08-11, tras el informe de Opus):** el comentario de las 173 líneas `readfile` se acorta a `# en pantalla` (línea más larga: 76 caracteres; ya no se parte en el listado del PDF). Recompilado.
+**Sesión principal (08-11, tras el informe de Opus):** el comentario de las 173 líneas `readfile` se acorta a `# en pantalla` (línea más larga: 76 caracteres; ya no se parte en el listado del PDF). Recompilado. Con el comentario corto, el listado es más breve y solo cinco prácticas conservan la página de más (S16-B, S16-C, S22-C, S26-B, S26-C); S07-B, S11-D y S25-B vuelven a su número de páginas anterior. Commiteado (d9d1458) y desplegado (gh-pages 6bf10a3) el 08-11 por orden del autor.
+
+**Decisión del autor (08-11):** los puntos 1 y 2 que Opus dejó sin tocar se quedan como están: los 7 `gnuplot --output` de bloques visibles (S11-C, S14-A, S14-C) y los `freq --plot` y `boxplot --output` de bloques ocultos no se duplican en pantalla. Encargo cerrado.
 

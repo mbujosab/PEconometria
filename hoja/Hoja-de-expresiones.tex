@@ -1,0 +1,108 @@
+% Hoja de expresiones del examen (curso PEconometria).
+% Se proyecta en UNA pantalla 16:9 durante el examen: debe caber en una sola página.
+% Cualquier cambio de contenido exige avisar al banco de preguntas
+% (doc/prompts/Encargo-<fecha>-qbank-chuletario-cambios.md) y cambiar la fecha de versión.
+% Compilar: make hoja   (lualatex; deja el PDF en org-lessons/ para el despliegue)
+\documentclass[10pt]{article}
+\newcommand{\versionhoja}{13-11-2026}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage[paperwidth=226mm,paperheight=127.125mm,margin=4mm]{geometry}
+\setlength{\columnsep}{5mm}\setlength{\columnseprule}{0.3pt}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{eso-pic}
+\AddToShipoutPictureFG{\AtPageLowerLeft{\makebox[\dimexpr\paperwidth-4mm\relax][r]{\raisebox{1.2mm}{\tiny Versión del \versionhoja}}}}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlist[itemize]{leftmargin=1.1em,itemsep=2.5pt,topsep=2pt,parsep=0pt}
+\titleformat{\section}{\normalsize\bfseries}{}{0pt}{}[\vspace{-1.2ex}\rule{\linewidth}{0.4pt}]
+\titlespacing*{\section}{0pt}{1.6ex}{0.6ex}
+\newcommand{\vv}[1]{\boldsymbol{#1}}
+\newcommand{\uno}{\boldsymbol{1}}
+\newcommand{\media}[1]{\boldsymbol{\mathop{\overline{#1}}}}
+\newcommand{\gorro}[1]{\boldsymbol{\mathop{\widehat{#1}}}}
+\newcommand{\pe}[2]{\langle #1,\,#2\rangle}
+\newcommand{\norma}[1]{\Vert #1\Vert}
+\newcommand{\s}{\mathfrak{s}}
+\newcommand{\SRC}{\mathrm{SRC}}\newcommand{\SEC}{\mathrm{SEC}}\newcommand{\STC}{\mathrm{STC}}
+\newcommand{\ee}{\mathrm{ee}}
+\begin{document}
+\raggedcolumns
+\begin{multicols}{3}
+\section{Vectores}
+\begin{itemize}
+\item $\pe{\vv x}{\vv y}_e=\sum_{i=1}^n x_iy_i$\\ $\pe{\vv x}{\vv y}_s=\frac1n\pe{\vv x}{\vv y}_e$
+\item $\norma{\vv x}=\sqrt{\pe{\vv x}{\vv x}}$ \quad (con $\pe{}{}_e$ o con $\pe{}{}_s$)
+\item $\vv x\perp\vv y$ si $\pe{\vv x}{\vv y}=0$ \qquad $\cos\theta=\dfrac{\pe{\vv x}{\vv y}}{\norma{\vv x}\,\norma{\vv y}}$
+\end{itemize}
+
+\section{Media, dispersión y correlación}
+\begin{itemize}
+\item $\mu_{\vv y}=\pe{\vv y}{\uno}_s=\frac1n\sum_i y_i$ \qquad $\media y=\mu_{\vv y}\uno$
+\item $\sigma_{\vv y}=\norma{\vv y-\media y}_s$ \qquad $\sigma^2_{\vv y}=\frac1n\sum_i(y_i-\mu_{\vv y})^2$
+\item $\sigma_{\vv x\vv y}=\pe{\vv x-\media x}{\vv y-\media y}_s$
+\item $\rho_{\vv x\vv y}=\dfrac{\sigma_{\vv x\vv y}}{\sigma_{\vv x}\,\sigma_{\vv y}}$
+\end{itemize}
+
+\section{Ajuste MCO}
+\begin{itemize}
+\item $n$ observaciones y $k$ regresores ($\uno$ incluido)
+\item $\vv y=\gorro y+\gorro e$, con $\gorro y=\hat\beta_1\uno+\hat\beta_2\vv x_2+\cdots+\hat\beta_k\vv x_k$
+\item Con $k=2$:\\[2pt] $\hat\beta_2=\dfrac{\sigma_{\vv x\vv y}}{\sigma^2_{\vv x}}$ \qquad $\hat\beta_1=\mu_{\vv y}-\hat\beta_2\,\mu_{\vv x}$
+\end{itemize}
+
+\columnbreak
+\section{Sumas de cuadrados y $R^2$}
+\begin{itemize}
+\item $\STC=\norma{\vv y-\media y}_e^2$ \qquad $\SEC=\norma{\gorro y-\media y}_e^2$
+\item $\SRC=\norma{\gorro e}_e^2$ \qquad $\STC=\SEC+\SRC$
+\item $R^2=\dfrac{\SEC}{\STC}=1-\dfrac{\SRC}{\STC}$
+\item Corregido:\quad $\bar R^2=1-\dfrac{\SRC/(n-k)}{\STC/(n-1)}$
+\end{itemize}
+
+\section{Modelo}
+\begin{itemize}
+\item $Y=\beta_1\mathit 1+\beta_2X_2+\cdots+\beta_kX_k+U$
+\item Perturbación:\quad $U=Y-E[Y\mid X_2,\ldots,X_k]$
+\item Con $k=2$ y $Var[U_i\mid\vv X]=\sigma^2\,\mathit 1$:\\[2pt]
+ $Var[\hat\beta_2\mid\vv X]=\dfrac{\sigma^2}{\sum_i(X_i-\overline X)^2}$
+\end{itemize}
+
+\section{Error estándar, contraste $t$ e intervalo}
+\begin{itemize}
+\item $\s^2=\dfrac{\SRC}{n-k}$
+\item $\ee(\hat\beta_j)=\dfrac{\s}{\norma{\tilde{\vv x}_j}_e}$\\[2pt] ($\tilde{\vv x}_j$: parte propia, ortogonal a los demás)
+\item Si $\beta_j=c$:\quad $t=\dfrac{\hat\beta_j-c}{\ee(\hat\beta_j)}\sim t_{n-k}$
+\item Intervalo:\quad $\hat\beta_j\pm t_c\cdot\ee(\hat\beta_j)$
+\end{itemize}
+
+\columnbreak
+\section{Contraste $F$}
+\begin{itemize}
+\item Con $q$ restricciones y $\SRC_r$ (del modelo restringido), bajo $H_0$:\\[3pt]
+ $F=\dfrac{(\SRC_r-\SRC)/q}{\SRC/(n-k)}\sim F_{q,\,n-k}$
+\item Significación conjunta ($q=k-1$):\\[3pt]
+ $F=\dfrac{\SEC/(k-1)}{\SRC/(n-k)}=\dfrac{n-k}{k-1}\cdot\dfrac{R^2}{1-R^2}$
+\end{itemize}
+
+\section{Colinealidad}
+\begin{itemize}
+\item $\mathrm{VIF}_j=\dfrac{1}{1-R_j^2}$\\[2pt] ($R_j^2$: el $R^2$ de $\vv x_j$ sobre los demás)
+\end{itemize}
+
+\section{Logaritmos}
+\begin{itemize}
+\item Logaritmo natural:\quad $\log(ab)=\log a+\log b$
+\item $\log(1+p)\approx p$ si $p$ es pequeño
+\item Si $\log y$ sube $\beta$, $y$ se multiplica por $e^{\beta}$\\ (cambio relativo: $e^{\beta}-1$)
+\item[]\hspace{-1.1em}\begin{tabular}{@{}ll@{}}
+nivel-nivel & $Y=\beta_1\mathit 1+\beta_2X+U$\\
+log-nivel & $\log Y=\beta_1\mathit 1+\beta_2X+U$\\
+nivel-log & $Y=\beta_1\mathit 1+\beta_2\log X+U$\\
+log-log & $\log Y=\beta_1\mathit 1+\beta_2\log X+U$
+\end{tabular}
+\end{itemize}
+\end{multicols}
+\end{document}
