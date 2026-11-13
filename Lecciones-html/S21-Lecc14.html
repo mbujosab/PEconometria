@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-11-11 mié 11:57 -->
+<!-- 2026-11-12 jue 19:39 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Lección 14. Colinealidad: cuando los regresores casi se alinean</title>
 <meta name="author" content="Marcos Bujosa" />
-<meta name="description" content="Lección 14: colinealidad. La parte propia de un regresor, el factor de inflación de la varianza (VIF) y por qué los coeficientes se vuelven imprecisos e inestables." />
+<meta name="description" content="Lección 14: colinealidad. La parte propia de un regresor, el factor de inflación de la varianza (VIF) y por qué los coeficientes se estiman con poca precisión y son inestables." />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
   #content { max-width: 60em; margin: auto; }
@@ -252,25 +252,25 @@ $(function() {    $('.note').before("<p class='admonition-title note'>Note</p>")
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org97c459e">1. De dónde venimos: el caso <code>nox</code> y <code>lnox</code></a></li>
-<li><a href="#orgd64bda3">2. Colinealidad exacta y colinealidad de grado</a></li>
+<li><a href="#orgd79d537">1. De dónde venimos: el caso <code>nox</code> y <code>lnox</code></a></li>
+<li><a href="#orgc56ba1c">2. Colinealidad exacta y colinealidad de grado</a></li>
 <li><a href="#parte-propia">3. La parte propia de un regresor</a></li>
 <li><a href="#cuanto-se-acorta">4. Cuánto se acorta: el factor de inflación de la varianza</a></li>
 <li><a href="#caso-nox-lnox">5. El caso <code>nox</code> y <code>lnox</code> con números</a></li>
 <li><a href="#por-que-oscilan">6. Por qué oscilan los coeficientes</a></li>
-<li><a href="#orge992fd8">7. Síntomas y diagnóstico</a></li>
+<li><a href="#orgd4db7ad">7. Síntomas y diagnóstico</a></li>
 <li><a href="#que-es-y-que-no-es">8. Qué es y qué no es</a></li>
-<li><a href="#org70da4a2">9. Qué hacer</a></li>
+<li><a href="#org64fd135">9. Qué hacer</a></li>
 <li><a href="#lo-que-no">10. Lo que no</a></li>
-<li><a href="#org7f69fd7">11. Recapitulación y guiño a las sesiones siguientes</a></li>
-<li><a href="#org969cdfa">12. Preguntas de repaso (sesión 21)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
-<li><a href="#orgefc75c0">13. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#org6c47920">11. Recapitulación y guiño a las sesiones siguientes</a></li>
+<li><a href="#orgfc7bfba">12. Preguntas de repaso (sesión 21)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
+<li><a href="#org91b253b">13. Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></a></li>
 </ul>
 </div>
 </div>
-<div class="abstract" id="orge9689dc">
+<div class="abstract" id="orgdcb1f81">
 <p>
-La lección 12 dejó enunciado que el error estándar de un coeficiente es \(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\), con \(\tilde{\boldsymbol x}_j\) la parte <i>propia</i> del regresor. Hoy definimos esa parte propia, medimos cuánto se acorta cuando un regresor casi cae en el subespacio de los demás y leemos la consecuencia: coeficientes imprecisos e inestables, con un ajuste que no se mueve.
+La lección 12 dejó enunciado que el error estándar de un coeficiente es \(\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\), con \(\tilde{\boldsymbol x}_j\) la parte <i>propia</i> del regresor. Hoy definimos esa parte propia, medimos cuánto se acorta cuando un regresor casi cae en el subespacio de los demás y leemos la consecuencia: coeficientes estimados con poca precisión e inestables, con un ajuste que no se mueve.
 </p>
 
 <p>
@@ -282,8 +282,8 @@ La lección 12 dejó enunciado que el error estándar de un coeficiente es \(\ma
 <ul class="org-ul">
 <li>(<a href="https://mbujosab.github.io/PEconometria/Transparencias/S21-Lecc14.slides.html">slides</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html">html</a>) &#x2014; (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf">pdf</a>)</li>
 </ul>
-<div id="outline-container-org97c459e" class="outline-2">
-<h2 id="org97c459e"><span class="section-number-2">1.</span> De dónde venimos: el caso <code>nox</code> y <code>lnox</code></h2>
+<div id="outline-container-orgd79d537" class="outline-2">
+<h2 id="orgd79d537"><span class="section-number-2">1.</span> De dónde venimos: el caso <code>nox</code> y <code>lnox</code></h2>
 <div class="outline-text-2" id="text-1">
 <p>
 La lección 13 dejó un caso sin explicar: en <code>price</code> sobre <code>rooms</code>, <code>nox</code> y <code>lnox</code>, los dos \(t\) de la contaminación eran pequeños y el \(F\) de excluirlas juntas, \(28{,}2\).
@@ -340,9 +340,9 @@ Hoy: qué es \(\tilde{\boldsymbol x}_j\), cuánto mide, qué le pasa al coeficie
 </p>
 </div>
 </div>
-<div id="outline-container-org7c43802" class="outline-4">
-<h4 id="org7c43802">De dónde venimos: el caso <code>nox</code> y <code>lnox</code></h4>
-<div class="outline-text-4" id="text-org7c43802">
+<div id="outline-container-orga76c53a" class="outline-4">
+<h4 id="orga76c53a">De dónde venimos: el caso <code>nox</code> y <code>lnox</code></h4>
+<div class="outline-text-4" id="text-orga76c53a">
 <p>
 La lección 13 terminó con un caso que supimos leer pero no medir. Con <code>rooms</code> y <code>nox</code> en el modelo, la contaminación tiene un \(t\) de \(-7{,}4\); con <code>rooms</code>, <code>nox</code> y <code>lnox</code>, los \(t\) de las dos medidas de contaminación caen a \(0{,}18\) y \(-1{,}05\), mientras que el \(F\) de excluirlas a la vez vale \(28{,}2\). Dijimos que era la firma de la colinealidad y que la lección 14 le pondría números.
 </p>
@@ -369,15 +369,15 @@ La sesión tiene tres partes. Las cuatro primeras transparencias definen la part
 </div>
 </div>
 </div>
-<div id="outline-container-orgd64bda3" class="outline-2">
-<h2 id="orgd64bda3"><span class="section-number-2">2.</span> Colinealidad exacta y colinealidad de grado</h2>
+<div id="outline-container-orgc56ba1c" class="outline-2">
+<h2 id="orgc56ba1c"><span class="section-number-2">2.</span> Colinealidad exacta y colinealidad de grado</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 <i>Exacta</i> (lección 10): un regresor es combinación lineal de los demás. \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) no es invertible; infinitos \(\boldsymbol{\mathop{\widehat\beta}}\) dan el mismo ajuste. Ejemplo: temperatura en Celsius y en Fahrenheit.
 </p>
 
 <p>
-<i>De grado</i> (hoy): un regresor en desviaciones forma un ángulo muy pequeño con el subespacio generado por los demás (constante incluida). Solución única, pero imprecisa e inestable.
+<i>De grado</i> (hoy): un regresor en desviaciones forma un ángulo muy pequeño con el subespacio generado por los demás (constante incluida). Solución única, pero estimada con poca precisión e inestable.
 </p>
 
 <p>
@@ -390,9 +390,9 @@ Es una escala, no una frontera. La pregunta útil no es ``¿hay colinealidad?'' 
 </p>
 </div>
 </div>
-<div id="outline-container-org331979a" class="outline-4">
-<h4 id="org331979a">Colinealidad exacta y colinealidad de grado</h4>
-<div class="outline-text-4" id="text-org331979a">
+<div id="outline-container-orgc47bd6b" class="outline-4">
+<h4 id="orgc47bd6b">Colinealidad exacta y colinealidad de grado</h4>
+<div class="outline-text-4" id="text-orgc47bd6b">
 <p>
 El curso ya conoce el caso extremo. En la lección 10, al deducir las ecuaciones normales, dijimos que si los regresores son linealmente dependientes la matriz \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) no es invertible y el sistema tiene infinitas soluciones: infinitos vectores \(\boldsymbol{\mathop{\widehat\beta}}\) producen el mismo ajuste \(\boldsymbol{\mathop{\widehat y}}\). Lo llamamos <i>colinealidad exacta</i>, y la práctica que siguió a esa lección lo comprobó (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-D-simulados-matricial.pdf#page=6">actividad 6</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-D-simulados-matricial.html#colinealidad-exacta">html</a>)) con la temperatura en grados Celsius y en grados Fahrenheit: Gretl omite una de las dos columnas y avisa. Es una situación que se detecta sola, porque no hay nada que estimar.
 </p>
@@ -426,7 +426,7 @@ Proyectamos \(\boldsymbol x_j\) sobre el subespacio de <i>los demás</i> regreso
 </p>
 
 
-<div id="org7437240" class="figure">
+<div id="orgbb51771" class="figure">
 <p><img src="img/S21-Lecc14/PartePropia_fila.png" alt="PartePropia_fila.png" width="700px" />
 </p>
 <p><span class="figure-number">Figura 1: </span>Dos regresores en desviaciones en el plano \(\mathcal L(\boldsymbol 1)^\perp\), con ángulo \(\theta\) de \(60^\circ\), \(20^\circ\) y \(6^\circ\). En azul, \(\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\) y \(\boldsymbol x_3-\mu_{\boldsymbol x_3}\boldsymbol 1\); el vector gris, que va desde la ``sombra'' del primero sobre la recta del segundo hasta la punta del primero, es \(\tilde{\boldsymbol x}_2\), la parte propia de \(\boldsymbol x_2\). Los dos regresores en desviaciones tienen la misma longitud en los tres paneles; la de la parte propia, cateto opuesto al ángulo \(\theta\), es \(\sin\theta\) veces esa longitud: \(0{,}87\), \(0{,}34\) y \(0{,}10\).</p>
@@ -436,9 +436,9 @@ Proyectamos \(\boldsymbol x_j\) sobre el subespacio de <i>los demás</i> regreso
 Enunciado en la lección 12 (demostración en el apéndice): \(\;\mathrm{ee}(\hat\beta_j)=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e\). Con un solo regresor no constante, \(\tilde{\boldsymbol x}_2=\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1\) y se recupera la lección 12.
 </p>
 </div>
-<div id="outline-container-org43b8cf8" class="outline-4">
-<h4 id="org43b8cf8">La parte propia de un regresor</h4>
-<div class="outline-text-4" id="text-org43b8cf8">
+<div id="outline-container-org70403e0" class="outline-4">
+<h4 id="org70403e0">La parte propia de un regresor</h4>
+<div class="outline-text-4" id="text-org70403e0">
 <p>
 La lección 12 habló de ``la parte del regresor \(j\) que no se puede reconstruir a partir de los demás''. Hoy le damos definición, y la definición es una proyección ortogonal de las de la lección 10, aplicada a un regresor en lugar de al regresando.
 </p>
@@ -537,9 +537,9 @@ Sustituyendo en el error estándar:
 </tbody>
 </table>
 </div>
-<div id="outline-container-org97a3666" class="outline-4">
-<h4 id="org97a3666">Cuánto se acorta: el factor de inflación de la varianza</h4>
-<div class="outline-text-4" id="text-org97a3666">
+<div id="outline-container-org4763f7c" class="outline-4">
+<h4 id="org4763f7c">Cuánto se acorta: el factor de inflación de la varianza</h4>
+<div class="outline-text-4" id="text-org4763f7c">
 <p>
 La igualdad del recuadro, la longitud de la parte propia, se deduce de lo demostrado en la lección 8 sin ningún ingrediente nuevo. La regresión auxiliar de \(\boldsymbol x_j\) sobre los demás regresores es una regresión como cualquier otra, con \(\boldsymbol x_j\) en el papel del regresando, así que tiene su triángulo rectángulo y su identidad \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\). Escribamos las tres sumas con su subíndice \(j\) para recordar de qué regresión provienen. La suma total es la longitud al cuadrado del regresor en desviaciones, \(\mathrm{STC}_j=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\). La suma residual es la longitud al cuadrado de la parte propia, \(\mathrm{SRC}_j=\Vert\tilde{\boldsymbol x}_j\Vert_e^2\), porque \(\tilde{\boldsymbol x}_j\) es el residuo de esa regresión. Y el coeficiente de determinación de la regresión auxiliar, que llamaremos \(R_j^2\), es \(\mathrm{SEC}_j/\mathrm{STC}_j=1-\mathrm{SRC}_j/\mathrm{STC}_j\). Despejando,
 \[
@@ -627,9 +627,9 @@ El último valor, \(2198{,}9\), es el error estándar de <code>nox</code> en la 
 En Gretl: comando <code>vif</code> tras estimar, o <i><i><code>Análisis -&gt; Colinealidad</code></i></i> en la ventana del modelo. Devuelve \(82{,}8\) para <code>nox</code>, \(82{,}9\) para <code>lnox</code> y \(1{,}1\) para <code>rooms</code>.
 </p>
 </div>
-<div id="outline-container-orge842ac8" class="outline-4">
-<h4 id="orge842ac8">El caso <code>nox</code> y <code>lnox</code> con números</h4>
-<div class="outline-text-4" id="text-orge842ac8">
+<div id="outline-container-org457f143" class="outline-4">
+<h4 id="org457f143">El caso <code>nox</code> y <code>lnox</code> con números</h4>
+<div class="outline-text-4" id="text-org457f143">
 <p>
 Volvamos al modelo con que abrimos la sesión y hagamos la cuenta completa para <code>nox</code>. La regresión auxiliar es la de <code>nox</code> sobre la constante, <code>rooms</code> y <code>lnox</code>, y su coeficiente de determinación es \(R_j^2=0{,}9879\): los otros regresores reproducen el \(98{,}8\,\%\) de la variación de <code>nox</code>. Casi todo, como cabía esperar de una variable y su logaritmo, cuya correlación es \(0{,}9939\): sus vectores en desviaciones forman un ángulo de \(6{,}3^\circ\).
 </p>
@@ -660,7 +660,7 @@ Gretl calcula los factores de inflación con el comando <code>vif</code>, que se
 </p>
 
 
-<div id="orga90e25e" class="figure">
+<div id="orgae4c5a8" class="figure">
 <p><img src="img/S21-Lecc14/ParalelogramoAplastado_fila.png" alt="ParalelogramoAplastado_fila.png" width="700px" />
 </p>
 <p><span class="figure-number">Figura 2: </span>Dos regresores en desviaciones y de longitud \(1\) (a trazos), que forman \(70^\circ\) a la izquierda y \(10^\circ\) a la derecha, y el mismo ajuste en desviaciones \(\boldsymbol{\mathop{\widehat y}}\) en los dos paneles. Los tramos continuos son su descomposición \(\hat\beta_2\boldsymbol x_2+\hat\beta_3\boldsymbol x_3\): primero \(\hat\beta_2\boldsymbol x_2\), horizontal y hacia la izquierda porque \(\hat\beta_2<0\), y después \(\hat\beta_3\boldsymbol x_3\) hasta \(\boldsymbol{\mathop{\widehat y}}\). \(\boldsymbol{\mathop{\widehat y}}'\) es el ajuste que daría otra muestra: dista \(0{,}07\) de \(\boldsymbol{\mathop{\widehat y}}\) en la dirección perpendicular a \(\boldsymbol x_2\), y su descomposición va en color más claro. A \(70^\circ\) las coordenadas cambian poco, lo mismo que el ajuste; a \(10^\circ\) cambian \(0{,}40\) cada una y en sentidos opuestos, casi seis veces el desplazamiento del ajuste: el factor es \(1/\sin10^\circ\).</p>
@@ -670,11 +670,11 @@ Gretl calcula los factores de inflación con el comando <code>vif</code>, que se
 Un desplazamiento de \(\boldsymbol{\mathop{\widehat y}}\) perpendicular a \(\boldsymbol x_2\) cambia \(\hat\beta_3\) en \(1/\sin\theta=\sqrt{\mathrm{VIF}}\) veces ese desplazamiento, y \(\hat\beta_2\) lo compensa con signo contrario. \(\mathrm{SRC}\), \(R^2\) y \(F\) dependen de \(\boldsymbol{\mathop{\widehat y}}\), no de sus coordenadas: la colinealidad no los altera.
 </p>
 </div>
-<div id="outline-container-org2df9413" class="outline-4">
-<h4 id="org2df9413">Por qué oscilan los coeficientes</h4>
-<div class="outline-text-4" id="text-org2df9413">
+<div id="outline-container-org88f7128" class="outline-4">
+<h4 id="org88f7128">Por qué oscilan los coeficientes</h4>
+<div class="outline-text-4" id="text-org88f7128">
 <p>
-El error estándar dice cuánto se dispersa un coeficiente de una muestra a otra. La figura dice por qué se dispersa tanto cuando los regresores casi se alinean, y lo dice sin probabilidad: es geometría de coordenadas.
+El error estándar dice cuánto se dispersa el estimador de un coeficiente de una muestra a otra. La figura dice por qué se dispersa tanto cuando los regresores casi se alinean, y lo dice sin probabilidad: es geometría de coordenadas.
 </p>
 
 <p>
@@ -686,7 +686,7 @@ La figura toma dos regresores en desviaciones de longitud \(1\) y un ajuste \(\b
 </p>
 
 <p>
-Dos consecuencias. La primera es que los coeficientes de regresores cuyos vectores en desviaciones casi se alinean no solo son imprecisos, sino que lo son <i>simultáneamente</i>: con correlación positiva entre los regresores, como en la figura, oscilan en sentidos opuestos (en las muestras en que uno resulta mayor, el otro resulta menor); con correlación negativa, en el mismo sentido. El signo de la covarianza entre los dos estimadores es el contrario al de la correlación entre los regresores. Para verlo basta sustituir \(\boldsymbol x_3\) por \(-\boldsymbol x_3\): la correlación entre los regresores cambia de signo, el coeficiente de \(\boldsymbol x_3\) también, y con él la covarianza entre los dos estimadores. Lo que no depende del signo es que las coordenadas cambian de forma que el ajuste apenas se mueve. La lección 11 dio, en su fórmula matricial y para \(k=2\), la covarianza entre \(\hat\beta_1\) y \(\hat\beta_2\), negativa cuando la media del regresor es positiva; con regresores casi alineados y correlación positiva, la covarianza entre \(\hat\beta_2\) y \(\hat\beta_3\) es muy negativa, y así lo comprobaremos con un experimento de Montecarlo en la práctica A de la sesión 22 (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-A-colinealidad-montecarlo.pdf#page=3">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-A-colinealidad-montecarlo.html#nube">html</a>)). Es lo que se veía en la tabla de la lección 13: con <code>lnox</code> en el modelo, el coeficiente de <code>nox</code> pasa de \(-1884{,}7\) a \(404{,}2\) y el de <code>lnox</code> es \(-13262\), de signo opuesto. Lo que apenas cambia es lo que los dos términos dan juntos: cuando <code>nox</code> pasa de \(5\) a \(6\), el precio ajustado baja \(1885\) dólares en el modelo con <code>nox</code> y \(2014\) en el modelo con <code>nox</code> y <code>lnox</code>.
+Dos consecuencias. La primera es que los estimadores de los coeficientes de regresores cuyos vectores en desviaciones casi se alinean no solo son imprecisos, sino que lo son <i>simultáneamente</i>: con correlación positiva entre los regresores, como en la figura, oscilan en sentidos opuestos (en las muestras en que uno resulta mayor, el otro resulta menor); con correlación negativa, en el mismo sentido. El signo de la covarianza entre los dos estimadores es el contrario al de la correlación entre los regresores. Para verlo basta sustituir \(\boldsymbol x_3\) por \(-\boldsymbol x_3\): la correlación entre los regresores cambia de signo, el coeficiente de \(\boldsymbol x_3\) también, y con él la covarianza entre los dos estimadores. Lo que no depende del signo es que las coordenadas cambian de forma que el ajuste apenas se mueve. La lección 11 dio, en su fórmula matricial y para \(k=2\), la covarianza entre \(\hat\beta_1\) y \(\hat\beta_2\), negativa cuando la media del regresor es positiva; con regresores casi alineados y correlación positiva, la covarianza entre \(\hat\beta_2\) y \(\hat\beta_3\) es muy negativa, y así lo comprobaremos con un experimento de Montecarlo en la práctica A de la sesión 22 (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-A-colinealidad-montecarlo.pdf#page=3">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-A-colinealidad-montecarlo.html#nube">html</a>)). Es lo que se veía en la tabla de la lección 13: con <code>lnox</code> en el modelo, el coeficiente de <code>nox</code> pasa de \(-1884{,}7\) a \(404{,}2\) y el de <code>lnox</code> es \(-13262\), de signo opuesto. Lo que apenas cambia es lo que los dos términos dan juntos: cuando <code>nox</code> pasa de \(5\) a \(6\), el precio ajustado baja \(1885\) dólares en el modelo con <code>nox</code> y \(2014\) en el modelo con <code>nox</code> y <code>lnox</code>.
 </p>
 
 <p>
@@ -694,13 +694,13 @@ La segunda consecuencia es la que hay que retener para leer resultados. Lo que l
 </p>
 
 <p>
-<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (el ejemplo de gasto por alumno en varias partidas, en el que dos regresores con vectores en desviaciones casi alineados tienen coeficientes imprecisos mientras el conjunto está bien estimado).
+<i>Para profundizar</i>: Wooldridge, J. M. (2020), cap. 3, sección 3.4 (el ejemplo de gasto por alumno en varias partidas, en el que dos regresores con vectores en desviaciones casi alineados tienen coeficientes estimados con poca precisión mientras el conjunto está bien estimado).
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orge992fd8" class="outline-2">
-<h2 id="orge992fd8"><span class="section-number-2">7.</span> Síntomas y diagnóstico</h2>
+<div id="outline-container-orgd4db7ad" class="outline-2">
+<h2 id="orgd4db7ad"><span class="section-number-2">7.</span> Síntomas y diagnóstico</h2>
 <div class="outline-text-2" id="text-7">
 <ul class="org-ul">
 <li>\(F\) conjunto alto con \(t\) individuales bajos (lección 13), o \(R^2\) alto con casi nada significativo.</li>
@@ -714,12 +714,12 @@ La segunda consecuencia es la que hay que retener para leer resultados. Lo que l
 </p>
 
 <p>
-<i>Qué mirar</i>: \(\sqrt{\mathrm{VIF}_j}\), el factor por el que se ha multiplicado el error estándar de \(\hat\beta_j\). Es una escala, no un veredicto.
+<i>Qué mirar</i>: \(\sqrt{\mathrm{VIF}_j}\), el factor por el que se ha multiplicado el error estándar de \(\hat\beta_j\). Es una escala, no un veredicto: en los coches de la práctica C de la sesión 22 el VIF es \(142\) y los dos \(t\) son grandes, \(10\) y \(-7{,}5\).
 </p>
 </div>
-<div id="outline-container-org9c39d9b" class="outline-4">
-<h4 id="org9c39d9b">Síntomas y diagnóstico</h4>
-<div class="outline-text-4" id="text-org9c39d9b">
+<div id="outline-container-org49be550" class="outline-4">
+<h4 id="org49be550">Síntomas y diagnóstico</h4>
+<div class="outline-text-4" id="text-org49be550">
 <p>
 La colinealidad de grado, a diferencia de la exacta, no es de inmediata detección: Gretl estima el modelo sin ningún aviso. Hay que reconocerla en la tabla, y los síntomas son los que las lecciones anteriores ya han producido.
 </p>
@@ -737,7 +737,7 @@ El cuarto es la correlación entre regresores, el síntoma más usado y el menos
 </p>
 
 <p>
-Los manuales suelen dar una regla: un VIF mayor que \(10\) indica un problema. Conviene saberla, porque Gretl la imprime al pie de la salida de <code>vif</code>, y conviene saber también que es arbitraria: \(10\) significa que el error estándar se ha multiplicado por \(3{,}2\), y si ese factor es grave o no depende de para qué se quiera el coeficiente. Un VIF de \(5\) que convierte un intervalo estrecho en uno inservible es un problema; un VIF de \(50\) en un coeficiente que sigue siendo significativo y con un intervalo aceptable no lo es. Léase la escala, no el umbral.
+Los manuales suelen dar una regla: un VIF mayor que \(10\) indica un problema. Conviene saberla, porque Gretl la imprime al pie de la salida de <code>vif</code>, y conviene saber también que es arbitraria: \(10\) significa que el error estándar se ha multiplicado por \(3{,}2\), y si ese factor es grave o no depende de para qué se quiera el coeficiente. Un VIF de \(5\) que convierte un intervalo estrecho en uno inservible es un problema; un VIF de \(50\) en un coeficiente que sigue siendo significativo y con un intervalo aceptable no lo es. Léase la escala, no el umbral. En los coches de la práctica C de la sesión 22 (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=5">actividad 4</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#t-grandes">html</a>)) el VIF de la edad y el de las millas es \(142\): cada error estándar se multiplica por \(11{,}9\). Aun así los dos \(t\) son \(10\) y \(-7{,}5\), y el contraste rechaza que cada coeficiente valga cero.
 </p>
 
 <p>
@@ -767,9 +767,9 @@ Para estimar el efecto de una variable hace falta que esa variable varíe <i>por
 </p>
 </div>
 </div>
-<div id="outline-container-orgdb5a4b8" class="outline-4">
-<h4 id="orgdb5a4b8">Qué es y qué no es</h4>
-<div class="outline-text-4" id="text-orgdb5a4b8">
+<div id="outline-container-org3789609" class="outline-4">
+<h4 id="org3789609">Qué es y qué no es</h4>
+<div class="outline-text-4" id="text-org3789609">
 <p>
 Los manuales tratan la colinealidad en el capítulo de ``problemas'' del modelo, y conviene precisar qué clase de problema es, porque no es del tipo de los que vendrán en las lecciones siguientes. En realidad es un problema de la muestra.
 </p>
@@ -796,15 +796,15 @@ La falta de variación propia es el punto de llegada de una idea que el curso re
 </div>
 </div>
 </div>
-<div id="outline-container-org70da4a2" class="outline-2">
-<h2 id="org70da4a2"><span class="section-number-2">9.</span> Qué hacer</h2>
+<div id="outline-container-org64fd135" class="outline-2">
+<h2 id="org64fd135"><span class="section-number-2">9.</span> Qué hacer</h2>
 <div class="outline-text-2" id="text-9">
 <ul class="org-ul">
 <li><i>Nada si el objetivo es predecir sin extrapolar</i>: el ajuste no depende de los generadores.</li>
 
 <li><i>Obtener más información</i>: más datos, o datos con mayor variación (rentas, tamaños, edades o países más dispares), con regresores que varíen por separado.</li>
 
-<li><i>Reformular</i>: quedarse con una de las dos variables o con una combinación, o imponer una restricción y contrastarla con el \(F\) (lección 13). Puede ganarse precisión, y se pierde lo que aportaba al ajuste la que sale. Mirar qué cambia en las predicciones: <code>nox</code> o <code>lnox</code> describen la realidad de forma distinta.</li>
+<li><i>Reformular</i>: quedarse con una de las dos variables o con una combinación, o imponer una restricción y contrastarla con el \(F\) (lección 13). Puede ganarse precisión, y se pierde lo que aportaba al ajuste la que sale. Mirar qué cambia en las predicciones: <code>nox</code> o <code>lnox</code> describen la realidad de forma distinta. Con dos magnitudes distintas, como la edad y las millas de un coche, cambia además lo que mide el coeficiente que queda: \(28\) dólares por semana a igual kilometraje; \(7{,}3\) con la edad sola.</li>
 
 <li><i>Ortogonalizar</i>: sustituir un regresor por su parte propia (el residuo de su regresión auxiliar), que es ortogonal a los demás. El ajuste no cambia; cambia la interpretación de los coeficientes.</li>
 </ul>
@@ -833,7 +833,7 @@ El segundo remedio es reformular el modelo: quitar un regresor, o fundir dos en 
 </p>
 
 <p>
-El segundo caso es el de dos magnitudes distintas que en la muestra se mueven juntas, como la edad y las millas de un coche. Aquí quitar una sí pierde información: el modelo deja de distinguir lo que las dos distinguían. A cambio, el coeficiente de la que queda gana precisión, y cambia de significado. Con las dos variables, el coeficiente de la edad, \(28{,}02\), es el efecto de una semana más de edad <i>a igual kilometraje</i>. Con la edad sola, el coeficiente es \(7{,}34\), y es el efecto de una semana más de edad <i>junto con</i> el de las millas que esa semana trae consigo: en la muestra, por cada semana más de edad un coche tiene, en promedio, \(134\) millas más (\(0{,}134\) es la pendiente de la regresión de <code>miles</code> sobre <code>age</code>). La identidad de la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=3">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#dos-juntas">html</a>) de la práctica C, \(7{,}34\approx28{,}02-154{,}6\cdot0{,}134\), lo descompone en el efecto de la edad a igual kilometraje más el efecto de esas \(134\) millas. Son dos preguntas distintas, y la muestra responde con más precisión a la segunda. Es un intercambio: precisión a cambio de una pregunta menos fina.
+El segundo caso es el de dos magnitudes distintas que en la muestra se mueven juntas, como la edad y las millas de un coche. Aquí quitar una sí pierde información: el modelo deja de distinguir lo que las dos distinguían. A cambio, el estimador del coeficiente de la que queda gana precisión, y el coeficiente cambia de significado. Con las dos variables, el coeficiente de la edad, \(28{,}02\), es el efecto de una semana más de edad <i>a igual kilometraje</i>. Con la edad sola, el coeficiente es \(7{,}34\), y es el efecto de una semana más de edad <i>junto con</i> el de las millas que esa semana trae consigo: en la muestra, por cada semana más de edad un coche tiene, en promedio, \(134\) millas más (\(0{,}134\) es la pendiente de la regresión de <code>miles</code> sobre <code>age</code>). La identidad de la <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S22-Prct-C-ramanathan-coches.pdf#page=3">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S22-Prct-C-ramanathan-coches.html#dos-juntas">html</a>) de la práctica C, \(7{,}34\approx28{,}02-154{,}6\cdot0{,}134\), lo descompone en el efecto de la edad a igual kilometraje más el efecto de esas \(134\) millas. Son dos preguntas distintas, y la muestra responde con más precisión a la segunda. Es un intercambio: precisión a cambio de una pregunta menos fina.
 </p>
 
 <p>
@@ -869,9 +869,9 @@ El caso en que esa justificación es más clara es el de la práctica D de la se
 <i>Lo correcto</i>: identificar los coeficientes poco significativos y contrastar con el \(F\) que valen cero a la vez (lección 13). Si el \(F\) no rechaza, quitar esos regresores es una opción, no una obligación.
 </p>
 </div>
-<div id="outline-container-orgd882d30" class="outline-4">
-<h4 id="orgd882d30">Lo que no</h4>
-<div class="outline-text-4" id="text-orgd882d30">
+<div id="outline-container-orgf681661" class="outline-4">
+<h4 id="orgf681661">Lo que no</h4>
+<div class="outline-text-4" id="text-orgf681661">
 <p>
 Reconocerlo no es una opción más: cuando la muestra tiene limitaciones, hay que decirlo. Si la pregunta económica exige separar el efecto de <code>nox</code> del de <code>lnox</code>, estos datos no lo permiten, y lo correcto es informar de los dos coeficientes con sus intervalos, que serán amplios, y no atribuir a la estimación una precisión que la muestra no da. Un intervalo ancho informa de lo que la muestra no permite precisar. Una vez dicho, es cuando cabe plantearse qué hacer con esas limitaciones, y es ahí donde se barajan las opciones anteriores, en función de los objetivos del estudio.
 </p>
@@ -886,8 +886,8 @@ Lo que no hay que hacer lo dijo la lección 13: eliminar regresores porque sus \
 </div>
 </div>
 </div>
-<div id="outline-container-org7f69fd7" class="outline-2">
-<h2 id="org7f69fd7"><span class="section-number-2">11.</span> Recapitulación y guiño a las sesiones siguientes</h2>
+<div id="outline-container-org6c47920" class="outline-2">
+<h2 id="org6c47920"><span class="section-number-2">11.</span> Recapitulación y guiño a las sesiones siguientes</h2>
 <div class="outline-text-2" id="text-11">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -946,9 +946,9 @@ Demostrado: la longitud de la parte propia. Enunciado (demostración en el apén
 <i>Laboratorio de colinealidad</i>: la colinealidad creciente en Montecarlo, la regresión auxiliar de <code>nox</code> y el VIF; el laboratorio del \(F\) ya anticipó la elipse de confianza de <code>nox</code> y <code>lnox</code>. <i>Lección 16</i>: la trampa de las variables ficticias es colinealidad exacta con \(\boldsymbol 1\).
 </p>
 </div>
-<div id="outline-container-org81bba9d" class="outline-4">
-<h4 id="org81bba9d">Recapitulación y guiño a las sesiones siguientes</h4>
-<div class="outline-text-4" id="text-org81bba9d">
+<div id="outline-container-org3978493" class="outline-4">
+<h4 id="org3978493">Recapitulación y guiño a las sesiones siguientes</h4>
+<div class="outline-text-4" id="text-org3978493">
 <p>
 La sesión ha añadido una definición y un resultado. La definición es la parte propia de un regresor, el residuo de proyectarlo sobre los demás: una regresión de la lección 10 con un regresor en el papel del regresando. El resultado es su longitud, \(\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j\), que se deduce de Pitágoras en esa regresión auxiliar. Todo lo demás es lectura: el error estándar de la lección 12, \(\mathfrak s\) dividido por esa longitud (la fórmula de \(\hat\beta_j\) sobre la parte propia está demostrada en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=14">apéndice, sección 5.4</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>), con la familia ortogonal de la lección 10, y la varianza \(\sigma^2/\Vert\tilde{\boldsymbol x}_j\Vert_e^2\) en la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=21">sección 7.1</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-7-1">html</a>)), el VIF como inverso del seno al cuadrado, y las coordenadas que oscilan porque los generadores casi se alinean.
 </p>
@@ -967,40 +967,40 @@ Quedan tres hilos, el primero ya recorrido. El laboratorio del contraste \(F\) a
 </div>
 </div>
 </div>
-<div id="outline-container-org969cdfa" class="outline-2">
-<h2 id="org969cdfa"><span class="section-number-2">12.</span> Preguntas de repaso (sesión 21)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div id="outline-container-orgfc7bfba" class="outline-2">
+<h2 id="orgfc7bfba"><span class="section-number-2">12.</span> Preguntas de repaso (sesión 21)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
 <div class="outline-text-2" id="text-12">
 <p>
 Le propongo 12 preguntas.
 Las marco con un nivel orientativo: [B] básica, [M] media, [D] discriminadora.
 </p>
 </div>
-<div id="outline-container-orge17ba6c" class="outline-4">
-<h4 id="orge17ba6c">Comentario</h4>
-<div class="outline-text-4" id="text-orge17ba6c">
+<div id="outline-container-org95fd467" class="outline-4">
+<h4 id="org95fd467">Comentario</h4>
+<div class="outline-text-4" id="text-org95fd467">
 <p>
 Las preguntas que más le conviene trabajar son la 4 (fija el resultado central: la longitud de la parte propia se deduce de Pitágoras en la regresión auxiliar), la 7 (la distinción entre lo que la colinealidad estropea, las coordenadas, y lo que respeta, el ajuste) y la 9 (la colinealidad no viola ningún supuesto y los errores estándar grandes son correctos). Repase también la 6: separa el efecto parcial de la lección 10 de la colinealidad, dos cosas fáciles de confundir. La 12 le pide distinguir lo demostrado de lo enunciado.
 </p>
 </div>
 </div>
-<div id="outline-container-org6336366" class="outline-4">
-<h4 id="org6336366">Pregunta 1 [B] — Exacta frente a de grado</h4>
-<div class="outline-text-4" id="text-org6336366">
+<div id="outline-container-org3fd147f" class="outline-4">
+<h4 id="org3fd147f">Pregunta 1 [B] — Exacta frente a de grado</h4>
+<div class="outline-text-4" id="text-org3fd147f">
 <p>
 La diferencia entre colinealidad exacta y colinealidad de grado es:
 </p>
 
 <ol class="org-ol">
 <li>Ninguna: son dos nombres para el mismo problema.</li>
-<li>En la exacta un regresor es combinación lineal de los demás y las ecuaciones normales tienen infinitas soluciones; en la de grado el regresor en desviaciones forma un ángulo muy pequeño con el subespacio generado por los demás, y la solución es única pero imprecisa e inestable.</li>
+<li>En la exacta un regresor es combinación lineal de los demás y las ecuaciones normales tienen infinitas soluciones; en la de grado el regresor en desviaciones forma un ángulo muy pequeño con el subespacio generado por los demás, y la solución es única pero estimada con poca precisión e inestable.</li>
 <li>La exacta ocurre con datos reales y la de grado solo con datos simulados.</li>
 <li>La de grado viola los supuestos del modelo y la exacta no.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orga4c522f" class="outline-4">
-<h4 id="orga4c522f">Pregunta 2 [B] — La parte propia</h4>
-<div class="outline-text-4" id="text-orga4c522f">
+<div id="outline-container-orgfc0d992" class="outline-4">
+<h4 id="orgfc0d992">Pregunta 2 [B] — La parte propia</h4>
+<div class="outline-text-4" id="text-orgfc0d992">
 <p>
 La parte propia \(\tilde{\boldsymbol x}_j\) de un regresor es:
 </p>
@@ -1013,9 +1013,9 @@ La parte propia \(\tilde{\boldsymbol x}_j\) de un regresor es:
 </ol>
 </div>
 </div>
-<div id="outline-container-orge189732" class="outline-4">
-<h4 id="orge189732">Pregunta 3 [B] — Qué mide el VIF</h4>
-<div class="outline-text-4" id="text-orge189732">
+<div id="outline-container-org8de33bd" class="outline-4">
+<h4 id="org8de33bd">Pregunta 3 [B] — Qué mide el VIF</h4>
+<div class="outline-text-4" id="text-org8de33bd">
 <p>
 Un \(\mathrm{VIF}_j=25\) significa que:
 </p>
@@ -1028,9 +1028,9 @@ Un \(\mathrm{VIF}_j=25\) significa que:
 </ol>
 </div>
 </div>
-<div id="outline-container-org17a7130" class="outline-4">
-<h4 id="org17a7130">Pregunta 4 [M] — Cómo se obtiene la longitud de la parte propia</h4>
-<div class="outline-text-4" id="text-org17a7130">
+<div id="outline-container-org365236c" class="outline-4">
+<h4 id="org365236c">Pregunta 4 [M] — Cómo se obtiene la longitud de la parte propia</h4>
+<div class="outline-text-4" id="text-org365236c">
 <p>
 La identidad \(\Vert\tilde{\boldsymbol x}_j\Vert_e^2=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e^2\,(1-R_j^2)\) se obtiene:
 </p>
@@ -1043,9 +1043,9 @@ La identidad \(\Vert\tilde{\boldsymbol x}_j\Vert_e^2=\Vert\boldsymbol x_j-\mu_{\
 </ol>
 </div>
 </div>
-<div id="outline-container-org9a05e3b" class="outline-4">
-<h4 id="org9a05e3b">Pregunta 5 [M] — Dos regresores</h4>
-<div class="outline-text-4" id="text-org9a05e3b">
+<div id="outline-container-org209a57d" class="outline-4">
+<h4 id="org209a57d">Pregunta 5 [M] — Dos regresores</h4>
+<div class="outline-text-4" id="text-org209a57d">
 <p>
 En un modelo con constante y dos regresores no constantes cuya correlación es \(0{,}99\), el error estándar de cada coeficiente, respecto al que tendría si los regresores no compartieran nada, se multiplica aproximadamente por:
 </p>
@@ -1058,9 +1058,9 @@ En un modelo con constante y dos regresores no constantes cuya correlación es \
 </ol>
 </div>
 </div>
-<div id="outline-container-org96a7e5a" class="outline-4">
-<h4 id="org96a7e5a">Pregunta 6 [M] — Efecto parcial o colinealidad</h4>
-<div class="outline-text-4" id="text-org96a7e5a">
+<div id="outline-container-orged5d5e7" class="outline-4">
+<h4 id="orged5d5e7">Pregunta 6 [M] — Efecto parcial o colinealidad</h4>
+<div class="outline-text-4" id="text-orged5d5e7">
 <p>
 Al añadir un regresor, el coeficiente de otro cambia de \(56\) a \(-24\) y su error estándar pasa de \(4\) a \(5\). ¿Qué indica?
 </p>
@@ -1073,9 +1073,9 @@ Al añadir un regresor, el coeficiente de otro cambia de \(56\) a \(-24\) y su e
 </ol>
 </div>
 </div>
-<div id="outline-container-org17d987c" class="outline-4">
-<h4 id="org17d987c">Pregunta 7 [D] — Lo que oscila y lo que no</h4>
-<div class="outline-text-4" id="text-org17d987c">
+<div id="outline-container-org05845be" class="outline-4">
+<h4 id="org05845be">Pregunta 7 [D] — Lo que oscila y lo que no</h4>
+<div class="outline-text-4" id="text-org05845be">
 <p>
 Con dos regresores cuyos vectores en desviaciones casi se alinean, de una muestra a otra cambian mucho:
 </p>
@@ -1088,9 +1088,9 @@ Con dos regresores cuyos vectores en desviaciones casi se alinean, de una muestr
 </ol>
 </div>
 </div>
-<div id="outline-container-orgdaa8987" class="outline-4">
-<h4 id="orgdaa8987">Pregunta 8 [M] — El signo de la covarianza</h4>
-<div class="outline-text-4" id="text-orgdaa8987">
+<div id="outline-container-org35ccfa0" class="outline-4">
+<h4 id="org35ccfa0">Pregunta 8 [M] — El signo de la covarianza</h4>
+<div class="outline-text-4" id="text-org35ccfa0">
 <p>
 Con <code>nox</code> y <code>lnox</code> en el mismo modelo, los coeficientes estimados son \(404\) y \(-13262\), de signos opuestos, y con <code>nox</code> solo el coeficiente era \(-1885\). La razón es que:
 </p>
@@ -1103,9 +1103,9 @@ Con <code>nox</code> y <code>lnox</code> en el mismo modelo, los coeficientes es
 </ol>
 </div>
 </div>
-<div id="outline-container-org790c03d" class="outline-4">
-<h4 id="org790c03d">Pregunta 9 [D] — Supuestos</h4>
-<div class="outline-text-4" id="text-org790c03d">
+<div id="outline-container-orgff23244" class="outline-4">
+<h4 id="orgff23244">Pregunta 9 [D] — Supuestos</h4>
+<div class="outline-text-4" id="text-orgff23244">
 <p>
 Respecto a los supuestos del modelo, la colinealidad de grado:
 </p>
@@ -1118,9 +1118,9 @@ Respecto a los supuestos del modelo, la colinealidad de grado:
 </ol>
 </div>
 </div>
-<div id="outline-container-org8557941" class="outline-4">
-<h4 id="org8557941">Pregunta 10 [M] — Qué mirar</h4>
-<div class="outline-text-4" id="text-org8557941">
+<div id="outline-container-orgc30c287" class="outline-4">
+<h4 id="orgc30c287">Pregunta 10 [M] — Qué mirar</h4>
+<div class="outline-text-4" id="text-orgc30c287">
 <p>
 Con cuatro regresores no constantes, ninguno de los cuales está muy correlado con otro por parejas, ¿puede haber colinealidad de grado?
 </p>
@@ -1133,9 +1133,9 @@ Con cuatro regresores no constantes, ninguno de los cuales está muy correlado c
 </ol>
 </div>
 </div>
-<div id="outline-container-org0fe5119" class="outline-4">
-<h4 id="org0fe5119">Pregunta 11 [M] — Qué hacer</h4>
-<div class="outline-text-4" id="text-org0fe5119">
+<div id="outline-container-org658fc3d" class="outline-4">
+<h4 id="org658fc3d">Pregunta 11 [M] — Qué hacer</h4>
+<div class="outline-text-4" id="text-org658fc3d">
 <p>
 Dos regresores son la misma magnitud en niveles y en logaritmos, sus \(t\) son bajos y el \(F\) de excluirlos juntos es alto. Se quiere un solo coeficiente que resuma el efecto de esa magnitud. La respuesta razonable es:
 </p>
@@ -1148,9 +1148,9 @@ Dos regresores son la misma magnitud en niveles y en logaritmos, sus \(t\) son b
 </ol>
 </div>
 </div>
-<div id="outline-container-org2a915eb" class="outline-4">
-<h4 id="org2a915eb">Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado</h4>
-<div class="outline-text-4" id="text-org2a915eb">
+<div id="outline-container-org953e125" class="outline-4">
+<h4 id="org953e125">Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado</h4>
+<div class="outline-text-4" id="text-org953e125">
 <p>
 De los resultados de la sesión:
 </p>
@@ -1164,101 +1164,101 @@ De los resultados de la sesión:
 </div>
 </div>
 </div>
-<div id="outline-container-orgefc75c0" class="outline-2">
-<h2 id="orgefc75c0"><span class="section-number-2">13.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
+<div id="outline-container-org91b253b" class="outline-2">
+<h2 id="org91b253b"><span class="section-number-2">13.</span> Respuestas&#xa0;&#xa0;&#xa0;<span class="tag"><span class="htmlonly">htmlonly</span></span></h2>
 <div class="outline-text-2" id="text-13">
 </div>
 <ul class="org-ul">
-<li><a id="orga5613b8"></a>Pregunta 1 [B] — Exacta frente a de grado<br />
-<div class="outline-text-5" id="text-orga5613b8">
+<li><a id="org34eae35"></a>Pregunta 1 [B] — Exacta frente a de grado<br />
+<div class="outline-text-5" id="text-org34eae35">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: la distinción con la que abre la sesión, y el enlace con la lección 10 (colinealidad exacta, ecuaciones normales con infinitas soluciones). La opción 4 es el error conceptual que la transparencia <a href="#que-es-y-que-no-es">``Qué es y qué no es''</a> desmonta.
 </p>
 </div>
 </li>
-<li><a id="org671ee4e"></a>Pregunta 2 [B] — La parte propia<br />
-<div class="outline-text-5" id="text-org671ee4e">
+<li><a id="org69eed34"></a>Pregunta 2 [B] — La parte propia<br />
+<div class="outline-text-5" id="text-org69eed34">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: la definición central de la sesión. La opción 1 es el caso particular con un solo regresor no constante; observe por qué deja de valer con varios.
 </p>
 </div>
 </li>
-<li><a id="org54571e6"></a>Pregunta 3 [B] — Qué mide el VIF<br />
-<div class="outline-text-5" id="text-org54571e6">
+<li><a id="orgf927f91"></a>Pregunta 3 [B] — Qué mide el VIF<br />
+<div class="outline-text-5" id="text-orgf927f91">
 <p>
 <i>Respuesta correcta: 3.</i>
 <i>Evalúa</i>: la lectura del VIF como factor de la varianza y de su raíz como factor del error estándar. La opción 4 es la reacción automática que la sesión desaconseja.
 </p>
 </div>
 </li>
-<li><a id="orgec06082"></a>Pregunta 4 [M] — Cómo se obtiene la longitud de la parte propia<br />
-<div class="outline-text-5" id="text-orgec06082">
+<li><a id="org7a4d082"></a>Pregunta 4 [M] — Cómo se obtiene la longitud de la parte propia<br />
+<div class="outline-text-5" id="text-org7a4d082">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: el resultado demostrado hoy, la longitud de la parte propia (el error estándar se enuncia y el apéndice lo demuestra), y el reconocimiento de que es la lección 8 aplicada a una regresión cuyo regresando es un regresor. La opción 4 confunde este resultado con la fórmula matricial de la varianza, que la lección 11 enunció sin demostrar.
 </p>
 </div>
 </li>
-<li><a id="org0713241"></a>Pregunta 5 [M] — Dos regresores<br />
-<div class="outline-text-5" id="text-org0713241">
+<li><a id="orgadc58a6"></a>Pregunta 5 [M] — Dos regresores<br />
+<div class="outline-text-5" id="text-orgadc58a6">
 <p>
 <i>Respuesta correcta: 3.</i>
 <i>Evalúa</i>: el cálculo con \(k=3\): \(\mathrm{VIF}=1/(1-0{,}99^2)=50\) y el error estándar se multiplica por \(\sqrt{50}\approx7{,}1\). La opción 2 confunde varianza con error estándar.
 </p>
 </div>
 </li>
-<li><a id="org4dd8810"></a>Pregunta 6 [M] — Efecto parcial o colinealidad<br />
-<div class="outline-text-5" id="text-org4dd8810">
+<li><a id="org4368ff4"></a>Pregunta 6 [M] — Efecto parcial o colinealidad<br />
+<div class="outline-text-5" id="text-org4368ff4">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: la distinción entre un cambio de significado del coeficiente (efecto parcial, lección 10 y su laboratorio, <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms">html</a>), donde el coeficiente de <code>bedrms</code> cambiaba de signo al añadir <code>sqft</code>) y la colinealidad, cuya firma es el error estándar multiplicado por un factor grande.
 </p>
 </div>
 </li>
-<li><a id="org2c88880"></a>Pregunta 7 [D] — Lo que oscila y lo que no<br />
-<div class="outline-text-5" id="text-org2c88880">
+<li><a id="org281c365"></a>Pregunta 7 [D] — Lo que oscila y lo que no<br />
+<div class="outline-text-5" id="text-org281c365">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: la idea que vertebra la sesión: la proyección depende del subespacio y las coordenadas de los generadores. Discrimina porque exige saber qué cantidades miran el subespacio (\(R^2\), \(\mathfrak s\), \(F\)) y cuáles las coordenadas (\(t\)).
 </p>
 </div>
 </li>
-<li><a id="orgc1f93d8"></a>Pregunta 8 [M] — El signo de la covarianza<br />
-<div class="outline-text-5" id="text-orgc1f93d8">
+<li><a id="orgd7fc516"></a>Pregunta 8 [M] — El signo de la covarianza<br />
+<div class="outline-text-5" id="text-orgd7fc516">
 <p>
 <i>Respuesta correcta: 2.</i>
-<i>Evalúa</i>: la lectura de la figura del paralelogramo aplicada al caso real, y la covarianza negativa entre coeficientes de regresores casi alineados con correlación positiva, como <code>nox</code> y <code>lnox</code> (con correlación negativa sería positiva). La opción 1 es la lectura ingenua de los signos.
+<i>Evalúa</i>: la lectura de la figura del paralelogramo aplicada al caso real, y la covarianza negativa entre los estimadores de los coeficientes de regresores casi alineados con correlación positiva, como <code>nox</code> y <code>lnox</code> (con correlación negativa sería positiva). La opción 1 es la lectura ingenua de los signos.
 </p>
 </div>
 </li>
-<li><a id="orgaadd647"></a>Pregunta 9 [D] — Supuestos<br />
-<div class="outline-text-5" id="text-orgaadd647">
+<li><a id="org7623555"></a>Pregunta 9 [D] — Supuestos<br />
+<div class="outline-text-5" id="text-org7623555">
 <p>
 <i>Respuesta correcta: 3.</i>
 <i>Evalúa</i>: que la colinealidad de grado no es una violación de supuestos y que los errores estándar grandes son información correcta. La opción 4 describe la colinealidad exacta, no la de grado.
 </p>
 </div>
 </li>
-<li><a id="org2ce3166"></a>Pregunta 10 [M] — Qué mirar<br />
-<div class="outline-text-5" id="text-org2ce3166">
+<li><a id="org4a1c995"></a>Pregunta 10 [M] — Qué mirar<br />
+<div class="outline-text-5" id="text-org4a1c995">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: el argumento de la lección 10 (un regresor cerca del subespacio de otros sin estar cerca de ninguno) y su consecuencia práctica: el VIF, no la matriz de correlaciones.
 </p>
 </div>
 </li>
-<li><a id="org66708ba"></a>Pregunta 11 [M] — Qué hacer<br />
-<div class="outline-text-5" id="text-org66708ba">
+<li><a id="org9a763b7"></a>Pregunta 11 [M] — Qué hacer<br />
+<div class="outline-text-5" id="text-org9a763b7">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: la opción razonable cuando dos regresores llevan la misma información (quedarse con una forma funcional no pierde información), y el error de eliminar los dos que la lección 13 ya señaló. La opción 3 no crea información: las copias repiten las mismas perturbaciones, y el error estándar que calcularía el programa sería falso.
 </p>
 </div>
 </li>
-<li><a id="orgf7aea34"></a>Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado<br />
-<div class="outline-text-5" id="text-orgf7aea34">
+<li><a id="orgecb1291"></a>Pregunta 12 [D] — Qué se ha demostrado hoy y qué se ha enunciado<br />
+<div class="outline-text-5" id="text-orgecb1291">
 <p>
 <i>Respuesta correcta: 2.</i>
 <i>Evalúa</i>: el alcance de la sesión, con el mismo criterio que las lecciones 11, 12 y 13: la longitud de la parte propia se demuestra en la sesión con material del curso; la fórmula del error estándar se enuncia y el apéndice la demuestra. La fórmula se comprueba además con números.
@@ -1278,7 +1278,7 @@ De los resultados de la sesión:
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-11-11 mié 11:57</p>
+<p class="date">Created: 2026-11-12 jue 19:39</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
