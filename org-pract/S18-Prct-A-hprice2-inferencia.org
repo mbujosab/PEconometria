@@ -97,17 +97,17 @@ set verbose off
 
 * Descripción de la práctica
 
-La lección 12 construyó tres herramientas (el error estándar, el intervalo de confianza y el contraste $t$) y dedicó su segunda mitad a /leer una tabla de resultados/. Hoy se trata de hacerlo con datos reales y con el programa delante.
+La lección 12 construyó tres herramientas (el error estándar, el intervalo de confianza y el contraste $t$) y dedicó su segunda mitad a /leer una tabla de resultados/. Hoy se aplican esas tres herramientas a datos reales y se lee la tabla de resultados que muestra el programa.
 
-Retomamos =hprice2= y la regresión =price ~ rooms=, el ajuste que arrastramos desde la práctica que siguió a la lección 8 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-B-hprice2-ajuste.html#price-rooms][html]])) y que sirvió de ``mundo verdadero'' en la práctica A de la sesión 16 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#mundo-artificial][html]])). Hoy, además de estimarlo, medimos su precisión.
+Retomamos =hprice2= y la regresión =price ~ rooms=, el ajuste que arrastramos desde la práctica que siguió a la lección 8 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-B-hprice2-ajuste.html#price-rooms][html]])) y que sirvió de ``mundo verdadero'' en la práctica A de la sesión 16 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#mundo-artificial][html]])). Hoy, además de estimar los coeficientes de esa regresión, medimos la precisión con que quedan estimados.
 
-Trabajamos con datos /reales/ porque el objetivo de esta práctica es la /lectura/: aprender a distinguir, en una salida de Gretl en español, qué número responde a qué pregunta. La verificación con datos simulados (¿cubre de verdad el intervalo el 95\% de las veces?) es el asunto de la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf][práctica C]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html][html]]) de esta misma sesión.
+Trabajamos con datos /reales/ porque el objetivo de esta práctica es la /lectura/: aprender a distinguir, en una salida de Gretl en español, qué número responde a qué pregunta. La verificación con datos simulados (¿cubre de verdad el intervalo el $95\%$ de las veces?) es el asunto de la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf][práctica C]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html][html]]) de esta misma sesión.
 
 /Objetivos/
 
 1. Leer las cuatro columnas de una tabla de resultados e identificar, en la salida en español, las /tres/ cantidades que Gretl rotula como ``desviación típica''.
 2. Reconstruir a mano, con los accesores de Gretl, el error estándar, el estadístico $t$, el valor $p$ y el intervalo de confianza, y comprobar que coinciden con la tabla.
-3. Verificar sobre datos reales la identidad de la lección 12, $t^2=(n-k)\,\mathrm{SEC}/\mathrm{SRC}$, y reconocer en ella el $F$ que Gretl imprime al pie de la tabla.
+3. Verificar sobre datos reales la identidad de la lección 12 para un modelo lineal simple, $t^2=(n-k)\,\mathrm{SEC}/\mathrm{SRC}$, y reconocer en ella el $F$ que Gretl imprime al pie de la tabla.
 4. Contrastar una hipótesis distinta de ``el coeficiente es cero'' y ver que el intervalo de confianza ya contenía la respuesta.
 5. Repetir la estimación con doce viviendas para ver qué cambia, y qué no, cuando hay pocas observaciones.
 
@@ -182,7 +182,7 @@ En inglés solo la primera es /standard deviation/; las otras dos son /standard 
 
 Todos los números de la tabla salen de las fórmulas de la lección 12 y de cantidades que ya sabíamos calcular. Vamos a rehacerlos uno a uno con los /accesores/ de Gretl (los objetos que empiezan por =$= y que conocemos desde la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf][práctica]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-B-hprice2-ajuste.html][html]]) que siguió a la lección 8) y a comprobar que coinciden.
 
-El bloque guarda en escalares las piezas de la lección 12 y las compara con lo que imprime Gretl: =n= y =k=; =SRC= con el accesor =$ess=; =STC=, despejada de $R^2=1-\mathrm{SRC}/\mathrm{STC}$ con =$rsq=; =SEC= por diferencia; =s=, la raíz de la cuasivarianza; =Lx=, la longitud euclídea del regresor en desviaciones (raíz de la suma de cuadrados, sesión 7); =ee=, su cociente; =b2= con =$coeff(rooms)=; el estadístico =tst=; el valor crítico con =critical= y el valor $p$ con =pvalue=. Los =printf= imprimen cada pieza junto a la de Gretl (=$sigma= y =$stderr(rooms)=), y el último construye el intervalo con sus dos extremos, $\hat\beta_2\mp t_c\,\mathrm{ee}$.
+El bloque de código de más abajo guarda en escalares las piezas de la lección 12 y las compara con lo que imprime Gretl: =n= y =k=; =SRC= con el accesor =$ess=; =STC=, despejada de $R^2=1-\mathrm{SRC}/\mathrm{STC}$ con =$rsq=; =SEC= por diferencia; =s=, la raíz de la cuasivarianza; =Lx=, la longitud euclídea del regresor en desviaciones (raíz de la suma de cuadrados, sesión 7); =ee=, su cociente; =b2= con =$coeff(rooms)=; el estadístico =tst=; el valor crítico con =critical= y el valor $p$ con =pvalue=. Los =printf= imprimen cada pieza junto a la de Gretl (=$sigma= y =$stderr(rooms)=), y el último construye el intervalo con sus dos extremos, $\hat\beta_2\mp t_c\,\mathrm{ee}$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -234,13 +234,15 @@ También puede obtener el intervalo desde los menús: en la ventana del modelo e
 :CUSTOM_ID: identidad-F
 :END:
 
-La lección 12 demostró que el estadístico $t$ no contiene nada que no estuviera ya en el triángulo de la lección 8:
+La lección 12 demostró que, en un modelo lineal simple, el estadístico $t$ no contiene nada que no estuviera ya en el triángulo de la lección 8:
 \[
 t^2=(n-k)\,\frac{\mathrm{SEC}}{\mathrm{SRC}}=(n-k)\,\frac{R^2}{1-R^2}.
 \]
 Comprobémoslo con los tres números que acabamos de calcular. Que el $F$ de Gretl sea exactamente $t^2$, y no solo un número parecido, es una identidad entre estadísticos: [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=14][apéndice, secciones 5.4]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4][html]]) y [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=27][10]].
 
-Esta actividad usa el estadístico $F$ y el comando =restrict=, que la lección 13 presentará con detalle; aquí basta con leerlos como una segunda forma del mismo contraste. Tres =printf= con los escalares del bloque anterior: la raíz de $(n-k)\,\mathrm{SEC}/\mathrm{SRC}$ frente a $t$; la versión con $R^2$ frente a $t^2$; y el $F$ que Gretl guarda en =$Fstat=.
+Esta actividad usa dos cosas que la lección 13 presentará con detalle: el estadístico $F$ que Gretl imprime al pie de la tabla y el comando =restrict=, que aparece al final de la actividad. Aquí basta con leer los dos como una segunda forma de contrastar $H_0\!:\beta_2=0$, la misma hipótesis que contrasta el $t$ de la tabla.
+
+El bloque de código de más abajo comprueba la identidad con tres =printf= sobre los escalares guardados en la Actividad 2. El primero compara la raíz de $(n-k)\,\mathrm{SEC}/\mathrm{SRC}$ con $t$, y el segundo compara $(n-k)\,R^2/(1-R^2)$ con $t^2$: son las dos igualdades de la fórmula anterior. El tercero muestra el $F$ que Gretl guarda en =$Fstat=, para compararlo con $t^2$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -265,7 +267,7 @@ printf "%s", readfile("identidad.txt")   # en pantalla
 
 *** Lo que debe observar
 
-Las dos vías dan el mismo $t$, y $t^2$ coincide con el =F(1, 504)= que Gretl imprime al pie de toda tabla de regresión. Ese $F$ es el cociente entre la parte explicada y la parte residual, cada una dividida por su número de dimensiones, y con un solo regresor no constante es $t^2$. La lección 13 lo convertirá en un contraste por derecho propio, capaz de juzgar varios regresores a la vez.
+Las dos vías dan el mismo $t$, y $t^2$ coincide con el =F(1, 504)= que Gretl imprime al pie de toda tabla de regresión. Ese $F$ es el cociente entre la parte explicada y la parte residual, cada una dividida por su número de dimensiones, y con un solo regresor no constante es $t^2$. La lección 13 usará el estadístico $F$ para contrastar una hipótesis conjunta: que varios coeficientes valgan cero a la vez.
 
 Puede verlo también desde los menús: en la ventana del modelo, //~Contrastes -> Restricciones lineales~//, escriba =b[2] = 0= y acepte. Gretl responde con un estadístico $F$ y su valor $p$; compárelos con $t^2$ y con el valor $p$ de la tabla.
 
@@ -411,7 +413,7 @@ Con los tres regresores, el $F(3,8)$ del pie de la tabla vale $9{,}55$ frente a 
 
 1. En la salida de la Actividad 1 aparecen tres cantidades rotuladas como ``desviación típica''. ¿Cuál de ellas cambiaría si dispusiéramos de más viviendas con la misma relación entre precio y habitaciones, y cuáles no? Razónelo con las fórmulas.
 2. En la Actividad 2 el error estándar resultó ser $\mathfrak s/\|\boldsymbol x-\boldsymbol{\mathop{\overline x}}\|_e$. Si en lugar de =rooms= usáramos =rooms= medido en decenas de habitaciones, ¿qué le pasaría a cada uno de los dos factores? ¿Y al estadístico $t$?
-3. La Actividad 3 mostró que $t^2$ coincide con el $F$ del pie de la tabla. ¿Qué hay en ese $F$ que no estuviera ya en el $R^2$?
+3. La Actividad 3 mostró que, en un modelo lineal simple, $t^2$ coincide con el $F$ del pie de la tabla. ¿Qué hay en ese $F$ que no estuviera ya en el $R^2$?
 4. En la Actividad 4 el mismo dato lleva a ``rechazar'' al $5\%$ y a ``no rechazar'' al $1\%$. ¿Es eso una contradicción? ¿Qué diría un lector que solo conociera el intervalo al $95\%$, y qué le faltaría por saber?
 5. En la Actividad 5 el coeficiente sigue siendo significativo con doce viviendas. Un compañero concluye que ``entonces con doce viviendas basta''. ¿Qué le respondería, con el intervalo en la mano?
 

@@ -64,4 +64,11 @@ versión nueva.
 
 ## Aplicado
 
-(Para la sesión del banco: anota aquí qué has hecho con esta respuesta.)
+16-11-2026 (sesión del banco). Comparada la hoja publicada con `chuletario-pantalla.tex`:
+las diferencias son las cinco anunciadas. «Parte propia» aparece en diez preguntas; solo
+una de papel lo lleva en opciones (`L-13-DosTPequenosYUnFGrande`, pareja «el error estándar
+crece / disminuye»): pide leer la fórmula, no recordarla; el instructor la leyó el 16-11 y
+la deja como está. En las demás de papel el término está solo en las explicaciones, y las
+de nivel M no van al papel. Ningún cambio en el banco. La copia del banco
+(`bocetos-2026-11-12/chuletario-pantalla.*`) queda como histórica: la fuente es
+`PEconometria/hoja/Hoja-de-expresiones.tex`.
