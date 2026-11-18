@@ -1,0 +1,180 @@
+#+title: Auditoría de comprensión de las prácticas S18-A, S18-B y S18-C (2026-11-18)
+
+Estado leído: los tres =.org= de =org-pract/= tal como estaban el 18-11 por la tarde (A 13:23, B 15:49, C 17:23; sin commitear), sus salidas =.txt= y =.png=, y, para comprobar lo que el alumno ya sabe, las lecciones 4, 5, 11, 12, 13 y el apéndice, y las prácticas S04–S16. *Nada aplicado.* Se ha leído como un alumno que ha seguido el curso hasta la lección 12 y no ha visto la 13. La sección «Banco de preguntas de reserva» se ha ignorado.
+
+Lo comprobado de forma sistemática, sin hallazgo:
+- todas las cifras citadas en los «Lo que debe observar» y en las respuestas, una a una contra los =.txt= (salvo la de A-4, más abajo);
+- todos los hiperenlaces a otras prácticas y al apéndice: la página =#page= del PDF local y el =CUSTOM_ID= del HTML existen y llevan a la actividad o sección nombrada;
+- los rótulos de menú de Gretl citados («Intervalos de confianza para los coeficientes», «Restricciones lineales»), en el catálogo español de Gretl instalado;
+- las cifras de A, Actividad 5, sobre $2\,000$ ejecuciones sin semilla: rehechas con =gretlcli= (otra semilla) dan cuantiles del coeficiente $1\,805$ y $14\,858$, razón de anchuras entre $3{,}7$ y $14{,}8$ con mínimo $1{,}7$, y $25\%$ de no rechazos; el texto es correcto;
+- la probabilidad binomial de C (siete o más fallos entre cien: $0{,}234$) y la desviación típica de la frecuencia de cobertura ($0{,}0034$);
+- los comandos que cada práctica da por conocidos, buscados en S04–S16 (dos remisiones de sesión erróneas, A-9 y C-7).
+
+* Veredicto
+
+Las tres prácticas se pueden seguir solas, en orden A, B, C, y ninguna tiene un error que impida avanzar o enseñe algo falso de forma grave: el código y las salidas cuadran, las cifras coinciden y las remisiones llevan a donde dicen. *A* se entiende; su obstáculo principal está en la Actividad 3, que introduce el $F$ y =restrict= antes de la lección 13 y deja sin comentar la mitad de la salida de =restrict= (una tabla con =NA= y una cuarta ``desviación típica''); además, una frase de la Actividad 5 («no ha cambiado la relación entre las variables») choca con lo que el alumno ve, un coeficiente que pasa de $9\,120$ a $10\,928$, y la respuesta 4 afirma algo que el propio intervalo desmiente. *B* es la más limpia: no hay obstáculo; solo remisiones y matices. *C* se entiende; su obstáculo principal es la figura de los cien intervalos, cuya instrucción de lectura («una de las dos líneas cruza la horizontal») lleva a contar mal los fallos, y en segundo lugar el Apéndice, que dice repetir la Actividad 1 cuando repite la 3 y depende de sus datos.
+
+Recuento: 0 graves, 4 medios (A-1, A-2, A-3, C-1), 24 leves (11 en A, 4 en B, 9 en C), y 4 incoherencias entre prácticas, leves, que en parte remiten a hallazgos anteriores.
+
+* Práctica A — =org-pract/S18-Prct-A-hprice2-inferencia.org=
+
+** A-1. «No ha cambiado la relación entre las variables» frente a un coeficiente que sí ha cambiado — MEDIA
+- Línea 383: «Dos cosas han cambiado y una no. Han cambiado el error estándar y el valor crítico. [...] No ha cambiado la relación entre las variables, que es la misma se muestreen las casas que se muestreen.»
+- Problema (comprobado contra =doceViviendas.txt=): el alumno tiene delante $\hat\beta_2=10\,927{,}6$ con doce viviendas y $9\,119{,}55$ con $506$. Leerá «la relación» como el coeficiente estimado y verá que sí ha cambiado; el recuento «dos cosas y una no» omite precisamente el número más visible. Lo que no cambia es el parámetro $\beta_2$, que no se observa. La frase siguiente («Por eso la lección 12 insistía en mirar el coeficiente y el intervalo antes que el veredicto») no se sigue de esta.
+- Corrección: «Han cambiado tres cosas: el coeficiente estimado ($10\,928$ frente a $9\,120$), el error estándar y el valor crítico. No ha cambiado el parámetro $\beta_2$, que es el mismo se muestreen las casas que se muestreen; el párrafo siguiente muestra cuánto varía su estimación.»
+
+** A-2. La respuesta 4 dice que con el intervalo al 95 % no se sabe si 10 000 está «justo fuera» — MEDIA
+- Línea 419: «Quien solo tuviera el intervalo al $95\%$ vería que $10\,000$ queda fuera [...]; lo que no podría saber es por cuánto: si $10\,000$ está justo fuera o muy lejos.»
+- Problema (comprobado): el intervalo es $[8\,295{,}68;\,9\,943{,}42]$; $10\,000$ queda a $57$ del extremo, con una semiamplitud de $824$. Basta mirarlo para ver que está justo fuera. El alumno que compare la respuesta con la salida aprende que la respuesta no es fiable, o, peor, que un intervalo no informa de la distancia. Lo que el intervalo al 95 % no da directamente es si se rechaza al 1 %.
+- Corrección: «lo que no podría saber sin hacer cuentas es si también se rechazaría al $1\%$: para eso necesitaría el valor $p$ o el intervalo al $99\%$, que aquí sí contiene a $10\,000$».
+
+** A-3. La salida de =restrict= se muestra entera y solo se comenta la primera línea — MEDIA
+- Línea 288 (=restriccionCero.txt=) y comentario en la 295: «El bloque =restrict= da el mismo número por otro camino: $F(1,504)=472{,}952$ [...]».
+- Problema (comprobado contra la salida): debajo del $F$ hay una tabla «Estimaciones restringidas» con =rooms= igual a $0$ y =NA= en tres columnas, una constante de $22\,511{,}5$ con su «Desv. típica» y una «Desviación típica de la regresión = 9208,86». Nadie la comenta. El alumno acaba de leer (línea 165) que la palabra ``típica'' aparece «tres veces» y ve dos más; los =NA= parecen un error. Además, la restricción se escribe =b[2] = 0= y la salida la repite como =b[rooms] = 0=, sin aviso.
+- Corrección: una frase tras la 295: «Debajo, Gretl estima el modelo con la restricción impuesta, es decir, sin =rooms= (de ahí los =NA=): la constante es la media de =price= y su D.T. de la regresión coincide con la D.T. de la vble. dep. de la tabla de la Actividad 1. La lección 13 explicará esa tabla. Gretl escribe =b[rooms]= donde usted tecleó =b[2]=.»
+
+** A-4. «Grados de libertad del ajuste» y «parte explicada / parte residual», sin antecedente — LEVE
+- Línea 293: «Ese $F$ es el cociente entre la parte explicada y la parte residual, cada una dividida por sus grados de libertad: los del ajuste, $k-1=1$ (uno por regresor no constante), y los del residuo, $n-k=504$ (lección 11).»
+- Problema (comprobado): la lección 11 (línea 532) define los grados de libertad del residuo y los del vector de datos en desviaciones; «grados de libertad del ajuste» aparece por primera vez en la lección 13 (líneas 141 y 151). La remisión «(lección 11)», puesta al final, parece cubrir los dos términos. «La parte explicada» y «la parte residual» no dicen de qué son parte (son $\mathrm{SEC}$ y $\mathrm{SRC}$).
+- Corrección: «Ese $F$ es el cociente entre $\mathrm{SEC}$ y $\mathrm{SRC}$, cada una dividida por sus grados de libertad: $k-1=1$ la primera (uno por regresor no constante; la lección 13 los llamará grados de libertad del ajuste) y $n-k=504$ la segunda (los del residuo, lección 11).»
+
+** A-5. La pregunta 1 pregunta qué «cambiaría», y la respuesta contesta qué tendería a cero — LEVE
+- Línea 389: «¿Cuál de ellas cambiaría si dispusiéramos de más viviendas [...], y cuáles no?»; respuesta en 413: las dos primeras «se estabilizarían en torno a un valor, sin tender a cero».
+- Problema (apreciación): con más viviendas cambian numéricamente las tres; un alumno literal responde «las tres» y la respuesta lo contradice.
+- Corrección: «¿Cuál de ellas tendería a cero si dispusiéramos de muchas más viviendas [...], y cuáles se estabilizarían en torno a un valor?»
+
+** A-6. «El coeficiente» designa a veces la estimación y a veces el parámetro — LEVE
+- Línea 163: «/Valor $p$/: la probabilidad de un $\vert t\vert$ al menos así de grande si el coeficiente fuese cero.» Línea 385: «no se rechaza que el coeficiente de =rooms= sea cero». Objetivo 4 (línea 111): «distinta de ``el coeficiente es cero''».
+- Problema (apreciación, con la regla de la Guía §7 sobre $\hat\beta$): dos líneas antes, «Coeficiente» es la columna de la tabla, $\hat\beta_2=9\,119{,}55$, que no es cero. El alumno puede leer que la hipótesis es sobre ese número.
+- Corrección: «si $\beta_2$ fuese cero» en la 163; «que $\beta_2$ sea cero» en la 385; «distinta de $\beta_2=0$» en el objetivo 4.
+
+** A-7. $21{,}7475^2$ no da $472{,}952$ — LEVE
+- Línea 295: «$F(1,504)=472{,}952$, que es $t^2=21{,}7475^2$».
+- Problema (comprobado): $21{,}7475^2=472{,}954$; el alumno que lo compruebe con la calculadora obtiene otra cifra en la tercera decimal. La igualdad exacta es $\sqrt{472{,}9521}=21{,}74746$.
+- Corrección: «que es $t^2$ (con $t=21{,}7475$ redondeado, $21{,}7475^2=472{,}95$)», o comparar solo dos decimales.
+
+** A-8. «Cada línea reproduce un número de la tabla» — LEVE
+- Línea 226.
+- Problema (comprobado): de las ocho líneas de =reconstruccion.txt=, tres (=||x - xbar||=, el valor crítico y el intervalo) no están en la tabla de la Actividad 1. El alumno las busca y no las encuentra.
+- Corrección: «Las líneas de $\mathfrak s$, del error estándar, de $t$ y del valor $p$ reproducen números de la tabla; las demás son piezas intermedias o el intervalo, que la tabla no da.»
+
+** A-9. =smpl full= atribuido a la sesión 16 — LEVE
+- Línea 114: «=set seed= con =smpl n --random= y =smpl full= [...] sesión 16».
+- Problema (comprobado): =smpl full= solo aparece en S14-A (línea 110, en la lista de comandos, y en el código); ninguna práctica de la sesión 16 lo usa. La práctica C lo atribuye, bien, a la sesión 14 (véase X-1).
+- Corrección: «=set seed= con =smpl n --random= (sesión 16) y =smpl full= (volver a la muestra completa, sesión 14)».
+
+** A-10. Dos remisiones distintas para la longitud del regresor en desviaciones — LEVE
+- Línea 183: «=Lx=, la longitud euclídea del regresor en desviaciones (raíz de la suma de cuadrados, sesión 7)»; línea 226: «$\|\boldsymbol x-\boldsymbol{\mathop{\overline x}}\|_e$, que aquí hemos calculado tal como se definió en la lección 4».
+- Problema (comprobado): la lección 4 define el vector en desviaciones y la desviación típica como su norma /estadística/ ($\|\cdot\|_s$, véase L5:476); la norma euclídea es de la lección 2. «Tal como se definió en la lección 4» invita a buscar ahí la versión sin $1/n$, que no está.
+- Corrección en 226: «es la $\mathfrak s$ de la lección 11 dividida por la longitud euclídea del regresor en desviaciones (el vector en desviaciones de la lección 4, medido con la norma euclídea de la lección 2)».
+
+** A-11. «Los tres números que acabamos de calcular», y el $F$ nombrado antes de presentarlo — LEVE
+- Línea 239: «Comprobémoslo con los tres números que acabamos de calcular. Que el $F$ de Gretl sea exactamente $t^2$ [...]».
+- Problema (apreciación): no se sabe cuáles son los tres números (¿$n-k$, $\mathrm{SEC}$, $\mathrm{SRC}$?); y «el $F$ de Gretl» aparece antes del párrafo de la línea 241, que es el que lo presenta.
+- Corrección: «Comprobémoslo con $n-k$, $\mathrm{SEC}$ y $\mathrm{SRC}$, que la Actividad 2 guardó en escalares», y mover la segunda frase de la 239 (con su remisión al apéndice) al final del párrafo de la 241.
+
+** A-12. La longitud del regresor con doce viviendas aparece sin decir de dónde sale — LEVE
+- Línea 383: «la longitud del regresor en desviaciones es $8{,}4$ veces menor ($7\,633/4\,057=1{,}88$ frente a $15{,}79$)».
+- Problema (comprobado: las cifras son correctas): la salida de doce viviendas no imprime esa longitud; el alumno ve un cociente de $\mathfrak s$ entre el error estándar y tiene que adivinar que es la fórmula de la Actividad 2 despejada.
+- Corrección: «($\mathfrak s/\mathrm{ee}=7\,633/4\,057=1{,}88$, despejada de $\mathrm{ee}=\mathfrak s/\|\boldsymbol x-\boldsymbol{\mathop{\overline x}}\|_e$, frente a $15{,}79$)».
+
+** A-13. «Pregunta 10 de la lección 12»: las preguntas de repaso solo están en el HTML — LEVE
+- Línea 415 (y B, línea 313).
+- Problema (comprobado): en =S17-Lecc12.org= las «Preguntas de repaso» llevan la etiqueta =:htmlonly:=; quien lea la lección en PDF no encuentra ninguna pregunta 10.
+- Corrección: enlazar la pregunta en el HTML, o remitir a la sección «Cómo se lee una tabla de resultados», que trata el cambio de unidades en el texto.
+
+** A-14. Dos expresiones imprecisas en las respuestas 2 y 3 — LEVE
+- Línea 415: «solo cambia el nombre de la pendiente, que pasa a ser $10\hat\beta_2$»: no cambia el nombre, cambia el valor. Corrección: «solo cambia el valor de la pendiente, que pasa a ser $10\hat\beta_2$».
+- Línea 417: «con quinientas observaciones, un ángulo modesto da un $F$ grande»: no dice entre qué vectores es el ángulo, y con $R^2=0{,}48$ el ángulo es de unos $46^\circ$, que no es «modesto» sino grande (lo modesto es el $R^2$). Corrección: «con quinientas observaciones, un $R^2$ modesto (un ángulo de unos $46^\circ$ entre el regresando y el regresor en desviaciones) da un $F$ grande».
+
+* Práctica B — =org-pract/S18-Prct-B-regresor-disperso.org=
+
+Sin hallazgos graves ni medios. Todas las cifras coinciden con las salidas; los comandos dados por conocidos están en las sesiones citadas (=nulldata= en S07, =setobs= en S04-B, la barra =\= en S07-B, =max= en S11-A).
+
+** B-1. «En una de cada veinte muestras» el intervalo falla — LEVE
+- Línea 348: «en una de cada veinte muestras del mismo mundo el $0{,}5$ quedaría fuera del intervalo».
+- Problema (apreciación): leído al pie de la letra es determinista, y la práctica C enseña justo lo contrario (fallan $7$ de los cien primeros, y eso es corriente). Además, «muestras del mismo mundo» llama muestra a cada repetición, cuando C las llama réplicas.
+- Corrección: «con probabilidad $0{,}05$ en cada repetición del experimento, de modo que, al repetirlo muchas veces, el $0{,}5$ quedaría fuera en alrededor de una de cada veinte».
+
+** B-2. Perturbaciones «sorteadas» que eran «dadas» — LEVE
+- Línea 226: «la proyección de las perturbaciones sorteadas sobre esa dirección»; línea 104: «doce perturbaciones dadas».
+- Problema (comprobado): en esta práctica nada se sortea; las perturbaciones salen de restar $10+0{,}5x_i$ a los doce valores tecleados. El alumno que busque el sorteo en el código no lo encuentra.
+- Corrección: «la proyección de las perturbaciones sobre esa dirección».
+
+** B-3. La línea «R2 en ambos casos» imprime un solo $R^2$ — LEVE
+- Líneas 285 y 296; salida =unidades.txt=: «R2 en ambos casos : 0,9866».
+- Problema (comprobado): el =printf= imprime el $R^2$ del segundo ajuste; el del primero no está en esta salida. El texto de la 313 dice que no cambia, y el alumno solo puede comprobarlo volviendo a la tabla de la Actividad 2 ($0{,}986603$).
+- Corrección: guardar el $R^2$ tras el primer ajuste e imprimir los dos, o cambiar el rótulo a «R2 del segundo ajuste» y añadir en la 313 «(el del primero es el de la tabla de la Actividad 2, $0{,}9866$)».
+
+** B-4. La respuesta 3 atribuye la desviación típica a la lección 5 — LEVE
+- Línea 346: «el objeto que la lección 4 definió y con el que la lección 5 construyó la desviación típica».
+- Problema (comprobado): la lección 4 se titula «Proyección ortogonal, media y desviación típica» y define allí la desviación típica como norma del vector en desviaciones (L4:414); la lección 5 la cita como «(lección 4)» (L5:476).
+- Corrección: «el vector en desviaciones que la lección 4 definió, y cuya norma estadística es la desviación típica (allí con el producto escalar estadístico; aquí con el euclídeo [...])».
+
+* Práctica C — =org-pract/S18-Prct-C-cobertura.org=
+
+** C-1. La instrucción para leer la figura de los cien intervalos lleva a contar mal — MEDIA
+- Línea 224 (pie de figura): «Los intervalos que no lo contienen son aquellos en los que una de las dos líneas cruza la horizontal.» Línea 194: «Cada vez que la línea del extremo inferior sube por encima de $0{,}5$, o la del extremo superior baja por debajo, ese intervalo no contiene a $\beta_2$.»
+- Problema (comprobado contra =replicasIC.gdt= y =baile.png=): con =--with-lines= cada intervalo no es un segmento vertical sino un punto de cada una de las dos líneas en zigzag; un intervalo que falla produce dos cruces (la línea baja y vuelve a subir), así que quien cuente cruces cuenta el doble. Además, de los siete fallos, cinco se ven claros (réplicas 7, 12, 27, 63 y 85), pero dos (15, extremo inferior $0{,}50002$; 47, extremo superior $0{,}4994$) no se distinguen a esta escala de seis intervalos que rozan el $0{,}5$ sin fallar (10, 29, 61, 92, 100). El alumno no puede comprobar en la figura el «fallan $7$» de la línea 235, y la pregunta 2 le pide escoger uno.
+- Corrección: en el pie, «Cada valor del eje horizontal es una réplica; el intervalo de esa réplica no contiene a $0{,}5$ si en ese punto la línea naranja (extremo superior) queda por debajo de la horizontal o la verde (extremo inferior) por encima. Cinco de los siete fallos se ven a simple vista; los otros dos quedan a menos de una milésima.» Opcionalmente, dibujar con puntos (=--with-points=) o con =--with-impulses=.
+
+** C-2. El Apéndice dice repetir la Actividad 1, repite la 3 y depende de sus datos — LEVE
+- Línea 392: «Repetimos la Actividad 1 con perturbaciones $\chi^2$ [...]»; línea 394: «dos bloques con la misma estructura que los dos últimos bloques de la Actividad 3».
+- Problema (comprobado contra el código): los bloques usan =x= de 120 observaciones, =R=, =sigma= y =beta*_verdadero= creados en la Actividad 3 (=DeteccionDatos=). Quien haga el Apéndice en otra sesión de Gretl, o tras la Actividad 2 sin la 3, obtiene errores (la serie =x= no existe en el fichero de réplicas). Las dos frases se contradicen sobre qué se repite.
+- Corrección: en la 392, «Repetimos la Actividad 3 [...]»; en la 394, añadir «Usan el conjunto de 120 observaciones y los escalares que creó el primer bloque de la Actividad 3: ejecute ese bloque antes si ha cerrado Gretl».
+
+** C-3. Remisión a S16-C con «un histograma» sin decir de qué — LEVE
+- Línea 392: «la misma con la que la práctica C de la sesión 16 obtuvo ([...] actividad 2), con $n=12$, un histograma con el que el contraste rechazaba la hipótesis de normalidad.»
+- Problema (comprobado en S16-C:361): era el histograma de las $4\,000$ estimaciones $\hat\beta_2$, y el contraste era el de normalidad de =freq --normal=, que rechazaba por las colas, no por la asimetría. La frase, con el inciso del enlace en medio, no se entiende a la primera.
+- Corrección: «la misma que usó la práctica C de la sesión 16 ([...] actividad 2): allí, con $n=12$, el histograma de las estimaciones $\hat\beta_2$ salía casi simétrico, pero con colas más pesadas que las de la normal, y el contraste de normalidad la rechazaba.»
+
+** C-4. «Potencia» como nombre de una frecuencia — LEVE
+- Línea 384: «(Los manuales llaman /potencia/ del contraste a esa frecuencia.)»
+- Problema (apreciación, contenido): la potencia es una probabilidad, la de rechazar $H_0$ cuando es falsa; la frecuencia de $4\,000$ réplicas la aproxima. La propia práctica insiste (línea 100) en no confundir una probabilidad con la frecuencia que la reproduce.
+- Corrección: «(Los manuales llaman /potencia/ del contraste a la probabilidad de rechazar una hipótesis falsa; esa frecuencia la aproxima.)»
+
+** C-5. «Ocurrió lo mismo con datos reales» supone que $\beta_2\neq0$ en =hprice2= — LEVE
+- Línea 386.
+- Problema (apreciación): en la Actividad 3 se sabe que $H_0$ es falsa porque se ha elegido $\beta_2$; con datos reales no se sabe. El paralelismo es razonable (la práctica A ya dice que «nadie discutía» que las habitaciones suben el precio), pero el texto lo presenta como el mismo hecho.
+- Corrección: «Algo parecido ocurrió con datos reales: [...] no rechazaba $H_0\!:\beta_2=0$, una hipótesis que con las $506$ viviendas se rechaza con $t=21{,}75$ y que nadie cree cierta.»
+
+** C-6. La cobertura con $n=12$ de la Actividad 3 coincide con la de la Actividad 1 sin explicación — LEVE
+- Línea 382: «($0{,}952$ y $0{,}946$)».
+- Problema (comprobado): con la misma semilla =20261113= y el mismo regresor, el bloque de $n=12$ repite exactamente las réplicas de la Actividad 1 (cobertura $0{,}9520$ en las dos). Un alumno atento lo nota y no sabe si es casualidad.
+- Corrección: añadir «(el bloque de $n=12$, con la misma semilla, repite las réplicas de la Actividad 1: por eso la cobertura vuelve a ser $0{,}952$)».
+
+** C-7. =smpl 1 12= atribuido a la sesión 14 — LEVE
+- Línea 113: «=smpl 1 12=, que restringe la muestra a las observaciones 1 a 12, y =smpl full= [...], los de la sesión 14».
+- Problema (comprobado): S14-A usa =smpl obs != 1 --restrict= y =smpl full=; la forma por rango =smpl 1 12= no aparece en ninguna práctica anterior. El texto la explica, así que no bloquea.
+- Corrección: «=smpl 1 12= (nuevo: restringe la muestra a las observaciones 1 a 12) y =smpl full=, que la devuelve entera (sesión 14)».
+
+** C-8. =--preserve= «conserva =tc= y =zc=», que el bloque siguiente redefine — LEVE
+- Línea 297: «(=--preserve= conserva los escalares que quedaban, =tc= y =zc=)».
+- Problema (comprobado contra el código): =tc= se recalcula en los dos bloques siguientes y =zc= no se usa más. El alumno busca para qué sirven los escalares conservados y no lo encuentra.
+- Corrección: suprimir el paréntesis, o decir «(=--preserve= conserva los escalares, aunque aquí ninguno de los que quedaban se vuelve a usar)».
+
+** C-9. =freq= imprime en Gretl una tabla que el documento no muestra — LEVE
+- Línea 260 (=freq t_H0_cierta=) y 248.
+- Problema (comprobado: el guion del documento solo guarda el gráfico): en Gretl el alumno ve además una tabla de frecuencias de unas veinte filas que el documento no enseña ni comenta.
+- Corrección: en la 248, «=freq t_H0_cierta= imprime la tabla de frecuencias, que aquí no necesitamos, y dibuja el histograma».
+
+** C-10. «El 5 % que imprime el programa» — LEVE
+- Línea 466; también respuesta 5 (línea 504): «el $0{,}05$ del programa».
+- Problema (apreciación): el $5\%$ lo elige quien contrasta; el programa imprime valores $p$ calculados con la $t_{n-k}$. El alumno puede buscar un $5\%$ en la salida.
+- Corrección: «El nivel del $5\%$ que se ha fijado ya no es la frecuencia real de rechazo» y «el $0{,}05$ elegido».
+
+* Incoherencias entre prácticas y con la lección 12
+
+** X-1. Origen de =smpl full=: sesión 16 en A, sesión 14 en C — LEVE
+- A:114 frente a C:113. Comprobado: es la sesión 14 (S14-A). Corregir A (véase A-9).
+
+** X-2. La frecuencia de fallos: «una de cada veinte» (B) frente a «siete de cien es corriente» (C) — LEVE
+- B:348 frente a C:235. La respuesta de B, leída al pie de la letra, contradice la lección de la Actividad 1 de C. Corregir B (véase B-1).
+
+** X-3. Tres remisiones distintas para la longitud del regresor en desviaciones — LEVE
+- A:183 («sesión 7»), A:226 («tal como se definió en la lección 4»), B:346 («la lección 4 definió y la lección 5 construyó la desviación típica»). Las tres son defendibles por separado, pero el alumno que las siga llega a tres sitios distintos y en ninguno encuentra la norma euclídea del vector en desviaciones con ese nombre. Unificar como en A-10.
+
+** X-4. «Coeficiente» por parámetro — LEVE
+- A:163, A:385 y A:111 usan «el coeficiente» para $\beta_2$; B y C dicen $\beta_2$ o «la pendiente». Véase A-6.
+
+Lo demás es coherente: la figura de dos paneles, sus cifras ($[0{,}08;\,0{,}90]$ y $[0{,}46;\,0{,}54]$, $5{,}98$ y $59{,}79$, $0{,}184$ y $0{,}018$) y la lectura de las tres ``desviaciones típicas'' coinciden con la lección 12 (L12:221, 509–515, 584); la equivalencia intervalo–contraste (A:340) es la de L12:507 generalizada a $1-\alpha$; «longitud del residuo por unidad de longitud del regresor en desviaciones» (A:196 y A:226) es la frase de L12:197; la lectura de la cobertura como fracción de columnas de la matriz de copias (C:237) es la de L12:507 y del apéndice, sección 9; la razón «once veces» entre las anchuras de los intervalos aparece igual en A:381 y en la respuesta 4 de C.

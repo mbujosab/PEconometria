@@ -97,29 +97,31 @@ set verbose off
 
 * Descripción de la práctica
 
-La lección 12 ilustró el intervalo de confianza con una figura de dos paneles: dos ajustes con /la misma/ muestra de doce perturbaciones, los mismos parámetros verdaderos y el mismo residuo, en los que lo único distinto era cuánto se separaban los valores del regresor. En uno el intervalo era $[0{,}08;\,0{,}90]$; en el otro, $[0{,}46;\,0{,}54]$.
+La lección 12 ilustró el intervalo de confianza con una figura de dos paneles: dos ajustes con /las mismas/ doce perturbaciones, los mismos parámetros y el mismo residuo, en los que lo único distinto era cuánto se separaban los valores del regresor. En uno el intervalo era $[0{,}08;\,0{,}90]$; en el otro, $[0{,}46;\,0{,}54]$.
 
-Esta práctica rehace esa figura en Gretl, con sus 24 puntos exactos. Es el mismo ejemplo de la lección 12, reproducido para que pueda seguir cada número y ver de dónde sale.
+Esta práctica rehace en Gretl los dos ajustes de esa figura, con sus 24 puntos. Es el mismo ejemplo de la lección 12, reproducido para que pueda seguir cada número y ver de dónde sale.
 
-Los datos son /simulados con parámetros conocidos/: $\beta_1=10$, $\beta_2=0{,}5$, y doce perturbaciones normales de desviación típica en torno a $1{,}1$. Conocer la verdad es lo que permite, en la Actividad 3, contrastar una hipótesis que /sabemos/ cierta, cosa imposible con datos reales, y preparar así la práctica C.
+Los datos están /construidos con parámetros conocidos/: $\beta_1=10$, $\beta_2=0{,}5$, y doce perturbaciones dadas, las mismas en los dos ajustes. Conocer los parámetros permite, en la Actividad 3, contrastar una hipótesis que /sabemos/ cierta, cosa imposible con datos reales, y preparar así la práctica C.
 
 /Objetivos/
 
 1. Reproducir los dos ajustes de la figura de la lección 12 y sus dos intervalos de confianza.
-2. Verificar que $\mathrm{ee}(\hat\beta_2)=\mathfrak s/\|\boldsymbol x-\boldsymbol{\mathop{\overline x}}\|_e$ y que, con el mismo residuo, toda la diferencia de precisión está en la longitud del regresor.
+2. Verificar que $\mathrm{ee}(\hat\beta_2)=\mathfrak s/\|\boldsymbol x-\boldsymbol{\mathop{\overline x}}\|_e$ y que, con el mismo residuo, toda la diferencia de precisión está en la longitud del regresor en desviaciones.
 3. Contrastar $H_0\!:\beta_2=0{,}5$, que es cierta, en los dos ajustes.
 4. Ver qué columnas de la tabla cambian, y cuáles no, al cambiar las unidades del regresor.
 
-/Comandos nuevos de esta práctica/. Los accesores =$coeff=, =$stderr=, =$sigma=, =$rsq= y =$df=, y las funciones =critical= y =pvalue=, son los de la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-A-hprice2-inferencia.pdf][práctica A]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-A-hprice2-inferencia.html][html]]) de hoy; =nulldata=, =setobs= y =printf=, los de las sesiones 4 y 7; =max(x)=, el mayor valor de una serie, el de la práctica A de la sesión 11 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#residuos-ortogonalidad][html]])). Lo nuevo:
+/Comandos nuevos de esta práctica/. Seguimos usando los accesores =$coeff= y =$rsq= (sesión 11) y =$df= (sesión 16); =$stderr=, =$sigma=, =critical= y =pvalue= son los de la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-A-hprice2-inferencia.pdf][práctica A]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-A-hprice2-inferencia.html][html]]) de hoy; =nulldata=, =setobs= y =printf=, los de las sesiones 4 y 7; la barra =\= al final de una línea, que indica que la instrucción continúa en la línea siguiente, la de la práctica B de la sesión 7; =max(x)=, el mayor valor de una serie, el de la práctica A de la sesión 11 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#residuos-ortogonalidad][html]])). Lo nuevo:
 - =index= :: serie interna con el número de orden de cada observación, $1,2,\ldots,n$. Sirve para construir un regresor con valores equiespaciados.
 - ={a, b, c}'= :: una lista de números entre llaves es una matriz fila; el apóstrofo la traspone a columna, y una columna con $n$ valores puede asignarse a una serie. Así se teclean a mano los doce valores del regresando.
-- =\= al final de una línea :: la instrucción continúa en la línea siguiente (práctica B de la sesión 7).
 
 * Actividad 1 - Regresor concentrado
+:PROPERTIES:
+:CUSTOM_ID: concentrado
+:END:
 
 Los doce valores del regresor van de $47{,}25$ a $52{,}75$ en pasos de $0{,}5$; los del regresando son los del panel izquierdo de la figura.
 
-Dos bloques. El primero crea un conjunto de doce observaciones de sección cruzada y las dos series: =x_c=, con los doce valores equiespaciados (=47.25 + 0.5*(index - 1)= vale $47{,}25$ en la primera observación y sube $0{,}5$ en cada una), e =y_c=, con los doce valores del regresando tecleados entre llaves. El segundo estima la regresión, guarda el valor crítico al $5\%$ con los grados de libertad del modelo (=$df=) y reconstruye el error estándar como $\mathfrak s$ (=$sigma=) dividido por la longitud del regresor en desviaciones, comparándolo con =$stderr(x_c)=; después imprime el estadístico $t$ y el intervalo.
+El código tiene dos bloques. El primero crea un conjunto de doce observaciones de sección cruzada y las dos series: =x_c=, con los doce valores equiespaciados (=47.25 + 0.5*(index - 1)= vale $47{,}25$ en la primera observación y sube $0{,}5$ en cada una), e =y_c=, con los doce valores del regresando tecleados entre llaves. El segundo estima la regresión, guarda el valor crítico al $5\%$ con los grados de libertad del residuo (=$df=) y reconstruye el error estándar como $\mathfrak s$ (=$sigma=) dividido por la longitud del regresor en desviaciones, comparándolo con =$stderr(x_c)=; después imprime el estadístico $t$ y el intervalo.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -157,7 +159,7 @@ printf "%s", readfile("concentrado.txt")   # en pantalla
 
 *** Lo que debe observar
 
-Son los números del panel izquierdo de la figura de la lección 12: $\hat\beta_2=0{,}4931$, error estándar $0{,}184$, $\vert t\vert=2{,}68$ e intervalo $[0{,}08;\,0{,}90]$. El coeficiente es significativo al $5\%$ (el cero queda fuera) y el intervalo es tan ancho que no dice casi nada sobre cuánto vale la pendiente. Fíjese también en el error estándar reconstruido: $\mathfrak s$ dividido por una longitud de solo $5{,}98$.
+Son los números del panel izquierdo de la figura de la lección 12: $\hat\beta_2=0{,}4931$, error estándar $0{,}184$, $\vert t\vert=2{,}68$ e intervalo $[0{,}08;\,0{,}90]$. El coeficiente es significativo al $5\%$ (el cero queda fuera) y el intervalo es tan ancho que no dice casi nada sobre cuánto vale la pendiente. El error estándar reconstruido es $\mathfrak s$ dividido por la longitud del regresor en desviaciones: $1{,}1001/5{,}9791=0{,}1840$. La Actividad 2 cambia ese denominador.
 
 * Actividad 2 - Regresor disperso
 :PROPERTIES:
@@ -166,7 +168,7 @@ Son los números del panel izquierdo de la figura de la lección 12: $\hat\beta_
 
 Ahora los valores del regresor van de $22{,}5$ a $77{,}5$ en pasos de $5$, diez veces más separados alrededor del mismo centro, y el regresando es el del panel derecho.
 
-Tres bloques. El primero crea el regresor disperso, con pasos de $5$, y su regresando. El segundo repite el ajuste y las mismas comparaciones que en la Actividad 1, con el =tc= ya calculado. El tercero recupera las perturbaciones de cada panel restando a =y= la parte verdadera $10+0{,}5x$, y con =max(abs(u_c - u_d))= imprime la mayor diferencia entre las dos series: si es cero, las perturbaciones son las mismas.
+El código tiene tres bloques. El primero crea el regresor disperso, con pasos de $5$, y su regresando. El segundo repite el ajuste y las mismas comparaciones que en la Actividad 1, con el =tc= ya calculado. El tercero recupera las perturbaciones de cada panel restando a =y= la parte verdadera $10+0{,}5x$, y con =max(abs(u_c - u_d))= imprime la mayor diferencia entre las dos series: si es cero, las perturbaciones son las mismas.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -199,6 +201,7 @@ printf "%s", readfile("disperso.txt")   # en pantalla
 #+latex: }
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
+/en línea de comandos/:
 #+NAME: MismasPerturbaciones
 #+begin_src gretl :eval no
 series u_c = y_c - 10 - 0.5*x_c        # perturbacion del panel concentrado
@@ -220,13 +223,18 @@ printf "%s", readfile("mismasPerturbaciones.txt")   # en pantalla
 
 *** Lo que debe observar
 
-La $\mathfrak s$ es /la misma/ que en la Actividad 1, $1{,}1001$, hasta la cuarta cifra. Y la última línea lo explica: las doce perturbaciones, lo que queda al restar de cada $y_i$ la parte verdadera $10+0{,}5x_i$, son idénticas en los dos paneles. Como el regresor en desviaciones apunta en la misma dirección en ambos casos (es el mismo patrón, multiplicado por diez), la proyección de las perturbaciones sorteadas sobre esa dirección, y con ella el residuo, coincide.
+La $\mathfrak s$ es /la misma/ que en la Actividad 1: las dos tablas dan =D.T. de la regresión= $1{,}100115$ y la misma suma de cuadrados de los residuos, $12{,}10252$. La última línea lo explica: las doce perturbaciones, lo que queda al restar de cada $y_i$ la parte verdadera $10+0{,}5x_i$, son idénticas en los dos paneles. Como el regresor en desviaciones apunta en la misma dirección en ambos casos (es el mismo patrón, multiplicado por diez), la proyección de las perturbaciones sobre esa dirección, y con ella el residuo, coincide.
 
-Toda la diferencia está, por tanto, en el denominador del error estándar: la longitud del regresor en desviaciones es $59{,}79$ en vez de $5{,}98$. Diez veces más largo el regresor, diez veces más pequeño el error estándar ($0{,}018$ frente a $0{,}184$), diez veces más estrecho el intervalo ($[0{,}46;\,0{,}54]$). La perturbación no ha cambiado; lo que ha cambiado es cuánto varía la variable cuyo efecto queremos medir. /Para estimar bien el efecto de una variable hace falta que esa variable varíe./
+Toda la diferencia está, por tanto, en el denominador del error estándar: la longitud del regresor en desviaciones es $59{,}79$ en vez de $5{,}98$. Con un regresor en desviaciones diez veces más largo, el error estándar es diez veces menor ($0{,}018$ frente a $0{,}184$) y el intervalo, diez veces más estrecho ($[0{,}46;\,0{,}54]$). La perturbación no ha cambiado; lo que ha cambiado es cuánto varía la variable cuyo efecto queremos medir. /Para estimar bien el efecto de una variable hace falta que esa variable varíe./
+
+El $R^2$ sube de $0{,}42$ a $0{,}99$ con el mismo residuo. La suma de cuadrados de los residuos es la misma en las dos tablas, pero el regresando varía más (su desviación típica pasa de $1{,}37$ a $9{,}06$), porque la parte $0{,}5\,x_i$ recorre un rango diez veces mayor.
 
 * Actividad 3 - Contrastar la hipótesis verdadera
+:PROPERTIES:
+:CUSTOM_ID: hipotesis-cierta
+:END:
 
-Con datos reales no sabemos cuánto vale $\beta_2$. Aquí sí: vale $0{,}5$, porque lo hemos elegido nosotros. Podemos entonces contrastar $H_0\!:\beta_2=0{,}5$ sabiendo que es /cierta/, y ver qué hace el contraste con ella; y de paso, contrastar $H_0\!:\beta_2=0$, que sabemos /falsa/.
+Con datos reales no sabemos cuánto vale $\beta_2$. Aquí sí: vale $0{,}5$, porque lo hemos elegido nosotros. Podemos entonces contrastar $H_0\!:\beta_2=0{,}5$ sabiendo que es /cierta/, y también $H_0\!:\beta_2=0$, que sabemos /falsa/, y ver el resultado del contraste en cada caso.
 
 Reestimamos los dos ajustes con =--quiet= para no reimprimir las tablas y, tras cada uno, guardamos dos estadísticos $t$: el de la hipótesis cierta, restando $0{,}5$ al coeficiente, y el de la falsa, restando $0$. Los =printf= finales los disponen en una tabla de dos columnas; el formato =%6.2f= reserva seis caracteres por número para que queden alineados.
 
@@ -261,9 +269,11 @@ printf "%s", readfile("contrastes.txt")   # en pantalla
 
 *** Lo que debe observar
 
-La hipótesis cierta no se rechaza en ningún panel (los dos estadísticos están cerca de cero), y el $0{,}5$ verdadero está dentro de los dos intervalos: dentro del ancho y dentro del estrecho. La hipótesis falsa se rechaza en los dos, pero con evidencias muy desiguales: $2{,}68$ frente a $27{,}14$.
+La hipótesis cierta no se rechaza en ningún panel, y el $0{,}5$ verdadero está dentro de los dos intervalos: dentro del ancho y dentro del estrecho. La hipótesis falsa se rechaza en los dos, pero con evidencias muy desiguales: $2{,}68$ frente a $27{,}14$.
 
-Que el intervalo contenga al verdadero $\beta_2$ /esta vez/ no es la garantía del intervalo: la garantía, según la lección 12, es sobre el procedimiento: el suceso ``el intervalo contiene a $\beta_2$'', con los extremos como variables aleatorias, tiene probabilidad $0{,}95$. Una probabilidad no se comprueba con una sola muestra: hay que repetir el experimento muchas veces, con nuevas perturbaciones cada vez, y contar. Eso es la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]]) de la práctica C.
+Los dos estadísticos de la hipótesis cierta son el mismo número, $-0{,}04$. Coinciden porque, al pasar del regresor concentrado al disperso, el error de estimación y el error estándar se dividen los dos por diez: $-0{,}0069/0{,}184$ y $-0{,}00069/0{,}0184$. En estos dos ajustes, la dispersión del regresor cambia el estadístico de la hipótesis falsa y deja igual el de la cierta.
+
+Que el intervalo contenga al verdadero $\beta_2$ /esta vez/ es el resultado de una muestra. Lo que la lección 12 garantiza es una propiedad del procedimiento: el suceso ``el intervalo contiene a $\beta_2$'', con los extremos como variables aleatorias, tiene probabilidad $0{,}95$. Una probabilidad no se comprueba con una sola muestra: hay que repetir el experimento muchas veces, con nuevas perturbaciones cada vez, y contar. Eso es la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]]) de la práctica C.
 
 * Actividad 4 - Cambiar las unidades del regresor
 :PROPERTIES:
@@ -300,7 +310,9 @@ printf "%s", readfile("unidades.txt")   # en pantalla
 
 *** Lo que debe observar
 
-El coeficiente y su error estándar se dividen los dos por cien; el estadístico $t$, el valor $p$ y el $R^2$ no se mueven. Es la pregunta 10 de la lección 12 con números: las dos primeras columnas de la tabla están en las unidades del problema y las dos últimas son adimensionales. Por eso $t$ y $p$ sirven para comparar y no sirven para valorar la magnitud de un efecto, y por eso el coeficiente hay que leerlo siempre sabiendo en qué unidades está.
+El coeficiente y su error estándar se dividen los dos por cien; el estadístico $t$, el valor $p$ y el $R^2$ no cambian. Es la pregunta 10 de la lección 12 con números: las dos primeras columnas de la tabla están en las unidades del problema y las dos últimas son adimensionales. Por eso $t$ y $p$ sirven para comparar la precisión relativa con que se han estimado dos coeficientes y no sirven para valorar la magnitud de un efecto, y por eso el coeficiente hay que leerlo siempre sabiendo en qué unidades está.
+
+Compare este resultado con el de la Actividad 2. Allí el regresor en desviaciones también se multiplicó, por diez, y el estadístico $t$ pasó de $2{,}68$ a $27{,}14$. La diferencia es que en la Actividad 2 cambió también el regresando: la pendiente siguió siendo $0{,}5$ por unidad, el coeficiente estimado pasó de $0{,}4931$ a $0{,}4993$ y el error estándar se dividió por diez. Aquí el regresando es el mismo: el coeficiente y el error estándar se dividen los dos por cien, y su cociente $t$ no cambia. Un cambio de unidades no añade variación al regresor; solo cambia la unidad en que se mide.
 
 * Preguntas de interpretación para la clase
 
@@ -327,13 +339,13 @@ El coeficiente y su error estándar se dividen los dos por cien; el estadístico
 
 * Respuestas
 
-1. /El mismo residuo./ El residuo es lo que queda de $\boldsymbol y$ tras quitarle su proyección sobre $\mathcal L(\boldsymbol 1,\boldsymbol x)$ (lección 6), y ese subespacio es el mismo en los dos paneles: multiplicar por diez el regresor en desviaciones, sin mover su centro, no cambia el plano que generan $\boldsymbol 1$ y $\boldsymbol x$, solo sus generadores. Como además $\boldsymbol y$ se construyó con las mismas perturbaciones, la parte de $\boldsymbol y$ ortogonal a ese plano, el residuo, es idéntica. Si hubiéramos sorteado de nuevo los valores del regresor, el plano sería otro y el residuo, en general, distinto.
+1. /El mismo residuo./ El residuo es lo que queda de $\boldsymbol y$ tras quitarle su proyección sobre $\mathcal L(\boldsymbol 1,\boldsymbol x)$ (lección 6), y ese subespacio es el mismo en los dos paneles: multiplicar por diez el regresor en desviaciones, sin mover su centro, no cambia el plano que generan $\boldsymbol 1$ y $\boldsymbol x$, solo sus generadores. En cada panel $\boldsymbol y$ es la suma de $10\cdot\boldsymbol 1+0{,}5\,\boldsymbol x$, que está en ese plano, y de las perturbaciones, que son las mismas. El residuo, la parte de $\boldsymbol y$ ortogonal al plano, es entonces la parte de las perturbaciones ortogonal al plano, idéntica en los dos paneles. Si hubiéramos sorteado de nuevo los valores del regresor, el plano sería otro y el residuo, en general, distinto.
 
-2. /Qué ``demuestra'' el intervalo ancho./ Ni una cosa ni la otra, en sentido estricto. Que el cero quede fuera dice que, a la luz del contraste, datos como estos serían raros si la pendiente fuese nula (menos del $5\%$ de las veces): no es una demostración, es un veredicto probabilístico. Y sobre el valor $0{,}5$ no dice nada especial: el intervalo lo contiene, pero contiene también al $0{,}2$ y al $0{,}8$. Un intervalo ancho deja sin descartar muchos valores distintos, y esa es su información: que los datos no permiten precisar más.
+2. /Qué ``demuestra'' el intervalo ancho./ Ninguna de las dos cosas. Que el cero quede fuera dice que datos como estos serían raros si la pendiente fuese nula (ocurrirían menos del $5\%$ de las veces): es una afirmación sobre probabilidades, que no excluye que la pendiente sea nula. Y sobre el valor $0{,}5$ no dice nada especial: el intervalo lo contiene, pero contiene también al $0{,}2$ y al $0{,}8$. Un intervalo ancho deja sin descartar muchos valores distintos, y esa es su información: que los datos no permiten precisar más.
 
 3. /La fórmula./ $\mathrm{ee}(\hat\beta_2)=\mathfrak s/\|\boldsymbol x-\boldsymbol{\mathop{\overline x}}\|_e$. El denominador es la norma del vector en desviaciones del regresor, el objeto que la lección 4 definió y con el que la lección 5 construyó la desviación típica (allí con el producto escalar estadístico; aquí con el euclídeo, sin el factor $1/n$, porque así es como aparece en la varianza de $\hat\beta_2$ de la lección 11). Con el mismo $\mathfrak s$ en el numerador, dos regresores cuyas longitudes en desviaciones están en razón $1:10$ dan errores estándar en razón $10:1$.
 
-4. /¿Podría haberse rechazado la hipótesis cierta?/ Sí. El contraste al $5\%$ rechaza una hipótesis cierta, por construcción, el $5\%$ de las veces: es lo que significa el nivel de significación. En esta muestra concreta no ha ocurrido (los estadísticos son $-0{,}04$), pero en una de cada veinte muestras del mismo mundo el $0{,}5$ quedaría fuera del intervalo. Esa frecuencia no se puede ver con una muestra; se ve repitiendo, y eso hace la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]]) de la práctica C.
+4. /¿Podría haberse rechazado la hipótesis cierta?/ Sí. El contraste al $5\%$ rechaza una hipótesis cierta, por construcción, el $5\%$ de las veces: es lo que significa el nivel de significación. En esta muestra concreta no ha ocurrido (los estadísticos son $-0{,}04$), pero en cada repetición del experimento con nuevas perturbaciones el $0{,}5$ quedaría fuera del intervalo con probabilidad $0{,}05$: al repetirlo muchas veces, en alrededor de una de cada veinte. Esa frecuencia no se puede ver con una muestra; se ve repitiendo, y eso hace la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]]) de la práctica C.
 
 5. /Precisión relativa y magnitud./ Para la precisión relativa, el estadístico $t$ (o el valor $p$), porque son adimensionales: dicen a cuántos errores estándar está cada coeficiente de cero, sea cual sea su unidad. Para la magnitud, solo sirve el coeficiente en las unidades del problema; y para compararla entre variables medidas en unidades distintas hay que reexpresarlas en una escala común (por ejemplo, el efecto de un cambio de una desviación típica en cada regresor), cosa que las columnas de la tabla no hacen por sí solas.
 

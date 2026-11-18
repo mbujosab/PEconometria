@@ -99,7 +99,7 @@ set verbose off
 
 La lección 12 construyó tres herramientas (el error estándar, el intervalo de confianza y el contraste $t$) y dedicó su segunda mitad a /leer una tabla de resultados/. Hoy se aplican esas tres herramientas a datos reales y se lee la tabla de resultados que muestra el programa.
 
-Retomamos =hprice2= y la regresión =price ~ rooms=, el ajuste que arrastramos desde la práctica que siguió a la lección 8 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-B-hprice2-ajuste.html#price-rooms][html]])) y que sirvió de ``mundo verdadero'' en la práctica A de la sesión 16 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#mundo-artificial][html]])). Hoy, además de estimar los coeficientes de esa regresión, medimos la precisión con que quedan estimados.
+Retomamos =hprice2= y la regresión =price ~ rooms=, el ajuste que estimamos por primera vez en la práctica que siguió a la lección 8 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-B-hprice2-ajuste.html#price-rooms][html]])) y que sirvió de ``mundo verdadero'' en la práctica A de la sesión 16 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#mundo-artificial][html]])). Hoy, además de estimar los coeficientes de esa regresión, medimos la precisión con que quedan estimados.
 
 Trabajamos con datos /reales/ porque el objetivo de esta práctica es la /lectura/: aprender a distinguir, en una salida de Gretl en español, qué número responde a qué pregunta. La verificación con datos simulados (¿cubre de verdad el intervalo el $95\%$ de las veces?) es el asunto de la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf][práctica C]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html][html]]) de esta misma sesión.
 
@@ -111,14 +111,12 @@ Trabajamos con datos /reales/ porque el objetivo de esta práctica es la /lectur
 4. Contrastar una hipótesis distinta de ``el coeficiente es cero'' y ver que el intervalo de confianza ya contenía la respuesta.
 5. Repetir la estimación con doce viviendas para ver qué cambia, y qué no, cuando hay pocas observaciones.
 
-/Comandos nuevos de esta práctica/. Seguimos usando =ols= y sus accesores =$coeff=, =$ess= y =$rsq= (prácticas de la sesión 11), =$nobs= (sesiones 7 y 14), =$df= (sesión 16) y =printf= con sus formatos (sesión 7). Lo nuevo:
+/Comandos nuevos de esta práctica/. Seguimos usando =ols= y sus accesores =$coeff=, =$ess= y =$rsq= (prácticas de la sesión 11), =$nobs= (sesiones 7 y 14), =$Fstat= (el estadístico $F$ del pie de la tabla, sesión 14), =$df= (sesión 16), =set seed= con =smpl n --random= (elegir al azar =n= observaciones, sesión 16), =smpl full= (volver a la muestra completa, sesión 14) y =printf= con sus formatos (sesión 7). Lo nuevo:
 - =$stderr(x)= :: error estándar del coeficiente de =x= en el último modelo estimado. Con el nombre entre paréntesis devuelve un número; sin argumento, el vector con todos, igual que =$coeff=.
 - =$sigma= :: la desviación típica de la regresión del último modelo, $\mathfrak s=\sqrt{\mathrm{SRC}/(n-k)}$.
-- =$Fstat= :: el estadístico $F$ que aparece al pie de la tabla del último modelo.
 - =critical(t, gl, p)= :: el valor de la $t$ con =gl= grados de libertad que deja probabilidad =p= a su derecha. Para un contraste bilateral al $5\%$ se pide =p = 0.025=.
 - =pvalue(t, gl, x)= :: la probabilidad de que una $t$ con =gl= grados de libertad supere =x=. El valor $p$ bilateral es el doble de la de $|t|$.
 - =restrict ... end restrict= :: bloque que contrasta una restricción lineal sobre los coeficientes del último modelo; =b[2]= es el segundo coeficiente.
-- =smpl n --random= y =smpl full= :: elegir al azar =n= observaciones del conjunto de datos y volver después a la muestra completa (sesión 16).
 - =(condición ? "sí" : "no")= :: expresión que vale el primer texto si la condición se cumple y el segundo si no; =&&= es la conjunción «y» entre dos condiciones.
 - =%d= y =%.3g= :: formatos de =printf= para un entero y para un número con tres cifras significativas; =%%= imprime el signo de tanto por ciento.
 
@@ -164,14 +162,14 @@ La tabla tiene, para cada regresor, las cuatro columnas de la lección 12, y con
 - /Estadístico $t$/: el cociente de las dos anteriores, $9\,119{,}55/419{,}34=21{,}75$. Cuántos errores estándar separan al coeficiente de cero.
 - /Valor $p$/: la probabilidad de un $\vert t\vert$ al menos así de grande si el coeficiente fuese cero. Aquí es del orden de $10^{-74}$.
 
-Y ahora el aviso terminológico de la lección 12. Busque en la tabla la palabra ``típica'' o la abreviatura ``D.T.'': aparece *tres veces*, para tres cantidades que no tienen nada que ver entre sí.
+La lección 12 avisó de un problema con los nombres. Busque en la tabla la palabra ``típica'' o la abreviatura ``D.T.'': aparece *tres veces*, para tres cantidades distintas.
 
 #+ATTR_LATEX: :align |l|p{7cm}|r|
 | Etiqueta en la salida       | Qué es                                                                                           | Valor aquí   |
 |-----------------------------+--------------------------------------------------------------------------------------------------+--------------|
 | =D.T. de la vble. dep.=     | dispersión de los /datos/ de =price=: $\sqrt{\mathrm{STC}/(n-1)}$                                | $9\,208{,}9$ |
 | =D.T. de la regresión=      | $\mathfrak s=\sqrt{\mathrm{SRC}/(n-k)}$: estimación de la desviación típica de la /perturbación/ | $6\,620{,}9$ |
-| =Desv. típica= (de =rooms=) | $\mathrm{ee}(\hat\beta_2)$: dispersión del /estimador/ de una muestra a otra                     | $419{,}3$    |
+| =Desv. típica= (de =rooms=) | $\mathrm{ee}(\hat\beta_2)$: estimación de la desviación típica del /estimador/ $\hat\beta_2$     | $419{,}3$    |
 
 En inglés solo la primera es /standard deviation/; las otras dos son /standard error/. Al leer una salida en español, identifíquelas por su posición, no por su nombre.
 
@@ -225,7 +223,7 @@ printf "%s", readfile("reconstruccion.txt")   # en pantalla
 
 *** Lo que debe observar
 
-Cada línea reproduce un número de la tabla. Fíjese en particular en el error estándar: es, literalmente, la $\mathfrak s$ de la lección 11 dividida por la longitud del regresor en desviaciones, $\|\boldsymbol x-\boldsymbol{\mathop{\overline x}}\|_e$, que aquí hemos calculado tal como se definió en la lección 4. Es la ``longitud del residuo por unidad de longitud del regresor en desviaciones'' de la lección 12.
+Cada línea reproduce un número de la tabla. Fíjese en particular en el error estándar: es la $\mathfrak s$ de la lección 11 dividida por la longitud del regresor en desviaciones, $\|\boldsymbol x-\boldsymbol{\mathop{\overline x}}\|_e$, que aquí hemos calculado tal como se definió en la lección 4. Es la ``longitud del residuo por unidad de longitud del regresor en desviaciones'' de la lección 12.
 
 También puede obtener el intervalo desde los menús: en la ventana del modelo estimado, //~Análisis -> Intervalos de confianza para los coeficientes~//. Compruebe que coincide con el calculado.
 
@@ -234,7 +232,7 @@ También puede obtener el intervalo desde los menús: en la ventana del modelo e
 :CUSTOM_ID: identidad-F
 :END:
 
-La lección 12 demostró que, en un modelo lineal simple, el estadístico $t$ no contiene nada que no estuviera ya en el triángulo de la lección 8:
+La lección 12 demostró que, en un modelo lineal simple, el estadístico $t$ se calcula con los dos catetos del triángulo de la lección 8:
 \[
 t^2=(n-k)\,\frac{\mathrm{SEC}}{\mathrm{SRC}}=(n-k)\,\frac{R^2}{1-R^2}.
 \]
@@ -265,11 +263,7 @@ printf "%s", readfile("identidad.txt")   # en pantalla
 #+include: ./S18-Prct-A-hprice2-inferencia/identidad.txt example
 #+latex: }
 
-*** Lo que debe observar
-
-Las dos vías dan el mismo $t$, y $t^2$ coincide con el =F(1, 504)= que Gretl imprime al pie de toda tabla de regresión. Ese $F$ es el cociente entre la parte explicada y la parte residual, cada una dividida por su número de dimensiones, y con un solo regresor no constante es $t^2$. La lección 13 usará el estadístico $F$ para contrastar una hipótesis conjunta: que varios coeficientes valgan cero a la vez.
-
-Puede verlo también desde los menús: en la ventana del modelo, //~Contrastes -> Restricciones lineales~//, escriba =b[2] = 0= y acepte. Gretl responde con un estadístico $F$ y su valor $p$; compárelos con $t^2$ y con el valor $p$ de la tabla.
+El mismo contraste se obtiene desde los menús: en la ventana del modelo, //~Contrastes -> Restricciones lineales~//, escriba =b[2] = 0= y acepte.
 
 El bloque =restrict= contrasta la restricción escrita en su interior sobre el último modelo estimado: =b[2] = 0= dice que el segundo coeficiente, el de =rooms=, es cero. Gretl imprime el estadístico $F$ de la restricción y su valor $p$.
 
@@ -293,6 +287,12 @@ printf "%s", readfile("restriccionCero.txt")   # en pantalla
 #+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
 #+include: ./S18-Prct-A-hprice2-inferencia/restriccionCero.txt example
 #+latex: }
+
+*** Lo que debe observar
+
+Las dos vías dan el mismo $t$, y $t^2$ coincide con el =F(1, 504)= que Gretl imprime al pie de toda tabla de regresión. Ese $F$ es el cociente entre $\mathrm{SEC}$ y $\mathrm{SRC}$, cada una dividida por sus grados de libertad (lección 11): $\mathrm{SRC}$ por los del residuo, $n-k=504$, y $\mathrm{SEC}$ por los del ajuste, $k-1=1$, uno por regresor no constante (la lección 12 ya dividía por ese $1$). Con un solo regresor no constante es $t^2$. La lección 13 usará el estadístico $F$ para contrastar una hipótesis conjunta: que varios coeficientes valgan cero a la vez.
+
+El bloque =restrict= da el mismo número por otro camino: $F(1,504)=472{,}952$, que es $t^2$ (con el $t$ redondeado, $21{,}7475^2=472{,}95$), con el valor $p$ de la fila de =rooms= en la tabla, del orden de $10^{-74}$. Gretl escribe =b[rooms]= donde usted tecleó =b[2]=. Debajo, Gretl estima el modelo con la restricción impuesta, es decir, sin =rooms= (de ahí los =NA= de su fila): la constante es la media de =price=, $22\,511{,}5$, y la desviación típica de esa regresión, $9\,208{,}86$, es la =D.T. de la vble. dep.= de la tabla de la Actividad 1. La lección 13 explicará esa segunda tabla.
 
 * Actividad 4 - Contrastar contra un valor distinto de cero
 :PROPERTIES:
@@ -344,9 +344,9 @@ Ahora mire los intervalos: el de $95\%$ deja fuera a $10\,000$ y el de $99\%$ lo
 :CUSTOM_ID: doce-viviendas
 :END:
 
-Todo lo anterior descansa sobre $506$ observaciones. ¿Qué cambia si solo tuviéramos una docena? Tomamos doce viviendas al azar[fn::/Al azar/ es esencial: =hprice2= viene ordenado por distritos, de modo que las doce primeras filas son vecinas entre sí y anómalamente parecidas. Con =smpl 1 12= el experimento engañaría, como ya se advirtió en la práctica B de la sesión 16 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#doce-viviendas][html]])); =smpl 12 --random= elige doce filas cualesquiera.] y repetimos.
+Las actividades anteriores usan las $506$ observaciones. ¿Qué cambia si solo tuviéramos una docena? Tomamos doce viviendas al azar[fn::/Al azar/ es esencial: =hprice2= viene ordenado por distritos, de modo que las doce primeras filas son vecinas entre sí y anómalamente parecidas. Con =smpl 1 12= el resultado no mostraría lo que ocurre con doce viviendas cualesquiera, como ya se advirtió en la práctica B de la sesión 16 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#doce-viviendas][html]])); =smpl 12 --random= elige doce filas cualesquiera.] y repetimos.
 
-=set seed= fija la semilla para que las doce viviendas sean las mismas para todos. =smpl 12 --random= reduce la muestra a doce observaciones elegidas al azar; a partir de ahí, =ols= y los accesores trabajan solo con ellas, y =$nobs= y =$df= valen $12$ y $10$. Los =printf= comparan el valor crítico y el intervalo con los de la muestra completa, guardados en =tc=, =b2= y =ee=. =smpl full= devuelve la muestra completa al terminar.
+=smpl 12 --random= reduce la muestra a doce observaciones elegidas al azar. =set seed= fija la /semilla/ del generador de números aleatorios de Gretl: con la misma semilla, el sorteo elige siempre las mismas doce filas. La fijamos para que su ejecución del código reproduzca la salida de este documento. Mientras la muestra está reducida, =ols= y los accesores usan solo esas doce viviendas: =$nobs= (el número de observaciones) vale $12$ y =$df= (los grados de libertad del residuo, $n-k$) vale $10$. Los =printf= comparan el valor crítico y el intervalo de confianza con los de la muestra completa, que la Actividad 2 guardó en =tc=, =b2= y =ee=. Al terminar, la orden =smpl full= devuelve la muestra completa.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -374,40 +374,15 @@ printf "%s", readfile("doceViviendas.txt")   # en pantalla
 #+include: ./S18-Prct-A-hprice2-inferencia/doceViviendas.txt example
 #+latex: }
 
-Con las mismas doce viviendas (la semilla se fija otra vez antes de =smpl 12 --random=, así que salen las mismas filas) estimamos también el modelo con tres regresores de la práctica B de la sesión 14, =price= sobre =rooms=, =nox= y =stratio=. La lección 13 lee esta salida: =$Fstat= es el $F$ del pie de la tabla, que contrasta que los tres coeficientes sean cero a la vez, y =critical(F, 3, $df, 0.05)= su valor crítico; los dos =printf= imprimen ese contraste y los $t$ de =nox= y =stratio= con su valor crítico.
-
-#+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
-/en línea de comandos/:
-#+NAME: DoceViviendasTres
-#+begin_src gretl :eval no
-set seed 20261107                                # las mismas doce viviendas
-smpl 12 --random
-ols price const rooms nox stratio
-scalar Fc12 = critical(F, 3, $df, 0.05)
-printf "\nF(3,%d) = %.2f,  F_c al 5%% = %.2f,  valor p = %.3f\n", $df, $Fstat, Fc12, pvalue(F, 3, $df, $Fstat)
-printf "t de nox = %.2f,  t de stratio = %.2f,  t_c al 5%% = %.2f\n", $coeff(nox)/$stderr(nox), $coeff(stratio)/$stderr(stratio), critical(t, $df, 0.025)
-smpl full
-#+end_src
-#+latex: }
-
-#+begin_src gretl :tangle guiones/S18-Prct-A-hprice2-inferencia.inp :eval no :exports none :noweb yes
-outfile --quiet doceViviendasTres.txt
-    <<DoceViviendasTres>>
-end outfile
-printf "%s", readfile("doceViviendasTres.txt")   # en pantalla
-#+end_src
-
-#+latex: {\vspace{0pt} \color{gray!70!black} \footnotesize
-#+include: ./S18-Prct-A-hprice2-inferencia/doceViviendasTres.txt example
-#+latex: }
+Después de comprobar las cifras, repita el sorteo con otras viviendas: borre la línea =set seed= del bloque anterior (o escriba =#= delante de ella) y ejecute el bloque varias veces. Cada ejecución elige otras doce filas.
 
 *** Lo que debe observar
 
-Con estas doce viviendas el coeficiente sigue siendo /significativo/: $\vert t\vert=2{,}69$ frente a un valor crítico de $2{,}23$. Si solo mirase el asterisco, concluiría lo mismo que con quinientas. Pero mire el intervalo: va de unos $1\,900$ a casi $20\,000$ dólares por habitación, diez veces más ancho que el de la muestra completa. Es la situación que la lección 12 describió con el panel izquierdo de su figura: /significativo, e informativo de casi nada/.
+Con estas doce viviendas el coeficiente sigue siendo /significativo/: $\vert t\vert=2{,}69$ frente a un valor crítico de $2{,}23$. Si solo mirase el asterisco, concluiría lo mismo que con quinientas. Pero mire el intervalo: va de unos $1\,900$ a casi $20\,000$ dólares por habitación, once veces más ancho que el de la muestra completa. Es la situación que la lección 12 describió con el panel izquierdo de su figura: /significativo, e informativo de casi nada/.
 
-Dos cosas han cambiado y una no. Han cambiado el error estándar (diez veces mayor, porque el regresor en desviaciones es mucho más corto con doce datos) y el valor crítico ($2{,}23$ con diez grados de libertad frente a $1{,}96$ con quinientos: la $t$ exige más cuando hay menos evidencia). No ha cambiado la relación entre las variables, que es la misma se muestreen las casas que se muestreen. Por eso la lección 12 insistía en mirar el coeficiente y el intervalo antes que el veredicto.
+Han cambiado tres cosas: el coeficiente estimado ($10\,928$ frente a $9\,120$), el error estándar y el valor crítico. El error estándar es $9{,}7$ veces mayor ($4\,057$ frente a $419$), porque la longitud del regresor en desviaciones es $8{,}4$ veces menor ($7\,633/4\,057=1{,}88$ frente a $15{,}79$) y $\mathfrak s$ es $1{,}15$ veces mayor ($7\,633$ frente a $6\,621$). El valor crítico es $2{,}23$ con $10$ grados de libertad frente a $1{,}96$ con $504$: con menos grados de libertad el valor crítico es mayor. No ha cambiado el parámetro $\beta_2$, que es el mismo se muestreen las viviendas que se muestreen: lo que cambia de un sorteo a otro es su estimación, como muestra el párrafo siguiente.
 
-Con los tres regresores, el $F(3,8)$ del pie de la tabla vale $9{,}55$ frente a un valor crítico de $4{,}07$ (valor $p$ $0{,}005$): datos como estos serían muy raros si los tres coeficientes fuesen cero a la vez. Y sin embargo el $t$ de =stratio= es $-0{,}10$, el de =nox=, $-2{,}6$, apenas supera el valor crítico $2{,}31$, y los tres intervalos son muy anchos. La lección 13 usa esta salida para decir lo que el $F$ dice y lo que no dice: que los tres regresores en conjunto acortan el residuo más de lo esperable por azar, pero no cuáles ni de qué tamaño es su efecto.
+Sin la semilla, cada ejecución del bloque da otra estimación. El valor crítico no cambia: $2{,}23$ depende solo de los diez grados de libertad del residuo. El coeficiente de =rooms= y su intervalo sí cambian. En $2\,000$ ejecuciones nuestras, nueve de cada diez coeficientes quedaron entre $1\,800$ y $14\,900$ dólares; nueve de cada diez intervalos fueron entre cuatro y quince veces más anchos que el de la muestra completa, y ninguno fue más estrecho; y una de cada cuatro ejecuciones dio $\vert t\vert<2{,}23$: con esas doce viviendas no se rechaza que el coeficiente de =rooms= sea cero. El rechazo depende de qué doce viviendas salgan; el intervalo ancho aparece con todas.
 
 * Preguntas de interpretación para la clase
 
@@ -439,11 +414,11 @@ Con los tres regresores, el $F(3,8)$ del pie de la tabla vale $9{,}55$ frente a 
 
 2. /Cambio de unidades en el regresor./ Si $\boldsymbol x$ se mide en decenas de habitaciones, el vector es $\boldsymbol x/10$ y su longitud en desviaciones se divide por diez (homogeneidad de la norma, lección 2). $\mathfrak s$ no cambia, porque el ajuste, y por tanto el residuo, es el mismo: solo cambia el nombre de la pendiente, que pasa a ser $10\hat\beta_2$. Así que el error estándar se multiplica por diez, igual que el coeficiente, y el cociente $t$ se conserva. Es la pregunta 10 de la lección 12, y la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-B-regresor-disperso.pdf#page=4][actividad 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-B-regresor-disperso.html#cambio-unidades][html]]) de la práctica B de hoy la ejecuta con números.
 
-3. /Qué hay en $F$ que no esté en $R^2$./ El factor $n-k$, y nada más. El $F$ de una regresión simple es $(n-k)\,R^2/(1-R^2)$: el mismo cociente de catetos, multiplicado por el número de dimensiones disponibles para el residuo. Por eso un $R^2$ de $0{,}48$, modesto, viene acompañado de un $F$ de $473$: con quinientas observaciones, un ángulo modesto da un $F$ grande. La lección 13 explotará el $F$ para juzgar varios regresores a la vez, donde el $R^2$ por sí solo ya no basta.
+3. /Qué hay en $F$ que no esté en $R^2$./ El factor $n-k$, y nada más. El $F$ de una regresión simple es $(n-k)\,R^2/(1-R^2)$: el mismo cociente de catetos, multiplicado por los grados de libertad del residuo. Por eso un $R^2$ de $0{,}48$, modesto, viene acompañado de un $F$ de $473$: con quinientas observaciones, un ángulo modesto da un $F$ grande.
 
-4. /Rechazar al $5\%$ y no al $1\%$./ No es una contradicción: son dos exigencias distintas ante los mismos datos, y el valor $p=0{,}036$ las resume a las dos: es más pequeño que $0{,}05$ y más grande que $0{,}01$. Quien solo tuviera el intervalo al $95\%$ vería que $10\,000$ queda fuera y concluiría correctamente ``se rechaza al $5\%$''; lo que no podría saber es por cuánto: si $10\,000$ está justo fuera o muy lejos. Para eso necesitaría el valor $p$, o bien el intervalo al $99\%$, que aquí sí lo contiene. El intervalo y el contraste son el mismo objeto, pero un intervalo a un solo nivel es una única rebanada de esa información.
+4. /Rechazar al $5\%$ y no al $1\%$./ No es una contradicción: son dos exigencias distintas ante los mismos datos, y el valor $p=0{,}036$ las resume a las dos: es más pequeño que $0{,}05$ y más grande que $0{,}01$. Quien solo tuviera el intervalo al $95\%$ vería que $10\,000$ queda fuera y concluiría correctamente ``se rechaza al $5\%$''; lo que no podría saber sin más cálculos es si también se rechazaría al $1\%$. Para eso necesitaría el valor $p$, o bien el intervalo al $99\%$, que aquí sí contiene a $10\,000$. El intervalo y el contraste contienen la misma información, pero un intervalo a un solo nivel da solo la parte que corresponde a ese nivel.
 
-5. /``Con doce viviendas basta''./ Basta para rechazar que el efecto sea cero, que es una hipótesis poco informativa: nadie discutía que las casas con más habitaciones valgan más. No basta para nada más: el intervalo, de unos $1\,900$ a casi $20\,000$ dólares por habitación, no descarta que una habitación valga la mitad que en la estimación completa ni que valga el doble. Significación no es precisión. Si la pregunta es ``¿cuánto vale una habitación?'', doce viviendas responden ``entre poco y mucho'', y eso es no responder.
+5. /``Con doce viviendas basta''./ Basta para rechazar que el efecto sea cero, que es una hipótesis poco informativa: nadie discutía que las casas con más habitaciones valgan más. No basta para nada más: el intervalo, de unos $1\,900$ a casi $20\,000$ dólares por habitación, no descarta que una habitación valga la mitad que en la estimación completa ni que valga el doble. Significación no es precisión.
 
 * COMMENT Banco de preguntas de reserva
 
