@@ -24,81 +24,90 @@ set verbose off
 
 nulldata 12
 setobs 1 1 --cross-section
-series x  = 22.5 + 5*(index - 1)              # el regresor disperso de la leccion 12
-scalar b1 = 10
-scalar b2 = 0.5
-scalar sig = 1.1
+series x = 22.5 + 5*(index - 1)               # el regresor disperso de la leccion 12
+scalar beta1_verdadero = 10
+scalar beta2_verdadero = 0.5
+scalar sigma = 1.1
 scalar R  = 4000
 scalar tc = critical(t, 10, 0.025)            # valor critico de la t_10 al 5%
 scalar zc = 1.96                              # el de la normal, para la Actividad 2
 
 set seed 20261113
 loop R --progressive --quiet
-    series u  = normal(0, sig)
-    series y  = b1 + b2*x + u
+    series u = normal(0, sigma)
+    series y = beta1_verdadero + beta2_verdadero*x + u
     ols y const x --quiet
-    scalar b2hat  = $coeff(x)
-    scalar ee     = $stderr(x)
-    scalar cL     = b2hat - tc*ee                # extremos del IC al 95%
-    scalar cR     = b2hat + tc*ee
-    scalar dentro = (cL <= b2 && b2 <= cR)       # 1 si el IC contiene al verdadero beta_2
-    scalar tstat  = (b2hat - b2)/ee              # t para la H0 CIERTA beta_2 = 0,5
-    scalar dentroZ = (b2hat - zc*ee <= b2 && b2 <= b2hat + zc*ee)   # con 1,96 en vez de t_c
-    store "@workdir/replicasIC.gdt" b2hat ee cL cR dentro tstat dentroZ
+    scalar beta2_estimado = $coeff(x)
+    scalar error_estandar = $stderr(x)
+    # extremos del intervalo al 95%
+    scalar extremo_inferior = beta2_estimado - tc*error_estandar
+    scalar extremo_superior = beta2_estimado + tc*error_estandar
+    # 1 si el intervalo contiene al verdadero beta_2, 0 si no
+    scalar contiene_beta2 = (extremo_inferior <= beta2_verdadero && beta2_verdadero <= extremo_superior)
+    # estadistico t para la H0 CIERTA beta_2 = 0,5
+    scalar t_H0_cierta = (beta2_estimado - beta2_verdadero)/error_estandar
+    # el mismo indicador con 1,96 en vez de t_c
+    scalar contiene_beta2_con_196 = (beta2_estimado - zc*error_estandar <= beta2_verdadero && \
+                                     beta2_verdadero <= beta2_estimado + zc*error_estandar)
+    store "@workdir/replicasIC.gdt" beta2_estimado error_estandar extremo_inferior extremo_superior \
+                                    contiene_beta2 t_H0_cierta contiene_beta2_con_196
 endloop
 open "@workdir/replicasIC.gdt" --quiet
-scalar tc = critical(t, 10, 0.025)            # al abrir otro fichero Gretl olvida los escalares
+scalar tc = critical(t, 10, 0.025)            # al abrir otro fichero, Gretl descarta los escalares
 scalar zc = 1.96
 outfile --quiet cobertura.txt
-    printf "Replicas                                   : %d\n", $nobs
-    printf "Intervalos que contienen al verdadero b2   : %.4f   (objetivo: 0,95)\n", mean(dentro)
-    printf "Rechazos de la H0 cierta al 5%%             : %.4f   (objetivo: 0,05)\n", mean(abs(tstat) > tc)
+    printf "Replicas                                    : %d\n", $nobs
+    printf "Intervalos que contienen al verdadero beta_2: %.4f   (objetivo: 0,95)\n", mean(contiene_beta2)
+    printf "Rechazos de la H0 cierta al 5%%              : %.4f   (objetivo: 0,05)\n", mean(abs(t_H0_cierta) > tc)
 end outfile
 printf "%s", readfile("cobertura.txt")   # en pantalla
 
 smpl 1 100
-series B2 = 0.5
-gnuplot cL cR B2 --time-series --with-lines --output=display                # en pantalla
-gnuplot cL cR B2 --time-series --with-lines --output="@workdir/baile.png"   # guardada para el documento
+series beta2_constante = 0.5
+gnuplot extremo_inferior extremo_superior beta2_constante --time-series --with-lines --output=display                # en pantalla
+gnuplot extremo_inferior extremo_superior beta2_constante --time-series --with-lines --output="@workdir/baile.png"   # guardada para el documento
 outfile --quiet baile.txt
-    printf "Intervalos que fallan entre los 100 primeros: %d\n", 100 - sum(dentro)
+    printf "Intervalos que fallan entre los 100 primeros: %d\n", 100 - sum(contiene_beta2)
 end outfile
 printf "%s", readfile("baile.txt")   # en pantalla
 smpl full
 
 outfile --quiet precioSigma.txt
-    printf "Cobertura del intervalo con t_c = %.3f : %.4f\n", tc, mean(dentro)
-    printf "Cobertura del intervalo con 1,96       : %.4f\n", mean(dentroZ)
+    printf "Cobertura del intervalo con t_c = %.3f : %.4f\n", tc, mean(contiene_beta2)
+    printf "Cobertura del intervalo con 1,96       : %.4f\n", mean(contiene_beta2_con_196)
     printf "\nCuantiles empiricos del estadistico t bajo la H0 cierta:\n"
-    printf "   2,5%%  -> %.3f      (la t_10 predice %.3f; la normal, %.3f)\n", quantile(tstat, 0.025), -tc, -zc
-    printf "  97,5%%  -> %.3f      (la t_10 predice  %.3f; la normal,  %.3f)\n", quantile(tstat, 0.975), tc, zc
-    printf "Fraccion de |t| > 1,96                 : %.4f   (con 1,96 se rechazaria la H0 cierta mas del 5%%)\n", mean(abs(tstat) > zc)
+    printf "   2,5%%  -> %.3f      (la t_10 predice %.3f; la normal, %.3f)\n", quantile(t_H0_cierta, 0.025), -tc, -zc
+    printf "  97,5%%  -> %.3f      (la t_10 predice  %.3f; la normal,  %.3f)\n", quantile(t_H0_cierta, 0.975), tc, zc
+    printf "Fraccion de |t| > 1,96                 : %.4f   (con 1,96 se rechazaria la H0 cierta mas del 5%%)\n", mean(abs(t_H0_cierta) > zc)
 end outfile
 printf "%s", readfile("precioSigma.txt")   # en pantalla
-freq tstat --plot="@workdir/histT.png"
+freq t_H0_cierta --plot="@workdir/histT.png"
 
 nulldata 120 --preserve
 setobs 1 1 --cross-section
 series x = 22.5 + 5*((index - 1) % 12)       # el mismo patron, diez veces
-scalar b1 = 10                               # los parametros del mundo, de nuevo
-scalar b2 = 0.5
-scalar sig = 1.1
+scalar beta1_verdadero = 10                  # los parametros, de nuevo
+scalar beta2_verdadero = 0.5
+scalar sigma = 1.1
 scalar R = 4000
-scalar c_falsa = 0.47
+scalar valor_falso = 0.47
 outfile --quiet deteccion.txt
     smpl 1 12                                    # una sola vuelta del patron: n = 12
     scalar tc = critical(t, $nobs - 2, 0.025)
     set seed 20261113
-    scalar rech = 0
-    scalar cov = 0
+    scalar rechazos_H0_falsa = 0
+    scalar intervalos_que_contienen = 0
     loop R --quiet
-        series u = normal(0, sig)
-        series y = b1 + b2*x + u
+        series u = normal(0, sigma)
+        series y = beta1_verdadero + beta2_verdadero*x + u
         ols y const x --quiet
-        rech += (abs(($coeff(x) - c_falsa)/$stderr(x)) > tc)
-        cov  += ($coeff(x) - tc*$stderr(x) <= b2 && b2 <= $coeff(x) + tc*$stderr(x))
+        scalar extremo_inferior = $coeff(x) - tc*$stderr(x)
+        scalar extremo_superior = $coeff(x) + tc*$stderr(x)
+        rechazos_H0_falsa        += (abs(($coeff(x) - valor_falso)/$stderr(x)) > tc)
+        intervalos_que_contienen += (extremo_inferior <= beta2_verdadero && beta2_verdadero <= extremo_superior)
     endloop
-    printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura del IC = %.3f\n", $nobs, tc, rech/R, cov/R
+    printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura del IC = %.3f\n", \
+           $nobs, tc, rechazos_H0_falsa/R, intervalos_que_contienen/R
 end outfile
 printf "%s", readfile("deteccion.txt")   # en pantalla
 
@@ -106,16 +115,19 @@ outfile --quiet deteccionN120.txt
     smpl full                                    # las diez vueltas: n = 120
     scalar tc = critical(t, $nobs - 2, 0.025)
     set seed 20261113
-    scalar rech = 0
-    scalar cov = 0
+    scalar rechazos_H0_falsa = 0
+    scalar intervalos_que_contienen = 0
     loop R --quiet
-        series u = normal(0, sig)
-        series y = b1 + b2*x + u
+        series u = normal(0, sigma)
+        series y = beta1_verdadero + beta2_verdadero*x + u
         ols y const x --quiet
-        rech += (abs(($coeff(x) - c_falsa)/$stderr(x)) > tc)
-        cov  += ($coeff(x) - tc*$stderr(x) <= b2 && b2 <= $coeff(x) + tc*$stderr(x))
+        scalar extremo_inferior = $coeff(x) - tc*$stderr(x)
+        scalar extremo_superior = $coeff(x) + tc*$stderr(x)
+        rechazos_H0_falsa        += (abs(($coeff(x) - valor_falso)/$stderr(x)) > tc)
+        intervalos_que_contienen += (extremo_inferior <= beta2_verdadero && beta2_verdadero <= extremo_superior)
     endloop
-    printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura del IC = %.3f\n", $nobs, tc, rech/R, cov/R
+    printf "n = %3d:  t_c = %.3f   rechazos de la H0 falsa (0,47) = %.3f   cobertura del IC = %.3f\n", \
+           $nobs, tc, rechazos_H0_falsa/R, intervalos_que_contienen/R
 end outfile
 printf "%s", readfile("deteccionN120.txt")   # en pantalla
 
@@ -123,16 +135,19 @@ outfile --quiet apendice.txt
     smpl 1 12
     scalar tc = critical(t, $nobs - 2, 0.025)
     set seed 20261113
-    scalar cov = 0
-    scalar rech0 = 0
+    scalar intervalos_que_contienen = 0
+    scalar rechazos_H0_cierta = 0
     loop R --quiet
-        series u = (randgen(X, 1) - 1)/sqrt(2) * sig     # chi2(1) centrada, con desviacion tipica sig
-        series y = b1 + b2*x + u
+        series u = (randgen(X, 1) - 1)/sqrt(2) * sigma     # chi2(1) centrada, con desviacion tipica sigma
+        series y = beta1_verdadero + beta2_verdadero*x + u
         ols y const x --quiet
-        cov   += ($coeff(x) - tc*$stderr(x) <= b2 && b2 <= $coeff(x) + tc*$stderr(x))
-        rech0 += (abs(($coeff(x) - b2)/$stderr(x)) > tc)
+        scalar extremo_inferior = $coeff(x) - tc*$stderr(x)
+        scalar extremo_superior = $coeff(x) + tc*$stderr(x)
+        intervalos_que_contienen += (extremo_inferior <= beta2_verdadero && beta2_verdadero <= extremo_superior)
+        rechazos_H0_cierta       += (abs(($coeff(x) - beta2_verdadero)/$stderr(x)) > tc)
     endloop
-    printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 cierta = %.4f\n", $nobs, cov/R, rech0/R
+    printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 cierta = %.4f\n", \
+           $nobs, intervalos_que_contienen/R, rechazos_H0_cierta/R
 end outfile
 printf "%s", readfile("apendice.txt")   # en pantalla
 
@@ -140,15 +155,18 @@ outfile --quiet apendiceN120.txt
     smpl full
     scalar tc = critical(t, $nobs - 2, 0.025)
     set seed 20261113
-    scalar cov = 0
-    scalar rech0 = 0
+    scalar intervalos_que_contienen = 0
+    scalar rechazos_H0_cierta = 0
     loop R --quiet
-        series u = (randgen(X, 1) - 1)/sqrt(2) * sig
-        series y = b1 + b2*x + u
+        series u = (randgen(X, 1) - 1)/sqrt(2) * sigma
+        series y = beta1_verdadero + beta2_verdadero*x + u
         ols y const x --quiet
-        cov   += ($coeff(x) - tc*$stderr(x) <= b2 && b2 <= $coeff(x) + tc*$stderr(x))
-        rech0 += (abs(($coeff(x) - b2)/$stderr(x)) > tc)
+        scalar extremo_inferior = $coeff(x) - tc*$stderr(x)
+        scalar extremo_superior = $coeff(x) + tc*$stderr(x)
+        intervalos_que_contienen += (extremo_inferior <= beta2_verdadero && beta2_verdadero <= extremo_superior)
+        rechazos_H0_cierta       += (abs(($coeff(x) - beta2_verdadero)/$stderr(x)) > tc)
     endloop
-    printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 cierta = %.4f\n", $nobs, cov/R, rech0/R
+    printf "chi2(1) centrada, n = %3d:  cobertura del IC = %.4f   rechazos de la H0 cierta = %.4f\n", \
+           $nobs, intervalos_que_contienen/R, rechazos_H0_cierta/R
 end outfile
 printf "%s", readfile("apendiceN120.txt")   # en pantalla
