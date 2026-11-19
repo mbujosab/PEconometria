@@ -1,0 +1,146 @@
+#+TITLE: Auditoría de comprensión de la lección 14 (colinealidad)
+#+DATE: 2026-11-19
+#+LANGUAGE: es
+
+Fichero auditado: =org-lessons/S21-Lecc14.org= (783 líneas), con sus dos figuras (=img/S21-Lecc14/PartePropia_fila.png= y =ParalelogramoAplastado_fila.png=). Lector supuesto: estudiante que ha seguido las lecciones 1–13 y las prácticas hasta la sesión 20, sin las de la sesión 22. Solo lectura: no se ha tocado ninguna lección ni práctica.
+
+* Veredicto
+
+Sí: un alumno que ha seguido el curso hasta la lección 13 puede entender esta lección leyendo solo los apuntes. El hilo central se sigue sin huecos y todas sus cuentas salen: la parte propia como residuo de la regresión auxiliar, su longitud por Pitágoras, el VIF como $1/\sin^2\theta_j$, el caso =nox=/=lnox= con números y las coordenadas que oscilan. No he encontrado ningún hallazgo grave. Los tres obstáculos principales son:
+1. El ejemplo de los coches, que la lección usa en cinco sitios, nunca dice cuál es la variable dependiente (coste acumulado de reparaciones) ni que las millas van en miles. Sin eso, «28 dólares por semana» y «0,134 son 134 millas» no se pueden leer.
+2. Hay dos factores para lo que parece la misma cosa: el error estándar «se multiplica por 8,7» al añadir =lnox= y «$\sqrt{\mathrm{VIF}}=9{,}10$ es el factor por el que se ha multiplicado el error estándar». El texto no dice por qué difieren.
+3. Dos pasos se apoyan en remisiones que no dicen lo que se les atribuye. El primero confunde la covarianza entre estimadores con que dos coeficientes de una misma muestra tengan signos opuestos. El segundo invoca la «familia ortogonal» de la lección 10, que exige que todos los generadores sean ortogonales entre sí, para un caso en que solo uno lo es.
+
+Recuento: 0 graves, 7 medios, 10 leves.
+
+* Hallazgos
+
+** M1 (media) — El ejemplo de los coches no dice qué se explica ni en qué unidades
+- Líneas 306, 324, 378, 391, 397, 401, 405.
+- Cita (l. 378): «cambia además lo que mide el coeficiente que queda: $28$ dólares por semana a igual kilometraje; $7{,}3$ con la edad sola». Cita (l. 401): «por cada semana más de edad un coche tiene, en promedio, $134$ millas más ($0{,}134$ es la pendiente de la regresión de =miles= sobre =age=)».
+- Problema: el alumno no ha hecho la práctica C de la sesión 22, y la lección no dice nunca que el regresando es =cost=, el coste acumulado de reparaciones en dólares, ni que =miles= va en miles de millas. Sin esa información, «28 dólares por semana» no dice de qué son los dólares, y el paso de $0{,}134$ a «134 millas» parece un error. Tampoco puede leer el $-154{,}6$ de la identidad de la línea 401, que son dólares por cada mil millas.
+- Comprobado: =org-pract/S22-Prct-C-ramanathan-coches/descripcion.txt= («cost: cumulative repair cost in actual dollars»; «miles: miles driven in thousands»). En la lección solo aparecen «edad», «millas» y «kilometraje».
+- Corrección: en la primera mención (l. 324), añadir una frase: «cincuenta y siete coches; se explica su coste acumulado de reparaciones, en dólares, con la edad en semanas y las millas recorridas, en miles».
+
+** M2 (media) — Los factores 8,7 y 9,10 no se reconcilian
+- Líneas 46, 69, 231 y 248 (factor $8{,}7$); líneas 250 y 306 (factor $9{,}10$).
+- Cita (l. 250): «su raíz es el factor por el que se ha multiplicado el error estándar del coeficiente respecto al que tendría si el regresor no compartiera variación con los demás regresores. Con $82{,}8$, ese factor es $9{,}10$». Cita (l. 306, transparencia): «$\sqrt{\mathrm{VIF}_j}$, el factor por el que se ha multiplicado el error estándar de $\hat\beta_j$».
+- Problema: la lección abre diciendo que el error estándar «se multiplica por 8,7» al añadir =lnox=, y después da $9{,}10$ como «el factor por el que se ha multiplicado el error estándar». El alumno lee dos números para el mismo fenómeno. La diferencia está en el punto de partida. El 9,10 compara con un =nox= que no compartiera nada con los demás regresores; el 8,7 compara con el modelo sin =lnox=, donde =nox= ya compartía algo con =rooms=. La línea 248 dice que =rooms= «apenas comparte nada», pero no hace la cuenta. La transparencia de la línea 306 omite el «respecto a...».
+- Comprobado: $24{,}81/2{,}861=8{,}67$ y $26{,}03/24{,}81=1{,}049$. Además, $1{,}049^2=1{,}101$, que es el VIF de =nox= en el modelo con =rooms= y =nox= (=S22-Prct-B-hprice2-vif/sinLnox.txt=, $R^2_{aux}=0{,}0917$, VIF $1{,}101$). Por tanto $9{,}10=8{,}67\cdot1{,}049$.
+- Corrección: al final de la línea 250, añadir: «No es el $8{,}7$ de la apertura porque aquel comparaba con el modelo sin =lnox=, en el que =nox= ya compartía un poco con =rooms= ($26{,}03/24{,}81=1{,}05$, la raíz de su VIF de $1{,}10$); $8{,}7\cdot1{,}05=9{,}1$». En la transparencia de la línea 306, añadir «respecto al que tendría si no compartiera nada».
+
+** M3 (media) — Signos opuestos en una muestra frente a covarianza entre estimadores; la pregunta 8 hereda la confusión
+- Línea 285; pregunta 8 (l. 590–600) y su respuesta (l. 731).
+- Cita (l. 285): «con regresores casi alineados y correlación positiva, la covarianza entre $\hat\beta_2$ y $\hat\beta_3$ es muy negativa [...]. Es lo que se veía en la tabla de la lección 13: con =lnox= en el modelo, el coeficiente de =nox= pasa de $-1884{,}7$ a $404{,}2$ y el de =lnox= es $-13262$, de signo opuesto.»
+- Problema: la covarianza negativa habla de cómo varían los dos estimadores de una muestra a otra. Lo que muestra la tabla es una sola muestra, en la que las dos estimaciones tienen signos opuestos. Son cosas distintas, y el «Es lo que se veía» las enlaza sin ningún paso intermedio. El alumno puede aprender que «signos opuestos en la tabla» indica «covarianza negativa», y eso es falso: dos estimaciones de signos opuestos no dicen nada sobre cómo variarían en otras muestras. El paso que falta es este: los dos estimadores se desvían de sus valores verdaderos en sentidos opuestos, y por eso, si los dos efectos verdaderos son negativos, en esta muestra uno ha quedado por encima de cero y otro muy por debajo. La explicación correcta, que es la del ajuste conjunto estable ($1885$ frente a $2014$), ya está en la frase siguiente. Además, $-1884{,}7$ no está en la tabla de la lección 13, que solo da el $t$, $-7{,}43$ (=S19-Lecc13.org=, l. 386–390). Está en la tabla de apertura de esta lección. La pregunta 8 se titula «El signo de la covarianza» y su respuesta dice evaluar «la covarianza negativa entre los estimadores», pero ni el enunciado ni la opción correcta hablan de covarianza.
+- Comprobado: $404{,}2-13262\,(\ln6-\ln5)=-2013{,}7$, así que la cifra de $2014$ es correcta. La correlación entre los dos estimadores es $-0{,}9933$ (=S22-Prct-B-hprice2-vif/intervalos.txt=).
+- Corrección: sustituir «Es lo que se veía en la tabla de la lección 13» por «En la única muestra que tenemos se ve su consecuencia: los dos estimadores se han desviado en sentidos opuestos, y el de =nox= ha pasado de $-1884{,}7$ (tabla de apertura) a $404{,}2$ mientras el de =lnox= es $-13262$». Retitular la pregunta 8 («Signos opuestos») o quitar de su respuesta la mención a la covarianza.
+
+** M4 (media) — «Familia ortogonal» usada para un caso que la lección 10 no cubre
+- Líneas 405, 461 y 474.
+- Cita (l. 405): «como $\tilde{\boldsymbol x}_j$ es ortogonal a todos ellos, sus coeficientes pasan a ser los del modelo sin $\boldsymbol x_j$ (familia ortogonal), con errores estándar menores».
+- Problema: la familia ortogonal de la lección 10 exige que /todos/ los generadores sean ortogonales entre sí (=S13-Lecc10.org=, l. 511 y 537: «mutuamente ortogonales [...] y /solo/ en ese caso»). Aquí solo $\tilde{\boldsymbol x}_j$ es ortogonal a los demás, y los demás no lo son entre sí. El alumno que vuelva a la lección 10 encontrará la condición «solo en ese caso» y verá que no se cumple. Hay un segundo tropiezo: en la línea 461 la transparencia dice «demostración en el apéndice, con la familia ortogonal», y en el apéndice la sección 7 se titula «La familia ortogonal y lo que da sin normalidad», pero trata de las $C_j$, que son variables aleatorias. Es otra familia.
+- Comprobado: el resultado es correcto. En =S22-Prct-C-ramanathan-coches/ortogonal.txt=, el coeficiente de =miles= pasa a $53{,}45$, el de la regresión simple, y su error estándar baja de $20{,}69$ a $1{,}74$. Pero el argumento por bloques (la proyección se parte en una sobre $\tilde{\boldsymbol x}_j$ y otra sobre el subespacio de los demás) solo está en el apéndice 5.4, l. 310.
+- Corrección: sustituir «(familia ortogonal)» por una frase: «la proyección sobre el subespacio se parte en dos proyecciones ortogonales, una sobre $\tilde{\boldsymbol x}_j$ y otra sobre el subespacio de los demás, como en la familia ortogonal de la lección 10 pero por bloques». En las líneas 461 y 474, escribir «con la parte propia ortogonal a los demás» en lugar de «con la familia ortogonal».
+
+** M5 (media) — «ese regresor» remite a =rooms=, que es justo el que no sufre
+- Línea 104.
+- Cita: «En el modelo de =hprice2= con =rooms=, =nox= y =lnox=, el vector de =rooms= sin restar la media forma $6^\circ$ con el subespacio de los demás, y su error estándar apenas aumenta. La solución existe y es única, pero el coeficiente de ese regresor se estima con poca precisión y cambia mucho ante cambios pequeños de los datos.»
+- Problema: el antecedente más cercano de «ese regresor» es =rooms=, del que la frase anterior acaba de decir que su error estándar apenas aumenta. Leído en orden, el párrafo dice que =rooms= se estima con poca precisión. La frase quiere hablar del regresor que, en desviaciones, casi se alinea, que se nombra dos frases antes.
+- Comprobado: el ángulo de =rooms= sin centrar con $\mathcal L(\boldsymbol 1,\text{nox},\text{lnox})$ es $6{,}07^\circ$ (calculado con Gretl sobre =hprice2=), y su VIF es $1{,}103$ (=vif.txt=). La cifra es correcta.
+- Corrección: mover la frase de =rooms= al final del párrafo, o sustituir «el coeficiente de ese regresor» por «el coeficiente del regresor que casi se alinea con los demás».
+
+** M6 (media) — Contradicción con la lección 12 sobre si falta información
+- L14, líneas 362 y 393, frente a =S17-Lecc12.org=, línea 694.
+- Cita L14 (l. 393): «el remedio de fondo es conseguirla, y solo hay una manera: más información». Cita L12 (l. 694): «No porque falte información en los datos, sino porque esa información no permite separar el efecto de ese regresor del de los demás regresores.»
+- Problema: la lección 12 dijo que la colinealidad no se debe a que falte información. La 14 dice que es «la misma situación que tener pocos datos» y que su remedio es «más información». Un alumno que recuerde la lección 12, que la 14 cita constantemente, encuentra dos afirmaciones opuestas y ninguna explicación.
+- Comprobado: grep en las dos lecciones; las citas son literales.
+- Corrección: en la línea 362, añadir: «La lección 12 dijo que no faltaba información; con la definición de hoy se precisa: no falta información en total, falta la información /propia/ de cada regresor». O bien retocar la frase de la lección 12.
+
+** M7 (media) — La remisión del tercer síntoma apunta a una regresión simple con pocos datos
+- Línea 320.
+- Cita: «El tercer síntoma es que el coeficiente se vuelva sensible a cambios pequeños de la muestra: quitar unas pocas observaciones y verlo saltar, como ocurría con las viviendas del laboratorio de regresión múltiple ([...] actividad 6 [...])».
+- Problema: la actividad 6 de =S14-Prct-A-ramanathan.org= (l. 471–563) estima =price= sobre =sqft=, una regresión simple sin colinealidad posible. La pendiente pasa de $0{,}1388$ a $0{,}1593$ o $0{,}1209$, y la propia práctica atribuye la sensibilidad a la muestra pequeña («propia de las muestras pequeñas, con cualquier método»). El alumno que vuelva a ella no verá colinealidad ni un coeficiente que «salte». El ejemplo adecuado es la actividad 5 de la práctica C de la sesión 22 («La misma regresión en dos mitades»): el coeficiente de la edad pasa de $5{,}1$ a $23{,}7$ y el de las millas de $-5{,}4$ a $-107{,}7$ (=submuestras.txt=).
+- Corrección: remitir a la actividad 5 de S22-C (anclaje ya existente en la práctica), o decir «como en la actividad 6, donde la causa era tener solo catorce viviendas; la colinealidad produce el mismo efecto con muchas».
+
+** L1 (leve) — Las cuentas redondeadas no dan las cifras que se imprimen
+- Líneas 225–228, 246 y 250.
+- Comprobado: $6290{,}37/2{,}861=2198{,}7$, no $2198{,}9$. $241{,}6\cdot9{,}10=2198{,}6$. $1/(1-0{,}9879)=82{,}6$, no $82{,}8$, y $\sqrt{1-0{,}9879}=0{,}1100$. Las cifras impresas salen con todos los decimales ($R^2_{aux}=0{,}987923$, $\Vert\tilde{\boldsymbol x}\Vert_e=2{,}8608$, $\mathfrak s/\Vert\cdot\Vert=241{,}643$; =auxiliar.txt=, =errorEstandar.txt=). Un alumno que rehaga las cuentas con los números del texto no las reproduce.
+- Corrección: dar $R_j^2=0{,}98792$ y $2{,}8608$, o escribir «$\approx2199$» en la línea 228 y en la cuenta de la línea 250.
+
+** L2 (leve) — «no hay nada que estimar» (l. 102)
+- Cita: «Es una situación que se detecta sola, porque no hay nada que estimar.»
+- Problema: lo que ocurre es que no hay una única solución; el alumno puede entender que no hay modelo.
+- Corrección: «porque las ecuaciones normales no tienen solución única y Gretl lo advierte».
+
+** L3 (leve) — «Ángulo con un subespacio» sin definir
+- Líneas 84, 104 y 204, frente a la línea 198.
+- Problema: la colinealidad de grado se define por el «ángulo muy pequeño con el subespacio». En la línea 198, en cambio, $\theta_j$ se define como el ángulo entre el regresor en desviaciones y su ajuste en desviaciones. El curso no ha definido el ángulo entre un vector y un subespacio (grep sin resultados en L1–L13, salvo el uso en L12, l. 694), y no dice que los dos ángulos sean el mismo.
+- Corrección: en la línea 198, añadir «(el ajuste es la proyección sobre el subespacio, así que este es el ángulo del regresor con el subespacio de los demás)».
+
+** L4 (leve) — «forma funcional» sin explicar
+- Línea 399 y pregunta 11 (l. 638).
+- Cita: «la segunda no añade información sobre las viviendas; añade una forma funcional».
+- Comprobado: la expresión no aparece en L1–L13 (grep).
+- Corrección: «añade una forma funcional, es decir, otra forma de la curva con que el precio depende de la contaminación».
+
+** L5 (leve) — La pregunta 4 de S16-B no trata de combinaciones de regresores
+- Línea 397. Cita: «Quien diseña un experimento elige esas combinaciones directamente, y en eso consistía la pregunta 4».
+- Comprobado: la pregunta 4 de =S16-Prct-B-condicionar.org= (l. 608) pide elegir las dosis de un único regresor; trata de su dispersión, no de combinaciones.
+- Corrección: «Quien diseña un experimento elige los valores de los regresores, como en la pregunta 4 [...], y puede elegir combinaciones que no vayan juntas».
+
+** L6 (leve) — BLUE remitido a la lección 11, que solo lo enuncia para $k=2$
+- Líneas 335 y 358.
+- Comprobado: =S15-Lecc11.org=, l. 492, enuncia Gauss–Markov solo para $\hat\beta_2$. La versión con $k$ regresores está en el apéndice, sección 7.3 (=Apendice-geometria.org=, l. 527).
+- Corrección: «(lección 11; con $k$ regresores, apéndice 7.3)».
+
+** L7 (leve) — Transparencia «Por qué oscilan»: falta la condición de longitud uno
+- Línea 269. Cita: «Un desplazamiento de $\boldsymbol{\mathop{\widehat y}}$ perpendicular a $\boldsymbol x_2$ cambia $\hat\beta_3$ en $1/\sin\theta=\sqrt{\mathrm{VIF}}$ veces ese desplazamiento».
+- Problema: la afirmación es cierta solo si $\Vert\boldsymbol x_3\Vert=1$. Lo dicen el pie de figura y los apuntes (l. 283), pero no la transparencia.
+- Corrección: «con regresores de longitud $1$, como en la figura».
+
+** L8 (leve) — Párrafo de la línea 395 demasiado cargado
+- El párrafo junta cuatro ideas: la norma euclídea frente a la estadística, el argumento de que una observación nueva no acorta la parte propia, la definición de muestra representativa con remisión al apéndice, y el ritmo $\sqrt n$. El argumento central («los $n$ sumandos anteriores no pueden sumar menos que antes...») es correcto, pero queda enterrado.
+- Corrección: partirlo en dos párrafos, a partir de «Cuánto se alarga depende de qué observaciones se añaden».
+
+** L9 (leve) — La respuesta de la pregunta 11 justifica la opción 3 con algo que la lección no da
+- Línea 758. Cita: «las copias repiten las mismas perturbaciones, y el error estándar que calcularía el programa sería falso».
+- Problema: la lección no trata de duplicar observaciones. El alumno puede descartar la opción por sentido común, pero no puede reconstruir esa justificación.
+- Corrección: añadir «(las fórmulas de la lección 11 suponen copias independientes, y duplicar filas las hace idénticas)».
+
+** L10 (leve) — Reparto de transparencias anunciado en la línea 71
+- Cita: «Las cuatro primeras transparencias definen la parte propia de un regresor y miden su longitud».
+- Problema: las cuatro primeras incluyen la apertura y «Colinealidad exacta y colinealidad de grado», que no definen la parte propia; las que lo hacen son dos.
+- Corrección: «Tras la apertura y la distinción entre colinealidad exacta y de grado, dos transparencias definen la parte propia y miden su longitud».
+
+* Comprobado y correcto
+
+- Remisiones a lecciones, todas verificadas con grep:
+  - Lección 3: $\cos\theta=\pm1$ si y solo si los vectores están alineados, y el anuncio de la colinealidad (l. 370–372, 401).
+  - Lección 5: la correlación como coseno (l. 270).
+  - Lección 8: $R^2=\cos^2\theta$ y $R^2=\rho^2$ en la regresión simple (l. 271, 560).
+  - Lección 10: colinealidad exacta con el ejemplo de Celsius y Fahrenheit, insuficiencia de las correlaciones por parejas con el ejemplo de las rentas (l. 786), efecto parcial (l. 825, 858) y familia ortogonal (l. 501).
+  - Lección 11: BLUE (l. 492), $\mathrm{Cov}(\hat\beta_1,\hat\beta_2)=-\sigma^2\overline X/\sum(X_i-\overline X)^2$ (l. 595), fórmula matricial enunciada sin demostrar (l. 545), «más dispersión en $X$, más precisión» (l. 416).
+  - Lección 12: $\mathrm{ee}=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$ enunciada, y la cita «no se puede reconstruir» (l. 668, 690–694); regresor concentrado y disperso (l. 511).
+  - Lección 13: tabla de apertura (=nox= $404{,}19$ con ee $2198{,}85$; =lnox= $-13262{,}2$), los $t$ $-7{,}43$, $0{,}18$ y $-1{,}05$, $F=28{,}2$, «firma de la colinealidad», no eliminar los dos regresores, restricciones $\beta_2=\beta_3$ y de suma uno, $R^2$ $0{,}5352$ frente a $0{,}5361$.
+- Términos: BLUE (L11), efecto parcial (L10), generadores (L7, L10), familia ortogonal (L10), significación conjunta (L13) y regresión auxiliar (definida en la propia lección) están explicados antes de usarse. «Extrapolar» y «error estándar de la predicción» no aparecen antes, pero se definen en el mismo lugar donde se usan (l. 391). Es cierto que el seno no había aparecido antes en el curso, como dice la lección.
+- Apéndice: las secciones 2, 3, 5.4, 6.5, 7.1, 7.2 y 7.3 existen con el contenido citado, y los números de página de los enlaces (#page=8, 10, 14, 20, 21, 22) coinciden con el PDF.
+- Prácticas: todas las anclas citadas existen (colinealidad-exacta, bedrms, quitar-viviendas, doce-viviendas, preguntas, elipse-confianza, nube, modelo-auxiliar, comando-vif, recta, dos-juntas, t-grandes, ortogonalizar, otros-factores, precio-otros-factores), y los números de actividad y de página de S22-A/B/C/D coinciden con los PDF.
+- Cuentas:
+  - Figura 1: $\sin60^\circ=0{,}87$, $\sin20^\circ=0{,}34$, $\sin6^\circ=0{,}10$.
+  - Tabla del VIF: para $\rho=0{,}5$, $0{,}9$, $0{,}99$ y $0{,}999$ salen $60^\circ$, $26^\circ$, $8^\circ$ y $2{,}6^\circ$, VIF $1{,}3$, $5{,}3$, $50$ y $500$, y raíces $1{,}15$, $2{,}3$, $7{,}1$ y $22$.
+  - Figura 2: $0{,}07/\sin70^\circ=0{,}075$ y $0{,}07/\sin10^\circ=0{,}40$; los cambios de $\hat\beta_2$ son $-0{,}03$ y $-0{,}40$; «casi seis veces» es $5{,}8$. Las dos descomposiciones dan el mismo $\boldsymbol{\mathop{\widehat y}}$ ($\approx(-0{,}50;\,0{,}35)$ en los dos paneles).
+  - Caso =nox=/=lnox=: $26{,}03\cdot0{,}1099=2{,}861$; $\sqrt{82{,}8}=9{,}10$; $2198{,}9/253{,}6=8{,}67$; $6291{,}0/253{,}6=24{,}81$; correlación $0{,}9939$, que corresponde a $6{,}3^\circ$; VIF $82{,}8$, $82{,}9$ y $1{,}1$. También se cumplen $\sqrt{10}=3{,}2$, $\sqrt{142}=11{,}9$ y $\sqrt{50}=7{,}1$ (pregunta 5).
+  - Variación de precio cuando =nox= pasa de 5 a 6: $1885$ y $2014$ dólares.
+  - Diferencia entre la recta y la curva en el barrio más contaminado: unos $800$ dólares (calculado con Gretl: entre $790$ y $820$ en las dieciséis observaciones con =nox= $=8{,}71$).
+- Cifras tomadas de las prácticas:
+  - Coches: $28{,}02$; $7{,}34$; $-154{,}6$; $0{,}134$ ($=0{,}9965\cdot19{,}96/148{,}7$); $28{,}02-154{,}6\cdot0{,}134=7{,}30\approx7{,}34$; VIF $141{,}7$; $t$ de $10{,}09$ y $-7{,}47$; predicción con ee $710{,}9/95{,}9=7{,}4$ («siete veces»); 300 semanas y 10 mil millas dentro del rango de cada variable.
+  - Tasación: 88 viviendas, cuatro características, $t=8{,}67$.
+  - Doce viviendas: intervalo de $1888$ a $19967$.
+- Afirmaciones de contenido:
+  - Las ganancias de precisión con $\beta_2=\beta_3$ y con $\beta_2+\beta_3=1$ son correctas: el error estándar cambia en un factor $\sqrt{(1+\rho)/2}\approx1$, y el Montecarlo de S22-A da $\mathrm{var}(b_2+b_3)$ estable y $\mathrm{var}(b_2-b_3)$ creciente.
+  - Ortogonalizar conserva el coeficiente y el error estándar del regresor sustituido (S22-C: $28{,}0163$ y $2{,}77558$ antes y después).
+  - Una observación nueva no acorta la parte propia.
+  - Ritmo $\sqrt n$ y nota de las normas $e$ y $s$.
+  - =omit --auto= sobre este mismo modelo quita =nox= y deja =lnox=, como describe la línea 439.
+- Preguntas de repaso: las doce tienen una sola opción correcta y se pueden contestar con la lección. Las respuestas contestan lo que se pregunta, salvo el desajuste de título y comentario de la pregunta 8 (M3).
