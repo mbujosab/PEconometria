@@ -78,3 +78,38 @@ pregunta; lo demás es redacción.
 
 ## Aplicado
 
+
+Revisado por la sesión del banco el 20-11-2026: **siete frases cambiadas en cinco preguntas de L-13**, todas en la
+retroalimentación (`exp`); ningún enunciado, opción ni cifra cambia. Commit `d053a50` del banco, empujado, y Moodle
+reimportado el mismo día (752 preguntas en cinco categorías).
+
+- **«Significación global».** Quitado «(también llamada global)» de `L-13-QueContrastaElFDelPie` y
+  `L-13-LeerUnContrasteF`: queda «significación conjunta». Ningún nombre de fichero decía «global».
+- **$F$ del pie que no rechaza.** `L-13-QueContrastaElFDelPie` decía «si no se rechaza, no hay nada que interpretar en
+  la tabla»; ahora «si no se rechaza, los datos no permiten afirmar que alguno de los coeficientes de los regresores no
+  constantes sea distinto de cero».
+- **«Parte propia».** `L-13-TIndividualesPequenosFGrande` decía «mide la dirección propia $\tilde{\boldsymbol x}_3$»;
+  ahora «la parte propia».
+- **Decisiones en términos de rechazo y sobre coeficientes.** En `L-13-DosSalidasDeGretl-x3` y
+  `L-13-TIndividualesPequenosFGrande`, «no permiten afirmar que ninguno de los dos aporte algo además del otro» y «no
+  permiten afirmar que uno aporte algo que el otro no aporte ya» pasan a «no rechazan que el coeficiente de cada uno
+  sea cero en presencia del otro» y «no se rechaza que el coeficiente de cada uno sea cero en presencia del otro».
+- **«Separar» reservado a la colinealidad.** `L-13-DosTPequenosYUnFGrande` (variantes en que ni los $t$ ni el $F$
+  rechazan) decía «los datos no separan de cero ninguno de los dos coeficientes»; ahora «tampoco el $F$ rechaza que los
+  dos coeficientes sean cero». Los demás usos de «no se puede separar el efecto de uno del efecto del otro» son de dos
+  regresores muy correlados y se quedan.
+
+Sin cambios, medido:
+
+- **$\bar R^2_r>\bar R^2\iff F<1$.** Solo aparece en `L-13-DosSalidasDeGretl-x3`, con una hipótesis de exclusión, y su
+  explicación ya lo enuncia «a igual $\mathrm{STC}$».
+- Ninguna pregunta usa «normalidad conjunta» ni «conjuntamente normales», «el plano entero», «la de su regresor»,
+  «en cualquiera de sus dos formas», los valores críticos $3{,}18$ y $1{,}96$ de la lección, la $\mathrm{SRC}$
+  $1{,}71\cdot10^{10}$, el valor $p$ $10^{-63}$ ni la descripción del bloque de resumen de Gretl; tampoco
+  $\mathrm E(R^2)=(k-1)/(n-1)$ ni «ninguna de las cuales se deduce de las demás».
+
+Queda como está, por si las lecciones quieren opinar: la opción «cada estadístico $t$ pregunta si su regresor aporta
+algo además de los otros» (verdadera, con su gemela falsa «por sí solo») de `L-13-DosTPequenosYUnFGrande` y
+`L-13-TIndividualesPequenosFGrande`, y la misma frase en una explicación de `L-13-DosSalidasDeGretl-x3`. El aviso retira
+«los datos no permiten afirmar que ese regresor aporte algo» como lectura de un $t$ que no rechaza, no esta descripción
+de qué pregunta el $t$; cambiarla sería rediseñar dos opciones.

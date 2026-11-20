@@ -30,3 +30,33 @@ Aviso desde la sesión de revisión de las lecciones (19-11). Se han aplicado en
 
 ## Aplicado
 
+
+Revisado por la sesión del banco el 20-11-2026: **cambios en cinco preguntas (tres de L-13 y dos de L-14)**; ninguna
+cifra cambia. Commit `93c1ada` del banco, empujado, y Moodle reimportado el mismo día (834 preguntas en cinco
+categorías).
+
+- **«Firma de la colinealidad» (punto 2).** Ya no aparece en el banco. Opciones:
+  - `L-13-DosTPequenosYUnFGrande`: «un $F$ conjunto grande con estadísticos $t$ individuales pequeños es la firma de
+    dos regresores muy correlados» pasa a «… es lo que cabe esperar con dos regresores muy correlados». Su gemela falsa
+    «… es señal de un error de cálculo», que se descartaba sola, pasa por decisión del instructor a «… es lo que cabe
+    esperar con dos regresores poco correlados».
+  - `L-14-EfectoParcialOColinealidad`: «la salida muestra / no muestra la firma de la colinealidad: …» pasan a «en la
+    salida se reconoce / no se reconoce la colinealidad: …».
+
+  Explicaciones: «es lo que cabe esperar con dos regresores muy correlados» (`L-13-DosSalidasDeGretl-x3`); «en eso se
+  reconoce la colinealidad» (`L-13-DosTPequenosYUnFGrande`, `L-14-EfectoParcialOColinealidad`); «eso es la colinealidad»
+  (`L-13-TIndividualesPequenosFGrande`, de la parte propia muy corta); «no es colinealidad, que se reconoce en un error
+  estándar multiplicado por un factor grande sin que $\mathfrak s$ cambie» (`L-14-EfectoParcialOColinealidad`).
+- **«Varianza» a secas (punto 13).** `L-14-UnaSalidaConSusVIF-x3`: «la fracción de la varianza muestral de … que esa
+  regresión reproduce» pasa a «la fracción de la varianza de …». «Varianza muestral» sigue en una pregunta de L-09 y
+  otra de L-11, que este aviso no menciona.
+
+Sin cambios, medido:
+
+- **Signos opuestos y covarianza (punto 7).** `L-14-SubespacioEstableCoordenadasNo` afirma que, con correlación
+  positiva entre los regresores, los estimadores tienen covarianza negativa («en las muestras en que uno resulta
+  mayor, el otro tiende a resultar menor») y lo explica con la geometría. Habla de los estimadores a lo largo de las
+  muestras, no presenta los signos de las estimaciones de una muestra como prueba.
+- Ninguna pregunta usa las cifras del aviso ($404$, $-13262$, $-1885$, $2198{,}9$, $8{,}7$, $9{,}10$, las de los
+  coches), ni `hprice2`, ni «laboratorio», ni «familia ortogonal», ni pide la cuenta de los cocientes redondeados
+  (punto 9). Los puntos 1, 3, 5, 6, 8, 10, 11 y 12 son de las preguntas de repaso, las prácticas y las transparencias.
