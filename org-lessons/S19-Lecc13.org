@@ -1,4 +1,3 @@
-
 #    -*- mode: org -*-
 
 #+TITLE: Lección 13. El contraste $F$: significación conjunta
@@ -115,14 +114,15 @@ Para responder no basta con mirar los $k-1$ contrastes $t$ de la tabla. La razó
 :CUSTOM_ID: estadistico-F
 :END:
 
-Los dos catetos de la lección 8, cada uno dividido por sus grados de libertad, la dimensión del subespacio donde vive ($k-1$ para el explicado, lección 10; $n-k$ para el residuo, lección 11):
+Los dos catetos de la lección 8, cada uno dividido por sus grados de libertad ($k-1$ el explicado, $n-k$ el residuo):
 \[
 \boxed{\;F=\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}\;}
 \qquad\text{(el denominador es $\mathfrak s^2$).}
 \]
+$k-1$ es el número $q$ de restricciones que impone $H_0$ ($\beta_2=0,\ldots,\beta_k=0$). El estadístico general divide por dicho número; este es el caso $q=k-1$.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
-Las coordenadas de la perturbación en una base ortonormal son variables aleatorias ortogonales y de la misma longitud $\sigma$ (homocedasticidad e incorrelación). Bajo $H_0$, $\mathrm{SEC}$ suma $k-1$ de sus cuadrados y $\mathrm{SRC}$ las otras $n-k$. Divididas por su número de sumandos, el numerador y el denominador de $F$ estiman los dos $\sigma^2$, y $F\approx1$. Si $H_0$ es falsa, el efecto de los regresores se suma al cateto explicado y no al residuo: el numerador crece y el denominador no. Un $F$ mucho mayor que $1$ es evidencia contra $H_0$.
+Las coordenadas de la perturbación en una base ortonormal son variables aleatorias ortogonales y de la misma longitud $\sigma$ (homocedasticidad e incorrelación). Bajo $H_0$, $\mathrm{SEC}$ suma $k-1$ de sus cuadrados y $\mathrm{SRC}$ las otras $n-k$. Divididas por su número de sumandos, el numerador y el denominador de $F$ estiman los dos $\sigma^2$, y $F\approx1$. Si $H_0$ es falsa, el efecto de los regresores se suma al cateto explicado y no al residuo: solo crece el numerador. Un $F$ mucho mayor que $1$ es evidencia contra $H_0$.
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
 Enunciado (demostración en el apéndice): bajo $H_0$, $\;F\sim F_{k-1,\,n-k}$. Se rechaza al nivel $\alpha$ si $F>F_c$, con $F_c$ el valor que deja $\alpha$ en la /cola derecha/ (una sola cola: $F$ compara longitudes, no tiene signo). Valor $p$: $\mathrm{P}(F_{k-1,\,n-k}>F)$.
@@ -140,6 +140,8 @@ La lección 12 dejó el estadístico $t$ escrito como $t^2=\frac{\mathrm{SEC}/1}
 F=\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}.
 \]
 El curso ya conoce los dos divisores. El denominador, $\mathrm{SRC}/(n-k)$, es la cuasivarianza de los residuos $\mathfrak s^2$ de la lección 11: la suma de cuadrados del residuo dividida por los grados de libertad del residuo, la dimensión $n-k$ del subespacio $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)^\perp$ donde el residuo vive. El numerador hace lo mismo con el otro cateto: $\mathrm{SEC}=\Vert\boldsymbol{\mathop{\widehat y}}-\boldsymbol{\mathop{\overline y}}\Vert_e^2$ es la suma de cuadrados del cateto explicado, y $k-1$ son sus grados de libertad, los /grados de libertad del ajuste/. El ajuste $\boldsymbol{\mathop{\widehat y}}$ vive en $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$, de dimensión $k$ si las columnas de $\boldsymbol{\mathsf X}$ son linealmente independientes; el ajuste en desviaciones es, además, ortogonal a $\boldsymbol 1$, y esa condición deja el subespacio de los regresores en desviaciones, de dimensión $k-1$ (lección 10). Así que $F$ compara los dos catetos /por grado de libertad/.
+
+El divisor $k-1$ es el número de restricciones que impone $H_0$ sobre los coeficientes: $\beta_2=0,\ldots,\beta_k=0$. Esa lectura es la que vale para cualquier hipótesis lineal. Cada restricción quita una dimensión al subespacio donde vive el ajuste, y las $k-1$ juntas lo reducen de $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$ a $\mathcal L(\boldsymbol 1)$. No hay un estadístico $F$ para la significación conjunta y otro para las demás hipótesis: hay uno solo, que divide el numerador por el número de restricciones, $q$, y el de esta sección es el caso $q=k-1$. La sección [[#modelos-anidados][``Restricciones lineales: modelos anidados'']] lo escribe para cualquier $q$.
 
 El motivo de dividir es este. Si en cada subespacio se toma una base de vectores ortogonales de longitud $1$, la longitud al cuadrado de un vector es la suma de sus coordenadas al cuadrado (Pitágoras generalizado, lección 10): el cateto explicado suma $k-1$ coordenadas al cuadrado y el residuo, $n-k$. Un cateto puede ser largo por dos motivos: porque sus coordenadas son grandes o porque son muchas. Comparar las dos sumas tal cual mezclaría los dos motivos: con $n=500$ y $k=3$, el residuo suma $497$ cuadrados y el cateto explicado solo $2$, así que el residuo sería más largo aunque todas las coordenadas fuesen del mismo tamaño. Dividir cada suma por su número de coordenadas elimina el segundo motivo y deja solo el primero, el tamaño de las coordenadas: $\mathrm{SEC}/(k-1)$ es la media de las coordenadas al cuadrado del cateto explicado y $\mathrm{SRC}/(n-k)$, la del residuo, y dos medias sí se pueden comparar aunque una tenga $2$ sumandos y la otra $497$. $F$ es el cociente de esas dos medias, y el párrafo siguiente dice por qué deben parecerse bajo $H_0$.[fn::Los dos divisores son grados de libertad: $k-1$ los del ajuste y $n-k$ los del residuo. Suman $(k-1)+(n-k)=n-1$, los grados de libertad del vector de datos en desviaciones (lección 11): la dimensión de $\mathcal L(\boldsymbol 1)^\perp$ (lección 4), donde vive el triángulo entero. La misma lectura, longitud al cuadrado por grado de libertad, explica el divisor $n$ del producto escalar estadístico: un vector de $\mathbb R^n$ sin ninguna condición de ortogonalidad tiene $n$ grados de libertad, y $\Vert\boldsymbol v\Vert_s^2=\frac1n\sum_iv_i^2$ es la media de las $n$ coordenadas al cuadrado de $\boldsymbol v$ en $\mathbb R^n$, y el vector $\boldsymbol 1$ mide $1$ porque todas sus coordenadas valen $1$. La diferencia está en el espacio donde se cuenta: el producto escalar estadístico divide siempre por $n$, la dimensión de $\mathbb R^n$; $\mathfrak s^2$ y el $F$ dividen por la dimensión del subespacio donde vive cada vector. Por eso la varianza de $\boldsymbol y$ divide por $n$ y la cuasivarianza $\mathrm{STC}/(n-1)$ por los $n-1$ grados de libertad del vector de datos en desviaciones (nota de la tabla de resultados, lección 12).] Recuerde el aviso de la lección 8 sobre las siglas: en su curso de Estadística, SCR era la suma /de regresión/, nuestra $\mathrm{SEC}$, y SCE la suma /del error/, nuestra $\mathrm{SRC}$.
 
@@ -174,7 +176,7 @@ file:img/S19-Lecc13/TrianguloF_ancho.png
 
 \[
 F=\frac{n-k}{k-1}\cdot\frac{\mathrm{SEC}}{\mathrm{SRC}}=\frac{n-k}{k-1}\cdot\frac{R^2}{1-R^2}:
-\quad\text{función de $\theta$ y de los grados de libertad.}
+\quad\text{función de $\theta$ y los grados de libertad}
 \]
 
 #+attr_ipynb: (slideshow . ((slide_type . fragment)))
