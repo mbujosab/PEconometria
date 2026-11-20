@@ -1,0 +1,195 @@
+#+TITLE: Auditoría de comprensión de la lección 13 (contraste $F$), lectura independiente
+#+DATE: 2026-11-20
+#+LANGUAGE: es
+
+Fichero auditado: =org-lessons/S19-Lecc13.org= (837 líneas en el estado de hoy), con sus tres figuras (=img/S19-Lecc13/TrianguloF_ancho.png=, =ProyeccionYTriangulo.png= y =ProyeccionAnidada.png=), las doce preguntas de repaso y sus respuestas. Lector supuesto: estudiante que ha seguido las lecciones 1–12 y las prácticas hasta la sesión 18, sin las de la sesión 20 ni la lección 14. Solo lectura: no se ha editado ni compilado nada. No he abierto el informe anterior de la misma fecha ni el apartado «Aplicado» del encargo.
+
+Nota sobre el encargo: describe las capas al revés. En el fichero, el encabezado de primer nivel (=* Título=, =slide_type slide=) es la transparencia, y el de tercer nivel (=*** Título=, =slide_type skip=) son los apuntes. He leído con esa correspondencia, que es la que usa la propia lección («la tabla de la transparencia», l. 64).
+
+* Veredicto
+
+Sí: un alumno que ha llegado a la lección 12 puede seguir esta lección leyendo los apuntes por su cuenta. Todas las derivaciones que he rehecho son correctas, todas las cifras cuadran con las salidas de Gretl (o, donde no hay salida, con mi propio cálculo, que señalo aparte), las remisiones a las lecciones 3–12, al apéndice y a las prácticas llevan a donde dicen y con la misma notación, y las tres figuras muestran lo que el texto nombra.
+
+Los obstáculos son de lectura, no de contenido, y se concentran en el ejemplo de =nox= y =lnox= y en la tabla de las tres restricciones:
+1. Una frase de la línea 441 («quitar la contaminación del modelo, en cualquiera de sus dos formas, alarga el residuo mucho más…») dice, leída a la letra, lo contrario de lo que la sección enseña: quitar /una/ de las dos medidas apenas cambia nada.
+2. La transparencia de la hipótesis conjunta (l. 87) dice que cada $t$ mide «la dirección de su regresor»; con varios regresores mide la de su parte propia, que es lo que los apuntes de la sección «Conjunto $\neq$ individual» usan para explicar el caso.
+3. La tabla de las tres restricciones lee la igualdad $\beta_{\text{nox}}=\beta_{\text{stratio}}$ no rechazada como «los datos no separan los dos efectos», casi la misma frase con la que dos transparencias después se describe la colinealidad.
+
+Recuento: 0 graves, 3 medios, 11 leves.
+
+* Hallazgos
+
+** M1 (media) — «en cualquiera de sus dos formas» dice lo contrario de lo que se quiere (l. 441)
+
+Cita: «el $F$ de excluir las dos a la vez vale $F(2,502)=28{,}2$ frente a un crítico de $3{,}01$: quitar la contaminación del modelo, en cualquiera de sus dos formas, alarga el residuo mucho más de lo que cabe esperar por azar.»
+
+Problema: «en cualquiera de sus dos formas» se lee naturalmente como «quitando =nox= o quitando =lnox=». Eso es falso, y es justo lo contrario de la moraleja de la sección: quitar una sola de las dos medidas apenas cambia el ajuste.
+
+Comprobado: con las dos medidas, $R^2=0{,}536175$ (=S20-Prct-A-hprice2-restricciones/apertura.txt=); sin =lnox=, $R^2=0{,}535161$ (=S22-Prct-B-hprice2-vif/sinLnox.txt=); sin =nox=, $R^2=0{,}536144$ (sin salida en el curso; calculado por mí con =gretlcli= sobre =hprice2=). Los $F$ de quitar una sola son los $t^2$ de la tabla de la apertura: $0{,}18^2=0{,}03$ y $1{,}05^2=1{,}10$, muy por debajo de $3{,}86$.
+
+Propuesta: «quitar del modelo las dos medidas de la contaminación a la vez alarga el residuo…».
+
+** M2 (media) — «Cada $t$ mide una sola dirección, la de su regresor» (l. 87, transparencia)
+
+Cita: «Cada $t$ mide una sola dirección, la de su regresor. La significación conjunta pide un estadístico que mida el cateto explicado entero, en su subespacio de dimensión $k-1$.»
+
+Problema: con varios regresores, el $t$ de $\beta_j$ no mide la dirección del regresor $j$ en desviaciones, sino la de su parte propia $\tilde{\boldsymbol x}_j$. En el caso que motiva la sesión la diferencia lo es todo: la dirección de =nox= es casi la que comparte con =lnox=, y esa es precisamente la que su $t$ /no/ mide. La propia lección lo dice en los apuntes de «Conjunto $\neq$ individual» (l. 445: «esa es una pregunta sobre la /parte propia/ de cada regresor») y lo usa en l. 443. La transparencia contradice a esos apuntes; el alumno que estudie por las transparencias se queda con la versión de $k=2$.
+
+Comprobado: apéndice §10, último párrafo (con $q=1$, $\mathcal Q=\mathcal L(\boldsymbol b_1)$, «la dirección de la parte propia del segundo triángulo»); apéndice §5.4, ec. =t-datos=; recapitulación de la lección 12 (l. 671 y ss., «longitud propia»).
+
+Propuesta: «Cada $t$ mide una sola dirección: la de la parte propia de su regresor, lo que no comparte con los demás.»
+
+** M3 (media) — «los datos no separan los dos efectos» para una igualdad no rechazada (l. 374, transparencia)
+
+Cita (tabla, tercera fila): «no se rechaza, por poco ($p=0{,}060$): los datos no separan los dos efectos».
+
+Problema: dos transparencias después, la conclusión del caso de colinealidad es «no se puede separar el efecto de uno del efecto del otro» (l. 428; también l. 447). Con casi la misma frase, el alumno puede entender que =nox= y =stratio= son colineales, cuando la tercera fila solo dice que datos como estos no serían demasiado raros si los dos coeficientes fuesen iguales. Los apuntes de esa fila (l. 393) lo dicen bien; es la lectura de la tabla la que confunde.
+
+Comprobado: el $F=3{,}560$, $p=0{,}0598$ (=igualdad.txt=, =restrictIgualdad.txt=); los $t$ de =nox= y =stratio= en el modelo completo son $-7{,}17$ y $-9{,}06$ (=completo.txt=), es decir, cada coeficiente se estima con precisión: no hay ningún síntoma de colinealidad entre ellos.
+
+Propuesta: «no se rechaza, por poco ($p=0{,}060$): datos como estos no serían demasiado raros si los dos coeficientes fuesen iguales».
+
+** L1 (leve) — El valor $p$ de =rooms= en la tabla de apertura (l. 43)
+
+Cita: «| =rooms= | 8161,84 | 418,34 | 19,51 | $10^{-63}$ |».
+
+Problema: Gretl da $1{,}65\cdot10^{-63}$ (=apertura.txt=, =S22-Prct-B-hprice2-vif/modelo.txt=). Escribir solo la potencia es un redondeo de orden de magnitud que en la misma columna convive con valores de tres decimales, y en la l. 257 la lección escribe $1{,}3\cdot10^{-99}$ con su mantisa.
+
+Propuesta: $1{,}7\cdot10^{-63}$.
+
+** L2 (leve) — Reparto de transparencias (l. 66)
+
+Cita: «las cuatro primeras transparencias construyen el contraste $F$ de significación conjunta y lo leen en el triángulo rectángulo de la lección 8 […]; la quinta lo lee en una tabla de Gretl; la sexta y la séptima lo generalizan […]; las dos siguientes lo interpretan, y la décima recapitula.»
+
+Problema: el recuento total es correcto (diez transparencias, comprobado con las propiedades =slide_type slide=), pero la primera es la apertura con la tabla de =nox= y =lnox=, que no construye el contraste. Son la segunda a la cuarta las que lo construyen.
+
+Propuesta: «la primera plantea el caso; la segunda, la tercera y la cuarta construyen el contraste…».
+
+** L3 (leve) — «ahí $F=1$ y $\bar R^2=0$» (l. 183, transparencia)
+
+Cita: «Bajo $H_0$, $R^2$ vale en promedio $(k-1)/(n-1)$ por azar: ahí $F=1$ y $\bar R^2=0$.»
+
+Problema: «ahí» se puede leer como «bajo $H_0$», y entonces dice que $F$ vale $1$ en promedio bajo $H_0$, lo que no es cierto (la esperanza de una $F_{q,m}$ es $m/(m-2)$, como la propia lección sugiere en l. 158). Los apuntes lo dicen bien: $F=1$ /cuando/ $R^2=r_0$ (l. 214) y $\bar R^2$ vale $0$ en promedio (l. 220).
+
+Propuesta: «…por azar; cuando $R^2$ vale eso, $F=1$ y $\bar R^2=0$».
+
+** L4 (leve) — El reparto «a partes iguales» se justifica con el mismo cuadrado esperado (l. 228)
+
+Cita: «Ese cuadrado vale en promedio $1/(n-1)$ porque la recta es una sola de las $n-1$ direcciones ortonormales, y las $n-1$ coordenadas de la perturbación sobre ellas tienen la misma distribución y el mismo cuadrado esperado».
+
+Problema: $\cos^2\theta$ es un cociente, y la nota de la l. 206 acaba de explicar que el mismo cuadrado esperado (la ortogonalidad) no basta para la esperanza de un cociente: hace falta la intercambiabilidad que da la normalidad. Esta frase vuelve a apoyar el resultado en «el mismo cuadrado esperado», y el alumno atento ve la contradicción.
+
+Comprobado: apéndice §8, corolario final («Aquí sí hace falta más que la ortogonalidad»).
+
+Propuesta: sustituir «y el mismo cuadrado esperado» por «y son independientes (isotropía, sección anterior)».
+
+** L5 (leve) — «si se suprime el plano entero» (l. 445)
+
+Cita: «Ese subespacio, un plano dentro de $\mathcal L(\boldsymbol 1)^\perp$, sí acerca el ajuste a $\boldsymbol y$ […]. El $F$ de excluir ambas mide eso: cuánto se alarga el residuo si se suprime el plano entero.»
+
+Problema: el modelo restringido conserva =rooms=, así que las dos direcciones que la restricción suprime son la parte del plano de =nox= y =lnox= ortogonal a =rooms= (el $\mathcal Q$ del apéndice §5.5), no el plano generado por =nox= y =lnox= en desviaciones. La lección lo define bien en l. 325 («las $q$ direcciones del plano de los regresores ortogonales al subespacio restringido»); aquí lo simplifica de más. Apreciación: no impide entender, pero no casa con la definición que la propia lección acaba de dar.
+
+Propuesta: «…si se suprimen las dos direcciones que =nox= y =lnox= añaden a la constante y =rooms=».
+
+** L6 (leve) — Decisión enunciada sobre el regresor (l. 106 y l. 445)
+
+Citas: «(los datos no permiten afirmar que ese regresor aporte algo que los demás no aporten ya)» (l. 106); «y los datos no permiten afirmar que aporte; y lo mismo al revés» (l. 445).
+
+Problema: la Guía (§6, l. 274) pide que las decisiones de un contraste se enuncien sobre los parámetros. No confunde, porque la hipótesis está escrita al lado ($H_0\!:\beta_j=0$).
+
+Propuesta: «los datos no permiten afirmar que su coeficiente sea distinto de cero con los demás regresores en el modelo».
+
+** L7 (leve) — «normalidad conjunta», término no definido (l. 158, nota; l. 206)
+
+Citas: «con normalidad conjunta de las $n$ perturbaciones $U_i$, esas coordenadas son independientes» (nota de l. 158); «si las $n$ perturbaciones $U_i$ son conjuntamente normales» (l. 206).
+
+Problema: el curso no ha definido «normalidad conjunta»: la lección 12 enuncia el supuesto como $U_i\mid\boldsymbol X\sim N(0,\sigma^2)$ para cada $i$, más el muestreo aleatorio. Comprobado con =grep=: «conjuntamente normal» solo aparece en la lección 13. Además, la normalidad conjunta sola no da coordenadas independientes; hace falta también la incorrelación y la homocedasticidad, que el texto da por supuestas sin decirlo.
+
+Propuesta: «con el supuesto de normalidad de la lección 12» en los dos sitios.
+
+** L8 (leve) — Respuesta de la pregunta 5: la opción 1 es falsa, no solo descriptiva (l. 757)
+
+Cita: «La opción 1 describe la distribución y no explica nada.» La opción 1 dice: «La distribución $F$ solo toma valores positivos y por eso no tiene cola izquierda en la que rechazar.»
+
+Problema: la distribución $F$ sí tiene cola izquierda (valores próximos a cero), y se podría poner en ella una región crítica; por eso la opción 4 es un distractor plausible. La respuesta debería decir que la opción 1 es falsa.
+
+Propuesta: «La opción 1 es falsa: la $F$ tiene cola izquierda, cerca de cero; lo que no hay es razón para rechazar en ella.»
+
+** L9 (leve) — Respuesta de la pregunta 11 generaliza más que la lección (l. 811)
+
+Cita: «Como $F<1$, el $R^2$ ajustado del modelo restringido es mayor que el del completo (sección ``Tres restricciones sobre =hprice2='').»
+
+Problema: la sección citada restringe esa equivalencia a hipótesis «que no cambien el regresando» (l. 401); con restricciones que fijan un valor, el modelo restringido tiene otro regresando y la lección dice que lo que se compara es la suma de cuadrados del residuo por grado de libertad. La pregunta habla de «$q$ restricciones» sin más.
+
+Propuesta: añadir «si las restricciones no cambian el regresando (exclusiones o igualdades)».
+
+** L10 (leve, apreciación) — La igualdad $\beta_{\text{nox}}=\beta_{\text{stratio}}$ depende de las unidades (l. 393)
+
+Cita: «$H_0\!:\beta_{\text{nox}}=\beta_{\text{stratio}}$ (``una unidad más de concentración de óxidos de nitrógeno reduce el precio mediano tanto como un alumno más por profesor'')».
+
+Problema: la lección fija los dos cambios comparados, como pide la Guía (§6, l. 292), así que la hipótesis está bien enunciada. Pero no advierte que su contenido depende de las unidades elegidas: si =nox= se midiese en otras unidades, la misma pregunta económica daría otra $H_0$ y otro $F$. Un alumno puede leer la tercera fila como «los dos factores pesan lo mismo», que es la comparación que la Guía prohíbe.
+
+Propuesta: una frase en los apuntes: «la hipótesis compara una unidad de cada regresor; con otras unidades sería otra hipótesis».
+
+** L11 (leve) — La varianza de una diferencia se atribuye solo a la regla 3 (l. 393, nota)
+
+Cita: «que no es la suma de las varianzas de los dos coeficientes (regla 3 del apéndice, sección 1.6, con la esperanza condicional en lugar de la esperanza): $Var[\hat\beta_{\text{nox}}-\hat\beta_{\text{stratio}}\mid\boldsymbol X]=\ldots-2\,Cov[\ldots]$».
+
+Problema: la regla 3 del apéndice es la varianza de una /suma/, con el signo $+$. Para la diferencia hace falta también la regla 2 ($\mathrm{Var}(-W)=\mathrm{Var}(W)$) y la bilinealidad de la covarianza; el alumno que abra el apéndice encuentra un $+2\,\mathrm{Cov}$ y no un $-2\,\mathrm{Cov}$.
+
+Propuesta: «reglas 2 y 3 del apéndice, sección 1.6, con $-\hat\beta_{\text{stratio}}$ en el papel del segundo sumando».
+
+* Comprobado sin hallazgo
+
+** Derivaciones rehechas
+- $F=\frac{\mathrm{SEC}/(k-1)}{\mathrm{SRC}/(n-k)}=\frac{n-k}{k-1}\frac{\mathrm{SEC}}{\mathrm{SRC}}=\frac{n-k}{k-1}\frac{R^2}{1-R^2}$, dividiendo por $\mathrm{STC}$ y usando $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ (l. 196–203, 178).
+- $r_0=(k-1)/(n-1)$, $r_0/(1-r_0)=(k-1)/(n-k)$ y $F=\frac{R^2/(1-R^2)}{r_0/(1-r_0)}$ (l. 210–214).
+- $\bar R^2=1-(1-R^2)\frac{n-1}{n-k}=1-\frac{1-R^2}{1-r_0}=\frac{R^2-r_0}{1-r_0}$; $\bar R^2>0\iff F>1$; $\mathrm E(\bar R^2)=0$ bajo $H_0$ por linealidad (l. 216–220).
+- $\mathrm E(R^2)=(k-1)/(n-1)$ bajo $H_0$ con normalidad: cotejado con el corolario del apéndice §8 y con la distribución Beta$\big(\tfrac{k-1}2,\tfrac{n-k}2\big)$ (l. 208).
+- Esperanzas $\mathrm E(\mathrm{SEC})=(k-1)\sigma^2$ bajo $H_0$ y $\mathrm E(\mathrm{SRC})=(n-k)\sigma^2$ siempre; fuera de $H_0$ el numerador suma $\sum_{\mathcal E}D_j^2$ (apéndice §7.2, ec. =esperanzas=) (l. 152–156).
+- Grados de libertad: $\dim\mathcal E=k-1$, $\dim\mathcal R=n-k$, suma $n-1=\dim\mathcal L(\boldsymbol 1)^\perp$; $\dim\mathcal Q=q$ como parte de $\mathcal L(\boldsymbol 1,\ldots,\boldsymbol x_k)$ (dim. $k$) ortogonal al restringido (dim. $k-q$) (l. 142, 146, 344).
+- Pitágoras anidado: $\boldsymbol{\widehat y}-\boldsymbol{\widehat y}_r\in\mathcal L(\boldsymbol 1,\ldots,\boldsymbol x_k)\perp\boldsymbol{\widehat e}$; y que $\boldsymbol{\widehat y}_r$ es también la proyección de $\boldsymbol{\widehat y}$ (l. 334–340). Lo he comprobado también para restricciones que fijan un valor (conjunto trasladado): $\boldsymbol{\widehat y}-\boldsymbol{\widehat y}_r$ sigue siendo ortogonal a la dirección del conjunto restringido y está en $\mathcal L(\boldsymbol 1,\ldots,\boldsymbol x_k)$, así que la nota de l. 313 es correcta.
+- Caso significación conjunta: $\mathrm{SRC}_r=\mathrm{STC}$, $\mathrm{SRC}_r-\mathrm{SRC}=\mathrm{SEC}$ (l. 350–352).
+- $q=1$: $F=t^2$ y $F_c=t_c^2$ (l. 232; apéndice §10); con la igualdad, $t=-526{,}4/279{,}0=-1{,}887$ y $t^2=3{,}56$ (nota de l. 393).
+- $\bar R^2_r>\bar R^2\iff\mathrm{SRC}_r(n-k)<\mathrm{SRC}(n-k+q)\iff F<1$, y el argumento de la media ponderada (mediante) de l. 401.
+- Restricción $\beta_3=\beta_4$: subespacio $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\boldsymbol x_3+\boldsymbol x_4)$; $\beta_j=c$: regresar $\boldsymbol y-c\,\boldsymbol x_j$ sobre los demás (l. 313, 323).
+- Nota de l. 106: $P(\text{algún }t\text{ rechaza})\ge P(\text{el primero rechaza})=0{,}05$.
+- Equivalencia $F>F_c\iff\theta<\theta_c$ (l. 234).
+
+** Cifras cotejadas con salidas de Gretl
+- Tabla de apertura (l. 43–45) y valores $p$ $0{,}854$, $0{,}295$: =S20-Prct-A-hprice2-restricciones/apertura.txt=, =S22-Prct-B-hprice2-vif/modelo.txt=.
+- Modelo completo (l. 250–257, 274): coeficientes, errores estándar, $t$, $R^2=0{,}600521$, $\mathfrak s=5837{,}767$, $F=251{,}5451$, $p=1{,}31\cdot10^{-99}$, $\mathrm{SRC}=1{,}7108\cdot10^{10}$, $\mathfrak s^2=3{,}4080\cdot10^7$ (=completo.txt=, =S14-Prct-B…/Ols_multiple_con_stratio.txt=). Derivadas: $\mathrm{STC}=505\cdot9208{,}856^2=4{,}2826\cdot10^{10}$, $\mathrm{SEC}=2{,}572\cdot10^{10}$, numerador $8{,}573\cdot10^9$, $5837{,}8^2=3{,}408\cdot10^7$, $\frac{502}3\cdot\frac{0{,}6005}{0{,}3995}=251{,}5$, «cien veces» ($251{,}5/2{,}62=96$).
+- Tres restricciones (l. 372–374, 389–393, 403): $\mathrm{SRC}_r=2{,}2093\cdot10^{10}$, aumento $4{,}9854\cdot10^9$, $F=73{,}143$, $F_c=3{,}014$, $p=1{,}33\cdot10^{-28}$ (=dosExclusiones.txt=, =restrictDos.txt=); $\mathrm{SRC}_r=1{,}9907\cdot10^{10}$, $F=82{,}133=(-9{,}063)^2$, $F_c=3{,}860=t_c^2$ (=unaExclusion.txt=); $\mathrm{SRC}_r=1{,}7229\cdot10^{10}$, aumento $1{,}2131\cdot10^8$, $F=3{,}560$, $p=0{,}0598$ (=igualdad.txt=, =restrictIgualdad.txt=). $t_c=1{,}9647$ (=S18-Prct-A…/contrasteC.txt=).
+- $\bar R^2$ del modelo completo $0{,}5981$ (=r2AjustadoTresModelos.txt=); el del restringido de la igualdad, $1-\frac{1{,}7229/503}{4{,}2826/505}=0{,}5961$, menor, como dice l. 403.
+- Tabla «Conjunto $\neq$ individual» (l. 419–421): $t=-7{,}43$, $R^2=0{,}5352$, ee $253{,}57$ de =nox= sin =lnox= (=S14-Prct-B…/Ols_rooms_nox_simple_y_conjunto.txt=, =S22-Prct-B…/sinLnox.txt=); $R^2=0{,}5362$, $F(2,502)=28{,}1754$, $p=2{,}5\cdot10^{-12}$ (=apertura.txt=), coherente con la pregunta 8.
+- $F(1,504)=472{,}95=t^2$ de la sesión 18 (l. 35, 62): =S18-Prct-A…/tabla.txt=, =identidad.txt=, =restriccionCero.txt=.
+- Resto de cifras calculadas a partir de las de la lección: $27$, $10{,}13=3{,}182^2$ (l. 183, 232); $0{,}30$, $0{,}01$, $42{,}4$, $0{,}293$ (l. 208, 222); $60^\circ$ y $88{,}2^\circ$ (l. 230); $82{,}9^\circ$ (l. 234: $R^2_c=3F_c/(3F_c+502)=0{,}01543$, $\theta_c=82{,}86^\circ$); tabla de casos inventados (l. 465–467): $F=6{,}00$, $18{,}00$, $3{,}36$; $\theta=18{,}4^\circ$, $84{,}3^\circ$; $F_c=19{,}16$, $4{,}76$, $2{,}61$; error estándar de la diferencia $\sqrt{55\,814+16\,579+5\,438}=279{,}0$.
+
+** Cifras sin salida de Gretl en el curso
+No las doy por buenas ni por malas a partir de las salidas del curso. Como información adicional, las he recalculado con =gretlcli= sobre =hprice2.gdt= en un directorio temporal, fuera del repositorio, y todas coinciden:
+- $t$ de =lnox= sin =nox= $=-7{,}51$ y $R^2=0{,}5361$ (l. 420, 439): mi cálculo, $-7{,}512$ y $0{,}536144$.
+- Correlación =nox=–=lnox= $=0{,}994$ y ángulo «de unos $6^\circ$» (l. 424, 439): $0{,}9939$ y $6{,}31^\circ$. (=elipse.txt= y =intervalos.txt= dan la correlación entre los /estimadores/, $-0{,}993$, que es otra cosa.)
+- Covarianza estimada $-2\,719$ (nota de l. 393): $-2718{,}76$.
+- Valores críticos sin salida: $F_c(3,502)=2{,}62$ y $3{,}82$ al $1\,\%$ (l. 260, 276): $2{,}6227$ y $3{,}8208$; $F_c(1,3)=10{,}13$ y $t_c(3)=3{,}182$: $10{,}128$ y $3{,}1824$; $F_c(3,2)$, $F_c(3,6)$, $F_c(3,999)$: $19{,}164$, $4{,}757$, $2{,}614$.
+
+** Remisiones seguidas
+- Lección 12: identidad $t^2=(n-k)\mathrm{SEC}/\mathrm{SRC}$ demostrada con $k=2$ (S17-Lecc12, l. 377–386); $Y_i-\overline Y=U_i-\overline U$ bajo $H_0$ (l. 458); base ortonormal y coordenadas $C_j$, «isotropía» (l. 159–175); ejemplo $t^2=27$ (l. 402–406); propiedad de dimensión alta enunciada sin demostrar y anuncio de la lección 13 (l. 456); cono con $n=1002$ y franja vertical (l. 430–436); tabla con $n=5$, $R^2=0{,}90$ significativo (l. 603–604); «ese $1$ es $k-1$ con $k=2$» y $\mathrm{ee}=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$ con «longitud propia» en la recapitulación (l. 665–694); nota de la tabla con $\sqrt{\mathrm{STC}/(n-1)}$ (l. 584); «no rechazar no es aceptar» (l. 613).
+- Lección 8: aviso SCR/SCE (S10-Lecc08, l. 201); «$R^2$ nunca empeora al añadir regresores» (l. 489); ejemplo $\mathrm{SEC}=90$, $\mathrm{SRC}=10$, $n=5$; ortogonalidad falsa de $\boldsymbol{\widehat e}$ con la hipotenusa (respuesta de su pregunta 4), a la que remite la respuesta de la pregunta 6.
+- Lección 9: $E[Y\mid\mathit1]=\mathrm E(Y)\,\mathit1$ (S12-Lecc09, l. 199–203).
+- Lección 10: $\boldsymbol{\widehat e}\boldsymbol{\mathsf X}=\boldsymbol 0$ (S13-Lecc10, l. 262); Pitágoras generalizado (l. 651).
+- Lección 11: $Var[\boldsymbol{\widehat\beta}\mid\boldsymbol X]=\sigma^2(\boldsymbol X^\top\boldsymbol X)^{-1}$ con la misma notación (S15-Lecc11, l. 572–575); $n-1$ grados de libertad del vector en desviaciones (l. 532); «cuasivarianza de los residuos».
+- Lecciones 3, 4, 5 y 6: Pitágoras en $\mathbb R^n$ (L3), $\mathcal L(\boldsymbol 1)^\perp$ (L4, citado así por L5), correlación como coseno (L5), proyección ortogonal (L6).
+- Apéndice: §1.6 reglas 1 y 3 (pág. 7); §5.1 $\mathcal E$ y $\mathcal R$; §5.4 (pág. 14); §5.5 (pág. 16), incluida la frase de la l. 344 cambiada hoy, coherente con la lección (ajuste restringido en desviaciones como proyección sobre $\mathcal E_r$, la constante no se restringe, nota sobre el conjunto trasladado); §6.4 parte sistemática (pág. 19); §7 Resultados 1 y 2 (págs. 21–22); §7.2 (pág. 22); §8 Resultado 3 y corolario de $\mathrm E(R^2)$ (pág. 24); §10 (pág. 27). Páginas cotejadas con =pdftotext= sobre =Apendice-geometria.pdf=; anclas HTML presentes en el =.org=.
+- Prácticas: S11-B act. 2 (pág. 2, =#price-rooms=); S14-B act. 3 (pág. 5, =#tercer-regresor=), act. 4 (pág. 5, =#r2-nunca-disminuye=), act. 5 (pág. 6, =#r2-ajustado=), con la definición de $\bar R^2$ por grados de libertad en su apéndice y el rótulo «R-cuadrado corregido»; S16-A act. 3 (pág. 4, =#loop=); S18-A act. 1 (pág. 2), act. 3 (pág. 4, =#identidad-F=, que dice lo que l. 62 le atribuye) y act. 5 (pág. 6, =#doce-viviendas=).
+- Curso de Estadística: la tabla ANOVA de Excel con regresión que cita l. 272 está en el inventario (=Inventario-2026-10-25-estadistica-previa.org=, F4 D36–41); que «Valor crítico de F» es el valor $p$ es correcto.
+
+** Figuras
+- =TrianguloF_ancho.png=: hipotenusa verde $\boldsymbol y-\boldsymbol{\overline y}$ con $\sqrt{\mathrm{STC}}$, cateto violeta $\boldsymbol{\widehat y}-\boldsymbol{\overline y}$ con $\sqrt{\mathrm{SEC}}$, residuo gris $\boldsymbol{\widehat e}$ con $\sqrt{\mathrm{SRC}}$, ángulo $\theta$, ángulo recto, eje rotulado «subespacio de los regresores en desviaciones (dim. $k-1$)», sin regresor bajo el eje: coincide con el pie y con l. 193–194.
+- =ProyeccionYTriangulo.png=: plano $\mathcal L(\boldsymbol 1,\boldsymbol x_2,\ldots,\boldsymbol x_k)$, recta azul «subespacio restringido», recta gris por el origen paralela al cateto violeta, triángulo sombreado, tres ángulos rectos; a la derecha, $\sqrt{\mathrm{SRC}_r}$, $\sqrt{\mathrm{SRC}_r-\mathrm{SRC}}$, $\sqrt{\mathrm{SRC}}$, $\theta_r$, eje «las $q$ direcciones que la restricción suprime» y vértice «$\boldsymbol{\widehat y}_r$ (ajuste con las $q$ restricciones)». Coincide con el pie (l. 296) y con l. 342–344.
+- =ProyeccionAnidada.png=: es el panel izquierdo ampliado; los tres ángulos rectos que describe l. 342 están dibujados donde dice.
+
+** Preguntas de repaso
+Las doce se pueden contestar con la lección; en cada una la opción marcada es correcta y es la única correcta. Las explicaciones coinciden con el texto actual, salvo los matices de L8 (pregunta 5) y L9 (pregunta 11).
+
+** Reglas de la Guía
+No he encontrado «compatible», «corregido» fuera del rótulo de Gretl, «grados de libertad del modelo» ni esperanzas con la tipografía cambiada. $\hat\beta$ dice estimador o estimación donde importa (nota de l. 393). La única desviación es la de L6.
