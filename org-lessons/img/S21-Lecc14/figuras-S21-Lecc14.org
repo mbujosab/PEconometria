@@ -21,6 +21,10 @@ azul, el residuo en gris, el ajuste en violeta.
   $\tilde{\boldsymbol x}_2$ (gris), la parte propia de $\boldsymbol x_2$. Los dos
   regresores tienen la misma longitud en los tres paneles; la de la parte propia
   es $\sin\theta$ veces esa longitud: $0{,}87$, $0{,}34$ y $0{,}10$.
+  El ángulo se rotula con su valor ($\theta=60^\circ$, etc.) bajo el vértice,
+  en el mismo sitio en los tres paneles: junto al arco no cabe en el de
+  $60^\circ$ (toca la flecha gris) ni se lee en el de $6^\circ$, y el pie con
+  los valores no se ve en la transparencia (2026-11-20).
 - =ParalelogramoAplastado= (+ =_fila=): dos paneles con el mismo ajuste
   $\boldsymbol{\mathop{\widehat y}}$ escrito como
   $\hat\beta_2\boldsymbol x_2+\hat\beta_3\boldsymbol x_3$ (regresores en
@@ -75,7 +79,7 @@ en la transparencia (decisión del 2026-09-30; antes también iba a 3800 px).
     \draw[axis] (-0.3,0) -- (3.6,0);
     % ángulo
     \draw pic[-,draw=black,angle radius=18,\Regresor!70!black,fill=\Regresor!20] {angle = X3--O--X2};
-    \node[\Regresor!70!black,anchor=west,inner sep=1pt] at ({#1/2}:0.8) {$\theta$};
+    \node[\Regresor!70!black,anchor=north west,inner sep=1pt,font=\small] at (0.02,-0.09) {$\theta=#1^\circ$};
     % proyección y ángulo recto
     \draw[guide] (X2) -- (P);
     \tkzMarkRightAngle[size=.16,gray,very thin,fill=lightgray!70,opacity=0.6](O,P,X2)
@@ -117,8 +121,9 @@ convert PartePropia.png -gravity center -background white -extent 3800x PartePro
   <<Colores de la regresion>>
 
   % #1 = angulo entre generadores; #2 = coef. numérico a de yhat; #3 = a' de yhat';
-  % #4 = texto de la descomposición de yhat; #5 = texto de la de yhat'; #6 = título
-  \newcommand{\panel}[6]{%
+  % #4 = texto de la descomposición de yhat; #5 = texto de la de yhat'; #6 = título;
+  % #7 = borde izquierdo de la caja del panel; #8 = borde derecho
+  \newcommand{\panel}[8]{%
   \begin{tikzpicture}
     [scale=1.6,
      axis/.style={-,gray,very thin},
@@ -128,8 +133,8 @@ convert PartePropia.png -gravity center -background white -extent 3800x PartePro
     \coordinate (O)  at (0,0);
     \coordinate (X2) at (1,0);
     \coordinate (X3) at ({cos(#1)},{sin(#1)});
-    \coordinate (Y)  at (1.0,0.35);
-    \coordinate (Yp) at (1.0,0.42);
+    \coordinate (Y)  at (-0.5,0.35);
+    \coordinate (Yp) at (-0.5,0.42);
     \coordinate (A)  at (#2,0);
     \coordinate (Ap) at (#3,0);
     % descomposición de yhat y de yhat': a x2 (horizontal) + b x3 (hasta el ajuste)
@@ -139,24 +144,24 @@ convert PartePropia.png -gravity center -background white -extent 3800x PartePro
     \draw[coordp,\Regresor!60!black] (Ap) -- (Yp);
     % generadores (unitarios)
     \draw[vector,\Regresor,dashed] (O) -- (X2) node[anchor=north west,xshift=-1mm]{$\boldsymbol x_2$};
-    \draw[vector,\Regresor!60!black,dashed] (O) -- (X3) node[anchor=east,xshift=-1mm]{$\boldsymbol x_3$};
+    \draw[vector,\Regresor!60!black,dashed] (O) -- (X3) node[anchor=south east]{$\boldsymbol x_3$};
     % los dos ajustes
     \fill[\Ajuste] (Y) circle (0.035) node[anchor=west,xshift=1mm]{$\boldsymbol{\mathop{\widehat y}}$};
     \fill[\Ajuste!60] (Yp) circle (0.035) node[anchor=south west,xshift=0.5mm]{$\boldsymbol{\mathop{\widehat y}}'$};
     % etiquetas
-    \node[anchor=north west,font=\small,align=left] at (-1.55,-0.15) {#4\\#5};
-    \node[anchor=south,font=\small,gray!60!black] at (0.0,1.35) {#6};
-    \path (-1.6,-0.9) rectangle (2.3,1.6);
+    \node[anchor=north west,font=\small,align=left] at ({#7+0.05},-0.15) {#4\\#5};
+    \node[anchor=south,font=\small,gray!60!black] at ({(#7+#8)/2},1.3) {#6};
+    \path (#7,-0.85) rectangle (#8,1.55);
   \end{tikzpicture}}
 
-  \panel{70}{0.873}{0.847}
-    {$\boldsymbol{\mathop{\widehat y}}=0{,}87\,\boldsymbol x_2+0{,}37\,\boldsymbol x_3$}
-    {$\boldsymbol{\mathop{\widehat y}}'=0{,}85\,\boldsymbol x_2+0{,}45\,\boldsymbol x_3$}
-    {generadores a $70^\circ$}\hspace{6mm}%
-  \panel{10}{-0.985}{-1.382}
-    {$\boldsymbol{\mathop{\widehat y}}=-0{,}99\,\boldsymbol x_2+2{,}02\,\boldsymbol x_3$}
-    {$\boldsymbol{\mathop{\widehat y}}'=-1{,}38\,\boldsymbol x_2+2{,}42\,\boldsymbol x_3$}
-    {generadores a $10^\circ$}
+  \panel{70}{-0.627}{-0.653}
+    {$\boldsymbol{\mathop{\widehat y}}=-0{,}63\,\boldsymbol x_2+0{,}37\,\boldsymbol x_3$}
+    {$\boldsymbol{\mathop{\widehat y}}'=-0{,}65\,\boldsymbol x_2+0{,}45\,\boldsymbol x_3$}
+    {generadores a $70^\circ$}{-1.2}{1.3}\hspace{3mm}%
+  \panel{10}{-2.485}{-2.882}
+    {$\boldsymbol{\mathop{\widehat y}}=-2{,}48\,\boldsymbol x_2+2{,}02\,\boldsymbol x_3$}
+    {$\boldsymbol{\mathop{\widehat y}}'=-2{,}88\,\boldsymbol x_2+2{,}42\,\boldsymbol x_3$}
+    {generadores a $10^\circ$}{-3.05}{1.3}
 \end{document}
 #+END_SRC
 

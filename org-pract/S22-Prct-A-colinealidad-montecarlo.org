@@ -97,7 +97,7 @@ set verbose off
 
 * Descripción de la práctica
 
-La lección 14 dijo que el error estándar de $\hat\beta_j$ es $\mathfrak s$ dividido por la longitud de la parte propia del regresor, y que esa longitud se encoge con el ángulo entre el regresor y los demás: $\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j$. Con dos regresores no constantes, $\sin^2\theta=1-\rho^2$ y la varianza del estimador se multiplica por $\mathrm{VIF}=1/(1-\rho^2)$. Esta práctica lo comprueba repitiendo: construimos dos regresores con una correlación elegida, sorteamos la perturbación dos mil veces y miramos cuánto oscilan las estimaciones.
+La lección 14 dijo que el error estándar de $\hat\beta_j$ es $\mathfrak s$ dividido por la longitud de la parte propia del regresor, y que esa longitud se encoge con el ángulo entre el regresor y los demás: $\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j$. Con dos regresores no constantes, $\sin^2\theta=1-\rho^2$ y la varianza del estimador se multiplica por $\mathrm{VIF}=1/(1-\rho^2)$. Esta práctica lo comprueba repitiendo: construimos dos regresores con una correlación elegida, sorteamos la perturbación dos mil veces y miramos cuánto cambian las estimaciones de una réplica a otra.
 
 El mundo artificial tiene $n=100$, $y=1+x_2+x_3+u$ con $u$ normal de desviación típica $1$, y cuatro versiones del par de regresores: $\rho=0$; $0{,}9$; $0{,}99$ y $0{,}999$. Los regresores están fijos dentro de cada experimento; lo único que cambia de una réplica a otra es $u$. Un detalle de construcción: $\boldsymbol x_3=\rho\boldsymbol z_1+\sqrt{1-\rho^2}\,\boldsymbol z_2$ con $\boldsymbol x_2=\boldsymbol z_1$, así que el subespacio generado por $\boldsymbol 1$, $\boldsymbol x_2$ y $\boldsymbol x_3$ es /el mismo/ para los cuatro valores de $\rho$. Lo que cambia es el ángulo entre los generadores, no el plano que generan.
 
@@ -105,7 +105,7 @@ El mundo artificial tiene $n=100$, $y=1+x_2+x_3+u$ con $u$ normal de desviación
 
 1. Comprobar que la varianza empírica de $\hat\beta_2$ crece como el VIF, y que coincide con $\sigma^2/\Vert\tilde{\boldsymbol x}_2\Vert_e^2$.
 2. Ver que la $\mathrm{SRC}$ no cambia con $\rho$: el ajuste es el mismo punto, y solo cambian sus coordenadas.
-3. Ver que $\hat\beta_2$ y $\hat\beta_3$ oscilan /juntos y al revés/: covarianza negativa, porque aquí la correlación entre los regresores es positiva (con correlación negativa oscilarían en el mismo sentido), y suma $\hat\beta_2+\hat\beta_3$ tan estable como lo era $\hat\beta_2$ sin colinealidad.
+3. Ver que $\hat\beta_2$ y $\hat\beta_3$ se desvían /a la vez y en sentidos opuestos/: covarianza negativa, porque aquí la correlación entre los regresores es positiva (con correlación negativa se desviarían en el mismo sentido), y suma $\hat\beta_2+\hat\beta_3$ tan estable como lo era $\hat\beta_2$ sin colinealidad.
 4. Ver cómo un efecto verdadero deja de ser significativo cuando el regresor pierde parte propia.
 
 /Comandos nuevos de esta práctica/. Seguimos con =nulldata=, =set seed=, =normal()=, =series= y =scalar= (sesión 7), =ols= con =--quiet= y los accesores =$ess=, =$coeff= y =$stderr= (sesiones 11 a 18), las matrices y =mcov= (práctica A de la sesión 16, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=7][apéndice]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#apendice-matricial][html]])) y =critical= (sesión 18). Lo nuevo:
@@ -270,7 +270,7 @@ gnuplot b3_rho99 b2_rho99 --output="@workdir/nubeRho99.png"   # guardada para el
 
 Fíjese en los ejes antes que en las barras. Los dos histogramas tienen la misma forma y el mismo centro, $1$: el estimador sigue siendo insesgado. Lo que cambia es la escala: con $\rho=0{,}99$ la desviación típica es $0{,}75$ en lugar de $0{,}10$, el factor $\sqrt{\mathrm{VIF}}\approx7$ de la lección 14, y hay réplicas en que $\hat\beta_2$ sale negativo, con un verdadero valor de $1$.
 
-La nube es la figura de ``Por qué oscilan los coeficientes'' de la lección 14 vista dos mil veces: los pares $(\hat\beta_2,\hat\beta_3)$ no se dispersan en todas direcciones, sino a lo largo de una recta de pendiente $-1$, con correlación $-0{,}99$. Cada muestra reparte el efecto total, $2$, entre dos regresores que casi no se distinguen, y el reparto es casi arbitrario; la suma no. Con datos reales solo se dispone de una réplica: un punto de esa nube, sin saber cuál.
+La nube es la figura de ``Por qué son inestables los coeficientes'' de la lección 14 vista dos mil veces: los pares $(\hat\beta_2,\hat\beta_3)$ no se dispersan en todas direcciones, sino a lo largo de una recta de pendiente $-1$, con correlación $-0{,}99$. Cada muestra reparte el efecto total, $2$, entre dos regresores que casi no se distinguen, y el reparto es casi arbitrario; la suma no. Con datos reales solo se dispone de una réplica: un punto de esa nube, sin saber cuál.
 
 * Preguntas de interpretación para la clase
 
@@ -283,7 +283,7 @@ La nube es la figura de ``Por qué oscilan los coeficientes'' de la lección 14 
 
 * Para profundizar
 
-- Lección 14 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html][lección 14]]), en especial ``La parte propia de un regresor'' y ``Por qué oscilan los coeficientes''.
+- Lección 14 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html][lección 14]]), en especial ``La parte propia de un regresor'' y ``Por qué son inestables los coeficientes''.
 - Lección 11 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html][lección 11]]), la covarianza entre $\hat\beta_1$ y $\hat\beta_2$ con $k=2$.
 - Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 3, sección 3.4, ``Multicollinearity''.
 - Manual de Gretl: funciones =mcov=, =corr= y =sd=; matrices en bucles.
@@ -310,7 +310,7 @@ La nube es la figura de ``Por qué oscilan los coeficientes'' de la lección 14 
 
 5. /Qué cambiar./ Más observaciones: la parte propia crece como $\sqrt n$, y para recuperar el factor $7$ del error estándar haría falta multiplicar $n$ por $50$. O más variación propia: sortear $\boldsymbol x_3$ con menos correlación es lo que un diseño experimental puede hacer y los datos observados no; con $\rho=0{,}9$ bastaban cien observaciones. La segunda opción es mucho más barata cuando está disponible, y es lo que la lección 14 llamó regresores que varíen por separado.
 
-6. /Correlación negativa./ El subespacio sería el mismo, porque $\boldsymbol x_3$ seguiría siendo una combinación de $\boldsymbol z_1$ y $\boldsymbol z_2$, y la parte propia de $\boldsymbol x_2$ tendría prácticamente la misma longitud, porque solo depende del valor absoluto de la correlación. Por eso la $\mathrm{SRC}$ sería idéntica, y el VIF, la varianza de $\hat\beta_2$ y la última columna, prácticamente las mismas. Cambiaría el signo de la covarianza, que pasaría a ser positiva, cerca de $+0{,}57$: la nube se alargaría a lo largo de una recta de pendiente $+1$, y cuando el azar sube un coeficiente, sube también el otro. Y se intercambiarían las columnas de la suma y de la diferencia: la dirección compartida sería ahora $\boldsymbol x_2-\boldsymbol x_3$, así que la diferencia se estimaría con precisión y la suma no. El $R^2$ también cambiaría, y mucho: con $\beta_2=\beta_3=1$ y regresores casi opuestos, los dos efectos casi se cancelan y la parte sistemática de $\boldsymbol y$ es pequeña. Lo que no depende del signo es lo que la lección 14 subraya: las coordenadas oscilan mucho y el ajuste apenas se mueve.
+6. /Correlación negativa./ El subespacio sería el mismo, porque $\boldsymbol x_3$ seguiría siendo una combinación de $\boldsymbol z_1$ y $\boldsymbol z_2$, y la parte propia de $\boldsymbol x_2$ tendría prácticamente la misma longitud, porque solo depende del valor absoluto de la correlación. Por eso la $\mathrm{SRC}$ sería idéntica, y el VIF, la varianza de $\hat\beta_2$ y la última columna, prácticamente las mismas. Cambiaría el signo de la covarianza, que pasaría a ser positiva, cerca de $+0{,}57$: la nube se alargaría a lo largo de una recta de pendiente $+1$, y cuando el azar sube un coeficiente, sube también el otro. Y se intercambiarían las columnas de la suma y de la diferencia: la dirección compartida sería ahora $\boldsymbol x_2-\boldsymbol x_3$, así que la diferencia se estimaría con precisión y la suma no. El $R^2$ también cambiaría, y mucho: con $\beta_2=\beta_3=1$ y regresores casi opuestos, los dos efectos casi se cancelan y la parte sistemática de $\boldsymbol y$ es pequeña. Lo que no depende del signo es lo que la lección 14 subraya: las coordenadas cambian mucho y el ajuste apenas se mueve.
 
 * COMMENT Banco de preguntas de reserva
 
