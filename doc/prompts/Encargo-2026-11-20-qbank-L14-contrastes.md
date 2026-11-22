@@ -30,3 +30,96 @@ Añadido el 21-11-2026, tras la revisión de fondo de la lección 14. Dos afirma
 
 ## Aplicado
 
+
+Revisado por la sesión del banco el 22-11-2026 (L-11 a L-16; en L-01..L-10 ninguna pregunta dice «significativo»,
+«permiten afirmar» ni «oscilar»). **Diez preguntas tocadas, de L-12 a L-14**; ninguna cifra, ninguna respuesta correcta y ningún
+sorteo cambian. `make lint` de L-12 a L-14 da lo mismo que antes y la vista de lectura está compilada. Commit `eb01ed9` del banco, empujado, y Moodle
+reimportado el mismo día (1 828 preguntas en diez categorías).
+
+**Punto 1, lecturas de una salida concreta.** Tres opciones decían «los datos no permiten afirmar…»; ahora son
+lecturas en términos de «no se rechaza», con su nivel:
+
+- `L-13-QueDiceYQueNoDiceElF` (el enunciado acaba en «al 5 % de significación:»): «los datos no permiten afirmar que
+  quitar x3 y x4 alargue el residuo más de lo que cabe esperar por azar» pasa a «no se rechaza que los coeficientes de
+  x3 y x4 sean cero a la vez». En sus `exp`, fuera «no hay evidencia de que alguno de los dos coeficientes sea
+  distinto de cero» (truncada) y «los datos no permiten afirmar que… acorten el residuo».
+- `L-13-DosTPequenosYUnFGrande` (mismo final de enunciado): la opción del régimen en que nada rechaza pasa a «no se
+  rechaza que el coeficiente de x3 sea cero, ni que lo sea el de x4, ni que lo sean los dos a la vez». Su `exp`:
+  «…no es el caso de "t pequeños con F grande": aquí tampoco el F rechaza al 5 % que los coeficientes de x3 y x4 sean
+  cero a la vez. Que no se rechace no demuestra que sean cero: es ausencia de evidencia contra H0, no evidencia a su
+  favor».
+- `L-14-UnaSalidaConSusVIF-x3`, parte 3: la misma opción, con el nivel dentro («al 5 % de significación no se rechaza
+  que el coeficiente de xa sea cero, ni que lo sea el de xb, ni que lo sean los dos a la vez»), y su `exp` igual.
+
+No se ha tocado, por ser afirmación general o caso hipotético: la `exp` de `L-13-QueContrastaElFDelPie` («si no se
+rechaza, los datos no permiten afirmar que alguno de los coeficientes… sea distinto de cero», que es la redacción
+que pidió el aviso de L-13 del 20-11); las opciones «rechazar H0 no excluye…», «si el F no rechazase…»; y el
+enunciado de `L-14-QueHacerConLaColinealidad` («el F… rechaza con claridad»), que describe un caso sin salida.
+Tampoco «con estos datos no se puede separar el efecto de uno del efecto del otro», que la lección conserva en
+«Qué decir y qué no hacer».
+
+**Puntos 2 y 3, «significativo» se dice del coeficiente.**
+
+- `L-14-QueHacerConLaColinealidad`: «…hasta que el que quede salga significativo» pasa a «…hasta que el coeficiente
+  del que quede salga significativo».
+- `L-12-RuidoEnElPieDeLaTabla`: «dice si el efecto de la superficie es significativo» pasa a «dice si el coeficiente
+  de la superficie es significativo».
+- `L-13-DosTPequenosYUnFGrande` (`exp`): «eliminar los dos "porque ninguno es significativo"» pasa a «"porque sus
+  coeficientes no son significativos"», como la opción 1 de la pregunta 11 de la lección.
+- `L-12-AnchuraDelIntervalo` (`exp`): «Decir solo "es significativo"» pasa a «"el coeficiente es significativo"».
+- Rótulos de la vista de profesor (`motivo`) de `L-12-UnaSalidaFilaAFila-x3` y `L-13-DosSalidasDeGretl-x3`:
+  «algún regresor no es significativo» pasa a «el coeficiente de algún regresor…», y «ninguno de los dos
+  regresores» a «ninguno de los dos coeficientes».
+
+Quedan como estaban, porque no se dice de un regresor: «un F conjunto no puede ser significativo si ningún t
+individual lo es» (opción falsa de `L-13-TIndividualesPequenosFGrande`), «un ángulo de 84° resulta significativo» y
+«Significativo no es relevante» (`L-13-MismoR2DistintoVeredicto`), «significativo e irrelevante a la vez» y «el
+veredicto "no significativo"» (`L-12-SignificativoNoEsRelevante`, dichos del efecto estimado). Ninguna pregunta decía
+«R² alto con casi nada significativo».
+
+**Punto 4.** Nada que cambiar: ninguna pregunta cita esa frase de los apuntes.
+
+**Punto 5, restricciones lineales.** `L-14-QueHacerConLaColinealidad` (su enunciado fija correlación positiva y
+alta). La opción verdadera decía que la combinación «se estima con precisión»; ahora, «estimado con un error
+estándar menor». Las dos `exp` ya no hablan de «la dirección compartida, la larga» ni de «se interpreta con
+claridad»: dicen que lo que decide la ganancia es la longitud en desviaciones del regresor que deja la restricción
+(con correlación positiva y c > 0, más largo que x2 y mucho más que su parte propia). Ninguna pregunta daba la regla
+«solo gana precisión si los efectos tienen el mismo signo que la correlación» ni decía «reduce la colinealidad».
+
+**Punto 6, signo de la covarianza.** `L-14-SubespacioEstableCoordenadasNo` es la única que usa la regla; su
+enunciado ya regresa sobre la constante y dos regresores. La `exp` decía «Lo general es que la covarianza… tiene el
+signo contrario…»; ahora, «Con dos regresores no constantes, como aquí, la covarianza…».
+
+**Punto 7.** Ninguna pregunta afirma que los dos modelos (`nox` solo, `nox` y `lnox`) den el mismo cambio del precio
+ajustado.
+
+**Punto 8.** Ninguna pregunta del banco dice «oscilar» ni cita el título antiguo.
+
+**Punto 9.** `L-14-SubespacioEstableCoordenadasNo`, `exp` de la figura: «y β̂2 lo compensa en sentido contrario»
+pasa a «y β̂2 cambia cos θ ≈ (la correlación del enunciado) veces esa cantidad, en sentido contrario». Uno de los
+tres ángulos sorteados es de 30° (cos θ = 0,866), así que no se dice «casi lo mismo»: se da la cifra.
+
+**Punto 10.** Ninguna pregunta cita el título «Qué no hacer».
+
+**Punto 11.** (g) `L-13-TIndividualesPequenosFGrande`: «por unidad de longitud propia del regresor» pasa a «por
+unidad de longitud de la parte propia del regresor»; no había ningún «componente de variación propia» («variación
+propia» a secas sigue, como en la lección). (a) Ninguna pregunta da como síntoma de colinealidad que un coeficiente
+cambie al añadir un regresor (`L-14-EfectoParcialOColinealidad` y `L-14-TablaAntesYDespues` dicen que eso es el
+efecto parcial); `L-14-TablaAntesYDespues` conserva una opción falsa sobre quitar unas pocas observaciones, que es
+un cambio de muestra y sigue siendo correcta. (b), (c), (d): `L-14-QueHacerConLaColinealidad` y
+`L-14-QueHacerYQueNoHacer` ya decían lo que ahora dice la lección (el coeficiente que queda cambia de significado;
+contrastar con un F antes de eliminar varios; al ortogonalizar, el coeficiente de x2 pasa a ser el del modelo sin
+x3) y no comparan errores estándar con el modelo sin x_j. (e), (f), (h): sin efecto en el banco.
+
+**«Cada t pregunta si su regresor aporta algo además de los otros»: decidido por el instructor el 22-11-2026.** Las
+opciones y `exp` que lo dicen (`L-13-DosTPequenosYUnFGrande`, `L-13-TIndividualesPequenosFGrande`,
+`L-13-DosSalidasDeGretl-x3`, `L-14-QueHacerYQueNoHacer`) **se quedan como están**: describen qué pregunta el
+contraste, no qué ha respondido, igual que los apuntes de la lección 13 («el t de `nox` pregunta si `nox` aporta algo
+además de la constante, `rooms` y `lnox`»), y esa descripción es lo que distingue la opción verdadera («además de
+los otros») de la falsa («por sí solo, ignorando a los demás»). Tampoco se toca «cada t juzga a su regresor con el
+otro dentro del modelo» de `L-13-TIndividualesPequenosFGrande`.
+
+Sí se cambió una `exp` de `L-14-QueHacerConLaColinealidad` que leía un resultado en términos del regresor: «cada uno
+dice que su regresor añade poco al otro, no que el par no añada nada» pasa a «cada uno deja sin rechazar que su
+coeficiente sea cero con el otro regresor en el modelo, no que lo sean los dos a la vez». Commit `f0c6c72` del
+banco, empujado, y esa categoría reimportada en Moodle el mismo 22-11 (300 preguntas).
