@@ -94,7 +94,7 @@ set workdir "@directory"
 
 * Descripción de la práctica
 
-Retomamos =hprice2=, ya usado en la práctica B de la sesión 11, y damos el paso a la regresión /múltiple/: primero con dos regresores (=rooms= y =nox= a la vez), y después con un tercero (=stratio=, la proporción alumnos/profesor de cada zona). El hilo conductor es doble: por un lado, observar cómo cambia el coeficiente de =rooms= al pasar del modelo simple al múltiple (efecto parcial, lección 10); por otro, comprobar con datos reales una propiedad algebraica de MCO anunciada en la lección 8 (el $R^2$ nunca disminuye al añadir un regresor) y ver por qué esto exige corregirlo con el /$R^2$ ajustado/ ($\bar R^2$), que sí puede bajar.
+Retomamos =hprice2=, ya usado en la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf][práctica B de la sesión 11]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-B-hprice2-ajuste.html][html]]), y damos el paso a la regresión /múltiple/: primero con dos regresores (=rooms= y =nox= a la vez), y después con un tercero (=stratio=, la proporción alumnos/profesor de cada zona). El hilo conductor es doble: por un lado, observar cómo cambia el coeficiente de =rooms= al pasar del modelo simple al múltiple (efecto parcial, lección 10); por otro, comprobar con datos reales una propiedad algebraica de MCO anunciada en la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=13][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#suma-explicada][html]]) (el $R^2$ nunca disminuye al añadir un regresor) y ver por qué esto exige corregirlo con el /$R^2$ ajustado/ ($\bar R^2$), que sí puede bajar.
 
 /Objetivo/
 
@@ -104,14 +104,14 @@ Retomamos =hprice2=, ya usado en la práctica B de la sesión 11, y damos el pas
 4. Calcular $\bar R^2$ ``a mano'' y contrastarlo con el que reporta Gretl, entendiendo por qué $\bar R^2$ sí puede bajar.
 5. Practicar, una vez más, la lectura /ceteris paribus/ de los coeficientes sin caer en lenguaje causal.
 
-/Comandos nuevos de esta práctica/. Casi todo es conocido: =open=, =setinfo=, =summary= (sesión 4), =printf= y los escalares (sesión 7), =ols= con varios regresores y la opción =--quiet=, =corr= y el accesor =$rsq= (sesión 11 y práctica A de hoy). Lo nuevo son dos accesores del último modelo estimado y una función:
-- =$ncoeff= :: el número de coeficientes estimados, es decir, $k$ contando la constante. =$nobs= es el número de observaciones (sesión 7).
+/Comandos nuevos de esta práctica/. Casi todo es conocido: =open=, =setinfo=, =summary= (sesión 4: [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S04-Prct-A-hprice2.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S04-Prct-A-hprice2.html#atributos][html]]) y [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S04-Prct-A-hprice2.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S04-Prct-A-hprice2.html#descriptivos][html]]) de la práctica A), =printf= y los escalares ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=4][actividad 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#correlacion-coseno][html]]) de la práctica A de la sesión 7), =ols= con varios regresores y la opción =--quiet=, =corr= y el accesor =$rsq= (sesión 11 y práctica A de hoy: [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#ejemplo-leccion-7][html]]), [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=5][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#sin-constante][html]]) y [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#bondad-ajuste][html]]) de la práctica A de la sesión 11 y [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms][html]]) de la práctica A de hoy). Lo nuevo son dos accesores del último modelo estimado y una función:
+- =$ncoeff= :: el número de coeficientes estimados, es decir, $k$ contando la constante. =$nobs= es el número de observaciones ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html#vector-pequeno][html]]) de la práctica B de la sesión 7).
 - =$ess= :: la suma de los cuadrados de los residuos del último modelo, $\mathrm{SRC}$.
 - =sst(y)= :: la suma de los cuadrados de las desviaciones de =y= respecto a su media, $\mathrm{STC}$.
 
 * Actividad 1 - Reapertura de hprice2 y etiquetas
 
-=open=, cuatro =setinfo= con la descripción y el nombre para los gráficos, y un =summary= de las cuatro variables, como en la sesión 4. =stratio= es nueva en el curso, por eso la etiquetamos.
+=open=, cuatro =setinfo= con la descripción y el nombre para los gráficos, y un =summary= de las cuatro variables, como en la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S04-Prct-A-hprice2.pdf][práctica A de la sesión 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S04-Prct-A-hprice2.html][html]]). =stratio= es nueva en el curso, por eso la etiquetamos.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -155,7 +155,7 @@ Estimamos el modelo con ambos regresores a la vez, y recordamos (reestimándolas
 
 /Antes de mirar el resultado/: ¿espera que el coeficiente de =rooms= sea muy distinto en la regresión simple y en la múltiple? ¿Y el de =nox=?
 
-Tres =ols= y un =corr=. Los dos primeros son las regresiones simples de la sesión 11; el tercero, con =rooms= y =nox= tras =const=, es el modelo con dos regresores no constantes. =corr rooms nox= imprime la correlación entre ambos, que hará falta en la lectura.
+Tres =ols= y un =corr=. Los dos primeros son las regresiones simples de la sesión 11 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-B-hprice2-ajuste.html#price-rooms][html]]) y [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-B-hprice2-ajuste.pdf#page=2][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-B-hprice2-ajuste.html#price-nox][html]]) de la práctica B); el tercero, con =rooms= y =nox= tras =const=, es el modelo con dos regresores no constantes. =corr rooms nox= imprime la correlación entre ambos, que hará falta en la lectura.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -194,7 +194,7 @@ La razón es que el desplazamiento del coeficiente de $\boldsymbol{x}_2$ al aña
 \]
 donde interviene también la /magnitud/ del coeficiente del regresor añadido y la escala de cada variable. La correlación indica si habrá desplazamiento; no indica cuánto.
 
-Fíjese que $R^2$ no es la suma de los dos $R^2$ simples: $0{,}4841+0{,}1815=0{,}666$ frente a $0{,}535$, porque sus vectores en desviaciones no son ortogonales (correlación $-0{,}30$; lección 10).
+Fíjese que $R^2$ no es la suma de los dos $R^2$ simples: $0{,}4841+0{,}1815=0{,}666$ frente a $0{,}535$, porque sus vectores en desviaciones no son ortogonales (correlación $-0{,}30$; [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=13][lección 10]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#r2-multiple][html]])).
 
 *** El plano de regresión
 :PROPERTIES:
@@ -291,7 +291,7 @@ printf "%s", readfile("Ols_multiple_con_stratio.txt")   # en pantalla
 
 *** Lo que debe observar
 
-El coeficiente de =stratio= es $-1\,167$: un alumno más por profesor en la zona se asocia, manteniendo fijas habitaciones y contaminación, con unos $1\,200$ dólares menos de precio mediano. Compare de nuevo los coeficientes de =rooms= y =nox= con los de la Actividad 2: =rooms= baja de $8\,179$ a $7\,001$ y =nox= de $-1\,885$ a $-1\,693$. Vuelven a cambiar, porque =stratio= está correlacionada con ambos; cada coeficiente responde a la pregunta ``manteniendo fijos /los demás regresores del modelo/'', y esa lista acaba de cambiar.
+El coeficiente de =stratio= es $-1\,167$: un alumno más por profesor en la zona se asocia, manteniendo fijas habitaciones y contaminación, con unos $1\,200$ dólares menos de precio mediano. Compare de nuevo los coeficientes de =rooms= y =nox= con los de la [[#rooms-nox][Actividad 2]]: =rooms= baja de $8\,179$ a $7\,001$ y =nox= de $-1\,885$ a $-1\,693$. Vuelven a cambiar, porque =stratio= está correlacionada con ambos; cada coeficiente responde a la pregunta ``manteniendo fijos /los demás regresores del modelo/'', y esa lista acaba de cambiar.
 
 
 * Actividad 4 - $R^2$ nunca disminuye: los cuatro modelos a la vez
@@ -337,7 +337,7 @@ printf "%s", readfile("comparacionR2cuatroModelos.txt")   # en pantalla
 #+include: ./S14-Prct-B-hprice2-r2ajustado/comparacionR2cuatroModelos.txt example
 #+latex: }
 
-Observe que $R^2$ del modelo con tres regresores no constantes es, como mínimo, igual al de cualquiera de los modelos que ``contiene'' (=price~rooms+nox= y, transitivamente, los dos simples). Es la propiedad mecánica de MCO anunciada en la lección 8 (``un $R^2$ alto no certifica nada por sí solo'', y en particular, /nunca baja/ al añadir un regresor, aporte este lo que aporte).
+Observe que $R^2$ del modelo con tres regresores no constantes es, como mínimo, igual al de cualquiera de los modelos que ``contiene'' (=price~rooms+nox= y, transitivamente, los dos simples). Es la propiedad algebraica de MCO anunciada en la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=13][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#suma-explicada][html]]) (un $R^2$ alto no certifica nada por sí solo y, en particular, /nunca baja/ al añadir un regresor, aporte este lo que aporte).
 
 * Actividad 5 - Del $R^2$ al $R^2$ ajustado
 :PROPERTIES:
@@ -394,7 +394,7 @@ Lea la salida en dos pasos, porque contiene los dos comportamientos posibles.
 
 Esa es, con datos reales, la diferencia entre los dos índices. =radial= mejora el ajuste (toda variable lo hace, aunque sea por casualidad), pero lo mejora /tan poco/ que no compensa el grado de libertad que consume. $R^2$ no lo refleja; $\bar R^2$ sí lo refleja, y baja.
 
-Esto no convierte a $\bar R^2$ en un criterio infalible para elegir modelos; la práctica C de esta sesión muestra hasta dónde llega.
+Esto no convierte a $\bar R^2$ en un criterio infalible para elegir modelos; la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-C-peso-edad.pdf][práctica C]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-C-peso-edad.html][html]]) de esta sesión muestra hasta dónde llega.
 
 El apéndice que cierra esta práctica explica de dónde sale exactamente la fórmula de $\bar R^2$ y por qué tiene esa propiedad.
 
@@ -403,11 +403,11 @@ El apéndice que cierra esta práctica explica de dónde sale exactamente la fó
 :CUSTOM_ID: apendice-r2-ajustado
 :END:
 
-Recordemos (lección 8) que $R^2=1-\mathrm{SRC}/\mathrm{STC}$, con $\mathrm{STC}=\sum_i(y_i-\mu_{\boldsymbol y})^2$ y $\mathrm{SRC}=\sum_i\hat e_i^2$. La idea del $R^2$ ajustado es sustituir, en ese cociente, cada suma de cuadrados por su /cuasivarianza/ correspondiente, es decir, dividir cada una por sus /grados de libertad/ y no por el número de observaciones:
+Recordemos ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=8][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#coeficiente-determinacion][html]])) que $R^2=1-\mathrm{SRC}/\mathrm{STC}$, con $\mathrm{STC}=\sum_i(y_i-\mu_{\boldsymbol y})^2$ y $\mathrm{SRC}=\sum_i\hat e_i^2$. La idea del $R^2$ ajustado es sustituir, en ese cociente, cada suma de cuadrados por su /cuasivarianza/ correspondiente, es decir, dividir cada una por sus /grados de libertad/ y no por el número de observaciones:
 \[
 \bar R^2 \;=\; 1-\frac{\mathrm{SRC}/(n-k)}{\mathrm{STC}/(n-1)},
 \]
-donde $k$ es el número /total/ de regresores del modelo (incluida la constante; convención fijada en la lección 10) y $n-k$ son los grados de libertad de los residuos ($k$ parámetros ``beta'' estimados). El denominador $\mathrm{STC}/(n-1)$ es la cuasivarianza de $\boldsymbol{y}$: el valor, sobre estos datos, del estimador insesgado de la varianza de la variable $Y$ del modelo teórico.[fn::La propiedad de /insesgadez/ que ya conoce del curso de estadística y probabilidad, y que la lección 11 aborda.] El numerador $\mathrm{SRC}/(n-k)$ es la cuasivarianza de $\boldsymbol{\mathop{\widehat{e}}}$: el valor, sobre estos datos, del estimador insesgado de la varianza de las perturbaciones $U$ del modelo teórico.
+donde $k$ es el número /total/ de regresores del modelo (incluida la constante; convención fijada en la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=5][lección 10]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#problema-aritmetico][html]])) y $n-k$ son los grados de libertad de los residuos ($k$ parámetros ``beta'' estimados). El denominador $\mathrm{STC}/(n-1)$ es la cuasivarianza de $\boldsymbol{y}$: el valor, sobre estos datos, del estimador insesgado de la varianza de la variable $Y$ del modelo teórico.[fn::La propiedad de /insesgadez/ que ya conoce del curso de estadística y probabilidad, y que la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S15-Lecc11.pdf#page=11][lección 11]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html#insesgadez][html]]) aborda.] El numerador $\mathrm{SRC}/(n-k)$ es la cuasivarianza de $\boldsymbol{\mathop{\widehat{e}}}$: el valor, sobre estos datos, del estimador insesgado de la varianza de las perturbaciones $U$ del modelo teórico.
 
 Conviene no pasar por alto que numerador y denominador estiman /dos cosas distintas/: el numerador, la dispersión de las perturbaciones alrededor de la recta; el denominador, la dispersión total de $Y$ alrededor de su media. $\bar R^2$ no es, por tanto, el cociente de dos estimaciones de la misma cantidad, sino, igual que $R^2$, una comparación entre lo que queda sin explicar y lo que había que explicar, esta vez con cada suma de cuadrados dividida por sus propios grados de libertad.
 
@@ -460,7 +460,7 @@ printf "%s", readfile("verificacionFormulaR2ajustado.txt")   # en pantalla
 2. ¿Cómo interpreta el signo obtenido para =stratio=? ¿Es coherente con lo que cabría esperar económicamente?
 3. Explique, sin usar la fórmula, por qué $R^2$ no puede bajar nunca al añadir un regresor, mientras que $\bar R^2$ sí puede hacerlo.
 4. Si al añadir =stratio= el $R^2$ ajustado hubiera bajado ligeramente, ¿qué le diría eso sobre el aporte de esa variable al modelo?
-5. ¿Diría que el $R^2$ ajustado ``certifica'' que un modelo es mejor que otro, en el mismo sentido en que la lección 8 advertía que un $R^2$ alto no certifica una relación causal?
+5. ¿Diría que el $R^2$ ajustado ``certifica'' que un modelo es mejor que otro, en el mismo sentido en que la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=12][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#suma-explicada][html]]) advertía que un $R^2$ alto no certifica una relación causal?
 
 /Para profundizar/:
 
@@ -487,4 +487,4 @@ printf "%s", readfile("verificacionFormulaR2ajustado.txt")   # en pantalla
 
 4. Si $\bar R^2$ hubiera bajado al añadir =stratio=. Eso indicaría que la reducción de residuos lograda por =stratio= es tan pequeña que no compensa el grado de libertad perdido al estimar un parámetro adicional: una señal de que el aumento de complejidad del modelo, en términos de parsimonia, no compensa la escasa aportación de ese regresor al ajuste del modelo.
 
-5. ¿Certifica el $R^2$ ajustado que un modelo es mejor? No, en el mismo sentido en que la lección 8 advertía sobre $R^2$: un $\bar R^2$ más alto es un indicio a favor de un modelo frente a otro en términos de ajuste penalizado por complejidad, pero no certifica que la especificación sea correcta, que los regresores incluidos sean los relevantes desde un punto de vista teórico, ni que exista ninguna relación causal. Es una herramienta de comparación entre modelos alternativos, no un veredicto definitivo sobre la validez de ninguno de ellos. La elección de qué variables incluir debe seguir estando guiada, en primer lugar, por la teoría económica, no solo por qué estadístico sube o baja.
+5. ¿Certifica el $R^2$ ajustado que un modelo es mejor? No, en el mismo sentido en que la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=12][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#suma-explicada][html]]) advertía sobre $R^2$: un $\bar R^2$ más alto es un indicio a favor de un modelo frente a otro en términos de ajuste penalizado por complejidad, pero no certifica que la especificación sea correcta, que los regresores incluidos sean los relevantes desde un punto de vista teórico, ni que exista ninguna relación causal. Es una herramienta de comparación entre modelos alternativos, no un veredicto definitivo sobre la validez de ninguno de ellos. La elección de qué variables incluir debe seguir estando guiada, en primer lugar, por la teoría económica, no solo por qué estadístico sube o baja.

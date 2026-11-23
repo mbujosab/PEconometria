@@ -93,22 +93,22 @@ set workdir "@directory"
 
 * Descripción de la práctica
 
-Retomamos =hprice2= (ya usado en la práctica A de la sesión 7) y sus tres variables etiquetadas: =price=, =rooms=, =nox=. Hoy estimamos, por primera vez con datos /reales/, dos regresiones lineales simples: precio en función del número de habitaciones, y precio en función de la contaminación. Las comparamos entre sí, verificamos las dos condiciones de ortogonalidad y calculamos la bondad de ajuste, conectando con las correlaciones ya calculadas en la práctica A de la sesión 7 y con el ángulo $\theta$ de la lección 8.
+Retomamos =hprice2= (ya usado en la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf][práctica A de la sesión 7]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html][html]])) y sus tres variables etiquetadas: =price=, =rooms=, =nox=. Hoy estimamos, por primera vez con datos /reales/, dos regresiones lineales simples: precio en función del número de habitaciones, y precio en función de la contaminación. Las comparamos entre sí, verificamos las dos condiciones de ortogonalidad y calculamos la bondad de ajuste, conectando con las correlaciones ya calculadas en la práctica A de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#covarianzas][html]])) y con el ángulo $\theta$ de la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=8][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#coeficiente-determinacion][html]]).
 
 /Objetivo/
 
 1. Estimar dos regresiones lineales simples con datos reales, interpretando el signo y la magnitud de la pendiente sin lenguaje causal.
-2. Verificar, con datos reales, las dos condiciones de ortogonalidad de la lección 7.
+2. Verificar, con datos reales, las dos condiciones de ortogonalidad de la lección 7 ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=3][primera]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#primera-condicion][html]]) y [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=4][segunda]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#segunda-condicion][html]])).
 3. Calcular $R^2$ ``a mano'' (STC/SEC/SRC) y compararlo con el que reporta Gretl y con $\rho_{\boldsymbol{x}\boldsymbol{y}}^2$.
 4. Comparar la bondad de ajuste de los dos modelos y relacionarla con el ángulo $\theta$ de la lección 8.
 5. Visualizar ambos ajustes mediante diagramas de dispersión con la recta ajustada.
-6. Intercambiar los papeles de las dos variables y comprobar que el $R^2$ no cambia, como advirtió la lección 8, aunque la recta sí.
+6. Intercambiar los papeles de las dos variables y comprobar que el $R^2$ no cambia, como advirtió la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=12][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#suma-explicada][html]]), aunque la recta sí.
 
-/Comandos de esta práctica/. Todos aparecen ya en la práctica A de esta sesión: =ols= con la constante =const= y la opción =--quiet=, y los accesores =$uhat=, =$coeff= y =$rsq=, que se refieren siempre al último modelo estimado. Lo único nuevo es =$pi=, el número $\pi$, que usamos para pasar un ángulo de radianes a grados.
+/Comandos de esta práctica/. Todos aparecen ya en la práctica A de esta sesión ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#ejemplo-leccion-7][html]]), [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#residuos-ortogonalidad][html]]), [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#bondad-ajuste][html]]) y [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=5][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#sin-constante][html]])): =ols= con la constante =const= y la opción =--quiet=, y los accesores =$uhat=, =$coeff= y =$rsq=, que se refieren siempre al último modelo estimado. Lo único nuevo es =$pi=, el número $\pi$, que usamos para pasar un ángulo de radianes a grados.
 
 * Actividad 1 - Reapertura de hprice2 y etiquetas
 
-Como en la práctica A de la sesión 7: =open= carga el fichero de muestra sin listar sus variables y =setinfo= vuelve a poner a cada una su descripción y su nombre para los gráficos (sesión 4).
+Como en la práctica A de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#reapertura][html]])): =open= carga el fichero de muestra sin listar sus variables y =setinfo= vuelve a poner a cada una su descripción y su nombre para los gráficos ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S04-Prct-A-hprice2.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S04-Prct-A-hprice2.html#atributos][html]]) de la práctica A de la sesión 4).
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -151,9 +151,9 @@ printf "%s", readfile("olsPriceRooms.txt")   # en pantalla
 
 *** Lo que debe observar
 
-La pendiente es $9\,119{,}55$: en el ajuste, a una habitación más le corresponden unos $9\,120$ dólares más de precio mediano. La constante, $-34\,796$, no debe interpretarse. Es el precio ajustado en el origen de =rooms=, el punto en que =rooms= vale cero, y en los datos ningún barrio tiene un número medio de habitaciones cercano a cero: =rooms= va de $3{,}56$ a $8{,}78$. Fuera de la región que ocupan los datos, el ajuste es una extrapolación sin observaciones que la sostengan, y atribuir un significado a la constante conduce a absurdos. Aquí sería el precio mediano, negativo, de un barrio cuyas viviendas no tuvieran ninguna habitación. Si interesa un precio de referencia, el origen se elige: con =rooms= centrado (lección 7), la constante es el precio ajustado en la media de =rooms=, que es el precio medio. Y $R^2=0{,}484$: el ajuste reproduce algo menos de la mitad de la variación de =price=. Si recuerda de su curso de Estadística la regla de que una regresión es fiable solo si el $R^2$ supera $0{,}85$, no la aplique aquí: con datos económicos reales un $R^2$ como este es habitual, porque el precio depende de muchas cosas además del número de habitaciones (lección 8). Como en la práctica A de esta sesión, ignore de momento las columnas =Desv. típica=, =Estadístico t= y =valor p=.
+La pendiente es $9\,119{,}55$: en el ajuste, a una habitación más le corresponden unos $9\,120$ dólares más de precio mediano. La constante, $-34\,796$, no debe interpretarse. Es el precio ajustado en el origen de =rooms=, el punto en que =rooms= vale cero, y en los datos ningún barrio tiene un número medio de habitaciones cercano a cero: =rooms= va de $3{,}56$ a $8{,}78$. Fuera de la región que ocupan los datos, el ajuste es una extrapolación sin observaciones que la sostengan, y atribuir un significado a la constante conduce a absurdos. Aquí sería el precio mediano, negativo, de un barrio cuyas viviendas no tuvieran ninguna habitación. Si interesa un precio de referencia, el origen se elige: con =rooms= centrado ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=7][lección 7]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#via-alternativa][html]])), la constante es el precio ajustado en la media de =rooms=, que es el precio medio. Y $R^2=0{,}484$: el ajuste reproduce algo menos de la mitad de la variación de =price=. Si recuerda de su curso de Estadística la regla de que una regresión es fiable solo si el $R^2$ supera $0{,}85$, no la aplique aquí: con datos económicos reales un $R^2$ como este es habitual, porque el precio depende de muchas cosas además del número de habitaciones (lección 8). Como en la práctica A de esta sesión ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#ejemplo-leccion-7][html]])), ignore de momento las columnas =Desv. típica=, =Estadístico t= y =valor p=.
 
-/Interpretación/: el coeficiente de =rooms= se lee como ``por cada habitación adicional, el precio mediano cambia, en promedio, en esa cantidad de dólares, /manteniendo el resto igual/ (aquí, sin ningún otro regresor)''. Evite decir que ``una habitación adicional /causa/'' ese cambio: como se discutió en la lección 8, la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ es puramente algebraica y no certifica, por sí sola, ninguna relación causal ni su dirección.
+/Interpretación/: el coeficiente de =rooms= se lee como ``por cada habitación adicional, el precio mediano cambia, en promedio, en esa cantidad de dólares, /manteniendo el resto igual/ (aquí, sin ningún otro regresor)''. Evite decir que ``una habitación adicional /causa/'' ese cambio: como se discutió en la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=12][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#suma-explicada][html]]), la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ es puramente algebraica y no certifica, por sí sola, ninguna relación causal ni su dirección.
 
 * Actividad 3 - Regresión: price sobre nox
 :PROPERTIES:
@@ -185,7 +185,7 @@ printf "%s", readfile("olsPriceNox.txt")   # en pantalla
 
 *** Lo que debe observar
 
-La pendiente es negativa, $-3\,386{,}85$: a una unidad más de contaminación le corresponden unos $3\,400$ dólares menos de precio mediano, como cabía esperar. El $R^2$, $0{,}182$, es bastante menor que el de =rooms=: con la contaminación como único regresor, el ajuste reproduce menos de una quinta parte de la variación de los precios. Compare ambos $R^2$ con las correlaciones de la práctica A de la sesión 7: $0{,}6958^2=0{,}484$ y $(-0{,}4260)^2=0{,}182$.
+La pendiente es negativa, $-3\,386{,}85$: a una unidad más de contaminación le corresponden unos $3\,400$ dólares menos de precio mediano, como cabía esperar. El $R^2$, $0{,}182$, es bastante menor que el de =rooms=: con la contaminación como único regresor, el ajuste reproduce menos de una quinta parte de la variación de los precios. Compare ambos $R^2$ con las correlaciones de la práctica A de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#covarianzas][html]])): $0{,}6958^2=0{,}484$ y $(-0{,}4260)^2=0{,}182$.
 
 * Actividad 4 - Verificación de las dos condiciones de ortogonalidad
 :PROPERTIES:
@@ -229,6 +229,9 @@ printf "%s", readfile("ortogonalidadAmbosModelos.txt")   # en pantalla
 #+latex: }
 
 * Actividad 5 - Bondad de ajuste: STC, SEC, SRC y $R^2$ en ambos modelos
+:PROPERTIES:
+:CUSTOM_ID: bondad-ajuste
+:END:
 
 Para cada modelo, estimado con =--quiet=: =STC= con las desviaciones de =price= respecto a su media, =SRC= como suma de cuadrados de =$uhat= y =SEC= por diferencia. El cociente =SEC/STC= es el $R^2$ a mano. Los últimos =printf= calculan el cuadrado de la correlación de cada par con =corr=, para comparar.
 
@@ -271,9 +274,9 @@ printf "%s", readfile("bondadDeAjusteAmbosModelos.txt")   # en pantalla
 
 *** El ángulo $\theta$, en grados
 
-El $R^2$ que acabamos de calcular /es/ un coseno al cuadrado (lección 8). Podemos, por tanto, aplicar el arco coseno y obtener el ángulo $\theta$ en grados:
+El $R^2$ que acabamos de calcular /es/ un coseno al cuadrado ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=8][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#coeficiente-determinacion][html]])). Podemos, por tanto, aplicar el arco coseno y obtener el ángulo $\theta$ en grados:
 
-Dos =printf= que calculan el arco coseno: =acos= devuelve el ángulo en radianes (práctica A de la sesión 7) y el factor =180/$pi= lo pasa a grados. =$pi= es el número $\pi$ que Gretl tiene guardado.
+Dos =printf= que calculan el arco coseno: =acos= devuelve el ángulo en radianes ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=4][actividad 4]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#correlacion-coseno][html]]) de la práctica A de la sesión 7) y el factor =180/$pi= lo pasa a grados. =$pi= es el número $\pi$ que Gretl tiene guardado.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -300,10 +303,13 @@ printf "%s", readfile("anguloTheta.txt")   # en pantalla
 #+latex: }
 
 * Actividad 6 - Diagramas de dispersión con la recta ajustada
+:PROPERTIES:
+:CUSTOM_ID: dispersion-recta
+:END:
 
 - GUI: seleccione =price= y =rooms= (con ~Ctrl~), botón derecho, */~Gráfico X-Y~/*; repita con =price= y =nox=.
 
-  =gnuplot= con dos variables dibuja el diagrama de dispersión, la primera en el eje vertical y la segunda en el horizontal, y superpone la recta ajustada (práctica A de la sesión 7).
+  =gnuplot= con dos variables dibuja el diagrama de dispersión, la primera en el eje vertical y la segunda en el horizontal, y superpone la recta ajustada ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#diagramas-dispersion][html]]) de la práctica A de la sesión 7).
 
   #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
   /o bien teclee en línea de comandos/:
@@ -342,11 +348,14 @@ gnuplot price nox   --output="price_nox_fit.png"     # guardada para el document
 </figure>
 #+END_EXPORT
 
-Compare la dispersión de los puntos alrededor de cada recta con el $R^2$ obtenido en la Actividad 5. Recuerde (lección 8) que $R^2=\cos^2\theta$, con $\theta$ el ángulo entre los vectores en desviaciones de los datos y del ajuste: cuanto menor la dispersión de la nube alrededor de la recta, más pequeño ese ángulo.
+Compare la dispersión de los puntos alrededor de cada recta con el $R^2$ obtenido en la [[#bondad-ajuste][Actividad 5]]. Recuerde ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=8][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#coeficiente-determinacion][html]])) que $R^2=\cos^2\theta$, con $\theta$ el ángulo entre los vectores en desviaciones de los datos y del ajuste: cuanto menor la dispersión de la nube alrededor de la recta, más pequeño ese ángulo.
 
 * Actividad 7 - Intercambiar los papeles: el $R^2$ no distingue causa de efecto
+:PROPERTIES:
+:CUSTOM_ID: intercambiar
+:END:
 
-La lección 8 advirtió que, si regresamos la superficie sobre el precio en lugar del precio sobre la superficie, el $R^2$ /no cambia/. Comprobémoslo con =price= y =rooms=: estimamos las dos regresiones, la habitual y la de papeles intercambiados.
+La [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=12][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#suma-explicada][html]]) advirtió que, si regresamos la superficie sobre el precio en lugar del precio sobre la superficie, el $R^2$ /no cambia/. Comprobémoslo con =price= y =rooms=: estimamos las dos regresiones, la habitual y la de papeles intercambiados.
 
 Dos regresiones con =--quiet=. En la primera, =price= es la variable dependiente y =rooms= el regresor; en la segunda, =rooms= es la dependiente y =price= el regresor. Tras cada una se guardan en escalares la pendiente (=$coeff= del regresor correspondiente) y el $R^2$ (=$rsq=). Los =printf= comparan los dos $R^2$, las dos pendientes, la inversa de la primera y el producto de ambas.
 
@@ -385,13 +394,16 @@ printf "%s", readfile("intercambiarPapeles.txt")   # en pantalla
 Los dos $R^2$ son el mismo número: en regresión simple $R^2=\rho_{\boldsymbol x\boldsymbol y}^2$, y la correlación es simétrica en las dos variables. El ajuste, en cambio, sí cambia: la pendiente de =rooms~price= no es la inversa de la de =price~rooms= (las dos rectas son distintas; solo coinciden si $\rho=\pm1$). El producto de las dos pendientes es $\frac{\sigma_{\boldsymbol x\boldsymbol y}}{\sigma_{\boldsymbol x}^2}\cdot\frac{\sigma_{\boldsymbol x\boldsymbol y}}{\sigma_{\boldsymbol y}^2}=\rho_{\boldsymbol x\boldsymbol y}^2$, que es otra vez el $R^2$. La conclusión es la de la lección 8: el $R^2$ mide cuánto se alinean dos vectores en desviaciones, y esa alineación es simétrica; de ella no se sigue ninguna dirección causal.
 
 * Actividad 8 - Síntesis comparativa
+:PROPERTIES:
+:CUSTOM_ID: sintesis-comparativa
+:END:
 
 | Modelo      | $\hat\beta_1$ | $\hat\beta_2$ | $R^2$ |
 |-------------+---------------+---------------+-------|
 | price~rooms |               |               |       |
 | price~nox   |               |               |       |
 
-Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta mejor, según $R^2$? ¿Es coherente con lo observado en los diagramas de dispersión y con las correlaciones ya calculadas en la práctica A de la sesión 7?
+Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta mejor, según $R^2$? ¿Es coherente con lo observado en los diagramas de dispersión y con las correlaciones ya calculadas en la práctica A de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#covarianzas][html]]))?
 
 * Preguntas de interpretación para la clase
 :PROPERTIES:
@@ -399,11 +411,11 @@ Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta m
 :END:
 
 1. ¿Por qué no podemos afirmar, a partir del modelo price~rooms, que ``añadir una habitación causa'' un aumento de precio?
-2. Compare los dos modelos: ¿cuál tiene mayor $R^2$? ¿Qué relación tiene esto con los valores de correlación ya calculados en la práctica A de la sesión 7?
-3. En los diagramas de dispersión con la recta ajustada, ¿qué modelo muestra una nube de puntos menos dispersa alrededor de la recta? ¿Cómo se traduce esto en términos del ángulo $\theta$ de la lección 8?
+2. Compare los dos modelos: ¿cuál tiene mayor $R^2$? ¿Qué relación tiene esto con los valores de correlación ya calculados en la práctica A de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#covarianzas][html]]))?
+3. En los diagramas de dispersión con la recta ajustada, ¿qué modelo muestra una nube de puntos menos dispersa alrededor de la recta? ¿Cómo se traduce esto en términos del ángulo $\theta$ de la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=8][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#coeficiente-determinacion][html]])?
 4. ¿Por qué la suma de los residuos no es cero en la salida de Gretl, sino un número muy pequeño (del orden de $10^{-8}$ o menor)?
 5. Si estimáramos =price= en función de =rooms= y =nox= /simultáneamente/ (dos regresores a la vez), ¿por qué NO cabría esperar que el $R^2$ de ese modelo fuera simplemente la suma de los $R^2$ de los dos modelos simples de hoy?
-6. En la Actividad 7 las dos regresiones tienen el mismo $R^2$ pero distinta recta. ¿Por qué las dos pendientes no son inversas una de otra? ¿Cuándo lo serían?
+6. En la [[#intercambiar][Actividad 7]] las dos regresiones tienen el mismo $R^2$ pero distinta recta. ¿Por qué las dos pendientes no son inversas una de otra? ¿Cuándo lo serían?
 
 /Para profundizar/:
 
@@ -422,14 +434,14 @@ Complete la tabla con los valores obtenidos. ¿Cuál de los dos modelos ajusta m
 
 * Respuestas
 
-1. ¿Por qué no podemos afirmar causalidad a partir de price~rooms? Porque la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y el propio ajuste MCO son consecuencias /puramente geométricas/ de la ortogonalidad del residuo: se cumplen igual para cualquier par de vectores $\boldsymbol{x},\boldsymbol{y}$, tengan o no una relación causal real entre sí (recuerde, de la lección 8, el ejemplo del queso y las muertes por enredarse en sábanas). Afirmar causalidad exige una teoría económica previa que justifique la dirección de la relación, algo que la sola regresión no proporciona.
+1. ¿Por qué no podemos afirmar causalidad a partir de price~rooms? Porque la descomposición $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y el propio ajuste MCO son consecuencias /puramente geométricas/ de la ortogonalidad del residuo: se cumplen igual para cualquier par de vectores $\boldsymbol{x},\boldsymbol{y}$, tengan o no una relación causal real entre sí (recuerde, de la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=12][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#suma-explicada][html]]), el ejemplo del queso y las muertes por enredarse en sábanas). Afirmar causalidad exige una teoría económica previa que justifique la dirección de la relación, algo que la sola regresión no proporciona.
 
-2. Comparación de $R^2$ entre los dos modelos. El modelo con mayor $|\rho_{\boldsymbol{x}\boldsymbol{y}}|$ (en valor absoluto) entre la variable y el regresor tendrá, necesariamente, mayor $R^2$, porque en regresión simple $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ exactamente (lección 8). Por tanto, el orden de los $R^2$ de hoy debe coincidir con el orden, en valor absoluto, de las correlaciones $\rho_{\text{price,rooms}}$ y $\rho_{\text{price,nox}}$ ya calculadas en la práctica A de la sesión 7.
+2. Comparación de $R^2$ entre los dos modelos. El modelo con mayor $|\rho_{\boldsymbol{x}\boldsymbol{y}}|$ (en valor absoluto) entre la variable y el regresor tendrá, necesariamente, mayor $R^2$, porque en regresión simple $R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2$ exactamente ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=13][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#r2-correlacion][html]])). Por tanto, el orden de los $R^2$ de hoy debe coincidir con el orden, en valor absoluto, de las correlaciones $\rho_{\text{price,rooms}}$ y $\rho_{\text{price,nox}}$ ya calculadas en la práctica A de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=2][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#covarianzas][html]])).
 
 3. Nube menos dispersa alrededor de la recta y ángulo $\theta$. El modelo con mayor $R^2$ es el que tiene la nube de puntos menos dispersa alrededor de la recta ajustada, porque $R^2=\cos^2\theta$: cuanto menor el ángulo $\theta$ entre los vectores en desviaciones de los datos y del ajuste, más cerca de 1 está $\cos^2\theta$, y más ``alineados'' (en el sentido geométrico de la lección 8) están esos dos vectores. Visualmente, eso es una nube más estrecha alrededor de la recta.
 
-4. Suma de residuos no cero. Por errores de redondeo en aritmética de coma flotante: los ordenadores no representan los números reales con precisión infinita, así que operaciones que algebraicamente deberían dar cero (como $\sum\hat e_i$) acumulan un error de cálculo muy pequeño, típicamente del orden de $10^{-8}$ o menor. Esto no contradice la identidad teórica $\sum\hat e_i=0$: es la misma situación que ya se comprobó en la práctica B de la sesión 7, con datos simulados.
+4. Suma de residuos no cero. Por errores de redondeo en aritmética de coma flotante: los ordenadores no representan los números reales con precisión infinita, así que operaciones que algebraicamente deberían dar cero (como $\sum\hat e_i$) acumulan un error de cálculo muy pequeño, típicamente del orden de $10^{-8}$ o menor. Esto no contradice la identidad teórica $\sum\hat e_i=0$: es la misma situación que ya se comprobó en la práctica B de la sesión 7 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html#vector-pequeno][html]])), con datos simulados.
 
-5. $R^2$ de un modelo con dos regresores no es la suma de los $R^2$ simples. Porque, como se explicó al cierre de la lección 8, cuando hay más de un regresor no constante el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\boldsymbol{x}_3)$ centrado tiene dimensión 2, no 1: los vectores en desviaciones de =rooms= y =nox= ya no están alineados en la misma recta, así que el ajuste conjunto $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ ya no es, en general, la suma de las contribuciones ``aisladas'' de cada regresor. Además, =rooms= y =nox= pueden estar correlacionadas entre sí, de modo que parte de lo que ``explica'' cada una por separado se solapa. Este fenómeno se estudiará con detalle en la regresión múltiple, más adelante en el curso.
+5. $R^2$ de un modelo con dos regresores no es la suma de los $R^2$ simples. Porque, como se explicó en la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=15][lección 8]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#r2-correlacion][html]]), cuando hay más de un regresor no constante el subespacio $\mathcal{L}(\boldsymbol{1},\boldsymbol{x}_2,\boldsymbol{x}_3)$ centrado tiene dimensión 2, no 1: los vectores en desviaciones de =rooms= y =nox= ya no están alineados en la misma recta, así que el ajuste conjunto $\boldsymbol{\mathop{\widehat{y}}}-\boldsymbol{\mathop{\overline{y}}}$ ya no es, en general, la suma de las contribuciones ``aisladas'' de cada regresor. Además, =rooms= y =nox= pueden estar correlacionadas entre sí, de modo que parte de lo que ``explica'' cada una por separado se solapa. Este fenómeno se estudiará con detalle en la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=13][lección 10]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#r2-multiple][html]]).
 
 6. /Dos rectas, un $R^2$./ La pendiente de =price~rooms= es $\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol x}^2$ y la de =rooms~price= es $\sigma_{\boldsymbol x\boldsymbol y}/\sigma_{\boldsymbol y}^2$: cada una proyecta un vector distinto sobre un plano distinto, y no hay razón para que una sea la inversa de la otra. Su producto vale $\rho_{\boldsymbol x\boldsymbol y}^2$, así que solo serían inversas ($b_{pr}\,b_{rp}=1$) si $\rho=\pm1$, es decir, si los puntos estuvieran exactamente sobre una recta. Como el $R^2$ es $\rho^2$, no cambia al intercambiar los papeles; la recta sí, porque minimiza distancias /verticales/, y ``vertical'' depende de qué variable pongamos en el eje de ordenadas.
