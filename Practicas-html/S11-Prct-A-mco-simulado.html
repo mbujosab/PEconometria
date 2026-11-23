@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-11-19 jue 00:16 -->
+<!-- 2026-11-23 lun 13:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 11 (A) &#x2014; MCO con Gretl: el ejemplo de la lección 7 y verificación con datos simulados</title>
@@ -287,12 +287,12 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org123772f">Descripción de la práctica</a></li>
+<li><a href="#org52794e0">Descripción de la práctica</a></li>
 <li><a href="#ejemplo-leccion-7">Actividad 1 - El ejemplo de la lección 7, ahora con Gretl</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orgf2860e1">Lo que debe observar</a></li>
+<li><a href="#orgb9f802b">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
@@ -302,34 +302,34 @@ org_html_manager.setup();  // activate after the parameters are set
 <ul>
 <li>
 <ul>
-<li><a href="#orgc5a7049">El ajuste preserva la media, y la recta pasa por el punto de las medias</a></li>
+<li><a href="#org7f73bb7">El ajuste preserva la media, y la recta pasa por el punto de las medias</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgfdf6fb5">Actividad 4 - La pendiente como correlación reescalada</a></li>
-<li><a href="#orge99d074">Actividad 5 - ¿Y si la muestra es mayor y la perturbación es aleatoria?</a></li>
+<li><a href="#orgea07411">Actividad 4 - La pendiente como correlación reescalada</a></li>
+<li><a href="#muestra-grande">Actividad 5 - ¿Y si la muestra es mayor y la perturbación es aleatoria?</a></li>
 <li><a href="#sin-constante">Actividad 6 - ¿Y si quitamos la constante?</a>
 <ul>
 <li>
 <ul>
-<li><a href="#orge39725f">Lo que debe observar</a></li>
+<li><a href="#org470a4d6">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org87bff59">Actividad 7 - Síntesis</a></li>
-<li><a href="#org6e3f0ef">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orgbdf73f7">Código completo de la práctica</a></li>
-<li><a href="#org01824ea">Respuestas</a></li>
+<li><a href="#org1947f79">Actividad 7 - Síntesis</a></li>
+<li><a href="#orgb99b074">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org5835bd5">Código completo de la práctica</a></li>
+<li><a href="#org6f170a0">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org123772f" class="outline-2">
-<h2 id="org123772f">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org123772f">
+<div id="outline-container-org52794e0" class="outline-2">
+<h2 id="org52794e0">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org52794e0">
 <p>
-En las lecciones 7 y 8 obtuvimos, a mano, las fórmulas de \(\hat\beta_1\) y \(\hat\beta_2\) (a partir de dos condiciones de ortogonalidad) y la descomposición \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) con su cociente \(R^2\). Hoy usamos por primera vez el comando <code>ols</code> de Gretl para comprobar que reproduce exactamente esos cálculos: primero con el mismo ejemplo pequeño (\(n=5\)) ya resuelto a mano en la lección 7, y después con una muestra simulada más grande, para distinguir qué es una <i>identidad algebraica</i> (se cumple siempre) de qué es una <i>estimación</i> (no coincide, pero se aproxima al valor verdadero que generó los datos).
+En las lecciones 7 y 8 obtuvimos, a mano, las fórmulas de \(\hat\beta_1\) y \(\hat\beta_2\) (a partir de dos condiciones de ortogonalidad) y la descomposición \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) con su cociente \(R^2\). Hoy usamos por primera vez el comando <code>ols</code> de Gretl para comprobar que reproduce exactamente esos cálculos: primero con el mismo ejemplo pequeño (\(n=5\)) ya resuelto a mano en la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=10">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#ejemplo-numerico">html</a>), y después con una muestra simulada más grande, para distinguir qué es una <i>identidad algebraica</i> (se cumple siempre) de qué es una <i>estimación</i> (no coincide, pero se aproxima al valor verdadero que generó los datos).
 </p>
 
 <p>
@@ -343,21 +343,21 @@ En las lecciones 7 y 8 obtuvimos, a mano, las fórmulas de \(\hat\beta_1\) y \(\
 <ol class="org-ol">
 <li>Usar <code>ols</code> por primera vez y comprobar que reproduce exactamente el cálculo manual de la lección 7.</li>
 <li>Verificar las dos condiciones de ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) usando los residuos que guarda Gretl.</li>
-<li>Verificar \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y \(R^2\) (lección 8), comparando el cálculo manual con el que reporta Gretl.</li>
+<li>Verificar \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y \(R^2\) (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=5">lección 8</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#pitagoras-varianza">html</a>)), comparando el cálculo manual con el que reporta Gretl.</li>
 <li>Verificar \(\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) y \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\).</li>
 <li>Distinguir, con una muestra simulada más grande, qué se cumple <i>siempre</i> (ortogonalidad) de qué es solo una <i>aproximación</i> (recuperar el coeficiente generador).</li>
-<li>Ver qué se pierde si se ajusta la recta <i>sin constante</i>: la primera condición de ortogonalidad desaparece, y con ella todo lo que la lección 7 dedujo de ella.</li>
+<li>Ver qué se pierde si se ajusta la recta <i>sin constante</i>: la primera condición de ortogonalidad desaparece, y con ella todo lo que la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=3">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#primera-condicion">html</a>) dedujo de ella.</li>
 </ol>
 
 <p>
-<i>Comandos nuevos de esta práctica</i>. Seguimos usando <code>nulldata --preserve</code>, <code>setobs</code>, <code>set seed</code>, <code>normal</code>, <code>uniform</code>, <code>series</code>, <code>scalar</code>, <code>print</code> y <code>printf</code> (prácticas de las sesiones 4 y 7). Lo nuevo:
+<i>Comandos nuevos de esta práctica</i>. Seguimos usando <code>nulldata --preserve</code>, <code>setobs</code>, <code>set seed</code>, <code>normal</code>, <code>uniform</code>, <code>series</code>, <code>scalar</code>, <code>print</code> y <code>printf</code> (prácticas de las sesiones 4 y 7: <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S04-Prct-A-hprice2.pdf#page=2">actividad 1</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S04-Prct-A-hprice2.html#mostrar-datos">html</a>) de la práctica A y <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S04-Prct-B-boston.pdf#page=2">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S04-Prct-B-boston.html#seccion-cruzada">html</a>) de la práctica B de la sesión 4; <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=4">actividad 4</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#correlacion-coseno">html</a>) de la práctica A, <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf#page=2">actividad 1</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html#vector-pequeno">html</a>) de la práctica B y <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-C-momentos-no-bastan.pdf#page=2">actividad 1</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-C-momentos-no-bastan.html#generacion-datos">html</a>) de la práctica C de la sesión 7). Lo nuevo:
 </p>
 <dl class="org-dl">
 <dt><code>ols y const x</code></dt><dd>estima por mínimos cuadrados ordinarios la regresión de <code>y</code> sobre la lista de regresores que sigue. <code>const</code> es el nombre que Gretl da al vector \(\boldsymbol{1}\), es decir, a la constante; si no lo incluye, la recta pasa por el origen. Gretl imprime la tabla de coeficientes y un pie con varias medidas; con la opción <code>--quiet</code> estima sin imprimir nada.</dd>
 <dt>Accesores</dt><dd>tras cada estimación, Gretl guarda los resultados en variables cuyo nombre empieza por <code>$</code>: <code>$uhat</code> es la serie de residuos, <code>$yhat</code> la del ajuste, <code>$coeff(x)</code> el coeficiente del regresor <code>x</code> (un escalar), <code>$rsq</code> el \(R^2\) y <code>$ess</code> la suma de cuadrados de los residuos. Se refieren siempre al <i>último</i> modelo estimado: si estima otro, cambian.</dd>
 <dt><code>matrix mx = {1;2;3;4;5}</code></dt><dd>crea una matriz escribiendo sus elementos entre llaves; el punto y coma separa filas, así que esta es una columna de cinco números. <code>series x = mx</code> convierte esa columna en una serie del conjunto de datos, con un valor por observación.</dd>
 <dt><code>print x u ehat --byobs</code></dt><dd>muestra varias series a la vez, con la opción <code>--byobs</code>, una observación por fila.</dd>
-<dt><code>max(x)</code></dt><dd>el mayor valor de una serie; <code>abs</code> es el valor absoluto (práctica B de la sesión 7).</dd>
+<dt><code>max(x)</code></dt><dd>el mayor valor de una serie; <code>abs</code> es el valor absoluto (práctica B de la sesión 7, <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html#relacion-conocida">html</a>)).</dd>
 </dl>
 </div>
 </div>
@@ -365,7 +365,7 @@ En las lecciones 7 y 8 obtuvimos, a mano, las fórmulas de \(\hat\beta_1\) y \(\
 <h2 id="ejemplo-leccion-7">Actividad 1 - El ejemplo de la lección 7, ahora con Gretl</h2>
 <div class="outline-text-2" id="text-ejemplo-leccion-7">
 <p>
-Recuperamos exactamente el ejemplo de la lección 7: \(\boldsymbol{x}=(1,2,3,4,5)\), \(\boldsymbol{u}=(1,-2,0,2,-1)\), \(\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}\).
+Recuperamos exactamente el ejemplo de la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=10">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#ejemplo-numerico">html</a>): \(\boldsymbol{x}=(1,2,3,4,5)\), \(\boldsymbol{u}=(1,-2,0,2,-1)\), \(\boldsymbol{y}=2+3\boldsymbol{x}+\boldsymbol{u}\).
 </p>
 
 <p>
@@ -376,7 +376,7 @@ Conjunto vacío de cinco observaciones, declarado de sección cruzada. Los cinco
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org0705d5b">nulldata 5 --preserve
+<pre class="src src-gretl" id="org577f95f">nulldata 5 --preserve
 setobs 1 1 --cross-section
 
 matrix mx = {1;2;3;4;5}
@@ -398,7 +398,7 @@ La primera regresión de la práctica: <code>ols</code> con <code>y</code> como 
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgb5b7bd0">ols y const x
+<pre class="src src-gretl" id="org99aad94">ols y const x
 </pre>
 </div>
 <ul class="org-ul">
@@ -409,7 +409,7 @@ La primera regresión de la práctica: <code>ols</code> con <code>y</code> como 
 <i>Antes de ejecutar</i>: ¿qué valores espera obtener para el coeficiente de <code>const</code> y para el de <code>x</code>? (Repase, si hace falta, el cálculo manual de la lección 7.)
 </p>
 
-<pre class="example" id="org1206dea">
+<pre class="example" id="org2797aac">
 Modelo 1: MCO, usando las observaciones 1-5
 Variable dependiente: y
 
@@ -426,11 +426,11 @@ Log-verosimilitud      -8,827561   Criterio de Akaike      21,65512
 Criterio de Schwarz     20,87400   Crit. de Hannan-Quinn   19,55866
 </pre>
 </div>
-<div id="outline-container-orgf2860e1" class="outline-4">
-<h4 id="orgf2860e1">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orgf2860e1">
+<div id="outline-container-orgb9f802b" class="outline-4">
+<h4 id="orgb9f802b">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgb9f802b">
 <p>
-Los coeficientes son \(2\) y \(3\), los mismos que calculamos a mano en la lección 7: Gretl no hace otra cosa que resolver las dos condiciones de ortogonalidad. Fíjese en <code>R-cuadrado</code>, \(0{,}9\), y en <code>Suma de cuad. residuos</code>, \(10\): son el \(R^2\) y la \(\mathrm{SRC}\) de la lección 8 con estos mismos datos. El resto de la tabla (columnas <code>Desv. típica</code>, <code>Estadístico t</code> y <code>valor p</code>, y las líneas del pie) lo dejamos para más adelante.
+Los coeficientes son \(2\) y \(3\), los mismos que calculamos a mano en la lección 7: Gretl no hace otra cosa que resolver las dos condiciones de ortogonalidad. Fíjese en <code>R-cuadrado</code>, \(0{,}9\), y en <code>Suma de cuad. residuos</code>, \(10\): son el \(R^2\) y la \(\mathrm{SRC}\) de la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=10">lección 8</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#ejemplo-numerico">html</a>) con estos mismos datos. El resto de la tabla (columnas <code>Desv. típica</code>, <code>Estadístico t</code> y <code>valor p</code>, y las líneas del pie) lo dejamos para más adelante.
 </p>
 </div>
 </div>
@@ -446,7 +446,7 @@ Gretl guarda, tras cada regresión, el vector de residuos en el accesor <code>$u
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org7e76471">series ehat = $uhat
+<pre class="src src-gretl" id="org3584c28">series ehat = $uhat
 series yhat = $yhat
 
 print x u ehat --byobs
@@ -456,7 +456,7 @@ printf "Suma de x*residuos           sum(x*ehat) = %.10f\n", sum(x*ehat)
 printf "Diferencia maxima |ehat-u|              = %.10f\n", max(abs(ehat-u))
 </pre>
 </div>
-<pre class="example" id="orgeb6c7da">
+<pre class="example" id="orgc2bd880">
              x            u         ehat
 
 1            1            1            1
@@ -471,7 +471,7 @@ Suma de x*residuos           sum(x*ehat) = 0,0000000000
 Diferencia maxima |ehat-u|              = 0,0000000000
 </pre>
 <p>
-<i>Aquí</i> <code>ehat</code> <i>coincide exactamente con</i> <code>u</code> <i>porque el ejemplo se construyó para que así fuera:</i> <code>u</code> <i>ya era ortogonal a los regresores. En la Actividad 5 veremos el caso general.</i>
+<i>Aquí</i> <code>ehat</code> <i>coincide exactamente con</i> <code>u</code> <i>porque el ejemplo se construyó para que así fuera:</i> <code>u</code> <i>ya era ortogonal a los regresores. En la <a href="#muestra-grande">Actividad 5</a> veremos el caso general.</i>
 </p>
 </div>
 </div>
@@ -479,14 +479,14 @@ Diferencia maxima |ehat-u|              = 0,0000000000
 <h2 id="bondad-ajuste">Actividad 3 - Bondad de ajuste: STC = SEC + SRC y \(R^2\)</h2>
 <div class="outline-text-2" id="text-bondad-ajuste">
 <p>
-Las tres sumas de cuadrados de la lección 8, cada una en un escalar: <code>STC</code> con las desviaciones de <code>y</code> respecto a su media, <code>SEC</code> con las del ajuste <code>yhat</code> y <code>SRC</code> con los residuos. El primer <code>printf</code> las imprime junto con <code>SEC+SRC</code>, para comparar con <code>STC</code>; los otros dos comparan el cociente <code>SEC/STC</code> con el \(R^2\) que Gretl guarda en <code>$rsq</code>.
+Las tres sumas de cuadrados de la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=5">lección 8</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#pitagoras-varianza">html</a>), cada una en un escalar: <code>STC</code> con las desviaciones de <code>y</code> respecto a su media, <code>SEC</code> con las del ajuste <code>yhat</code> y <code>SRC</code> con los residuos. El primer <code>printf</code> las imprime junto con <code>SEC+SRC</code>, para comparar con <code>STC</code>; los otros dos comparan el cociente <code>SEC/STC</code> con el \(R^2\) que Gretl guarda en <code>$rsq</code>.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgb7ef4af">scalar mu_y = mean(y)
+<pre class="src src-gretl" id="org2b5e127">scalar mu_y = mean(y)
 scalar STC  = sum((y - mu_y)^2)
 scalar SEC  = sum((yhat - mu_y)^2)
 scalar SRC  = sum(ehat^2)
@@ -496,17 +496,17 @@ printf "R2 (a mano)         = %.6f\n", SEC/STC
 printf "R2 de Gretl ($rsq)  = %.6f\n", $rsq
 </pre>
 </div>
-<pre class="example" id="orge1bfda1">
+<pre class="example" id="org84c2f63">
 STC = 100,0000   SEC = 90,0000   SRC = 10,0000   (SEC+SRC = 100,0000)
 R2 (a mano)         = 0,900000
 R2 de Gretl ($rsq)  = 0,900000
 </pre>
 </div>
-<div id="outline-container-orgc5a7049" class="outline-4">
-<h4 id="orgc5a7049">El ajuste preserva la media, y la recta pasa por el punto de las medias</h4>
-<div class="outline-text-4" id="text-orgc5a7049">
+<div id="outline-container-org7f73bb7" class="outline-4">
+<h4 id="org7f73bb7">El ajuste preserva la media, y la recta pasa por el punto de las medias</h4>
+<div class="outline-text-4" id="text-org7f73bb7">
 <p>
-Fíjese en que, al calcular SEC, hemos escrito <code>sum((yhat - mu_y)^2)</code> usando la media de \(\boldsymbol{y}\), cuando lo que pide la definición es la media de \(\boldsymbol{\mathop{\widehat{y}}}\). No es un descuido: la lección 7 demostró que ambas coinciden. Comprobémoslo, junto con las otras dos consecuencias de la primera condición de ortogonalidad:
+Fíjese en que, al calcular SEC, hemos escrito <code>sum((yhat - mu_y)^2)</code> usando la media de \(\boldsymbol{y}\), cuando lo que pide la definición es la media de \(\boldsymbol{\mathop{\widehat{y}}}\). No es un descuido: la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=3">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#primera-condicion">html</a>) demostró que ambas coinciden. Comprobémoslo, junto con las otras dos consecuencias de la primera condición de ortogonalidad:
 </p>
 
 <p>
@@ -517,7 +517,7 @@ Dos escalares más, la media de <code>x</code> y la del ajuste, y tres <code>pri
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org1c85a32">scalar mu_x    = mean(x)
+<pre class="src src-gretl" id="org259a85a">scalar mu_x    = mean(x)
 scalar mu_yhat = mean(yhat)
 
 printf "mu_y = %.10f     mu_yhat = %.10f   (el ajuste preserva la media)\n", mu_y, mu_yhat
@@ -525,7 +525,7 @@ printf "beta1 + beta2*mu_x = %.10f          (la recta pasa por el punto de las m
 printf "Diferencia maxima |(yhat-mu_yhat) - beta2*(x-mu_x)| = %.10f\n", max(abs((yhat-mu_yhat) - $coeff(x)*(x-mu_x)))
 </pre>
 </div>
-<pre class="example" id="orgf3a9a5c">
+<pre class="example" id="orga067474">
 mu_y = 11,0000000000     mu_yhat = 11,0000000000   (el ajuste preserva la media)
 beta1 + beta2*mu_x = 11,0000000000          (la recta pasa por el punto de las medias)
 Diferencia maxima |(yhat-mu_yhat) - beta2*(x-mu_x)| = 0,0000000000
@@ -536,22 +536,22 @@ Diferencia maxima |(yhat-mu_yhat) - beta2*(x-mu_x)| = 0,0000000000
 </div>
 </div>
 </div>
-<div id="outline-container-orgfdf6fb5" class="outline-2">
-<h2 id="orgfdf6fb5">Actividad 4 - La pendiente como correlación reescalada</h2>
-<div class="outline-text-2" id="text-orgfdf6fb5">
+<div id="outline-container-orgea07411" class="outline-2">
+<h2 id="orgea07411">Actividad 4 - La pendiente como correlación reescalada</h2>
+<div class="outline-text-2" id="text-orgea07411">
 <p>
-Recordando la lección 7 (\(\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\)) y la lección 8 (\(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\) en regresión simple):
+Recordando la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=6">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#covarianza-sobre-varianza">html</a>) (\(\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\)) y la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=13">lección 8</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#r2-correlacion">html</a>) (\(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\) en regresión simple):
 </p>
 
 <p>
-La correlación con la función <code>corr</code> y la pendiente reconstruida con la fórmula de la lección 7, con las desviaciones típicas que da <code>sd</code>. Los cinco <code>printf</code> ponen una debajo de otra cada cantidad calculada a mano y la que guarda Gretl. Recuerde que <code>sd</code> divide por \(n-1\) (práctica C de la sesión 7); como el cociente de dos <code>sd</code> cancela ese divisor, la fórmula no se ve afectada.
+La correlación con la función <code>corr</code> y la pendiente reconstruida con la fórmula de la lección 7, con las desviaciones típicas que da <code>sd</code>. Los cinco <code>printf</code> ponen una debajo de otra cada cantidad calculada a mano y la que guarda Gretl. Recuerde que <code>sd</code> divide por \(n-1\) (práctica C de la sesión 7, <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-C-momentos-no-bastan.pdf#page=6">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-C-momentos-no-bastan.html#construccion">html</a>)); como el cociente de dos <code>sd</code> cancela ese divisor, la fórmula no se ve afectada.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orga2476c1">scalar rho_xy = corr(x,y)
+<pre class="src src-gretl" id="orgd47657b">scalar rho_xy = corr(x,y)
 scalar beta2_formula = rho_xy * sd(y)/sd(x)
 
 printf "rho_xy                       = %.6f\n", rho_xy
@@ -561,7 +561,7 @@ printf "rho_xy^2                     = %.6f\n", rho_xy^2
 printf "R2 ($rsq de Gretl)           = %.6f\n", $rsq
 </pre>
 </div>
-<pre class="example" id="orgf93d422">
+<pre class="example" id="orga363afa">
 rho_xy                       = 0,948683
 beta2 (formula rho*sy/sx)    = 3,000000
 beta2 ($coeff(x) de Gretl)   = 3,000000
@@ -570,22 +570,22 @@ R2 ($rsq de Gretl)           = 0,900000
 </pre>
 </div>
 </div>
-<div id="outline-container-orge99d074" class="outline-2">
-<h2 id="orge99d074">Actividad 5 - ¿Y si la muestra es mayor y la perturbación es aleatoria?</h2>
-<div class="outline-text-2" id="text-orge99d074">
+<div id="outline-container-muestra-grande" class="outline-2">
+<h2 id="muestra-grande">Actividad 5 - ¿Y si la muestra es mayor y la perturbación es aleatoria?</h2>
+<div class="outline-text-2" id="text-muestra-grande">
 <p>
 Generamos una muestra nueva, mayor (\(n=60\)), con una perturbación aleatoria (no diseñada para ser ortogonal a \(\boldsymbol{x}\)).
 </p>
 
 <p>
-Conjunto nuevo de 60 observaciones y semilla fija. <code>x2</code> toma valores uniformes entre \(0\) y \(10\), <code>u2</code> es una perturbación normal de media \(0\) y desviación típica \(2\), e <code>y2</code> se construye con la misma fórmula que en la Actividad 1. La regresión se estima y sus residuos se guardan en <code>ehat2</code>.
+Conjunto nuevo de 60 observaciones y semilla fija. <code>x2</code> toma valores uniformes entre \(0\) y \(10\), <code>u2</code> es una perturbación normal de media \(0\) y desviación típica \(2\), e <code>y2</code> se construye con la misma fórmula que en la <a href="#ejemplo-leccion-7">Actividad 1</a>. La regresión se estima y sus residuos se guardan en <code>ehat2</code>.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org6cda585">nulldata 60 --preserve
+<pre class="src src-gretl" id="org6fa8041">nulldata 60 --preserve
 set seed 24680
 
 series x2 = uniform(0, 10)
@@ -604,13 +604,13 @@ Cuatro <code>printf</code>: las dos sumas de las condiciones de ortogonalidad co
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orged7bb3e">printf "Suma de residuos    sum(ehat2)     = %.10f    (debe ser 0, exactamente)\n", sum(ehat2)
+<pre class="src src-gretl" id="orge6579cb">printf "Suma de residuos    sum(ehat2)     = %.10f    (debe ser 0, exactamente)\n", sum(ehat2)
 printf "Suma de x2*residuos sum(x2*ehat2)  = %.10f    (debe ser 0, exactamente)\n", sum(x2*ehat2)
 printf "beta2 estimado (pendiente)         = %.4f    (valor generador = 3, pero NO se recupera exacto)\n", $coeff(x2)
 printf "beta1 estimado (constante)         = %.4f    (valor generador = 2, pero NO se recupera exacto)\n", $coeff(const)
 </pre>
 </div>
-<pre class="example" id="org290bfe3">
+<pre class="example" id="org5f63e95">
 Suma de residuos    sum(ehat2)     = 0,0000000000    (debe ser 0, exactamente)
 Suma de x2*residuos sum(x2*ehat2)  = -0,0000000000    (debe ser 0, exactamente)
 beta2 estimado (pendiente)         = 3,0601    (valor generador = 3, pero NO se recupera exacto)
@@ -625,7 +625,7 @@ beta1 estimado (constante)         = 1,8220    (valor generador = 2, pero NO se 
 <h2 id="sin-constante">Actividad 6 - ¿Y si quitamos la constante?</h2>
 <div class="outline-text-2" id="text-sin-constante">
 <p>
-La lección 7 sostuvo que sin constante no puede hablarse de regresión. Comprobemos qué se pierde, con la muestra de la Actividad 5: pedimos a Gretl la recta que pasa por el origen (solo el regresor <code>x2</code>, sin <code>const</code>).
+La <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=10">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#lugar-de-las-medias">html</a>) sostuvo que sin constante no puede hablarse de regresión. Comprobemos qué se pierde, con la muestra de la <a href="#muestra-grande">Actividad 5</a>: pedimos a Gretl la recta que pasa por el origen (solo el regresor <code>x2</code>, sin <code>const</code>).
 </p>
 
 <p>
@@ -636,7 +636,7 @@ Primero se reestima el modelo con constante sin imprimir la tabla (<code>--quiet
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org18681f5">ols y2 const x2 --quiet
+<pre class="src src-gretl" id="org4cb2965">ols y2 const x2 --quiet
 scalar b2_con = $coeff(x2)
 scalar mu_yhat_con = mean($yhat)
 
@@ -648,7 +648,7 @@ printf "media de y2 = %.4f   media del ajuste sin constante = %.4f   (con consta
 printf "pendiente sin constante = %.4f   (con constante: %.4f;  generador: 3)\n", $coeff(x2), b2_con
 </pre>
 </div>
-<pre class="example" id="orgcecf70f">
+<pre class="example" id="org34544cd">
 Modelo 2: MCO, usando las observaciones 1-60
 Variable dependiente: y2
 
@@ -670,33 +670,33 @@ media de y2 = 16,4212   media del ajuste sin constante = 16,0062   (con constant
 pendiente sin constante = 3,3550   (con constante: 3,0601;  generador: 3)
 </pre>
 </div>
-<div id="outline-container-orge39725f" class="outline-4">
-<h4 id="orge39725f">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-orge39725f">
+<div id="outline-container-org470a4d6" class="outline-4">
+<h4 id="org470a4d6">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org470a4d6">
 <p>
-Sin la constante solo queda una condición de ortogonalidad, la del regresor: \(\sum x_i\hat e_i\) sigue siendo cero, pero \(\sum\hat e_i\) vale \(24{,}9\). Con ello se pierde todo lo que la lección 7 dedujo de la primera condición: el ajuste ya no tiene la media de los datos (\(16{,}01\) frente a \(16{,}42\)), la recta ya no pasa por el punto de las medias, y la pendiente sube de \(3{,}06\) a \(3{,}355\): al imponer que la recta pase por el origen, la pendiente aumenta para compensar la constante omitida. Fíjese también en que Gretl ya no imprime un <code>R-cuadrado</code>, sino dos: sin constante no existe la descomposición \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) de la lección 8, y el programa ofrece dos sustitutos (``no centrado'' y ``centrado'') que no son comparables con el \(R^2\) de los modelos con constante.
+Sin la constante solo queda una condición de ortogonalidad, la del regresor: \(\sum x_i\hat e_i\) sigue siendo cero, pero \(\sum\hat e_i\) vale \(24{,}9\). Con ello se pierde todo lo que la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=3">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#primera-condicion">html</a>) dedujo de la primera condición: el ajuste ya no tiene la media de los datos (\(16{,}01\) frente a \(16{,}42\)), la recta ya no pasa por el punto de las medias, y la pendiente sube de \(3{,}06\) a \(3{,}355\): al imponer que la recta pase por el origen, la pendiente aumenta para compensar la constante omitida. Fíjese también en que Gretl ya no imprime un <code>R-cuadrado</code>, sino dos: sin constante no existe la descomposición \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) de la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=5">lección 8</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#pitagoras-varianza">html</a>), y el programa ofrece dos sustitutos (``no centrado'' y ``centrado'') que no son comparables con el \(R^2\) de los modelos con constante.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org87bff59" class="outline-2">
-<h2 id="org87bff59">Actividad 7 - Síntesis</h2>
-<div class="outline-text-2" id="text-org87bff59">
+<div id="outline-container-org1947f79" class="outline-2">
+<h2 id="org1947f79">Actividad 7 - Síntesis</h2>
+<div class="outline-text-2" id="text-org1947f79">
 <p>
-Hoy hemos comprobado con Gretl, en vez de a mano, tres resultados ya demostrados en las lecciones 7 y 8: (i) las fórmulas de \(\hat\beta_1,\hat\beta_2\); (ii) las dos condiciones de ortogonalidad que, por construcción de MCO, se cumplen <i>siempre</i> (no dependen de si el ejemplo está ``diseñado'' o no); (iii) \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\). Y hemos visto la diferencia esencial entre una <i>identidad algebraica</i> (ortogonalidad: exacta siempre) y una <i>estimación</i> (recuperar el coeficiente generador: solo aproximada, y solo exacta en el ejemplo construido de la lección 7).
+Hoy hemos comprobado con Gretl, en vez de a mano, tres resultados ya demostrados en las lecciones 7 y 8: (i) las fórmulas de \(\hat\beta_1,\hat\beta_2\); (ii) las dos condiciones de ortogonalidad que, por construcción de MCO, se cumplen <i>siempre</i> (no dependen de si el ejemplo está ``diseñado'' o no); (iii) \(\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}\) y \(R^2=\rho_{\boldsymbol{x}\boldsymbol{y}}^2\). Y hemos visto la diferencia esencial entre una <i>identidad algebraica</i> (ortogonalidad: exacta siempre) y una <i>estimación</i> (recuperar el coeficiente generador: solo aproximada, y solo exacta en el ejemplo construido de la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=10">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#ejemplo-numerico">html</a>)).
 </p>
 </div>
 </div>
-<div id="outline-container-org6e3f0ef" class="outline-2">
-<h2 id="org6e3f0ef">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-org6e3f0ef">
+<div id="outline-container-orgb99b074" class="outline-2">
+<h2 id="orgb99b074">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-orgb99b074">
 <ol class="org-ol">
-<li>En la Actividad 1, ¿por qué Gretl reproduce exactamente \(\hat\beta_1=2,\hat\beta_2=3\), y no una aproximación?</li>
-<li>¿Por qué la ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) se cumple exactamente en la Actividad 5, mientras que \(\hat\beta_2\) solo se aproxima a 3?</li>
+<li>En la <a href="#ejemplo-leccion-7">Actividad 1</a>, ¿por qué Gretl reproduce exactamente \(\hat\beta_1=2,\hat\beta_2=3\), y no una aproximación?</li>
+<li>¿Por qué la ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) se cumple exactamente en la <a href="#muestra-grande">Actividad 5</a>, mientras que \(\hat\beta_2\) solo se aproxima a 3?</li>
 <li>¿Qué diferencia hay entre el vector generador \(\boldsymbol{u}\) y el vector de residuos \(\boldsymbol{\mathop{\widehat{e}}}\)? ¿En qué caso particular, de los vistos hoy, coinciden?</li>
 <li>¿Por qué el signo de \(\hat\beta_2\) coincide siempre con el signo de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\)?</li>
-<li>Si en la Actividad 5 usáramos \(n=600\) en lugar de \(n=60\) (manteniendo el mismo proceso generador), ¿qué esperaría que ocurriera con la cercanía entre \(\hat\beta_2\) y 3?</li>
-<li>En la Actividad 6, ¿por qué \(\sum x_i\hat e_i\) sigue siendo cero y \(\sum\hat e_i\) no? ¿Qué subespacio es ahora el de los regresores?</li>
+<li>Si en la <a href="#muestra-grande">Actividad 5</a> usáramos \(n=600\) en lugar de \(n=60\) (manteniendo el mismo proceso generador), ¿qué esperaría que ocurriera con la cercanía entre \(\hat\beta_2\) y 3?</li>
+<li>En la <a href="#sin-constante">Actividad 6</a>, ¿por qué \(\sum x_i\hat e_i\) sigue siendo cero y \(\sum\hat e_i\) no? ¿Qué subespacio es ahora el de los regresores?</li>
 </ol>
 
 <p>
@@ -709,9 +709,9 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres resultados ya demostrados
 </ul>
 </div>
 </div>
-<div id="outline-container-orgbdf73f7" class="outline-2">
-<h2 id="orgbdf73f7">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-orgbdf73f7">
+<div id="outline-container-org5835bd5" class="outline-2">
+<h2 id="org5835bd5">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org5835bd5">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -729,17 +729,17 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres resultados ya demostrados
 </table>
 </div>
 </div>
-<div id="outline-container-org01824ea" class="outline-2">
-<h2 id="org01824ea">Respuestas</h2>
-<div class="outline-text-2" id="text-org01824ea">
+<div id="outline-container-org6f170a0" class="outline-2">
+<h2 id="org6f170a0">Respuestas</h2>
+<div class="outline-text-2" id="text-org6f170a0">
 <ol class="org-ol">
-<li>¿Por qué Gretl reproduce exactamente \(\hat\beta_1=2,\hat\beta_2=3\)? Porque <code>ols</code> no hace más que resolver, internamente, las mismas dos condiciones de ortogonalidad que resolvimos a mano en la lección 7. Como este ejemplo se construyó a propósito con un vector \(\boldsymbol{u}\) cuya covarianza muestral con \(\boldsymbol{x}\) es cero (y de media cero), el sistema de ortogonalidad recupera exactamente los coeficientes generadores 2 y 3, puesto que el vector de residuos es necesariamente igual a \(\boldsymbol{u}\). Es consecuencia del diseño del ejemplo.</li>
+<li>¿Por qué Gretl reproduce exactamente \(\hat\beta_1=2,\hat\beta_2=3\)? Porque <code>ols</code> no hace más que resolver, internamente, las mismas dos condiciones de ortogonalidad que resolvimos a mano en la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=10">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#ejemplo-numerico">html</a>). Como este ejemplo se construyó a propósito con un vector \(\boldsymbol{u}\) cuya covarianza muestral con \(\boldsymbol{x}\) es cero (y de media cero), el sistema de ortogonalidad recupera exactamente los coeficientes generadores 2 y 3, puesto que el vector de residuos es necesariamente igual a \(\boldsymbol{u}\). Es consecuencia del diseño del ejemplo.</li>
 
-<li>¿Por qué la ortogonalidad es exacta y \(\hat\beta_2\) solo se aproxima? Porque la ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) es una consecuencia <i>algebraica</i> de cómo MCO define \(\hat\beta_1,\hat\beta_2\) (las dos condiciones que se imponen para construirlos): se cumple exactamente para <i>cualquier</i> conjunto de datos, sin excepción. En cambio, que \(\hat\beta_2\) coincida con el valor 3 usado para generar los datos es una cuestión distinta: depende de que la perturbación \(u_2\) sea ortogonal a los regresores, es decir, de media nula y que tenga, para esa muestra concreta, covarianza exactamente nula con \(x_2\). Eso ocurre por diseño en la Actividad 1; una perturbación aleatoria (Actividad 5) solo lo cumple <i>aproximadamente</i>, con un error que depende de la muestra concreta.</li>
+<li>¿Por qué la ortogonalidad es exacta y \(\hat\beta_2\) solo se aproxima? Porque la ortogonalidad (\(\sum\hat e_i=0\), \(\sum x_i\hat e_i=0\)) es una consecuencia <i>algebraica</i> de cómo MCO define \(\hat\beta_1,\hat\beta_2\) (las dos condiciones que se imponen para construirlos): se cumple exactamente para <i>cualquier</i> conjunto de datos, sin excepción. En cambio, que \(\hat\beta_2\) coincida con el valor 3 usado para generar los datos es una cuestión distinta: depende de que la perturbación \(u_2\) sea ortogonal a los regresores, es decir, de media nula y que tenga, para esa muestra concreta, covarianza exactamente nula con \(x_2\). Eso ocurre por diseño en la <a href="#ejemplo-leccion-7">Actividad 1</a>; una perturbación aleatoria (<a href="#muestra-grande">Actividad 5</a>) solo lo cumple <i>aproximadamente</i>, con un error que depende de la muestra concreta.</li>
 
-<li>Diferencia entre \(\boldsymbol{u}\) y \(\boldsymbol{\mathop{\widehat{e}}}\). \(\boldsymbol{u}\) es el vector que <i>nosotros</i> usamos para <i>generar</i> los datos (una elección de diseño, no observable en la práctica real); \(\boldsymbol{\mathop{\widehat{e}}}\) es el vector de residuos que MCO <i>calcula</i> a partir de los datos observados, sin conocer \(\boldsymbol{u}\). Coinciden exactamente solo en el caso especial de la Actividad 1, porque ahí \(\boldsymbol{u}\) se construyó deliberadamente ortogonal a los regresores, la misma situación que ya advertimos en la lección 7. En la Actividad 5, con perturbación aleatoria, \(\boldsymbol{\mathop{\widehat{e}}}\neq\boldsymbol{u}_2\) en general.</li>
+<li>Diferencia entre \(\boldsymbol{u}\) y \(\boldsymbol{\mathop{\widehat{e}}}\). \(\boldsymbol{u}\) es el vector que <i>nosotros</i> usamos para <i>generar</i> los datos (una elección de diseño, no observable en la práctica real); \(\boldsymbol{\mathop{\widehat{e}}}\) es el vector de residuos que MCO <i>calcula</i> a partir de los datos observados, sin conocer \(\boldsymbol{u}\). Coinciden exactamente solo en el caso especial de la <a href="#ejemplo-leccion-7">Actividad 1</a>, porque ahí \(\boldsymbol{u}\) se construyó deliberadamente ortogonal a los regresores, la misma situación que ya advertimos en la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=10">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#ejemplo-numerico">html</a>). En la <a href="#muestra-grande">Actividad 5</a>, con perturbación aleatoria, \(\boldsymbol{\mathop{\widehat{e}}}\neq\boldsymbol{u}_2\) en general.</li>
 
-<li>Signo de \(\hat\beta_2\) y de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\). Porque \(\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) (lección 7), y tanto \(\sigma_{\boldsymbol{y}}\) como \(\sigma_{\boldsymbol{x}}\) son siempre no negativas (son normas). Por tanto, el cociente \(\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) nunca cambia el signo: el signo de \(\hat\beta_2\) es siempre el mismo que el de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\).</li>
+<li>Signo de \(\hat\beta_2\) y de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\). Porque \(\hat\beta_2=\rho_{\boldsymbol{x}\boldsymbol{y}}\,\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=6">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#covarianza-sobre-varianza">html</a>)), y tanto \(\sigma_{\boldsymbol{y}}\) como \(\sigma_{\boldsymbol{x}}\) son siempre no negativas (son normas). Por tanto, el cociente \(\sigma_{\boldsymbol{y}}/\sigma_{\boldsymbol{x}}\) nunca cambia el signo: el signo de \(\hat\beta_2\) es siempre el mismo que el de \(\rho_{\boldsymbol{x}\boldsymbol{y}}\).</li>
 
 <li>Con \(n=600\) en lugar de \(n=60\). Cabe esperar que \(\hat\beta_2\) se acerque <i>todavía más</i> a 3: con muestras más grandes, la covarianza muestral entre la perturbación \(u_2\) y el regresor \(x_2\) tiende a acercarse a cero (si, como es el caso, \(u_2\) se generó independientemente de \(x_2\)), de modo que el ``desajuste'' entre \(\hat\beta_2\) y el valor generador 3 tiende a reducirse. Esta es una primera intuición, sin demostrar todavía, de la propiedad de <i>consistencia</i> de un estimador, que se estudiará con más detalle más adelante en el curso.</li>
 
@@ -750,7 +750,7 @@ Hoy hemos comprobado con Gretl, en vez de a mano, tres resultados ya demostrados
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-11-19 jue 00:16</p>
+<p class="date">Created: 2026-11-23 lun 13:42</p>
 </div>
 </body>
 </html>

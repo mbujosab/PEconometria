@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-11-19 jue 00:17 -->
+<!-- 2026-11-23 lun 22:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 14 (D) &#x2014; La matriz de regresores en la práctica: verificación con datos simulados</title>
@@ -287,16 +287,16 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgf9d7c5a">Descripción de la práctica</a></li>
-<li><a href="#orgc5193ae">Actividad 1 - Datos simulados: un caso general, no ortogonal</a></li>
+<li><a href="#org353e032">Descripción de la práctica</a></li>
+<li><a href="#caso-general">Actividad 1 - Datos simulados: un caso general, no ortogonal</a></li>
 <li><a href="#matriz-regresores">Actividad 2 - La matriz de regresores y las ecuaciones normales</a></li>
-<li><a href="#org0618632">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</a></li>
+<li><a href="#dos-lecturas">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</a></li>
 <li><a href="#construir-ortogonal">Actividad 4 - Familia ortogonal: el mismo experimento, cambiando una sola cosa</a></li>
-<li><a href="#org8e0a084">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</a>
+<li><a href="#cada-coeficiente">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org32cf8e4">Lo que debe observar</a></li>
+<li><a href="#orgeadcadb">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
@@ -305,7 +305,7 @@ org_html_manager.setup();  // activate after the parameters are set
 <ul>
 <li>
 <ul>
-<li><a href="#org7e4751e">Lo que debe observar</a></li>
+<li><a href="#orgde66793">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
@@ -314,21 +314,21 @@ org_html_manager.setup();  // activate after the parameters are set
 <ul>
 <li>
 <ul>
-<li><a href="#org8ed3890">Lo que debe observar</a></li>
+<li><a href="#orgba4255a">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgff9efda">Actividad 8 - Síntesis</a></li>
-<li><a href="#orgd79c7cc">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orge3b1a3e">Código completo de la práctica</a></li>
-<li><a href="#orgdda77f3">Respuestas</a></li>
+<li><a href="#org1e28776">Actividad 8 - Síntesis</a></li>
+<li><a href="#org9d6d2db">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org0b1bc93">Código completo de la práctica</a></li>
+<li><a href="#orged5f270">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgf9d7c5a" class="outline-2">
-<h2 id="orgf9d7c5a">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-orgf9d7c5a">
+<div id="outline-container-org353e032" class="outline-2">
+<h2 id="org353e032">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-org353e032">
 <p>
 Cerramos la sesión de regresión múltiple volviendo, por primera vez con Gretl, sobre la notación matricial de la lección 10: la matriz de regresores \(\boldsymbol{\mathsf{X}}\), las ecuaciones normales \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}}\boldsymbol{\mathop{\widehat{\beta}}}=\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}\), y la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\). Trabajamos con datos <i>simulados</i> porque ahora no queremos <i>interpretar</i> ningún fenómeno económico; queremos <i>verificar</i> que el álgebra de la lección 10 se cumple exactamente como se demostró: primero en un caso general, y después en el caso especial de regresores mutuamente ortogonales (``familia ortogonal''), donde cada coeficiente se puede calcular de forma aislada.
 </p>
@@ -347,11 +347,11 @@ Cerramos la sesión de regresión múltiple volviendo, por primera vez con Gretl
 </ol>
 
 <p>
-<i>Comandos nuevos de esta práctica</i>. Los datos se generan como en la sesión 7 (<code>nulldata</code>, <code>set seed</code>, <code>uniform</code>, <code>normal</code>, <code>series</code>, <code>scalar</code>, <code>printf</code>) y los modelos se estiman con <code>ols</code> y sus accesores (sesión 11). Lo nuevo es el lenguaje matricial de Gretl:
+<i>Comandos nuevos de esta práctica</i>. Los datos se generan como en la sesión 7 (<code>nulldata</code>, <code>set seed</code>, <code>uniform</code>, <code>normal</code>, <code>series</code>, <code>scalar</code>, <code>printf</code>: <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf#page=2">actividad 1</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html#vector-pequeno">html</a>) y <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-B-verificacion-geometrica.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-B-verificacion-geometrica.html#relacion-conocida">html</a>) de la práctica B y <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=4">actividad 4</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#correlacion-coseno">html</a>) de la práctica A) y los modelos se estiman con <code>ols</code> y sus accesores (sesión 11: <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=2">actividad 1</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#ejemplo-leccion-7">html</a>) y <a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=3">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#bondad-ajuste">html</a>) de la práctica A). Lo nuevo es el lenguaje matricial de Gretl:
 </p>
 <dl class="org-dl">
 <dt><code>list Xlist = const x2 x3</code></dt><dd>una <i>lista</i> de series con nombre propio.</dd>
-<dt><code>matrix X = { Xlist }</code></dt><dd>la matriz cuyas columnas son las series de la lista, en ese orden. Aquí es la matriz de regresores \(\boldsymbol{\mathsf X}\) de la lección 10, con \(n\) filas y \(k\) columnas.</dd>
+<dt><code>matrix X = { Xlist }</code></dt><dd>la matriz cuyas columnas son las series de la lista, en ese orden. Aquí es la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=5">matriz de regresores \(\boldsymbol{\mathsf X}\) de la lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#matriz-regresores">html</a>), con \(n\) filas y \(k\) columnas.</dd>
 <dt><code>X'X</code></dt><dd>el apóstrofo transpone: <code>X'X</code> es \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) y <code>X'Y</code> es \(\boldsymbol{\mathsf X}^\top\boldsymbol y\). El asterisco multiplica matrices.</dd>
 <dt><code>invpd(A)</code></dt><dd>la inversa de una matriz simétrica definida positiva, como lo es \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) cuando los regresores son linealmente independientes. <code>det(A)</code> es el determinante.</dd>
 <dt><code>print M</code></dt><dd>muestra una matriz con sus filas y columnas.</dd>
@@ -360,22 +360,22 @@ Cerramos la sesión de regresión múltiple volviendo, por primera vez con Gretl
 </dl>
 </div>
 </div>
-<div id="outline-container-orgc5193ae" class="outline-2">
-<h2 id="orgc5193ae">Actividad 1 - Datos simulados: un caso general, no ortogonal</h2>
-<div class="outline-text-2" id="text-orgc5193ae">
+<div id="outline-container-caso-general" class="outline-2">
+<h2 id="caso-general">Actividad 1 - Datos simulados: un caso general, no ortogonal</h2>
+<div class="outline-text-2" id="text-caso-general">
 <p>
-Generamos \(n=40\) observaciones con dos regresores no constantes, \(x_2\) y \(x_3\), deliberadamente <i>correlacionados entre sí</i> (para no obtener, sin advertirlo, el caso especial de la Actividad 4).
+Generamos \(n=40\) observaciones con dos regresores no constantes, \(x_2\) y \(x_3\), deliberadamente <i>correlacionados entre sí</i> (para no obtener, sin advertirlo, el caso especial de la <a href="#construir-ortogonal">Actividad 4</a>).
 </p>
 
 <p>
-Cuarenta observaciones y semilla fija. <code>x2</code> es uniforme entre \(0\) y \(10\); <code>x3</code> se construye sumando a <code>x2</code> una variable normal independiente, para que ambos estén correlacionados; <code>u</code> es la perturbación. Los tres escalares son los coeficientes verdaderos, y la línea de <code>y</code> aplica el modelo fila a fila. El <code>printf</code> final imprime la correlación entre los dos regresores con la función <code>corr</code> (sesión 7).
+Cuarenta observaciones y semilla fija. <code>x2</code> es uniforme entre \(0\) y \(10\); <code>x3</code> se construye sumando a <code>x2</code> una variable normal independiente, para que ambos estén correlacionados; <code>u</code> es la perturbación. Los tres escalares son los coeficientes verdaderos, y la línea de <code>y</code> aplica el modelo fila a fila. El <code>printf</code> final imprime la correlación entre los dos regresores con la función <code>corr</code> (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-A-hprice2.pdf#page=2">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-A-hprice2.html#covarianzas">html</a>) de la práctica A de la sesión 7).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org11a71cd">nulldata 40 --preserve
+<pre class="src src-gretl" id="orgd643f5d">nulldata 40 --preserve
 set seed 97531
 
 series x2 = uniform(0,10)
@@ -390,7 +390,7 @@ series y = b1 + b2*x2 + b3*x3 + u
 printf "Correlacion entre x2 y x3 = %.4f  (no son ortogonales en desviaciones)\n", corr(x2,x3)
 </pre>
 </div>
-<pre class="example" id="orgfdcfbb6">
+<pre class="example" id="orgdfbf633">
 Correlacion entre x2 y x3 = 0,5046  (no son ortogonales en desviaciones)
 </pre>
 <p>
@@ -402,7 +402,7 @@ Correlacion entre x2 y x3 = 0,5046  (no son ortogonales en desviaciones)
 <h2 id="matriz-regresores">Actividad 2 - La matriz de regresores y las ecuaciones normales</h2>
 <div class="outline-text-2" id="text-matriz-regresores">
 <p>
-Construimos explícitamente la matriz de regresores \(\boldsymbol{\mathsf{X}}=[\boldsymbol{1};\;\boldsymbol{x}_2;\;\boldsymbol{x}_3]\) (lección 10) con el comando <code>matrix</code> de Gretl, a partir de una lista de series.
+Construimos explícitamente la matriz de regresores \(\boldsymbol{\mathsf{X}}=[\boldsymbol{1};\;\boldsymbol{x}_2;\;\boldsymbol{x}_3]\) (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=5">lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#matriz-regresores">html</a>)) con el comando <code>matrix</code> de Gretl, a partir de una lista de series.
 </p>
 
 <p>
@@ -413,7 +413,7 @@ Primero la lista <code>Xlist</code> con los tres regresores, la constante <code>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org8f140c6">list Xlist = const x2 x3
+<pre class="src src-gretl" id="org28e4132">list Xlist = const x2 x3
 matrix X = { Xlist }
 list ylist = y
 matrix Y = { ylist }
@@ -427,7 +427,7 @@ printf "\nVector X'y (3x1):\n"
 print XtY
 </pre>
 </div>
-<pre class="example" id="org3235d3c">
+<pre class="example" id="org9439f23">
 Matriz X'X (3x3):
 XtX (3 x 3)
 
@@ -448,7 +448,7 @@ Mire esa matriz: los apuntes de ``Ecuaciones normales'' afirman que cada element
 </p>
 
 <p>
-Ahora resolvemos las ecuaciones normales <i>usando la inversa</i>, tal como aparece en la mayoría de los manuales (lección 10), y comparamos el resultado con lo que da <code>ols</code> directamente.
+Ahora resolvemos las ecuaciones normales <i>usando la inversa</i>, tal como aparece en la mayoría de los manuales (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=12">lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#ecuaciones-normales">html</a>)), y comparamos el resultado con lo que da <code>ols</code> directamente.
 </p>
 
 <p>
@@ -459,7 +459,7 @@ Ahora resolvemos las ecuaciones normales <i>usando la inversa</i>, tal como apar
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org3b859e7">matrix beta_matricial = invpd(XtX)*XtY
+<pre class="src src-gretl" id="org7034537">matrix beta_matricial = invpd(XtX)*XtY
 printf "beta calculado como (X'X)^(-1) X'y:\n"
 print beta_matricial
 
@@ -473,7 +473,7 @@ printf "\nDiferencia (debe ser practicamente cero):\n"
 print diferencia
 </pre>
 </div>
-<pre class="example" id="org5c7b5ad">
+<pre class="example" id="orgfe2e9eb">
 beta calculado como (X'X)^(-1) X'y:
 beta_matricial (3 x 1)
 
@@ -498,15 +498,15 @@ diferencia (3 x 1)
  -1,3323e-15 
 </pre>
 <p>
-<i>Recuerde la advertencia de la lección 10: esta fórmula con inversa EXISTE, y es lo que Gretl calcula internamente al ejecutar</i> <code>ols</code>; <i>pero el camino conceptual del curso nunca ha sido, ni será, invertir una matriz: es siempre la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\), que verificamos en la siguiente actividad.</i>
+<i>Recuerde la advertencia de la lección 10: esta fórmula con inversa EXISTE, y es lo que Gretl calcula internamente al ejecutar</i> <code>ols</code>; <i>pero el camino conceptual del curso nunca ha sido, ni será, invertir una matriz: es siempre la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\), que verificamos en la</i> <a href="#dos-lecturas">Actividad 3</a>.
 </p>
 </div>
 </div>
-<div id="outline-container-org0618632" class="outline-2">
-<h2 id="org0618632">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</h2>
-<div class="outline-text-2" id="text-org0618632">
+<div id="outline-container-dos-lecturas" class="outline-2">
+<h2 id="dos-lecturas">Actividad 3 - Las dos lecturas de la ortogonalidad: \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}\) y \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}\)</h2>
+<div class="outline-text-2" id="text-dos-lecturas">
 <p>
-Recuperamos el vector de residuos de la última regresión y verificamos que es ortogonal a las tres columnas de \(\boldsymbol{\mathsf{X}}\) simultáneamente, en sus dos lecturas equivalentes (lección 10, ``Transposición'').
+Recuperamos el vector de residuos de la última regresión y verificamos que es ortogonal a las tres columnas de \(\boldsymbol{\mathsf{X}}\) simultáneamente, en sus dos lecturas equivalentes (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=9">lección 10, ``Transposición''</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#transposicion">html</a>)).
 </p>
 
 <p>
@@ -517,7 +517,7 @@ Los residuos del último modelo, <code>$uhat</code>, pasan a una serie, de la se
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgf1577b4">series ehat = $uhat
+<pre class="src src-gretl" id="org962b9f7">series ehat = $uhat
 list elist = ehat
 matrix E = { elist }
 
@@ -530,7 +530,7 @@ printf "\ne*X (Gretl lo presenta como fila 1x3; mismos tres numeros):\n"
 print eX
 </pre>
 </div>
-<pre class="example" id="org276c31c">
+<pre class="example" id="orgd55b8b5">
 X'e (columna 3x1, debe ser (aprox.) el vector nulo):
 XtE (3 x 1)
 
@@ -549,7 +549,7 @@ Observe que <code>XtE</code> y <code>eX</code> contienen <i>los mismos tres núm
 </p>
 
 <p>
-Una advertencia sobre lo que ve en pantalla, para que no deshaga lo aprendido en la lección 10. Gretl presenta uno de los dos resultados ``en columna'' y el otro ``en fila'', y el guion ha tenido que escribir <code>E'X</code>, transponiendo lo que el curso llama un vector, porque el lenguaje matricial de Gretl no ofrece otra cosa: <i>para Gretl</i> un vector es una matriz de una sola fila o de una sola columna, y por tanto tiene orientación. Para nosotros no la tiene: un vector es una lista de coordenadas, y solo las matrices se transponen (lección 10, ``Transposición''; y la pregunta 2 del repaso de esa lección, que quizá acaba de responder). De hecho, el sentido de aquella transparencia es precisamente este: \(\boldsymbol{\mathop{\widehat e}}\boldsymbol{\mathsf{X}}\) <i>no exige</i> transponer \(\boldsymbol{\mathop{\widehat e}}\); la transposición recae sobre la matriz, no sobre el vector. Lo que ve en pantalla es una convención de Gretl, no un ingrediente del curso.
+Una advertencia sobre lo que ve en pantalla, para que no deshaga lo aprendido en la lección 10. Gretl presenta uno de los dos resultados ``en columna'' y el otro ``en fila'', y el guion ha tenido que escribir <code>E'X</code>, transponiendo lo que el curso llama un vector, porque el lenguaje matricial de Gretl no ofrece otra cosa: <i>para Gretl</i> un vector es una matriz de una sola fila o de una sola columna, y por tanto tiene orientación. Para nosotros no la tiene: un vector es una lista de coordenadas, y solo las matrices se transponen (lección 10, ``Transposición''; y la <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#pregunta-2">pregunta 2 del repaso de esa lección</a>, que quizá acaba de responder). De hecho, el sentido de aquella transparencia es precisamente este: \(\boldsymbol{\mathop{\widehat e}}\boldsymbol{\mathsf{X}}\) <i>no exige</i> transponer \(\boldsymbol{\mathop{\widehat e}}\); la transposición recae sobre la matriz, no sobre el vector. Lo que ve en pantalla es una convención de Gretl, no un ingrediente del curso.
 </p>
 </div>
 </div>
@@ -557,15 +557,15 @@ Una advertencia sobre lo que ve en pantalla, para que no deshaga lo aprendido en
 <h2 id="construir-ortogonal">Actividad 4 - Familia ortogonal: el mismo experimento, cambiando una sola cosa</h2>
 <div class="outline-text-2" id="text-construir-ortogonal">
 <p>
-Vamos a construir ahora el caso especial de la transparencia ``Familia ortogonal'' de la lección 10. Y lo construiremos cambiando una sola cosa, para que la comparación sea interpretable.
+Vamos a construir ahora el caso especial de la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=12">transparencia ``Familia ortogonal'' de la lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#familia-ortogonal">html</a>). Y lo construiremos cambiando una sola cosa, para que la comparación sea interpretable.
 </p>
 
 <p>
-Si cambiáramos varias cosas a la vez y el resultado cambiara, no sabríamos a cuál atribuirlo. Así que dejamos <b>todo</b> exactamente como en la Actividad 1 (las mismas \(n=40\) observaciones, los mismos \(\beta_1=5\), \(\beta_2=2\), \(\beta_3=-1\), y <i>la misma perturbación</i> \(\boldsymbol u\), sin volver a generarla) y cambiamos <b>una sola cosa</b> por decisión nuestra: la correlación entre los dos regresores, que pasará de \(0{,}50\) a cero exacto (con ella cambian, necesariamente, el regresor \(\boldsymbol x_3\) y por tanto el regresando; pero \(n\), los \(\beta\) y la perturbación son los mismos).
+Si cambiáramos varias cosas a la vez y el resultado cambiara, no sabríamos a cuál atribuirlo. Así que dejamos <b>todo</b> exactamente como en la <a href="#caso-general">Actividad 1</a> (las mismas \(n=40\) observaciones, los mismos \(\beta_1=5\), \(\beta_2=2\), \(\beta_3=-1\), y <i>la misma perturbación</i> \(\boldsymbol u\), sin volver a generarla) y cambiamos <b>una sola cosa</b> por decisión nuestra: la correlación entre los dos regresores, que pasará de \(0{,}50\) a cero exacto (con ella cambian, necesariamente, el regresor \(\boldsymbol x_3\) y por tanto el regresando; pero \(n\), los \(\beta\) y la perturbación son los mismos).
 </p>
 
 <p>
-Para conseguirlo no hace falta ningún truco nuevo, solo la proyección ortogonal ya conocida: centramos \(\boldsymbol{x}_2\) para que tenga media nula, y a \(\boldsymbol{x}_3\) le quitamos su proyección sobre la constante y sobre \(\boldsymbol{z}_2\), es decir, nos quedamos con sus <i>residuos</i>. Por construcción (ecuaciones normales, lección 10), lo que queda es exactamente ortogonal a \(\boldsymbol1\) y a \(\boldsymbol{z}_2\).
+Para conseguirlo no hace falta ningún truco nuevo, solo la proyección ortogonal ya conocida: centramos \(\boldsymbol{x}_2\) para que tenga media nula, y a \(\boldsymbol{x}_3\) le quitamos su proyección sobre la constante y sobre \(\boldsymbol{z}_2\), es decir, nos quedamos con sus <i>residuos</i>. Por construcción (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=11">ecuaciones normales, lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#ecuaciones-normales">html</a>)), lo que queda es exactamente ortogonal a \(\boldsymbol1\) y a \(\boldsymbol{z}_2\).
 </p>
 
 <p>
@@ -576,7 +576,7 @@ Para conseguirlo no hace falta ningún truco nuevo, solo la proyección ortogona
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org8e1406a">series z2 = x2 - mean(x2)        # centrado: media nula
+<pre class="src src-gretl" id="orgc437f44">series z2 = x2 - mean(x2)        # centrado: media nula
 ols x3 const z2 --quiet
 series z3 = $uhat                # residuos: ortogonales a 1 y a z2 por construccion
 
@@ -588,7 +588,7 @@ printf "suma(z2*z3)  = %.10f   (debe ser 0: ortogonalidad mutua)\n", sum(z2*z3)
 printf "corr(z2,z3)  = %.10f   (era 0,5046 entre x2 y x3)\n", corr(z2,z3)
 </pre>
 </div>
-<pre class="example" id="orgf12e479">
+<pre class="example" id="org50db01a">
 media(z2)    = 0,0000000000   (debe ser 0)
 media(z3)    = -0,0000000000   (debe ser 0)
 suma(z2*z3)  = 0,0000000000   (debe ser 0: ortogonalidad mutua)
@@ -599,26 +599,26 @@ corr(z2,z3)  = 0,0000000000   (era 0,5046 entre x2 y x3)
 </p>
 </div>
 </div>
-<div id="outline-container-org8e0a084" class="outline-2">
-<h2 id="org8e0a084">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</h2>
-<div class="outline-text-2" id="text-org8e0a084">
+<div id="outline-container-cada-coeficiente" class="outline-2">
+<h2 id="cada-coeficiente">Actividad 5 - Cada coeficiente por separado: la familia ortogonal en acción</h2>
+<div class="outline-text-2" id="text-cada-coeficiente">
 <p>
-Recordando la transparencia ``Familia ortogonal'' de la lección 10: si los regresores son mutuamente ortogonales, cada \(\hat\beta_j\) puede calcularse <i>de forma aislada</i>, sin resolver ningún sistema, con la misma fórmula de Cauchy–Schwarz de la lección 3; y además \(R^2\) se descompone como suma de correlaciones al cuadrado.
+Recordando la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=12">transparencia ``Familia ortogonal'' de la lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#familia-ortogonal">html</a>): si los regresores son mutuamente ortogonales, cada \(\hat\beta_j\) puede calcularse <i>de forma aislada</i>, sin resolver ningún sistema, con la misma <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S03-Lecc03.pdf#page=7">fórmula de Cauchy–Schwarz de la lección 3</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S03-Lecc03.html#cauchy-schwarz">html</a>); y además \(R^2\) se descompone como suma de correlaciones al cuadrado.
 </p>
 
 <p>
-Vamos a comprobarlo, pero haciendo <i>los dos cálculos en los dos escenarios</i>: el general de la Actividad 1 y el ortogonal que acabamos de construir. Porque comprobar que la fórmula funciona donde debe funcionar solo es la mitad del experimento; la otra mitad es ver qué ocurre donde no debe.
+Vamos a comprobarlo, pero haciendo <i>los dos cálculos en los dos escenarios</i>: el general de la <a href="#caso-general">Actividad 1</a> y el ortogonal que acabamos de construir. Porque comprobar que la fórmula funciona donde debe funcionar solo es la mitad del experimento; la otra mitad es ver qué ocurre donde no debe.
 </p>
 
 <p>
-Dos bloques idénticos, uno por escenario. En cada uno se estima el modelo conjunto con <code>--quiet</code> y se imprimen tres filas con dos columnas: a la izquierda, el coeficiente del modelo conjunto (<code>$coeff(x2)</code>) y el \(R^2\) (<code>$rsq</code>); a la derecha, el cálculo <i>aislado</i> que valdría si los regresores fueran ortogonales: <code>cov(x,y)/var(x)</code>, que es la pendiente de la regresión simple (lección 7; las dos funciones dividen por \(n-1\) y el divisor se cancela en el cociente), y la suma de las correlaciones al cuadrado.
+Dos bloques idénticos, uno por escenario. En cada uno se estima el modelo conjunto con <code>--quiet</code> y se imprimen tres filas con dos columnas: a la izquierda, el coeficiente del modelo conjunto (<code>$coeff(x2)</code>) y el \(R^2\) (<code>$rsq</code>); a la derecha, el cálculo <i>aislado</i> que valdría si los regresores fueran ortogonales: <code>cov(x,y)/var(x)</code>, que es la pendiente de la regresión simple (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S09-Lecc07.pdf#page=6">lección 7</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S09-Lecc07.html#covarianza-sobre-varianza">html</a>); las dos funciones dividen por \(n-1\) y el divisor se cancela en el cociente), y la suma de las correlaciones al cuadrado.
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgd2f571f">printf "================ CASO GENERAL (Actividad 1) ================\n"
+<pre class="src src-gretl" id="org1046ab9">printf "================ CASO GENERAL (Actividad 1) ================\n"
 printf "correlacion entre los regresores = %.4f\n\n", corr(x2,x3)
 ols y const x2 x3 --quiet
 printf "beta2:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(x2), cov(x2,y)/var(x2)
@@ -633,7 +633,7 @@ printf "beta3:  conjunto = %10.6f     aislado (cov/var) = %10.6f\n", $coeff(z3),
 printf "R2    : conjunto = %10.6f     suma de rho^2     = %10.6f\n", $rsq, corr(z2,yo)^2 + corr(z3,yo)^2
 </pre>
 </div>
-<pre class="example" id="orgdb1e528">
+<pre class="example" id="org3a75394">
 ================ CASO GENERAL (Actividad 1) ================
 correlacion entre los regresores = 0,5046
 
@@ -649,9 +649,9 @@ beta3:  conjunto =  -0,980779     aislado (cov/var) =  -0,980779
 R2    : conjunto =   0,835808     suma de rho^2     =   0,835808
 </pre>
 </div>
-<div id="outline-container-org32cf8e4" class="outline-4">
-<h4 id="org32cf8e4">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org32cf8e4">
+<div id="outline-container-orgeadcadb" class="outline-4">
+<h4 id="orgeadcadb">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgeadcadb">
 <p>
 La salida tiene dos bloques, y hay que leerlos como las dos mitades de un mismo experimento. Recuerde que <i>lo único</i> que los separa por decisión nuestra es la correlación entre los regresores: mismo \(n\), mismos \(\beta\), misma perturbación.
 </p>
@@ -680,7 +680,7 @@ El caso general es el que da sentido a la comprobación del caso ortogonal. La t
 <h2 id="colinealidad-exacta">Actividad 6 - El caso contrario: colinealidad exacta</h2>
 <div class="outline-text-2" id="text-colinealidad-exacta">
 <p>
-La lección 10 puso un ejemplo de regresores <i>linealmente dependientes</i>: la temperatura de un mismo día en grados Celsius y en Fahrenheit, \(F=32+1{,}8\,C\). Cada una varía; juntas no aportan dos direcciones, sino una. Fabriquemos ese caso con los datos de la Actividad 1, tomando <code>x2</code> como si fuera una temperatura en Celsius.
+La <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=17">lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#modelo-poblacional">html</a>) puso un ejemplo de regresores <i>linealmente dependientes</i>: la temperatura de un mismo día en grados Celsius y en Fahrenheit, \(F=32+1{,}8\,C\). Cada una varía; juntas no aportan dos direcciones, sino una. Fabriquemos ese caso con los datos de la <a href="#caso-general">Actividad 1</a>, tomando <code>x2</code> como si fuera una temperatura en Celsius.
 </p>
 
 <p>
@@ -691,7 +691,7 @@ La lección 10 puso un ejemplo de regresores <i>linealmente dependientes</i>: la
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org4f074f7">series C = x2                     # "temperatura" en Celsius
+<pre class="src src-gretl" id="org952be1e">series C = x2                     # "temperatura" en Celsius
 series F = 32 + 1.8*C             # la misma temperatura, en Fahrenheit
 printf "corr(C, F) = %.10f\n", corr(C, F)
 
@@ -702,7 +702,7 @@ printf "determinante de X'X con C y F = %g   (una matriz invertible tiene determ
 ols y const C F
 </pre>
 </div>
-<pre class="example" id="orgfb314a6">
+<pre class="example" id="orgf1faa9d">
 corr(C, F) = 1,0000000000
 determinante de X'X con C y F = 0   (una matriz invertible tiene determinante distinto de cero)
 
@@ -723,11 +723,11 @@ Log-verosimilitud      -109,5238   Criterio de Akaike      223,0476
 Criterio de Schwarz     226,4253   Crit. de Hannan-Quinn   224,2688
 </pre>
 </div>
-<div id="outline-container-org7e4751e" class="outline-4">
-<h4 id="org7e4751e">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org7e4751e">
+<div id="outline-container-orgde66793" class="outline-4">
+<h4 id="orgde66793">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgde66793">
 <p>
-La correlación entre <code>C</code> y <code>F</code> es \(1\): son el mismo vector en desviaciones, salvo escala. El determinante de \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) es nulo (o del orden del error de redondeo): la matriz no es invertible, y las ecuaciones normales tienen infinitas soluciones, como advertía la lección 10. Gretl no se detiene: detecta la dependencia, <i>elimina</i> uno de los dos regresores y lo indica en la salida. Es la respuesta razonable, porque el ajuste \(\boldsymbol{\mathop{\widehat y}}\) es único aunque los coeficientes no lo sean, pero conviene saber que ha ocurrido: el coeficiente de <code>C</code> que queda ya no es ``el efecto de C manteniendo F fija'', porque fijar <code>F</code> es fijar <code>C</code>. En la lección 14 veremos el caso menos extremo y más frecuente: regresores cuyos vectores en desviaciones forman un ángulo muy pequeño, que Gretl no elimina y que hacen inestables los coeficientes.
+La correlación entre <code>C</code> y <code>F</code> es \(1\): son el mismo vector en desviaciones, salvo escala. El determinante de \(\boldsymbol{\mathsf X}^\top\boldsymbol{\mathsf X}\) es nulo (o del orden del error de redondeo): la matriz no es invertible, y las ecuaciones normales tienen infinitas soluciones, como advertía la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=12">lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#ecuaciones-normales">html</a>). Gretl no se detiene: detecta la dependencia, <i>elimina</i> uno de los dos regresores y lo indica en la salida. Es la respuesta razonable, porque el ajuste \(\boldsymbol{\mathop{\widehat y}}\) es único aunque los coeficientes no lo sean, pero conviene saber que ha ocurrido: el coeficiente de <code>C</code> que queda ya no es ``el efecto de C manteniendo F fija'', porque fijar <code>F</code> es fijar <code>C</code>. En la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=3">lección 14</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#exacta-y-de-grado">html</a>) veremos el caso menos extremo y más frecuente: regresores cuyos vectores en desviaciones forman un ángulo muy pequeño, que Gretl no elimina y que hacen inestables los coeficientes.
 </p>
 </div>
 </div>
@@ -736,18 +736,18 @@ La correlación entre <code>C</code> y <code>F</code> es \(1\): son el mismo vec
 <h2 id="coordenadas-base-ortonormal">Actividad 7 - Coordenadas en una base ortonormal: \(\mathrm{SEC}\), \(\mathrm{SRC}\) y el \(F\) con números</h2>
 <div class="outline-text-2" id="text-coordenadas-base-ortonormal">
 <p>
-El <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice ``Estructura geométrica de la probabilidad y de la inferencia en el modelo de regresión''</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5">html</a>) (sección <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=12">5</a>) escribe las sumas de cuadrados de la lección 8 como sumas de cuadrados de coordenadas: en una base ortonormal de \(\mathcal L(\boldsymbol 1)^\perp\) cuyos \(k-1\) primeros vectores generen el subespacio de los regresores en desviaciones (el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html">html</a>) lo llama \(\mathcal E\)) y cuyos \(n-k\) restantes generen el del residuo (\(\mathcal R\)), \(\mathrm{SEC}\) es la suma de los cuadrados de las \(k-1\) primeras coordenadas del vector de datos en desviaciones, \(\mathrm{SRC}\) la de las otras \(n-k\), y el \(F\) de significación conjunta es el cociente de las dos medias cuadráticas. Vamos a construir esa base con los datos de la Actividad 1 y a comprobarlo con números.
+El <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice ``Estructura geométrica de la probabilidad y de la inferencia en el modelo de regresión''</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5">html</a>) (sección <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=12">5</a>) escribe las <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S10-Lecc08.pdf#page=5">sumas de cuadrados de la lección 8</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S10-Lecc08.html#pitagoras-varianza">html</a>) como sumas de cuadrados de coordenadas: en una base ortonormal de \(\mathcal L(\boldsymbol 1)^\perp\) cuyos \(k-1\) primeros vectores generen el subespacio de los regresores en desviaciones (el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html">html</a>) lo llama \(\mathcal E\)) y cuyos \(n-k\) restantes generen el del residuo (\(\mathcal R\)), \(\mathrm{SEC}\) es la suma de los cuadrados de las \(k-1\) primeras coordenadas del vector de datos en desviaciones, \(\mathrm{SRC}\) la de las otras \(n-k\), y el \(F\) de significación conjunta es el cociente de las dos medias cuadráticas. Vamos a construir esa base con los datos de la <a href="#caso-general">Actividad 1</a> y a comprobarlo con números.
 </p>
 
 <p>
-Primero la parte de \(\mathcal E\), ortogonalizando como en la Actividad 4: <code>b_1</code> es \(\boldsymbol x_2\) en desviaciones dividido por su longitud, y <code>b_2</code> es la parte de \(\boldsymbol x_3\) en desviaciones ortogonal a <code>b_1</code>, también normalizada (es la parte propia de \(\boldsymbol x_3\), lección 14, dividida por su longitud). Después la parte de \(\mathcal R\), con una regla fija: <code>M</code> es la matriz que proyecta sobre \(\mathcal L(\boldsymbol 1)^\perp\) (la identidad menos la matriz de unos dividida por \(n\)), <code>PR</code> la que proyecta sobre \(\mathcal R\) (se le quitan las dos direcciones de \(\mathcal E\)), y <code>eigensym</code> devuelve sus autovalores en <code>lam</code> y sus autovectores en <code>V</code>; los autovectores de autovalor \(1\) son una base ortonormal de \(\mathcal R\), y <code>selifc</code> se queda con esas columnas. Dos <code>printf</code> comprueban que la base entera es ortonormal y de media cero (las identidades (2) del <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html">html</a>)). Las coordenadas se obtienen multiplicando la traspuesta de cada bloque por el vector de datos en desviaciones <code>v</code>, y el resto son comparaciones: las dos sumas de cuadrados de coordenadas frente a \(\mathrm{SEC}\) y \(\mathrm{SRC}\) (<code>$ess</code> es la \(\mathrm{SRC}\) de Gretl), su suma frente a \(\mathrm{STC}\), el cociente de medias cuadráticas frente a <code>$Fstat</code>, y la coordenada sobre <code>b_2</code> dividida por la longitud de la parte propia de \(\boldsymbol x_3\) frente a \(\hat\beta_3\).
+Primero la parte de \(\mathcal E\), ortogonalizando como en la <a href="#construir-ortogonal">Actividad 4</a>: <code>b_1</code> es \(\boldsymbol x_2\) en desviaciones dividido por su longitud, y <code>b_2</code> es la parte de \(\boldsymbol x_3\) en desviaciones ortogonal a <code>b_1</code>, también normalizada (es la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=4">parte propia de \(\boldsymbol x_3\), lección 14</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#parte-propia">html</a>), dividida por su longitud). Después la parte de \(\mathcal R\), con una regla fija: <code>M</code> es la matriz que proyecta sobre \(\mathcal L(\boldsymbol 1)^\perp\) (la identidad menos la matriz de unos dividida por \(n\)), <code>PR</code> la que proyecta sobre \(\mathcal R\) (se le quitan las dos direcciones de \(\mathcal E\)), y <code>eigensym</code> devuelve sus autovalores en <code>lam</code> y sus autovectores en <code>V</code>; los autovectores de autovalor \(1\) son una base ortonormal de \(\mathcal R\), y <code>selifc</code> se queda con esas columnas. Dos <code>printf</code> comprueban que la base entera es ortonormal y de media cero (las identidades (2) del <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html">html</a>)). Las coordenadas se obtienen multiplicando la traspuesta de cada bloque por el vector de datos en desviaciones <code>v</code>, y el resto son comparaciones: las dos sumas de cuadrados de coordenadas frente a \(\mathrm{SEC}\) y \(\mathrm{SRC}\) (<code>$ess</code> es la \(\mathrm{SRC}\) de Gretl), su suma frente a \(\mathrm{STC}\), el cociente de medias cuadráticas frente a <code>$Fstat</code>, y la coordenada sobre <code>b_2</code> dividida por la longitud de la parte propia de \(\boldsymbol x_3\) frente a \(\hat\beta_3\).
 </p>
 
 <p>
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgb1f6d4e">ols y const x2 x3 --quiet
+<pre class="src src-gretl" id="org7c0bb0c">ols y const x2 x3 --quiet
 scalar n = $nobs
 scalar k = 3
 
@@ -780,7 +780,7 @@ printf "\n(SEC/(k-1)) / (SRC/(n-k)) = %.4f    F de Gretl = %.4f\n", (cE'cE/(k-1)
 printf "c2 / ||parte propia de x3|| = %.6f    beta3 de Gretl = %.6f\n", cE[2]/sqrt(sum(e3^2)), $coeff(x3)
 </pre>
 </div>
-<pre class="example" id="orgbcdcef8">
+<pre class="example" id="org790bc7a">
 vectores de la base: 2 en E, 37 en R, total 39 = n-1
 ortonormalidad: max|B'B - I| = 1,17961e-15 ; media cero: max|B'1| = 9,55833e-16
 
@@ -795,37 +795,37 @@ suma de todas                             =  1567,0343   STC =  1567,0343
 c2 / ||parte propia de x3|| = -0,980779    beta3 de Gretl = -0,980779
 </pre>
 </div>
-<div id="outline-container-org8ed3890" class="outline-4">
-<h4 id="org8ed3890">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org8ed3890">
+<div id="outline-container-orgba4255a" class="outline-4">
+<h4 id="orgba4255a">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-orgba4255a">
 <p>
-La base tiene \(n-1=39\) vectores, \(2\) en \(\mathcal E\) y \(37\) en \(\mathcal R\), ortonormales y de media cero con error del orden del redondeo. Las dos sumas de cuadrados de coordenadas coinciden con \(\mathrm{SEC}\) y \(\mathrm{SRC}\), y su suma con \(\mathrm{STC}\): es Pitágoras generalizado (lección 10) con la base partida en dos. El cociente de las dos medias cuadráticas es, con todos sus decimales, el \(F\) que Gretl imprime al pie de la tabla, que la lección 13 presenta como el contraste de significación conjunta: con la base construida así, el \(F\) es el cociente entre la suma de cuadrados de la parte de \(\boldsymbol y-\boldsymbol{\mathop{\overline y}}\) que cae en \(\mathcal E\) y la de la parte que cae en \(\mathcal R\), cada una dividida por la dimensión de su subespacio (\(2\) y \(37\)). Las lecciones 11 y 13 llamarán a esas dimensiones <i>grados de libertad</i>. Y la coordenada sobre <code>b_2</code>, dividida por la longitud de la parte propia de \(\boldsymbol x_3\), es \(\hat\beta_3\): la fórmula de la lección 14 (\(\hat\beta_j\) es la proyección de \(\boldsymbol y\) sobre la dirección de la parte propia, por unidad de longitud de esa parte), que el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>) usa en su sección <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=14">5.4</a>. Lo que en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html">html</a>) es una variable aleatoria, la coordenada de la perturbación \(C_j\), es aquí un número por coordenada: estamos en una realización, la de la Actividad 1.
+La base tiene \(n-1=39\) vectores, \(2\) en \(\mathcal E\) y \(37\) en \(\mathcal R\), ortonormales y de media cero con error del orden del redondeo. Las dos sumas de cuadrados de coordenadas coinciden con \(\mathrm{SEC}\) y \(\mathrm{SRC}\), y su suma con \(\mathrm{STC}\): es Pitágoras generalizado (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=13">lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#r2-multiple">html</a>)) con la base partida en dos. El cociente de las dos medias cuadráticas es, con todos sus decimales, el \(F\) que Gretl imprime al pie de la tabla, que la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=11">lección 13</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#F-tabla-resultados">html</a>) presenta como el contraste de significación conjunta: con la base construida así, el \(F\) es el cociente entre la suma de cuadrados de la parte de \(\boldsymbol y-\boldsymbol{\mathop{\overline y}}\) que cae en \(\mathcal E\) y la de la parte que cae en \(\mathcal R\), cada una dividida por la dimensión de su subespacio (\(2\) y \(37\)). Las lecciones <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S15-Lecc11.pdf#page=17">11</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html#blue">html</a>) y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=6">13</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#estadistico-F">html</a>) llamarán a esas dimensiones <i>grados de libertad</i>. Y la coordenada sobre <code>b_2</code>, dividida por la longitud de la parte propia de \(\boldsymbol x_3\), es \(\hat\beta_3\): la fórmula de la lección 14 (\(\hat\beta_j\) es la proyección de \(\boldsymbol y\) sobre la dirección de la parte propia, por unidad de longitud de esa parte), que el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-5-4">html</a>) usa en su sección <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=14">5.4</a>. Lo que en el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf">apéndice</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html">html</a>) es una variable aleatoria, la coordenada de la perturbación \(C_j\), es aquí un número por coordenada: estamos en una realización, la de la Actividad 1.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgff9efda" class="outline-2">
-<h2 id="orgff9efda">Actividad 8 - Síntesis</h2>
-<div class="outline-text-2" id="text-orgff9efda">
+<div id="outline-container-org1e28776" class="outline-2">
+<h2 id="org1e28776">Actividad 8 - Síntesis</h2>
+<div class="outline-text-2" id="text-org1e28776">
 <p>
 Hoy hemos verificado con Gretl el álgebra matricial completa de la lección 10: (i) que \(\boldsymbol{\mathop{\widehat{\beta}}}=(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\boldsymbol{\mathsf{X}}^\top\boldsymbol{y}\) coincide con lo que calcula <code>ols</code>, y que \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\) (que es lo mismo que \(\boldsymbol{\mathop{\widehat{e}}}\boldsymbol{\mathsf{X}}=\boldsymbol{0}\)); (ii) que con regresores mutuamente ortogonales cada coeficiente puede aislarse sin resolver ningún sistema, y \(R^2\) se descompone como suma de correlaciones al cuadrado; (iii) que en una base ortonormal adaptada a los regresores, \(\mathrm{SEC}\) y \(\mathrm{SRC}\) son sumas de cuadrados de coordenadas y el \(F\) es el cociente de esas dos sumas, cada una dividida por la dimensión de su subespacio.
 </p>
 
 <p>
-Y lo hemos verificado de una manera concreta que conviene retener, porque vale para cualquier experimento y no solo para este: comparando dos escenarios que se diferencian en <i>una sola cosa</i>. Si el caso ortogonal hubiera tenido además otro tamaño muestral, otros coeficientes y otra desviación típica de la perturbación, habríamos visto cambiar los números sin poder atribuir el cambio a la ortogonalidad. Al dejar fijo todo lo demás, incluida la perturbación, la única explicación posible de la diferencia entre los dos bloques de la Actividad 5 es la que queríamos estudiar.
+Y lo hemos verificado de una manera concreta que conviene retener, porque vale para cualquier experimento y no solo para este: comparando dos escenarios que se diferencian en <i>una sola cosa</i>. Si el caso ortogonal hubiera tenido además otro tamaño muestral, otros coeficientes y otra desviación típica de la perturbación, habríamos visto cambiar los números sin poder atribuir el cambio a la ortogonalidad. Al dejar fijo todo lo demás, incluida la perturbación, la única explicación posible de la diferencia entre los dos bloques de la <a href="#cada-coeficiente">Actividad 5</a> es la que queríamos estudiar.
 </p>
 </div>
 </div>
-<div id="outline-container-orgd79c7cc" class="outline-2">
-<h2 id="orgd79c7cc">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-orgd79c7cc">
+<div id="outline-container-org9d6d2db" class="outline-2">
+<h2 id="org9d6d2db">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org9d6d2db">
 <ol class="org-ol">
-<li>En la Actividad 2, ¿por qué la diferencia entre <code>beta_matricial</code> y <code>beta_ols</code> no es cero, sino un número muy pequeño?</li>
-<li>¿Por qué necesitamos que <code>x2</code> y <code>x3</code> estén correlacionados en la Actividad 1 para que el ejercicio tenga sentido pedagógico? ¿Qué habría pasado si, por descuido, hubieran resultado casi ortogonales?</li>
-<li>En la Actividad 4, ¿por qué es importante que \(\boldsymbol{z}_2\) y \(\boldsymbol{z}_3\) tengan media <i>exactamente</i> cero, y no solo estén incorrelados?</li>
-<li>En la Actividad 5, el cálculo ``aislado'' \(\hat\beta_2\) (<code>cov(x2,y)/var(x2)</code>) sobre los datos de la Actividad 1 (<code>x2</code>, <code>x3</code>, correlacionados) no coincide con el coeficiente de <code>x2</code> en el modelo conjunto <code>ols y const x2 x3</code>, y el de <code>x3</code> ni siquiera tiene el mismo signo. ¿Por qué?</li>
-<li>¿Diría que el uso de la inversa \((\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\) en esta práctica contradice la advertencia de la lección 10 de que el curso ``nunca la usa como vía de razonamiento''? ¿Qué diferencia hay entre usarla para <i>verificar</i> una fórmula ya conocida y usarla como <i>método</i> para resolver MCO?</li>
-<li>En la Actividad 6, ¿por qué el ajuste \(\boldsymbol{\mathop{\widehat y}}\) es único aunque los coeficientes no lo sean? ¿Qué subespacio generan \(\boldsymbol 1\), \(\boldsymbol C\) y \(\boldsymbol F\)?</li>
+<li>En la <a href="#matriz-regresores">Actividad 2</a>, ¿por qué la diferencia entre <code>beta_matricial</code> y <code>beta_ols</code> no es cero, sino un número muy pequeño?</li>
+<li>¿Por qué necesitamos que <code>x2</code> y <code>x3</code> estén correlacionados en la <a href="#caso-general">Actividad 1</a> para que el ejercicio tenga sentido pedagógico? ¿Qué habría pasado si, por descuido, hubieran resultado casi ortogonales?</li>
+<li>En la <a href="#construir-ortogonal">Actividad 4</a>, ¿por qué es importante que \(\boldsymbol{z}_2\) y \(\boldsymbol{z}_3\) tengan media <i>exactamente</i> cero, y no solo estén incorrelados?</li>
+<li>En la <a href="#cada-coeficiente">Actividad 5</a>, el cálculo ``aislado'' \(\hat\beta_2\) (<code>cov(x2,y)/var(x2)</code>) sobre los datos de la <a href="#caso-general">Actividad 1</a> (<code>x2</code>, <code>x3</code>, correlacionados) no coincide con el coeficiente de <code>x2</code> en el modelo conjunto <code>ols y const x2 x3</code>, y el de <code>x3</code> ni siquiera tiene el mismo signo. ¿Por qué?</li>
+<li>¿Diría que el uso de la inversa \((\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathsf{X}})^{-1}\) en esta práctica contradice la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=12">advertencia de la lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#ecuaciones-normales">html</a>) de que el curso ``nunca la usa como vía de razonamiento''? ¿Qué diferencia hay entre usarla para <i>verificar</i> una fórmula ya conocida y usarla como <i>método</i> para resolver MCO?</li>
+<li>En la <a href="#colinealidad-exacta">Actividad 6</a>, ¿por qué el ajuste \(\boldsymbol{\mathop{\widehat y}}\) es único aunque los coeficientes no lo sean? ¿Qué subespacio generan \(\boldsymbol 1\), \(\boldsymbol C\) y \(\boldsymbol F\)?</li>
 </ol>
 
 <p>
@@ -838,9 +838,9 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 </ul>
 </div>
 </div>
-<div id="outline-container-orge3b1a3e" class="outline-2">
-<h2 id="orge3b1a3e">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-orge3b1a3e">
+<div id="outline-container-org0b1bc93" class="outline-2">
+<h2 id="org0b1bc93">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org0b1bc93">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -858,19 +858,19 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 </table>
 </div>
 </div>
-<div id="outline-container-orgdda77f3" class="outline-2">
-<h2 id="orgdda77f3">Respuestas</h2>
-<div class="outline-text-2" id="text-orgdda77f3">
+<div id="outline-container-orged5f270" class="outline-2">
+<h2 id="orged5f270">Respuestas</h2>
+<div class="outline-text-2" id="text-orged5f270">
 <ol class="org-ol">
-<li>¿Por qué la diferencia no es cero? Por errores de redondeo en aritmética de coma flotante, la misma razón por la que \(\sum\hat e_i\) no era cero en la práctica A de la sesión 11. Invertir una matriz \(3\times3\) y multiplicarla por otro vector implica varias operaciones aritméticas encadenadas, cada una con su pequeñísimo error de precisión; el resultado final coincide con el de <code>ols</code> hasta un margen del orden de \(10^{-10}\) o menor, que es indistinguible de cero a efectos prácticos.</li>
+<li>¿Por qué la diferencia no es cero? Por errores de redondeo en aritmética de coma flotante, la misma razón por la que \(\sum\hat e_i\) no era cero en la práctica A de la sesión 11 (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=3">actividad 2</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#residuos-ortogonalidad">html</a>)). Invertir una matriz \(3\times3\) y multiplicarla por otro vector implica varias operaciones aritméticas encadenadas, cada una con su pequeñísimo error de precisión; el resultado final coincide con el de <code>ols</code> hasta un margen del orden de \(10^{-10}\) o menor, que es indistinguible de cero a efectos prácticos.</li>
 
-<li>¿Por qué necesitamos correlación entre <code>x2</code> y <code>x3</code>? Porque el objetivo pedagógico de la Actividad 1 es mostrar el caso <i>general</i> de la regresión múltiple, en el que resolver el sistema completo (o, equivalentemente, usar la matriz inversa) es imprescindible. Si <code>x2</code> y <code>x3</code> hubieran resultado casi ortogonales por accidente, el ejercicio se habría parecido demasiado al caso especial de la Actividad 4, y no habría quedado clara la diferencia entre ``hay que resolver el sistema'' (caso general) y ``cada coeficiente se calcula aislado'' (familia ortogonal): precisamente el contraste que se explota, con toda intención, entre las Actividades 1-3 y las Actividades 4-5.</li>
+<li>¿Por qué necesitamos correlación entre <code>x2</code> y <code>x3</code>? Porque el objetivo pedagógico de la <a href="#caso-general">Actividad 1</a> es mostrar el caso <i>general</i> de la regresión múltiple, en el que resolver el sistema completo (o, equivalentemente, usar la matriz inversa) es imprescindible. Si <code>x2</code> y <code>x3</code> hubieran resultado casi ortogonales por accidente, el ejercicio se habría parecido demasiado al caso especial de la <a href="#construir-ortogonal">Actividad 4</a>, y no habría quedado clara la diferencia entre ``hay que resolver el sistema'' (caso general) y ``cada coeficiente se calcula aislado'' (familia ortogonal): precisamente el contraste que se explota, con toda intención, entre las Actividades 1-3 y las Actividades 4-5.</li>
 
-<li>¿Por qué la media exactamente nula, no solo la incorrelación? Porque la fórmula de la transparencia ``Familia ortogonal'' (lección 10) exige que \(\boldsymbol{1},\boldsymbol{z}_2,\boldsymbol{z}_3\) sean <i>mutuamente</i> ortogonales: no basta con que \(\boldsymbol{z}_2\perp\boldsymbol{z}_3\), hace falta además que cada uno de ellos sea ortogonal a la constante \(\boldsymbol{1}\), es decir, que tenga media cero. Sin esa condición, \(\hat\beta_1\) (el coeficiente de la constante) no sería, en general, la media de \(\boldsymbol{y}\), y la familia dejaría de ser ortogonal: la fórmula de la familia ortogonal no se podría aplicar a los tres coeficientes a la vez. Para \(\hat\beta_2\) y \(\hat\beta_3\) bastaría con la incorrelación, porque la constante centra los regresores por su cuenta (lección 10: centrar no cambia los coeficientes de los regresores no constantes); la media exactamente cero es lo que hace que también \(\hat\beta_1\) sea una proyección aislada.</li>
+<li>¿Por qué la media exactamente nula, no solo la incorrelación? Porque la fórmula de la transparencia ``Familia ortogonal'' (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=12">lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#familia-ortogonal">html</a>)) exige que \(\boldsymbol{1},\boldsymbol{z}_2,\boldsymbol{z}_3\) sean <i>mutuamente</i> ortogonales: no basta con que \(\boldsymbol{z}_2\perp\boldsymbol{z}_3\), hace falta además que cada uno de ellos sea ortogonal a la constante \(\boldsymbol{1}\), es decir, que tenga media cero. Sin esa condición, \(\hat\beta_1\) (el coeficiente de la constante) no sería, en general, la media de \(\boldsymbol{y}\), y la familia dejaría de ser ortogonal: la fórmula de la familia ortogonal no se podría aplicar a los tres coeficientes a la vez. Para \(\hat\beta_2\) y \(\hat\beta_3\) bastaría con la incorrelación, porque la constante centra los regresores por su cuenta (lección 10: centrar no cambia los coeficientes de los regresores no constantes); la media exactamente cero es lo que hace que también \(\hat\beta_1\) sea una proyección aislada.</li>
 
-<li>¿Coincide el cálculo aislado con los datos de la Actividad 1? No, y ya no hace falta creerlo: la Actividad 5 lo calcula. La fórmula aislada \(\hat\beta_2=\sigma_{\boldsymbol{x}_2\boldsymbol{y}}/\sigma^2_{\boldsymbol{x}_2}\) solo reproduce el coeficiente del modelo conjunto cuando los regresores son mutuamente ortogonales. Con <code>x2</code> y <code>x3</code> correlacionados, el cálculo aislado no tiene en cuenta la información compartida entre ambos y asigna a uno parte de lo que corresponde al otro: \(\hat\beta_2\) pasa de \(2{,}11\) a \(1{,}68\), y \(\hat\beta_3\), y esto es lo llamativo, pasa de \(-0{,}98\) a \(+0{,}22\), cambiando de signo. Es el mismo fenómeno que se observó en la práctica de Ramanathan con <code>sqft</code> y <code>bedrms</code>, aquí con un mundo del que conocemos los coeficientes verdaderos y podemos por tanto ver cuál de los dos cálculos acierta: el modelo conjunto (\(-0{,}98\) frente a \(\beta_3=-1\)).</li>
+<li>¿Coincide el cálculo aislado con los datos de la <a href="#caso-general">Actividad 1</a>? No, y ya no hace falta creerlo: la <a href="#cada-coeficiente">Actividad 5</a> lo calcula. La fórmula aislada \(\hat\beta_2=\sigma_{\boldsymbol{x}_2\boldsymbol{y}}/\sigma^2_{\boldsymbol{x}_2}\) solo reproduce el coeficiente del modelo conjunto cuando los regresores son mutuamente ortogonales. Con <code>x2</code> y <code>x3</code> correlacionados, el cálculo aislado no tiene en cuenta la información compartida entre ambos y asigna a uno parte de lo que corresponde al otro: \(\hat\beta_2\) pasa de \(2{,}11\) a \(1{,}68\), y \(\hat\beta_3\), y esto es lo llamativo, pasa de \(-0{,}98\) a \(+0{,}22\), cambiando de signo. Es el mismo fenómeno que se observó en la práctica de Ramanathan (<a href="https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=4">actividad 3</a> (<a href="https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#bedrms">html</a>)) con <code>sqft</code> y <code>bedrms</code>, aquí con un mundo del que conocemos los coeficientes verdaderos y podemos por tanto ver cuál de los dos cálculos acierta: el modelo conjunto (\(-0{,}98\) frente a \(\beta_3=-1\)).</li>
 
-<li>¿Contradice esta práctica la advertencia de la lección 10 sobre la inversa? No, y la distinción es importante. La advertencia de la lección 10 es que el curso nunca usa la inversa como <i>vía de razonamiento</i> para justificar por qué MCO funciona, ni como herramienta habitual de cálculo: el argumento conceptual sigue siendo, siempre, la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\). Aquí hemos usado la inversa una única vez, con un propósito muy distinto: <i>verificar numéricamente</i> que una fórmula ya demostrada por otro camino (las ecuaciones normales, obtenidas de la ortogonalidad) da, en efecto, el mismo resultado que <code>ols</code>. Usarla como comprobación puntual de una fórmula ya justificada no es lo mismo que apoyarse en ella para <i>explicar</i> por qué MCO funciona.</li>
+<li>¿Contradice esta práctica la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S13-Lecc10.pdf#page=12">advertencia de la lección 10</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S13-Lecc10.html#ecuaciones-normales">html</a>) sobre la inversa? No, y la distinción es importante. La advertencia de la lección 10 es que el curso nunca usa la inversa como <i>vía de razonamiento</i> para justificar por qué MCO funciona, ni como herramienta habitual de cálculo: el argumento conceptual sigue siendo, siempre, la condición de ortogonalidad \(\boldsymbol{\mathsf{X}}^\top\boldsymbol{\mathop{\widehat{e}}}=\boldsymbol{0}\). Aquí hemos usado la inversa una única vez, con un propósito muy distinto: <i>verificar numéricamente</i> que una fórmula ya demostrada por otro camino (las ecuaciones normales, obtenidas de la ortogonalidad) da, en efecto, el mismo resultado que <code>ols</code>. Usarla como comprobación puntual de una fórmula ya justificada no es lo mismo que apoyarse en ella para <i>explicar</i> por qué MCO funciona.</li>
 
 <li><i>Ajuste único, coeficientes no.</i> \(\boldsymbol F=32\,\boldsymbol 1+1{,}8\,\boldsymbol C\) es combinación lineal de \(\boldsymbol 1\) y \(\boldsymbol C\), así que \(\mathcal L(\boldsymbol 1,\boldsymbol C,\boldsymbol F)=\mathcal L(\boldsymbol 1,\boldsymbol C)\): un plano, no un subespacio de dimensión tres. La proyección de \(\boldsymbol y\) sobre ese plano es única (es el punto más cercano), pero se puede escribir de infinitas maneras como combinación de tres generadores que solo aportan dos direcciones. Gretl elige una de esas maneras eliminando <code>F</code>; cualquier otra daría el mismo \(\boldsymbol{\mathop{\widehat y}}\), los mismos residuos y el mismo \(R^2\).</li>
 </ol>
@@ -879,7 +879,7 @@ Y lo hemos verificado de una manera concreta que conviene retener, porque vale p
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-11-19 jue 00:17</p>
+<p class="date">Created: 2026-11-23 lun 22:08</p>
 </div>
 </body>
 </html>

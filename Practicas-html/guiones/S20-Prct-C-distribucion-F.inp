@@ -23,90 +23,90 @@ set workdir "@directory"
 set verbose off
 
 open hprice2.gdt --quiet
-scalar b1  = 20000
-scalar sig = 5000
+scalar beta1_verdadero  = 20000
+scalar sigma = 5000
 scalar R   = 2000
 set seed 20261119
 loop R --progressive --quiet
-    series u = normal(0, sig)
-    series y = b1 + u                       # H0 cierta: rooms, nox y stratio no intervienen
+    series u = normal(0, sigma)
+    series y = beta1_verdadero + u                       # H0 cierta: rooms, nox y stratio no intervienen
     ols y const rooms nox stratio --quiet
-    scalar Fst   = $Fstat
+    scalar F_replica   = $Fstat
     scalar SRC   = $ess
     scalar SEC   = $ess*$rsq/(1-$rsq)      # SEC = STC - SRC, con STC = SRC/(1-R^2)
-    scalar numer = SEC/3
-    scalar denom = SRC/502
-    store "@workdir/replicasF.gdt" Fst numer denom
+    scalar SEC_por_grado_de_libertad = SEC/3
+    scalar SRC_por_grado_de_libertad = SRC/502
+    store "@workdir/replicasF.gdt" F_replica SEC_por_grado_de_libertad SRC_por_grado_de_libertad
 endloop
 open "@workdir/replicasF.gdt" --quiet
 outfile --quiet bajoH0.txt
-    scalar sig = 5000
-    scalar Fc506 = critical(F, 3, 502, 0.05)
-    printf "H0 cierta, n = 506, k = 4, %d replicas, sigma^2 = %.3e\n", $nobs, sig^2
-    printf "media de SEC/(k-1) = %.4e\n", mean(numer)
-    printf "media de SRC/(n-k) = %.4e\n", mean(denom)
-    printf "media de F         = %.3f    mediana = %.3f\n", mean(Fst), median(Fst)
-    printf "fraccion de F > F_c(3,502) = %.4f\n", mean(Fst > critical(F, 3, 502, 0.05))
-    printf "cuantil empirico 95%% de F  = %.3f   (F_c = %.3f)\n", quantile(Fst, 0.95), Fc506
+    scalar sigma = 5000
+    scalar F_critico_n506 = critical(F, 3, 502, 0.05)
+    printf "H0 cierta, n = 506, k = 4, %d replicas, sigma^2 = %.3e\n", $nobs, sigma^2
+    printf "media de SEC/(k-1) = %.4e\n", mean(SEC_por_grado_de_libertad)
+    printf "media de SRC/(n-k) = %.4e\n", mean(SRC_por_grado_de_libertad)
+    printf "media de F         = %.3f    mediana = %.3f\n", mean(F_replica), median(F_replica)
+    printf "fraccion de F > F_c(3,502) = %.4f\n", mean(F_replica > critical(F, 3, 502, 0.05))
+    printf "cuantil empirico 95%% de F  = %.3f   (F_c = %.3f)\n", quantile(F_replica, 0.95), F_critico_n506
 end outfile
 printf "%s", readfile("bajoH0.txt")   # en pantalla
 
-freq Fst --plot="@workdir/histF.png"
+freq F_replica --plot="@workdir/histF.png"
 
 open hprice2.gdt --quiet
-scalar b1  = 20000
-scalar sig = 5000
+scalar beta1_verdadero  = 20000
+scalar sigma = 5000
 scalar R   = 2000
 set seed 20261119
 smpl 20 --random
 set seed 20261119
 loop R --progressive --quiet
-    series u = normal(0, sig)
-    series y = b1 + u
+    series u = normal(0, sigma)
+    series y = beta1_verdadero + u
     ols y const rooms nox stratio --quiet
-    scalar F20 = $Fstat
-    store "@workdir/replicasF20.gdt" F20
+    scalar F_replica_n20 = $Fstat
+    store "@workdir/replicasF20.gdt" F_replica_n20
 endloop
 open "@workdir/replicasF20.gdt" --quiet
 outfile --quiet n20.txt
-    scalar Fc20 = critical(F, 3, 16, 0.05)
+    scalar F_critico_n20 = critical(F, 3, 16, 0.05)
     printf "H0 cierta, n = 20 (n-k = 16), %d replicas\n", $nobs
-    printf "media de F = %.3f    mediana = %.3f    cuantil 95%% = %.3f   (F_c(3,16) = %.3f)\n", mean(F20), median(F20), quantile(F20, 0.95), Fc20
-    printf "fraccion de F > F_c(3,16)  = %.4f\n", mean(F20 > Fc20)
-    printf "fraccion de F > F_c(3,502) = %.4f\n", mean(F20 > critical(F, 3, 502, 0.05))
+    printf "media de F = %.3f    mediana = %.3f    cuantil 95%% = %.3f   (F_c(3,16) = %.3f)\n", mean(F_replica_n20), median(F_replica_n20), quantile(F_replica_n20, 0.95), F_critico_n20
+    printf "fraccion de F > F_c(3,16)  = %.4f\n", mean(F_replica_n20 > F_critico_n20)
+    printf "fraccion de F > F_c(3,502) = %.4f\n", mean(F_replica_n20 > critical(F, 3, 502, 0.05))
 end outfile
 printf "%s", readfile("n20.txt")   # en pantalla
 
-freq F20 --plot="@workdir/histF20.png"
+freq F_replica_n20 --plot="@workdir/histF20.png"
 
 open hprice2.gdt --quiet
 outfile --quiet deteccion.txt
-    scalar b1  = 20000
-    scalar sig = 5000
+    scalar beta1_verdadero  = 20000
+    scalar sigma = 5000
     scalar R   = 2000
-    scalar bn = -800                         # efecto pequeno de nox; rooms y stratio siguen sin intervenir
+    scalar beta_nox_verdadero = -800                         # efecto pequeno de nox; rooms y stratio siguen sin intervenir
     set seed 20261119
     smpl 20 --random
-    scalar Fc = critical(F, 3, $nobs-4, 0.05)
+    scalar F_critico = critical(F, 3, $nobs-4, 0.05)
     set seed 20261119
-    scalar rech = 0
+    scalar rechazos = 0
     loop R --quiet
-        series u = normal(0, sig)
-        series y = b1 + bn*nox + u
+        series u = normal(0, sigma)
+        series y = beta1_verdadero + beta_nox_verdadero*nox + u
         ols y const rooms nox stratio --quiet
-        rech += ($Fstat > Fc)
+        rechazos += ($Fstat > F_critico)
     endloop
-    printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rech/R
+    printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rechazos/R
     smpl full                                # y lo mismo con n = 506
-    scalar Fc = critical(F, 3, $nobs-4, 0.05)
+    scalar F_critico = critical(F, 3, $nobs-4, 0.05)
     set seed 20261119
-    scalar rech = 0
+    scalar rechazos = 0
     loop R --quiet
-        series u = normal(0, sig)
-        series y = b1 + bn*nox + u
+        series u = normal(0, sigma)
+        series y = beta1_verdadero + beta_nox_verdadero*nox + u
         ols y const rooms nox stratio --quiet
-        rech += ($Fstat > Fc)
+        rechazos += ($Fstat > F_critico)
     endloop
-    printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rech/R
+    printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rechazos/R
 end outfile
 printf "%s", readfile("deteccion.txt")   # en pantalla
