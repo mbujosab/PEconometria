@@ -97,7 +97,7 @@ set verbose off
 
 * Descripción de la práctica
 
-La lección 13 dijo que, si $H_0$ es cierta y las perturbaciones son normales, el $F$ sigue una distribución $F$ de Fisher con $q$ y $n-k$ grados de libertad: numerador y denominador estiman los dos $\sigma^2$, así que el cociente oscila en torno a $1$, y el valor crítico deja un $5\%$ de probabilidad a su derecha. Esta práctica lo comprueba repitiendo, como la práctica C de la sesión 18 comprobó la cobertura del intervalo ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]])).
+La [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=5][lección 13]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#estadistico-F][html]]) dijo que, si $H_0$ es cierta y las perturbaciones son normales, el $F$ sigue una distribución $F$ de Fisher con $q$ y $n-k$ grados de libertad: numerador y denominador estiman los dos $\sigma^2$, así que el cociente oscila en torno a $1$, y el valor crítico deja un $5\%$ de probabilidad a su derecha. Esta práctica lo comprueba repitiendo, como la práctica C de la sesión 18 comprobó la cobertura del intervalo ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]])).
 
 El mundo artificial usa los regresores /reales/ de =hprice2= (=rooms=, =nox= y =stratio=) y una variable dependiente /simulada/ en la que ninguno de los tres interviene: $y=20\,000+u$, con $u$ normal de desviación típica $5\,000$. La hipótesis $H_0\!:\beta_{\text{rooms}}=\beta_{\text{nox}}=\beta_{\text{stratio}}=0$ es cierta por construcción. Después la hacemos falsa por poco y miramos cuántas veces el $F$ lo detecta, con $n=20$ y con $n=506$.
 
@@ -107,10 +107,10 @@ El mundo artificial usa los regresores /reales/ de =hprice2= (=rooms=, =nox= y =
 2. Repetir con $n=20$ para ver que la distribución depende de $n-k$ y que usar el valor crítico equivocado cambia la frecuencia de rechazo.
 3. Con una $H_0$ falsa por poco, comparar la frecuencia de rechazo con $n=20$ y con $n=506$.
 
-/Comandos nuevos de esta práctica/. La mecánica es la de la práctica A de la sesión 16 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop][html]])): =loop R --progressive --quiet=, =store= para acumular una fila por réplica en un fichero =.gdt=, y =open= de ese fichero al terminar el bucle; =smpl 20 --random= y =smpl full= (sesiones 16 y 18); =critical= y =quantile= (sesión 18); =$Fstat=, el $F$ del pie de la tabla de =ols=, el contraste de que todos los coeficientes salvo la constante son cero (práctica A de la sesión 18, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-A-hprice2-inferencia.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-A-hprice2-inferencia.html#identidad-F][html]])), que es el $F$ de hoy porque $H_0$ excluye los tres regresores; y =$rsq=, el $R^2$ del último modelo (sesión 11), que junto con =$ess= permite recuperar la $\mathrm{SEC}$, que Gretl no devuelve directamente. Lo nuevo:
-- =mean(Fst > Fc)= :: la comparación produce una serie de ceros y unos (práctica C de la sesión 7, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-C-momentos-no-bastan.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-C-momentos-no-bastan.html#generacion-datos][html]])), y su media es la fracción de réplicas en que el $F$ supera el valor crítico (práctica C de la sesión 18, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]])).
-- =rech += (...)= :: suma al escalar =rech= el valor entre paréntesis, uno o cero: el contador de rechazos de la práctica C de la sesión 18 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=5][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#falsa-por-poco][html]])).
-- =open= y los escalares :: al abrir un conjunto de datos, =open= borra los escalares definidos antes, salvo con la opción =--preserve=. Por eso los bloques de las Actividades 2 y 3 vuelven a definir =b1=, =sig= y =R= justo después de =open=, y =BajoH0Resultados= y =N20Resultados= redefinen, tras el =open= de las réplicas, los escalares que usan (=sig=, =Fc506=, =Fc20=).
+/Comandos nuevos de esta práctica/. La mecánica es la de la práctica A de la sesión 16 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-A-montecarlo.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-A-montecarlo.html#loop][html]])): =loop R --progressive --quiet=, =store= para acumular una fila por réplica en un fichero =.gdt=, y =open= de ese fichero al terminar el bucle; =smpl 20 --random= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S16-Prct-B-condicionar.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S16-Prct-B-condicionar.html#doce-viviendas][html]]) de la práctica B de la sesión 16) y =smpl full= ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=8][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#quitar-viviendas][html]]) de la práctica A de la sesión 14); =critical= y =quantile= (sesión 18: [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-A-hprice2-inferencia.pdf#page=3][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-A-hprice2-inferencia.html#tabla-a-mano][html]]) de la práctica A y [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=4][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#precio-sigma][html]]) de la práctica C); =$Fstat=, el $F$ del pie de la tabla de =ols=, el contraste de que todos los coeficientes salvo la constante son cero (práctica A de la sesión 18, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-A-hprice2-inferencia.pdf#page=4][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-A-hprice2-inferencia.html#identidad-F][html]])), que es el $F$ de hoy porque $H_0$ excluye los tres regresores; y =$rsq=, el $R^2$ del último modelo ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S11-Prct-A-mco-simulado.pdf#page=3][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S11-Prct-A-mco-simulado.html#bondad-ajuste][html]]) de la práctica A de la sesión 11), que junto con =$ess= permite recuperar la $\mathrm{SEC}$, que Gretl no devuelve directamente. Lo nuevo:
+- =mean(F_replica > F_critico)= :: la comparación produce una serie de ceros y unos (práctica C de la sesión 7, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S07-Prct-C-momentos-no-bastan.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S07-Prct-C-momentos-no-bastan.html#generacion-datos][html]])), y su media es la fracción de réplicas en que el $F$ supera el valor crítico (práctica C de la sesión 18, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]])).
+- =rechazos += (...)= :: suma al escalar =rechazos= el valor entre paréntesis, uno o cero: el contador de rechazos de la práctica C de la sesión 18 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=5][actividad 3]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#falsa-por-poco][html]])).
+- =open= y los escalares :: al abrir un conjunto de datos, =open= borra los escalares definidos antes, salvo con la opción =--preserve=. Por eso los bloques de las [[#muestra-20][Actividades 2]] y [[#falsa-por-poco][3]] vuelven a definir =beta1_verdadero=, =sigma= y =R= justo después de =open=, y =BajoH0Resultados= y =N20Resultados= redefinen, tras el =open= de las réplicas, los escalares que usan (=sigma=, =F_critico_n506=, =F_critico_n20=).
 
 * Actividad 1 - Dos mil réplicas bajo $H_0$ cierta, $n=506$
 :PROPERTIES:
@@ -119,40 +119,40 @@ El mundo artificial usa los regresores /reales/ de =hprice2= (=rooms=, =nox= y =
 
 Abra =hprice2=, fije la semilla y repita $2\,000$ veces: sortee las perturbaciones, construya $y$, estime el modelo con los tres regresores y guarde el $F$ del pie de la tabla junto con su numerador $\mathrm{SEC}/(k-1)$ y su denominador $\mathrm{SRC}/(n-k)$. Gretl no da la $\mathrm{SEC}$ directamente, pero $\mathrm{STC}=\mathrm{SRC}/(1-R^2)$.
 
-Tras abrir =hprice2=, tres escalares fijan la constante =b1=, la desviación típica de la perturbación =sig= y el número de réplicas =R=. En cada vuelta del bucle se sortea =u=, se construye =y= sin ningún regresor, se estima el modelo con los tres y se guardan cinco escalares: el $F$ del pie de la tabla, la $\mathrm{SRC}$, la $\mathrm{SEC}$ recuperada de =$ess= y =$rsq=, y el numerador y el denominador del $F$, cada uno dividido por sus grados de libertad, $3$ y $502$. =store= añade una fila por réplica al fichero =replicasF.gdt=. Al salir del bucle, =open= carga ese fichero: ahora cada observación es una réplica, y =Fst=, =numer= y =denom= son series de $2\,000$ valores. El bloque =BajoH0Resultados= vuelve a definir =sig= y =Fc506=, porque el =open= de las réplicas ha borrado los escalares, y seis =printf= imprimen la cabecera con $\sigma^2$, la media del numerador, la media del denominador, la media y la mediana del $F$, la fracción de réplicas que superan el valor crítico y el cuantil empírico del $95\%$ junto a $F_c$. =freq= dibuja el histograma del $F$.
+Tras abrir =hprice2=, tres escalares fijan la constante =beta1_verdadero=, la desviación típica de la perturbación =sigma= y el número de réplicas =R=. En cada vuelta del bucle se sortea =u=, se construye =y= sin ningún regresor, se estima el modelo con los tres y se guardan cinco escalares: el $F$ del pie de la tabla, la $\mathrm{SRC}$, la $\mathrm{SEC}$ recuperada de =$ess= y =$rsq=, y el numerador y el denominador del $F$, cada uno dividido por sus grados de libertad, $3$ y $502$. =store= añade una fila por réplica al fichero =replicasF.gdt=. Al salir del bucle, =open= carga ese fichero: ahora cada observación es una réplica, y =F_replica=, =SEC_por_grado_de_libertad= y =SRC_por_grado_de_libertad= son series de $2\,000$ valores. El bloque =BajoH0Resultados= vuelve a definir =sigma= y =F_critico_n506=, porque el =open= de las réplicas ha borrado los escalares, y seis =printf= imprimen la cabecera con $\sigma^2$, la media del numerador, la media del denominador, la media y la mediana del $F$, la fracción de réplicas que superan el valor crítico y el cuantil empírico del $95\%$ junto a $F_c$. =freq= dibuja el histograma del $F$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: BajoH0
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
-scalar b1  = 20000
-scalar sig = 5000
+scalar beta1_verdadero  = 20000
+scalar sigma = 5000
 scalar R   = 2000
 set seed 20261119
 loop R --progressive --quiet
-    series u = normal(0, sig)
-    series y = b1 + u                       # H0 cierta: rooms, nox y stratio no intervienen
+    series u = normal(0, sigma)
+    series y = beta1_verdadero + u                       # H0 cierta: rooms, nox y stratio no intervienen
     ols y const rooms nox stratio --quiet
-    scalar Fst   = $Fstat
+    scalar F_replica   = $Fstat
     scalar SRC   = $ess
     scalar SEC   = $ess*$rsq/(1-$rsq)      # SEC = STC - SRC, con STC = SRC/(1-R^2)
-    scalar numer = SEC/3
-    scalar denom = SRC/502
-    store "@workdir/replicasF.gdt" Fst numer denom
+    scalar SEC_por_grado_de_libertad = SEC/3
+    scalar SRC_por_grado_de_libertad = SRC/502
+    store "@workdir/replicasF.gdt" F_replica SEC_por_grado_de_libertad SRC_por_grado_de_libertad
 endloop
 open "@workdir/replicasF.gdt" --quiet
 #+end_src
 #+NAME: BajoH0Resultados
 #+begin_src gretl :eval no
-scalar sig = 5000
-scalar Fc506 = critical(F, 3, 502, 0.05)
-printf "H0 cierta, n = 506, k = 4, %d replicas, sigma^2 = %.3e\n", $nobs, sig^2
-printf "media de SEC/(k-1) = %.4e\n", mean(numer)
-printf "media de SRC/(n-k) = %.4e\n", mean(denom)
-printf "media de F         = %.3f    mediana = %.3f\n", mean(Fst), median(Fst)
-printf "fraccion de F > F_c(3,502) = %.4f\n", mean(Fst > critical(F, 3, 502, 0.05))
-printf "cuantil empirico 95%% de F  = %.3f   (F_c = %.3f)\n", quantile(Fst, 0.95), Fc506
+scalar sigma = 5000
+scalar F_critico_n506 = critical(F, 3, 502, 0.05)
+printf "H0 cierta, n = 506, k = 4, %d replicas, sigma^2 = %.3e\n", $nobs, sigma^2
+printf "media de SEC/(k-1) = %.4e\n", mean(SEC_por_grado_de_libertad)
+printf "media de SRC/(n-k) = %.4e\n", mean(SRC_por_grado_de_libertad)
+printf "media de F         = %.3f    mediana = %.3f\n", mean(F_replica), median(F_replica)
+printf "fraccion de F > F_c(3,502) = %.4f\n", mean(F_replica > critical(F, 3, 502, 0.05))
+printf "cuantil empirico 95%% de F  = %.3f   (F_c = %.3f)\n", quantile(F_replica, 0.95), F_critico_n506
 #+end_src
 #+latex: }
 
@@ -171,12 +171,12 @@ printf "%s", readfile("bajoH0.txt")   # en pantalla
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 #+NAME: HistogramaF
 #+begin_src gretl :eval no
-freq Fst
+freq F_replica
 #+end_src
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S20-Prct-C-distribucion-F.inp :eval no :exports none
-freq Fst --plot="@workdir/histF.png"
+freq F_replica --plot="@workdir/histF.png"
 #+end_src
 
 #+attr_latex: :width 0.7\textwidth
@@ -186,41 +186,44 @@ freq Fst --plot="@workdir/histF.png"
 
 *** Lo que debe observar
 
-Las dos medias, la del numerador y la del denominador, están junto a $\sigma^2=2{,}5\cdot10^7$: bajo $H_0$ cierta las dos son estimaciones de la misma $\sigma^2$, la varianza de la perturbación, y esa es la razón de que el $F$ se mueva alrededor de $1$ ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=22][apéndice, Resultado 2]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-7-2][html]]); que su forma exacta sea la $F_{q,n-k}$ es el [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=24][Resultado 3]], y el histograma la aproxima con bloques sucesivos de $n$ filas de la matriz de copias de la lección 11, un bloque por réplica). La media del $F$ es $1{,}02$; la mediana, $0{,}81$: la distribución es asimétrica, con muchos valores pequeños y una cola larga a la derecha, y el histograma lo muestra. El $5{,}5\%$ de las réplicas supera $F_c$, frente al $5\%$ nominal; con $2\,000$ réplicas la frecuencia observada tiene su propia oscilación, igual que en la práctica C de la sesión 18 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]])).
+Las dos medias, la del numerador y la del denominador, están junto a $\sigma^2=2{,}5\cdot10^7$: bajo $H_0$ cierta las dos son estimaciones de la misma $\sigma^2$, la varianza de la perturbación, y esa es la razón de que el $F$ se mueva alrededor de $1$ ([[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=22][apéndice, Resultado 2]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-7-2][html]]); que su forma exacta sea la $F_{q,n-k}$ es el [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=24][Resultado 3]], y el histograma la aproxima con bloques sucesivos de $n$ filas de [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S15-Lecc11.pdf#page=20][la matriz de copias de la lección 11]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html#apendice-copias][html]]), un bloque por réplica). La media del $F$ es $1{,}02$; la mediana, $0{,}81$: la distribución es asimétrica, con muchos valores pequeños y una cola larga a la derecha, y el histograma lo muestra. El $5{,}5\%$ de las réplicas supera $F_c$, frente al $5\%$ nominal; con $2\,000$ réplicas la frecuencia observada tiene su propia oscilación, igual que en la práctica C de la sesión 18 ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=2][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#cubre-95][html]])).
 
 * Actividad 2 - Lo mismo con $n=20$
+:PROPERTIES:
+:CUSTOM_ID: muestra-20
+:END:
 
 Tome veinte viviendas al azar y repita. El valor crítico ya no es $F_c(3,502)$ sino $F_c(3,16)$, y esa diferencia importa.
 
-Igual que en la Actividad 1, con dos cambios. =smpl 20 --random= reduce la muestra a veinte viviendas elegidas al azar; la semilla se fija antes, para que sean las mismas para todos, y se vuelve a fijar antes del bucle. Y el valor crítico se calcula con $16$ grados de libertad en el denominador. Los escalares =R=, =sig= y =b1= se definen de nuevo después de =open=, que los había borrado (véase la lista de comandos nuevos). Tras abrir las réplicas, =N20Resultados= recalcula =Fc20= (el =open= lo ha borrado) e imprime la media, la mediana y el cuantil del $95\%$ del $F$ junto a $F_c(3,16)$, y la fracción de rechazos con el valor crítico correcto y con el de $n=506$.
+Igual que en la [[#bajo-h0][Actividad 1]], con dos cambios. =smpl 20 --random= reduce la muestra a veinte viviendas elegidas al azar; la semilla se fija antes, para que sean las mismas para todos, y se vuelve a fijar antes del bucle. Y el valor crítico se calcula con $16$ grados de libertad en el denominador. Los escalares =R=, =sigma= y =beta1_verdadero= se definen de nuevo después de =open=, que los había borrado (véase la lista de comandos nuevos). Tras abrir las réplicas, =N20Resultados= recalcula =F_critico_n20= (el =open= lo ha borrado) e imprime la media, la mediana y el cuantil del $95\%$ del $F$ junto a $F_c(3,16)$, y la fracción de rechazos con el valor crítico correcto y con el de $n=506$.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
 #+NAME: N20
 #+begin_src gretl :eval no
 open hprice2.gdt --quiet
-scalar b1  = 20000
-scalar sig = 5000
+scalar beta1_verdadero  = 20000
+scalar sigma = 5000
 scalar R   = 2000
 set seed 20261119
 smpl 20 --random
 set seed 20261119
 loop R --progressive --quiet
-    series u = normal(0, sig)
-    series y = b1 + u
+    series u = normal(0, sigma)
+    series y = beta1_verdadero + u
     ols y const rooms nox stratio --quiet
-    scalar F20 = $Fstat
-    store "@workdir/replicasF20.gdt" F20
+    scalar F_replica_n20 = $Fstat
+    store "@workdir/replicasF20.gdt" F_replica_n20
 endloop
 open "@workdir/replicasF20.gdt" --quiet
 #+end_src
 #+NAME: N20Resultados
 #+begin_src gretl :eval no
-scalar Fc20 = critical(F, 3, 16, 0.05)
+scalar F_critico_n20 = critical(F, 3, 16, 0.05)
 printf "H0 cierta, n = 20 (n-k = 16), %d replicas\n", $nobs
-printf "media de F = %.3f    mediana = %.3f    cuantil 95%% = %.3f   (F_c(3,16) = %.3f)\n", mean(F20), median(F20), quantile(F20, 0.95), Fc20
-printf "fraccion de F > F_c(3,16)  = %.4f\n", mean(F20 > Fc20)
-printf "fraccion de F > F_c(3,502) = %.4f\n", mean(F20 > critical(F, 3, 502, 0.05))
+printf "media de F = %.3f    mediana = %.3f    cuantil 95%% = %.3f   (F_c(3,16) = %.3f)\n", mean(F_replica_n20), median(F_replica_n20), quantile(F_replica_n20, 0.95), F_critico_n20
+printf "fraccion de F > F_c(3,16)  = %.4f\n", mean(F_replica_n20 > F_critico_n20)
+printf "fraccion de F > F_c(3,502) = %.4f\n", mean(F_replica_n20 > critical(F, 3, 502, 0.05))
 #+end_src
 #+latex: }
 
@@ -239,12 +242,12 @@ printf "%s", readfile("n20.txt")   # en pantalla
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 #+NAME: HistogramaF20
 #+begin_src gretl :eval no
-freq F20
+freq F_replica_n20
 #+end_src
 #+latex: }
 
 #+begin_src gretl :tangle guiones/S20-Prct-C-distribucion-F.inp :eval no :exports none
-freq F20 --plot="@workdir/histF20.png"
+freq F_replica_n20 --plot="@workdir/histF20.png"
 #+end_src
 
 #+attr_latex: :width 0.7\textwidth
@@ -257,10 +260,13 @@ freq F20 --plot="@workdir/histF20.png"
 Con dieciséis grados de libertad en el denominador, el $F$ sigue oscilando en torno a $1$ pero se dispersa más: el denominador, $\mathrm{SRC}/16$, es una estimación de $\sigma^2$ mucho peor que $\mathrm{SRC}/502$, y cuando sale pequeño el cociente se dispara. Por eso $F_c(3,16)=3{,}24$ es mayor que $F_c(3,502)=2{,}62$. Con el valor crítico correcto se rechaza el $5{,}05\%$ de las veces; con el de $n=506$, el $8{,}75\%$: un contraste que dice ``$5\%$'' y rechaza casi el $9\%$ de las hipótesis ciertas. Es el mismo precio de estimar $\sigma$ que la práctica C de la sesión 18 midió con la $t$ ([[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf#page=4][actividad 2]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html#precio-sigma][html]])).
 
 * Actividad 3 - Una hipótesis falsa por poco, con $n=20$ y con $n=506$
+:PROPERTIES:
+:CUSTOM_ID: falsa-por-poco
+:END:
 
 Haga que =nox= intervenga con un coeficiente pequeño, $\beta_{\text{nox}}=-800$ (=nox= recorre unas cinco unidades en la muestra, así que su efecto máximo es de unos $4\,000$ dólares, menos que la desviación típica de la perturbación, $5\,000$), y mantenga los otros dos en cero. $H_0$ es ahora falsa. Cuente cuántas veces se rechaza con $n=20$ y con $n=506$.
 
-Ahora =y= se construye con =nox= dentro, con el coeficiente =bn=, y el bucle ya no acumula réplicas: es un =loop= sin =--progressive= que solo cuenta. En cada vuelta, =rech += ($Fstat > Fc)= suma uno si el $F$ supera el valor crítico, y al terminar =rech/R= es la fracción de rechazos. =Fc= se calcula con los grados de libertad de la muestra activa, =$nobs-4=. Primero con la submuestra de veinte viviendas; después =smpl full= recupera las $506$ y se repiten, en el mismo bloque, las líneas desde la de =Fc=.
+Ahora =y= se construye con =nox= dentro, con el coeficiente =beta_nox_verdadero=, y el bucle ya no acumula réplicas: es un =loop= sin =--progressive= que solo cuenta. En cada vuelta, =rechazos += ($Fstat > F_critico)= suma uno si el $F$ supera el valor crítico, y al terminar =rechazos/R= es la fracción de rechazos. =F_critico= se calcula con los grados de libertad de la muestra activa, =$nobs-4=. Primero con la submuestra de veinte viviendas; después =smpl full= recupera las $506$ y se repiten, en el mismo bloque, las líneas desde la de =F_critico=.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -270,33 +276,33 @@ open hprice2.gdt --quiet
 #+end_src
 #+NAME: Deteccion
 #+begin_src gretl :eval no
-scalar b1  = 20000
-scalar sig = 5000
+scalar beta1_verdadero  = 20000
+scalar sigma = 5000
 scalar R   = 2000
-scalar bn = -800                         # efecto pequeno de nox; rooms y stratio siguen sin intervenir
+scalar beta_nox_verdadero = -800                         # efecto pequeno de nox; rooms y stratio siguen sin intervenir
 set seed 20261119
 smpl 20 --random
-scalar Fc = critical(F, 3, $nobs-4, 0.05)
+scalar F_critico = critical(F, 3, $nobs-4, 0.05)
 set seed 20261119
-scalar rech = 0
+scalar rechazos = 0
 loop R --quiet
-    series u = normal(0, sig)
-    series y = b1 + bn*nox + u
+    series u = normal(0, sigma)
+    series y = beta1_verdadero + beta_nox_verdadero*nox + u
     ols y const rooms nox stratio --quiet
-    rech += ($Fstat > Fc)
+    rechazos += ($Fstat > F_critico)
 endloop
-printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rech/R
+printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rechazos/R
 smpl full                                # y lo mismo con n = 506
-scalar Fc = critical(F, 3, $nobs-4, 0.05)
+scalar F_critico = critical(F, 3, $nobs-4, 0.05)
 set seed 20261119
-scalar rech = 0
+scalar rechazos = 0
 loop R --quiet
-    series u = normal(0, sig)
-    series y = b1 + bn*nox + u
+    series u = normal(0, sigma)
+    series y = beta1_verdadero + beta_nox_verdadero*nox + u
     ols y const rooms nox stratio --quiet
-    rech += ($Fstat > Fc)
+    rechazos += ($Fstat > F_critico)
 endloop
-printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rech/R
+printf "H0 falsa, n = %d: rechazos = %.3f\n", $nobs, rechazos/R
 #+end_src
 #+latex: }
 
@@ -318,15 +324,15 @@ Con veinte viviendas, la hipótesis falsa se rechaza el $7{,}7\%$ de las veces: 
 
 * Preguntas de interpretación para la clase
 
-1. En la Actividad 1, el numerador y el denominador tienen esperanza $\sigma^2$ y aun así la mediana del $F$ es $0{,}81$, no $1$. ¿Cómo puede el cociente de dos cantidades de esperanza $\sigma^2$ estar por debajo de $1$ más de la mitad de las veces?
+1. En la [[#bajo-h0][Actividad 1]], el numerador y el denominador tienen esperanza $\sigma^2$ y aun así la mediana del $F$ es $0{,}81$, no $1$. ¿Cómo puede el cociente de dos cantidades de esperanza $\sigma^2$ estar por debajo de $1$ más de la mitad de las veces?
 2. ¿Por qué bajo $H_0$ cierta $\mathrm{SEC}/(k-1)$ estima $\sigma^2$? Diga qué son los $k-1$ del denominador en la geometría de la lección 13.
-3. Si en la Actividad 2 se usara $F_c(3,502)$ con $n=20$, el contraste rechazaría casi el $9\%$ de las hipótesis ciertas. ¿Se equivocaría de más o de menos quien usara $F_c(3,16)$ con $n=506$?
-4. En la Actividad 3 la $\mathrm{SRC}$ del modelo restringido incluye lo que =nox= aportaría al ajuste y no se le deja aportar. ¿Cuál de los dos términos del $F$ crece con $n$ y cuál no?
-5. Un investigador con $n=20$ obtiene $F=1{,}9$ y concluye que ``los tres regresores son irrelevantes''. Con los resultados de la Actividad 3, ¿qué le respondería?
+3. Si en la [[#muestra-20][Actividad 2]] se usara $F_c(3,502)$ con $n=20$, el contraste rechazaría casi el $9\%$ de las hipótesis ciertas. ¿Se equivocaría de más o de menos quien usara $F_c(3,16)$ con $n=506$?
+4. En la [[#falsa-por-poco][Actividad 3]] la $\mathrm{SRC}$ del modelo restringido incluye lo que =nox= aportaría al ajuste y no se le deja aportar. ¿Cuál de los dos términos del $F$ crece con $n$ y cuál no?
+5. Un investigador con $n=20$ obtiene $F=1{,}9$ y concluye que ``los tres regresores son irrelevantes''. Con los resultados de la [[#falsa-por-poco][Actividad 3]], ¿qué le respondería?
 
 * Para profundizar
 
-- Lección 13 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html][lección 13]]), secciones ``El estadístico $F$'' y ``Lectura geométrica: la misma figura''.
+- Lección 13 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html][lección 13]]), secciones [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=5][``El estadístico $F$'']] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#estadistico-F][html]]) y [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=7][``Lectura geométrica: la misma figura'']] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#misma-figura][html]]).
 - [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S18-Prct-C-cobertura.pdf][Práctica C de la sesión 18]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S18-Prct-C-cobertura.html][html]]), con la misma lógica aplicada al intervalo y al $t$.
 - Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 4, sección 4.5, y apéndice C.6 (contrastes y tamaño muestral).
 - Manual de Gretl: =loop= con la opción =--progressive= y comando =store=; funciones =critical=, =quantile= y =freq=.
@@ -345,13 +351,13 @@ Con veinte viviendas, la hipótesis falsa se rechaza el $7{,}7\%$ de las veces: 
 
 1. /Mediana menor que uno./ El cociente de dos variables no tiene por esperanza el cociente de las esperanzas, y la distribución del numerador es muy asimétrica: $\mathrm{SEC}/3$ es una suma de tres cuadrados, con muchos valores pequeños y pocos grandes que tiran de la esperanza hacia arriba. Más de la mitad de las veces el numerador queda por debajo de su esperanza, y el $F$ por debajo de $1$; las réplicas en que sale grande compensan en la media pero no en la mediana.
 
-2. /Por qué $\mathrm{SEC}/(k-1)$ estima $\sigma^2$./ Bajo $H_0$ cierta, cada realización de $\boldsymbol y$ es una constante más la realización de las perturbaciones, y la parte de $\boldsymbol{\mathop{\widehat y}}$ que se aparta de $\boldsymbol{\mathop{\overline y}}$ es la proyección de esa realización sobre las $k-1$ direcciones de los regresores no constantes. Por el reparto por igual de la lección 13, la suma de cuadrados de esa proyección, evaluada sobre la muestra aleatoria, tiene esperanza $\sigma^2$ por grado de libertad; el cateto explicado tiene $k-1$, los grados de libertad del ajuste, y $\mathrm{SEC}$ dividida por $k-1$ estima $\sigma^2$. Los $k-1$ son la dimensión del subespacio de los regresores en desviaciones (lección 13).
+2. /Por qué $\mathrm{SEC}/(k-1)$ estima $\sigma^2$./ Bajo $H_0$ cierta, cada realización de $\boldsymbol y$ es una constante más la realización de las perturbaciones, y la parte de $\boldsymbol{\mathop{\widehat y}}$ que se aparta de $\boldsymbol{\mathop{\overline y}}$ es la proyección de esa realización sobre las $k-1$ direcciones de los regresores no constantes. Por el reparto por igual de la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=6][lección 13]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#estadistico-F][html]]), la suma de cuadrados de esa proyección, evaluada sobre la muestra aleatoria, tiene esperanza $\sigma^2$ por grado de libertad; el cateto explicado tiene $k-1$, los grados de libertad del ajuste, y $\mathrm{SEC}$ dividida por $k-1$ estima $\sigma^2$. Los $k-1$ son la dimensión del subespacio de los regresores en desviaciones (lección 13).
 
 3. /El error contrario./ De menos: $F_c(3,16)=3{,}24$ es mayor que el $2{,}62$ que corresponde a $n=506$, así que rechazaría menos del $5\%$ de las hipótesis ciertas. Un contraste más conservador de lo que anuncia. Rechaza de menos y, a cambio, deja pasar hipótesis falsas que el valor crítico correcto habría rechazado.
 
 4. /Qué crece con $n$./ El numerador. Con $H_0$ falsa, $\mathrm{SRC}_r-\mathrm{SRC}$ contiene la longitud al cuadrado de $\beta_{\text{nox}}\tilde{\boldsymbol x}_{\text{nox}}$, y la parte propia de =nox= se alarga con el número de observaciones; la perturbación añade lo de siempre, del orden de $q\sigma^2$. El denominador estima $\sigma^2$ y no crece. Por eso el mismo efecto, invisible con $n=20$, se detecta con $n=506$: no porque el efecto sea mayor, sino porque la parte propia de =nox= es más larga.
 
-5. /``Irrelevantes'' con $n=20$./ Que $F=1{,}9$ no rechaza, pero que con veinte observaciones un efecto del tamaño del de la Actividad 3 solo se rechaza el $8\%$ de las veces: no rechazar es casi lo esperable, haya o no efecto. Lo que puede decir es que los datos no permiten afirmar que los regresores intervengan, que es distinto de afirmar que no lo hacen. Los intervalos de los tres coeficientes dirán cuán grande podría ser lo que no se ha detectado.
+5. /``Irrelevantes'' con $n=20$./ Que $F=1{,}9$ no rechaza, pero que con veinte observaciones un efecto del tamaño del de la [[#falsa-por-poco][Actividad 3]] solo se rechaza el $8\%$ de las veces: no rechazar es casi lo esperable, haya o no efecto. Lo que puede decir es que los datos no permiten afirmar que los regresores intervengan, que es distinto de afirmar que no lo hacen. Los intervalos de los tres coeficientes dirán cuán grande podría ser lo que no se ha detectado.
 
 * COMMENT Banco de preguntas de reserva
 

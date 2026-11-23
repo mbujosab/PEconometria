@@ -97,7 +97,7 @@ set verbose off
 
 * Descripción de la práctica
 
-Cuando un modelo tiene dos regresores con $t$ pequeños, la tentación es quitar los dos. La lección 13 avisó de que dos $t$ pequeños no son un $F$ pequeño: la pregunta ``¿sobra esta variable?'' y la pregunta ``¿sobran estas dos?'' son distintas, y solo la segunda se responde con el $F$ de $q=2$. Esta práctica hace las dos preguntas sobre unos datos pequeños y compara.
+Cuando un modelo tiene dos regresores con $t$ pequeños, la tentación es quitar los dos. La [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=19][lección 13]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#conjunto-individual][html]]) avisó de que dos $t$ pequeños no son un $F$ pequeño: la pregunta ``¿sobra esta variable?'' y la pregunta ``¿sobran estas dos?'' son distintas, y solo la segunda se responde con el $F$ de $q=2$. Esta práctica hace las dos preguntas sobre unos datos pequeños y compara.
 
 Volvemos a =data4-1= de Ramanathan, el fichero de catorce viviendas de la [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S14-Prct-A-ramanathan.pdf#page=1][actividad 1]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S14-Prct-A-ramanathan.html#datos][html]]) de la práctica A de la sesión 14, con el modelo =price ~ sqft + bedrms + baths=: precio en miles de dólares, superficie en pies cuadrados, número de dormitorios y de baños. Con $n=14$ y $k=4$ quedan diez grados de libertad, y estos datos permiten decir poco.
 
@@ -112,13 +112,16 @@ Volvemos a =data4-1= de Ramanathan, el fichero de catorce viviendas de la [[http
 - =restrict --quiet= :: hace el contraste sin imprimir las estimaciones restringidas. Sirve cuando solo queremos el estadístico.
 - =$test= :: tras un contraste, el valor de su estadístico; aquí, el $F$ que =restrict= acaba de calcular. Guardarlo en un escalar permite compararlo con el valor crítico o pasarlo a =pvalue=.
 - Escalares en una restricción :: a la derecha del igual, en lugar de un número, puede ir el nombre de un escalar: =b[bedrms] = iL=.
-- =$vcv[3,4]= :: de la matriz de varianzas y covarianzas de los coeficientes (práctica A de esta sesión, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S20-Prct-A-hprice2-restricciones.pdf#page=6][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S20-Prct-A-hprice2-restricciones.html#elipse-confianza][html]])), el elemento de la fila $3$ y la columna $4$: la covarianza entre el tercer y el cuarto coeficiente. Está en el bloque =Esquinas= de la Actividad 3. La figura de la elipse usa las mismas matrices y el mismo bloque =plot= que esa actividad 6.
+- =$vcv[3,4]= :: de la matriz de varianzas y covarianzas de los coeficientes (práctica A de esta sesión, [[https://mbujosab.github.io/PEconometria/Practicas-pdf/S20-Prct-A-hprice2-restricciones.pdf#page=6][actividad 6]] ([[https://mbujosab.github.io/PEconometria/Practicas-html/S20-Prct-A-hprice2-restricciones.html#elipse-confianza][html]])), el elemento de la fila $3$ y la columna $4$: la covarianza entre el tercer y el cuarto coeficiente. Está en el bloque =Esquinas= de la [[#rectangulo][Actividad 3]]. La figura de la elipse usa las mismas matrices y el mismo bloque =plot= que esa actividad 6.
 
 * Actividad 1 - El modelo completo y los regresores uno a uno
+:PROPERTIES:
+:CUSTOM_ID: uno-a-uno
+:END:
 
 Abra =data4-1= (//~Archivo -> Abrir archivo de datos -> Archivo de muestra~//, pestaña //~Ramanathan~//) y estime =price= sobre =sqft=, =bedrms= y =baths= con //~Modelo -> Mínimos cuadrados ordinarios~//. Después omita =baths=, y después también =bedrms=, anotando en cada paso el $t$ de lo que queda y la $\mathrm{SRC}$.
 
-Tres estimaciones seguidas con =ols=, sin =--quiet= para ver las tres tablas: el modelo completo, el modelo sin =baths= y el modelo con =sqft= solo. Cada =ols= sustituye al anterior como último modelo, así que los accesores se refieren siempre a la tabla que acaba de imprimirse. Tras la primera estimación se guardan tres escalares que harán falta en la Actividad 2: =SRC= (=$ess=), =df= (los grados de libertad, =$df=) y =s2=, la cuasivarianza =SRC/df=; tras la tercera, =SRCr=. El =printf= imprime el valor crítico $t_c$ con esos grados de libertad, y la última línea, =corr bedrms baths=, la correlación entre los dos regresores.
+Tres estimaciones seguidas con =ols=, sin =--quiet= para ver las tres tablas: el modelo completo, el modelo sin =baths= y el modelo con =sqft= solo. Cada =ols= sustituye al anterior como último modelo, así que los accesores se refieren siempre a la tabla que acaba de imprimirse. Tras la primera estimación se guardan tres escalares que harán falta en la [[#exclusion-conjunta][Actividad 2]]: =SRC= (=$ess=), =df= (los grados de libertad, =$df=) y =s2=, la cuasivarianza =SRC/df=; tras la tercera, =SRCr=. El =printf= imprime el valor crítico $t_c$ con esos grados de libertad, y la última línea, =corr bedrms baths=, la correlación entre los dos regresores.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /o bien teclee en línea de comandos/:
@@ -159,10 +162,13 @@ Los dos coeficientes son negativos y sus $t$ están lejos de $t_c=2{,}23$: con d
 Fíjese también en =sqft=: su coeficiente pasa de $0{,}155$ a $0{,}139$ y su error estándar de $0{,}032$ a $0{,}019$. Cada vez que se quita un regresor, los que quedan se miden con una parte propia más larga.
 
 * Actividad 2 - La exclusión conjunta
+:PROPERTIES:
+:CUSTOM_ID: exclusion-conjunta
+:END:
 
 Estime el $F$ de $H_0\!:\beta_{\text{bedrms}}=\beta_{\text{baths}}=0$ con las dos $\mathrm{SRC}$ que ya tiene, y compruébelo con =restrict= (//~Contrastes -> Restricciones lineales~// en la ventana del modelo completo).
 
-La primera línea construye el $F$ con $q=2$ a partir de los escalares =SRC=, =SRCr=, =s2= y =df= guardados en la Actividad 1. Dos =printf=: el primero imprime las dos $\mathrm{SRC}$ y el aumento; el segundo, el $F$, el valor crítico y el valor $p$. Después se vuelve a estimar el modelo completo, porque =restrict= actúa sobre el último modelo estimado, y se imponen las dos restricciones.
+La primera línea construye el $F$ con $q=2$ a partir de los escalares =SRC=, =SRCr=, =s2= y =df= guardados en la [[#uno-a-uno][Actividad 1]]. Dos =printf=: el primero imprime las dos $\mathrm{SRC}$ y el aumento; el segundo, el $F$, el valor crítico y el valor $p$. Después se vuelve a estimar el modelo completo, porque =restrict= actúa sobre el último modelo estimado, y se imponen las dos restricciones.
 
 #+latex: {\vspace{1pt} \footnotesize \color{gray!70!black}
 /en línea de comandos/:
@@ -307,16 +313,16 @@ La elipse está inclinada porque los dos estimadores están correlados: $-0{,}31
 
 * Preguntas de interpretación para la clase
 
-1. En la Actividad 1, el $t$ de =bedrms= pasa de $-0{,}80$ a $-0{,}97$ al quitar =baths=. ¿Qué dos cosas cambian en el cociente $t=\hat\beta/\mathrm{ee}$ cuando se elimina un regresor?
-2. La Actividad 2 da $F=0{,}47$. ¿Qué diría un $F$ menor que $1$ sobre el aumento de la $\mathrm{SRC}$ comparada con lo que la perturbación aporta por grado de libertad?
+1. En la [[#uno-a-uno][Actividad 1]], el $t$ de =bedrms= pasa de $-0{,}80$ a $-0{,}97$ al quitar =baths=. ¿Qué dos cosas cambian en el cociente $t=\hat\beta/\mathrm{ee}$ cuando se elimina un regresor?
+2. La [[#exclusion-conjunta][Actividad 2]] da $F=0{,}47$. ¿Qué diría un $F$ menor que $1$ sobre el aumento de la $\mathrm{SRC}$ comparada con lo que la perturbación aporta por grado de libertad?
 3. El intervalo de =bedrms= va de $-82$ a $39$ miles de dólares por dormitorio. ¿Es correcto decir que ``el número de dormitorios no influye en el precio''? ¿Qué es lo que estos datos sí permiten decir?
-4. En la Actividad 3, ¿qué relación hay entre la elipse y los dos intervalos? ¿Puede un par estar dentro de los dos intervalos y fuera de la elipse? ¿Y al revés?
+4. En la [[#rectangulo][Actividad 3]], ¿qué relación hay entre la elipse y los dos intervalos? ¿Puede un par estar dentro de los dos intervalos y fuera de la elipse? ¿Y al revés?
 5. Si las catorce viviendas fueran ciento cuarenta con la misma dispersión y los mismos coeficientes, ¿qué le pasaría a la elipse y a los intervalos? ¿Y a la correlación entre los dos estimadores?
 
 * Para profundizar
 
-- Lección 13 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html][lección 13]]), secciones ``La hipótesis conjunta'' y ``Conjunto $\neq$ individual: el caso de la apertura''.
-- Lección 12 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html][lección 12]]), el intervalo de confianza como conjunto de valores que el contraste no rechaza.
+- Lección 13 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html][lección 13]]), secciones [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=3][``La hipótesis conjunta'']] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#hipotesis-conjunta][html]]) y [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S19-Lecc13.pdf#page=19][``Conjunto $\neq$ individual: el caso de la apertura'']] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S19-Lecc13.html#conjunto-individual][html]]).
+- Lección 12 ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html][lección 12]]), [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S17-Lecc12.pdf#page=20][el intervalo de confianza como conjunto de valores que el contraste no rechaza]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html#intervalo-confianza][html]]).
 - Wooldridge, J. M. (2020). /Introductory Econometrics/, cap. 4, sección 4.5, en particular la discusión ``relación entre los contrastes $F$ y $t$''.
 - Manual de Gretl: comando =restrict=, accesores =$test=, =$pvalue= y =$vcv=.
 
@@ -338,9 +344,9 @@ La elipse está inclinada porque los dos estimadores están correlados: $-0{,}31
 
 3. /``No influye''./ No es correcto: el intervalo contiene valores tan distintos como $-80$ y $+30$ miles de dólares por dormitorio, y datos como estos no serían raros si el coeficiente valiese cualquiera de ellos. Lo que sí se puede decir es que, con la superficie ya en el modelo, catorce viviendas no permiten medir el efecto de un dormitorio adicional, y que ese efecto podría ser cero. No rechazar no es demostrar.
 
-4. /La elipse y los intervalos./ No son la misma región ni una es la sombra de la otra. Un par puede estar dentro de los dos intervalos y fuera de la elipse: las esquinas rechazadas de la Actividad 3. Y al revés: la elipse se extiende sobre cada eje hasta $\pm\sqrt{2F_c}\cdot\mathrm{ee}=\pm2{,}86\,\mathrm{ee}$, más allá del $\pm2{,}23\,\mathrm{ee}$ del intervalo, así que hay pares que el $F$ no rechaza aunque una de las coordenadas se salga de su intervalo, porque la otra compensa. El intervalo responde a una pregunta sobre un coeficiente; la elipse, a una pregunta sobre los dos a la vez.
+4. /La elipse y los intervalos./ No son la misma región ni una es la sombra de la otra. Un par puede estar dentro de los dos intervalos y fuera de la elipse: las esquinas rechazadas de la [[#rectangulo][Actividad 3]]. Y al revés: la elipse se extiende sobre cada eje hasta $\pm\sqrt{2F_c}\cdot\mathrm{ee}=\pm2{,}86\,\mathrm{ee}$, más allá del $\pm2{,}23\,\mathrm{ee}$ del intervalo, así que hay pares que el $F$ no rechaza aunque una de las coordenadas se salga de su intervalo, porque la otra compensa. El intervalo responde a una pregunta sobre un coeficiente; la elipse, a una pregunta sobre los dos a la vez.
 
-5. /Diez veces más viviendas./ Los regresores en desviaciones serían $\sqrt{10}$ veces más largos, los errores estándar $\sqrt{10}$ veces menores, y la elipse y los intervalos se encogerían en ese factor alrededor de las mismas estimaciones. La correlación entre los estimadores no cambiaría: depende del ángulo entre las partes propias de =bedrms= y =baths=, no de su longitud. La inclinación de la elipse es un rasgo de la muestra que el tamaño no corrige; la lección 14 lo dijo del VIF.
+5. /Diez veces más viviendas./ Los regresores en desviaciones serían $\sqrt{10}$ veces más largos, los errores estándar $\sqrt{10}$ veces menores, y la elipse y los intervalos se encogerían en ese factor alrededor de las mismas estimaciones. La correlación entre los estimadores no cambiaría: depende del ángulo entre =bedrms= y =baths=, una vez descontado de cada uno lo que comparte con la constante y con =sqft=, y no de sus longitudes. La inclinación de la elipse es un rasgo de la muestra que el tamaño no corrige; la [[https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=14][lección 14 dirá lo mismo]] ([[https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#que-hacer-y-que-no][html]]) del factor de inflación de la varianza.
 
 * COMMENT Banco de preguntas de reserva
 
