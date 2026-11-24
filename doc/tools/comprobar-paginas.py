@@ -90,6 +90,13 @@ for f in files:
             n, label = int(m.group(1)), m.group(2)
             num = seccion(label)
             if num is None:
+                # etiqueta sin sección («pdf», «muestra»): se toma la última «sección N»
+                # del texto que precede al enlace o, si no la hay, el ancla «#sec-N-M»
+                # del enlace HTML que lo sigue
+                antes = re.findall(r'secci[oó]n(?:es)?\s+(\d+(?:\.\d+)?)', line[max(0, m.start() - 120):m.start()])
+                despues = re.match(r'[^\[]{0,6}\[\[[^\]]*Apendice-geometria\.html#sec-(\d+(?:-\d+)?)\]', line[m.end():])
+                num = antes[-1] if antes else (despues.group(1).replace('-', '.') if despues else None)
+            if num is None:
                 print(f'{f}:{i}  apéndice «{label}»: no se reconoce la sección'); bad += 1; continue
             try:
                 ok = tiene_seccion(num, page_layout(AP_PDF, n))

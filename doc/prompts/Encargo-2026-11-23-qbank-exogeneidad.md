@@ -43,3 +43,31 @@ Después de los cambios, dar en «Aplicado» la lista de preguntas tocadas, la d
 
 ## Aplicado
 
+Sesión del banco, 23-11-2026. Buscado en `preguntas/*.json` (todas las lecciones), `PROMPT-generar-preguntas.org`, `clasificacion/*.tex` y el generador del bloque básico de L-15 (`bocetos-2026-11-22/construir_L15.py`). Sin cambios de cifras, de respuestas correctas ni de sorteos; `make lint` de las lecciones 11 y 15, sin errores. Cambios sin commit y sin subir a Moodle, a la espera del visto bueno del autor.
+
+### Preguntas tocadas
+
+- **`L-09-PerturbacionQueEs`**: opción retirada por decisión del autor (véase la duda 1).
+- **`L-15-CobbDouglas`** (nivel M, cuestionario voluntario). Opción verdadera: «…exige suponer que lo que la función no recoge, como la tecnología, ~~no está relacionado con los factores~~ es ortogonal a las funciones de los factores». En las dos explicaciones (la de esa opción y la de su gemela falsa), «exige $E[U\mid\boldsymbol X]=\mathit 0$» pasa a «exige el supuesto de exogeneidad del modelo empírico: que lo que la función no recoge sea ortogonal a las funciones de los factores». No se escribe $E[V\mid\boldsymbol X]=\mathit 0$ porque el enunciado no presenta $V$: el modelo del enunciado es $Q=A\,L^{\alpha}K^{\gamma}e^{U}$, como en la lección (véase la duda 2).
+- **`L-11-EstimadorYEstimacion`**. Opción falsa: «la fórmula del estimador se deduce de los supuestos del modelo (~~exogeneidad~~ linealidad, homocedasticidad)…». Llamaba supuesto a la exogeneidad; la opción es falsa por otra razón y lo sigue siendo.
+
+### Punto 1 («mecánic»)
+
+Ninguna aparición en las preguntas. Las cinco de `PROMPT-generar-preguntas.org` son otros usos («la mecánica de `Supuesto`/`Cuestion`», «comprobación mecánica») y no se tocan.
+
+### Dudas para el autor
+
+1. **`L-09-PerturbacionQueEs`**: tenía marcada como **verdadera** «$U$ se interpreta como el efecto conjunto de todo lo que, además de la renta, hace variar el gasto (gustos, tamaño del hogar, precios locales…)». Con la regla nueva eso es $V$, no $U$. **Decisión del autor (23-11): se retira la opción por ahora** y se reescribirá el curso que viene (anotado en `TODO.org`, «Para el curso 2027-28»). Retirada, junto con el paréntesis «(se interpreta como gustos, tamaño del hogar…)» de la explicación de la opción falsa «error de medida». El hueco queda con una verdadera y dos falsas; `make lint` de la lección 9, sin errores.
+2. **Símbolo del modelo en L-15**. `L-15-CobbDouglas` y la lección escriben el modelo con $U$ ($e^{U}$, «$+U$»), y la frase nueva de la lección exige $E[V\mid\boldsymbol X]=\mathit 0$. En el banco se ha esquivado enunciando el supuesto con palabras. **Decisión del autor (23-11): vale como salida provisional**; anotado en `TODO.org` para el curso que viene.
+3. **Lección 11** (`L-11-QueSupuestoHaceQue`, `L-11-QueSignificaInsesgado`, `L-11-QueHaceMasPrecisoAlEstimador`): usan $E[U_i\mid\boldsymbol X]=\mathit 0$ como condición de la que sale la insesgadez («bajo el modelo … con muestreo aleatorio y $E[U_i\mid\boldsymbol X]=\mathit 0$», «la insesgadez se apoya en $E[U_i\mid\boldsymbol X]=\mathit 0$»). Ninguna la llama supuesto ni exogeneidad, y coincide con la lección 11 (se deduce de la definición de $U_i$ y del muestreo aleatorio). No se han tocado; se anota por si el enunciado «con muestreo aleatorio y $E[U_i\mid\boldsymbol X]=\mathit 0$» se lee como exigirla.
+
+### Revisado sin cambio (punto 3)
+
+Las apariciones de «causa/causal» en L-06, L-08, `L-09-DescomposicionNoImplicaCausalidad`, `L-10-EfectoParcialYRegresoresCorrelados`, `L-12-LeerUnaTablaDeGretl`, L-13 y `L-16-SaltoEntreGrupos` dicen que la lectura causal la decide la teoría o el diseño del estudio, no el ajuste; ninguna enuncia la condición como «no relacionado» o «incorrelado con los regresores». «No están relacionados» en `L-13-TIndividualesPequenosFGrande` habla de lo que dicen los contrastes $t$, e «incorreladas» en L-10 y L-11, de los regresores entre sí y de las perturbaciones entre sí. Las cuatro preguntas nuevas del bloque básico de L-15 no mencionan la exogeneidad.
+
+### Comprobación pedida
+
+`grep -i -E "mecánic|exogeneidad|exógen" preguntas/*.json`, apariciones que quedan:
+
+- `preguntas/L-15-CobbDouglas.json:151`: «…exige el supuesto de exogeneidad del modelo empírico, que lo que la función no recoge sea ortogonal a las funciones de los factores…»
+- `preguntas/L-15-CobbDouglas.json:158`: «…Leerlo como efecto exige el supuesto de exogeneidad del modelo empírico: que lo que la función no recoge sea ortogonal a las funciones de los factores»
