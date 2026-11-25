@@ -27,3 +27,9 @@ Después del cambio, `grep -i "corregido" preguntas/*.json` solo debe dar los r�
 
 ## Aplicado
 
+Sesión del banco, 24-11-2026. Sin cambios de cifras, de respuestas correctas ni de sorteos; `make lint` de la lección 13, sin errores. Sin commit y sin subir a Moodle, a la espera del visto bueno del autor.
+
+- **Puntos 1 y 2**: no se tocan (rótulo de la tabla y opción que nombra la casilla).
+- **Punto 3**, `L-13-DosSalidasDeGretl-x3`: las dos explicaciones dicen ahora «el $R^2$ ajustado (la casilla "R-cuadrado corregido")», y «sube exactamente cuando» pasa a «sube cuando». La explicación de la opción del punto 2 se deja como está.
+- **Punto 4**, `PROMPT-generar-preguntas.org`: «$R^2$ ajustado» en las dos menciones de prosa; la lista de casillas del pie de la salida conserva «$R^2$ corregido».
+- Comprobación: «corregido» queda en `preguntas/*.json` solo en los rótulos de las tablas de `L-12-UnaSalidaFilaAFila-x3` y `L-13-DosSalidasDeGretl-x3`, en la opción del punto 2 con su explicación y su variable de sorteo, en las dos menciones entre comillas de la casilla y en «el $R^2$ sin corregir» de una explicación.

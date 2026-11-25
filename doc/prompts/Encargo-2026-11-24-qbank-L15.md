@@ -61,4 +61,28 @@ Si una pregunta tiene como respuesta correcta algo que estos cambios hacen falso
 
 ## Aplicado
 
-(Lo rellena la sesión del banco: qué preguntas se tocaron, cuáles quedan para decisión del autor, y el commit.)
+Sesión del banco, 24-11-2026. Buscado en las ocho preguntas de la lección 15 (`preguntas/L-15-*.json`) y en el generador del bloque básico (`bocetos-2026-11-22/construir_L15.py`). Ninguna pregunta del banco cita S25-B ni S26-B. Sin cambios de cifras ni de respuestas correctas; `make lint` de la lección 15, sin errores. Cambios sin commit y sin subir a Moodle, a la espera del visto bueno del autor.
+
+### Preguntas tocadas
+
+- **`L-15-UnaSalidaConLogaritmos-x3`** (bloque básico nuevo, aún no publicado), punto 2. La explicación del cambio de unidades del regresando decía «los coeficientes de [los dos regresores], el $R^2$ y los estadísticos $t$ quedan iguales». Ahora: «…, sus errores estándar y sus estadísticos $t$, y el $R^2$, quedan iguales; el estadístico $t$ de la constante sí cambia». Las opciones ya hablaban solo de los coeficientes. Además, en las tres opciones de la parte 3, $\hat y$ es «la previsión de» la variable en logaritmos, no «el ajuste».
+- **`L-15-ElegirLaFormaFuncional`** (M): en las explicaciones, $b_2$ pasa a $\hat\beta_2$ (once apariciones). Ninguna opción cambia.
+
+### Para decisión del autor
+
+1. **`L-15-ElegirLaFormaFuncional`**, punto 6. Tiene marcada como **verdadera** «donde abundan los datos, los dos modelos dan previsiones […] parecidas; donde escasean, y al extrapolar, pueden separarse mucho», con su gemela falsa («también darán previsiones parecidas al extrapolar»). Es la afirmación general que la lección ha retirado y ahora solo sostiene «en este ejemplo». No se ha tocado. **Decisión del autor (25-11): recortada.** La verdadera dice ahora «aunque los dos modelos den previsiones […] parecidas dentro del rango de los datos, al extrapolar pueden separarse mucho», y la falsa, «si los dos modelos dan previsiones […] parecidas dentro del rango de los datos, también las darán al extrapolar, fuera de ese rango». La explicación ya no dice que mínimos cuadrados obligue a los ajustes a coincidir donde hay datos.
+2. **`L-15-UnaSalidaConLogaritmos-x3`**, punto 3. La explicación del cálculo exacto dice que, para una diferencia de $0{,}30$, $0{,}40$ o $0{,}50$ en el logaritmo del regresando, la aproximación «se queda corta». Es el caso en que sí es cierto (aumento, regresando en logaritmos) y no se afirma en general; se ha dejado. En `L-15-LeerElCoeficienteSegunLaForma` la explicación del nivel-log dice que la cuenta proporcional «se pasa», también cierto en ese caso.
+
+### Revisado sin cambio
+
+- Punto 1: «dicotómic» no aparece en ninguna pregunta del banco.
+- Puntos 4, 5 y 7: ninguna aparición («precio medio», «ve columnas», «efecto por fracción», «cerca del centro», «más regresores»).
+- Punto 8: `ElegirLaFormaFuncional`, `PrevisionEnNiveles`, `ConYSinLogaritmoEnElRegresando` y el bloque dicen que los $R^2$ de regresandos distintos no se comparan y que se compara sobre el regresando en niveles.
+- Punto 9: las lecturas de contrastes de `CobbDouglas`, `ElasticidadesYRendimientosAEscala` y el bloque llevan «al $5$ % de significación».
+- `PrevisionEnNiveles`: la razón de que $e^{\hat y}$ quede por debajo es que la esperanza de $e^{U}$ es mayor que $1$; no usa «multiplican más de lo que dividen».
+
+### Otro cambio de estos días en las preguntas de L-15 (no viene de este aviso)
+
+Por indicación del autor (23/24-11), ninguna opción multiplica ya la lectura de una unidad o de un 1 % por un cambio mayor: los cambios grandes llevan la aproximación y el cálculo exacto en la misma frase. Afecta al bloque básico nuevo y a `L-15-CobbDouglas` (las tres opciones del 5 % de capital pasan a «el doble de capital … según la aproximación y … según el cálculo exacto»). Detalle en `bocetos-2026-11-22/L-15-diseno.md` del banco.
+
+Commit: pendiente.
