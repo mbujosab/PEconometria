@@ -44,4 +44,8 @@ El banco no depende de ello: aunque la lección lo incorpore, la opción de log-
 
 ## Aplicado
 
-(Lo rellena la sesión del curso.)
+Sesión del curso, 25-11-2026, con el visto bueno del autor. Lección compilada (PDF, HTML y transparencias); sin commit ni despliegue.
+
+- **Punto 1, apuntes.** En «Cuatro formas, cuatro lecturas del coeficiente», el párrafo «Log-log» lleva ahora el ejemplo pedido, con `nox` y $-0{,}718$: un 50 % más da un $36$ % menos con la aproximación; el cálculo exacto va en tres pasos ($\log(1{,}5)=0{,}405$; $-0{,}718\cdot0{,}405=-0{,}291$; $e^{-0{,}291}=0{,}7475$, un $25{,}3$ % menos) y se resume en «si $x$ se multiplica por $1+p$, $y$ se multiplica por $(1+p)^{\beta_2}$».
+- **Punto 1, transparencia.** En la pantalla de las cuatro lecturas la línea no cabe (715 px de 700). Va en la segunda pantalla de «Log-log: modelo con elasticidad constante», con la elasticidad de esa pantalla, $-0{,}954$: un 50 % más de contaminación, un $47{,}7$ % menos con la aproximación y un $32{,}1$ % menos con el cálculo exacto, $1{,}5^{-0{,}954}-1=-0{,}321$ (545 px).
+- **Punto 2, hoja de expresiones.** No se añade. La línea ocupa dos renglones en la tercera columna y la tabla de las cuatro formas queda pegada al pie «Versión del…»; el autor la condicionó a que no afectase a la legibilidad. La hoja sigue en la versión del 13-11-2026.
