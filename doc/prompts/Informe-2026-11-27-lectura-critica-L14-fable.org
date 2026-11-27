@@ -1,0 +1,206 @@
+#+TITLE: Lectura crítica de la lección 14 (colinealidad): comprensión y corrección, lectura independiente
+#+DATE: 2026-11-27
+#+LANGUAGE: es
+
+Fichero auditado: =org-lessons/S21-Lecc14.org= (797 líneas, estado del commit =df3cde5=), con sus dos figuras (=img/S21-Lecc14/PartePropia_fila.png= y =ParalelogramoAplastado_fila.png=, abiertas, y su código en =figuras-S21-Lecc14.org=), las doce preguntas de repaso y sus respuestas. Lector supuesto: estudiante que ha seguido las lecciones 1–13 y las prácticas hasta la sesión 20, sin las de la sesión 22 ni las lecciones 15 y 16. Encargo: =doc/prompts/Encargo-2026-11-27-lectura-critica-L14-fable.md=. Solo lectura: no se ha editado ninguna lección, práctica ni figura, y no se ha abierto ningún informe ni encargo anterior sobre la lección 14.
+
+En cada hallazgo se separa lo *comprobado* (con la cuenta, la salida o el fichero y la línea) de lo que es *apreciación* mía. Los guiones de =gretlcli= (Gretl 2022c) y sus salidas están fuera del repositorio, en =/tmp/claude-1000/-home-marcos-SynologyDrive-ReposGH-Docencia-PEconometria/24822856-b7c3-494d-a9ee-1ce52988acbd/scratchpad/l14/= (=a.inp=, =b.inp=, =c.inp=, =links.py=).
+
+* Veredicto
+
+Sí: un alumno que ha llegado a la lección 13 puede seguir esta lección leyendo los apuntes por su cuenta, de principio a fin. Todas las derivaciones que he rehecho son correctas (lista en «Comprobado sin hallazgo»), todas las cifras cuadran con las salidas de Gretl o, donde no hay salida, con mi cálculo; las 65 remisiones con página llevan a donde dicen; las dos figuras muestran lo que el texto y los pies dicen que muestran, con las cifras que el texto da. El seno, que es nuevo en el curso (comprobado: no aparece en ninguna lección anterior ni en el apéndice), está definido antes de usarse y la nota al pie basta para el paso $1-\cos^2\theta=\sin^2\theta$.
+
+No hay hallazgos graves. Los dos medios son dos afirmaciones que, leídas a la letra, dicen más de lo que es cierto y chocan con algo que el alumno ya sabe:
+1. «Tampoco dependen de él los estadísticos $F$» (l. 296, y la transparencia, l. 278): vale para el $F$ de significación conjunta y para el $F$ de excluir a la vez los regresores casi alineados, no para el $F$ de excluir uno solo, que es $t^2$ (lección 13).
+2. La opción correcta de la pregunta 8 (l. 613) dice que «el mismo ajuste admite descomposiciones muy distintas»: eso describe la colinealidad exacta; con colinealidad de grado la descomposición de un ajuste es única (l. 85, l. 105), y lo que tiene descomposiciones muy distintas son ajustes casi iguales.
+
+Los leves son remisiones o descripciones del programa imprecisas, dos incumplimientos de reglas de la Guía y tres apreciaciones.
+
+Recuento: 0 graves, 2 medios, 11 leves.
+
+* Hallazgos
+
+** M1 (media) — «los estadísticos $F$» no dependen del ángulo: falso para el $F$ de excluir un solo regresor (l. 296; transparencia, l. 278; respuesta 7, l. 736)
+
+Cita (l. 296, apuntes): «$\boldsymbol{\mathop{\widehat y}}$ es el mismo punto se describa como se describa, así que $\mathrm{SRC}$, $R^2$ y $\mathfrak s$ no dependen del ángulo que formen los generadores. Tampoco dependen de él los estadísticos $F$, que se calculan con sumas residuales. Los $t$ sí: cada uno se calcula con una coordenada.»
+
+Cita (l. 278, transparencia): «$\mathrm{SRC}$, $R^2$ y $F$ dependen de $\boldsymbol{\mathop{\widehat y}}$, no de sus coordenadas: la colinealidad no los altera.»
+
+Problema: el alumno sabe por la lección 13 que el $F$ de excluir un solo regresor es $t^2$ y que se calcula también con sumas residuales. La frase, sin acotar de qué $F$ habla, le dice a la vez que ese $F$ no depende del ángulo (por ser un $F$) y que sí depende (por ser un $t^2$). La afirmación vale solo para los $F$ cuyos dos subespacios, el completo y el restringido, no cambian al cerrar el ángulo entre los dos generadores: el de significación conjunta y el de excluir los dos a la vez. La propia lección lo acota bien en los demás sitios («un $F$ de significación conjunta», l. 328; «el $F$ conjunto», opción 2 de la pregunta 7, l. 600).
+
+Comprobado:
+- Lección 13, l. 318: «excluir uno solo, $\beta_4=0$ ($q=1$, el contraste $t$ de siempre)»; práctica A de la sesión 20, =unaExclusion.txt=: $F=82{,}133=t^2$.
+- Con los mismos datos de la lección: el $F$ de excluir =nox= y =lnox= a la vez es $28{,}18$ (=S20-Prct-A-hprice2-restricciones/apertura.txt=); el $F$ de excluir solo =nox= es $F(1,502)=0{,}0338=0{,}1838^2$ (mi ejecución de =omit --auto= sobre =price ~ rooms nox lnox=, =a.inp=).
+- En los coches: «Omitir age: $F(1,54)=101{,}89=t^2$», «Omitir miles: $F(1,54)=55{,}87=t^2$» (=S22-Prct-C-ramanathan-coches/contrastes.txt=).
+
+Propuesta: en la l. 296, «Tampoco dependen de él el $F$ de significación conjunta ni el $F$ de excluir a la vez los regresores casi alineados: comparan sumas residuales de subespacios que no cambian con ese ángulo. El $F$ de excluir uno solo es su $t^2$ (lección 13), y sí depende.» En la l. 278, «$\mathrm{SRC}$, $R^2$ y el $F$ conjunto»; en la l. 736, «($R^2$, $\mathfrak s$, $F$ conjunto)».
+
+** M2 (media) — Pregunta 8, opción 2: «el mismo ajuste admite descomposiciones muy distintas» (l. 613)
+
+Cita: «2) Los dos regresores casi se alinean, así que el mismo ajuste admite descomposiciones muy distintas en las que un coeficiente compensa al otro.»
+
+Problema: es la opción marcada como correcta y, a la letra, describe la colinealidad exacta («infinitos $\boldsymbol{\mathop{\widehat\beta}}$ dan el mismo ajuste», l. 82), no la de grado. Con =nox= y =lnox= los regresores son linealmente independientes, la solución es única (l. 85: «Solución única»; l. 105: «La solución existe y es única»; opción 2 de la pregunta 1, l. 522) y un ajuste dado tiene una sola descomposición. Lo que la lección enseña es que ajustes /casi iguales/ tienen descomposiciones muy distintas (l. 292: $\boldsymbol{\mathop{\widehat y}}$ y $\boldsymbol{\mathop{\widehat y}}'$ a distancia $0{,}07$ con coordenadas que cambian $0{,}40$). Un alumno que haya entendido la diferencia entre exacta y de grado puede descartar la opción por eso mismo. Las otras tres son claramente falsas, así que la pregunta se contesta; lo que falla es la formulación de la correcta.
+
+Comprobado: las líneas citadas; la explicación de la respuesta (l. 745) sí lo dice bien: «un coeficiente compensa al otro y el ajuste apenas cambia». La figura muestra «el mismo ajuste» con dos descomposiciones, pero con generadores distintos en cada panel ($70^\circ$ y $10^\circ$), no con los mismos regresores.
+
+Propuesta: «2) Los dos regresores casi se alinean, así que ajustes casi iguales tienen descomposiciones muy distintas, en las que un coeficiente compensa al otro.»
+
+** L1 (leve) — La ganancia de una restricción se mide con la «longitud en desviaciones» (l. 417)
+
+Cita: «Lo que decide la ganancia es la longitud en desviaciones del regresor que deja la restricción: cuanto más largo, menor es el error estándar.» Y al final del párrafo: «Si el $F$ no la rechaza y el regresor que deja la restricción es largo en desviaciones, […]».
+
+Problema: es cierto cuando los únicos regresores son $\boldsymbol 1$, $\boldsymbol x_2$ y $\boldsymbol x_3$. Si el modelo tiene más regresores (el de =hprice2= tiene =rooms=), lo que cuenta es la longitud de la /parte propia/ del regresor que deja la restricción respecto de los demás, que es la idea central de la lección. El párrafo no dice que supone un modelo sin más regresores.
+
+Comprobado: la cuenta con $k=3$ es correcta (con longitudes iguales $L$ y ángulo $\theta$, $\Vert\boldsymbol x_2-\boldsymbol x_3\Vert=2L\sin(\theta/2)$ frente a $L\sin\theta$ de la parte propia: casi iguales con $\theta$ pequeño; y en la práctica A de la sesión 22, =montecarlo.txt=, $\mathrm{var}(b_2+b_3)=0{,}011$ y $\mathrm{var}(b_2-b_3)=2{,}28$ con $\rho=0{,}99$). La imprecisión con más regresores es deducción mía de la fórmula $\mathrm{ee}=\mathfrak s/\Vert\tilde{\boldsymbol x}_j\Vert_e$ de la propia lección.
+
+Propuesta: «la longitud de la parte propia del regresor que deja la restricción (su longitud en desviaciones si el modelo no tiene más regresores)», o decir al empezar el párrafo que el modelo solo tiene $\boldsymbol 1$, $\boldsymbol x_2$ y $\boldsymbol x_3$.
+
+** L2 (leve) — El tercer síntoma se ilustra con dos mitades que no son dos muestras comparables (l. 332)
+
+Cita: «El tercer síntoma es que el coeficiente cambie mucho cuando cambia la muestra. […] estima ese modelo en dos mitades de la muestra: el coeficiente de la edad es $5{,}1$ con los $28$ primeros coches y $23{,}7$ con los $29$ restantes, y el de las millas, $-5{,}4$ y $-107{,}7$.»
+
+Problema: la lección presenta el cambio como efecto de cambiar de muestra. La práctica que cita advierte de que no es solo eso, y la lección lo omite.
+
+Comprobado: las cuatro cifras están en =S22-Prct-C-ramanathan-coches/submuestras.txt=. La práctica, l. 345: «El fichero está ordenado por edad, así que las dos mitades son además coches jóvenes y coches viejos, y $\mathfrak s$ cambia de una a otra; eso añade una diferencia real al cambio de los coeficientes» ($\mathfrak s=142{,}5$ y $296{,}5$ en la salida).
+
+Propuesta: añadir media frase: «(las dos mitades son además coches jóvenes y coches viejos, como advierte la práctica)».
+
+** L3 (leve) — =omit --auto=: comando no presentado, y el contraste conjunto no se imprime «al final» (l. 453)
+
+Cita: «(es lo que hace la opción =--auto= de =omit= en Gretl)» y «Al terminar hay que leer el contraste conjunto de todas las variables omitidas, que Gretl imprime al final.»
+
+Problema: el alumno no ha usado nunca =omit=, y la frase le pide leer una parte de su salida que no está donde se le dice.
+
+Comprobado:
+- =omit= no aparece en ninguna práctica como comando; solo en el «Para profundizar» de la práctica A de la sesión 20 (l. 471) (=grep= en =org-pract/S*.org= y =org-lessons/S*.org=).
+- Lo que la lección dice que hace es cierto: mi ejecución (=a.inp=, =b.inp=) imprime «Eliminación secuencial utilizando alfa= 0,10 a dos colas», una línea «Quitando …» por variable con su valor $p$, y después el contraste conjunto: «Hipótesis nula: los parámetros de regresión son cero para las variables z1, z2. Estadístico de contraste: F(2, 501) = …». Pero ese contraste va /antes/ de la tabla del modelo final, que es lo último que se imprime.
+- Con =price ~ rooms nox lnox= sale =nox= (valor $p$ $0{,}854$) y queda =lnox= con $t=-7{,}51$: coincide con «Cuando uno sale, el coeficiente del que queda recoge el efecto de los dos».
+
+Propuesta: «(es lo que hace el comando =omit= de Gretl, que quita regresores de un modelo estimado, con la opción =--auto=)» y «…, que Gretl imprime tras la lista de variables eliminadas, antes de la tabla del modelo final».
+
+** L4 (leve) — La regla del $10$ no está «al pie» de la salida de =vif= (l. 336)
+
+Cita: «Conviene saberla, porque Gretl la imprime al pie de la salida de =vif=».
+
+Comprobado: en =S22-Prct-B-hprice2-vif/vif.txt= y en mi ejecución, «Valores mayores que 10.0 pueden indicar un problema de colinealidad» es la tercera línea de la cabecera, antes de los valores; al pie va la definición «VIF(j) = 1/(1 - R(j)^2) …».
+
+Propuesta: «porque Gretl la imprime en la cabecera de la salida de =vif=».
+
+** L5 (leve) — «Mientras la $\mathrm{SRC}$ no cambia» remite a la actividad 2; está en la actividad 1 (l. 492)
+
+Cita: «se verá, con un experimento de Montecarlo, cómo crece la dispersión de los coeficientes al cerrar el ángulo entre dos regresores mientras la $\mathrm{SRC}$ no cambia (práctica A, actividad 2 (html))».
+
+Comprobado: en =S22-Prct-A-colinealidad-montecarlo.org=, la tabla con las cuatro correlaciones, la varianza de $\hat\beta_2$ y la columna de la $\mathrm{SRC}$ ($96{,}56$ en las cuatro filas) es la de la actividad 1 (=#cuatro-experimentos=, página 2 del PDF; la tabla, en la 3). La actividad 2 (=#nube=) compara los histogramas con $\rho=0$ y $\rho=0{,}99$ y dibuja la nube; la $\mathrm{SRC}$ no aparece en ella.
+
+Propuesta: remitir a la actividad 1 (=#cuatro-experimentos=), o a las dos: «(práctica A, actividades 1 y 2)».
+
+** L6 (leve) — La regresión auxiliar puede ser múltiple: la remisión es a la lección 10, no solo a la 8 (l. 197 y 205)
+
+Cita: «se deduce de lo demostrado en la lección 8 sin ningún ingrediente nuevo. La regresión auxiliar de $\boldsymbol x_j$ sobre los demás regresores es una regresión como cualquier otra […] así que tiene su triángulo rectángulo y su identidad $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$»; y (l. 205) «Y la lección 8 otra vez: $R_j^2=\cos^2\theta_j$».
+
+Problema: la lección 8 lo demuestra para la regresión simple. Con más de dos regresores no constantes la regresión auxiliar es múltiple, y quien dice que el triángulo, $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ y $R^2=\cos^2\theta$ valen igual es la lección 10.
+
+Comprobado: =S13-Lecc10.org=, apuntes de «La geometría es la misma» (=#geometria-misma=, página 3 del PDF), puntos 3 y 4: «el teorema de Pitágoras sigue siendo aplicable: $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$ […] es igual de válido en la regresión múltiple» y «El coeficiente de determinación se define igual: $R^2=\cos^2\theta$».
+
+Propuesta: «se deduce de lo demostrado en la lección 8, que la lección 10 extendió a cualquier número de regresores, sin ningún ingrediente nuevo» (con el enlace a =#geometria-misma=).
+
+** L7 (leve, regla de la Guía) — «los otros dos regresores» en la transparencia; «constante y dos regresores» en la pregunta 7 (l. 228 y l. 597)
+
+Cita (l. 228, transparencia): «Regresión auxiliar de =nox= sobre =rooms= y =lnox= (=hprice2=): $R_j^2=0{,}9879$, es decir, los otros dos regresores reproducen el $98{,}8\,\%$ de la variación de =nox=.»
+
+Problema: la Guía (§7, «La constante es uno de los regresores») y la propia lección cuentan la constante entre «los demás regresores»; los otros son tres. Los apuntes del mismo apartado lo dicen bien (l. 253: «sobre la constante, =rooms= y =lnox= […]: los otros regresores reproducen»). En la pregunta 7 (l. 597), «un modelo con constante y dos regresores» trata la constante como si no fuera un regresor; la pregunta 5 (l. 571) dice «constante y dos regresores no constantes».
+
+Comprobado: las líneas citadas y =GuiaDeEstilo.org=, l. 242–245.
+
+Propuesta: en la l. 228, «los demás regresores reproducen»; en la l. 597, «constante y dos regresores no constantes».
+
+** L8 (leve, regla de la Guía) — La opción 2 de la pregunta 12 lleva enlaces (l. 665)
+
+Cita: «…se ha enunciado en la sesión y el [[apéndice]] ([[html]]) la demuestra.»
+
+Comprobado: =GuiaDeEstilo.org=, l. 151–154: «En las preguntas de repaso, las opciones no llevan enlaces: un enlace en una opción señala dónde buscar la respuesta antes de contestar» (regla fechada el 26-11 en esta misma lección). Es la única opción de las 48 que lleva enlace.
+
+Propuesta: dejar «el apéndice la demuestra» sin enlace en la opción y, si se quiere conservar, pasar el enlace a la explicación de la respuesta 12 (l. 781), que dice «el apéndice la demuestra» sin enlazarlo.
+
+** L9 (leve) — «la figura del paralelogramo» no es un nombre que la lección haya dado (l. 745)
+
+Cita: «/Evalúa/: la lectura de la figura del paralelogramo aplicada al caso real».
+
+Comprobado: «paralelogramo» solo aparece en esa línea y en el nombre del fichero y del bloque (=FiguraParalelogramo=, =ParalelogramoAplastado_fila.png=), que el alumno no ve. La figura no dibuja ningún paralelogramo y ni el pie ni los apuntes la llaman así.
+
+Propuesta: «la lectura de la figura de [[#por-que-oscilan][``Por qué son inestables los coeficientes'']]».
+
+** L10 (leve, apreciación) — Pregunta 7: «qué cambia mucho de una muestra a otra y qué no» (l. 597–600)
+
+Cita (opción 2): «…el ajuste, el $R^2$, $\mathfrak s$ y el $F$ conjunto, no: la proyección es estable y las coordenadas no.»
+
+Apreciación: la opción es la correcta y la única defendible, y la parte de los sentidos (opuestos con correlación positiva, el mismo con negativa) coincide con la l. 294 y lleva su condición (constante y dos regresores). Pero lo que la lección demuestra es que el ajuste, el $R^2$, $\mathfrak s$ y el $F$ conjunto /no dependen del ángulo/ entre los generadores (l. 296, l. 372), no que cambien poco de una muestra a otra: cambian con la perturbación como en cualquier regresión, con colinealidad o sin ella. Un alumno puede quedarse con «con colinealidad el $R^2$ apenas cambia entre muestras».
+
+Propuesta: en el enunciado, «¿qué hace cambiar mucho la colinealidad de una muestra a otra y qué no altera?».
+
+** L11 (leve, apreciación) — Figura de la parte propia: el cateto del ajuste no tiene trazo ni rótulo propios (l. 129 y l. 147)
+
+Cita (l. 147): «Un cateto es el ajuste en desviaciones, que está sobre la recta de $\boldsymbol x_3-\mu_{\boldsymbol x_3}\boldsymbol 1$.» Pie (l. 129): «desde la ``sombra'' del primero sobre la recta del segundo».
+
+Comprobado en la imagen: la hipotenusa y el cateto gris tienen rótulo ($\boldsymbol x_2-\mu_{\boldsymbol x_2}\boldsymbol 1$ y $\tilde{\boldsymbol x}_2$). El otro cateto, el ajuste en desviaciones o «sombra», es el tramo del origen al pie de la flecha gris, y queda tapado por la flecha azul de $\boldsymbol x_3-\mu_{\boldsymbol x_3}\boldsymbol 1$, sin color ni rótulo propios; solo lo señala la marca del ángulo recto.
+
+Apreciación: un alumno con poca base ve dos lados del triángulo y tiene que deducir el tercero. No impide seguir el argumento. Si alguna vez se regenera la figura, bastaría un trazo propio para ese tramo; mientras tanto, media frase en la l. 147: «(el tramo de esa recta que va del origen al pie del vector gris)».
+
+* Comprobado sin hallazgo
+
+** Derivaciones rehechas
+
+- Definición de la parte propia y su ortogonalidad (l. 145): residuo de la regresión auxiliar, ortogonal a $\boldsymbol 1$ y a cada uno de los otros regresores; media cero.
+- Triángulo de la regresión auxiliar con $k=3$ (l. 147) y longitud de la parte propia con el seno (l. 149): hipotenusa, catetos y ángulo, como en la lección 8; $\sin60^\circ=0{,}866$, $\sin20^\circ=0{,}342$, $\sin6^\circ=0{,}1045$ ($87\,\%$, $34\,\%$, $10\,\%$).
+- Nota al pie de la l. 149: $(h\cos\theta)^2+(h\sin\theta)^2=h^2\Rightarrow\cos^2\theta+\sin^2\theta=1$.
+- Fórmulas de $\hat\beta_j$ y de $\mathrm{ee}(\hat\beta_j)$ con la parte propia (l. 153) y la observación de que da igual $\boldsymbol y$ que $\boldsymbol y$ en desviaciones (l. 155): coinciden con el apéndice, sección 5.4.
+- Despeje de $\mathrm{SRC}_j$ (l. 197–205): $R_j^2=1-\mathrm{SRC}_j/\mathrm{STC}_j$, $\mathrm{SRC}_j=\mathrm{STC}_j(1-R_j^2)$, raíces, $1-R_j^2=\sin^2\theta_j$ con $\theta_j\in[0^\circ,90^\circ]$; y que $\theta_j$ es el ángulo de la definición de colinealidad de grado (l. 207).
+- Descomposición del error estándar en dos factores y VIF (l. 209–213), con la condición «con el $\mathfrak s$ del modelo completo» dicha; equivalencia «no compartir variación» = correlación cero con cada regresor no constante (l. 259).
+- $k=3$: $R_2^2=\rho^2$, mismo VIF para los dos, caso de correlación negativa (l. 215).
+- Coordenadas de la figura del ajuste (l. 275–292), con $\boldsymbol x_2=(1,0)$, $\boldsymbol x_3=(\cos\theta,\sin\theta)$, $\boldsymbol{\mathop{\widehat y}}=(-0{,}5;\,0{,}35)$ y $\boldsymbol{\mathop{\widehat y}}'=(-0{,}5;\,0{,}42)$: a $70^\circ$, $(-0{,}627;\,0{,}372)\to(-0{,}653;\,0{,}447)$; a $10^\circ$, $(-2{,}485;\,2{,}016)\to(-2{,}882;\,2{,}419)$; $\Delta\hat\beta_3=\delta/\sin\theta$, $\Delta\hat\beta_2=-\cos\theta\,\Delta\hat\beta_3$; $1/\sin10^\circ=5{,}76$; $1/\sin\theta=\sqrt{\mathrm{VIF}}$ con $k=3$.
+- Signo de la covarianza entre los dos estimadores (l. 294): con $k=3$, el elemento fuera de la diagonal de la inversa es $-S_{23}/(S_{22}S_{33}-S_{23}^2)$, de signo contrario a $\rho$, y la correlación entre estimadores es $-\rho$; con más regresores, el signo es el contrario al de la correlación entre las dos partes propias. Cotejado: $-0{,}9905$ con $\rho=0{,}9911$ (S22-A), $-0{,}9965$ con $\rho=0{,}9965$ (S22-C), $-0{,}993$ con $\rho=0{,}994$ (S20-A, S22-B).
+- Norma euclídea, norma estadística y efecto de añadir observaciones (l. 407 y su nota): $\Vert\boldsymbol x\Vert_e^2=n\Vert\boldsymbol x\Vert_s^2$ (lección 2); una observación nueva no acorta la parte propia (la suma de los $n$ sumandos anteriores era mínima con los coeficientes anteriores y el sumando nuevo no es negativo); el aumento es $e^2/(1+h)$, con $e$ el error de predicción de la auxiliar anterior y $h$ función solo de los demás regresores, así que la condición «dados los valores de los demás regresores» es la correcta; crecimiento con $\sqrt n$ si el VIF y la varianza no cambian (l. 409).
+- Restricciones (l. 417): $\beta_2=\beta_3\Rightarrow\beta_2(\boldsymbol x_2+\boldsymbol x_3)$; $\beta_2+\beta_3=1\Rightarrow\boldsymbol x_3+\beta_2(\boldsymbol x_2-\boldsymbol x_3)$ con $\boldsymbol x_3$ restado del regresando (como la lección 13, l. 318); longitudes de la suma y de la diferencia según el signo de la correlación (salvo lo dicho en L1).
+- Ortogonalizar (l. 419): el coeficiente y el error estándar del regresor sustituido no cambian; los de los demás pasan a ser los del modelo sin $\boldsymbol x_j$, con errores estándar menores que en el modelo original. Cotejado con =S22-Prct-C-ramanathan-coches/ortogonal.txt= y =simples.txt= ($53{,}45$; $1{,}74<20{,}69$; constante $-796{,}08$) y con =S22-Prct-D-hprice1-tasacion/conOtros.txt=, =sinTasacion.txt= y =conTasacion.txt= (los cuatro coeficientes coinciden con los del modelo sin tasación y los cuatro errores estándar son menores que con la tasación).
+
+** Cifras cotejadas con salidas de Gretl
+
+- Tabla de apertura (l. 40–46) y l. 61–69: $-1884{,}7$; $253{,}6$; $6291{,}0$; $404{,}2$; $2198{,}9$; $6290{,}4$; $t=-7{,}4$; $0{,}18$; $-1{,}05$; $2198{,}85/253{,}573=8{,}67$ (=S22-Prct-B-hprice2-vif/modelo.txt= y =sinLnox.txt=; tabla de apertura de la lección 13, l. 40–45).
+- $F=28{,}2$, crítico $3{,}01$, $p=0{,}854$ y $p=0{,}295$ (=S20-Prct-A-hprice2-restricciones/apertura.txt= y =elipse.txt=; lección 13, l. 417–421).
+- Caso con números (l. 228–259): $R_j^2=0{,}9879$; $26{,}03$; $0{,}1099$; $2{,}861$; $82{,}8$; $9{,}10$; $6290{,}37$; $2198{,}85$; $241{,}6$; $24{,}81$; VIF $82{,}8$, $82{,}9$ y $1{,}1$ (=auxiliar.txt=, =errorEstandar.txt=, =sinLnox.txt=, =vif.txt=). Productos y cocientes rehechos: $26{,}03\cdot0{,}1099=2{,}8607$; $6290{,}37/2{,}861=2198{,}7$; $241{,}6\cdot9{,}10=2198{,}6$; $26{,}03/2{,}861=9{,}10$; $24{,}81/2{,}861=8{,}67$.
+- Tabla de correlaciones y VIF (l. 182–187) y l. 215: $60^\circ$, $1{,}33$, $1{,}155$; $25{,}8^\circ$, $5{,}26$, $2{,}29$; $8{,}1^\circ$, $50{,}3$, $7{,}09$; $2{,}56^\circ$, $500{,}3$, $22{,}4$. $\sqrt{10}=3{,}16$ (l. 336).
+- Coches (l. 316, 332, 336, 403, 415): 57 coches, unidades; VIF $141{,}68$, $\sqrt{}=11{,}90$; $t=10{,}09$ y $-7{,}475$, $t_c=2{,}005$; mitades $5{,}14$, $23{,}72$, $-5{,}37$, $-107{,}74$; $28{,}02$, $7{,}34$, $-154{,}6$; predicción con error estándar $95{,}9$ y $710{,}9$, iguales en los dos modelos, cociente $7{,}4$ (=descripcion.txt=, =conjunto.txt=, =contrastes.txt=, =submuestras.txt=, =simples.txt=, =prediccion.txt=).
+- Doce viviendas (l. 374): intervalo $[1888{,}3;\,19966{,}8]$ (=S18-Prct-A-hprice2-inferencia/doceViviendas.txt=).
+- Tasación (l. 421): 88 viviendas, cuatro características, $t=8{,}671$ (=S22-Prct-D-hprice1-tasacion/conOtros.txt=).
+- Montecarlo (l. 294): correlación entre regresores $0{,}9911$, dos mil réplicas, correlación entre estimaciones $-0{,}9905$ (=montecarlo.txt=, =histogramas.txt=). Pendiente de la nube, con mi reproducción del experimento (=c.inp=, mismas semillas): $-0{,}995$ por MCO de $\hat\beta_3$ sobre $\hat\beta_2$ y $-1{,}004$ en el eje mayor.
+- Respuestas: $1/(1-0{,}99^2)=50{,}3$, $\sqrt{50}=7{,}07$ (l. 718); $56$ y $-24$ de la pregunta 6 son los $56{,}2$ y $-23{,}9$ de =S14-Prct-A-ramanathan/olsBedrms.txt= (los errores estándar $4$ y $5$ son del enunciado, no de esa salida).
+
+** Cifras sin salida de Gretl en el curso (calculadas por mí)
+
+- Correlación entre =nox= y =lnox=, $0{,}9939$, y ángulo $6{,}3^\circ$ (l. 253): $0{,}99394$ y $6{,}309^\circ$ (=a.inp=). La lección 13 da $0{,}994$ y «unos $6^\circ$».
+- Ángulo de =rooms= sin restar la media con el subespacio de los demás, $6^\circ$ (l. 105; decisión del autor, no se señala): $6{,}07^\circ$, con VIF $1{,}103$.
+- Pendiente de =miles= sobre =age=, $0{,}134$ (l. 415): $0{,}13369$; la práctica la da en el texto de la actividad 2, no en una salida. Identidad $28{,}0163-154{,}635\cdot0{,}13369=7{,}3435$.
+- Lo que la l. 413 dice de las dos formas funcionales: con =rooms= en su media, la diferencia entre el ajuste con =nox= y el ajuste con =lnox= no pasa de $220$ dólares entre $4{,}5$ y $7{,}5$ (cuartiles $4{,}49$ y $6{,}24$), es $-575$ en el mínimo ($3{,}85$) y $-794$ en el máximo ($8{,}71$), y $-1705$ y $-3485$ en $3$ y en $12$, fuera del rango (=b.inp=). La frase es correcta.
+- Coordenadas de la segunda figura y senos de la primera: rehechos arriba; coinciden con el código de =figuras-S21-Lecc14.org=.
+
+** Remisiones seguidas
+
+- Las 68 remisiones con enlace a PDF de las líneas 21–781, 65 de ellas con página (=links.py=, que coteja cada página con el texto del PDF compilado hoy a las 15:58): en todas, la página enlazada contiene el apartado o la frase a la que se remite. Donde la página no es la del título del apartado, lleva al párrafo citado: lección 12, p. 28 («la parte del regresor $j$ que no se puede reconstruir», «longitud propia»); lección 10, p. 17 (Celsius y Fahrenheit, renta del trabajo y del capital, «no prohíbe»); lección 12, p. 21 (regresor concentrado y disperso); lección 13, p. 19 y 20; figura de la actividad 1 de la práctica C, p. 3. Las secciones 2, 3, 5.4, 6.5, 7.1, 7.2 y 7.3 del apéndice están en las páginas 8, 10, 14, 20, 21, 22 y 23 y contienen lo que la lección les atribuye.
+- Lección 10: colinealidad exacta e infinitas soluciones (l. 492), «cuánto avanzar o retroceder en la dirección de cada regresor» (l. 333), independencia lineal que «no prohíbe que los regresores estén correlados» (l. 782), correlaciones por parejas y ejemplo de la renta (l. 786), efecto parcial (l. 825, 854–860), mínima distancia (l. 74).
+- Lección 3: coseno como cateto contiguo entre hipotenusa (l. 135), alineados $\Leftrightarrow\cos\theta=\pm1$ (l. 296, 343, 370) y el avance sobre la lección 14 (l. 372, 401). Lección 5: correlación como coseno. Lección 2: las dos normas. Lección 8: $\mathrm{STC}=\mathrm{SEC}+\mathrm{SRC}$, $R^2=\cos^2\theta$, $R^2=\rho^2$ en regresión simple.
+- Lección 11: «Más dispersión en $X$, o más observaciones: más precisión» (l. 416, literal), BLUE y Modelo Clásico (l. 128, 492, 516), fórmula matricial enunciada. Lección 12: «longitud del residuo por unidad de longitud del regresor en desviaciones» (l. 223, literal), recapitulación (l. 668, 690–694). Lección 13: tabla de apertura, «Conjunto $\neq$ individual», restricciones con suma y con igualdad (l. 318), el error de eliminar los dos (p. 20).
+- Prácticas: S14-D actividad 6 (Gretl omite =F= y avisa: =colinealidadExacta.txt=), S14-A actividad 3, S16-B pregunta 4 (dosis), S18-A actividad 5, S20-A actividad 6, S22-A actividad 2, S22-B actividades 1 y 3, S22-C actividades 1, 2, 4, 5 y 6, S22-D actividades 3 y 4: cada una hace lo que la lección dice y da las cifras que la lección cita (salvo L2 y L5).
+- Notación: $\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1$ es la forma desarrollada de $\boldsymbol x-\boldsymbol{\mathop{\overline x}}$ de las lecciones 8 y 12 ($\boldsymbol{\mathop{\overline v}}=\mu_{\boldsymbol v}\boldsymbol 1$, lección 8, l. 76); $\tilde{\boldsymbol x}_j$, $\mathfrak s$, $\Vert\cdot\Vert_e$ y $\Vert\cdot\Vert_s$ son los de las lecciones 12, 11 y 2.
+
+** Figuras
+
+- =PartePropia_fila.png=: tres paneles con $\theta=60^\circ$, $20^\circ$ y $6^\circ$ rotulados; los dos regresores en azul con sus rótulos, la parte propia en gris con el suyo; misma longitud de los dos regresores en los tres paneles; $0{,}87$, $0{,}34$ y $0{,}10$ al pie de cada panel, como en el pie y en la l. 149 (salvo L11).
+- =ParalelogramoAplastado_fila.png=: generadores a trazos rotulados $\boldsymbol x_2$ y $\boldsymbol x_3$, $70^\circ$ y $10^\circ$ en el título de cada panel, tramos continuos de la descomposición con el primero hacia la izquierda, $\boldsymbol{\mathop{\widehat y}}$ y $\boldsymbol{\mathop{\widehat y}}'$ rotulados, la descomposición de $\boldsymbol{\mathop{\widehat y}}'$ en color más claro, y las cuatro ecuaciones con las coordenadas de la l. 292.
+
+** Preguntas de repaso
+
+- Las doce se contestan con el texto actual; en las doce la opción marcada es la correcta y la única (con las reservas de M2 y L10). Las explicaciones contestan lo que se pregunta. Los cambios del 27-11 encajan: la opción 2 de la pregunta 7 coincide con la l. 294; la opción 4 de la pregunta 9 describe la colinealidad exacta y la explicación lo dice (l. 754); la respuesta 10 (l. 763) remite a la página correcta de la lección 10. El enunciado de la pregunta 8 da él mismo las cifras $404$, $-13262$ y $-1885$ (la segunda ya no está en los apuntes; está en la tabla de apertura de la lección 13).
+
+** Reglas de la Guía
+
+- Sin «compatible» en contrastes o intervalos (la l. 490 lo usa en otro sentido), decisiones con nivel al leer una salida (l. 296, 336), hipótesis sobre coeficientes, geometría solo sobre vectores de datos, «muestra» y «muestra aleatoria» (l. 409), «Montecarlo» en una palabra, sin «$R^2$ corregido», $\hat\beta$ con su sentido por la palabra o por el contexto, y ninguna expresión de la lista de modismos del §3. Incumplimientos: L7 y L8.
