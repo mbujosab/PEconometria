@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
-<!-- 2026-11-23 lun 11:39 -->
+<!-- 2026-11-26 jue 09:31 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sesión 22 (A) &#x2014; Dos regresores cada vez más alineados: un experimento de Montecarlo</title>
@@ -287,12 +287,12 @@ org_html_manager.setup();  // activate after the parameters are set
 <h2>&Iacute;ndice</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org3a5e4a2">Descripción de la práctica</a></li>
+<li><a href="#orgeeebbf8">Descripción de la práctica</a></li>
 <li><a href="#cuatro-experimentos">Actividad 1 - Cuatro experimentos, una tabla</a>
 <ul>
 <li>
 <ul>
-<li><a href="#org2ae6df6">Lo que debe observar</a></li>
+<li><a href="#org1e3624d">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
@@ -301,21 +301,21 @@ org_html_manager.setup();  // activate after the parameters are set
 <ul>
 <li>
 <ul>
-<li><a href="#org07d780b">Lo que debe observar</a></li>
+<li><a href="#org38ae024">Lo que debe observar</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgc158a47">Preguntas de interpretación para la clase</a></li>
-<li><a href="#orgf0bd214">Para profundizar</a></li>
-<li><a href="#org6c7f66f">Código completo de la práctica</a></li>
-<li><a href="#orgeacec97">Respuestas</a></li>
+<li><a href="#org4a074e4">Preguntas de interpretación para la clase</a></li>
+<li><a href="#org8609ef3">Para profundizar</a></li>
+<li><a href="#org7ea4899">Código completo de la práctica</a></li>
+<li><a href="#org585b8ca">Respuestas</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org3a5e4a2" class="outline-2">
-<h2 id="org3a5e4a2">Descripción de la práctica</h2>
-<div class="outline-text-2" id="text-org3a5e4a2">
+<div id="outline-container-orgeeebbf8" class="outline-2">
+<h2 id="orgeeebbf8">Descripción de la práctica</h2>
+<div class="outline-text-2" id="text-orgeeebbf8">
 <p>
 La <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=4">lección 14</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#parte-propia">html</a>) dijo que el error estándar de \(\hat\beta_j\) es \(\mathfrak s\) dividido por la longitud de la parte propia del regresor, y que esa longitud se encoge con el ángulo entre el regresor y los demás: \(\Vert\tilde{\boldsymbol x}_j\Vert_e=\Vert\boldsymbol x_j-\mu_{\boldsymbol x_j}\boldsymbol 1\Vert_e\sin\theta_j\). Con dos regresores no constantes, \(\sin^2\theta=1-\rho^2\) y la varianza del estimador se multiplica por \(\mathrm{VIF}=1/(1-\rho^2)\). Esta práctica lo comprueba repitiendo: construimos dos regresores con una correlación elegida, sorteamos la perturbación dos mil veces y miramos cuánto cambian las estimaciones de una réplica a otra.
 </p>
@@ -364,7 +364,7 @@ Léalo en tres partes. <i>Preparación</i>: un conjunto de 100 observaciones, lo
 <i>en línea de comandos</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgce07b1c">nulldata 100
+<pre class="src src-gretl" id="org48a4e51">nulldata 100
 scalar n   = $nobs
 scalar beta1_verdadero  = 1
 scalar beta2_verdadero  = 1
@@ -376,7 +376,7 @@ matrix rhos = {0, 0.9, 0.99, 0.999}
 </pre>
 </div>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org3d4b47d">printf "n = %d, beta = (1, 1, 1), sigma = 1, %d replicas por cada rho\n\n", n, R
+<pre class="src src-gretl" id="orga04a92d">printf "n = %d, beta = (1, 1, 1), sigma = 1, %d replicas por cada rho\n\n", n, R
 printf "%7s %8s %8s %10s %10s %10s %10s %10s %8s %8s %8s\n", "rho", "corr", "VIF", "var(b2)", "formula", "cov(b2,b3)", "var(b2+b3)", "var(b2-b3)", "SRC", "R2", "%|t|&gt;tc"
 loop j=1..4 --quiet
     scalar rho = rhos[j]
@@ -410,7 +410,7 @@ loop j=1..4 --quiet
 endloop
 </pre>
 </div>
-<pre class="example" id="org074465e">
+<pre class="example" id="org7fb7eef">
 n = 100, beta = (1, 1, 1), sigma = 1, 2000 replicas por cada rho
 
     rho     corr      VIF    var(b2)    formula cov(b2,b3) var(b2+b3) var(b2-b3)      SRC       R2  %|t|&gt;tc
@@ -420,9 +420,9 @@ n = 100, beta = (1, 1, 1), sigma = 1, 2000 replicas por cada rho
   0,999   0,9991    563,3     5,7069     5,8603    -5,7085     0,0108    22,8446    96,56   0,7999    0,071
 </pre>
 </div>
-<div id="outline-container-org2ae6df6" class="outline-4">
-<h4 id="org2ae6df6">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org2ae6df6">
+<div id="outline-container-org1e3624d" class="outline-4">
+<h4 id="org1e3624d">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org1e3624d">
 <p>
 Lea la tabla por columnas. La varianza empírica de \(\hat\beta_2\) coincide con \(\sigma^2/\Vert\tilde{\boldsymbol x}_2\Vert_e^2\) en los cuatro casos, con la oscilación propia de dos mil réplicas: <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S17-Lecc12.pdf#page=27">el enunciado de la lección 12</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S17-Lecc12.html#recapitulacion">html</a>) y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=4">la fórmula de la 14</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#parte-propia">html</a>) funcionan, y el <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/Apendice-geometria.pdf#page=20">apéndice (sección 6.5)</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/Apendice-geometria.html#sec-6-5">html</a>) lo demuestra: \(\hat\beta_2\) es \(\beta_2\) más la coordenada de la perturbación en la dirección de la parte propia, dividida por la longitud de esa parte. Y crece como el VIF: de \(0{,}011\) con \(\rho=0\) a \(5{,}7\) con \(\rho=0{,}999\), un factor \(530\) que la columna del VIF anuncia.
 </p>
@@ -432,7 +432,7 @@ La \(\mathrm{SRC}\) es la misma en las cuatro filas, con todos sus decimales. El
 </p>
 
 <p>
-La covarianza entre \(\hat\beta_2\) y \(\hat\beta_3\) es negativa y casi igual a la varianza en valor absoluto, salvo con \(\rho=0\), donde es prácticamente nula (\(0{,}0003\) frente a \(0{,}0108\)): cuando uno sube, el otro baja lo mismo. Por eso la varianza de la suma se queda en \(0{,}011\) para \(\rho=0{,}9\), \(0{,}99\) y \(0{,}999\): la suma se mide con la precisión que \(\hat\beta_2\) tenía sin colinealidad. La diferencia \(\hat\beta_2-\hat\beta_3\) se comporta al revés: su varianza pasa de \(0{,}022\) con \(\rho=0\) a \(2{,}28\) con \(\rho=0{,}99\) y a \(22{,}8\) con \(\rho=0{,}999\). Es lo que la lección 14 dice de las restricciones en ``Qué hacer'' (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=14">pdf</a>, <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#que-hacer-y-que-no">html</a>). La restricción \(\beta_2=\beta_3\), que aquí es cierta, deja el regresor \(\boldsymbol x_2+\boldsymbol x_3\), y su estimación tiene la precisión de la suma. Una restricción como \(\beta_2+\beta_3=2\), también cierta, deja el regresor \(\boldsymbol x_2-\boldsymbol x_3\), y su estimación tiene la precisión de la diferencia: apenas gana precisión. Y la última columna dice lo que la colinealidad cuesta: un coeficiente que vale \(1\), con una perturbación de desviación típica \(1\) y cien datos, se detecta siempre con \(\rho=0\) y solo el \(7\%\) de las veces con \(\rho=0{,}999\).
+La covarianza entre \(\hat\beta_2\) y \(\hat\beta_3\) es negativa y casi igual a la varianza en valor absoluto, salvo con \(\rho=0\), donde es prácticamente nula (\(0{,}0003\) frente a \(0{,}0108\)): cuando uno sube, el otro baja lo mismo. Por eso la varianza de la suma se queda en \(0{,}011\) para \(\rho=0{,}9\), \(0{,}99\) y \(0{,}999\): la suma se mide con la precisión que \(\hat\beta_2\) tenía sin colinealidad. La diferencia \(\hat\beta_2-\hat\beta_3\) se comporta al revés: su varianza pasa de \(0{,}022\) con \(\rho=0\) a \(2{,}28\) con \(\rho=0{,}99\) y a \(22{,}8\) con \(\rho=0{,}999\). Es lo que la lección 14 dice de las restricciones en ``Qué hacer'' (<a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=15">pdf</a>, <a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#que-hacer-y-que-no">html</a>). La restricción \(\beta_2=\beta_3\), que aquí es cierta, deja el regresor \(\boldsymbol x_2+\boldsymbol x_3\), y su estimación tiene la precisión de la suma. Una restricción como \(\beta_2+\beta_3=2\), también cierta, deja el regresor \(\boldsymbol x_2-\boldsymbol x_3\), y su estimación tiene la precisión de la diferencia: apenas gana precisión. Y la última columna dice lo que la colinealidad cuesta: un coeficiente que vale \(1\), con una perturbación de desviación típica \(1\) y cien datos, se detecta siempre con \(\rho=0\) y solo el \(7\%\) de las veces con \(\rho=0{,}999\).
 </p>
 </div>
 </div>
@@ -452,7 +452,7 @@ Las matrices <code>estimaciones_rho0</code> y <code>estimaciones_rho99</code> gu
 <i>en línea de comandos</i> (con las matrices <code>estimaciones_rho0</code> y <code>estimaciones_rho99</code> de la Actividad 1):
 </p>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org022b054">nulldata R --preserve
+<pre class="src src-gretl" id="org4bf2d4a">nulldata R --preserve
 series beta2_estimado_rho0  = estimaciones_rho0[,1]
 series beta2_estimado_rho99 = estimaciones_rho99[,1]
 series beta3_estimado_rho99 = estimaciones_rho99[,2]
@@ -460,48 +460,48 @@ series suma_estimados_rho99 = beta2_estimado_rho99 + beta3_estimado_rho99
 </pre>
 </div>
 <div class="org-src-container">
-<pre class="src src-gretl" id="org29b1cef">printf "rho = 0     : b2 medio = %.4f   desv. tipica = %.4f   min = %.3f   max = %.3f\n", mean(beta2_estimado_rho0), sd(beta2_estimado_rho0), min(beta2_estimado_rho0), max(beta2_estimado_rho0)
+<pre class="src src-gretl" id="org56a7c54">printf "rho = 0     : b2 medio = %.4f   desv. tipica = %.4f   min = %.3f   max = %.3f\n", mean(beta2_estimado_rho0), sd(beta2_estimado_rho0), min(beta2_estimado_rho0), max(beta2_estimado_rho0)
 printf "rho = 0,99  : b2 medio = %.4f   desv. tipica = %.4f   min = %.3f   max = %.3f\n", mean(beta2_estimado_rho99), sd(beta2_estimado_rho99), min(beta2_estimado_rho99), max(beta2_estimado_rho99)
 printf "rho = 0,99  : b2 + b3 medio = %.4f   desv. tipica = %.4f\n", mean(suma_estimados_rho99), sd(suma_estimados_rho99)
 printf "correlacion entre b2 y b3 con rho = 0,99: %.4f\n", corr(beta2_estimado_rho99, beta3_estimado_rho99)
 </pre>
 </div>
-<pre class="example" id="org3fa51df">
+<pre class="example" id="orgde6130d">
 rho = 0     : b2 medio = 1,0046   desv. tipica = 0,1037   min = 0,661   max = 1,357
 rho = 0,99  : b2 medio = 1,0152   desv. tipica = 0,7549   min = -1,701   max = 3,318
 rho = 0,99  : b2 + b3 medio = 2,0045   desv. tipica = 0,1042
 correlacion entre b2 y b3 con rho = 0,99: -0,9905
 </pre>
 <div class="org-src-container">
-<pre class="src src-gretl" id="orgca71748">freq beta2_estimado_rho0
+<pre class="src src-gretl" id="orgc71c262">freq beta2_estimado_rho0
 freq beta2_estimado_rho99
 gnuplot beta3_estimado_rho99 beta2_estimado_rho99
 </pre>
 </div>
 
-<div id="orgb5f4e21" class="figure">
+<div id="orgd889ab6" class="figure">
 <p><img src="./S22-Prct-A-colinealidad-montecarlo/histRho0.png" alt="histRho0.png" width="380px" />
 </p>
 <p><span class="figure-number">Figura 1: </span>\(\hat\beta_2\) en las \(2\,000\) réplicas con \(\rho=0\). El eje horizontal va de \(0{,}66\) a \(1{,}36\).</p>
 </div>
 
 
-<div id="org3fa6b5f" class="figure">
+<div id="orgfe76f17" class="figure">
 <p><img src="./S22-Prct-A-colinealidad-montecarlo/histRho99.png" alt="histRho99.png" width="380px" />
 </p>
 <p><span class="figure-number">Figura 2: </span>\(\hat\beta_2\) en las \(2\,000\) réplicas con \(\rho=0{,}99\). El eje horizontal va de \(-1{,}7\) a \(3{,}3\): la misma forma, siete veces más ancha.</p>
 </div>
 
 
-<div id="org744042a" class="figure">
+<div id="orge39e34f" class="figure">
 <p><img src="./S22-Prct-A-colinealidad-montecarlo/nubeRho99.png" alt="nubeRho99.png" width="550px" />
 </p>
 <p><span class="figure-number">Figura 3: </span>\(\hat\beta_3\) frente a \(\hat\beta_2\) con \(\rho=0{,}99\). Las \(2\,000\) réplicas se alinean sobre la recta \(\hat\beta_3=2-\hat\beta_2\): lo que una coordenada gana lo pierde la otra, y la suma apenas se mueve.</p>
 </div>
 </div>
-<div id="outline-container-org07d780b" class="outline-4">
-<h4 id="org07d780b">Lo que debe observar</h4>
-<div class="outline-text-4" id="text-org07d780b">
+<div id="outline-container-org38ae024" class="outline-4">
+<h4 id="org38ae024">Lo que debe observar</h4>
+<div class="outline-text-4" id="text-org38ae024">
 <p>
 Fíjese en los ejes antes que en las barras. Los dos histogramas tienen la misma forma y el mismo centro, \(1\): el estimador sigue siendo insesgado. Lo que cambia es la escala: con \(\rho=0{,}99\) la desviación típica es \(0{,}75\) en lugar de \(0{,}10\), el factor \(\sqrt{\mathrm{VIF}}\approx7\) de la <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=6">lección 14</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#cuanto-se-acorta">html</a>), y hay réplicas en que \(\hat\beta_2\) sale negativo, con un verdadero valor de \(1\).
 </p>
@@ -512,9 +512,9 @@ La nube es <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Le
 </div>
 </div>
 </div>
-<div id="outline-container-orgc158a47" class="outline-2">
-<h2 id="orgc158a47">Preguntas de interpretación para la clase</h2>
-<div class="outline-text-2" id="text-orgc158a47">
+<div id="outline-container-org4a074e4" class="outline-2">
+<h2 id="org4a074e4">Preguntas de interpretación para la clase</h2>
+<div class="outline-text-2" id="text-org4a074e4">
 <ol class="org-ol">
 <li>¿Por qué la \(\mathrm{SRC}\) es la misma en las cuatro filas de la tabla, y por qué el \(R^2\) no lo es? ¿Habría pasado lo mismo si \(\boldsymbol x_3\) se hubiera generado de forma independiente para cada \(\rho\)?</li>
 <li>Con \(\rho=0\) la varianza de \(\hat\beta_2+\hat\beta_3\) es \(0{,}023\), el doble que con \(\rho=0{,}99\). ¿Es que la colinealidad <i>mejora</i> la estimación de la suma? Razónelo con la parte propia del regresor \(\boldsymbol x_2+\boldsymbol x_3\).</li>
@@ -525,9 +525,9 @@ La nube es <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Le
 </ol>
 </div>
 </div>
-<div id="outline-container-orgf0bd214" class="outline-2">
-<h2 id="orgf0bd214">Para profundizar</h2>
-<div class="outline-text-2" id="text-orgf0bd214">
+<div id="outline-container-org8609ef3" class="outline-2">
+<h2 id="org8609ef3">Para profundizar</h2>
+<div class="outline-text-2" id="text-org8609ef3">
 <ul class="org-ul">
 <li>Lección 14 (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html">lección 14</a>), en especial <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=4">``La parte propia de un regresor''</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#parte-propia">html</a>) y <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Lecc14.pdf#page=9">``Por qué son inestables los coeficientes''</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S21-Lecc14.html#por-que-oscilan">html</a>).</li>
 <li>Lección 11, <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S15-Lecc11.pdf#page=19">``¿Y con más regresores?''</a> (<a href="https://mbujosab.github.io/PEconometria/Lecciones-html/S15-Lecc11.html#mas-regresores">html</a>): la covarianza entre \(\hat\beta_1\) y \(\hat\beta_2\) con \(k=2\).</li>
@@ -536,9 +536,9 @@ La nube es <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Le
 </ul>
 </div>
 </div>
-<div id="outline-container-org6c7f66f" class="outline-2">
-<h2 id="org6c7f66f">Código completo de la práctica</h2>
-<div class="outline-text-2" id="text-org6c7f66f">
+<div id="outline-container-org7ea4899" class="outline-2">
+<h2 id="org7ea4899">Código completo de la práctica</h2>
+<div class="outline-text-2" id="text-org7ea4899">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -556,9 +556,9 @@ La nube es <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Le
 </table>
 </div>
 </div>
-<div id="outline-container-orgeacec97" class="outline-2">
-<h2 id="orgeacec97">Respuestas</h2>
-<div class="outline-text-2" id="text-orgeacec97">
+<div id="outline-container-org585b8ca" class="outline-2">
+<h2 id="org585b8ca">Respuestas</h2>
+<div class="outline-text-2" id="text-org585b8ca">
 <ol class="org-ol">
 <li><i>La \(\mathrm{SRC}\) idéntica.</i> El residuo es \(\boldsymbol y\) menos su proyección sobre el subespacio de los regresores, y ese subespacio es el mismo para los cuatro \(\rho\), porque \(\boldsymbol x_3\) es siempre una combinación de \(\boldsymbol z_1\) y \(\boldsymbol z_2\) y \(\boldsymbol x_2=\boldsymbol z_1\). Como además la perturbación sorteada es la misma (la semilla se fija antes de cada bucle), y \(\boldsymbol y\) es \(\boldsymbol u\) más un vector del subespacio, el residuo es el residuo de \(\boldsymbol u\), idéntico en las cuatro filas. El \(R^2\) cambia porque cambia la longitud de \(\boldsymbol{\mathop{\widehat y}}\): con los dos efectos positivos, alinear los regresores hace que se sumen. Con un \(\boldsymbol x_3\) generado por separado para cada \(\rho\), los subespacios serían distintos y la \(\mathrm{SRC}\) variaría un poco, sin que eso cambiara la conclusión: el ajuste es casi el mismo; las coordenadas, no.</li>
 
@@ -577,7 +577,7 @@ La nube es <a href="https://mbujosab.github.io/PEconometria/Lecciones-pdf/S21-Le
 </div>
 <div id="postamble" class="status">
 <p class="author">Autor: Marcos Bujosa</p>
-<p class="date">Created: 2026-11-23 lun 11:39</p>
+<p class="date">Created: 2026-11-26 jue 09:31</p>
 </div>
 </body>
 </html>
